@@ -1,0 +1,18 @@
+{
+  "result": "pass",
+  "apkSha256": "68865439ba06fc2b04a422a7b3397e0cca10b300b80b5b9e02227549fdda79fd",
+  "exportRoute": "ACTION_CREATE_DOCUMENT -> emulator Downloads URI",
+  "entries": [
+    "events.jsonl",
+    "summary.md",
+    "recovery.jsonl",
+    "report.json",
+    "interrupted-metadata.json",
+    "export-manifest.json"
+  ],
+  "entryHashesVerified": true,
+  "plaintextDescriptorsAbsent": true,
+  "newRecoveryEpochVerified": true,
+  "reportStatus": "inconclusive",
+  "zipSha256": "9760d92f3fac06398d3ed99d8e398830af7467e88b00ebd6f5f0180c63b9d3e0"
+}

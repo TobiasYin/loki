@@ -1,0 +1,110 @@
+Performing Streamed Install
+Success
+
+single-tap pass raw= 2
+no-action fail raw= 0
+wrong-target fail raw= 2
+long-press pass raw= 47
+swipe pass raw= 29
+keyboard-button-a fail raw= 4
+sequential-gamepad-buttons fail raw= 4
+two-step-task pass raw= 4
+log-budget inconclusive raw= 2
+process-restart inconclusive raw= 0
+{
+  "environment": "Android API36 arm64 emulator; single display; no Thor hardware",
+  "coverage": "ADB shell input -> Android Activity dispatch. No product gateway, physical baseline or cross-display injection proof.",
+  "apkSha256": "68865439ba06fc2b04a422a7b3397e0cca10b300b80b5b9e02227549fdda79fd",
+  "results": [
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "single-tap",
+      "caseId": "LAB-02",
+      "expected": "pass",
+      "actual": "pass",
+      "rawEvents": 2,
+      "attemptId": "aff819ba-59f3-41b5-bb41-55d5671fca98"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "no-action",
+      "caseId": "LAB-14",
+      "expected": "fail",
+      "actual": "fail",
+      "rawEvents": 0,
+      "attemptId": "4acd09de-0fba-414c-a21b-4dfd9ed952af"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "wrong-target",
+      "caseId": "LAB-02",
+      "expected": "fail",
+      "actual": "fail",
+      "rawEvents": 2,
+      "attemptId": "8538a045-536d-4296-81f7-974cb8b80bb1"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "long-press",
+      "caseId": "LAB-04-LONG",
+      "expected": "pass",
+      "actual": "pass",
+      "rawEvents": 47,
+      "attemptId": "519da8ec-da9b-4ee6-b861-dedb8f045c86"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "swipe",
+      "caseId": "LAB-04-SWIPE",
+      "expected": "pass",
+      "actual": "pass",
+      "rawEvents": 29,
+      "attemptId": "aa34a4cd-42bf-40fb-a6b7-19be1b3065e7"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "keyboard-button-a",
+      "caseId": "LAB-06",
+      "expected": "fail",
+      "actual": "fail",
+      "rawEvents": 4,
+      "attemptId": "15453139-ca88-4f78-80de-212fca3f92ad"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "sequential-gamepad-buttons",
+      "caseId": "LAB-08",
+      "expected": "fail",
+      "actual": "fail",
+      "rawEvents": 4,
+      "attemptId": "f9adc13e-6467-4157-96d1-ce5a2da1e115"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "two-step-task",
+      "caseId": "LAB-11",
+      "expected": "pass",
+      "actual": "pass",
+      "rawEvents": 4,
+      "attemptId": "5de6ace0-2731-47d8-957c-5f305d65373f"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": true,
+      "label": "log-budget",
+      "caseId": "LAB-13",
+      "expected": "inconclusive",
+      "actual": "inconclusive",
+      "rawEvents": 2,
+      "attemptId": "58c486b2-1be0-44a0-b05e-ae13b4cf1778"
+    },
+    {
+      "prefixHashVerifiedBeforeRedaction": false,
+      "label": "process-restart",
+      "caseId": "LAB-13",
+      "expected": "inconclusive",
+      "actual": "inconclusive",
+      "rawEvents": 0,
+      "attemptId": "a4e7a989-256a-45f8-80d8-440ff9e6c3aa"
+    }
+  ]
+}
