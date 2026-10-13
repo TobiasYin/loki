@@ -203,3 +203,12 @@ test('failed intent persistence prevents execution; recovery never replays', asy
   const restored = await new ThorRuntime(f.ports, registry()).recover({ sessionId: 's', runId: 'r', state: 'executing_tools', startedAt: 1, modelProfileRevision: 1, capabilityEpoch: 1 });
   assert.equal(restored.state, 'interrupted'); assert.equal(f.executions.length, 0);
 });
+
+test('only the audited internal configuration fixture can omit public capabilities', () => {
+  const probe = {...descriptor('probe'),toolId:'probe.picture',executor:'native-probe',provenance:'native-configuration-probe',requiredCapabilities:[],platformPrerequisites:['probe.picture']};
+  const r=new ToolRegistry();r.register({packId:'configuration-probe',packVersion:'1',tools:[probe]});
+  const f=fixture();f.snapshot.session.enabled.screen_perception=false;f.snapshot.availability['probe.picture']={status:'ready'};
+  assert.equal(r.effective(f.snapshot).length,1);
+  assert.throws(()=>new ToolRegistry().register({packId:'untrusted',packVersion:'1',tools:[probe]}));
+  assert.throws(()=>new ToolRegistry().register({packId:'configuration-probe',packVersion:'1',tools:[{...probe,effectClass:'arbitrary-shell'}]}));
+});

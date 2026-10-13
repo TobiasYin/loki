@@ -193,7 +193,10 @@ class WebViewFlowTest {
     }
     @Test fun lifecycleRecoveryNeverReplaysAndStorageFailureRevokesBeforeExecution() {
         configure(0,401);var activity=launch();var web=activity.findViewById<WebView>(android.R.id.custom)
-        waitFor(web,"window.productReady === true");probe(activity,web);send(web,"WAIT_CANCEL")
+        waitFor(web,"window.productReady === true")
+        javascript(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host(activity).selectedSession())},capability:'perception',enabled:false}))")
+        waitFor(web,"!document.querySelector('input[aria-label=上屏感知]').checked")
+        probe(activity,web);send(web,"WAIT_CANCEL")
         waitFor(web,"document.getElementById('send').textContent === '停止'")
         val before=SqliteStore(context,"product.db").use {it.load()};val rid=before.getJSONArray("runs").objects().last().getString("id")
         finish(activity);activity=launch();web=activity.findViewById<WebView>(android.R.id.custom)
