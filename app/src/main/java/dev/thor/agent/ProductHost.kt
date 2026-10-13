@@ -151,10 +151,10 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
     }
     fun bootstrap(c: String): JSONObject { connection = c; return obj("connectionId" to c) }
     private fun bound(c: String, j: JSONObject): Binding {
-        require(c == connection); val b = binding ?: error("No active run")
-        require(j.getString("sessionId") == b.sessionId && j.getString("runId") == b.runId)
-        if (j.has("leaseId")) require(j.getString("leaseId") == b.lease)
-        if (j.has("capabilityEpoch")) require(j.getLong("capabilityEpoch") == b.capabilityEpoch)
+        requireTool(c == connection,Code.STALE_AUTHORIZATION,"Connection mismatch"); val b = binding ?: fail(Code.STALE_AUTHORIZATION,"No active run")
+        requireTool(j.getString("sessionId") == b.sessionId && j.getString("runId") == b.runId,Code.STALE_AUTHORIZATION,"Session/Run mismatch")
+        if (j.has("leaseId")) requireTool(j.getString("leaseId") == b.lease,Code.STALE_AUTHORIZATION,"Lease mismatch")
+        if (j.has("capabilityEpoch")) requireTool(j.getLong("capabilityEpoch") == b.capabilityEpoch,Code.STALE_AUTHORIZATION,"Epoch mismatch")
         authority.validate(b); return b
     }
     fun rpc(c: String, request: JSONObject): CompletableFuture<JSONObject> {
@@ -185,7 +185,8 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
                 future.complete(value)
             } catch (e: Exception) {
                 lastError = if(request.optString("op") == "begin") "发送失败：请先配置模型并完成图片/工具探测；无模拟回答。" else "操作被拒绝：检查授权、活动运行或本地存储。"
-                future.complete(obj("error" to if(e is dev.thor.tools.ToolFailure) e.code.name else "IO_ERROR")); publish()
+                val code=when(e) {is ToolFailure ->e.code.name;is dev.thor.bridge.BridgeFailure ->e.code.name;is IllegalArgumentException,is org.json.JSONException ->"INVALID_ARGUMENT";else ->"IO_ERROR"}
+                if(request.optString("op") == "tool.prepare")future.complete(obj("content" to JSONArray(),"observedAt" to System.currentTimeMillis(),"source" to "native-gateway","truncated" to false,"outcome" to "observed","error" to code)) else future.complete(obj("error" to code)); publish()
             }
         }
         return future
