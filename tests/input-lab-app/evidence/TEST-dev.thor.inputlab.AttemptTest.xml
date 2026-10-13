@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.inputlab.AttemptTest" tests="37" skipped="0" failures="0" errors="0" timestamp="2026-10-13T09:19:44.645Z" hostname="JGJHX5JPGF" time="0.046">
+  <properties/>
+  <testcase name="duplicateTapFails" classname="dev.thor.inputlab.AttemptTest" time="0.023"/>
+  <testcase name="cancelNotTap" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="shortWindowCannotPass" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="noActionFails" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="buttonAxisDoesNotSubstituteForTwoButtonOverlap" classname="dev.thor.inputlab.AttemptTest" time="0.001"/>
+  <testcase name="heldButtonWithoutFocusLossFails" classname="dev.thor.inputlab.AttemptTest" time="0.001"/>
+  <testcase name="longHoldCannotProveTap" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="differentDownTimeFails" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="upWithoutDownFails" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="fixtureOriginIsNeverAndroidEvidence" classname="dev.thor.inputlab.AttemptTest" time="0.01"/>
+  <testcase name="longAndSwipeHaveIndependentEvidence" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="comboRequiresSameDeviceOverlap" classname="dev.thor.inputlab.AttemptTest" time="0.001"/>
+  <testcase name="cancelCaseNeedsDownCancel" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="jsonEscapesControlCharacters" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="semanticClickCannotProveRawTap" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="lossOfFocusDoesNotZeroAxes" classname="dev.thor.inputlab.AttemptTest" time="0.003"/>
+  <testcase name="historyCannotHideLastNonNeutral" classname="dev.thor.inputlab.AttemptTest" time="0.001"/>
+  <testcase name="smallOverlapCannotBorrowAnExcursionAfterButtonRelease" classname="dev.thor.inputlab.AttemptTest" time="0.001"/>
+  <testcase name="missingAxesFail" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="compositeSourceIsAcceptedAndRepeatDoesNotDuplicate" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="keyboardDoesNotBecomeController" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="keyboardAxesFail" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="lateEventsDoNotChangeFrozenResult" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="extraControllerTapCannotProveSingleButtonCase" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="differentDeviceUpFails" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="focusDoesNotManufactureUp" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="wrongTargetFails" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="moveAwayAndBackCannotProveTap" classname="dev.thor.inputlab.AttemptTest" time="0.001"/>
+  <testcase name="batchedAxesPreservedExcursionThenNeutral" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="wrongButtonFails" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="integrityFaultOverridesSuccessfulInput" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="actualUpAfterFocusCanProveRelease" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="rawTouchCanActivateSemanticSceneButIsNotSemanticByItself" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="singleTapPassAndRawCountsOnce" classname="dev.thor.inputlab.AttemptTest" time="0.001"/>
+  <testcase name="unadvertisedZeroAxesDoNotBlockValidButtonAxisCombo" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="twoStepTaskAndWrongOrder" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <testcase name="endpointJumpWithoutMoveCannotProveSwipe" classname="dev.thor.inputlab.AttemptTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
