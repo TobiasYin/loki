@@ -22,7 +22,8 @@ class TrustedWebViewBridge(
     private val page: String = "$ORIGIN/assets/index.html",
     private val hostRpc: ((String, JSONObject) -> java.util.concurrent.CompletableFuture<JSONObject>)? = null,
     private val onInvalidated: (() -> Unit)? = null,
-    private val networkObserver: ((HttpStart, HttpEvent) -> Unit)? = null
+    private val networkObserver: ((HttpStart, HttpEvent) -> Unit)? = null,
+    private val onRendererGone: (() -> Unit)? = null
 ): AutoCloseable {
     companion object { const val ORIGIN = "https://appassets.androidplatform.net" }
     private val ui = Handler(Looper.getMainLooper())
@@ -65,7 +66,7 @@ class TrustedWebViewBridge(
                 }
                 return WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden", emptyMap(), ByteArrayInputStream(ByteArray(0)))
             }
-            override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean { close(); view.destroy(); return true }
+            override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean { close(); view.destroy(); onRendererGone?.invoke(); return true }
             override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: android.net.http.SslError) { handler.cancel(); invalidate() }
         }
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) WebViewCompat.addWebMessageListener(webView, "ThorNative", setOf(ORIGIN)) { view, message, origin, mainFrame, reply ->

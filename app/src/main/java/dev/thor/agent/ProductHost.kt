@@ -142,7 +142,9 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
     private fun session(sid: String) = rows("sessions").single { it.getString("id") == sid }
     private fun run(rid: String) = rows("runs").single { it.getString("id") == rid }
     private fun enabled(s: JSONObject) = capNames.filter { s.getJSONObject("capabilities").optBoolean(it.key) }.values.toSet()
-    private fun persist() { try { store.save(state) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;binding=null;prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
+    private fun persist() { try {
+        for(s in rows("sessions")) {s.put("capabilityEpoch",authority.sessionEpoch(s.getString("id")));val granted=authority.sessionEnabled(s.getString("id"));for((name,cap) in capNames)s.getJSONObject("capabilities").put(name,cap in granted)}
+        store.save(state) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;binding=null;prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
     private fun newSession(): String {
         val sid = id(); authority.createSession(sid)
         state.getJSONArray("sessions").put(obj("id" to sid, "title" to "新会话", "createdAt" to System.currentTimeMillis(), "updatedAt" to System.currentTimeMillis(), "archivedAt" to null,
@@ -174,10 +176,12 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
                     "network.tool.begin" -> networkTool(c, data)
                     "tool.cancel" -> { bound(c, data); prepared[data.getString("requestId")]?.approved?.complete(false); authority.stopRun(); obj() }
                     "persist" -> save(c, data)
-                    "attachment.get" -> { val b = bound(c, data); val a = rows("attachments").singleOrNull { it.getString("id") == data.getString("id") && it.getString("sessionId") == b.sessionId }; if (b.runId == probeRun && a != null) probeImageReads++; if(a != null) {
-                        require(a.getLong("expiresAt") > System.currentTimeMillis())
-                        require(a.getJSONArray("source").let { src -> (0 until src.length()).all { dev.thor.bridge.Capability.valueOf(src.getString(it)) in authority.enabled(b) } })
-                    }; a ?: obj() }
+                    "attachment.get" -> {
+                        val b = bound(c, data); val a = rows("attachments").singleOrNull { it.getString("id") == data.getString("id") && it.getString("sessionId") == b.sessionId }
+                        val available=a != null && a.getLong("expiresAt")>System.currentTimeMillis() && a.getJSONArray("source").let {src ->(0 until src.length()).all {dev.thor.bridge.Capability.valueOf(src.getString(it)) in authority.enabled(b)}}
+                        if(available && b.runId==probeRun)probeImageReads++
+                        if(available)a!! else obj()
+                    }
                     "attachment.put" -> { error("Only Native image capture/picker may create attachments") }
                     "end" -> end(c, data)
                     else -> error("Unsupported RPC")
@@ -461,7 +465,7 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
     }
     fun view(): JSONObject {
         val v = JSONObject(state.toString())
-        if(storageFailed)v.put("fatal","本地存储失败；已停止网络和设备执行。历史保留，修复存储后重新打开；不会重放副作用。")
+        if(storageFailed)v.put("fatal","本地存储失败；已停止网络和设备执行。历史保留；失败的变更未保存，重新打开将恢复上次已保存的开关。修复存储后重开，不会重放副作用。")
         v.put("attachments", JSONArray(rows("attachments").map { JSONObject(it.toString()).apply { remove("data"); remove("path") } }))
         v.put("runs", JSONArray(rows("runs").map { JSONObject(it.toString()).apply { remove("turn"); remove("contexts"); remove("runtime") } }))
         v.put("availability", obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else "需校准显示；按工具检查",

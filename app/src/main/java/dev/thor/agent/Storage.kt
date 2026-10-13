@@ -84,7 +84,7 @@ class CredentialVault(context: Context) {
         }.generateKey()
     }
     fun put(ref: String, secret: String) {
-        require(secret.length in 1..8192)
+        require(secret.length in 1..8192 && '\r' !in secret && '\n' !in secret)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()); updateAAD(ref.toByteArray()) }
         val encoded = obj("iv" to Base64.encodeToString(cipher.iv, Base64.NO_WRAP), "cipher" to Base64.encodeToString(cipher.doFinal(secret.toByteArray()), Base64.NO_WRAP))
         check(prefs.edit().putString(ref, encoded.toString()).commit()) { "凭据保存失败" }

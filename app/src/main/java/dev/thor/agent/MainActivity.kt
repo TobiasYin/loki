@@ -49,7 +49,10 @@ class MainActivity : Activity() {
                 } else if(request.optString("op") == "settings") {
                     runOnUiThread { showSettings() }; java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
                 } else host.rpc(c, request)
-            }, { host.interrupt("页面/renderer 连接失效；不重放") }, host::auditHttp)
+            }, { host.interrupt("页面/renderer 连接失效；不重放") }, host::auditHttp, {
+            val panel=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;addView(TextView(this@MainActivity).apply {text="聊天渲染进程已退出；当前运行已中断，不会重放。"});addView(Button(this@MainActivity).apply {text="重新打开聊天";setOnClickListener {recreate()}})}
+            setContentView(panel)
+        })
         if(bridge!!.supported) bridge!!.load() else setContentView(TextView(this).apply { text = "请更新 Android System WebView：安全消息桥不可用。" })
     }
     override fun onStop() {
