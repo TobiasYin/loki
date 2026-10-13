@@ -252,7 +252,10 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
             "lease" to obj("sessionId" to b.sessionId, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to System.currentTimeMillis() + authority.remainingLeaseMs(b)), "availability" to available, "l0" to l0)
     }
     private fun toolEnvelope(c: String, j: JSONObject): Envelope {
-        val b = bound(c, j); require(j.getString("bridgeVersion") == "0.1")
+        val b = bound(c, j); require(j.getString("bridgeVersion") == "0.1" && j.getString("schemaVersion") == "1")
+        require(j.getString("requestId").length in 1..100 && j.getString("toolCallId").length in 1..512)
+        if(j.getString("toolId").startsWith("web."))require(j.getJSONArray("resources").toString() == "[\"public-web\"]")
+        if(j.getString("toolId") == "probe.picture")require(j.getJSONArray("resources").toString() == "[\"fixture\"]")
         val remaining = (j.getLong("deadline") - System.currentTimeMillis()).coerceAtMost(authority.remainingLeaseMs(b)).coerceAtMost(60000)
         require(remaining > 0)
         return Envelope(b.sessionId, b.runId, j.getString("toolCallId"), j.getString("toolId"), b.capabilityEpoch, clock.now() + remaining,
