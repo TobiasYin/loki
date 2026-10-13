@@ -36,7 +36,7 @@ class MainActivity : Activity() {
         try { host = ProductHost.create(this) { state -> runOnUiThread {
             if (!isFinishing && !isDestroyed) web.evaluateJavascript("window.receiveProductState?.(JSON.parse(${JSONObject.quote(state.toString())}))", null)
         } }
-        } catch(_:Exception) {setContentView(LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;addView(TextView(this@MainActivity).apply {text="本地存储或安全配置初始化失败；历史保留，未执行网络或设备操作。"});addView(Button(this@MainActivity).apply {text="重试打开";setOnClickListener {recreate()}})});return}
+        } catch(error:Exception) {if(BuildConfig.DEBUG)android.util.Log.e("ThorInit",error.javaClass.simpleName+"\n"+error.stackTrace.joinToString("\n"));setContentView(LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;addView(TextView(this@MainActivity).apply {text="本地存储或安全配置初始化失败；历史保留，未执行网络或设备操作。"});addView(Button(this@MainActivity).apply {text="重试打开";setOnClickListener {recreate()}})});return}
         val transport = dev.thor.bridge.HttpTransport(host.authority, host.policy)
         val toolGateway = dev.thor.bridge.ToolGateway(host.authority, emptyList(), { emptyMap() })
         bridge = dev.thor.bridge.android.TrustedWebViewBridge(web, host.authority, transport, toolGateway,
@@ -54,6 +54,11 @@ class MainActivity : Activity() {
             setContentView(panel)
         })
         if(bridge!!.supported) bridge!!.load() else setContentView(TextView(this).apply { text = "请更新 Android System WebView：安全消息桥不可用。" })
+    }
+    override fun onPause() {
+        super.onPause()
+        // Android may create the next Activity before destroying this one. Release the single writer before that handoff.
+        if(pickerSession == null) {bridge?.close();if(::host.isInitialized)host.close()}
     }
     override fun onStop() {
         super.onStop()
