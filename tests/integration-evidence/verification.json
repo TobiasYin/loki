@@ -1,0 +1,64 @@
+{
+  "sourceCommit": "75aed94a91d2563d8ef526a42981998fb5461696",
+  "serial": "emulator-5680",
+  "labDisplay": 3,
+  "emulator": true,
+  "requireShizuku": true,
+  "deviceFingerprint": "google/sdk_gphone64_arm64/emu64a:16/BP22.250325.006/13344233:user/release-keys",
+  "webView": "Current WebView Update Service state\n  Current WebView package (name, version): (com.google.android.webview, 133.0.6943.137)\n  Minimum targetSdkVersion: 33\n  Minimum WebView version code: 694313732\n  Number of relros started: 1\n  Number of relros finished: 1\n  WebView package dirty: false\n  Any WebView package installed: true\n  Preferred WebView package (name, version): (com.google.android.webview, 133.0.6943.137)\n  WebView packages:\n    Valid package com.google.android.webview (versionName: 133.0.6943.137, versionCode: 694313732, targetSdkVersion: 34) is  installed/enabled for all users\n    com.google.android.webview.beta is NOT installed.\n    com.google.android.webview.dev is NOT installed.\n    com.google.android.webview.canary is NOT installed.\n    com.google.android.webview.debug is NOT installed.\n    com.android.webview is NOT installed.\n",
+  "reportQualification": "unqualified-physical-baseline-pending",
+  "files": {
+    "integrated-lab-report.json": "7ba3ddcad8e977b702b67c9db7c491d76e4c16a37b061b97d27dc400f4921a61",
+    "lab-signature.txt": "e7463ef0a2e590d40449fa88657acdc540e808bb3563e3f302e0bd710964a2f6",
+    "integrated-lab-events.jsonl": "ebfa2a5cbf51aecebeb831e82921507f27e32136e469950fe4ad4d2d1af5fb78",
+    "shizuku-start.log": "82bffb000912c98a36166715db150dcd3714b0b83b61df6f21e646fb3d33d948",
+    "product-suite-final.log": "cd0c6b3f5641c6bc86de2e990189ef8d51f30f05ae392f9777eac56ed94694aa",
+    "integrated-shell-result.json": "2110a01f5b8169b004e4c2c60d43cc72d5a03f910e8099a187c5d0e6adbc83ed",
+    "integrated-lab-native.json": "38d2db0a742b2f0f34e150abd84318b78a0149ec5fe82f5a53ff005d9fd7d14f",
+    "model-requests.jsonl": "7a7bc936da5dc5f5ebbb860f4f666f10eb817ad29737bfd477bceb34471c4a4b",
+    "integrated-chat.png": "11d1e7a7ae6d83af460da86827cd8d1b29609e57c0decac88c9861de68c91771",
+    "commit-verify.log": "aa0fd71cf85a95934258bd306456d9847e1efb66f3cff17361b21fba985a3959",
+    "agent-signature.txt": "e7463ef0a2e590d40449fa88657acdc540e808bb3563e3f302e0bd710964a2f6",
+    "shizuku-signature.txt": "16dc2863a363e1eda065ae9e92c840a996ef78a5caf2015be740996c2ddd5d55",
+    "integrated-frame-report.json": "5677f4b3b197fbc4c9f04935c3670e0707ba63f131898272865319a9a7fdc3b5",
+    "lab-parser-final.log": "064c8f422cf57a46dd3afd8d4835ac67d414fdd179eb554517ab8cc4733c03d1",
+    "integrated-capture-result.json": "10d60f32c557356908a15a5a946125c785f8dc44208378c1d7d6e55f9a72dd76",
+    "artifacts.json": "d15fe33804c896dea0889e0ec4eef8b94b8696fa031d8bd3eb618a74bdc38232",
+    "integrated-frame-native.json": "ab596c4b781f923c1d38a604de3ac9761cbe60ed0cf88305c1d0423455a1b0f2"
+  },
+  "jvmTests": {
+    "native-bridge/core": {
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "tools/core": {
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "integration/device-authority": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "app": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "tests/input-lab-app/app": {
+      "tests": 44,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "rawPrefixCheckedBeforeRedaction": true,
+  "descriptorPolicy": "sha256",
+  "receiverPrefixHashMeaning": "original private receiver bytes; exported file hashes below verify redacted evidence"
+}

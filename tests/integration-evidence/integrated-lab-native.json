@@ -1,0 +1,357 @@
+{
+  "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+  "run": {
+    "id": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+    "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+    "status": "completed",
+    "expanded": false,
+    "startedAt": 1791892863520,
+    "probe": false,
+    "modelProfileRevision": 201,
+    "capabilityEpoch": 2,
+    "contexts": [
+      {
+        "snapshotId": "2104a5d0-26b9-40bd-b2ec-48bcc20627e9",
+        "modelProfileRevision": 201,
+        "capabilityEpoch": 2,
+        "registryVersion": "configuration-probe@1|thor.device@0.1.0|thor.web@1",
+        "l0SnapshotId": "fdaca86d-6291-4036-9c32-8744fa46c89a",
+        "includedMessageIds": [
+          "current:20749c4a-0657-4e0a-abe1-67e3c487b457"
+        ],
+        "attachmentRefs": [],
+        "effectiveTools": [
+          "web.search",
+          "web.fetch",
+          "perception.app_info",
+          "perception.window_info",
+          "perception.ui_tree",
+          "perception.capture_screen",
+          "perception.device_info",
+          "input.tap",
+          "input.long_press",
+          "input.swipe",
+          "input.release_inputs"
+        ],
+        "estimatedTokens": 5373,
+        "estimated": true,
+        "compressionVersion": "deterministic-v1",
+        "droppedTurnIds": [],
+        "contentHash": "da4bab4de66efa0d08ccbc778964e2c798171c7d96ec57813a8c8797de39376c"
+      },
+      {
+        "snapshotId": "47c44273-fe38-4b65-a640-98d24e8e0aae",
+        "modelProfileRevision": 201,
+        "capabilityEpoch": 2,
+        "registryVersion": "configuration-probe@1|thor.device@0.1.0|thor.web@1",
+        "l0SnapshotId": "fdaca86d-6291-4036-9c32-8744fa46c89a",
+        "includedMessageIds": [
+          "current:20749c4a-0657-4e0a-abe1-67e3c487b457"
+        ],
+        "attachmentRefs": [],
+        "effectiveTools": [
+          "web.search",
+          "web.fetch",
+          "perception.app_info",
+          "perception.window_info",
+          "perception.ui_tree",
+          "perception.capture_screen",
+          "perception.device_info",
+          "input.tap",
+          "input.long_press",
+          "input.swipe",
+          "input.release_inputs"
+        ],
+        "estimatedTokens": 6402,
+        "estimated": true,
+        "compressionVersion": "deterministic-v1",
+        "droppedTurnIds": [],
+        "contentHash": "6b4b7be2d73b027651c406731e5330c50d75daa12c4794b1afa32a3ecca0a10a"
+      }
+    ],
+    "turn": {
+      "turnId": "bc5a81c0-fc3d-4067-bd6e-be7e017944bc",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "messages": [
+        {
+          "kind": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "LAB_TAP_179_678: tap upper START once"
+            }
+          ]
+        },
+        {
+          "kind": "assistant",
+          "text": "",
+          "calls": [
+            {
+              "id": "lab_call|fc_lab_call",
+              "name": "input_tap",
+              "arguments": {
+                "x": 179,
+                "y": 678,
+                "coordinateSpace": "display_logical",
+                "expectedPackage": "dev.thor.inputlab"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "tool_result",
+          "toolCallId": "lab_call|fc_lab_call",
+          "toolName": "input_tap",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":3,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ],
+          "isError": false
+        },
+        {
+          "kind": "assistant",
+          "text": "集成中文流式回答：真实 Pi 经 Native Fetch 完成。",
+          "calls": []
+        }
+      ],
+      "source": [
+        "screen_perception",
+        "screen_control"
+      ],
+      "observedAt": 1791892866150,
+      "complete": true,
+      "effects": [
+        {
+          "toolCallId": "lab_call|fc_lab_call",
+          "toolId": "input.tap",
+          "effectClass": "input",
+          "outcome": "submitted",
+          "evidenceRef": "native-event:20749c4a-0657-4e0a-abe1-67e3c487b457:5ea111f4-3944-41dc-b253-5519247ab278"
+        }
+      ]
+    },
+    "runtime": {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "state": "completed",
+      "modelProfileRevision": 201,
+      "capabilityEpoch": 2,
+      "startedAt": 1791892864605
+    }
+  },
+  "events": [
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "08e093de-7c58-48c1-84a3-51740199a925",
+      "sequence": 1,
+      "wallTime": 1791892864605,
+      "elapsedMs": 0,
+      "type": "state",
+      "data": {
+        "state": "queued"
+      },
+      "id": "08e093de-7c58-48c1-84a3-51740199a925",
+      "summary": "{\"state\":\"queued\"}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "86078a3e-d19d-4594-b4ce-4da1ec153b4d",
+      "sequence": 2,
+      "wallTime": 1791892864612,
+      "elapsedMs": 7,
+      "type": "state",
+      "data": {
+        "state": "preparing"
+      },
+      "id": "86078a3e-d19d-4594-b4ce-4da1ec153b4d",
+      "summary": "{\"state\":\"preparing\"}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "c28fe301-a23c-4c04-971d-0e088ae6c596",
+      "sequence": 3,
+      "wallTime": 1791892864648,
+      "elapsedMs": 43,
+      "type": "context",
+      "data": {
+        "snapshotId": "2104a5d0-26b9-40bd-b2ec-48bcc20627e9",
+        "estimatedTokens": 5373,
+        "droppedTurnIds": []
+      },
+      "id": "c28fe301-a23c-4c04-971d-0e088ae6c596",
+      "summary": "{\"snapshotId\":\"2104a5d0-26b9-40bd-b2ec-48bcc20627e9\",\"estimatedTokens\":5373,\"droppedTurnIds\":[]}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "fd22cbe2-a8a6-4088-8c30-15e8601248d4",
+      "sequence": 4,
+      "wallTime": 1791892864662,
+      "elapsedMs": 57,
+      "type": "state",
+      "data": {
+        "state": "generating"
+      },
+      "id": "fd22cbe2-a8a6-4088-8c30-15e8601248d4",
+      "summary": "{\"state\":\"generating\"}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "26ea6bc7-4cb6-4f97-943a-a6cbd0324b60",
+      "sequence": 5,
+      "wallTime": 1791892865288,
+      "elapsedMs": 683,
+      "type": "state",
+      "data": {
+        "state": "executing_tools"
+      },
+      "id": "26ea6bc7-4cb6-4f97-943a-a6cbd0324b60",
+      "summary": "{\"state\":\"executing_tools\"}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "bffb4cbc-b996-4193-932a-d3b09e930299",
+      "sequence": 6,
+      "wallTime": 1791892865299,
+      "elapsedMs": 694,
+      "type": "tool_intent",
+      "data": {
+        "toolId": "input.tap",
+        "schemaVersion": "1",
+        "capabilityEpoch": 2,
+        "requestId": "5ea111f4-3944-41dc-b253-5519247ab278",
+        "outcome": "unknown"
+      },
+      "toolCallId": "lab_call|fc_lab_call",
+      "id": "bffb4cbc-b996-4193-932a-d3b09e930299",
+      "summary": "{\"toolId\":\"input.tap\",\"schemaVersion\":\"1\",\"capabilityEpoch\":2,\"requestId\":\"5ea111f4-3944-41dc-b253-5519247ab278\",\"outcome\":\"unknown\"}",
+      "toolId": "input.tap",
+      "outcome": "unknown"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "cf43a6e5-6ef6-4ed7-8fed-96c0dc33f951",
+      "sequence": 7,
+      "wallTime": 1791892865310,
+      "elapsedMs": 705,
+      "type": "tool_started",
+      "data": {
+        "toolId": "input.tap"
+      },
+      "toolCallId": "lab_call|fc_lab_call",
+      "id": "cf43a6e5-6ef6-4ed7-8fed-96c0dc33f951",
+      "summary": "{\"toolId\":\"input.tap\"}",
+      "toolId": "input.tap"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "ebed101e-da2e-49cc-82ee-7d0ff88e48be",
+      "sequence": 8,
+      "wallTime": 1791892865434,
+      "elapsedMs": 829,
+      "type": "tool_result",
+      "data": {
+        "toolId": "input.tap",
+        "observedAt": 1791892865431,
+        "source": "accessibility-dispatchGesture",
+        "truncated": false,
+        "error": null,
+        "outcome": "submitted",
+        "evidenceRef": "native-event:20749c4a-0657-4e0a-abe1-67e3c487b457:5ea111f4-3944-41dc-b253-5519247ab278",
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":3,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+          }
+        ]
+      },
+      "toolCallId": "lab_call|fc_lab_call",
+      "id": "ebed101e-da2e-49cc-82ee-7d0ff88e48be",
+      "summary": "{\"toolId\":\"input.tap\",\"observedAt\":1791892865431,\"source\":\"accessibility-dispatchGesture\",\"truncated\":false,\"error\":null,\"outcome\":\"submitted\",\"evidenceRef\":\"native-event:20749c4a-0657-4e0a-abe1-67e3c487b457:5ea111f4-3944-41dc-b253-5519247ab278\",\"content\":[{\"type\":\"text\",\"text\":\"{\\\"submitted\\\":true,\\\"systemCallback\\\":\\\"completed\\\",\\\"gameEffectObserved\\\":false,\\\"displayId\\\":3,\\\"durationMs\\\":80,\\\"displayRole\\\":\\\"upper\\\",\\\"message\\\":null}\"}]}",
+      "toolId": "input.tap",
+      "outcome": "submitted",
+      "error": null
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "10aaa3d4-aa7e-4052-bab3-90e24b993b18",
+      "sequence": 9,
+      "wallTime": 1791892865483,
+      "elapsedMs": 878,
+      "type": "context",
+      "data": {
+        "snapshotId": "47c44273-fe38-4b65-a640-98d24e8e0aae",
+        "estimatedTokens": 6402,
+        "droppedTurnIds": []
+      },
+      "id": "10aaa3d4-aa7e-4052-bab3-90e24b993b18",
+      "summary": "{\"snapshotId\":\"47c44273-fe38-4b65-a640-98d24e8e0aae\",\"estimatedTokens\":6402,\"droppedTurnIds\":[]}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "75a759d7-e4a5-49f3-830f-59abc650dd8b",
+      "sequence": 10,
+      "wallTime": 1791892865515,
+      "elapsedMs": 910,
+      "type": "state",
+      "data": {
+        "state": "generating"
+      },
+      "id": "75a759d7-e4a5-49f3-830f-59abc650dd8b",
+      "summary": "{\"state\":\"generating\"}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "be1ec462-51fb-4ce8-9159-d8e3b9872b36",
+      "sequence": 11,
+      "wallTime": 1791892865812,
+      "elapsedMs": 1207,
+      "type": "text_delta",
+      "data": {
+        "text": "集成"
+      },
+      "id": "be1ec462-51fb-4ce8-9159-d8e3b9872b36",
+      "summary": "{\"text\":\"集成\"}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "f4376f1b-0068-416d-8677-1581ce6359bb",
+      "sequence": 12,
+      "wallTime": 1791892865891,
+      "elapsedMs": 1286,
+      "type": "text_delta",
+      "data": {
+        "text": "中文流式回答：真实 Pi 经 Native Fetch 完成。"
+      },
+      "id": "f4376f1b-0068-416d-8677-1581ce6359bb",
+      "summary": "{\"text\":\"中文流式回答：真实 Pi 经 Native Fetch 完成。\"}"
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+      "eventId": "b7395beb-4d47-434a-9a4d-7115bc2a81b3",
+      "sequence": 13,
+      "wallTime": 1791892866159,
+      "elapsedMs": 1554,
+      "type": "state",
+      "data": {
+        "state": "completed"
+      },
+      "id": "b7395beb-4d47-434a-9a4d-7115bc2a81b3",
+      "summary": "{\"state\":\"completed\"}"
+    }
+  ]
+}

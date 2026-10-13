@@ -1,0 +1,19 @@
+{
+  "toolId": "perception.capture_screen",
+  "observedAt": 1791892870481,
+  "source": "android-sdk/accessibility",
+  "truncated": false,
+  "error": null,
+  "outcome": "observed",
+  "evidenceRef": "native-event:7ae856b4-ec20-4b3b-82f8-ab453ab8bbf6:9ab52809-f04f-4084-b687-770cc2921dcc",
+  "content": [
+    {
+      "type": "attachment",
+      "attachmentId": "0d810d66-82ff-4e7b-9d0d-9c9aa21defb4"
+    },
+    {
+      "type": "text",
+      "text": "{\"displayRole\":\"upper\",\"displayId\":3,\"frameId\":\"fd8cf031-4b46-4b66-920a-ded8b104188b\",\"mime\":\"image\\/jpeg\",\"bytes\":1946,\"width\":64,\"height\":64,\"quality\":80,\"rotation\":0,\"transform\":{\"left\":0,\"top\":0,\"displayWidth\":100,\"displayHeight\":100,\"imageWidth\":64,\"imageHeight\":64},\"message\":null}"
+    }
+  ]
+}

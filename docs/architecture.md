@@ -1,7 +1,7 @@
 # 总体架构与分层
 
 > 2026-10-13 状态更新：五模块已开发并进入正式软件整合。本文早期“仅规划/未授权/无 APK”等叙述保留其历史背景；当前实现、实际测试与尚未完成的 Thor 验收，以 [中文集成报告](integration-report.md) 为准。来源模块旧测试不等于本次集成结果。
-[决定] 采用 Kotlin Android 宿主＋本地 WebView 中的聊天 UI 和 Pi 运行时。具体 UI 框架推迟到 PoC；不引入服务端 Agent。该选择以 POC-03/04 通过为条件。
+[决定] 采用 Kotlin Android 宿主＋本地 WebView 中的聊天 UI 和 Pi 运行时。目前使用 APK 内 HTML/CSS/JS 极简聊天，不引入服务端 Agent。Pi/WebView/Fetch 的软件链已验证，Thor 上的 POC-03/04 仍需验收。
 
 ```mermaid
 flowchart TB

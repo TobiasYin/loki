@@ -1,0 +1,69 @@
+{
+  "runId": "aba84b0c-91be-4d29-9824-1ffe01a86abe",
+  "events": [
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "aba84b0c-91be-4d29-9824-1ffe01a86abe",
+      "eventId": "87fc6d34-ac1f-4edc-8b03-913c05550e35",
+      "sequence": 8,
+      "wallTime": 1791892873044,
+      "elapsedMs": 733,
+      "type": "tool_result",
+      "data": {
+        "toolId": "perception.capture_screen",
+        "observedAt": 1791892873029,
+        "source": "android-sdk/accessibility",
+        "truncated": false,
+        "error": null,
+        "outcome": "observed",
+        "evidenceRef": "native-event:aba84b0c-91be-4d29-9824-1ffe01a86abe:577ef5c7-958d-44c6-9ad7-b3b1277a0e44",
+        "content": [
+          {
+            "type": "attachment",
+            "attachmentId": "a4ee97ac-a2f2-470a-b098-54f01a84448e"
+          },
+          {
+            "type": "text",
+            "text": "{\"displayRole\":\"upper\",\"displayId\":3,\"frameId\":\"1349c4ed-bd21-444a-a38e-cf6026b47997\",\"mime\":\"image\\/jpeg\",\"bytes\":1008,\"width\":100,\"height\":100,\"quality\":80,\"rotation\":0,\"transform\":{\"left\":129,\"top\":628,\"displayWidth\":100,\"displayHeight\":100,\"imageWidth\":100,\"imageHeight\":100},\"message\":null}"
+          }
+        ]
+      },
+      "toolCallId": "call_142|fc_call_142",
+      "id": "87fc6d34-ac1f-4edc-8b03-913c05550e35",
+      "summary": "{\"toolId\":\"perception.capture_screen\",\"observedAt\":1791892873029,\"source\":\"android-sdk\\/accessibility\",\"truncated\":false,\"error\":null,\"outcome\":\"observed\",\"evidenceRef\":\"native-event:aba84b0c-91be-4d29-9824-1ffe01a86abe:577ef5c7-958d-44c6-9ad7-b3b1277a0e44\",\"content\":[{\"type\":\"attachment\",\"attachmentId\":\"a4ee97ac-a2f2-470a-b098-54f01a84448e\"},{\"type\":\"text\",\"text\":\"{\\\"displayRole\\\":\\\"upper\\\",\\\"displayId\\\":3,\\\"frameId\\\":\\\"1349c4ed-bd21-444a-a38e-cf6026b47997\\\",\\\"mime\\\":\\\"image\\\\\\/jpeg\\\",\\\"bytes\\\":1008,\\\"width\\\":100,\\\"height\\\":100,\\\"quality\\\":80,\\\"rotation\\\":0,\\\"transform\\\":{\\\"left\\\":129,\\\"top\\\":628,\\\"displayWidth\\\":100,\\\"displayHeight\\\":100,\\\"imageWidth\\\":100,\\\"imageHeight\\\":100},\\\"message\\\":null}\"}]}",
+      "toolId": "perception.capture_screen",
+      "outcome": "observed",
+      "error": null
+    },
+    {
+      "sessionId": "a22cae2d-f525-4c81-91bd-d3773f44fd04",
+      "runId": "aba84b0c-91be-4d29-9824-1ffe01a86abe",
+      "eventId": "5b7b735f-50f7-47a7-8f0c-f8a7b4ca034e",
+      "sequence": 14,
+      "wallTime": 1791892873867,
+      "elapsedMs": 1556,
+      "type": "tool_result",
+      "data": {
+        "toolId": "input.tap",
+        "observedAt": 1791892873865,
+        "source": "accessibility-dispatchGesture",
+        "truncated": false,
+        "error": null,
+        "outcome": "submitted",
+        "evidenceRef": "native-event:aba84b0c-91be-4d29-9824-1ffe01a86abe:41385267-b5a6-46ea-a7e9-b008f2953ad8",
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":3,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+          }
+        ]
+      },
+      "toolCallId": "call_143|fc_call_143",
+      "id": "5b7b735f-50f7-47a7-8f0c-f8a7b4ca034e",
+      "summary": "{\"toolId\":\"input.tap\",\"observedAt\":1791892873865,\"source\":\"accessibility-dispatchGesture\",\"truncated\":false,\"error\":null,\"outcome\":\"submitted\",\"evidenceRef\":\"native-event:aba84b0c-91be-4d29-9824-1ffe01a86abe:41385267-b5a6-46ea-a7e9-b008f2953ad8\",\"content\":[{\"type\":\"text\",\"text\":\"{\\\"submitted\\\":true,\\\"systemCallback\\\":\\\"completed\\\",\\\"gameEffectObserved\\\":false,\\\"displayId\\\":3,\\\"durationMs\\\":80,\\\"displayRole\\\":\\\"upper\\\",\\\"message\\\":null}\"}]}",
+      "toolId": "input.tap",
+      "outcome": "submitted",
+      "error": null
+    }
+  ]
+}
