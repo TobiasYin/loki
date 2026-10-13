@@ -1,0 +1,801 @@
+{
+  "contractVersion": 1,
+  "packId": "thor.device",
+  "packVersion": "0.1.0",
+  "status": "independent manual diagnostic module; integration unverified",
+  "authorization": "Native port; ManualTestAuthority is the local TEST implementation only",
+  "outputPolicy": {
+    "stdoutStderrBytes": 65536,
+    "screenshotBytes": 2097152,
+    "uiTreeChars": 12000,
+    "uiTreeNodes": 80,
+    "l0Bytes": 1024
+  },
+  "tools": [
+    {
+      "toolId": "perception.app_info",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "package": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility for current-upper target; PackageManager visibility for version lookup"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read upper application package label/version/install details without capture."
+    },
+    {
+      "toolId": "perception.window_info",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "maxWindows": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16,
+            "default": 16
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Enumerate bounded Accessibility windows only on the calibrated upper display."
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "windowId": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "maxDepth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5,
+            "default": 5
+          },
+          "maxNodes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 80,
+            "default": 80
+          },
+          "maxChars": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12000,
+            "default": 12000
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read a bounded upper window UI tree; hide passwords; null/surface content can be empty."
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "maxEdge": {
+            "type": "integer",
+            "minimum": 64,
+            "maximum": 1280,
+            "default": 1280
+          },
+          "quality": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 95,
+            "default": 80
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "jpeg"
+            ],
+            "default": "jpeg"
+          },
+          "region": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Capture calibrated upper display via Accessibility into a bounded private JPEG attachment."
+    },
+    {
+      "toolId": "perception.device_info",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "system",
+                "displays",
+                "resources"
+              ]
+            },
+            "maxItems": 3,
+            "default": [
+              "system"
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [],
+      "platformPrerequisites": [],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read requested system/display/resource SDK data; never use Shell."
+    },
+    {
+      "toolId": "input.tap",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 2,
+            "maxItems": 32
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "coordinateSpace": {
+            "type": "string",
+            "enum": [
+              "display_logical",
+              "frame_pixels"
+            ]
+          },
+          "frameId": {
+            "type": "string"
+          },
+          "expectedPackage": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "coordinateSpace"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Submit a bounded single-finger tap to the calibrated upper display."
+    },
+    {
+      "toolId": "input.long_press",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 2,
+            "maxItems": 32
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "coordinateSpace": {
+            "type": "string",
+            "enum": [
+              "display_logical",
+              "frame_pixels"
+            ]
+          },
+          "frameId": {
+            "type": "string"
+          },
+          "expectedPackage": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "coordinateSpace"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Submit a bounded single-finger long press to the calibrated upper display."
+    },
+    {
+      "toolId": "input.swipe",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 2,
+            "maxItems": 32
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "coordinateSpace": {
+            "type": "string",
+            "enum": [
+              "display_logical",
+              "frame_pixels"
+            ]
+          },
+          "frameId": {
+            "type": "string"
+          },
+          "expectedPackage": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "points",
+          "coordinateSpace"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Submit a bounded single-finger swipe to the calibrated upper display."
+    },
+    {
+      "toolId": "input.press_button",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "button": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "down",
+              "up",
+              "hold"
+            ]
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "required": [
+          "button",
+          "phase"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Verified native gamepad device/source/axis backend (not provided)"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "availabilityPolicy": "unsupported; no keyboard/touch fallback",
+      "description": "Native gamepad injection is unsupported; do not use keyboard/touch/Shell fallback."
+    },
+    {
+      "toolId": "input.set_axes",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "axes": {
+            "type": "object"
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "required": [
+          "axes",
+          "durationMs"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Verified native gamepad device/source/axis backend (not provided)"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "availabilityPolicy": "unsupported; no keyboard/touch fallback",
+      "description": "Native gamepad axis injection is unsupported until Thor delivery and release are verified."
+    },
+    {
+      "toolId": "input.release_inputs",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [],
+      "platformPrerequisites": [],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Clean up only this Run-owned inputs; submitted Accessibility gestures cannot be instantly retracted."
+    },
+    {
+      "toolId": "debug.shell",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "arbitrary-shell",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60000,
+            "default": 15000
+          },
+          "maxBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536,
+            "default": 65536
+          }
+        },
+        "required": [
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [],
+      "platformPrerequisites": [
+        "Shizuku shell UID 2000"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Execute explicitly approved arbitrary Shell with Shizuku shell UID; crosses capability boundaries."
+    },
+    {
+      "toolId": "files.list",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "default": "."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 100
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "synthetic",
+              "shizuku"
+            ],
+            "default": "synthetic"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "explicit-debug-root"
+      ],
+      "platformPrerequisites": [
+        "Explicit synthetic root only for transactions; Shizuku shell UID 2000 plus shared root for optional read/list"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "List within explicit synthetic config root, or opt into Shizuku shared read-only root."
+    },
+    {
+      "toolId": "files.read",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "default": 0
+          },
+          "maxBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536,
+            "default": 65536
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "synthetic",
+              "shizuku"
+            ],
+            "default": "synthetic"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "explicit-debug-root"
+      ],
+      "platformPrerequisites": [
+        "Explicit synthetic root only for transactions; Shizuku shell UID 2000 plus shared root for optional read/list"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read bounded text/metadata within approved roots; requires adb_debug even for synthetic files."
+    },
+    {
+      "toolId": "files.backup",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "expectedHash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "path",
+          "expectedHash"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "explicit-debug-root"
+      ],
+      "platformPrerequisites": [
+        "Explicit synthetic root only for transactions; Shizuku shell UID 2000 plus shared root for optional read/list"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Save authenticated encrypted backup of an existing synthetic config matching expectedHash."
+    },
+    {
+      "toolId": "files.write",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "write",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "expectedHash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "backupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 1044480
+          }
+        },
+        "required": [
+          "path",
+          "expectedHash",
+          "backupId",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "explicit-debug-root"
+      ],
+      "platformPrerequisites": [
+        "Explicit synthetic root only for transactions; Shizuku shell UID 2000 plus shared root for optional read/list"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Write approved synthetic JSON config only after matching backup/hash, atomic replace and readback."
+    },
+    {
+      "toolId": "files.restore",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "write",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "backupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedCurrentHash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "backupId",
+          "expectedCurrentHash"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "explicit-debug-root"
+      ],
+      "platformPrerequisites": [
+        "Explicit synthetic root only for transactions; Shizuku shell UID 2000 plus shared root for optional read/list"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Restore an approved backup with expected current hash and a recovery copy of the current version."
+    }
+  ]
+}
