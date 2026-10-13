@@ -26,7 +26,7 @@ try:
  (output/'lab-parser-final.log').write_text(result);print(result,flush=True)
  assert '4 Android parser fixture checks passed.' in result,'Lab parser instrumentation failed'
  if a.require_shizuku:(output/'integrated-shell-result.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/integrated-shell-result.json',binary=True))
- for name in ['integrated-lab-report.json','integrated-lab-native.json','integrated-chat.png']:
+ for name in ['integrated-lab-report.json','integrated-lab-native.json','integrated-capture-result.json','integrated-chat.png']:
   (output/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name,binary=True))
  report=json.loads((output/'integrated-lab-report.json').read_text());attempt=report['metadata']['attemptId']
  raw=adb('exec-out','run-as','dev.thor.inputlab','cat',f'files/reports/{attempt}/events.jsonl',binary=True)

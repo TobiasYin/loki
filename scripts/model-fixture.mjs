@@ -42,6 +42,7 @@ const server = http.createServer(async (req,res) => {
   else if(userText.includes('WRITE_CONFIG') && !result) {const old=userText.match(/WRITE_CONFIG_([0-9a-f]{64})/)[1];reply={call:{name:'files_backup',args:JSON.stringify({path:'settings.json',expectedHash:old})}};}
   else if(userText.includes('WRITE_CONFIG') && !currentSerialized.includes('files_write')) {const old=userText.match(/WRITE_CONFIG_([0-9a-f]{64})/)[1];reply={call:{name:'files_write',args:JSON.stringify({path:'settings.json',expectedHash:old,content:'{"volume":70,"unknown":"keep"}',backupId:backupId(current)})}};}
   else if(userText.includes('DEVICE_INFO') && !result) reply={call:{name:'perception_device_info',args:'{"sections":["system"]}'}};
+  else if(userText.includes('LAB_CAPTURE') && !result) reply={call:{name:'perception_capture_screen',args:'{"region":[0,0,100,100],"maxEdge":64,"format":"jpeg"}'}};
   else if(userText.includes('LAB_TAP') && !result) { const match = serialized.match(/LAB_TAP_(\d+)_(\d+)/); reply={call:{id:'lab_call',name:'input_tap',args:JSON.stringify({x:Number(match[1]),y:Number(match[2]),coordinateSpace:'display_logical',expectedPackage:'dev.thor.inputlab'})}}; }
   else if(userText.includes('SHELL_WAIT') && !result) reply={call:{name:'debug_shell',args:'{"command":"sleep 30; echo LATE_SHELL_MARKER"}'}};
   else if(userText.includes('SHELL_REJECT') && !result) reply={call:{name:'debug_shell',args:'{"command":"echo integration-approved-only"}'}};

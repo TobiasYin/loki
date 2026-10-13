@@ -139,6 +139,12 @@ class WebViewFlowTest {
             assertFalse(state.toString().contains("integration-only-secret"))
             java.io.File(context.filesDir,"integrated-lab-native.json").writeText(obj("runId" to rid,"run" to state.getJSONArray("runs").objects().single {it.getString("id")==rid},"events" to org.json.JSONArray(state.getJSONArray("events").objects().filter {it.getString("runId")==rid})).toString(2))
             receiver("release",args)
+            send(web,"LAB_CAPTURE: capture actual upper pixels with a structured region")
+            waitFor(web,"document.getElementById('send').textContent === '停止'");waitFor(web,"document.getElementById('send').textContent === '发送'")
+            val capture=SqliteStore(context,"product.db").use {it.load().getJSONArray("events").objects().last {it.getString("type")=="tool_result"}}.getJSONObject("data")
+            assertEquals("perception.capture_screen",capture.getString("toolId"));assertTrue("Actual Accessibility screenshot must succeed: $capture",capture.isNull("error"))
+            assertEquals("attachment",capture.getJSONArray("content").getJSONObject(0).getString("type"))
+            java.io.File(context.filesDir,"integrated-capture-result.json").writeText(capture.toString(2))
             try {receiver("report",args);fail("Expired receiver lease accepted")}catch(_: RuntimeException){}
         } finally {finish(activity)}
     }
