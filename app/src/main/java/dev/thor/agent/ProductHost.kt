@@ -430,8 +430,8 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         publish(); return view()
     }
-    fun stop(reason: String) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; binding?.let { backend.release(it.runId); run(it.runId).put("stopReason", reason) } }
-    fun interrupt(reason: String) { if(closing)return;runCatching { serial.execute { stop(reason); binding?.let { run(it.runId).put("status", "interrupted"); persist() }; binding = null; connection = null; publish() } } }
+    fun stop(reason: String) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; binding?.let {backend.release(it.runId);run(it.runId).takeIf {r ->r.optString("status") !in terminal}?.put("stopReason",reason)} }
+    fun interrupt(reason: String) { if(closing)return;runCatching { serial.execute { stop(reason); binding?.let {val r=run(it.runId);if(r.optString("status") !in terminal)r.put("status","interrupted");persist()}; binding = null; connection = null; publish() } } }
     private fun revokeResources() { if(closing)return;runCatching { serial.execute { binding?.let { authority.invalidateResources(it.sessionId); stop("系统授权或后端失效"); persist(); publish() } } } }
     fun calibrate(upper: Int, lower: Int) { snapshots.update(displayFacts(context)); snapshots.calibrate(upper, lower); revokeResources() }
     fun bindDebug() = debug.requestAndBind()
@@ -488,7 +488,7 @@ class ProductHost private constructor(private val context: Context, private val 
         displayManager.unregisterDisplayListener(displayListener)
         authority.stopRun(); prepared.values.forEach { it.approved.complete(false) }
         ThorAccessibilityService.invalidated = null
-        serial.execute { try {stop("宿主关闭"); binding?.let {run(it.runId).put("status","interrupted");persist()};binding=null;deviceAuthority.close()} finally {store.close();storageOwner.release()} }
+        serial.execute { try {stop("宿主关闭"); binding?.let {val r=run(it.runId);if(r.optString("status") !in terminal)r.put("status","interrupted");persist()};binding=null;deviceAuthority.close()} finally {store.close();storageOwner.release()} }
         debug.close(); deviceWorker.shutdownNow(); serial.shutdown()
     }
 }
