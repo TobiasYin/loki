@@ -9,7 +9,7 @@ def redact(v):
  if isinstance(v,dict):return {k:(hashlib.sha256(str(x).encode()).hexdigest() if k=='descriptor' else redact(x)) for k,x in v.items()}
  if isinstance(v,list):return [redact(x) for x in v]
  return v
-for name in ['integrated-lab-report.json','integrated-lab-native.json','integrated-shell-result.json','integrated-capture-result.json','artifacts.json']:
+for name in ['integrated-lab-report.json','integrated-lab-native.json','integrated-shell-result.json','integrated-capture-result.json','integrated-frame-report.json','integrated-frame-native.json','artifacts.json']:
  (dst/name).write_text(json.dumps(redact(json.loads((src/name).read_text())),ensure_ascii=False,indent=2)+'\n')
 (dst/'integrated-lab-events.jsonl').write_text(''.join(json.dumps(redact(json.loads(line)),ensure_ascii=False)+'\n' for line in raw.splitlines()))
 for name in ['integrated-chat.png','product-suite-final.log','lab-parser-final.log','commit-verify.log','model-requests.jsonl','shizuku-signature.txt','shizuku-start.log']:

@@ -139,6 +139,7 @@ class WebViewFlowTest {
             assertFalse(state.toString().contains("integration-only-secret"))
             java.io.File(context.filesDir,"integrated-lab-native.json").writeText(obj("runId" to rid,"run" to state.getJSONArray("runs").objects().single {it.getString("id")==rid},"events" to org.json.JSONArray(state.getJSONArray("events").objects().filter {it.getString("runId")==rid})).toString(2))
             receiver("release",args)
+            Thread.sleep(500)
             send(web,"LAB_CAPTURE: capture actual upper pixels with a structured region")
             waitFor(web,"document.getElementById('send').textContent === '停止'");waitFor(web,"document.getElementById('send').textContent === '发送'")
             val capture=SqliteStore(context,"product.db").use {it.load().getJSONArray("events").objects().last {it.getString("type")=="tool_result"}}.getJSONObject("data")
@@ -146,6 +147,21 @@ class WebViewFlowTest {
             assertEquals("attachment",capture.getJSONArray("content").getJSONObject(0).getString("type"))
             java.io.File(context.filesDir,"integrated-capture-result.json").writeText(capture.toString(2))
             try {receiver("report",args);fail("Expired receiver lease accepted")}catch(_: RuntimeException){}
+            val frameBegun=host(activity).prepareForRunner("LAB_FRAME_${x}_${y}: capture START region then tap its centre using frame pixels").get(5,TimeUnit.SECONDS)
+            val frameRid=frameBegun.getJSONObject("lease").getString("runId");val frameTest=id()
+            val frameSetup=receiver("prepare",android.os.Bundle().apply {putInt("version",1);putString("testRunId",frameTest);putString("caseId","LAB-02");putString("agentRunId",frameRid);putString("senderTraceRef","product-native:$frameRid:frame-input")})
+            val frameArgs=android.os.Bundle().apply {putInt("version",1);putString("testRunId",frameTest);putString("lease",frameSetup.getString("lease"))}
+            Thread.sleep(1000)
+            javascript(web,"window.runPreparedNative(JSON.parse(${JSONObject.quote(frameBegun.toString())}));true")
+            waitFor(web,"document.getElementById('send').textContent === '发送'")
+            var frameSnapshot=JSONObject(receiver("report",frameArgs).getString("snapshot")!!);val frameEnd=System.nanoTime()+TimeUnit.SECONDS.toNanos(8)
+            while(frameSnapshot.isNull("report") && System.nanoTime()<frameEnd) {Thread.sleep(100);frameSnapshot=JSONObject(receiver("report",frameArgs).getString("snapshot")!!)}
+            assertEquals("Actual screenshot-coordinate touch must reach the independent receiver", "pass",frameSnapshot.getJSONObject("report").getString("status"))
+            val frameEvents=SqliteStore(context,"product.db").use {it.load().getJSONArray("events").objects().filter {it.getString("runId")==frameRid && it.getString("type")=="tool_result"}}
+            assertEquals(2,frameEvents.size);assertTrue(frameEvents.all {it.getJSONObject("data").isNull("error")})
+            java.io.File(context.filesDir,"integrated-frame-report.json").writeText(frameSnapshot.getJSONObject("report").toString(2))
+            java.io.File(context.filesDir,"integrated-frame-native.json").writeText(obj("runId" to frameRid,"events" to org.json.JSONArray(frameEvents)).toString(2))
+            receiver("release",frameArgs)
         } finally {finish(activity)}
     }
     @Test fun actualFileApprovalsRejectApproveAndHashConflict() {

@@ -28,6 +28,10 @@ const server = http.createServer(async (req,res) => {
   const result = protocol === 'openai-responses' ? current.some(m=>m.type==='function_call_output') : current.some(m=>Array.isArray(m.content) && m.content.some(c=>c.type==='tool_result'));
   const imageCount = (serialized.match(/image_url|"type":"image"/g) ?? []).length;
   const names = (body.tools ?? []).map(t=>t.name ?? t.function?.name);
+  function frameId(value) {
+    if(typeof value==='string') {try{return frameId(JSON.parse(value));}catch{return undefined;}}
+    if(value&&typeof value==='object') {if(value.frameId)return value.frameId;for(const v of Object.values(value)){const id=frameId(v);if(id)return id;}}
+  }
   let reply;
   if(userText.includes('HTTP_429')) {res.writeHead(429);res.end('fixture HTTP failure');return;}
   if(userText.includes('HTTP_500')) {res.writeHead(500);res.end('fixture HTTP failure');return;}
@@ -42,6 +46,8 @@ const server = http.createServer(async (req,res) => {
   else if(userText.includes('WRITE_CONFIG') && !result) {const old=userText.match(/WRITE_CONFIG_([0-9a-f]{64})/)[1];reply={call:{name:'files_backup',args:JSON.stringify({path:'settings.json',expectedHash:old})}};}
   else if(userText.includes('WRITE_CONFIG') && !currentSerialized.includes('files_write')) {const old=userText.match(/WRITE_CONFIG_([0-9a-f]{64})/)[1];reply={call:{name:'files_write',args:JSON.stringify({path:'settings.json',expectedHash:old,content:'{"volume":70,"unknown":"keep"}',backupId:backupId(current)})}};}
   else if(userText.includes('DEVICE_INFO') && !result) reply={call:{name:'perception_device_info',args:'{"sections":["system"]}'}};
+  else if(userText.includes('LAB_FRAME') && !result) {const m=userText.match(/LAB_FRAME_(\d+)_(\d+)/);const x=Number(m[1]),y=Number(m[2]);reply={call:{name:'perception_capture_screen',args:JSON.stringify({region:[x-50,y-50,x+50,y+50],maxEdge:100,format:'jpeg'})}};}
+  else if(userText.includes('LAB_FRAME') && !currentSerialized.includes('input_tap')) reply={call:{name:'input_tap',args:JSON.stringify({x:50,y:50,coordinateSpace:'frame_pixels',frameId:frameId(current),expectedPackage:'dev.thor.inputlab'})}};
   else if(userText.includes('LAB_CAPTURE') && !result) reply={call:{name:'perception_capture_screen',args:'{"region":[0,0,100,100],"maxEdge":64,"format":"jpeg"}'}};
   else if(userText.includes('LAB_TAP') && !result) { const match = serialized.match(/LAB_TAP_(\d+)_(\d+)/); reply={call:{id:'lab_call',name:'input_tap',args:JSON.stringify({x:Number(match[1]),y:Number(match[2]),coordinateSpace:'display_logical',expectedPackage:'dev.thor.inputlab'})}}; }
   else if(userText.includes('SHELL_WAIT') && !result) reply={call:{name:'debug_shell',args:'{"command":"sleep 30; echo LATE_SHELL_MARKER"}'}};
