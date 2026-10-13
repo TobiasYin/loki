@@ -1,0 +1,860 @@
+{
+  "reportSchemaVersion": 1,
+  "metadata": {
+    "schemaVersion": 1,
+    "labVersion": "0.1.0",
+    "versionCode": 1,
+    "buildId": "input-lab-v1",
+    "testRunId": "1d71db76-7438-41a0-af19-f8778715bbf0",
+    "attemptId": "8635f2f0-f968-4580-aaec-c307cbc4e791",
+    "caseId": "LAB-02",
+    "receiverEpoch": "38030467-e960-4849-915a-87b353366c79",
+    "scenarioVersion": 1,
+    "seed": 1101,
+    "mode": "agent_e2e",
+    "layoutEpoch": 0,
+    "sceneRevision": 1,
+    "deviceRevision": 0,
+    "phase": "FINISHED",
+    "clockIds": {
+      "eventTime": "android_uptime_ms",
+      "receivedUptimeMs": "android_uptime_ms",
+      "receivedElapsedRealtimeNanos": "android_elapsed_realtime_ns",
+      "wallTimeMs": "unix_epoch_ms"
+    }
+  },
+  "environmentBefore": {
+    "labVersion": "0.1.0",
+    "applicationId": "dev.thor.inputlab",
+    "uid": 10214,
+    "pid": 16689,
+    "androidApi": 36,
+    "androidRelease": "16",
+    "manufacturer": "Google",
+    "model": "sdk_gphone64_arm64",
+    "firmwareFingerprint": "google/sdk_gphone64_arm64/emu64a:16/BP22.250325.006/13344233:user/release-keys",
+    "window": {
+      "actualWindowDisplayId": 3,
+      "rotation": 0,
+      "hasWindowFocus": false,
+      "windowScreenX": 0,
+      "windowScreenY": 0,
+      "windowWidth": 720,
+      "windowHeight": 1280,
+      "arenaWindowBounds": {
+        "left": 12,
+        "top": 336,
+        "right": 708,
+        "bottom": 1058
+      },
+      "layoutHash": "41ca47396aafa27cead2e3d47af1c2d3ba3ee020d35e503bc0ed7884aee68919",
+      "insets": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "lifecycle": "resumed"
+    },
+    "displays": [
+      {
+        "displayId": 0,
+        "name": "Built-in Screen",
+        "rotation": 0,
+        "state": 2,
+        "physicalWidth": 720,
+        "physicalHeight": 1280,
+        "refreshRate": 60.000004
+      },
+      {
+        "displayId": 2,
+        "name": "Emulator 2D Display",
+        "rotation": 0,
+        "state": 2,
+        "physicalWidth": 720,
+        "physicalHeight": 1280,
+        "refreshRate": 60
+      },
+      {
+        "displayId": 3,
+        "name": "Overlay #1",
+        "rotation": 0,
+        "state": 2,
+        "physicalWidth": 720,
+        "physicalHeight": 1280,
+        "refreshRate": 60.000004
+      }
+    ],
+    "inputDevices": [
+      {
+        "available": true,
+        "deviceId": -1,
+        "name": "Virtual",
+        "descriptor": "f2a41bc8f04c990f5dfe4466e5c2428bfb7cae01d78f2c439d00ea47944857dd",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": true,
+        "sources": 769,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 2,
+        "name": "virtio_input_multi_touch_11",
+        "descriptor": "1ecdfdca8dd5d4a6f09dee2fb72145026286d8e60892b4366910efbed432c2f3",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 3,
+        "name": "virtio_input_multi_touch_10",
+        "descriptor": "ce670c4fc686a8e8fa8bc80fc42fca9f3f12f465c50478911fc23f3e3db6317a",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 4,
+        "name": "virtio_input_multi_touch_9",
+        "descriptor": "aa4e6ed4e0800c9e91eb470d4029ebae995ee1b2e16bca7c6c01d0770540ee1a",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 5,
+        "name": "virtio_input_multi_touch_8",
+        "descriptor": "4c98328a34242152eaf970f1aa815890496856ec2fcd607bdeb7de7079e4abf5",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 6,
+        "name": "virtio_input_multi_touch_7",
+        "descriptor": "f225827941c08750a6722fd7c47612e1fc97989ae0337fd80b851f1d4f2480ee",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 7,
+        "name": "virtio_input_multi_touch_6",
+        "descriptor": "2a6ca9aac16ba3d2aebb919558f9583c89895b2dad5a77d9a117cb8e7ca852c0",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 8,
+        "name": "virtio_input_multi_touch_5",
+        "descriptor": "28023105888bcdff6ba0a49b16eaf43d68abcae4305fc9a8fe1a4ed3625f517d",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 9,
+        "name": "virtio_input_multi_touch_4",
+        "descriptor": "f4183ad48551a1602b76d6580635e6e8faf2f2727d494b31bf06ee82f9bca867",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 10,
+        "name": "virtio_input_multi_touch_3",
+        "descriptor": "cc5b6d0333e6f552a973d30560a582080efba905a224d077673ce2901aab8a7e",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 11,
+        "name": "virtio_input_multi_touch_2",
+        "descriptor": "19a1451d349bd5bb2ec73eeb8ceb8075a8cad7a5934f92b8eacecef608b259f2",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": [
+          {
+            "axis": 0,
+            "source": 20482,
+            "min": 0,
+            "max": 719.978,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 1,
+            "source": 20482,
+            "min": 0,
+            "max": 1279.9609,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 2,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 3,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 4,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 5,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 6,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 7,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 8,
+            "source": 20482,
+            "min": -1.5707964,
+            "max": 1.5707964,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          }
+        ]
+      },
+      {
+        "available": true,
+        "deviceId": 12,
+        "name": "virtio_input_multi_touch_1",
+        "descriptor": "e7316f00361c6c92fb14210b915a10bb47aeab419c4d78e22de1c74e8a4e2dd6",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": [
+          {
+            "axis": 0,
+            "source": 20482,
+            "min": 0,
+            "max": 719.978,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 1,
+            "source": 20482,
+            "min": 0,
+            "max": 1279.9609,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 2,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 3,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 4,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 5,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 6,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 7,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 8,
+            "source": 20482,
+            "min": -1.5707964,
+            "max": 1.5707964,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          }
+        ]
+      },
+      {
+        "available": true,
+        "deviceId": 13,
+        "name": "gpio-keys",
+        "descriptor": "cacafa9efee9e3bcdbdb8d1d5857a207053a5f9558f9860cf87f2fc2678fd1fa",
+        "vendorId": 1,
+        "productId": 1,
+        "isVirtual": false,
+        "sources": 257,
+        "motionRanges": []
+      }
+    ]
+  },
+  "environmentAfter": {
+    "labVersion": "0.1.0",
+    "applicationId": "dev.thor.inputlab",
+    "uid": 10214,
+    "pid": 16689,
+    "androidApi": 36,
+    "androidRelease": "16",
+    "manufacturer": "Google",
+    "model": "sdk_gphone64_arm64",
+    "firmwareFingerprint": "google/sdk_gphone64_arm64/emu64a:16/BP22.250325.006/13344233:user/release-keys",
+    "window": {
+      "actualWindowDisplayId": 3,
+      "rotation": 0,
+      "hasWindowFocus": true,
+      "windowScreenX": 0,
+      "windowScreenY": 0,
+      "windowWidth": 720,
+      "windowHeight": 1280,
+      "arenaWindowBounds": {
+        "left": 12,
+        "top": 336,
+        "right": 708,
+        "bottom": 1058
+      },
+      "layoutHash": "41ca47396aafa27cead2e3d47af1c2d3ba3ee020d35e503bc0ed7884aee68919",
+      "insets": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "lifecycle": "resumed"
+    },
+    "displays": [
+      {
+        "displayId": 0,
+        "name": "Built-in Screen",
+        "rotation": 0,
+        "state": 2,
+        "physicalWidth": 720,
+        "physicalHeight": 1280,
+        "refreshRate": 60.000004
+      },
+      {
+        "displayId": 2,
+        "name": "Emulator 2D Display",
+        "rotation": 0,
+        "state": 2,
+        "physicalWidth": 720,
+        "physicalHeight": 1280,
+        "refreshRate": 60
+      },
+      {
+        "displayId": 3,
+        "name": "Overlay #1",
+        "rotation": 0,
+        "state": 2,
+        "physicalWidth": 720,
+        "physicalHeight": 1280,
+        "refreshRate": 60.000004
+      }
+    ],
+    "inputDevices": [
+      {
+        "available": true,
+        "deviceId": -1,
+        "name": "Virtual",
+        "descriptor": "f2a41bc8f04c990f5dfe4466e5c2428bfb7cae01d78f2c439d00ea47944857dd",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": true,
+        "sources": 769,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 2,
+        "name": "virtio_input_multi_touch_11",
+        "descriptor": "1ecdfdca8dd5d4a6f09dee2fb72145026286d8e60892b4366910efbed432c2f3",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 3,
+        "name": "virtio_input_multi_touch_10",
+        "descriptor": "ce670c4fc686a8e8fa8bc80fc42fca9f3f12f465c50478911fc23f3e3db6317a",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 4,
+        "name": "virtio_input_multi_touch_9",
+        "descriptor": "aa4e6ed4e0800c9e91eb470d4029ebae995ee1b2e16bca7c6c01d0770540ee1a",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 5,
+        "name": "virtio_input_multi_touch_8",
+        "descriptor": "4c98328a34242152eaf970f1aa815890496856ec2fcd607bdeb7de7079e4abf5",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 6,
+        "name": "virtio_input_multi_touch_7",
+        "descriptor": "f225827941c08750a6722fd7c47612e1fc97989ae0337fd80b851f1d4f2480ee",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 7,
+        "name": "virtio_input_multi_touch_6",
+        "descriptor": "2a6ca9aac16ba3d2aebb919558f9583c89895b2dad5a77d9a117cb8e7ca852c0",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 8,
+        "name": "virtio_input_multi_touch_5",
+        "descriptor": "28023105888bcdff6ba0a49b16eaf43d68abcae4305fc9a8fe1a4ed3625f517d",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 9,
+        "name": "virtio_input_multi_touch_4",
+        "descriptor": "f4183ad48551a1602b76d6580635e6e8faf2f2727d494b31bf06ee82f9bca867",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 10,
+        "name": "virtio_input_multi_touch_3",
+        "descriptor": "cc5b6d0333e6f552a973d30560a582080efba905a224d077673ce2901aab8a7e",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": []
+      },
+      {
+        "available": true,
+        "deviceId": 11,
+        "name": "virtio_input_multi_touch_2",
+        "descriptor": "19a1451d349bd5bb2ec73eeb8ceb8075a8cad7a5934f92b8eacecef608b259f2",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": [
+          {
+            "axis": 0,
+            "source": 20482,
+            "min": 0,
+            "max": 719.978,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 1,
+            "source": 20482,
+            "min": 0,
+            "max": 1279.9609,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 2,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 3,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 4,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 5,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 6,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 7,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 8,
+            "source": 20482,
+            "min": -1.5707964,
+            "max": 1.5707964,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          }
+        ]
+      },
+      {
+        "available": true,
+        "deviceId": 12,
+        "name": "virtio_input_multi_touch_1",
+        "descriptor": "e7316f00361c6c92fb14210b915a10bb47aeab419c4d78e22de1c74e8a4e2dd6",
+        "vendorId": 0,
+        "productId": 0,
+        "isVirtual": false,
+        "sources": -2147462909,
+        "motionRanges": [
+          {
+            "axis": 0,
+            "source": 20482,
+            "min": 0,
+            "max": 719.978,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 1,
+            "source": 20482,
+            "min": 0,
+            "max": 1279.9609,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 2,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 3,
+            "source": 20482,
+            "min": 0,
+            "max": 1,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 4,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 5,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 6,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 7,
+            "source": 20482,
+            "min": 0,
+            "max": 1468.6047,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          },
+          {
+            "axis": 8,
+            "source": 20482,
+            "min": -1.5707964,
+            "max": 1.5707964,
+            "flat": 0,
+            "fuzz": 0,
+            "resolution": 0
+          }
+        ]
+      },
+      {
+        "available": true,
+        "deviceId": 13,
+        "name": "gpio-keys",
+        "descriptor": "cacafa9efee9e3bcdbdb8d1d5857a207053a5f9558f9860cf87f2fc2678fd1fa",
+        "vendorId": 1,
+        "productId": 1,
+        "isVirtual": false,
+        "sources": 257,
+        "motionRanges": []
+      }
+    ]
+  },
+  "expectations": {
+    "stimulusDescription": "Tap START exactly once. Complete DOWN/UP required. Wrong target, no action, semantic-only must fail. LAB-03 uses the same frozen receiver geometry.",
+    "inputMode": "touch_or_explicit_semantic",
+    "observationWindowMs": 5000,
+    "quietWindowMs": 300,
+    "cleanupPolicy": "observe_actual_up_and_neutral_never_synthesize",
+    "targetWindowBounds": {
+      "left": 67.68,
+      "top": 516.5,
+      "right": 290.4,
+      "bottom": 841.4
+    },
+    "endTargetWindowBounds": {
+      "left": 429.6,
+      "top": 516.5,
+      "right": 652.32,
+      "bottom": 841.4
+    },
+    "touchSlopPx": 18,
+    "tapMaxMs": 500,
+    "longPressMinMs": 600,
+    "swipeDurationMs": [
+      100,
+      5000
+    ],
+    "expectedKeyCode": 96,
+    "comboKeyCodes": [
+      96,
+      97
+    ],
+    "requiredAxisIds": [
+      0,
+      1,
+      11,
+      14,
+      17,
+      18
+    ],
+    "axisExcursionFraction": 0.5,
+    "axisNeutralFraction": 0.05,
+    "upperRoleConfirmed": true
+  },
+  "sceneBefore": {
+    "hits": 0,
+    "wrong": 0,
+    "semanticCount": 0,
+    "sceneRevision": 0,
+    "pressed": [],
+    "axes": [],
+    "staleOrUnknown": false,
+    "rawCount": 0,
+    "sampleCount": 0
+  },
+  "sceneAfter": {
+    "hits": 1,
+    "wrong": 0,
+    "semanticCount": 0,
+    "sceneRevision": 1,
+    "pressed": [],
+    "axes": [],
+    "staleOrUnknown": false,
+    "rawCount": 2,
+    "sampleCount": 2
+  },
+  "rawEventInterval": {
+    "firstSequence": 1,
+    "cutoffSequence": 7
+  },
+  "assertions": {
+    "status": "pass",
+    "reasons": [
+      "receiver_assertions_satisfied"
+    ]
+  },
+  "status": "pass",
+  "receiverQualificationVersion": "unqualified-physical-baseline-pending",
+  "senderResult": null,
+  "senderTraceRef": "product-native:20749c4a-0657-4e0a-abe1-67e3c487b457:lab_call",
+  "agentRunId": "20749c4a-0657-4e0a-abe1-67e3c487b457",
+  "association": "time_window_only_not_sender_authentication",
+  "recordOrigin": "android_dispatch",
+  "systemInjectionProven": false,
+  "integrity": {
+    "incomplete": false,
+    "droppedSamples": 0,
+    "error": null,
+    "lateEvents": "append_to_events_jsonl_after_cutoff_until_next_arm"
+  },
+  "eventPrefixSha256": "6cebc929efef7a162fdf9843b6534af7b3592c74993ce80cd093c8de748fb43e",
+  "eventPrefixBytes": 14691
+}

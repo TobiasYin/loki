@@ -1,0 +1,12 @@
+/build/
+/.gradle/
+/local.properties
+/node_modules/
+
+/.kotlin/
+
+**/build/
+**/.gradle/
+**/node_modules/
+
+**/__pycache__/

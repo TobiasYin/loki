@@ -1,0 +1,19 @@
+
+> thor-agent-chat-tests@0.1.0 test
+> node --test web-tests/*.test.cjs
+
+✔ untrusted text never creates HTML, scripts, remote links or images (65.197208ms)
+✔ failed and unknown remain visible outside collapsed disclosure (11.558042ms)
+✔ active banner belongs to originating session after switching and stop is reachable (9.028958ms)
+✔ capability choice and unavailable reason are distinct and bound to session (8.060417ms)
+✔ waiting confirmation remains outside disclosure and approves exact run (9.006875ms)
+✔ long histories render 200 messages and 50 sessions without persistence in web storage (25.568417ms)
+✔ storage recovery failure is explicit and disables sending without clearing history (7.590417ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 457.861875

@@ -1,0 +1,214 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import type { Model } from '@earendil-works/pi-ai';
+import { ThorRuntime, defaultCapabilities, RuntimeError, ToolRegistry, compileContext, assertPaired, type HistoryTurn, type ToolOutcome } from '../src/index.js';
+import { fixture, registry, descriptor, PNG } from './fixtures.js';
+import { ProtocolAudit } from '../src/protocol-audit.js';
+
+for (const protocol of ['openai-responses', 'anthropic-messages'] as const) {
+  test(`${protocol}: streamed text + user image + image tool round trip through injected fetch`, async () => {
+    const f = fixture(protocol, [{ call: { name: 'picture' } }, { text: '图片回传完成中文' }]);
+    const r = new ThorRuntime(f.ports, registry());
+    const run = await r.run(f.lease, [{ type: 'text', text: 'Describe synthetic image' }, { type: 'attachment', attachmentId: 'user-image' }]);
+    assert.equal(run.state, 'completed'); assert.equal(f.executions.length, 1); assert.equal(f.requests.length, 2);
+    assert.equal(f.events.filter(e => e.type === 'text_delta').map(e => e.data.text).join(''), '图片回传完成中文');
+    assert.equal(f.requests[0]!.url, protocol === 'openai-responses' ? 'https://fixture.invalid/v1/responses' : 'https://fixture.invalid/v1/messages?beta=true');
+    for (const request of f.requests) {
+      assert.equal(request.envelope.purpose, 'model'); assert.equal(request.envelope.credentialRef, 'credential-local-test');
+      const auth = protocol === 'openai-responses' ? request.headers.authorization : request.headers['x-api-key'];
+      assert.equal(auth, protocol === 'openai-responses' ? 'Bearer sk-thor-native-placeholder' : 'sk-thor-native-placeholder');
+      assert.deepEqual(request.body.tools.map((t: any) => t.name).sort(), ['echo', 'picture']);
+      assert.equal(JSON.stringify(request.body).split('<L0>').length - 1, 1);
+    }
+    const first = JSON.stringify(f.requests[0]!.body); const second = JSON.stringify(f.requests[1]!.body);
+    assert.ok(first.includes(PNG)); assert.ok(second.includes(PNG));
+    if (protocol === 'openai-responses') {
+      const output = f.requests[1]!.body.input.find((i: any) => i.type === 'function_call_output');
+      assert.equal(output.call_id, 'call_0'); assert.ok(output.output.some((i: any) => i.type === 'input_image' && i.image_url.endsWith(PNG)));
+    } else {
+      const result = f.requests[1]!.body.messages.flatMap((m: any) => m.content).find((c: any) => c.type === 'tool_result');
+      assert.equal(result.tool_use_id, 'call_0'); assert.ok(result.content.some((c: any) => c.type === 'image' && c.source.data === PNG));
+    }
+    assert.ok(!JSON.stringify(f.turns).includes(PNG)); // Durable domain records contain only attachment references.
+    assert.equal(f.events.find(e => e.type === 'tool_intent')!.sequence < f.events.find(e => e.type === 'tool_started')!.sequence, true);
+    assert.deepEqual(f.events.map(e => e.sequence), f.events.map((_, i) => i + 1));
+  });
+  test(`${protocol}: one-byte SSE chunks preserve UTF-8 and deliver multiple deltas`, async () => {
+    const f = fixture(protocol, [{ text: '你好中文', chunkSize: 1 }]);
+    const r = new ThorRuntime(f.ports, registry()); let streamedBeforeClose = false;
+    r.subscribe(e => { if (e.type === 'text_delta' && !f.closedResponses.includes(0)) streamedBeforeClose = true; });
+    assert.equal((await r.run(f.lease, [{ type: 'text', text: 'hello' }])).state, 'completed'); assert.equal(streamedBeforeClose, true);
+    assert.equal(f.events.filter(e => e.type === 'text_delta').map(e => e.data.text).join(''), '你好中文');
+  });
+  test(`${protocol}: malformed complete tool JSON never executes`, async () => {
+    const f = fixture(protocol, [{ call: { name: 'echo', args: '{"text":"partial"' } }]);
+    await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: 'echo' }]);
+    assert.equal(f.executions.length, 0); assert.ok(f.events.some(e => e.type === 'diagnostic' && e.data.code === 'TOOL_FAILED'));
+  });
+  test(`${protocol}: disconnect with partial tool arguments never executes`, async () => {
+    const f = fixture(protocol, [{ call: { name: 'echo', args: '{"text":' }, disconnect: true }]);
+    assert.equal((await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: 'echo' }])).state, 'failed');
+    assert.equal(f.executions.length, 0);
+  });
+  test(`${protocol}: HTTP 429/500 fails without retry or leaking provider errors`, async () => {
+    for (const status of [401, 403, 429, 500]) {
+      const f = fixture(protocol, [{ status }]); const r = new ThorRuntime(f.ports, registry());
+      assert.equal((await r.run(f.lease, [{ type: 'text', text: 'hello' }])).state, 'failed');
+      assert.equal(f.requests.length, 1); assert.ok(!JSON.stringify(f.events).includes('synthetic-http-failure'));
+    }
+  });
+  test(`${protocol}: stop cancels an open stream and terminal state persists once`, async () => {
+    const f = fixture(protocol, [{ wait: true }]); const r = new ThorRuntime(f.ports, registry());
+    f.setOnRequest(() => r.stop());
+    const run = await r.run(f.lease, [{ type: 'text', text: 'hello' }]);
+    assert.equal(run.state, 'cancelled'); assert.equal(f.executions.length, 0);
+    assert.equal(f.runs.filter(x => x.state === 'cancelled').length, 1);
+  });
+}
+test('default capabilities and unavailable backend produce exact effective set', () => {
+  assert.deepEqual(Object.values(defaultCapabilities()), [true, true, false, false]);
+  const f = fixture(); const r = registry(); assert.deepEqual(r.effective(f.snapshot).map(t => t.modelName), ['echo', 'picture']);
+  f.snapshot.session.enabled.screen_perception = false; f.snapshot.availability['search-backend'] = { status: 'ready' };
+  assert.deepEqual(r.effective(f.snapshot).map(t => t.modelName), ['search']);
+  assert.throws(() => r.register({ packId: 'bad', packVersion: '1', tools: [descriptor('echo')] }));
+  assert.throws(() => new ToolRegistry().register({ packId: 'bad', packVersion: '1', tools: [descriptor('bad', ['unknown' as any])] }));
+});
+test('Anthropic completed zero-argument tool block is valid without JSON deltas', () => {
+  const audit = new ProtocolAudit();
+  audit.observe('anthropic-messages', { type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 'zero', name: 'app_info', input: {} } });
+  assert.equal(audit.permits('zero', {}), false);
+  audit.observe('anthropic-messages', { type: 'content_block_stop', index: 0 });
+  assert.equal(audit.permits('zero', {}), true);
+});
+test('off/on epoch change after model response rejects old call; a fresh lease can execute', async () => {
+  const f = fixture('openai-responses', [{ call: { name: 'echo' } }]); const r = new ThorRuntime(f.ports, registry());
+  r.subscribe(e => {
+    if (e.type === 'state' && e.data.state === 'executing_tools') {
+      f.snapshot.session.enabled.screen_perception = false; f.snapshot.session.capabilityEpoch++;
+      r.authorizationChanged(f.lease.sessionId, f.snapshot.session.capabilityEpoch);
+      f.snapshot.session.enabled.screen_perception = true; f.snapshot.session.capabilityEpoch++; f.snapshot.lease.capabilityEpoch = f.snapshot.session.capabilityEpoch;
+    }
+  });
+  assert.equal((await r.run(f.lease, [{ type: 'text', text: 'echo' }])).state, 'cancelled');
+  assert.equal(f.executions.length, 0);
+  const fresh = fixture('openai-responses', [{ call: { name: 'echo' } }, { text: 'new call done' }]); fresh.snapshot.session.capabilityEpoch = fresh.snapshot.lease.capabilityEpoch = 3;
+  assert.equal((await new ThorRuntime(fresh.ports, registry()).run(fresh.snapshot.lease, [{ type: 'text', text: 'echo' }])).state, 'completed');
+  assert.equal(fresh.executions.length, 1);
+});
+test('epoch rechecked after durable intent before executor; Native remains final gate', async () => {
+  const f = fixture('anthropic-messages', [{ call: { name: 'echo' } }]); const r = new ThorRuntime(f.ports, registry());
+  r.subscribe(e => { if (e.type === 'tool_intent') { f.snapshot.session.capabilityEpoch += 2; f.snapshot.lease.capabilityEpoch += 2; } });
+  await r.run(f.lease, [{ type: 'text', text: 'echo' }]); assert.equal(f.executions.length, 0);
+});
+test('revoked late image result is never delivered to model', async () => {
+  const f = fixture('anthropic-messages', [{ call: { name: 'picture' } }]); const r = new ThorRuntime(f.ports, registry());
+  f.setTool(async () => { f.snapshot.session.capabilityEpoch++; r.authorizationChanged(f.lease.sessionId, f.snapshot.session.capabilityEpoch); return { content: [{ type: 'attachment', attachmentId: 'tool-image' }], observedAt: Date.now(), source: 'fixture', truncated: false }; });
+  assert.equal((await r.run(f.lease, [{ type: 'text', text: 'image' }])).state, 'cancelled'); assert.equal(f.requests.length, 1);
+  assert.ok(!JSON.stringify(f.events).includes(PNG));
+});
+test('unknown/uninjected tools, invalid schema and duplicate call IDs do not execute', async () => {
+  for (const name of ['missing', 'tap', 'shell', 'search']) {
+    const f = fixture('openai-responses', [{ call: { name } }, { text: 'blocked' }]);
+    await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: name }]); assert.equal(f.executions.length, 0);
+  }
+  const bad = fixture('openai-responses', [{ call: { name: 'echo', args: '{"text":17}' } }, { text: 'invalid' }]);
+  await new ThorRuntime(bad.ports, registry()).run(bad.lease, [{ type: 'text', text: 'invalid' }]); assert.equal(bad.executions.length, 0);
+  const dup = fixture('openai-responses', [{ call: { id: 'same', name: 'echo' } }, { call: { id: 'same', name: 'echo', args: '{"text":"different"}' } }, { text: 'done' }]);
+  await new ThorRuntime(dup.ports, registry()).run(dup.lease, [{ type: 'text', text: 'loop' }]); assert.equal(dup.executions.length, 1);
+});
+test('tool failures are error tool results, text truncates at valid UTF-8 boundary', async () => {
+  const f = fixture('openai-responses', [{ call: { name: 'echo' } }, { text: 'failure handled' }]);
+  f.setTool(async () => { throw new Error('secret-from-port'); });
+  assert.equal((await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: 'error' }])).state, 'completed');
+  assert.ok(JSON.stringify(f.requests[1]!.body).includes('IO_ERROR')); assert.ok(!JSON.stringify(f.events).includes('secret-from-port'));
+  const t = fixture('openai-responses', [{ call: { name: 'echo' } }, { text: 'done' }]);
+  t.setTool(async (): Promise<ToolOutcome> => ({ content: [{ type: 'text', text: '中'.repeat(800) }], observedAt: Date.now(), source: 'fixture', truncated: false }));
+  await new ThorRuntime(t.ports, registry()).run(t.lease, [{ type: 'text', text: 'long' }]);
+  const result = t.events.find(e => e.type === 'tool_result')!; assert.equal(result.data.truncated, true); assert.ok(!JSON.stringify(result).includes('�'));
+});
+test('bounded deterministic compression drops whole pairs; revoked derived history is filtered', async () => {
+  const f = fixture(); const m: Model<any> = { id: 'fixture-model', name: 'Test', provider: 'openai', api: 'openai-responses', baseUrl: f.snapshot.session.model.baseUrl, reasoning: false, input: ['text', 'image'], contextWindow: 8000, maxTokens: 100, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
+  const history: HistoryTurn[] = Array.from({ length: 10 }, (_, i) => ({ turnId: `t${i}`, runId: `r${i}`, source: ['screen_perception'], observedAt: Date.now(), complete: true,
+    messages: [{ kind: 'user', content: [{ type: 'text', text: `goal-${i}` }] }, { kind: 'assistant', text: '', calls: [{ id: `c${i}`, name: 'echo', arguments: { text: 'test' } }] }, { kind: 'tool_result', toolCallId: `c${i}`, toolName: 'echo', content: [{ type: 'text', text: `PRIVATE-${i}` + 'x'.repeat(800) }], isError: false }, { kind: 'assistant', text: `Derived PRIVATE-${i}`, calls: [] }] }));
+  const compile = () => compileContext({ snapshot: f.snapshot, tools: registry().effective(f.snapshot), registryVersion: '1', model: m, history, current: [{ role: 'user', content: 'CURRENT GOAL', timestamp: 1 }], attachments: f.ports.attachments, imageTokens: 100, maxHistoryTurns: 50 });
+  const before = await compile(); assert.ok(before.manifest.droppedTurnIds.length > 0); assert.ok(before.manifest.estimatedTokens <= 5500); assertPaired(before.messages); assert.ok(JSON.stringify(before.messages).includes('CURRENT GOAL')); assert.equal(history.length, 10);
+  f.snapshot.session.enabled.screen_perception = false;
+  const after = await compile(); assert.ok(!JSON.stringify(after.messages).includes('PRIVATE')); assert.ok(JSON.stringify(after.messages).includes('goal-0')); assert.equal(after.messages.filter(m => m.role === 'system').length, 1); assert.ok(!JSON.stringify(after.messages).includes('local.test'));
+});
+test('required current content cannot fit: stops without a request', async () => {
+  const f = fixture(); f.snapshot.session.model.contextWindow = 2000; f.snapshot.session.model.maxOutput = 1000;
+  const result = await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: 'x'.repeat(8000) }]); assert.equal(result.state, 'failed'); assert.equal(result.error, 'LIMIT_EXCEEDED'); assert.equal(f.requests.length, 0);
+});
+test('consumed leases do not run twice and a second Session cannot run concurrently', async () => {
+  const f = fixture(); const r = new ThorRuntime(f.ports, registry());
+  await r.run(f.lease, [{ type: 'text', text: 'one' }]);
+  await assert.rejects(r.run(f.lease, [{ type: 'text', text: 'again' }]), (e: any) => e.code === 'STALE_AUTHORIZATION');
+  const held = fixture('openai-responses', [{ wait: true }]); const coordinator = new ThorRuntime(held.ports, registry());
+  let resolveRequested!: () => void; const requested = new Promise<void>(resolve => { resolveRequested = resolve; }); held.setOnRequest(resolveRequested);
+  const first = coordinator.run(held.lease, [{ type: 'text', text: 'held' }]); await requested;
+  await assert.rejects(coordinator.run({ ...held.lease, sessionId: 'second', runId: 'second' }, [{ type: 'text', text: 'two' }]), (e: any) => e.code === 'BACKEND_UNAVAILABLE');
+  coordinator.stop(); assert.equal((await first).state, 'cancelled');
+});
+test('expired images are reloaded before every request and L0 is replaced', async () => {
+  const f = fixture('openai-responses', [{ call: { name: 'picture' } }, { text: 'expired image handled' }]); const r = new ThorRuntime(f.ports, registry());
+  r.subscribe(e => { if (e.type === 'tool_result') { f.attachments.get('tool-image')!.expiresAt = 0; f.snapshot.l0.snapshotId = 'l0-2'; f.snapshot.l0.upperApp = { packageName: 'new.app', label: 'New app' }; } });
+  assert.equal((await r.run(f.lease, [{ type: 'text', text: 'image' }])).state, 'completed');
+  const second = JSON.stringify(f.requests[1]!.body); assert.ok(!second.includes(PNG)); assert.ok(second.includes('Image unavailable')); assert.ok(!second.includes('local.test')); assert.ok(second.includes('new.app'));
+  assert.equal(f.contexts[1]!.l0SnapshotId, 'l0-2'); assert.ok(f.contexts[1]!.attachmentRefs.includes('tool-image'));
+});
+test('tool deadline stops waiting for an uncooperative executor; late data cannot re-enter', async () => {
+  const f = fixture('openai-responses', [{ call: { name: 'echo' } }, { text: 'timeout handled' }]); const reg = new ToolRegistry(); reg.register({ packId: 'short', packVersion: '1', tools: [{ ...descriptor(), timeoutMs: 10 }] });
+  let deliver!: (result: ToolOutcome) => void;
+  f.setTool(() => new Promise(resolve => { deliver = resolve; }));
+  assert.equal((await new ThorRuntime(f.ports, reg).run(f.lease, [{ type: 'text', text: 'deadline' }])).state, 'completed');
+  assert.ok(JSON.stringify(f.requests[1]!.body).includes('TIMEOUT'));
+  const count = f.events.length; deliver({ content: [{ type: 'text', text: 'LATE PRIVATE RESULT' }], source: 'fake', observedAt: Date.now(), truncated: false }); await Promise.resolve();
+  assert.equal(f.events.length, count); assert.ok(!JSON.stringify(f.requests).includes('LATE PRIVATE RESULT'));
+});
+test('compression retains explicit constraints and side-effect ledger; oversized required memory stops', async () => {
+  const f = fixture(); f.snapshot.session.enabled.adb_debug = true;
+  const p = f.snapshot.session.model; const model: Model<any> = { id: p.modelId, name: 'T', api: p.protocol, provider: 'openai', baseUrl: p.baseUrl, reasoning: false, input: ['text'], contextWindow: 8000, maxTokens: 1000, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
+  const old: HistoryTurn = { turnId: 'old', runId: 'old', source: ['adb_debug'], observedAt: 1, complete: true, messages: [{ kind: 'user', content: [{ type: 'text', text: 'old request'.repeat(1000) }] }], constraints: ['Do not overwrite existing saves'], effects: [{ toolCallId: 'c', toolId: 'files.write', effectClass: 'write', outcome: 'observed', evidenceRef: 'backup-123' }] };
+  const options = { snapshot: f.snapshot, tools: [], registryVersion: '1', model, history: [old], current: [{ role: 'user' as const, content: 'current', timestamp: 1 }], attachments: f.ports.attachments, imageTokens: 100, maxHistoryTurns: 1 };
+  const compiled = await compileContext(options); assert.deepEqual(compiled.manifest.droppedTurnIds, ['old']); const text = JSON.stringify(compiled.messages); assert.ok(text.includes('backup-123')); assert.ok(text.includes('Do not overwrite existing saves'));
+  f.snapshot.session.enabled.adb_debug = false; assert.ok(!JSON.stringify((await compileContext(options)).messages).includes('backup-123'));
+  old.constraints = ['x'.repeat(10_000)]; await assert.rejects(compileContext(options), (e: any) => e.code === 'LIMIT_EXCEEDED');
+});
+test('authority bootstrap can be cancelled and configuration changes affect only new Runs', async () => {
+  const f = fixture(); f.ports.authority.read = async () => new Promise(() => {}); const r = new ThorRuntime(f.ports, registry());
+  const pending = r.run(f.lease, [{ type: 'text', text: 'pending' }]); r.stop(); await assert.rejects(pending, (e: any) => e.code === 'CANCELLED'); assert.equal(f.requests.length, 0);
+  const pinned = fixture('openai-responses', [{ call: { name: 'echo' } }, { text: 'done' }]); pinned.setOnRequest(index => { if (!index) { pinned.snapshot.session.model.revision = 2; pinned.snapshot.session.model.modelId = 'changed-model'; } });
+  await new ThorRuntime(pinned.ports, registry()).run(pinned.lease, [{ type: 'text', text: 'pin' }]); assert.ok(pinned.requests.every(q => q.body.model === 'fixture-model' && q.envelope.profileRevision === 1));
+});
+test('timeout, request/response budgets and bounded tool loop fail', async () => {
+  const f = fixture('anthropic-messages', [{ wait: true }]);
+  assert.equal((await new ThorRuntime(f.ports, registry(), { runTimeoutMs: 30 }).run(f.lease, [{ type: 'text', text: 'wait' }])).state, 'failed');
+  for (const limits of [{ maxRequestBytes: 20 }, { maxResponseBytes: 20 }]) {
+    const f = fixture(); assert.equal((await new ThorRuntime(f.ports, registry(), limits).run(f.lease, [{ type: 'text', text: 'budget' }])).state, 'failed');
+  }
+  const loop = fixture('openai-responses', [{ call: { name: 'echo' } }, { call: { name: 'echo' } }]);
+  assert.equal((await new ThorRuntime(loop.ports, registry(), { maxRequests: 1 }).run(loop.lease, [{ type: 'text', text: 'loop' }])).state, 'failed'); assert.equal(loop.requests.length, 1);
+});
+test('session/run mismatch, expired lease, incomplete probes reject before network', async () => {
+  for (const mutate of [(f: ReturnType<typeof fixture>) => { f.snapshot.lease.sessionId = 'other'; }, (f: ReturnType<typeof fixture>) => { f.snapshot.lease.expiresAt = 0; }, (f: ReturnType<typeof fixture>) => { f.snapshot.session.model.lastProbe.imageToolRoundTrip = false; }]) {
+    const f = fixture(); const lease = structuredClone(f.lease); mutate(f);
+    try { await new ThorRuntime(f.ports, registry()).run(lease, [{ type: 'text', text: 'bad lease' }]); } catch (e) { assert.ok(e instanceof RuntimeError); }
+    assert.equal(f.requests.length, 0);
+  }
+});
+test('failed intent persistence prevents execution; recovery never replays', async () => {
+  const f = fixture('openai-responses', [{ call: { name: 'echo' } }]); const original = f.ports.persistence.appendEvent;
+  f.ports.persistence.appendEvent = async e => { if (e.type === 'tool_intent') throw new Error('disk full'); return original(e); };
+  await assert.rejects(new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: 'persist' }]), (e: any) => e.code === 'PERSISTENCE_ERROR'); assert.equal(f.executions.length, 0); assert.equal(f.requests.length, 1);
+  const restored = await new ThorRuntime(f.ports, registry()).recover({ sessionId: 's', runId: 'r', state: 'executing_tools', startedAt: 1, modelProfileRevision: 1, capabilityEpoch: 1 });
+  assert.equal(restored.state, 'interrupted'); assert.equal(f.executions.length, 0);
+});
+
+test('only the audited internal configuration fixture can omit public capabilities', () => {
+  const probe = {...descriptor('probe'),toolId:'probe.picture',executor:'native-probe',provenance:'native-configuration-probe',requiredCapabilities:[],platformPrerequisites:['probe.picture']};
+  const r=new ToolRegistry();r.register({packId:'configuration-probe',packVersion:'1',tools:[probe]});
+  const f=fixture();f.snapshot.session.enabled.screen_perception=false;f.snapshot.availability['probe.picture']={status:'ready'};
+  assert.equal(r.effective(f.snapshot).length,1);
+  assert.throws(()=>new ToolRegistry().register({packId:'untrusted',packVersion:'1',tools:[probe]}));
+  assert.throws(()=>new ToolRegistry().register({packId:'configuration-probe',packVersion:'1',tools:[{...probe,effectClass:'arbitrary-shell'}]}));
+});

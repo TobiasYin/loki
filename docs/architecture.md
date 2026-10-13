@@ -1,6 +1,7 @@
 # 总体架构与分层
 
-[决定] 采用 Kotlin Android 宿主＋本地 WebView 中的聊天 UI 和 Pi 运行时。具体 UI 框架推迟到 PoC；不引入服务端 Agent。该选择以 POC-03/04 通过为条件。
+> 2026-10-13 状态更新：五模块已开发并进入正式软件整合。本文早期“仅规划/未授权/无 APK”等叙述保留其历史背景；当前实现、实际测试与尚未完成的 Thor 验收，以 [中文集成报告](integration-report.md) 为准。来源模块旧测试不等于本次集成结果。
+[决定] 采用 Kotlin Android 宿主＋本地 WebView 中的聊天 UI 和 Pi 运行时。目前使用 APK 内 HTML/CSS/JS 极简聊天，不引入服务端 Agent。Pi/WebView/Fetch 的软件链已验证，Thor 上的 POC-03/04 仍需验收。
 
 ```mermaid
 flowchart TB
@@ -65,3 +66,11 @@ Native Capability Store 是唯一授权事实源，Runtime 只有版本化镜像
 新增 [Thor Input Lab](input-lab.md) 测试 APK，占据上屏目标应用位置；与 Agent 独立安装、进程、UID 和数据。前期手动诊断面板调用 Native 适配器，后期 Agent 经产品网关调用相同待测输入链路；两者经过 Android 分发后由 Lab 收集接收事件和状态。
 
 受信 runner 的场景准备/报告通道与输入通道分开，不能直接制造事件或写通过结果，也不作为模型可调用工具。正式 Thor Agent 不依赖 Lab，输入发布回归必须先有 Lab 证据并保留真实模拟器验证。接收器自身的判定代码不共享 Agent 坐标变换实现，避免相同错误相互掩盖。
+
+## 已落地的软件整合
+
+根 Gradle 统一编译正式 App、Native Core/Android 桥、设备 Core/Android library、独立 Input Lab 和两个诊断宿主。App 预构建打包无 Node/外部模块导入的 Pi browser bundle。
+
+产品授权由 Native Authority 拥有，持久化由 ProductHost/SQLite拥有；原独立 Coordinator 和 ManualTestAuthority 不参与正式授权。前台只保留一个 Native Run，Activity singleTask；页面连接/前台生命周期失效立即撤销执行。UI 在 Native 收尾完成前仍阻止新发送。
+
+设备工具经真实 Gateway 与 bundled复杂 schema 校验；网络工具也登记 purpose/profile，并受 Native 搜索能力和 SSRF 控制。Native transport 不解析模型 JSON/SSE。批准卡、领域回合、ContextSnapshot/附件及图片工具回传已接入，详细限制与证据见集成报告。

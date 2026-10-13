@@ -1,5 +1,6 @@
 # 模型接入与通用 Native Fetch
 
+> 2026-10-13 状态更新：五模块已开发并进入正式软件整合。本文早期“仅规划/未授权/无 APK”等叙述保留其历史背景；当前实现、实际测试与尚未完成的 Thor 验收，以 [中文集成报告](integration-report.md) 为准。来源模块旧测试不等于本次集成结果。
 ## 责任边界
 
 [需求] 用户自填 OpenAI Responses 兼容 API 或 Anthropic Messages API，必须支持图片输入与工具调用。Pi/JS 负责 provider 选择、URL 路径构造、JSON、图片编码、鉴权 header 名称、SSE、tool call/result、停止原因、token usage 和协议兼容。Native 仅收发通用 HTTP。
@@ -21,7 +22,7 @@
 
 首版使用 HTTP 流式路径；若 provider 有 SSE/WebSocket 选择，限定已核对的 SSE/HTTP 方案。自定义 Fetch 不接管 WebSocket，禁止 auto 意外切换出 Native 通道。
 
-## Native Fetch 桥契约 v0.1（设计）
+## 已实现的 Native wire v1 与 Runtime 内部 v0.1 适配
 
 信封统一包含 bridgeVersion、requestId、runId、purpose、网络 profileRef、epoch/lease。purpose 区分 model、web_search、web_fetch、用户发起的配置测试；不是 JS 自报后就生效，Native 对照已登记授权上下文验证。
 
@@ -61,6 +62,6 @@ Native credentialRef 绑定精确 scheme/host/port、允许路径前缀和 heade
 
 ## 配置验证流程
 
-用户点击测试才对选定端点发请求：连接/鉴权 → 文本增量 → 应用内非敏感测试图片 → 无副作用 echo 工具 → 图片工具结果后续回答。报告各项单独通过/失败；支持模型不代表 endpoint 兼容，不能只收到 HTTP 200 就显示“可用”。测试会调用用户服务，设置页应说明可能计费；本次没有发送真实模型请求。
+用户点击测试才对选定端点发请求：连接/鉴权 → 文本增量 → 应用内非敏感测试图片 → 无副作用 echo 工具 → 图片工具结果后续回答。报告各项单独通过/失败；支持模型不代表 endpoint 兼容，不能只收到 HTTP 200 就显示“可用”。测试会调用用户服务，设置页应说明可能计费；本轮已经通过真实 Pi/Native Fetch 发送到本地受控协议服务；真实外部模型账户尚未测试。
 
 POC-04 用随机分块、半个中文字符、多行事件、空闲心跳、4xx/5xx、取消和背压验证。最终请求中的工具声明与有效权限以 POC-05 审查。

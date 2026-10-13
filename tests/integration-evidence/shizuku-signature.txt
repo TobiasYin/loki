@@ -1,0 +1,4 @@
+Signer #1 certificate DN: CN=Rikka
+Signer #1 certificate SHA-256 digest: 268b5590e868fb08bae7e0ac413564cd1ff88f5ccff74af9dbd0dc918e30db30
+Signer #1 certificate SHA-1 digest: 2900b8e762737549d63c41056906b5cdaeef6e18
+Signer #1 certificate MD5 digest: a12263bde276e621f46754cdec1dc089

@@ -1,9 +1,7 @@
-# Android 应用宿主
+# Thor Agent 正式 Android 宿主
 
-当前仅为文档占位目录，尚未开始实现。
+产品入口为 `MainActivity` → `ProductHost` → trusted WebView + 真实 Pi Runtime/Native Fetch/设备 Gateway。构建必须从根目录执行 `./gradlew :app:assembleDebug`。原模拟 Coordinator/RuntimePort 仅为旧单元测试保留，不是正常产品路径。
 
-未来负责 APK 入口、生命周期、WebView 容器、系统权限引导、下屏启动、Native 设置和持久化集成。
+Native 保存会话、Run、事件、领域回合、ContextSnapshot manifest 和附件，Keystore 加密凭据及配置备份。恢复只显示 interrupted，不执行旧 intent。四项能力共用 Native Authority；危险操作等待具体审批，未批准不能执行。
 
-不解析模型协议，不预先声明具体 Gradle 子模块。
-
-设计入口：[专项文档](../docs/architecture.md)。后续获得开发授权后再选择依赖、工程配置与物理模块；本次不安装依赖、不写产品代码、不构建 APK。
+完整设置、构建、测试命令和限制见 [根 README](../README.md) 与 [中文集成报告](../docs/integration-report.md)。本目录 `validation.md`/`validation/` 是来源任务的独立模拟证据；本次产品证据在 `tests/integration-evidence/`。
