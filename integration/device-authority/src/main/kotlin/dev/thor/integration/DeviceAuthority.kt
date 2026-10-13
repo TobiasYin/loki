@@ -6,7 +6,7 @@ import dev.thor.bridge.BridgeFailure
 import dev.thor.tools.*
 
 /** Device executor mirror; all decisions and short commits belong to Native Authority. */
-class DeviceAuthority(private val native: Authority) : AuthorizationPort, AutoCloseable {
+class DeviceAuthority(private val native: Authority, private val refreshResources: () -> Unit = {}) : AuthorizationPort, AutoCloseable {
     private var binding: Binding? = null
     private var allowed = emptySet<String>()
     private var cancellation = Cancellation()
@@ -24,6 +24,7 @@ class DeviceAuthority(private val native: Authority) : AuthorizationPort, AutoCl
         allowed = tools.toSet()
     }
     override fun validate(envelope: Envelope): Cancellation = native.atomic {
+        refreshResources()
         val b = binding ?: fail(Code.STALE_AUTHORIZATION, "No device lease")
         try { native.validate(b) } catch (e: BridgeFailure) { fail(runCatching { Code.valueOf(e.code.name) }.getOrDefault(Code.STALE_AUTHORIZATION), "Native lease invalid") }
         requireTool(envelope.sessionId == b.sessionId && envelope.runId == b.runId && envelope.capabilityEpoch == b.capabilityEpoch,

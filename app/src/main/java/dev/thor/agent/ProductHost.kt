@@ -38,8 +38,16 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
     @Volatile private var closing = false
     private var connection: String? = null
     private var snapshot: Snapshot? = null
-    private val deviceAuthority = DeviceAuthority(authority)
+    private val deviceAuthority = DeviceAuthority(authority) { snapshots.update(displayFacts(context)) }
     private val snapshots = Snapshots(clock) { ThorAccessibilityService.instance?.target(it) ?: Target(null, "unknown", "no-accessibility") }
+    private val displayManager=context.getSystemService(android.hardware.display.DisplayManager::class.java)
+    private var displayState=displayFacts(context)
+    private val displayListener=object:android.hardware.display.DisplayManager.DisplayListener {
+        override fun onDisplayAdded(id:Int)=changed()
+        override fun onDisplayRemoved(id:Int)=changed()
+        override fun onDisplayChanged(id:Int)=changed()
+        private fun changed() {val facts=displayFacts(context);if(facts != displayState) {displayState=facts;snapshots.update(facts);revokeResources()} }
+    }
     private val debug = DebugConnection(context) { revokeResources() }
     private val local = LocalFiles(File(context.filesDir, "approved-synthetic-config").toPath())
     private val backups = EncryptedVault(File(context.filesDir, "config-backups").toPath(), backupKey(), Clock { System.currentTimeMillis() })
@@ -121,6 +129,7 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
         } catch(_: Exception) { searchConfigured = false }
         policy = NetworkPolicy(profiles, redactor)
         ThorAccessibilityService.invalidated = { revokeResources() }
+        displayManager.registerDisplayListener(displayListener,android.os.Handler(android.os.Looper.getMainLooper()))
     }
     private fun backupKey(): SecretKey {
         val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }; val alias = "thor-product-backups-v1"
@@ -210,7 +219,10 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
     private fun authoritySnapshot(refresh: Boolean): JSONObject {
         val b = binding ?: error("No active run"); authority.validate(b);require(prefs.getInt("revision",-1)==revision)
         snapshots.update(displayFacts(context))
-        if (refresh || snapshot == null) snapshot = runCatching { snapshots.capture() }.getOrNull()
+        if (refresh || snapshot == null) {
+            // Preserve a valid frame/snapshot identity across model requests; changed/expired resources get a new identity.
+            snapshot = snapshot?.let { old -> runCatching { snapshots.validate(old.id) }.getOrNull() } ?: runCatching { snapshots.capture() }.getOrNull()
+        }
         val available = JSONObject(); val allowed = mutableSetOf<String>()
         for (t in ToolPack.descriptors.values) {
             var a = backend.availability(t.toolId)
@@ -458,6 +470,7 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
     private fun publish() = notify(view())
     override fun close() {
         if(closing)return;closing=true
+        displayManager.unregisterDisplayListener(displayListener)
         authority.stopRun(); prepared.values.forEach { it.approved.complete(false) }
         ThorAccessibilityService.invalidated = null
         serial.execute { stop("宿主关闭"); binding?.let { run(it.runId).put("status", "interrupted"); persist() }; binding = null; deviceAuthority.close(); store.close() }
