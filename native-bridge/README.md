@@ -1,3 +1,5 @@
+> 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
+
 # Thor Native Bridge 0.1
 
 这是 `native-bridge/` 内独立的 Android/Kotlin 工程。已实现通用 HTTP 字节桥、受信 WebView 连接和 Native 最终工具网关，附 JS Fetch 子集、MockWebServer 测试及独立 APK 宿主。它不依赖仓库的 `app/`、`runtime/`、`tools/`，不接入 Pi、不解析模型 JSON/SSE，不提供真实设备工具。

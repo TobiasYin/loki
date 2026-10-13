@@ -1,3 +1,5 @@
+> 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
+
 # Thor Input Lab 0.1.0
 
 独立 Kotlin / Android View 接收器，applicationId `dev.thor.inputlab`，默认独立进程与 UID。所有工程、锁文件、测试、说明和证据只在本目录中；不依赖 Thor Agent 或其他子项目。APK 无网络权限、Pi、Shizuku、模型配置、输入注入器或外部 setup/report IPC。

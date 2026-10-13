@@ -10,6 +10,11 @@ class Authority(val clock: MonotonicClock = SYSTEM_CLOCK) {
     private val listeners = mutableListOf<() -> Unit>()
     @Synchronized fun connect(): String = nonce().also { connections.add(it) }
     @Synchronized fun createSession(id: String) { require(id !in sessions); sessions[id] = Session(mutableSetOf(Capability.screen_perception, Capability.web_search)) }
+    @Synchronized fun restoreSession(id: String, enabled: Set<Capability>, epoch: Long) {
+        require(id !in sessions && epoch >= 1); sessions[id] = Session(enabled.toMutableSet(), epoch)
+    }
+    @Synchronized fun sessionEpoch(id: String): Long = sessions.getValue(id).epoch
+    @Synchronized fun sessionEnabled(id: String): Set<Capability> = sessions.getValue(id).enabled.toSet()
     @Synchronized fun beginRun(sessionId: String, connectionId: String, profiles: Map<Purpose, Set<String>>, durationMs: Long = 180_000): Binding {
         requireBridge(connectionId in connections, Code.UNTRUSTED_BRIDGE)
         requireBridge(run?.let { it.alive && clock.nowMs() < it.expires } != true, Code.LIMIT_EXCEEDED)

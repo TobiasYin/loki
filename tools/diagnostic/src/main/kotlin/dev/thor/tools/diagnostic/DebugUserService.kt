@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit
 class DebugUserService : IDebugService.Stub() {
     private val clock = Clock { SystemClock.elapsedRealtime() }
     private data class Lease(val token: String, val caller: Int, val deadline: Long, val root: String, val cancel: Cancellation, val owner: IBinder, val death: IBinder.DeathRecipient)
+    private data class ShellJob(val token: String,val process: java.lang.Process,val timeout: Int,val max: Int)
+    @Volatile private var shellJob: ShellJob? = null
     @Volatile private var lease: Lease? = null
     private val watchdog = Executors.newSingleThreadScheduledExecutor().apply {
         scheduleWithFixedDelay({ synchronized(this@DebugUserService) { lease?.let { if (clock.now() >= it.deadline) retire(it) } } }, 100, 100, TimeUnit.MILLISECONDS)
@@ -45,12 +47,7 @@ class DebugUserService : IDebugService.Stub() {
             requireTool(request.toByteArray().size <= 16 * 1024, Code.LIMIT_EXCEEDED, "Binder request too large")
             val obj = JSONObject(request); val args = obj.args()
             val data: Map<String, Any?> = when (args.string("operation")) {
-                "shell" -> {
-                    args.only("operation", "command", "timeoutMs", "maxBytes")
-                    val out = BoundedShell("/system/bin/sh", clock).execute(args.string("command"), args.int("timeoutMs", 15000), args.int("maxBytes", Budgets.TEXT), l.cancel) { check(token) }
-                    mapOf("stdout" to out.stdout, "stderr" to out.stderr, "exitCode" to out.exitCode, "durationMs" to out.durationMs, "truncated" to out.truncated,
-                        "error" to out.error?.name, "terminationConfirmed" to out.terminationConfirmed, "descendantsMayRemain" to true, "uid" to Process.myUid())
-                }
+                "shell" -> fail(Code.UNSUPPORTED, "Use guarded short shell submission")
                 "files.read", "files.list" -> {
                     args.only("operation", "path", "maxBytes", "limit")
                     // Do not create the directory or infer shell access from its name. User must provision it.
@@ -76,8 +73,27 @@ class DebugUserService : IDebugService.Stub() {
         } catch (t: ToolFailure) { JSONObject().put("error", t.code.name).put("message", t.message).toString() }
           catch (t: Exception) { JSONObject().put("error", Code.IO_ERROR.name).put("message", "UserService failure: ${t.javaClass.simpleName}").toString() }
     }
+    @Synchronized override fun startShell(token: String, command: String, timeoutMs: Int, maxBytes: Int): String {
+        val l = check(token)
+        requireTool(shellJob == null && timeoutMs in 1..60000 && maxBytes in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Invalid shell submission/budget")
+        val process = BoundedShell("/system/bin/sh",clock).start(command,l.cancel) { check(token) }
+        shellJob = ShellJob(token,process,timeoutMs,maxBytes)
+        return "{\"started\":true}"
+    }
+    override fun awaitShell(token: String): String {
+        return try {
+            val l = check(token); val job = shellJob ?: fail(Code.CANCELLED,"No submitted shell")
+            requireTool(job.token == token,Code.STALE_AUTHORIZATION,"Wrong shell job")
+            val out = BoundedShell("/system/bin/sh",clock).collect(job.process,job.timeout,job.max,l.cancel) { check(token) }
+            check(token)
+            (json(mapOf("data" to mapOf("stdout" to out.stdout,"stderr" to out.stderr,"exitCode" to out.exitCode,"durationMs" to out.durationMs,"truncated" to out.truncated,
+                "error" to out.error?.name,"terminationConfirmed" to out.terminationConfirmed,"descendantsMayRemain" to true,"uid" to Process.myUid()))) as JSONObject).toString()
+        } catch(t: ToolFailure) {JSONObject().put("error",t.code.name).toString()} catch(t: Exception){JSONObject().put("error",Code.IO_ERROR.name).toString()}
+        finally { synchronized(this) { shellJob?.takeIf {it.token == token}?.let {if(it.process.isAlive)it.process.destroyForcibly();shellJob=null} } }
+    }
     @Synchronized private fun retire(l: Lease) {
         l.cancel.cancel()
+        shellJob?.takeIf {it.token == l.token}?.let {if(it.process.isAlive)it.process.destroyForcibly();shellJob=null}
         runCatching { l.owner.unlinkToDeath(l.death, 0) }
         if (lease === l) lease = null
     }

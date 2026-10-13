@@ -1,3 +1,5 @@
+> 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
+
 # 独立模块集成说明
 
 此模块不读取或编译 `native-bridge/`、`app/`、`runtime/`、`tests/input-lab-app/`。本版能力契约是局部 v1 接口和 APK assets 中的固定 schema。独立构建与 JVM 测试已经完成；跨模块集成、Android 设备冒烟和 Thor 实机均未完成。

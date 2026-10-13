@@ -18,7 +18,7 @@ export interface L0 { snapshotId: string; device?: string; upperApp?: { packageN
 export interface AuthoritySnapshot { session: SessionConfig; lease: RunLease; availability: Record<string, Availability>; l0: L0 }
 export interface AuthorityPort {
   /** Caller-owned mirror of Native's authority. No method here grants authority. */
-  read(sessionId: string, runId: string): Promise<AuthoritySnapshot>;
+  read(sessionId: string, runId: string, refresh?: boolean): Promise<AuthoritySnapshot>;
 }
 export interface ToolDescriptor {
   toolId: string; modelName: string; schemaVersion: string; description: string; inputSchema: TSchema;
@@ -34,7 +34,7 @@ export interface ToolEnvelope {
   toolId: string; schemaVersion: string; capabilityEpoch: number; requestId: string;
   deadline: number; arguments: unknown; targetSnapshotId: string; resources: string[];
 }
-export type ErrorCode = 'CAPABILITY_DISABLED' | 'STALE_AUTHORIZATION' | 'PERMISSION_MISSING' | 'BACKEND_UNAVAILABLE' | 'TARGET_CHANGED' | 'UNSUPPORTED' | 'TIMEOUT' | 'CANCELLED' | 'LIMIT_EXCEEDED' | 'IO_ERROR' | 'PROTOCOL_ERROR' | 'PERSISTENCE_ERROR';
+export type ErrorCode = 'CAPABILITY_DISABLED' | 'STALE_AUTHORIZATION' | 'PERMISSION_MISSING' | 'BACKEND_UNAVAILABLE' | 'TARGET_CHANGED' | 'UNSUPPORTED' | 'TIMEOUT' | 'CANCELLED' | 'LIMIT_EXCEEDED' | 'IO_ERROR' | 'PROTOCOL_ERROR' | 'PERSISTENCE_ERROR' | 'INVALID_ARGUMENT' | 'HASH_CONFLICT' | 'APPROVAL_REQUIRED' | 'SECURE_CONTENT' | 'DISPLAY_GONE' | 'RATE_LIMITED';
 export class RuntimeError extends Error { constructor(public code: ErrorCode, message: string = code) { super(message); } }
 export interface Attachment { attachmentId: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; data: string; observedAt: number; expiresAt: number; source: Capability[] }
 export interface AttachmentPort { put(attachment: Attachment): Promise<void>; get(id: string): Promise<Attachment | undefined> }
@@ -43,7 +43,7 @@ export interface ToolOutcome {
   content: Content[]; observedAt: number; source: string; truncated: boolean; evidenceRef?: string;
   error?: ErrorCode; outcome?: 'submitted' | 'observed' | 'unknown';
 }
-export interface ToolPort { execute(envelope: ToolEnvelope, signal: AbortSignal): Promise<ToolOutcome> }
+export interface ToolPort { execute(envelope: ToolEnvelope, signal: AbortSignal, awaiting?: (waiting: boolean) => Promise<void>): Promise<ToolOutcome> }
 export interface NetworkEnvelope {
   bridgeVersion: '0.1'; purpose: 'model'; requestId: string; sessionId: string; runId: string;
   leaseId: string; capabilityEpoch: number; profileRef: string; profileRevision: number;

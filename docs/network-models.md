@@ -1,5 +1,6 @@
 # 模型接入与通用 Native Fetch
 
+> 2026-10-13 状态更新：五模块已开发并进入正式软件整合。本文早期“仅规划/未授权/无 APK”等叙述保留其历史背景；当前实现、实际测试与尚未完成的 Thor 验收，以 [中文集成报告](integration-report.md) 为准。来源模块旧测试不等于本次集成结果。
 ## 责任边界
 
 [需求] 用户自填 OpenAI Responses 兼容 API 或 Anthropic Messages API，必须支持图片输入与工具调用。Pi/JS 负责 provider 选择、URL 路径构造、JSON、图片编码、鉴权 header 名称、SSE、tool call/result、停止原因、token usage 和协议兼容。Native 仅收发通用 HTTP。

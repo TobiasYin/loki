@@ -10,7 +10,7 @@ import { ProtocolAudit } from './protocol-audit.js';
 const terminal = new Set<RunState>(['completed', 'failed', 'cancelled', 'interrupted']);
 const transitions: Record<RunState, RunState[]> = {
   queued: ['preparing', 'cancelled', 'failed'], preparing: ['generating', 'stopping', 'failed'],
-  generating: ['executing_tools', 'completed', 'stopping', 'failed'], executing_tools: ['generating', 'completed', 'stopping', 'failed'],
+  generating: ['executing_tools', 'completed', 'stopping', 'failed'], executing_tools: ['awaiting_user', 'generating', 'completed', 'stopping', 'failed'],
   awaiting_user: ['executing_tools', 'stopping', 'failed'], stopping: ['cancelled', 'interrupted', 'failed'],
   completed: [], failed: [], cancelled: [], interrupted: [],
 };
@@ -96,9 +96,9 @@ export class ThorRuntime {
     const updated = { ...a.run, state: next };
     await this.event(a, 'state', { state: next, ...(a.run.error ? { error: a.run.error } : {}) }, undefined, updated);
   }
-  private async authority(a: Active): Promise<AuthoritySnapshot> {
+  private async authority(a: Active, refresh = false): Promise<AuthoritySnapshot> {
     if (a.controller.signal.aborted) fail(a.stopReason ?? 'CANCELLED');
-    const s = await abortable(this.ports.authority.read(a.run.sessionId, a.run.runId), a.controller.signal);
+    const s = await abortable(this.ports.authority.read(a.run.sessionId, a.run.runId, refresh), a.controller.signal);
     if (s.session.sessionId !== a.run.sessionId || s.lease.sessionId !== a.run.sessionId || s.lease.runId !== a.run.runId || s.lease.leaseId !== a.lease.leaseId || s.lease.capabilityEpoch !== a.lease.capabilityEpoch || s.session.capabilityEpoch !== a.lease.capabilityEpoch || s.lease.expiresAt <= Date.now()) fail('STALE_AUTHORIZATION');
     if (a.controller.signal.aborted) fail(a.stopReason ?? 'CANCELLED');
     return s;
@@ -132,7 +132,7 @@ export class ThorRuntime {
         try {
           await this.event(a, 'tool_started', { toolId: t.toolId }, callId);
           await this.toolCheck(a, t);
-          const outcome = await abortable(this.ports.tools.execute(envelope, controller.signal), controller.signal);
+          const outcome = await abortable(this.ports.tools.execute(envelope, controller.signal, async waiting => { await this.state(a, waiting ? 'awaiting_user' : 'executing_tools'); }), controller.signal);
           if (effect) Object.assign(effect, { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef });
           await this.toolCheck(a, t); // Reject late data following revocation, cancellation or target change.
           const bounded = await this.boundOutcome(outcome, t, s);
@@ -245,7 +245,7 @@ export class ThorRuntime {
         beforeToolCall: async ({ toolCall }) => audit.permits(toolCall.id, toolCall.arguments) ? undefined : { block: true, reason: 'PROTOCOL_ERROR: incomplete or conflicting JSON', terminate: true },
         prepareRequest: async request => {
           try {
-          const s = await this.authority(active);
+          const s = await this.authority(active, true);
           if (++active.requests > this.limits.maxRequests) fail('LIMIT_EXCEEDED');
           active.requestSnapshot = s; active.effective = this.registry.effective(s);
           if (s.session.enabled.screen_perception && (s.l0.device || s.l0.upperApp)) active.source.add('screen_perception');

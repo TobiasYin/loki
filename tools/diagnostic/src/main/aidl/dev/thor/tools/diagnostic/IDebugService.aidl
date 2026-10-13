@@ -5,5 +5,7 @@ interface IDebugService {
     void openLease(String token, long deadlineElapsed, String root, IBinder owner) = 2;
     String execute(String token, String request) = 3;
     void cancel(String token) = 4;
+    String startShell(String token, String command, int timeoutMs, int maxBytes) = 5;
+    String awaitShell(String token) = 6;
     void destroy() = 16777114;
 }

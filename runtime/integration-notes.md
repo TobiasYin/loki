@@ -1,3 +1,5 @@
+> 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
+
 # Runtime 局部契约与未来接入
 
 本模块遵循仓库的四能力、L0、lease/epoch、工具及 Session/Run/Event/Context 分层语义。这里定义的 TypeScript 端口是独立任务的局部接口，不依赖其他任务产物。没有完成 Native/UI/ToolPack 跨模块集成。

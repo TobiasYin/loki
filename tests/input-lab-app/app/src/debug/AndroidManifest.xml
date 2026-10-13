@@ -1,0 +1,1 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"><permission android:name="dev.thor.inputlab.permission.CONTROL" android:protectionLevel="signature"/><application><provider android:name=".RunnerProvider" android:authorities="dev.thor.inputlab.runner" android:exported="true" android:permission="dev.thor.inputlab.permission.CONTROL"/></application></manifest>

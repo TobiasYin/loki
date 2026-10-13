@@ -15,8 +15,14 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
         .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(1)
     private val dead = Shizuku.OnBinderDeadListener { service = null; invalidated() }
+    private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
+        if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
+            requireTool(Shizuku.getUid() == 2000,Code.UNSUPPORTED,"Root backend refused")
+            Shizuku.bindUserService(args,this)
+        }.onFailure { invalidated() }
+    }
     private val received = Shizuku.OnBinderReceivedListener { /* User must explicitly bind after permission */ }
-    init { Shizuku.addBinderDeadListener(dead); Shizuku.addBinderReceivedListenerSticky(received) }
+    init { Shizuku.addRequestPermissionResultListener(permission); Shizuku.addBinderDeadListener(dead); Shizuku.addBinderReceivedListenerSticky(received) }
     fun availability(): Availability = try {
         val backend = "shizuku-userservice/shell-uid-2000"
         when {
@@ -53,8 +59,11 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         try {
             cp.check()
             requireTool(availability().status == Status.READY, Code.PERMISSION_MISSING, "Shizuku readiness changed before IPC")
-            cp.submitted()
-            val response = JSONObject(remote.execute(token, (json(request) as JSONObject).toString()))
+            val raw = if(request["operation"] == "shell") {
+                cp.effect { remote.startShell(token,request.getValue("command") as String,(request["timeoutMs"] as Number).toInt(),(request["maxBytes"] as Number).toInt()) }
+                remote.awaitShell(token)
+            } else { cp.check(); remote.execute(token, (json(request) as JSONObject).toString()) }
+            val response = JSONObject(raw)
             if (response.has("error")) fail(Code.valueOf(response.getString("error")), response.optString("message"))
             val data = response.getJSONObject("data").args()
             (data["error"] as? String)?.let { fail(Code.valueOf(it), "Shell stopped; direct child termination does not confirm descendants stopped") }
@@ -64,5 +73,5 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         } finally { runCatching { remote.cancel(token) } }
     }
     fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max), cp)
-    fun close() { invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
+    fun close() { invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
 }

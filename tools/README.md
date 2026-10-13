@@ -1,3 +1,5 @@
+> 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
+
 # Android Device ToolPack 与手动诊断宿主
 
 `tools/` 是独立 Kotlin/Android 工程，版本 `0.1.0`，包名 `dev.thor.tools.diagnostic`。可在本目录安装依赖、构建、执行 JVM 测试并安装诊断 APK；不依赖仓库其他模块、Pi、模型服务或 Input Lab。

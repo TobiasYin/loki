@@ -1,3 +1,5 @@
+> 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
+
 # Integration notes
 
 本任务只实现独立接收器，不读取或编译其他任务产物。将来注入端以 Android 系统分发作为唯一动作数据通道；没有模拟点击、setPassed、事件回放、可写 provider、广播或 HTTP 入口。正式 APK 只有正常 launcher Activity 对外可启动。

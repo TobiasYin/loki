@@ -15,10 +15,22 @@ class BoundedShell(private val shell: String, private val clock: Clock) {
         requireTool(command.isNotBlank() && command.toByteArray().size <= 8192 && !command.contains('\u0000'), message = "Shell command must be 1..8192 UTF-8 bytes")
         requireTool(timeoutMs in 1..60_000 && maxBytes in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Shell time/output budget exceeded")
         check(); cancellation.check()
-        val start = clock.now()
+        val process = start(command, cancellation, check)
+        return collect(process, timeoutMs, maxBytes, cancellation, check)
+    }
+    /** Short submission primitive; production callers wrap this in the Native authority commit. */
+    fun start(command: String, cancellation: Cancellation, check: () -> Unit): Process {
+        requireTool(command.isNotBlank() && command.toByteArray().size <= 8192 && !command.contains('\u0000'), message = "Invalid command")
+        check(); cancellation.check()
         val process = ProcessBuilder(shell, "-c", command).start()
-        process.outputStream.close() // No interactive stdin or persistent shell.
+        process.outputStream.close()
         cancellation.register { process.destroy(); if (process.isAlive) process.destroyForcibly() }
+        return process
+    }
+    /** Waiting/draining never holds Native's authorization lock. */
+    fun collect(process: Process, timeoutMs: Int, maxBytes: Int, cancellation: Cancellation, check: () -> Unit): Output {
+        requireTool(timeoutMs in 1..60_000 && maxBytes in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Shell budget exceeded")
+        val start = clock.now()
         val used = AtomicLong(0); val truncated = AtomicBoolean(false); val stoppedDraining = AtomicBoolean(false)
         val drain = Executors.newFixedThreadPool(2)
         fun collect(input: java.io.InputStream): java.util.concurrent.Future<String> = drain.submit<String> {

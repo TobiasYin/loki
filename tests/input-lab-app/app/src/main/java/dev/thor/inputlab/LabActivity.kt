@@ -19,6 +19,26 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.InputDeviceListener {
+    companion object { @Volatile var runnerActivity: java.lang.ref.WeakReference<LabActivity>? = null }
+    private var runnerTestRunId: String? = null
+    private var runnerAgentRunId: String? = null
+    private var runnerTrace: String? = null
+    fun runnerPrepare(case: String, testRun: String, agentRun: String, trace: String) {
+        check(BuildConfig.DEBUG && active?.active() != true && !finishing)
+        require(case in caseNames && testRun.length in 1..100 && agentRun.length in 1..100 && trace.length in 1..512)
+        runnerTestRunId = testRun; runnerAgentRunId = agentRun; runnerTrace = trace
+        cases.setSelection(caseNames.indexOf(case)); modes.setSelection(3); duration.setText("5"); role.isChecked = true
+        scheduleArm()
+    }
+    fun runnerDescription(): String {
+        check(BuildConfig.DEBUG)
+        return Json.encode(mapOf("geometry" to windowSnapshot(),"target" to arena.targetWindow().map(),"endTarget" to arena.endWindow().map()))
+    }
+    fun runnerSnapshot(): String {
+        check(BuildConfig.DEBUG)
+        return Json.encode(mapOf("attemptId" to attemptId, "testRunId" to testRunId, "phase" to active?.phase?.name,
+            "geometry" to windowSnapshot(), "target" to arena.targetWindow().map(), "endTarget" to arena.endWindow().map(), "report" to report, "receivedUptimeMs" to SystemClock.uptimeMillis(), "receivedElapsedRealtimeMs" to SystemClock.elapsedRealtime()))
+    }
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var header: TextView
     private lateinit var output: TextView
@@ -61,6 +81,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
+        if(BuildConfig.DEBUG) runnerActivity = java.lang.ref.WeakReference(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         dm = getSystemService(DisplayManager::class.java)
         im = getSystemService(InputManager::class.java)
@@ -147,7 +168,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
             try {
                 if(rootDir().listFiles().orEmpty().count { it.isDirectory }>=50 || rootDir().walkTopDown().filter { it.isFile }.sumOf { it.length() } >= 200L*1024*1024) error("Report retention budget full: export and explicitly delete private reports via device settings/adb before new attempt")
                 journal?.let { previous -> Thread { previous.close() }.start() }
-                testRunId=UUID.randomUUID().toString(); attemptId=UUID.randomUUID().toString(); sequence=0; report=null
+                testRunId=runnerTestRunId ?: UUID.randomUUID().toString(); attemptId=UUID.randomUUID().toString(); sequence=0; report=null
                 attemptDir=File(rootDir(),attemptId)
                 journal=Journal(attemptDir!!,maxSamples=if(faultProbe=="budget") 4 else 100_000)
                 mode=selectedMode
@@ -180,7 +201,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         if(journal!!.incomplete.get()) a.fault(journal!!.error ?: "log_incomplete")
         val v=a.finish(SystemClock.uptimeMillis())
         emit("finished",mapOf("provisionalVerdict" to mapOf("status" to v.status,"reasons" to v.reasons),"cutoffSequence" to sequence,"state" to a.state()))
-        val frozen=linkedMapOf<String,Any?>("reportSchemaVersion" to 1,"metadata" to metadata(),"environmentBefore" to initialEnvironment,"environmentAfter" to environment(),"expectations" to expectations(),"sceneBefore" to initialSceneState,"sceneAfter" to a.state(),"rawEventInterval" to mapOf("firstSequence" to 1,"cutoffSequence" to sequence),"assertions" to mapOf("status" to v.status,"reasons" to v.reasons),"status" to v.status,"receiverQualificationVersion" to "unqualified-physical-baseline-pending","senderResult" to null,"senderTraceRef" to null,"agentRunId" to null,"association" to "time_window_only_not_sender_authentication","recordOrigin" to "android_dispatch","systemInjectionProven" to false)
+        val frozen=linkedMapOf<String,Any?>("reportSchemaVersion" to 1,"metadata" to metadata(),"environmentBefore" to initialEnvironment,"environmentAfter" to environment(),"expectations" to expectations(),"sceneBefore" to initialSceneState,"sceneAfter" to a.state(),"rawEventInterval" to mapOf("firstSequence" to 1,"cutoffSequence" to sequence),"assertions" to mapOf("status" to v.status,"reasons" to v.reasons),"status" to v.status,"receiverQualificationVersion" to "unqualified-physical-baseline-pending","senderResult" to null,"senderTraceRef" to runnerTrace,"agentRunId" to runnerAgentRunId,"association" to "time_window_only_not_sender_authentication","recordOrigin" to "android_dispatch","systemInjectionProven" to false)
         val j=journal!!; val dir=attemptDir!!
         Thread {
             try {
@@ -258,6 +279,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
     override fun onPause() { lifecycleState="paused"; super.onPause(); emit("lifecycle",mapOf("state" to "paused")); active?.takeIf { it.active() && it.caseId !in setOf("LAB-01","LAB-09") }?.fault("activity_paused") }
     override fun onResume() { lifecycleState="resumed"; super.onResume(); emit("lifecycle",mapOf("state" to "resumed")) }
     override fun onDestroy() {
+        if(runnerActivity?.get() === this) runnerActivity = null
         lifecycleState="destroyed"
         if(::dm.isInitialized) dm.unregisterDisplayListener(this)
         if(::im.isInitialized) im.unregisterInputDeviceListener(this)

@@ -19,7 +19,10 @@ class TrustedWebViewBridge(
     private val transport: HttpTransport,
     private val tools: ToolGateway,
     private val bootstrap: (String) -> JSONObject,
-    private val page: String = "$ORIGIN/assets/index.html"
+    private val page: String = "$ORIGIN/assets/index.html",
+    private val hostRpc: ((String, JSONObject) -> java.util.concurrent.CompletableFuture<JSONObject>)? = null,
+    private val onInvalidated: (() -> Unit)? = null,
+    private val networkObserver: ((HttpStart, HttpEvent) -> Unit)? = null
 ): AutoCloseable {
     companion object { const val ORIGIN = "https://appassets.androidplatform.net" }
     private val ui = Handler(Looper.getMainLooper())
@@ -85,6 +88,17 @@ class TrustedWebViewBridge(
                     }
                     else -> {
                         requireBridgePublic(json.getInt("bridgeVersion") == 1, Code.UNSUPPORTED)
+                        if (json.getString("type") == "host.rpc") {
+                            val c = connection ?: throw BridgeFailure(Code.UNTRUSTED_BRIDGE)
+                            requireBridgePublic(json.getString("connectionId") == c, Code.UNTRUSTED_BRIDGE)
+                            val handler = hostRpc ?: throw BridgeFailure(Code.UNSUPPORTED)
+                            handler(c, json).whenComplete { value, error -> ui.post {
+                                if (!closed && connection == c && webView.url == page) postString(reply, JSONObject()
+                                    .put("type", "host.result").put("requestId", requestId)
+                                    .put("value", value ?: JSONObject.NULL).put("code", if (error == null) JSONObject.NULL else "IO_ERROR").toString())
+                            } }
+                            return@addWebMessageListener
+                        }
                         val b = binding(json.getJSONObject("binding"))
                         requireBridgePublic(b.connectionId == connection, Code.UNTRUSTED_BRIDGE)
                         when (json.getString("type")) {
@@ -93,7 +107,7 @@ class TrustedWebViewBridge(
                                 val h = json.getJSONObject("headers"); val headers = h.keys().asSequence().associateWith { h.getString(it) }
                                 val start = HttpStart(e, json.getString("url"), json.getString("method"), headers, if (json.optBoolean("hasBody")) body else null, json.optString("credentialRef").takeIf { it.isNotEmpty() })
                                 val c = connection!!
-                                transport.start(start) { event -> postEvent(c, reply, e, event) }
+                                transport.start(start) { event -> networkObserver?.invoke(start,event); postEvent(c, reply, e, event) }
                             }
                             "stream.credit" -> transport.credit(requestId, b, json.getInt("bytes"))
                             "request.abort" -> { requireBridgePublic(aborted.size < 512 || requestId in aborted, Code.LIMIT_EXCEEDED); transport.abort(requestId, b); aborted.add(requestId) }
@@ -170,7 +184,7 @@ class TrustedWebViewBridge(
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) reply.postMessage(payload)
     }
     fun load() { check(!closed); webView.loadUrl(page) }
-    private fun invalidate() { connection?.let { authority.disconnect(it) }; connection = null; binary = false; aborted.clear() }
+    private fun invalidate() { connection?.let { authority.disconnect(it); onInvalidated?.invoke() }; connection = null; binary = false; aborted.clear() }
     override fun close() {
         if (closed) return
         closed = true; invalidate(); transport.close(); tools.close()
