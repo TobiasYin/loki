@@ -25,7 +25,14 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 
 /** Owns product state, Native leases and audited RPC. No model protocol parsing. */
-class ProductHost(private val context: Context, private val notify: (JSONObject) -> Unit) : AutoCloseable {
+class ProductHost private constructor(private val context: Context, private val notify: (JSONObject) -> Unit) : AutoCloseable {
+    companion object {
+        private val storageOwner=java.util.concurrent.Semaphore(1)
+        fun create(context: Context,notify:(JSONObject)->Unit):ProductHost {
+            check(storageOwner.tryAcquire(1,TimeUnit.SECONDS)) {"Previous storage owner is still closing"}
+            return try {ProductHost(context,notify)}catch(t:Throwable){storageOwner.release();throw t}
+        }
+    }
     val authority = Authority(dev.thor.bridge.MonotonicClock { SystemClock.elapsedRealtime() })
     private val serial = Executors.newSingleThreadExecutor()
     private val deviceWorker = Executors.newSingleThreadExecutor()
@@ -481,7 +488,7 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
         displayManager.unregisterDisplayListener(displayListener)
         authority.stopRun(); prepared.values.forEach { it.approved.complete(false) }
         ThorAccessibilityService.invalidated = null
-        serial.execute { stop("宿主关闭"); binding?.let { run(it.runId).put("status", "interrupted"); persist() }; binding = null; deviceAuthority.close(); store.close() }
+        serial.execute { try {stop("宿主关闭"); binding?.let {run(it.runId).put("status","interrupted");persist()};binding=null;deviceAuthority.close()} finally {store.close();storageOwner.release()} }
         debug.close(); deviceWorker.shutdownNow(); serial.shutdown()
     }
 }

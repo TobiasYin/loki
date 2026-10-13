@@ -213,6 +213,13 @@ class WebViewFlowTest {
             assertNull(nativeHost.authority.currentBinding())
             assertEquals(recovered.getJSONArray("runs").length(),SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").length()})
             nativeStore.writableDatabase.execSQL("PRAGMA query_only=OFF")
+            finish(activity);activity=launch();web=activity.findViewById<WebView>(android.R.id.custom)
+            waitFor(web,"window.productReady === true")
+            send(web,"WAIT_CANCEL");waitFor(web,"document.getElementById('send').textContent === '停止'")
+            instrumentation.runOnMainSync {assertTrue(web.webViewRenderProcess!!.terminate())}
+            val timeout=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);var rendererNotice=false
+            while(!rendererNotice && System.nanoTime()<timeout) {instrumentation.runOnMainSync {val content=activity.findViewById<android.view.ViewGroup>(android.R.id.content);rendererNotice=(content.getChildAt(0) as? android.widget.LinearLayout)?.getChildAt(0)?.let {(it as? android.widget.TextView)?.text?.contains("渲染进程") }==true};Thread.sleep(100)}
+            assertTrue("Renderer exit must expose a Native recovery action",rendererNotice);assertNull(host(activity).authority.currentBinding())
         } finally {finish(activity)}
     }
     @Test fun realShizukuShellRequiresApprovalAndRunsAsShellUid() {

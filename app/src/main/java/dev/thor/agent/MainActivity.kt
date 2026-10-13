@@ -33,10 +33,10 @@ class MainActivity : Activity() {
         }
         web.settings.textZoom = (resources.configuration.fontScale * 100).toInt().coerceIn(75, 200)
         WebView.setWebContentsDebuggingEnabled(false)
-        try { host = ProductHost(this) { state -> runOnUiThread {
+        try { host = ProductHost.create(this) { state -> runOnUiThread {
             if (!isFinishing && !isDestroyed) web.evaluateJavascript("window.receiveProductState?.(JSON.parse(${JSONObject.quote(state.toString())}))", null)
         } }
-        } catch(_:Exception) {setContentView(TextView(this).apply {text="本地存储或安全配置初始化失败；历史保留，未执行网络或设备操作。"});return}
+        } catch(_:Exception) {setContentView(LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;addView(TextView(this@MainActivity).apply {text="本地存储或安全配置初始化失败；历史保留，未执行网络或设备操作。"});addView(Button(this@MainActivity).apply {text="重试打开";setOnClickListener {recreate()}})});return}
         val transport = dev.thor.bridge.HttpTransport(host.authority, host.policy)
         val toolGateway = dev.thor.bridge.ToolGateway(host.authority, emptyList(), { emptyMap() })
         bridge = dev.thor.bridge.android.TrustedWebViewBridge(web, host.authority, transport, toolGateway,
