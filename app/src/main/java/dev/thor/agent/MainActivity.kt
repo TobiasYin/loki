@@ -87,6 +87,8 @@ class MainActivity : Activity() {
         val name = field("模型显示名", "name")
         val protocol = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, arrayOf("OpenAI Responses", "Anthropic Messages")); setSelection(prefs.getInt("protocol", 0)); content.addView(this) }
         val url = field("模型基础 URL（HTTPS）", "url"); val model = field("模型 ID", "model")
+        val contextBudget = field("本地上下文预算（不是模型能力声明；默认 32768）", "contextBudgetText")
+        val maxOutput = field("最大输出预算（默认 2048；按服务实际限制填写）", "maxOutputText")
         val headerName = field("Native 凭据头名称（留空使用协议默认）", "headerName")
         val headerTemplate = field("Native 模板，如 Bearer {{credential}}（留空默认）", "headerTemplate")
         label("模型 API Key：${vault.status("model")}；留空保留，勾选后删除")
@@ -123,13 +125,16 @@ class MainActivity : Activity() {
                     require(modelKey.length() <= 8192 && searchKey.length() <= 8192)
                     require(headerName.text.isBlank() || headerName.text.toString().matches(Regex("[A-Za-z0-9-]+")))
                     require(headerTemplate.text.isBlank() || headerTemplate.text.toString().split("{{credential}}").size == 2 && !headerTemplate.text.contains('\r') && !headerTemplate.text.contains('\n'))
+                    val budget = contextBudget.text.toString().ifBlank { "32768" }.toInt()
+                    val outputBudget = maxOutput.text.toString().ifBlank { "2048" }.toInt()
+                    require(budget in 4096..524288 && outputBudget in 16..16384 && outputBudget < budget)
                     val nextRevision = prefs.getInt("revision",0)+1
                     check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
                     if(removeModel.isChecked) vault.remove("model") else if(modelKey.length() > 0) vault.put("model", modelKey.text.toString())
                     if(removeSearch.isChecked) vault.remove("search") else if(searchKey.length() > 0) vault.put("search", searchKey.text.toString())
                     check(prefs.edit().putString("name", name.text.toString().take(80)).putInt("protocol", protocol.selectedItemPosition)
                         .putString("url", url.text.toString()).putString("model", model.text.toString().take(200)).putString("searchBackend", backend.text.toString().take(80))
-                        .putString("headerName", headerName.text.toString()).putString("headerTemplate", headerTemplate.text.toString()).putString("searchUrl", searchUrl.text.toString()).putInt("revision", nextRevision).putString("probe", "untested").commit())
+                        .putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString()).putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName", headerName.text.toString()).putString("headerTemplate", headerTemplate.text.toString()).putString("searchUrl", searchUrl.text.toString()).putInt("revision", nextRevision).putString("probe", "untested").commit())
                     modelKey.text.clear(); searchKey.text.clear(); dialog.dismiss(); recreate(); Toast.makeText(this, "已保存新修订；请重新打开设置运行实际探测", Toast.LENGTH_LONG).show()
                 } catch(_: Exception) { Toast.makeText(this, "保存失败：检查 HTTPS 地址/输入长度或 Keystore 状态；不会向聊天暴露错误详情", Toast.LENGTH_LONG).show() }
             }

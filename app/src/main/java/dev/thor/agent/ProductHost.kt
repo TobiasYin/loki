@@ -106,7 +106,7 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
             profiles.add(NetworkProfile(ref, "${u.scheme}://${u.rawAuthority}", setOf(path), setOf("POST"), setOf(Purpose.model, Purpose.configuration_test), credentialRef, header, explicitLocal = localDebug))
             val passed = prefs.getInt("probeRevision", -1) == revision && prefs.getString("probe", "") == "passed"
             model = obj("profileId" to ref, "revision" to revision, "label" to prefs.getString("name", "模型"), "protocol" to protocol,
-                "baseUrl" to base, "modelId" to prefs.getString("model", ""), "credentialRef" to credentialRef, "contextWindow" to 32768, "maxOutput" to 2048,
+                "baseUrl" to base, "modelId" to prefs.getString("model", ""), "credentialRef" to credentialRef, "contextWindow" to prefs.getInt("contextBudget",32768), "maxOutput" to prefs.getInt("maxOutput",2048),
                 "lastProbe" to obj("revision" to revision, "textStream" to passed, "imageInput" to passed, "toolCalling" to passed, "imageToolRoundTrip" to passed))
         } catch (_: Exception) { model = null }
         profiles.add(NetworkProfile("public-web", null, emptySet(), setOf("GET"), setOf(Purpose.web_fetch)))
@@ -197,11 +197,14 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "user", "text" to text, "attachments" to pendingImages, "status" to "complete"))
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "assistant", "text" to "", "attachments" to JSONArray(), "status" to "streaming"))
         s.put("pendingAttachments",JSONArray()); persist(); publish()
+        val input=JSONArray().put(obj("type" to "text","text" to text))
+        if(probe)input.put(obj("type" to "attachment","attachmentId" to addProbeImage(b))) else for(i in 0 until pendingImages.length())input.put(obj("type" to "attachment","attachmentId" to pendingImages.getString(i)))
+        r.put("turn",obj("turnId" to id(),"runId" to b.runId,"messages" to JSONArray().put(obj("kind" to "user","content" to input)),"source" to JSONArray(),"observedAt" to System.currentTimeMillis(),"complete" to false));persist()
         val ttl = authority.remainingLeaseMs(b)
         return obj("lease" to obj("sessionId" to sid, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to System.currentTimeMillis() + ttl),
             "network" to obj("binding" to bindingJson(b), "purpose" to if(probe) "configuration_test" else "model", "profileRef" to ref, "credentialRef" to credentialRef, "deadlineMs" to clock.now() + ttl, "timeoutMs" to ttl),
-            "history" to JSONArray(rows("runs").filter { it.getString("sessionId") == sid && it.has("turn") && !it.optBoolean("probe") }.map { it.getJSONObject("turn") }),
-            "input" to JSONArray().put(obj("type" to "text", "text" to text)).apply { if(probe) put(obj("type" to "attachment", "attachmentId" to addProbeImage(b))); else for(i in 0 until pendingImages.length())put(obj("type" to "attachment","attachmentId" to pendingImages.getString(i))) })
+            "history" to JSONArray(rows("runs").filter { it.getString("sessionId") == sid && it.getString("id") != b.runId && it.has("turn") && !it.optBoolean("probe") }.map { it.getJSONObject("turn") }),
+            "input" to input)
     }
     private fun bindingJson(b: Binding) = obj("sessionId" to b.sessionId, "runId" to b.runId, "lease" to b.lease, "connectionId" to b.connectionId, "capabilityEpoch" to b.capabilityEpoch)
     private fun authoritySnapshot(refresh: Boolean): JSONObject {
@@ -230,7 +233,7 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
         publishedTools = allowed.toSet() + if(b.runId == probeRun) setOf("probe.picture") else if(dev.thor.bridge.Capability.web_search in authority.enabled(b)) setOf("web.fetch") + if(searchConfigured)setOf("web.search") else emptySet() else emptySet()
         val l0 = obj("snapshotId" to (snapshot?.id ?: "no-target:${b.runId}"))
         if (dev.thor.bridge.Capability.screen_perception in authority.enabled(b)) {
-            l0.put("device", "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}; API ${android.os.Build.VERSION.SDK_INT}")
+            l0.put("device", "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
             snapshot?.target?.packageName?.let { l0.put("upperApp", obj("packageName" to it, "label" to it)); l0.put("displaySnapshotId", snapshot!!.id) }
         }
         return obj("session" to obj("sessionId" to b.sessionId, "title" to session(b.sessionId).getString("title"), "model" to profile, "enabled" to enabled, "capabilityEpoch" to b.capabilityEpoch),
@@ -446,7 +449,7 @@ class ProductHost(private val context: Context, private val notify: (JSONObject)
         v.put("attachments", JSONArray(rows("attachments").map { JSONObject(it.toString()).apply { remove("data"); remove("path") } }))
         v.put("runs", JSONArray(rows("runs").map { JSONObject(it.toString()).apply { remove("turn"); remove("contexts"); remove("runtime") } }))
         v.put("availability", obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else "需校准显示；按工具检查",
-            "search" to if(searchConfigured) "Brave 搜索已配置；公开网页读取可用" else "搜索未配置；公开 HTTPS 网页读取可用", "screen_control" to "触摸需校准/无障碍；手柄 unsupported", "debug" to "Shell 需 Shizuku 与逐项审批；文件仅合成目录"))
+            "search" to if(searchConfigured) "Brave 搜索已配置；公开网页读取可用" else "搜索未配置；公开 HTTPS 网页读取可用", "screen_control" to "触摸需校准/无障碍；手柄 unsupported", "debug" to "Shell: ${debug.availability().reason}；逐项审批；文件仅合成目录"))
         v.put("activeRunId", binding?.runId ?: JSONObject.NULL)
         v.put("error", lastError ?: JSONObject.NULL)
         v.put("modelStatus", if(model == null) "模型未配置" else if(prefs.getString("probe", "") == "passed" && prefs.getInt("probeRevision", -1) == revision) "配置探测已通过" else "配置未测试/失败，请在 Native 设置运行图片与工具探测")
