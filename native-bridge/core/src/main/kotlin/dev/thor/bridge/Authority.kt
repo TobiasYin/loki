@@ -1,0 +1,56 @@
+package dev.thor.bridge
+
+/** Sole authorization owner. Host calls mutation APIs; none are exposed to JS. */
+class Authority(val clock: MonotonicClock = SYSTEM_CLOCK) {
+    private data class Session(val enabled: MutableSet<Capability>, var epoch: Long = 1)
+    private data class Run(val session: String, val id: String, val lease: String, val connection: String, val expires: Long, val profiles: Map<Purpose, Set<String>>, var alive: Boolean = true)
+    private val sessions = mutableMapOf<String, Session>()
+    private val connections = mutableSetOf<String>()
+    private var run: Run? = null
+    private val listeners = mutableListOf<() -> Unit>()
+    @Synchronized fun connect(): String = nonce().also { connections.add(it) }
+    @Synchronized fun createSession(id: String) { require(id !in sessions); sessions[id] = Session(mutableSetOf(Capability.screen_perception, Capability.web_search)) }
+    @Synchronized fun beginRun(sessionId: String, connectionId: String, profiles: Map<Purpose, Set<String>>, durationMs: Long = 180_000): Binding {
+        requireBridge(connectionId in connections, Code.UNTRUSTED_BRIDGE)
+        requireBridge(run?.let { it.alive && clock.nowMs() < it.expires } != true, Code.LIMIT_EXCEEDED)
+        require(durationMs in 1..180_000)
+        val s = sessions[sessionId] ?: throw BridgeFailure(Code.STALE_AUTHORIZATION)
+        run = Run(sessionId, nonce(), nonce(), connectionId, clock.nowMs() + durationMs, profiles.mapValues { it.value.toSet() })
+        val r = run!!
+        changed()
+        return Binding(sessionId, r.id, r.lease, connectionId, s.epoch)
+    }
+    @Synchronized fun currentBinding(): Binding? = run?.takeIf { it.alive && clock.nowMs() < it.expires }?.let { Binding(it.session, it.id, it.lease, it.connection, sessions.getValue(it.session).epoch) }
+    @Synchronized fun setEnabled(sessionId: String, capability: Capability, enabled: Boolean) {
+        val s = sessions.getValue(sessionId)
+        if ((capability in s.enabled) != enabled) {
+            if (enabled) s.enabled.add(capability) else s.enabled.remove(capability)
+            s.epoch++
+            changed()
+        }
+    }
+    @Synchronized fun invalidateResources(sessionId: String) { sessions.getValue(sessionId).epoch++; changed() }
+    @Synchronized fun disconnect(connectionId: String) { connections.remove(connectionId); if (run?.connection == connectionId) run?.alive = false; changed() }
+    @Synchronized fun stopRun() { run?.alive = false; changed() }
+    @Synchronized fun onChange(listener: () -> Unit): AutoCloseable { listeners.add(listener); return AutoCloseable { synchronized(this) { listeners.remove(listener) } } }
+    private fun changed() { listeners.toList().forEach { listener -> try { listener() } catch (_: Exception) { /* One observer cannot prevent the others from revoking. */ } } }
+    @Synchronized fun validate(binding: Binding, strictEpoch: Boolean = true) {
+        requireBridge(binding.connectionId in connections, Code.UNTRUSTED_BRIDGE)
+        val r = run ?: throw BridgeFailure(Code.STALE_AUTHORIZATION)
+        requireBridge(r.alive && r.session == binding.sessionId && r.id == binding.runId && r.lease == binding.lease && r.connection == binding.connectionId, Code.STALE_AUTHORIZATION)
+        requireBridge(clock.nowMs() < r.expires, Code.TIMEOUT)
+        if (strictEpoch) requireBridge(sessions.getValue(r.session).epoch == binding.capabilityEpoch, Code.STALE_AUTHORIZATION)
+    }
+    @Synchronized fun remainingLeaseMs(binding: Binding): Long { validate(binding, false); return run!!.expires - clock.nowMs() }
+    @Synchronized fun enabled(binding: Binding): Set<Capability> { validate(binding); return sessions.getValue(binding.sessionId).enabled.toSet() }
+    @Synchronized fun validateNetwork(e: NetworkEnvelope, starting: Boolean) {
+        requireBridge(e.bridgeVersion == 1, Code.UNSUPPORTED)
+        // Model transport continues across a search toggle; new requests still need the latest epoch.
+        validate(e.binding, starting || e.purpose != Purpose.model)
+        requireBridge(clock.nowMs() < e.deadlineMs, Code.TIMEOUT)
+        requireBridge(e.profileRef in run!!.profiles[e.purpose].orEmpty(), Code.PERMISSION_MISSING)
+        if (e.purpose == Purpose.web_search || e.purpose == Purpose.web_fetch) requireBridge(Capability.web_search in sessions.getValue(e.binding.sessionId).enabled, Code.CAPABILITY_DISABLED)
+    }
+    /** The authorization lock stays held across a short commit; long executors use one checkpoint per step. */
+    @Synchronized fun <T> atomic(block: () -> T): T = block()
+}

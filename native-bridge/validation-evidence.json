@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-13",
+  "jvm_suites": [
+    {
+      "name": "dev.thor.bridge.GatewayTest",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "dev.thor.bridge.TransportTest",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "js_tests": 12,
+  "fixture_tests": 4,
+  "android_build": "PASS debug APK and AAR",
+  "lint": {
+    "android": {
+      "errors": 0,
+      "warnings": [
+        "AndroidGradlePluginVersion",
+        "GradleDependency",
+        "SetJavaScriptEnabled"
+      ]
+    },
+    "host": {
+      "errors": 0,
+      "warnings": [
+        "OldTargetApi",
+        "DataExtractionRules",
+        "SetTextI18n",
+        "SetTextI18n"
+      ]
+    }
+  },
+  "device_attached": false,
+  "webview_execution": "NOT_RUN",
+  "thor_execution": "NOT_RUN",
+  "artifacts": {
+    "host/build/outputs/apk/debug/host-debug.apk": {
+      "bytes": 1977122,
+      "sha256": "ee38f711225dae8ebfb434d1e5250a5689307729f5e59b79909488d4c487ddb7"
+    },
+    "android/build/outputs/aar/android-debug.aar": {
+      "bytes": 24744,
+      "sha256": "780ef43ee16594d9f86b4dc142e13659616ca79589445771f719e7bc98463667"
+    },
+    "core/build/libs/core.jar": {
+      "bytes": 95036,
+      "sha256": "116cefa57f7f2166ce3ed1951d321cdeb49019793525aaf6a8a8b78f734f3059"
+    }
+  }
+}
