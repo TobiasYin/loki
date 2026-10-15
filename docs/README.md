@@ -19,6 +19,7 @@
 | 产品 | [product-scope](product-scope.md)、[requirements](requirements.md) | 为谁做、做什么、怎样验收 |
 | 架构 | [architecture](architecture.md)、[technology](technology.md) | 分层、依赖方向、替代方案 |
 | Agent | [pi-webview](pi-webview.md)、[session-context](session-context.md) | Pi 接入、运行事件、上下文 |
+| 真机续测 | [0.5.0 真机验收](physical-resume-2026-10-16.md) | 下屏 IME、会话/Skill、上屏接收与真实下载安装 |
 | Skill 验收 | [Agent 创建与复用攻略 Skill](skill-agent-acceptance.md) | 真实模型检索、保存、独立会话匹配与按需读取 |
 | 工具 | [tool-system](tool-system.md)、[perception-tools](perception-tools.md) | 工具契约、注入和撤销、按需感知 |
 | 平台 | [displays-input](displays-input.md)、[debug-files](debug-files.md) | 双屏、触摸、手柄、Shell、文件 |

@@ -34,7 +34,8 @@ class PhysicalImeTest {
     private fun visible(b: JSONObject) {
         assertTrue("Input must remain above IME: $b",b.getDouble("inputTop")>=0 && b.getDouble("inputBottom")<=b.getDouble("viewportHeight")+1)
         assertTrue("Send/stop must remain above IME: $b",b.getDouble("sendTop")>=0 && b.getDouble("sendBottom")<=b.getDouble("viewportHeight")+1)
-        assertTrue(b.getDouble("sendWidth")>=44 && b.getDouble("sendHeight")>=44)
+        // Physical display density rounds a 44 CSS px target to e.g. 43.9973.
+        assertTrue(b.getDouble("sendWidth")>=43.5 && b.getDouble("sendHeight")>=43.5)
     }
     @Test fun lowerScreenImeKeepsLiveSendAndStopVisible() {
         val args=InstrumentationRegistry.getArguments()
@@ -65,6 +66,13 @@ class PhysicalImeTest {
             instrumentation.runOnMainSync {ime.showSoftInput(web,InputMethodManager.SHOW_IMPLICIT)}
             until {var shown=false;instrumentation.runOnMainSync {shown=web.rootWindowInsets?.isVisible(WindowInsets.Type.ime())==true};shown}
             Thread.sleep(900) // Observe the settled IME, not its small initial animation frame.
+            evidence.put("settledBounds",bounds(web))
+            instrumentation.runOnMainSync {
+                evidence.put("nativeGeometry",obj("webWidth" to web.width,"webHeight" to web.height,"decorHeight" to activity.window.decorView.height,"imeBottom" to web.rootWindowInsets!!.getInsets(WindowInsets.Type.ime()).bottom))
+                val bitmap=android.graphics.Bitmap.createBitmap(web.width.coerceAtLeast(1),web.height.coerceAtLeast(1),android.graphics.Bitmap.Config.ARGB_8888)
+                web.draw(android.graphics.Canvas(bitmap));File(context.filesDir,"physical-ime-settled.png").outputStream().use {bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)};bitmap.recycle()
+            }
+            File(context.filesDir,"physical-ime.json").writeText(evidence.toString(2))
             until {runCatching {visible(bounds(web));true}.getOrDefault(false)}
             val before=bounds(web);visible(before);evidence.put("composer",before)
             var bottom=0
@@ -74,7 +82,8 @@ class PhysicalImeTest {
             js(web,"document.getElementById('input').value='Reply only IME_OK. Do not use tools.';document.getElementById('send').click()")
             until {js(web,"document.getElementById('send').textContent === '停止'")=="true"}
             val active=bounds(web);visible(active);evidence.put("activeStop",active)
-            until(180) {js(web,"document.getElementById('send').textContent === '发送'")=="true"}
+            // Ordinary live model requests deliberately have no generation deadline.
+            while(js(web,"document.getElementById('send').dataset.running === 'false'")!="true")Thread.sleep(500)
             val state=SqliteStore(context,"product.db").use {it.load()}
             val run=state.getJSONArray("runs").objects().last()
             assertEquals("completed",run.getString("status"))

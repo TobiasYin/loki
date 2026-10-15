@@ -66,6 +66,9 @@ class PhysicalDeviceFlowTest {
                 if(kind=="frame")launchReceiver()
                 val count=js(web,"document.querySelectorAll('.session-row').length").toInt();js(web,"document.getElementById('new').click()")
                 until {js(web,"document.querySelectorAll('.session-row').length === ${count+1}")=="true"}
+                // Respect the provider's advertised effort levels on the new composer.
+                js(web,"document.getElementById('effort-select').value='low';document.getElementById('effort-select').dispatchEvent(new Event('change'))")
+                js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'perception',enabled:true}))")
                 js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'screen_control',enabled:true}))")
                 until {js(web,"document.querySelector('input[aria-label=屏幕操作]').checked")=="true"}
                 val description=receiver("describe",Bundle().apply {putInt("version",1)}).getJSONObject("snapshot")
@@ -109,7 +112,7 @@ class PhysicalDeviceFlowTest {
                     // Keep independent frame coverage even when the logical case
                     // is refused; retain both reports and fail the suite at the end.
                     if(report.getString("status")!="pass") {
-                        until {js(web,"document.getElementById('send').textContent === '发送'")=="true"}
+                        while(js(web,"document.getElementById('send').dataset.running === 'false'")!="true")Thread.sleep(500)
                         continue
                     }
                     assertEquals("Physical receiver must observe exactly one complete target tap","pass",report.getString("status"));assertEquals(runId,report.getString("agentRunId"))
@@ -124,7 +127,7 @@ class PhysicalDeviceFlowTest {
                         assertTrue("Next model context must use the actual captured target",run.getJSONArray("contexts").objects().any {it.optString("l0SnapshotId")==details.getString("targetSnapshotId")})
                         record.put("freshFrameSnapshotId",details.getString("targetSnapshotId"))
                     }
-                    until {js(web,"document.getElementById('send').textContent === '发送'")=="true"}
+                    while(js(web,"document.getElementById('send').dataset.running === 'false'")!="true")Thread.sleep(500)
                     val completed=SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().single {r -> r.getString("id")==runId}}
                     record.put("runStatus",completed.getString("status"))
                     assertEquals("completed",completed.getString("status"))

@@ -45,6 +45,26 @@ class PhysicalDeviceStateTest {
         val evidence=obj("scope" to "Native cleanup/readback only; not Agent execution proof")
         try {
             evidence.put("before",snapshot())
+            args.getString("cleanupSession")?.let {sid->
+                assertEquals("Cleanup may only target the explicitly recorded test session",sid,host.selectedSession())
+                val web=activity.findViewById<android.webkit.WebView>(android.R.id.custom)
+                val ready=SystemClock.elapsedRealtime()+30000
+                var delivered=false
+                while(!delivered && SystemClock.elapsedRealtime()<ready) {
+                    val latch=java.util.concurrent.CountDownLatch(1)
+                    ins.runOnMainSync {web.evaluateJavascript("window.productReady===true") {delivered=it=="true";latch.countDown()}}
+                    assertTrue(latch.await(5,java.util.concurrent.TimeUnit.SECONDS));if(!delivered)Thread.sleep(100)
+                }
+                assertTrue(delivered)
+                for(cap in listOf("debug","screen_control")) {
+                    val command=obj("op" to "capability","sessionId" to sid,"capability" to cap,"enabled" to false)
+                    ins.runOnMainSync {web.evaluateJavascript("ThorUI.postMessage(${JSONObject.quote(command.toString())})",null)}
+                }
+                val stop=SystemClock.elapsedRealtime()+30000
+                fun cleared():Boolean {val caps=host.view().getJSONArray("sessions").objects().single {it.getString("id")==sid}.getJSONObject("capabilities");return !caps.getBoolean("debug") && !caps.getBoolean("screen_control")}
+                while(!cleared() && SystemClock.elapsedRealtime()<stop)Thread.sleep(100)
+                assertTrue(cleared());evidence.put("testControlsDisabled",true).put("cleanupSession",sid)
+            }
             if(args.getString("restoreBaseline")=="true") {
                 for(screen in listOf("upper","lower"))panel(screen,args.getString(if(screen=="upper")"baselineUpper" else "baselineLower")!!.toInt())
                 Thread.sleep(500)
