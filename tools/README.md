@@ -69,7 +69,7 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 2. 在系统设置显式开启此 APK 的无障碍服务。屏幕角色不硬编码为 0/1：通过校准按钮查看 display ID、名字、尺寸和旋转，分别确认 upper/lower。单屏设备不能完成双屏校准。每次进程重启、角色或显示几何变化重新确认。
 3. “Observe minimal upper context” 仅观察最小应用事实和能力摘要，不截图、不查版本、不遍历 UI 树；快照 TTL 10s。未知或多应用时不猜包名。
 4. 选择工具，编辑 JSON，执行并查看输入、结构化结果、错误和后端。开启屏幕操作后，明确给出逻辑坐标或先截图、再在快照 10s 内使用 frameId 与缩略图像素。过期帧/角色/目标/布局会拒绝。
-5. 用户自行安装并以 ADB 启动 Shizuku，点“Request/bind”。如果弹出授权，授权后再次点 Bind。检查实际 UserService UID；Root/其他 UID 被拒绝。通过 `debug.shell` 的默认 `id` 测试身份，命令仍需具体审批。
+5. 用户自行安装并以 ADB 启动 Shizuku，点“Request/bind”。如果弹出授权，授权后再次点 Bind。检查实际 UserService UID；Root/其他 UID 被拒绝。通过 `debug.shell` 的默认 `id` 测试身份，id 为白名单直接执行；灰名单命令需要具体审批。
 6. 配置闭环：`files.read sample.json` → 复制 hash → `files.backup` → 复制 backupId → `files.write`（保留未知字段）并审阅完整前后文本/旧新 hash → `files.restore` 并审阅恢复差异。schema 只接受 JSON object；写入内容原样保留，不自动重序列化编码/换行。
 7. STOP、撤销能力、宿主离开前台、显示失效或 binder 死亡会停止 Run，拒绝后续动作，尝试结束受管 Shell 子进程。已发生副作用返回 submitted/unknown；不自动恢复配置或重放输入。
 
@@ -79,7 +79,7 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 {"path":"test.json","backend":"shizuku","maxBytes":65536,"offset":0}
 ```
 
-任意 Shell 可以跨越屏幕感知、操作、联网及文件能力边界；关闭这些开关无法把 Shell 沙箱化。其写入不享受结构化配置的备份保护。宿主持续显示这一风险，Shell 审批也重复说明。所有文件工具即使由普通应用权限执行，仍要求 `adb_debug`。
+设备命令由共享 ShellCommandPolicy 在 Native 与 UID2000 两端校验，生产执行为固定 argv；白名单常用调整无需审批，灰名单绑定具体命令审批，黑名单和未知形式不能执行。debug.command_policy 不执行命令；debug.thor_brightness 封装 Thor 固定亮度协议。所有命令和文件工具仍要求 `adb_debug`，文件写入保留独立备份/审批。详见 docs/adb-policy-acceptance.md。
 
 ## 资源和安全限制
 

@@ -85,7 +85,15 @@ class ProductHost private constructor(private val context: Context, private val 
     private var probeTools = 0
     private var probeImageReads = 0
     private val skills=SkillStore(File(context.filesDir,"skills")).apply {
-        for(name in listOf("skill-creator","skill-manager"))installBuiltin(context.assets.open("skills/$name/SKILL.md").bufferedReader().use {it.readText()})
+        for(name in listOf("skill-creator","skill-manager","adb-operations")) {
+            val files=linkedMapOf<String,ByteArray>()
+            fun load(path: String) {
+                val children=context.assets.list("skills/$name/$path").orEmpty()
+                if(children.isEmpty())files[path]=context.assets.open("skills/$name/$path").use {it.readBytes()}
+                else children.forEach {load(if(path.isEmpty())it else "$path/$it")}
+            }
+            load("");installBuiltin(files)
+        }
     }
     private var skillDetail: JSONObject?=null
     private val skillToolIds=setOf("skills.list","skills.read","skills.save","skills.enable","skills.delete")
@@ -204,7 +212,9 @@ class ProductHost private constructor(private val context: Context, private val 
             } catch (e: Exception) {
                 lastError = if(request.optString("op") == "begin") "发送失败：请先配置模型并完成图片/工具探测；无模拟回答。" else "操作被拒绝：检查授权、活动运行或本地存储。"
                 val code=when(e) {is ToolFailure ->e.code.name;is dev.thor.bridge.BridgeFailure ->e.code.name;is IllegalArgumentException,is org.json.JSONException ->"INVALID_ARGUMENT";else ->"IO_ERROR"}
-                if(request.optString("op") == "tool.prepare")future.complete(obj("content" to JSONArray(),"observedAt" to System.currentTimeMillis(),"source" to "native-gateway","truncated" to false,"outcome" to "observed","error" to code)) else future.complete(obj("error" to code)); publish()
+                val content=JSONArray()
+                if(code=="COMMAND_BLOCKED")content.put(obj("type" to "text","text" to obj("policyVersion" to ShellCommandPolicy.VERSION,"policyTier" to "black","executed" to false,"reason" to (e as ToolFailure).message).toString()))
+                if(request.optString("op") == "tool.prepare")future.complete(obj("content" to content,"observedAt" to System.currentTimeMillis(),"source" to "native-gateway","truncated" to false,"outcome" to "observed","error" to code)) else future.complete(obj("error" to code)); publish()
             }
         }
         return future
@@ -322,9 +332,17 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         deviceAuthority.validate(e); schemas.validate(e.toolId, args)
         require(redactor.redact(j.getJSONObject("arguments").toString()) == j.getJSONObject("arguments").toString())
-        val needsApproval = ToolPack.descriptors.getValue(e.toolId).effect in setOf(Effect.WRITE, Effect.ARBITRARY_SHELL)
-        var approval: Approval? = null; var summary = ""
-        if (e.toolId == "debug.shell") summary = "运行设备 Shell（可跨越其他能力边界）\n${args.getValue("command")}"
+        val shellPolicy=if(e.toolId=="debug.shell")ShellCommandPolicy.classify(args.getValue("command") as String) else null
+        requireTool(shellPolicy?.tier!=ShellCommandPolicy.Tier.BLACK,Code.COMMAND_BLOCKED,shellPolicy?.reason.orEmpty())
+        val brightness=if(e.toolId=="debug.thor_brightness")ThorBrightnessCommand.parse(args) else null
+        val needsApproval = when {
+            brightness!=null -> brightness.needsApproval
+            shellPolicy!=null -> shellPolicy.tier==ShellCommandPolicy.Tier.GRAY
+            ToolPack.descriptors.getValue(e.toolId).effect==Effect.ARBITRARY_SHELL -> fail(Code.COMMAND_BLOCKED,"未配置命令策略的执行器禁止调用")
+            else -> ToolPack.descriptors.getValue(e.toolId).effect==Effect.WRITE
+        }
+        var approval: Approval? = null; var summary = brightness?.summary.orEmpty()
+        if (e.toolId == "debug.shell") summary = "灰名单 · 需要本次确认\n${args.getValue("command")}\n\n${shellPolicy!!.reason}\n确认仅适用于当前会话、本次运行和这条具体命令。"
         if (e.toolId in setOf("files.write", "files.restore")) {
             val path: String; val desired: ByteArray; val expected: String
             if(e.toolId == "files.write") { path = local.path(args.getValue("path") as String).toString(); desired = (args.getValue("content") as String).toByteArray(); expected = args.getValue("expectedHash") as String }
@@ -375,7 +393,10 @@ class ProductHost private constructor(private val context: Context, private val 
                 }
                 deviceAuthority.validate(p.e)
                 backend.approval = p.approval
-                backend.shellApproval = if(p.e.toolId == "debug.shell") hash((p.args.getValue("command") as String).toByteArray()) else null
+                backend.shellApproval = if(p.approvalId==null)null else when(p.e.toolId) {
+                    "debug.shell" -> hash((p.args.getValue("command") as String).toByteArray())
+                    else -> null
+                }
                 val result = gateway.execute(p.e, p.args)
                 serial.execute {
                     try {
@@ -569,12 +590,10 @@ class ProductHost private constructor(private val context: Context, private val 
         return obj("action" to tool,"name" to name,"enabled" to args.optBoolean("enabled"),"expectedHash" to hash)
     }
     fun view(): JSONObject {
-        val v = JSONObject(state.toString())
+        val v = chatSnapshot(state,binding?.runId)
         if(storageFailed)v.put("fatal","本地存储失败；已停止网络和设备执行。历史保留；失败的变更未保存，重新打开将恢复上次已保存的开关。修复存储后重开，不会重放副作用。")
-        v.put("attachments", JSONArray(rows("attachments").map { JSONObject(it.toString()).apply { remove("data"); remove("path") } }))
-        v.put("runs", JSONArray(rows("runs").map { JSONObject(it.toString()).apply { remove("turn"); remove("contexts"); remove("runtime") } }))
         v.put("availability", obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else "需校准显示；按工具检查",
-            "search" to if(searchConfigured) "Brave 搜索已配置；公开网页读取可用" else "搜索未配置；公开 HTTPS 网页读取可用", "screen_control" to "触摸需校准/无障碍；手柄 unsupported", "debug" to "Shell: ${debug.availability().reason}；逐项审批；文件仅合成目录"))
+            "search" to if(searchConfigured) "Brave 搜索已配置；公开网页读取可用" else "搜索未配置；公开 HTTPS 网页读取可用", "screen_control" to "触摸需校准/无障碍；手柄 unsupported", "debug" to "Shell: ${debug.availability().reason}；白名单常用调整直接执行，灰名单逐项确认；文件仅合成目录"))
         v.put("skills",skills.catalog()).put("skillDetail",skillDetail ?: JSONObject.NULL)
         v.put("activeRunId", binding?.runId ?: JSONObject.NULL)
         v.put("error", lastError ?: JSONObject.NULL)

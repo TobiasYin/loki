@@ -264,3 +264,15 @@ test('large Skill catalogs stay bounded and advertise explicit paginated discove
  assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'hello'}])).state,'completed');
  const request=JSON.stringify(f.requests[0]!.body);assert.match(request,/skills_list/);assert.doesNotMatch(request,/guide-63/);assert.ok(request.length<20000);
 });
+test('large unavailable tool inventories keep L0 bounded without changing effective authorization',async()=>{
+ const f=fixture();
+ for(let i=0;i<100;i++)f.snapshot.availability[`extra.long_diagnostic_tool_${i}`]={status:'backend_missing'};
+ assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'hello'}])).state,'completed');
+ const body=JSON.stringify(f.requests[0]!.body);
+ assert.match(body,/unavailableOmitted/);assert.doesNotMatch(body,/extra.long_diagnostic_tool_99/);
+ function strings(value:unknown):string[] {return typeof value==='string'?[value]:value&&typeof value==='object'?Object.values(value).flatMap(strings):[];}
+ const l0=strings(f.requests[0]!.body).map(s=>s.match(/<L0>(.*?)<\/L0>/s)?.[1]).find(Boolean)!;
+ assert.ok(new TextEncoder().encode(l0).byteLength<=1024);assert.ok(JSON.parse(l0).unavailableOmitted>0);
+ assert.deepEqual(JSON.parse(l0).enabled,f.snapshot.session.enabled);
+ assert.ok(f.contexts[0]!.effectiveTools.every(id=>!id.startsWith('extra.')));
+});

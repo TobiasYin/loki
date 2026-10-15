@@ -48,7 +48,7 @@
         const apply=()=>command({op:'capability',sessionId:s.id,capability:cap,enabled});
         if(enabled && (cap==='debug'||cap==='screen_control')) {
           check.checked=false;
-          modal(`开启${label}`,cap==='debug'?'开启后，Agent 可运行设备 Shell 并访问系统允许的文件。Shell 可能截图、操作屏幕或联网，因此其他能力开关无法限制 Shell 的这些行为。部分应用私有文件仍可能无法访问。\n\n每次 Shell 或配置写入仍需批准具体操作。':'屏幕操作可能影响上屏应用和焦点，需系统授权与设备验证。只有已校准且授权的目标可执行触摸；手柄后端尚不可用。',null,apply);
+          modal(`开启${label}`,cap==='debug'?'开启后，Agent 可运行经过分级审核的设备命令：白名单命令及亮度、风扇、刷新率等限定范围的常用调整直接执行；涉及隐私或按键分配等灰名单操作逐条确认；抹除、格式化、刷机和未审查命令禁止执行。完整操作手册可在 Skill 管理中查看。配置文件写入仍需单独批准。':'屏幕操作可能影响上屏应用和焦点，需系统授权与设备验证。只有已校准且授权的目标可执行触摸；手柄后端尚不可用。',null,apply);
         } else apply();
       });
       const text=element('span',label);text.append(element('small',`${s.capabilities[cap]?'意愿：已选择':'意愿：未选择'} · ${state.availability[cap]}`));row.append(check,text);panel.append(row);
@@ -62,7 +62,7 @@
     node.querySelector('summary').addEventListener('click',()=>disclosures.set(key,!node.open));
     return node;
   }
-  const fieldNames={query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
+  const fieldNames={screen:'目标屏幕',displayId:'显示编号',displayName:'显示名称',brightness:'亮度（0–255）',before:'修改前',requested:'请求值',verified:'回读一致',policyVersion:'策略版本',policyTier:'安全等级',reason:'原因',requiresApproval:'需要确认',allowed:'允许提交',executed:'已执行',white:'白名单示例',gray:'灰名单示例',black:'禁止执行',execution:'执行规则',stdout:'输出',stderr:'错误输出',exitCode:'退出码',uid:'执行身份',command:'具体命令',query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
   function structured(value,depth=0) {
     if(value===null || value===undefined)return element('span','无','muted');
     if(typeof value!=='object')return element('div',typeof value==='boolean'?(value?'是':'否'):String(value),'text');
@@ -95,7 +95,7 @@
     const count=events.filter(e=>e.type==='tool_started').length;
     disclosure.append(element('summary',`${statuses[run.status]??run.status} · ${count} 项工具操作`));
     const calls=new Map();
-    const toolLabels={'skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','debug.shell':'运行设备指令'};
+    const toolLabels={'skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
     const outcomeLabels={observed:'已完成',submitted:'已提交',unknown:'结果未知'};
     for(const event of events) {
       if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type))continue;
@@ -110,7 +110,7 @@
     for(const call of calls.values()) {
       const card=element('details',undefined,'tool-card');
       const title=toolLabels[call.toolId]??call.toolId??call.toolName??'工具';
-      const status=call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
+      const status=call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
       card.append(element('summary',`${title} · ${status}`));
       if(call.arguments && Object.keys(call.arguments).length) {card.append(element('small','输入'));card.append(structured(call.arguments));}
       if(call.result) {

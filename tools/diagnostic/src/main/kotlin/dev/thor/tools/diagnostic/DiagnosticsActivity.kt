@@ -160,9 +160,12 @@ class DiagnosticsActivity : Activity() {
             val cap = ToolPack.descriptors.getValue(tool).capability
             requireTool(authority.enabled(cap), Code.CAPABILITY_DISABLED, "Enable $cap in this manual test session")
             val review = when (tool) {
+                "debug.thor_brightness" -> ThorBrightnessCommand.parse(args).let {if(it.needsApproval)it.summary else null}
                 "debug.shell" -> {
                     val command = args.string("command")
-                    "Exact arbitrary command:\n$command\n\nCross-capability risk: Shell may capture/input/network/write without structured backups. Stop may leave descendants."
+                    val policy=ShellCommandPolicy.classify(command)
+                    requireTool(policy.tier!=ShellCommandPolicy.Tier.BLACK,Code.COMMAND_BLOCKED,policy.reason)
+                    if(policy.tier==ShellCommandPolicy.Tier.GRAY)"Gray-list command:\n$command\n\n${policy.reason}" else null
                 }
                 "files.write" -> {
                     val p = backend.files.path(args.string("path")).toString()

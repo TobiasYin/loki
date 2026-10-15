@@ -34,7 +34,7 @@ export interface ToolEnvelope {
   toolId: string; schemaVersion: string; capabilityEpoch: number; requestId: string;
   deadline: number; arguments: unknown; targetSnapshotId: string; resources: string[];
 }
-export type ErrorCode = 'CAPABILITY_DISABLED' | 'STALE_AUTHORIZATION' | 'PERMISSION_MISSING' | 'BACKEND_UNAVAILABLE' | 'TARGET_CHANGED' | 'UNSUPPORTED' | 'TIMEOUT' | 'CANCELLED' | 'LIMIT_EXCEEDED' | 'IO_ERROR' | 'PROTOCOL_ERROR' | 'PERSISTENCE_ERROR' | 'INVALID_ARGUMENT' | 'HASH_CONFLICT' | 'APPROVAL_REQUIRED' | 'SECURE_CONTENT' | 'DISPLAY_GONE' | 'RATE_LIMITED';
+export type ErrorCode = 'CAPABILITY_DISABLED' | 'STALE_AUTHORIZATION' | 'PERMISSION_MISSING' | 'BACKEND_UNAVAILABLE' | 'TARGET_CHANGED' | 'UNSUPPORTED' | 'TIMEOUT' | 'CANCELLED' | 'LIMIT_EXCEEDED' | 'IO_ERROR' | 'PROTOCOL_ERROR' | 'PERSISTENCE_ERROR' | 'INVALID_ARGUMENT' | 'HASH_CONFLICT' | 'APPROVAL_REQUIRED' | 'COMMAND_BLOCKED' | 'SECURE_CONTENT' | 'DISPLAY_GONE' | 'RATE_LIMITED';
 export class RuntimeError extends Error { constructor(public code: ErrorCode, message: string = code) { super(message); } }
 export interface Attachment { attachmentId: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; data: string; observedAt: number; expiresAt: number; source: Capability[] }
 export interface AttachmentPort { put(attachment: Attachment): Promise<void>; get(id: string): Promise<Attachment | undefined> }

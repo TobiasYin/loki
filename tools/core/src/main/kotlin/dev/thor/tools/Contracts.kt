@@ -8,7 +8,7 @@ fun interface Clock { fun now(): Long }
 enum class Capability { SCREEN_PERCEPTION, WEB_SEARCH, SCREEN_CONTROL, ADB_DEBUG }
 enum class Status { READY, PERMISSION_MISSING, BACKEND_MISSING, UNSUPPORTED, TEMPORARILY_UNAVAILABLE }
 data class Availability(val status: Status, val reason: String, val backend: String)
-enum class Code { CAPABILITY_DISABLED, STALE_AUTHORIZATION, PERMISSION_MISSING, BACKEND_UNAVAILABLE, TARGET_CHANGED, UNSUPPORTED, TIMEOUT, CANCELLED, LIMIT_EXCEEDED, IO_ERROR, INVALID_ARGUMENT, HASH_CONFLICT, APPROVAL_REQUIRED, SECURE_CONTENT, DISPLAY_GONE, RATE_LIMITED }
+enum class Code { CAPABILITY_DISABLED, STALE_AUTHORIZATION, PERMISSION_MISSING, BACKEND_UNAVAILABLE, TARGET_CHANGED, UNSUPPORTED, TIMEOUT, CANCELLED, LIMIT_EXCEEDED, IO_ERROR, INVALID_ARGUMENT, HASH_CONFLICT, APPROVAL_REQUIRED, COMMAND_BLOCKED, SECURE_CONTENT, DISPLAY_GONE, RATE_LIMITED }
 class ToolFailure(val code: Code, override val message: String) : RuntimeException(message)
 fun fail(code: Code, message: String): Nothing = throw ToolFailure(code, message)
 fun requireTool(condition: Boolean, code: Code = Code.INVALID_ARGUMENT, message: String) { if (!condition) fail(code, message) }
@@ -31,6 +31,8 @@ object ToolPack {
         Descriptor("input.set_axes", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.release_inputs", Capability.SCREEN_CONTROL, Effect.INPUT),
         Descriptor("debug.shell", Capability.ADB_DEBUG, Effect.ARBITRARY_SHELL),
+        Descriptor("debug.command_policy", Capability.ADB_DEBUG, Effect.READ),
+        Descriptor("debug.thor_brightness", Capability.ADB_DEBUG, Effect.ARBITRARY_SHELL),
         Descriptor("files.list", Capability.ADB_DEBUG, Effect.READ),
         Descriptor("files.read", Capability.ADB_DEBUG, Effect.READ),
         Descriptor("files.backup", Capability.ADB_DEBUG, Effect.READ),

@@ -22,7 +22,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(3)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(5)
     private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
@@ -91,8 +91,44 @@ class DebugConnection(private val context: Context, private val invalidated: () 
             cp.check()
             requireTool(availability().status == Status.READY, Code.PERMISSION_MISSING, "Shizuku readiness changed before IPC")
             val raw = if(request["operation"] == "shell") {
-                cp.effect { remote.startShell(token,request.getValue("command") as String,(request["timeoutMs"] as Number).toInt(),(request["maxBytes"] as Number).toInt()) }
+                val command=request.getValue("command") as String
+                val approval=request["approvalHash"] as? String
+                ShellCommandPolicy.classify(command).requireAllowed(approval,command)
+                cp.effect {
+                    val start=JSONObject(remote.startShell(token,command,(request["timeoutMs"] as Number).toInt(),(request["maxBytes"] as Number).toInt(),approval.orEmpty()))
+                    if(start.has("error"))fail(Code.valueOf(start.getString("error")),start.optString("message"))
+                    requireTool(start.optBoolean("started"),Code.IO_ERROR,"Command submission was not acknowledged")
+                }
                 remote.awaitShell(token)
+            } else if(request["operation"]=="thor.brightness") {
+                val args=request.filterKeys {it in setOf("action","screen","value")}
+                val command=ThorBrightnessCommand.parse(args)
+                var raw=""
+                val invoke={
+                    cp.check();raw=remote.thorBrightness(token,command.action,command.screen,command.value ?: -1)
+                    val response=JSONObject(raw)
+                    if(response.has("error") && !response.optBoolean("submitted"))fail(Code.valueOf(response.getString("error")),response.optString("message"))
+                }
+                if(command.mutates)cp.effect(invoke) else invoke()
+                // The vendor queues persistent brightness asynchronously. Verify
+                // outside the short authority commit without resubmitting writes.
+                val response=JSONObject(raw)
+                if(command.mutates && !response.has("error")) {
+                    val data=response.getJSONObject("data");val end=SystemClock.elapsedRealtime()+1500
+                    do {
+                        cp.check()
+                        val read=JSONObject(remote.thorBrightness(token,"read",command.screen,-1))
+                        if(read.has("error"))fail(Code.valueOf(read.getString("error")),read.optString("message"))
+                        val actual=read.getJSONObject("data")
+                        requireTool(actual.getInt("displayId")==data.getInt("displayId"),Code.TARGET_CHANGED,"Thor display identity changed during brightness verification")
+                        data.put("brightness",actual.getInt("brightness"))
+                        data.put("verified",kotlin.math.abs(command.value!!-actual.getInt("brightness"))<=1)
+                        if(data.getBoolean("verified"))break
+                        Thread.sleep(50)
+                    } while(SystemClock.elapsedRealtime()<end)
+                    raw=response.toString()
+                }
+                raw
             } else { cp.check(); remote.execute(token, (json(request) as JSONObject).toString()) }
             val response = JSONObject(raw)
             if (response.has("error")) fail(Code.valueOf(response.getString("error")), response.optString("message"))
@@ -103,6 +139,6 @@ class DebugConnection(private val context: Context, private val invalidated: () 
             return data
         } finally { runCatching { remote.cancel(token) } }
     }
-    fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max), cp)
+    fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint, approvalHash: String? = null) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max,"approvalHash" to approvalHash), cp)
     fun close() { closed=true;invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
 }

@@ -231,7 +231,7 @@ class WebViewFlowTest {
             assertTrue("Renderer exit must expose a Native recovery action",rendererNotice);assertNull(host(activity).authority.currentBinding())
         } finally {finish(activity)}
     }
-    @Test fun realShizukuShellRequiresApprovalAndRunsAsShellUid() {
+    @Test fun realShizukuReviewedShellRequiresApprovalAndRunsAsShellUid() {
         org.junit.Assume.assumeTrue("Shizuku companion/permission explicitly required for this run",androidx.test.platform.app.InstrumentationRegistry.getArguments().getString("requireShizuku")=="true")
         configure(0,501);val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
         try {
@@ -258,7 +258,7 @@ class WebViewFlowTest {
                 else {
                     assertTrue(result.isNull("error"));assertEquals("submitted",result.getString("outcome"))
                     val data=JSONObject(result.getJSONArray("content").getJSONObject(0).getString("text"))
-                    assertEquals(2000,data.getInt("uid"));assertEquals(0,data.getInt("exitCode"));assertTrue(data.getString("stdout").contains("integration-approved-only"))
+                    assertEquals(2000,data.getInt("uid"));assertEquals(0,data.getInt("exitCode"));assertEquals("gray",data.getString("policyTier"))
                     java.io.File(context.filesDir,"integrated-shell-result.json").writeText(result.toString(2))
                 }
             }
@@ -268,14 +268,13 @@ class WebViewFlowTest {
             waitFor(web,"document.querySelector('input[aria-label=\"ADB 调试\"]').checked")
             send(web,"SHELL_WAIT: cancel running exact harmless shell")
             waitFor(web,"!!document.querySelector('.wait')")
-            javascript(web,"document.querySelector('.wait button').click()")
-            waitFor(web,"document.getElementById('active').textContent.includes('工具执行中')")
+            // Stopping while an unapproved gray command is pending must not submit it.
             javascript(web,"document.getElementById('send').click()")
             waitFor(web,"document.getElementById('send').textContent === '发送'")
             val stopped=SqliteStore(context,"product.db").use {it.load()}
             assertEquals("cancelled",stopped.getJSONArray("runs").objects().last().getString("status"))
-            assertFalse(stopped.toString().contains("LATE_SHELL_MARKER\\n"))
-            assertTrue(stopped.getJSONArray("events").objects().any {it.getString("type")=="tool_result" && it.getJSONObject("data").optString("outcome")=="unknown"})
+            val stoppedRun=stopped.getJSONArray("runs").objects().last().getString("id")
+            assertFalse(stopped.getJSONArray("events").objects().any {it.getString("runId")==stoppedRun && it.getString("type")=="tool_result" && it.getJSONObject("data").optString("outcome")=="submitted"})
         } finally {finish(activity)}
     }
     @Test fun realBridgeRejectsUnknownCommandAndDirectNetwork() {

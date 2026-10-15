@@ -43,6 +43,14 @@ class SkillStoreTest {
         rejected {store.save(mapOf("SKILL.md" to skill(body="change").toByteArray()),entry.getString("hash"))}
         store.setEnabled("game-guide",false);assertEquals(0,store.catalog(true).length())
     }
+    @Test fun builtinUpgradeUpdatesReferencesAndPreservesDisabledChoice() {
+        val store=store();store.installBuiltin(mapOf("SKILL.md" to skill().toByteArray(),"references/device.md" to "old".toByteArray()))
+        val hash=store.catalog().getJSONObject(0).getString("hash");store.setEnabled("game-guide",false)
+        store.installBuiltin(mapOf("SKILL.md" to skill().toByteArray(),"references/device.md" to "new".toByteArray()))
+        assertEquals(0,store.catalog(true).length());assertNotEquals(hash,store.catalog().getJSONObject(0).getString("hash"))
+        assertEquals("new",store.read("game-guide","references/device.md").getString("content"))
+        assertFalse(store.catalog().toString().contains("SECRET_BODY_SENTINEL"))
+    }
     private fun zip(vararg entries:Pair<String,ByteArray>):ByteArray=ByteArrayOutputStream().also {out->ZipOutputStream(out).use {z->entries.forEach {(path,bytes)->z.putNextEntry(ZipEntry(path));z.write(bytes);z.closeEntry()}}}.toByteArray()
     @Test fun zipRejectsTraversalMultipleSkillsAndOversizeWithoutWriting() {
         for(path in listOf("../SKILL.md","/SKILL.md","x/../../SKILL.md","x\\SKILL.md","x//SKILL.md"))rejected {SkillStore.unpack(zip(path to skill().toByteArray()).inputStream(),true)}

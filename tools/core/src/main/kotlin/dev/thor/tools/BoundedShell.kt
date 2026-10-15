@@ -27,6 +27,15 @@ class BoundedShell(private val shell: String, private val clock: Clock) {
         cancellation.register { process.destroy(); if (process.isAlive) process.destroyForcibly() }
         return process
     }
+    /** Production device commands are policy-checked argv; never interpreted by a shell. */
+    fun startArgv(argv: List<String>, cancellation: Cancellation, check: () -> Unit): Process {
+        requireTool(argv.isNotEmpty() && argv.all { it.isNotEmpty() && !it.contains('\u0000') } && argv.sumOf {it.toByteArray().size}<=8192, message="Invalid argv")
+        check();cancellation.check()
+        val process=ProcessBuilder(argv).start()
+        process.outputStream.close()
+        cancellation.register {process.destroy();if(process.isAlive)process.destroyForcibly()}
+        return process
+    }
     /** Waiting/draining never holds Native's authorization lock. */
     fun collect(process: Process, timeoutMs: Int, maxBytes: Int, cancellation: Cancellation, check: () -> Unit): Output {
         requireTool(timeoutMs in 1..60_000 && maxBytes in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Shell budget exceeded")

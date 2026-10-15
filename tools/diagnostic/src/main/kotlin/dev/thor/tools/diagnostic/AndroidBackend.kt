@@ -34,7 +34,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             else -> "synthetic-config/android-app-owned-root"
         }
         if (toolId in setOf("input.press_button", "input.set_axes")) return Availability(Status.UNSUPPORTED, "No verified native gamepad device/source/axis backend; Thor POC-07 required", "none/native-gamepad")
-        if (toolId == "debug.shell") return shizuku.availability()
+        if (toolId in setOf("debug.shell","debug.thor_brightness")) return shizuku.availability()
+        if (toolId == "debug.command_policy") return Availability(Status.READY,"Native command policy; no device mutation","native-command-policy")
         if (toolId in gestureTools && inputUnknown) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
         if (toolId == "perception.device_info" || toolId.startsWith("files.") || toolId == "input.release_inputs") return Availability(Status.READY, "Manual diagnostics only", backend)
         if (ThorAccessibilityService.instance == null) return Availability(Status.PERMISSION_MISSING, "Enable this diagnostic Accessibility service in Android settings", backend)
@@ -88,13 +89,24 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 val timeout = args.int("timeoutMs", 15000); val maxBytes = args.int("maxBytes", Budgets.TEXT)
                 requireTool(timeout in 1..60_000 && maxBytes in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Shell time/output budget exceeded")
                 requireTool(command.isNotBlank() && command.toByteArray().size <= 8192 && !command.contains('\u0000'), message = "Invalid Shell command")
-                requireTool(shellApproval == hash(command.toByteArray()), Code.APPROVAL_REQUIRED, "Confirm this exact command; arbitrary Shell crosses perception/input/network/file boundaries")
+                val policy=ShellCommandPolicy.classify(command)
+                val approved=shellApproval
                 shellApproval = null
-                val output = shizuku.shell(e.runId, command, timeout, maxBytes, cp)
+                policy.requireAllowed(approved,command)
+                val output = shizuku.shell(e.runId, command, timeout, maxBytes, cp,approved) + policy.data()
                 val exit = output["exitCode"] as? Number
                 result(e, output, truncated = output["truncated"] == true, outcome = "submitted").copy(
                     error = if (exit == null || exit.toInt() != 0) Code.IO_ERROR else null,
                     message = if (exit == null || exit.toInt() != 0) "Shell command exited unsuccessfully; see exitCode/output" else null)
+            }
+            "debug.command_policy" -> {
+                args.only("command")
+                result(e,if(args.containsKey("command"))ShellCommandPolicy.classify(args.string("command")).data() else ShellCommandPolicy.describe())
+            }
+            "debug.thor_brightness" -> {
+                val command=ThorBrightnessCommand.parse(args);shellApproval=null
+                val data=shizuku.call(e.runId,args+mapOf("operation" to "thor.brightness"),cp)
+                result(e,data,outcome=if(command.mutates)"submitted" else "observed").copy(error=if(data["verified"]==true)null else Code.IO_ERROR)
             }
             "files.list" -> {
                 args.only("path", "limit", "backend")

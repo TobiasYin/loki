@@ -45,16 +45,21 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         val db = writableDatabase
         db.beginTransaction()
         try {
-            // Delete children first, insert parents first. Compare row payload to avoid rewriting long history for each token.
+            // Read each table once inside the transaction. A per-row SELECT here
+            // makes every streamed fragment perform thousands of old-history queries.
+            val previousRows=tables.associateWith {table ->
+                val rows=mutableMapOf<String,String>()
+                db.rawQuery("SELECT id,payload FROM $table",null).use {c->while(c.moveToNext())rows[c.getString(0)]=c.getString(1)}
+                rows
+            }
+            // Delete children first, insert parents first; compare committed payloads.
             for (table in tables.asReversed()) {
                 val wanted = state.getJSONArray(table).objects().map { it.getString("id") }.toSet()
-                val existing = mutableListOf<String>()
-                db.rawQuery("SELECT id FROM $table", null).use { c -> while(c.moveToNext()) existing.add(c.getString(0)) }
-                existing.filter { it !in wanted }.forEach { db.delete(table, "id=?", arrayOf(it)) }
+                previousRows.getValue(table).keys.filter { it !in wanted }.forEach { db.delete(table, "id=?", arrayOf(it));previousRows.getValue(table).remove(it) }
             }
             for (table in tables) for (row in state.getJSONArray(table).objects()) {
                 val payload = row.toString(); val id = row.getString("id")
-                val previous = db.rawQuery("SELECT payload FROM $table WHERE id=?", arrayOf(id)).use { if(it.moveToFirst()) it.getString(0) else null }
+                val previous = previousRows.getValue(table)[id]
                 if (previous == payload) continue
                 val values = ContentValues().apply {
                     put("id", id); put("payload", payload)
@@ -63,6 +68,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
                     if(table == "events") put("sequence", row.getInt("sequence"))
                 }
                 if(previous == null) db.insertOrThrow(table, null, values) else db.update(table, values, "id=?", arrayOf(id))
+                previousRows.getValue(table)[id]=payload
             }
             val selected = ContentValues().apply { put("name", "selected"); put("value", state.optString("selected")) }
             db.insertWithOnConflict("metadata", null, selected, SQLiteDatabase.CONFLICT_REPLACE)

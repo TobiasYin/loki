@@ -25,7 +25,7 @@
 
 | 工具 | 关键参数 | 结果与限制 |
 |---|---|---|
-| debug.shell | command（明确任意 Shell）、cwd 可选、timeout 默认 15s/最大 60s | stdout/stderr、exitCode/signal、duration、truncated；合计输出默认 64 KiB；不支持永久 daemon |
+| debug.shell | command（Native 已审查单条设备命令）、timeout 默认 15s/最大 60s | stdout/stderr、exitCode/signal、duration、truncated；合计输出默认 64 KiB；不支持永久 daemon |
 | debug.logs | package/process 过滤、since/duration、maxBytes | 有限日志与来源；默认脱敏，权限不足明确返回 |
 | files.list | 已授权根范围、path、limit 默认 100 | 条目、类型、大小、分页标识；不递归无限遍历 |
 | files.read | path 或 grantRef、offset、maxBytes 默认 64 KiB | 文本编码、内容/hash/截断；二进制首版只返回元数据 |
@@ -47,13 +47,11 @@
 
 备份初始策略：每目标保留最近 10 份，总预算 100 MiB，达到预算先询问清理或拒绝新写；不无声删除唯一恢复点。数值待实测，策略需要设置页可见。
 
-## 任意 Shell 的真实安全边界
+## 设备命令分级
 
-调试开启后，Shell 可以调用截图、输入、网络及文件命令，因此能够跨越感知/操作/搜索的产品边界。即使结构化 files.write 做了 diff/备份，Shell 自行写文件也未必能自动备份；不能声称有完整事务保护。
+实现与真机验收见 [ADB 与 Thor 配置](adb-policy-acceptance.md)。debug.command_policy 可读取规则或检查具体命令；debug.shell 只执行已审查 argv。亮度、风扇、刷新率等限定常用调整是白名单，无需 UI 批准；敏感读取与按键分配变更是灰名单，每次精确确认；危险或未知形式禁止。不能通过用户确认运行黑名单命令。
 
-首版 Shell 调用在执行前展示确切命令和作用范围并请求批准；这减少误操作，不构成命令沙箱。系统仍由 shell UID/SELinux 限制。不能用命令关键字黑名单承诺把“只调试”与其他能力强隔离。
-
-shell 子进程有 Run 归属、时限和取消句柄，关闭调试停止后续启动并尝试结束进程组；已提交操作不可回滚，已脱离进程组的任务未必能完全终止。发生失控时显示“停止未完全确认”，指引用户停 Shizuku/目标进程；不伪报成功。
+Thor 独立屏幕亮度由 debug.thor_brightness 固定接口处理，避免错误地把副屏百分比存储值当作背光控制。完整操作手册为内置 adb-operations Skill，目录只发布元数据，具体参考资料由 Agent 按需读取。文件写入继续使用已有备份、指纹与页面审批。
 
 ## 验证门槛
 

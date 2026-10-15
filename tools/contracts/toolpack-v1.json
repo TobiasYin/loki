@@ -576,7 +576,82 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Execute explicitly approved arbitrary Shell with Shizuku shell UID; crosses capability boundaries."
+      "description": "Execute one reviewed device command as shell UID 2000. Read adb-operations Skill first. White forms and bounded brightness/fan/refresh adjustments run directly; gray sensitive reads and input-routing settings require exact-command UI approval; black destructive/unknown forms never run. No shell scripts/operators. Use debug.command_policy to classify first."
+    },
+    {
+      "toolId": "debug.command_policy",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [],
+      "platformPrerequisites": [],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read Native ADB white/gray/black policy or classify one command without executing it."
+    },
+    {
+      "toolId": "debug.thor_brightness",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "arbitrary-shell",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "read",
+              "set"
+            ]
+          },
+          "screen": {
+            "type": "string",
+            "enum": [
+              "upper",
+              "lower"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "required": [
+          "action",
+          "screen"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [],
+      "platformPrerequisites": [
+        "Shizuku shell UID 2000"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read or set AYN Thor upper/lower screen brightness independently through its firmware controller. Read adb-operations Skill and references/thor-brightness.md first. Both read and bounded set are white: no UI approval needed. Native resolves the real display ID; value is 0..255, not the lower-screen stored percentage. Read both screens before/after and restore when testing."
     },
     {
       "toolId": "files.list",

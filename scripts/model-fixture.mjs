@@ -52,8 +52,8 @@ const server = http.createServer(async (req,res) => {
   else if(userText.includes('LAB_FRAME') && !currentSerialized.includes('input_tap')) reply={call:{name:'input_tap',args:JSON.stringify({x:50,y:50,coordinateSpace:'frame_pixels',frameId:frameId(current),expectedPackage:'dev.thor.inputlab'})}};
   else if(userText.includes('LAB_CAPTURE') && !result) reply={call:{name:'perception_capture_screen',args:'{"region":[0,0,100,100],"maxEdge":64,"format":"jpeg"}'}};
   else if(userText.includes('LAB_TAP') && !result) { const match = serialized.match(/LAB_TAP_(\d+)_(\d+)/); reply={call:{id:'lab_call',name:'input_tap',args:JSON.stringify({x:Number(match[1]),y:Number(match[2]),coordinateSpace:'display_logical',expectedPackage:'dev.thor.inputlab'})}}; }
-  else if(userText.includes('SHELL_WAIT') && !result) reply={call:{name:'debug_shell',args:'{"command":"sleep 30; echo LATE_SHELL_MARKER"}'}};
-  else if(userText.includes('SHELL_REJECT') && !result) reply={call:{name:'debug_shell',args:'{"command":"echo integration-approved-only"}'}};
+  else if(userText.includes('SHELL_WAIT') && !result) reply={call:{name:'debug_shell',args:'{"command":"settings put system screen_focus_lock 1"}'}};
+  else if(userText.includes('SHELL_REJECT') && !result) reply={call:{name:'debug_shell',args:'{"command":"settings put system screen_focus_lock 1"}'}};
   else reply={text:'集成中文流式回答：真实 Pi 经 Native Fetch 完成。'};
   appendFileSync(join(output,'model-requests.jsonl'), JSON.stringify({index:count++,protocol,url:req.url,imageCount,names,result,credentialMatched:true,requestBytes:Buffer.byteLength(raw)})+'\n');
   res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-store'});

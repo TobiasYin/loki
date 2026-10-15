@@ -117,8 +117,16 @@ class SkillStore(private val root: File) {
         commit(entries.filter {it!==e});File(root,e.getString("revision")).deleteRecursively()
     }
     @Synchronized fun installBuiltin(content: String) {
-        val name=manifest(content).first
-        if(entries.none {it.getString("name")==name})save(mapOf("SKILL.md" to content.toByteArray()),builtin=true)
+        installBuiltin(mapOf("SKILL.md" to content.toByteArray()))
+    }
+    @Synchronized fun installBuiltin(files: Map<String,ByteArray>) {
+        val name=manifest(utf8(files.getValue("SKILL.md"))).first
+        val previous=entries.singleOrNull {it.getString("name")==name}
+        if(previous==null)save(files,builtin=true)
+        else if(previous.getBoolean("builtin")) {
+            val hash=digest(files.toSortedMap().entries.joinToString("\n") {(path,bytes)->"$path:${digest(bytes)}"}.toByteArray())
+            if(hash!=previous.getString("hash"))save(files,previous.getString("hash"),builtin=true)
+        }
     }
     private fun commit(next: List<JSONObject>) {
         val tmp=File(root,"catalog.tmp")

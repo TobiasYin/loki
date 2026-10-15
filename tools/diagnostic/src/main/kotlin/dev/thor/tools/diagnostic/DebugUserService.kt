@@ -112,12 +112,16 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
         } catch (t: ToolFailure) { JSONObject().put("error", t.code.name).put("message", t.message).toString() }
           catch (t: Exception) { JSONObject().put("error", Code.IO_ERROR.name).put("message", "UserService failure: ${t.javaClass.simpleName}").toString() }
     }
-    @Synchronized override fun startShell(token: String, command: String, timeoutMs: Int, maxBytes: Int): String {
+    @Synchronized override fun startShell(token: String, command: String, timeoutMs: Int, maxBytes: Int, approvalHash: String): String {
+        return try {
         val l = check(token)
         requireTool(shellJob == null && timeoutMs in 1..60000 && maxBytes in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Invalid shell submission/budget")
-        val process = BoundedShell("/system/bin/sh",clock).start(command,l.cancel) { check(token) }
+        val argv=ShellCommandPolicy.classify(command).requireAllowed(approvalHash,command)
+        val process = BoundedShell("/system/bin/sh",clock).startArgv(argv,l.cancel) { check(token) }
         shellJob = ShellJob(token,process,timeoutMs,maxBytes)
-        return "{\"started\":true}"
+        "{\"started\":true}"
+        } catch(t: ToolFailure) {JSONObject().put("error",t.code.name).put("message",t.message).toString()}
+          catch(_: Exception) {JSONObject().put("error",Code.IO_ERROR.name).toString()}
     }
     override fun awaitShell(token: String): String {
         return try {
@@ -129,6 +133,22 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
                 "error" to out.error?.name,"terminationConfirmed" to out.terminationConfirmed,"descendantsMayRemain" to true,"uid" to Process.myUid()))) as JSONObject).toString()
         } catch(t: ToolFailure) {JSONObject().put("error",t.code.name).toString()} catch(t: Exception){JSONObject().put("error",Code.IO_ERROR.name).toString()}
         finally { synchronized(this) { shellJob?.takeIf {it.token == token}?.let {if(it.process.isAlive)it.process.destroyForcibly();shellJob=null} } }
+    }
+    @Synchronized override fun thorBrightness(token: String, action: String, screen: String, value: Int): String {
+        var submitted=false
+        return try {
+            val l=check(token)
+            val args=mutableMapOf<String,Any?>("action" to action,"screen" to screen)
+            if(action=="set")args["value"]=value else requireTool(value == -1,message="Read does not accept a brightness value")
+            val command=ThorBrightnessCommand.parse(args)
+            // The caller/token and bounded operation were checked as the app caller. Only this
+            // fixed operation adopts the service's own shell identity for vendor IPC.
+            val identity=Binder.clearCallingIdentity()
+            val data=try {ThorBrightness(hostContext ?: fail(Code.UNSUPPORTED,"Application context required")).execute(command) {
+                l.cancel.check();requireTool(clock.now()<l.deadline,Code.TIMEOUT,"Brightness lease expired");submitted=true
+            }} finally {Binder.restoreCallingIdentity(identity)}
+            (json(mapOf("data" to (data+mapOf("uid" to Process.myUid())),"submitted" to submitted)) as JSONObject).toString()
+        } catch(t: Exception) {JSONObject().put("error",(t as? ToolFailure)?.code?.name ?: Code.IO_ERROR.name).put("message",(t as? ToolFailure)?.message ?: "Firmware brightness operation failed: ${t.javaClass.simpleName}/${t.cause?.javaClass?.simpleName.orEmpty()} ${if(t is SecurityException)t.message.orEmpty().take(180) else ""}").put("submitted",submitted).toString()}
     }
     @Synchronized private fun retire(l: Lease) {
         l.cancel.cancel()
