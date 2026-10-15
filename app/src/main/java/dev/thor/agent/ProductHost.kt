@@ -199,10 +199,10 @@ class ProductHost private constructor(private val context: Context, private val 
         return profile
     }
     private fun supportsImages(p:JSONObject)=p.getJSONArray("input").let {a->(0 until a.length()).any {a.getString(it)=="image"}}
-    private fun probeKey(p:JSONObject)="probe:$revision:${p.getString("modelId")}:${p.getString("protocol")}"
+    private fun probeKey(p:JSONObject)="probe:$revision:${p.getString("modelId")}:${p.getString("protocol")}:images=${supportsImages(p)}"
     private fun profilePassed(p:JSONObject)=prefs.getBoolean(probeKey(p),false) ||
         p.getString("modelId")==prefs.getString("model","") && p.getString("protocol")==ModelCatalog.protocols[prefs.getInt("protocol",0).coerceIn(0,2)] &&
-        prefs.getString("probe","")=="passed" && prefs.getInt("probeRevision",-1)==revision
+        prefs.getString("probe","")=="passed" && prefs.getInt("probeRevision",-1)==revision && (!supportsImages(p) || prefs.getBoolean("probeImages",true))
     private fun skillCatalog(s:JSONObject,enabledOnly:Boolean):JSONArray {
         val names=s.optJSONArray("selectedSkills")?.let {a->(0 until a.length()).map {a.getString(it)}.toSet()}
         return JSONArray(skills.catalog(enabledOnly).objects().filter {it.optBoolean("builtin") || names==null || it.getString("name") in names})
@@ -537,7 +537,7 @@ class ProductHost private constructor(private val context: Context, private val 
         if(b.runId == probeRun) {
             val turn = r.optJSONObject("turn")
             val passed = r.getString("status") == "completed" && (probeCompleted+probeConsumerClosed).size >= 2 && probeTools > 0 && (!supportsImages(scope(b).profile) || probeImageReads >= 2) && r.getJSONArray("contexts").length() >= 2 && turn?.optBoolean("complete") == true && rows("events").any { it.getString("runId") == b.runId && it.getString("type") == "text_delta" }
-            if(scope(b).profile.getString("modelId")==prefs.getString("model","") && scope(b).profile.getString("protocol")==ModelCatalog.protocols[prefs.getInt("protocol",0).coerceIn(0,2)])check(prefs.edit().putString("probe",if(passed)"passed" else "failed").putInt("probeRevision",revision).commit())
+            if(scope(b).profile.getString("modelId")==prefs.getString("model","") && scope(b).profile.getString("protocol")==ModelCatalog.protocols[prefs.getInt("protocol",0).coerceIn(0,2)])check(prefs.edit().putString("probe",if(passed)"passed" else "failed").putInt("probeRevision",revision).putBoolean("probeImages",supportsImages(scope(b).profile)).commit())
             r.put("probeTransport",obj("httpStatuses" to JSONArray(probeHeads.values.toList()),"eofRequests" to probeCompleted.size,"clientClosedAfterBodyRequests" to probeConsumerClosed.size,"nonemptyBodies" to probeBodies.size,"toolCalls" to probeTools,"imageReads" to probeImageReads))
             r.put("probePassed", passed)
             check(prefs.edit().putBoolean(probeKey(scope(b).profile),passed).commit())

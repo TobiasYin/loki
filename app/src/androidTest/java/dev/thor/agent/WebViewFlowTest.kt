@@ -126,7 +126,9 @@ class WebViewFlowTest {
             send(web,"DEVICE_INFO: text-only profile remains usable")
             waitFor(web,"document.getElementById('send').textContent==='停止'");waitFor(web,"document.getElementById('send').textContent==='发送'")
             assertEquals("completed",SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().last().getString("status")})
-            java.io.File(context.filesDir,"integrated-text-only-profile.json").writeText(obj("passed" to true,"imagesRequired" to false,"toolConnectionVerified" to true).toString(2))
+            assertTrue(context.getSharedPreferences("profiles",0).edit().putBoolean("supportsImages",true).commit())
+            assertNotEquals("New image support must require image verification", "连接已通过",host(activity).view().getString("modelStatus"))
+            java.io.File(context.filesDir,"integrated-text-only-profile.json").writeText(obj("passed" to true,"imagesRequired" to false,"toolConnectionVerified" to true,"newImageCapabilityRequiresProbe" to true).toString(2))
         } finally {finish(activity)}
     }
     @Test fun fullSettingsPageDoesNotInterruptRunsAndKeepsVoiceConfigurationOutOfComposer() {
