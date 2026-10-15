@@ -11,6 +11,16 @@ import java.net.InetAddress
 import java.util.concurrent.*
 
 class TransportTest {
+    @Test fun modelGenerationHasNoTransportIdleOrTotalCapButCanBeStopped()=Lab(Limits(idleMs=10,totalMs=20)).use {l->
+        l.server.enqueue(MockResponse().setBody("late model result").setHeadersDelay(70,TimeUnit.MILLISECONDS).setBodyDelay(70,TimeUnit.MILLISECONDS))
+        val request=l.request().let {it.copy(envelope=it.envelope.copy(deadlineMs=l.authority.clock.nowMs()+3000))}
+        val events=Events();l.transport.start(request,events.sink {if(it is HttpEvent.Head)l.transport.credit("r",l.binding,256)})
+        events.await();assertTrue(events.all.last() is HttpEvent.End);assertEquals("late model result",events.bytes().toString(Charsets.UTF_8))
+        l.server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE))
+        val stop=l.request("stop").let {it.copy(envelope=it.envelope.copy(deadlineMs=9_007_199_254_740_991L))}
+        val cancelled=Events();l.transport.start(stop,cancelled.sink());l.authority.stopRun(l.binding.runId);cancelled.await()
+        assertEquals(Code.STALE_AUTHORIZATION,(cancelled.all.last() as HttpEvent.Error).code)
+    }
     @Test fun nativeSessionRoutingOverridesCallerHeaderAndIsProfileScoped() {
         val binding=Binding("native-session","run","lease","connection",1)
         val profile=NetworkProfile("go","https://opencode.ai",setOf("/zen/go/v1/responses"),setOf("POST"),setOf(Purpose.model),nativeSessionHeader="x-opencode-session")

@@ -208,6 +208,10 @@ class ProductHost private constructor(private val context: Context, private val 
         val names=s.optJSONArray("selectedSkills")?.let {a->(0 until a.length()).map {a.getString(it)}.toSet()}
         return JSONArray(skills.catalog(enabledOnly).objects().filter {it.optBoolean("builtin") || names==null || it.getString("name") in names})
     }
+    private fun leaseWallDeadline(b:Binding):Long {
+        val remaining=authority.remainingLeaseMs(b)
+        return if(remaining>9_007_199_254_740_991L-System.currentTimeMillis())9_007_199_254_740_991L else System.currentTimeMillis()+remaining
+    }
     private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null) { try {
         for(s in rows("sessions")) {s.put("capabilityEpoch",authority.sessionEpoch(s.getString("id")));val granted=authority.sessionEnabled(s.getString("id"));for((name,cap) in capNames)s.getJSONObject("capabilities").put(name,cap in granted)}
         if(currentRun==null)store.save(state) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
@@ -247,7 +251,13 @@ class ProductHost private constructor(private val context: Context, private val 
                     "authority" -> { val b=bound(c,data); authoritySnapshot(b,data.optBoolean("refresh")) }
                     "tool.prepare" -> prepare(c, data)
                     "network.tool.begin" -> networkTool(c, data)
-                    "tool.cancel" -> { bound(c, data); prepared[data.getString("requestId")]?.approved?.complete(false); authority.stopRun(data.getString("runId")); obj() }
+                    "tool.cancel" -> {
+                        val b=bound(c,data);val request=data.getString("requestId");val p=prepared[request]
+                        if(p!=null) {require(p.e.runId==b.runId && p.e.toolCallId==data.getString("toolCallId"));p.approved.complete(false)}
+                        deviceAuthority.cancelTool(b.runId,request)
+                        if(p?.approvalId!=null && run(b.runId).optJSONObject("approval")?.optString("id")==p.approvalId) {run(b.runId).getJSONObject("approval").put("status","cancelled");persist();publish()}
+                        obj()
+                    }
                     "persist" -> save(c, data)
                     "attachment.get" -> {
                         val b = bound(c, data); val a = rows("attachments").singleOrNull { it.getString("id") == data.getString("id") && it.getString("sessionId") == b.sessionId }
@@ -280,7 +290,7 @@ class ProductHost private constructor(private val context: Context, private val 
         if (probe) { probeToken = null; probeTools = 0; probeImageReads = 0;probeHeads.clear();probeCompleted.clear();probeBodies.clear();probeConsumerClosed.clear() }
         val pendingImages=if(probe)JSONArray() else s.optJSONArray("pendingAttachments") ?: JSONArray()
         val text=if(probe && !supportsImages(profile))"Configuration probe: text-only model. Call probe_picture once, read its returned text, then answer PROBE_OK." else d.getString("text"); require(text.isNotBlank() && text.length <= 8000)
-        val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } })
+        val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } },durationMs=if(probe)180_000 else 0)
         bindings[b.runId]=b;scopes[b.runId]=RunScope(profile);deviceAuthority.bind(b);if(probe)probeRun=b.runId
         val r = obj("id" to b.runId, "sessionId" to sid, "status" to "queued", "expanded" to false, "startedAt" to System.currentTimeMillis(), "probe" to probe,
             "modelId" to profile.getString("modelId"),"thinkingEffort" to profile.getString("thinkingEffort"),"contextWindow" to profile.getInt("contextWindow"),"modelProfileRevision" to revision, "capabilityEpoch" to b.capabilityEpoch, "contexts" to JSONArray())
@@ -290,11 +300,11 @@ class ProductHost private constructor(private val context: Context, private val 
         if(!probe)s.put("pendingAttachments",JSONArray()); persist(); publish()
         val input=JSONArray().put(obj("type" to "text","text" to text))
         if(probe && supportsImages(profile))input.put(obj("type" to "attachment","attachmentId" to addProbeImage(b))) else if(!probe)for(i in 0 until pendingImages.length())input.put(obj("type" to "attachment","attachmentId" to pendingImages.getString(i)))
-        r.put("turn",obj("turnId" to id(),"runId" to b.runId,"messages" to JSONArray().put(obj("kind" to "user","content" to input)),"source" to JSONArray(),"observedAt" to System.currentTimeMillis(),"complete" to false));persist()
+        r.put("turn",obj("turnId" to id(),"runId" to b.runId,"messages" to JSONArray().put(obj("kind" to "user","content" to input)),"source" to JSONArray(if(dev.thor.bridge.Capability.screen_perception in enabled(s))listOf("screen_perception") else emptyList<String>()),"observedAt" to System.currentTimeMillis(),"complete" to false));persist()
         val ttl = authority.remainingLeaseMs(b)
-        return obj("lease" to obj("sessionId" to sid, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to System.currentTimeMillis() + ttl),
-            "network" to obj("binding" to bindingJson(b), "purpose" to if(probe) "configuration_test" else "model", "profileRef" to profile.getString("profileId"), "credentialRef" to credentialRef, "deadlineMs" to clock.now() + ttl, "timeoutMs" to ttl),
-            "history" to JSONArray(rows("runs").filter { it.getString("sessionId") == sid && it.getString("id") != b.runId && it.has("turn") && !it.optBoolean("probe") }.map { it.getJSONObject("turn") }),
+        return obj("runTimeoutMs" to if(probe)180_000 else 0,"lease" to obj("sessionId" to sid, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to leaseWallDeadline(b)),
+            "network" to obj("binding" to bindingJson(b), "purpose" to if(probe) "configuration_test" else "model", "profileRef" to profile.getString("profileId"), "credentialRef" to credentialRef, "deadlineMs" to if(probe)clock.now()+ttl else 9_007_199_254_740_991L, "timeoutMs" to if(probe)ttl else 0),
+            "history" to JSONArray(rows("runs").filter { it.getString("sessionId") == sid && it.getString("id") != b.runId && it.has("turn") && !it.optBoolean("probe") }.map { previous -> recoverTurnHistory(previous.getJSONObject("turn"),rows("events").filter {it.getString("runId")==previous.getString("id")}) }),
             "input" to input)
     }
     private fun bindingJson(b: Binding) = obj("sessionId" to b.sessionId, "runId" to b.runId, "lease" to b.lease, "connectionId" to b.connectionId, "capabilityEpoch" to b.capabilityEpoch)
@@ -340,7 +350,7 @@ class ProductHost private constructor(private val context: Context, private val 
             snapshot?.target?.packageName?.let { l0.put("upperApp", obj("packageName" to it, "label" to it)); l0.put("displaySnapshotId", snapshot!!.id) }
         }
         return obj("session" to obj("sessionId" to b.sessionId, "title" to session(b.sessionId).getString("title"), "model" to profile, "enabled" to enabled, "capabilityEpoch" to b.capabilityEpoch),
-            "lease" to obj("sessionId" to b.sessionId, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to System.currentTimeMillis() + authority.remainingLeaseMs(b)), "availability" to available, "l0" to l0, "skills" to if(b.runId == probeRun)JSONArray() else skillCatalog(session(b.sessionId),true))
+            "lease" to obj("sessionId" to b.sessionId, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to leaseWallDeadline(b)), "availability" to available, "l0" to l0, "skills" to if(b.runId == probeRun)JSONArray() else skillCatalog(session(b.sessionId),true))
     }
     private fun toolEnvelope(c: String, j: JSONObject): Envelope {
         val b = bound(c, j);val snapshot=scope(b).snapshot; require(j.getString("bridgeVersion") == "0.1" && j.getString("schemaVersion") == "1")
@@ -662,7 +672,7 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     private fun skillAction(tool:String,args:JSONObject,preview:Boolean):JSONObject {
         require(args.toString().length<=3*1024*1024 && redactor.redact(args.toString())==args.toString())
-        val expected=when(tool) {"skills.list"->setOf("query","offset");"skills.read"->setOf("name","path");"skills.save"->setOf("content","expectedHash","resources");"skills.enable"->setOf("name","expectedHash","enabled");else->setOf("name","expectedHash")}
+        val expected=when(tool) {"skills.list"->setOf("query","offset");"skills.read"->setOf("name","path");"skills.save"->setOf("content","expectedHash","files","resources");"skills.enable"->setOf("name","expectedHash","enabled");else->setOf("name","expectedHash")}
         require(args.keys().asSequence().all {it in expected})
         if(tool=="skills.list") {
             val query=args.optString("query").lowercase();val offset=args.optInt("offset",0);require(query.length<=200 && offset in 0..64)
@@ -673,8 +683,9 @@ class ProductHost private constructor(private val context: Context, private val 
         if(tool=="skills.read")return if(preview)obj() else skills.read(args.getString("name"),args.optString("path","SKILL.md"),true)
         if(tool=="skills.save") {
             val content=args.getString("content");val hash=args.getString("expectedHash")
-            val files=skills.textPackage(content,args.optJSONObject("resources"),hash)
-            return if(preview)obj("action" to "save","name" to SkillStore.manifest(content).first,"expectedHash" to hash,"content" to content,"resources" to args.optJSONObject("resources")) else skills.save(files,hash)
+            val resources=skillTextResources(args)
+            val files=skills.textPackage(content,resources,hash)
+            return if(preview)obj("action" to "save","name" to SkillStore.manifest(content).first,"expectedHash" to hash,"content" to content,"resources" to resources) else skills.save(files,hash)
         }
         val name=args.getString("name");val hash=args.getString("expectedHash")
         val item=skills.catalog().objects().single {it.getString("name")==name};require(item.getString("hash")==hash)

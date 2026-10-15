@@ -42,7 +42,7 @@ Native 可以实现通用流式压缩解码、TLS、连接取消和 HTTP redirec
 
 ## 流量与内存预算（待 PoC 调整）
 
-单 chunk 初值 32 KiB；每请求未消费缓冲上限 256 KiB；单模型请求 body 上限 16 MiB；累计响应上限 32 MiB；连接超时 15 秒、读空闲 60 秒、单次请求总时限 180 秒。与 provider 最大输出配置联动；超限返回明确错误，不静默丢块。截图解码的原始缓冲另行计量，不能只按 JPEG 大小估算内存。
+单 chunk 初值 32 KiB；每请求未消费缓冲上限 256 KiB；单模型请求 body 上限 16 MiB；累计响应上限 32 MiB；连接超时 15 秒。普通 HTTP 的读空闲 60 秒、单次请求总时限 180 秒；模型请求和普通整轮任务不设置生成/等待时限（`timeoutMs=0`），仍支持用户停止、撤销和字节预算。配置探查与单个工具保留独立时限。与 provider 最大输出配置联动；超限返回明确错误，不静默丢块。截图解码的原始缓冲另行计量，不能只按 JPEG 大小估算内存。
 
 优先特性探测后的 ArrayBuffer 消息；不支持时用有上限的 base64 分块，并计入编码开销。AndroidX 提供消息桥/消息数据类型，但具体 Thor WebView 支持由 feature probe 与真实传输测量确认。[WebViewCompat](https://developer.android.com/reference/androidx/webkit/WebViewCompat)、[WebMessageCompat](https://developer.android.com/reference/androidx/webkit/WebMessageCompat)。
 
@@ -58,7 +58,7 @@ Native credentialRef 绑定精确 scheme/host/port、允许路径前缀和 heade
 
 ## 重试、错误与取消
 
-只由 JS/Pi 决定 provider 语义重试；Native 不根据模型错误 body 重试，不自动重发已上传的模型 POST。配置中限制 Pi/SDK 语义重试初值最多 2 次并设置总时限，准确 API 支持在锁定版本验证。避免 SDK＋Pi＋Native 叠加重试。
+只由 JS/Pi 决定 provider 语义重试；Native 不根据模型错误 body 重试，不自动重发已上传的模型 POST。Pi/SDK 语义重试有次数上限；普通模型任务不设总时间上限。锁定 SDK 的零时限语义已适配并验证，避免把 0 误解为立即超时。避免 SDK＋Pi＋Native 叠加重试。
 
 流在第一个完整响应之前断开、部分文本后断开、工具调用参数未闭合等都要有不同状态。未验证完整的工具参数绝不能执行；已执行副作用后断流，重新请求模型不得自动重复同一 toolCallId。重复/冲突 id 由 Run Coordinator 拒绝并留审计。
 

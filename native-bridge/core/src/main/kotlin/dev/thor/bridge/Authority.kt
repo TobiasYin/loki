@@ -20,9 +20,11 @@ class Authority(val clock: MonotonicClock = SYSTEM_CLOCK) {
         requireBridge(runs.values.none { it.session == sessionId && it.alive && clock.nowMs() < it.expires }, Code.LIMIT_EXCEEDED)
         runs.entries.removeAll { !it.value.alive || clock.nowMs() >= it.value.expires }
         requireBridge(runs.size < 8, Code.LIMIT_EXCEEDED)
-        require(durationMs in 1..180_000)
+        // Zero is a host-selected foreground run without a wall-clock expiry.
+        // Stop, disconnect and capability epochs still revoke it immediately.
+        require(durationMs == 0L || durationMs in 1..600_000)
         val s = sessions[sessionId] ?: throw BridgeFailure(Code.STALE_AUTHORIZATION)
-        val r = Run(sessionId, nonce(), nonce(), connectionId, clock.nowMs() + durationMs, profiles.mapValues { it.value.toSet() })
+        val r = Run(sessionId, nonce(), nonce(), connectionId, if(durationMs==0L)Long.MAX_VALUE else clock.nowMs() + durationMs, profiles.mapValues { it.value.toSet() })
         runs[r.id] = r
         changed()
         return Binding(sessionId, r.id, r.lease, connectionId, s.epoch)

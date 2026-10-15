@@ -12,6 +12,7 @@ const server = http.createServer(async (req,res) => {
     appendFileSync(join(output,'model-requests.jsonl'),JSON.stringify({purpose:'web_search',credentialMatched:true,path:'/res/v1/web/search'})+'\n');
     res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({web:{results:[{title:'Fixture source',url:'https://example.org/source',description:'Controlled search boundary result',page_age:'2026-10-13'}]}}));return;
   }
+  if(req.url === '/web/slow') {res.writeHead(200,{'content-type':'text/plain'});res.write('slow page');const timer=setTimeout(()=>res.end(' too late'),35000);res.on('close',()=>clearTimeout(timer));return;}
   if(req.url === '/web/redirect') {
     if(req.headers.authorization || req.headers['x-subscription-token']) {res.writeHead(400);res.end('unexpected credential');return;}
     res.writeHead(302,{location:'http://127.0.0.1:8878/web/anonymous%20page'});res.end();return;
@@ -48,7 +49,20 @@ const server = http.createServer(async (req,res) => {
   } else if(probing) {
     if(!userText.includes('text-only') && imageCount < 2) {res.writeHead(422);res.end('image result missing');return;}
     reply={text:'PROBE_OK：输入与工具图片均已收到，红色测试图。'};
-  } else if(userText.includes('WEB_FETCH') && !result) reply={call:{name:'web_fetch',args:JSON.stringify({url:'http://127.0.0.1:8877/web/redirect'})}};
+  } else if(userText.includes('SESSION_RESEARCH_THEN_FAIL') && !result)reply={call:{name:'web_fetch',args:JSON.stringify({url:'http://127.0.0.1:8877/web/redirect'})}};
+  else if(userText.includes('SESSION_RESEARCH_THEN_FAIL')){res.writeHead(500);res.end('controlled failure after observed research');return;}
+  else if(userText.includes('SESSION_CONTINUE_CONTEXT')) {
+    if(!serialized.includes('SESSION_RESEARCH_THEN_FAIL') || !serialized.includes('ANONYMOUS_WEB_OK')){res.writeHead(422);res.end('failed context missing');return;}
+    reply={text:'SESSION_CONTEXT_RETAINED：已读取的网页内容仍在，不需要重复执行。'};
+  }
+  else if(userText.includes('SESSION_FOLLOWUP_CONTEXT')) {
+    if(!serialized.includes('SESSION_CONTEXT_RETAINED')){res.writeHead(422);res.end('follow-up context missing');return;}
+    reply={text:'SESSION_FOLLOWUP_RETAINED'};
+  }
+  else if(userText.includes('TOOL_TIMEOUT_RECOVERY') && !result) reply={call:{name:'web_fetch',args:JSON.stringify({url:'http://127.0.0.1:8877/web/slow'})}};
+  else if(userText.includes('TOOL_TIMEOUT_RECOVERY') && !currentSerialized.includes('web_search'))reply={call:{name:'web_search',args:JSON.stringify({query:'after one tool timeout'})}};
+  else if(userText.includes('TOOL_TIMEOUT_RECOVERY'))reply={text:'TOOL_TIMEOUT_RECOVERED'};
+  else if(userText.includes('WEB_FETCH') && !result) reply={call:{name:'web_fetch',args:JSON.stringify({url:'http://127.0.0.1:8877/web/redirect'})}};
   else if(userText.includes('WEB_FETCH')) reply={text:'ANONYMOUS_WEB_OK：网页内容已读取。'};
   else if(userText.includes('WEB_SEARCH') && !result) reply={call:{name:'web_search',args:'{"query":"thor integration"}'}};
   else if(userText.includes('WRITE_CONFIG') && !result) {const old=userText.match(/WRITE_CONFIG_([0-9a-f]{64})/)[1];reply={call:{name:'files_backup',args:JSON.stringify({path:'settings.json',expectedHash:old})}};}

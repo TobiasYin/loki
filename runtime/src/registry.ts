@@ -31,7 +31,11 @@ export class ToolRegistry {
   }
   validate(name: string, args: unknown): ToolDescriptor {
     const t = this.get(name);
-    if (!t || !Value.Check(t.inputSchema, args)) throw new RuntimeError('PROTOCOL_ERROR', 'Unknown tool or invalid arguments');
+    if (!t) throw new RuntimeError('PROTOCOL_ERROR', 'Unknown tool');
+    if (!Value.Check(t.inputSchema, args)) {
+      const fields=Object.keys((t.inputSchema as {properties?:Record<string,unknown>}).properties??{}).join(', ');
+      throw new RuntimeError('PROTOCOL_ERROR', `Invalid tool arguments. Allowed top-level fields: ${fields}.`+(t.toolId==='skills.save'?(fields.includes('files')?' Put reference files in files: [{path,content}, ...]; never use a path as a top-level field.':' All reference file paths must be nested inside the resources object.'):''));
+    }
     return t;
   }
 }

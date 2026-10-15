@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import { createNativeFetch, encodeFrame, decodeFrame } from './fetch-adapter.js';
 const te = new TextEncoder();
 const ctx = { binding: { sessionId: 's', runId: 'r', lease: 'l', connectionId: 'c', capabilityEpoch: 1 }, purpose: 'model', profileRef: 'local', deadlineMs: 999999, timeoutMs: 2000 };
+test('unbounded model has no elapsed timer while ordinary web requests still time out',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const sent=[];let settled=false;
+  const adapter=createNativeFetch({send:v=>sent.push(decodeFrame(v)),context:()=>({...ctx,timeoutMs:0})});
+  const controller=new AbortController();const pending=adapter.fetch('https://local/model',{signal:controller.signal});
+  pending.then(()=>{settled=true;},()=>{settled=true;});
+  t.mock.timers.tick(30*86400000);await Promise.resolve();assert.equal(settled,false);
+  controller.abort();await assert.rejects(pending,{code:'CANCELLED'});assert.equal(sent.filter(e=>e.type==='request.abort').length,1);
+  const web=createNativeFetch({send:()=>{},context:()=>({...ctx,purpose:'web_fetch',timeoutMs:0})});
+  const bounded=web.fetch('https://local/web');t.mock.timers.tick(180001);await assert.rejects(bounded,{code:'TIMEOUT'});
+  adapter.close();web.close();
+});
 function fixture({ binary = false, status = 200, bytes = te.encode('中文🙂\nbytes'), headers = { 'content-type': ['text/plain'] }, chunkSize = 1, pause = false } = {}) {
   const sent = [], calls = new Map(); let adapter;
   const emit = (header, bytes) => queueMicrotask(() => adapter.receive(binary && bytes ? encodeFrame({ bridgeVersion: 1, ...header }, bytes) : JSON.stringify({ bridgeVersion: 1, ...header, ...(bytes ? { bytes: Buffer.from(bytes).toString('base64') } : {}) })));

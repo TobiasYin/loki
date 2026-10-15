@@ -1,9 +1,42 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Model } from '@earendil-works/pi-ai';
-import { ThorRuntime, defaultCapabilities, RuntimeError, ToolRegistry, compileContext, assertPaired, type HistoryTurn, type ToolOutcome } from '../src/index.js';
+import { ThorRuntime, RuntimeSession, defaultCapabilities, RuntimeError, ToolRegistry, compileContext, assertPaired, type HistoryTurn, type ToolOutcome } from '../src/index.js';
 import { fixture, registry, descriptor, PNG } from './fixtures.js';
 import { ProtocolAudit } from '../src/protocol-audit.js';
+
+for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) {
+  test(`${protocol}: unbounded model waits for delayed headers and still stops explicitly`,async()=>{
+    const f=fixture(protocol,[{text:'late headers'}]);
+    f.setOnRequest(()=>new Promise(resolve=>setTimeout(resolve,35)));
+    assert.equal((await new ThorRuntime(f.ports,registry(),{runTimeoutMs:0}).run(f.lease,[{type:'text',text:'wait'}])).state,'completed');
+    const stopped=fixture(protocol,[{wait:true}]);const runtime=new ThorRuntime(stopped.ports,registry(),{runTimeoutMs:0});
+    stopped.setOnRequest(()=>{setTimeout(()=>runtime.stop(),20);});
+    assert.equal((await runtime.run(stopped.lease,[{type:'text',text:'wait'}])).state,'cancelled');
+  });
+  test(`${protocol}: failed research survives a follow-up with the same Pi Agent`,async()=>{
+    const session=new RuntimeSession('session-test');
+    const first=fixture(protocol,[{call:{name:'echo',id:'research_unique'}},{status:500}]);
+    const before=new ThorRuntime(first.ports,registry(),{},session);
+    assert.equal((await before.run(first.lease,[{type:'text',text:'remember research goal'}])).state,'failed');
+    const recorded=first.turns.at(-1)!;assert.equal(recorded.complete,false);
+    assert.ok(JSON.stringify(recorded.messages).includes('echo-result'));
+    assert.ok(first.turns.some(t=>!t.complete && t.messages.some(m=>m.kind==='tool_result')),'research must checkpoint before the later HTTP failure');
+    const agent=session.agent;const previousMessages=agent!.state.messages.length;
+    const second=fixture(protocol,[{text:'continued with research'}]);
+    assert.equal((await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'continue from there'}],[recorded])).state,'completed');
+    assert.equal(session.agent,agent);assert.ok(agent!.state.messages.length>previousMessages);
+    const body=JSON.stringify(second.requests[0]!.body);
+    assert.ok(body.includes('remember research goal'));assert.ok(body.includes('echo-result'));assert.ok(body.includes('interrupted'));
+    assert.equal(body.split('continue from there').length-1,1,'new user input must not be sliced away by Pi system records');
+    assert.equal(second.turns.at(-1)!.messages.filter(m=>m.kind==='user').length,1);
+    assert.ok(JSON.stringify(second.turns.at(-1)!.messages[0]).includes('continue from there'));
+    assert.equal(second.executions.length,0,'history must not replay an observed tool');
+    const third=fixture(protocol,[{text:'after restart'}]);
+    assert.equal((await new ThorRuntime(third.ports,registry(),{},new RuntimeSession('session-test')).run(third.lease,[{type:'text',text:'continue after restart'}],[recorded,second.turns.at(-1)!])).state,'completed');
+    assert.ok(JSON.stringify(third.requests[0]!.body).includes('echo-result'));
+  });
+}
 
 for (const protocol of ['openai-responses', 'anthropic-messages'] as const) {
   test(`${protocol}: streamed text + user image + image tool round trip through injected fetch`, async () => {
@@ -287,3 +320,11 @@ test('Completions strict audit rejects truncated and conflicting argument stream
 
 test('one-million-token model budget is used without an extra fixed percentage cutoff',async()=>{const f=fixture();const p=f.snapshot.session.model;const model:Model<any>={id:p.modelId,name:'1M',provider:'openai',api:p.protocol,reasoning:false,input:['text'],baseUrl:p.baseUrl,contextWindow:1000000,maxTokens:2048,cost:{input:0,output:0,cacheRead:0,cacheWrite:0}};const c=await compileContext({snapshot:f.snapshot,tools:[],registryVersion:'1',model,history:[],current:[{role:'user',content:'x'.repeat(850000),timestamp:1}],attachments:f.ports.attachments,imageTokens:0,maxHistoryTurns:1});assert.ok(c.manifest.estimatedTokens>850000);assert.ok(c.manifest.estimatedTokens<=997952);});
 test('text-only model probe flags and image placeholders are respected',async()=>{const f=fixture('openai-completions',[{call:{name:'picture'}},{text:'文字模型继续'}]);f.snapshot.session.model.input=['text'];f.snapshot.session.model.lastProbe.imageInput=false;f.snapshot.session.model.lastProbe.imageToolRoundTrip=false;const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'read'}]);assert.equal(result.state,'completed');assert.ok(!JSON.stringify(f.requests).includes(PNG));assert.match(JSON.stringify(f.requests),/supports text only|does not support images/);});
+
+test('invalid Skill resource nesting stays blocked and returns a safe actionable schema hint',()=>{
+ const t={...descriptor('skills_save'),toolId:'skills.save',inputSchema:{type:'object',properties:{content:{type:'string'},expectedHash:{type:'string'},resources:{type:'object',additionalProperties:{type:'string'}}},required:['content','expectedHash'],additionalProperties:false}};
+ const r=new ToolRegistry();r.register({packId:'test-skill-schema',packVersion:'1',tools:[t]});
+ const good={content:'guide',expectedHash:'',resources:{'references/a.md':'A','references/b.md':'B'}};
+ assert.equal(r.validate('skills_save',good).toolId,'skills.save');
+ assert.throws(()=>r.validate('skills_save',{content:'guide',expectedHash:'',resources:{'references/a.md':'A'},'references/b.md':'PRIVATE_CONTENT_MUST_NOT_ECHO'}),(error:unknown)=>error instanceof RuntimeError && error.code==='PROTOCOL_ERROR' && error.message.includes('resources object') && !error.message.includes('PRIVATE_CONTENT_MUST_NOT_ECHO'));
+});

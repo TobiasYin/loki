@@ -15,6 +15,15 @@ class DeviceAuthorityTest {
     private fun begin(): Binding = native.beginRun("a", native.connect(), emptyMap()).also { port.bind(it); port.publish(it, setOf("perception.device_info")) }
     private fun e(b: Binding, call: String = "c") = Envelope(b.sessionId, b.runId, call, "perception.device_info", b.capabilityEpoch, now + 5000, requestId = call)
     private fun rejected(action: () -> Unit) { try { action(); fail("Expected rejection") } catch(_: ToolFailure) { } }
+    @Test fun oneToolTimeoutDoesNotRevokeItsRunOrOtherTools() {
+        val b=begin();val first=e(b,"first");val next=e(b,"next")
+        val ca=port.validate(first);val cb=port.validate(next)
+        port.cancelTool(b.runId,first.requestId)
+        assertTrue(ca.cancelled);assertFalse(cb.cancelled);native.validate(b)
+        rejected {port.commit(first){fail("Cancelled call must not commit")}}
+        var committed=false;port.commit(next){committed=true};assertTrue(committed)
+        native.stopRun(b.runId);assertTrue(cb.cancelled)
+    }
     @Test fun concurrentRunsKeepPublicationCancellationAndReplayLedgersSeparate() {
         val a=begin();val b=native.beginRun("b",a.connectionId,emptyMap());port.bind(b);port.publish(b,setOf("perception.device_info"))
         val ca=port.validate(e(a));val cb=port.validate(e(b));port.claim(e(a));port.claim(e(b))

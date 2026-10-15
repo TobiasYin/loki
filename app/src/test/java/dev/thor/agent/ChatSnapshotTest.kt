@@ -32,4 +32,16 @@ class ChatSnapshotTest {
         snapshot.getJSONArray("sessions").getJSONObject(0).put("title","UI mutation")
         assertEquals("a",source.getJSONArray("sessions").getJSONObject(0).getString("title"))
     }
+    @Test fun thousandsOfStreamFragmentsProjectAsCompleteBlocksWithoutMutatingTheLedger() {
+        val source=state();val events=source.getJSONArray("events")
+        repeat(2000) {n->
+            events.put(obj("sessionId" to "b","runId" to "run-b","sequence" to n*2,"type" to "thinking_delta","data" to obj("blockId" to "1:0","text" to "片")))
+            events.put(obj("sessionId" to "b","runId" to "run-b","sequence" to n*2+1,"type" to "tool_call_update","toolCallId" to "call","data" to obj("toolName" to "skills_save","arguments" to obj("content" to "v$n"))))
+        }
+        val before=source.toString();val result=chatSnapshot(source,null).getJSONArray("events").objects()
+        assertEquals(3,result.size);assertEquals("片".repeat(2000),result.single {it.optString("type")=="thinking_delta"}.getJSONObject("data").getString("text"))
+        assertEquals("v1999",result.single {it.optString("type")=="tool_call_update"}.getJSONObject("data").getJSONObject("arguments").getString("content"))
+        assertEquals(before,source.toString())
+    }
+
 }

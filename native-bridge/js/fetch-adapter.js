@@ -104,7 +104,7 @@ export function createNativeFetch({ send, context, binary = false, onUnhandled =
       let uploadCode;
       const cancelUpload = (code = 'CANCELLED') => { uploadCode ||= code; reader.cancel().catch(() => {}); };
       const stopUpload = () => cancelUpload('CANCELLED');
-      const uploadTimer = setTimeout(() => cancelUpload('TIMEOUT'), Math.min(180000, ctx.timeoutMs || 180000));
+      const uploadTimer = ctx.purpose==='model' && ctx.timeoutMs===0 ? undefined : setTimeout(() => cancelUpload('TIMEOUT'), Math.min(180000, ctx.timeoutMs || 180000));
       uploads.add(cancelUpload);
       signal?.addEventListener('abort', stopUpload, { once: true });
       try {
@@ -131,7 +131,7 @@ export function createNativeFetch({ send, context, binary = false, onUnhandled =
     return new Promise((resolve, reject) => {
       const s = { id, ctx, resolve, reject, signal, url, method, seq: 0, inFlight: 0 };
       s.abort = () => terminate(s, 'CANCELLED', true);
-      s.timer = setTimeout(() => terminate(s, 'TIMEOUT', true), Math.min(180000, ctx.timeoutMs || 180000));
+      if(!(ctx.purpose==='model' && ctx.timeoutMs===0))s.timer = setTimeout(() => terminate(s, 'TIMEOUT', true), Math.min(180000, ctx.timeoutMs || 180000));
       requests.set(id, s); signal?.addEventListener('abort', s.abort, { once: true });
       if (signal?.aborted) { s.abort(); return; }
       try { post({ ...base(id, ctx), type: 'request.start', url, method, headers: Object.fromEntries(headers), hasBody: body != null }, body); }

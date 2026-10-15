@@ -10,6 +10,7 @@ class DeviceAuthority(private val native: Authority, private val refreshResource
     private class Scope(val binding:Binding) {
         var allowed=emptySet<String>()
         val cancellation=Cancellation()
+        val toolCancellations=mutableMapOf<String,Cancellation>()
         val requests=mutableSetOf<String>()
         val calls=mutableSetOf<String>()
     }
@@ -38,7 +39,16 @@ class DeviceAuthority(private val native: Authority, private val refreshResource
         requireTool(envelope.toolId in scope.allowed, Code.PERMISSION_MISSING, "Tool not published")
         val now = native.clock.nowMs()
         requireTool(envelope.deadline > now && envelope.deadline <= now + native.remainingLeaseMs(b), Code.TIMEOUT, "Invalid deadline")
-        scope.cancellation.check(); scope.cancellation
+        scope.cancellation.check()
+        val child=scope.toolCancellations.getOrPut(envelope.requestId) {
+            requireTool(scope.toolCancellations.size<64,Code.LIMIT_EXCEEDED,"Tool cancellation budget exceeded")
+            Cancellation().also {c->scope.cancellation.register {c.cancel()}}
+        }
+        child.check();child
+    }
+    /** A tool timeout cancels only that invocation; user Stop/revocation still cancels the Run. */
+    fun cancelTool(runId:String,requestId:String)=native.atomic {
+        scopes[runId]?.toolCancellations?.get(requestId)?.cancel();Unit
     }
     override fun claim(e: Envelope) = native.atomic {
         validate(e)

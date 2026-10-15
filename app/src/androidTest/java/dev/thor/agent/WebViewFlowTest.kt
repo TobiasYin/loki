@@ -53,6 +53,48 @@ class WebViewFlowTest {
         waitFor(web,"document.getElementById('send').textContent === '发送'",30)
         assertEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
     }
+    @Test fun failedResearchSurvivesHostRestartAndFollowupReusesPiSession() {
+        configure(0,1302);var activity=launch();var web=activity.findViewById<WebView>(android.R.id.custom)
+        try {
+            waitFor(web,"window.productReady===true && document.querySelectorAll('.session-row').length>0");probe(activity,web)
+            val sid=host(activity).selectedSession()
+            send(web,"SESSION_RESEARCH_THEN_FAIL")
+            waitFor(web,"document.getElementById('send').textContent==='停止'");waitFor(web,"document.getElementById('send').textContent==='发送'")
+            val before=SqliteStore(context,"product.db").use {it.load()}.getJSONArray("runs").objects().last()
+            assertEquals("failed",before.getString("status"));assertFalse(before.getJSONObject("turn").getBoolean("complete"))
+            assertTrue(before.getJSONObject("turn").toString().contains("ANONYMOUS_WEB_OK"))
+            finish(activity);activity=launch();web=activity.findViewById(android.R.id.custom)
+            waitFor(web,"window.productReady===true && document.querySelectorAll('.session-row').length>0")
+            assertEquals(sid,host(activity).selectedSession())
+            send(web,"SESSION_CONTINUE_CONTEXT")
+            waitFor(web,"document.getElementById('send').textContent==='停止'");waitFor(web,"document.getElementById('send').textContent==='发送'")
+            assertTrue(javascript(web,"document.getElementById('chat').textContent").contains("SESSION_CONTEXT_RETAINED"))
+            send(web,"SESSION_FOLLOWUP_CONTEXT")
+            waitFor(web,"document.getElementById('send').textContent==='停止'");waitFor(web,"document.getElementById('send').textContent==='发送'")
+            val after=SqliteStore(context,"product.db").use {it.load()};val last=after.getJSONArray("runs").objects().last()
+            assertEquals("completed",last.getString("status"))
+            assertTrue(after.getJSONArray("events").objects().any {it.getString("runId")==last.getString("id") && it.optString("type")=="context" && it.getJSONObject("data").optBoolean("piSessionReused")})
+            assertTrue(last.getJSONArray("contexts").getJSONObject(0).getJSONArray("includedMessageIds").toString().contains(before.getJSONObject("turn").getString("turnId")))
+            java.io.File(context.filesDir,"integrated-session-continuation.json").writeText(obj("passed" to true,"failedRunId" to before.getString("id"),"continuedRunId" to last.getString("id"),"persistedResearch" to true,"piSessionReused" to true,"automaticReplay" to false).toString(2))
+        } finally {finish(activity)}
+    }
+    @Test fun oneTimedOutPageReadCanContinueWithSearchInTheSameRun() {
+        configure(0,1301);val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
+        try {
+            waitFor(web,"window.productReady===true && document.querySelectorAll('.session-row').length>0")
+            probe(activity,web)
+            send(web,"TOOL_TIMEOUT_RECOVERY")
+            waitFor(web,"document.getElementById('send').textContent==='停止'")
+            waitFor(web,"document.getElementById('send').textContent==='发送'",60)
+            val s=SqliteStore(context,"product.db").use {it.load()};val run=s.getJSONArray("runs").objects().last()
+            assertEquals("completed",run.getString("status"))
+            val results=s.getJSONArray("events").objects().filter {it.getString("runId")==run.getString("id") && it.getString("type")=="tool_result"}.map {it.getJSONObject("data")}
+            assertTrue(results.any {it.optString("toolId")=="web.fetch" && it.optString("error")=="TIMEOUT"})
+            assertTrue(results.any {it.optString("toolId")=="web.search" && it.isNull("error")})
+            assertTrue(javascript(web,"document.getElementById('chat').textContent").contains("TOOL_TIMEOUT_RECOVERED"))
+            java.io.File(context.filesDir,"integrated-tool-timeout-recovery.json").writeText(obj("passed" to true,"runId" to run.getString("id"),"results" to org.json.JSONArray(results)).toString(2))
+        } finally {finish(activity)}
+    }
     @Test fun allProtocolsImagesToolRoundTripTextDevicePersistenceErrorsAndCancellation() {
         for(protocol in 0..2) {
             configure(protocol, protocol+1)

@@ -1,4 +1,4 @@
-import { Agent, type AgentEvent, type AgentTool } from '@earendil-works/pi-agent-core';
+import { Agent, type AgentEvent, type AgentTool, type AgentOptions } from '@earendil-works/pi-agent-core';
 import type { Message, Model } from '@earendil-works/pi-ai';
 import { streamSimple as responses } from '@earendil-works/pi-ai/api/openai-responses';
 import { streamSimple as completions } from '@earendil-works/pi-ai/api/openai-completions';
@@ -7,6 +7,8 @@ import { compileContext, project, resolveContent } from './context.js';
 import { DEFAULT_LIMITS, RuntimeError, type AgentRun, type AuthoritySnapshot, type Content, type DomainMessage, type EffectRecord, type HistoryTurn, type ModelProfile, type RunEvent, type RunLease, type RunState, type RuntimeLimits, type RuntimePorts, type ToolDescriptor, type ToolEnvelope, type ToolOutcome, type ErrorCode, type Capability } from './contracts.js';
 import { ToolRegistry } from './registry.js';
 import { ProtocolAudit } from './protocol-audit.js';
+import { RuntimeSession, closeInterruptedRound } from './session.js';
+import { withoutProviderDeadline } from './provider-timeouts.js';
 
 const terminal = new Set<RunState>(['completed', 'failed', 'cancelled', 'interrupted']);
 const transitions: Record<RunState, RunState[]> = {
@@ -22,7 +24,7 @@ interface Active {
   persistenceFailed: boolean; requestMessages: Message[]; resultRefs: Map<string, Content[]>;
   failure?: ErrorCode;
   effects: EffectRecord[];
-  turnId: string; streamMessage: number;
+  turnId: string; streamMessage: number; messageOffset: number; input: Content[];
 }
 function fail(code: ErrorCode): never { throw new RuntimeError(code); }
 export function assertRuntimeFeatures(): void {
@@ -58,9 +60,9 @@ export class ThorRuntime {
   private consumedRuns = new Map<string, number>();
   private listeners = new Set<(event: RunEvent) => void>();
   private limits: RuntimeLimits;
-  constructor(private ports: RuntimePorts, private registry: ToolRegistry, limits: Partial<RuntimeLimits> = {}) {
+  constructor(private ports: RuntimePorts, private registry: ToolRegistry, limits: Partial<RuntimeLimits> = {}, private session?:RuntimeSession) {
     this.limits = { ...DEFAULT_LIMITS, ...limits };
-    if (Object.values(this.limits).some(v => !Number.isSafeInteger(v) || v < 1)) fail('LIMIT_EXCEEDED');
+    if (Object.entries(this.limits).some(([key,v]) => !Number.isSafeInteger(v) || v < (key==='runTimeoutMs'?0:1))) fail('LIMIT_EXCEEDED');
   }
   subscribe(listener: (event: RunEvent) => void): () => void { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   get currentRun(): AgentRun | undefined { return this.active && structuredClone(this.active.run); }
@@ -120,7 +122,7 @@ export class ThorRuntime {
         a.seenCalls.add(callId); t.requiredCapabilities.forEach(c => a.source.add(c));
         const effect = t.effectClass !== 'read' && t.effectClass !== 'network' ? { toolCallId: callId, toolId: t.toolId, effectClass: t.effectClass, outcome: 'unknown' as const } : undefined;
         if (effect) a.effects.push(effect);
-        const deadline = Math.min(Date.now() + t.timeoutMs, a.lease.expiresAt, a.run.startedAt + this.limits.runTimeoutMs);
+        const deadline = Math.min(Date.now() + t.timeoutMs, a.lease.expiresAt, this.limits.runTimeoutMs ? a.run.startedAt + this.limits.runTimeoutMs : Number.MAX_SAFE_INTEGER);
         const envelope: ToolEnvelope = { bridgeVersion: '0.1', sessionId: a.run.sessionId, runId: a.run.runId, leaseId: a.lease.leaseId, toolCallId: callId, toolId: t.toolId, schemaVersion: t.schemaVersion,
           capabilityEpoch: a.lease.capabilityEpoch, requestId: crypto.randomUUID(), deadline, arguments: args, targetSnapshotId: s.l0.snapshotId, resources: t.resources };
         // Intent commits before the port may perform a side effect.
@@ -185,7 +187,7 @@ export class ThorRuntime {
       try {
         const response = await abortable(this.ports.network.fetch(request, { signal: controller.signal, redirect: 'error' }, {
           bridgeVersion: '0.1', purpose: 'model', requestId: crypto.randomUUID(), sessionId: a.run.sessionId, runId: a.run.runId, leaseId: a.lease.leaseId, capabilityEpoch: a.lease.capabilityEpoch,
-          profileRef: a.profile.profileId, profileRevision: a.profile.revision, credentialRef: a.profile.credentialRef, credentialPlaceholder: 'sk-thor-native-placeholder', deadline: Math.min(a.lease.expiresAt, a.run.startedAt + this.limits.runTimeoutMs),
+          profileRef: a.profile.profileId, profileRevision: a.profile.revision, credentialRef: a.profile.credentialRef, credentialPlaceholder: 'sk-thor-native-placeholder', deadline: Math.min(a.lease.expiresAt, this.limits.runTimeoutMs ? a.run.startedAt + this.limits.runTimeoutMs : Number.MAX_SAFE_INTEGER),
         }), controller.signal);
         if (response.redirected || response.status >= 300 && response.status < 400 || response.url && new URL(response.url).origin !== base.origin) fail('UNSUPPORTED');
         if (!response.body) { cleanup(); return response; }
@@ -212,6 +214,21 @@ export class ThorRuntime {
       } catch (e) { cleanup(); controller.abort(); throw e; }
     };
   }
+  private async saveTurn(a:Active,complete:boolean):Promise<void> {
+    const messages:DomainMessage[]=[];
+    for(const m of a.agent?.state.messages.filter(m=>m.role!=='system').slice(a.messageOffset)??[]) {
+      if(m.role==='user')messages.push({kind:'user',content:a.input});
+      else if(m.role==='assistant') {
+        // Partial JSON is diagnostic data, never an executable historical tool call.
+        const calls=m.content.filter(c=>c.type==='toolCall').filter(c=>m.stopReason==='toolUse' || a.seenCalls.has(c.id)).map(c=>({id:c.id,name:c.name,arguments:c.arguments}));
+        const text=m.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+        if(text || calls.length)messages.push({kind:'assistant',text,calls});
+      } else if(m.role==='toolResult')messages.push({kind:'tool_result',toolCallId:m.toolCallId,toolName:m.toolName,
+        content:a.resultRefs.get(m.toolCallId)??m.content.filter(c=>c.type==='text').map(c=>({type:'text',text:c.text})),isError:m.isError});
+    }
+    if(!messages.some(m=>m.kind==='user'))messages.unshift({kind:'user',content:a.input});
+    await this.persist(a,()=>this.ports.persistence.saveTurn(a.run.sessionId,{turnId:a.turnId,runId:a.run.runId,messages:closeInterruptedRound(messages),source:[...a.source],observedAt:Date.now(),complete,effects:a.effects}));
+  }
   private async onPi(a: Active, e: AgentEvent): Promise<void> {
     if (terminal.has(a.run.state)) return;
     if (e.type === 'message_start' && e.message.role === 'assistant') a.streamMessage++;
@@ -224,6 +241,7 @@ export class ThorRuntime {
         if (call?.type === 'toolCall') await this.event(a, 'tool_call_update', { toolName: call.name, arguments: call.arguments, complete: delta.type === 'toolcall_end' }, call.id);
       }
     }
+    if(e.type==='message_end' && !a.persistenceFailed)await this.saveTurn(a,false);
     if (e.type === 'tool_execution_start' && !a.controller.signal.aborted) await this.state(a, 'executing_tools');
     if (e.type === 'tool_execution_end' && e.isError) await this.event(a, 'diagnostic', { code: 'TOOL_FAILED', toolName: e.toolName }, e.toolCallId);
   }
@@ -239,19 +257,24 @@ export class ThorRuntime {
     let a: Active | undefined; let timer: ReturnType<typeof setTimeout> | undefined;
     const pending = { sessionId: lease.sessionId, epoch: lease.capabilityEpoch, controller: new AbortController(), reason: undefined as ErrorCode | undefined };
     this.pending = pending;
-    timer = setTimeout(() => { pending.reason = 'TIMEOUT'; if (a) a.stopReason = 'TIMEOUT'; pending.controller.abort(); a?.agent?.abort(); }, Math.max(0, Math.min(this.limits.runTimeoutMs, lease.expiresAt - Date.now())));
+    if(this.limits.runTimeoutMs)timer = setTimeout(() => { pending.reason = 'TIMEOUT'; if (a) a.stopReason = 'TIMEOUT'; pending.controller.abort(); a?.agent?.abort(); }, Math.max(0, Math.min(this.limits.runTimeoutMs, lease.expiresAt - Date.now())));
     try {
       const initial = await abortable(this.ports.authority.read(lease.sessionId, lease.runId), pending.controller.signal);
       const profile = structuredClone(initial.session.model); checkProfile(profile);
       a = { run: { sessionId: lease.sessionId, runId: lease.runId, state: 'queued', modelProfileRevision: profile.revision, capabilityEpoch: lease.capabilityEpoch, startedAt: Date.now() },
-        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], streamMessage: 0, turnId: crypto.randomUUID() };
+        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], streamMessage: 0, messageOffset:0, input, turnId: crypto.randomUUID() };
       this.active = a; const active = a; const model = toModel(profile);
+      if(initial.session.enabled.screen_perception && (initial.l0.device || initial.l0.upperApp))a.source.add('screen_perception');
       await this.event(a, 'state', { state: 'queued' }, undefined, a.run); await this.state(a, 'preparing');
-      await this.persist(a, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages: [{ kind: 'user', content: input }], source: [], observedAt: Date.now(), complete: false }));
+      await this.persist(a, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages: [{ kind: 'user', content: input }], source: [...active.source], observedAt: Date.now(), complete: false }));
       await this.authority(a);
       const user = await project([{ kind: 'user', content: input }], model, this.ports.attachments, initial);
       let audit = new ProtocolAudit();
-      const agent = new Agent({ initialState: { model, thinkingLevel: profile.thinkingEffort??'off', messages: [] }, toolExecution: 'sequential', transport: 'sse',
+      if(this.session && this.session.sessionId!==lease.sessionId)fail('STALE_AUTHORIZATION');
+      const previous=this.session?.agent;
+      const restored=previous?[]:await project(history.slice(-this.limits.maxHistoryTurns).flatMap(t=>t.source.every(c=>initial.session.enabled[c])?closeInterruptedRound(t.messages):t.messages.filter(m=>m.kind==='user')),model,this.ports.attachments,initial);
+      active.messageOffset=previous?.state.messages.filter(m=>m.role!=='system').length??restored.length;
+      const agentOptions:AgentOptions={initialState:{model,thinkingLevel:profile.thinkingEffort??'off',messages:restored},sessionId:lease.sessionId,toolExecution:'sequential',transport:'sse',
         beforeToolCall: async ({ toolCall }) => audit.permits(toolCall.id, toolCall.arguments) ? undefined : { block: true, reason: 'PROTOCOL_ERROR: incomplete or conflicting JSON', terminate: true },
         prepareRequest: async request => {
           try {
@@ -264,8 +287,7 @@ export class ThorRuntime {
           // Refresh image references on every request; expired/deleted/disabled data never survives
           // merely because Pi still holds an earlier in-memory image block.
           const current: Message[] = [];
-          for (const m of request.context.messages) {
-            if (m.role === 'system') continue;
+          for (const m of request.context.messages.filter(m=>m.role!=='system').slice(active.messageOffset)) {
             if (m.role === 'user') current.push({ ...m, content: await resolveContent(input, this.ports.attachments, s.session.enabled) });
             else if (m.role === 'toolResult' && active.resultRefs.has(m.toolCallId)) current.push({ ...m, content: await resolveContent(active.resultRefs.get(m.toolCallId)!, this.ports.attachments, s.session.enabled) });
             else current.push(m);
@@ -273,7 +295,7 @@ export class ThorRuntime {
           const compiled = await compileContext({ snapshot: { ...s, session: { ...s.session, model: profile } }, tools: active.effective, registryVersion: this.registry.version, model,
             history, current, currentRefs: [...input, ...[...active.resultRefs.values()].flat()].filter(c => c.type === 'attachment').map(c => c.attachmentId), attachments: this.ports.attachments, imageTokens: this.limits.imageTokenEstimate, maxHistoryTurns: this.limits.maxHistoryTurns });
           active.requestMessages = compiled.messages;
-          await this.persist(active, () => this.ports.persistence.saveContext(compiled.manifest)); await this.event(active, 'context', { snapshotId: compiled.manifest.snapshotId, estimatedTokens: compiled.manifest.estimatedTokens, droppedTurnIds: compiled.manifest.droppedTurnIds });
+          await this.persist(active, () => this.ports.persistence.saveContext(compiled.manifest)); await this.event(active, 'context', { snapshotId: compiled.manifest.snapshotId, estimatedTokens: compiled.manifest.estimatedTokens, droppedTurnIds: compiled.manifest.droppedTurnIds, piSessionReused:!!previous });
           await this.state(active, 'generating');
           // Keep history out of Agent's evolving transcript; inject the bounded projection only at convertToLlm.
           return { context: { messages: request.context.messages.filter(m => m.role !== 'system'), tools } };
@@ -281,17 +303,21 @@ export class ThorRuntime {
         },
         convertToLlm: () => active.requestMessages,
         streamFn: (_model, context, options) => {
-          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onProviderStreamEvent: (event: unknown) => audit.observe(profile.protocol, event), apiKey: 'sk-thor-native-placeholder', fetch: this.fetch(active), transport: 'sse' as const, maxTokens: profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
+          const fetcher=this.fetch(active);
+          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onProviderStreamEvent: (event: unknown) => audit.observe(profile.protocol, event), apiKey: 'sk-thor-native-placeholder', fetch: this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher), transport: 'sse' as const, maxTokens: profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
           return profile.protocol === 'openai-responses' ? responses(model, context, common) : profile.protocol==='openai-completions' ? completions(model,context,common) : anthropic(model, context, common);
         },
-      });
+      };
+      const agent=previous??new Agent(agentOptions);
+      if(previous) {agent.state.model=model;agent.state.thinkingLevel=profile.thinkingEffort??'off';agent.beforeToolCall=agentOptions.beforeToolCall;agent.prepareRequest=agentOptions.prepareRequest;agent.convertToLlm=agentOptions.convertToLlm!;agent.streamFunction=agentOptions.streamFn;}
+      if(this.session)this.session.agent=agent;
       a.agent = agent;
       const abortAgent = () => agent.abort(); a.controller.signal.addEventListener('abort', abortAgent, { once: true });
-      agent.subscribe(e => this.onPi(active, e));
-      await agent.prompt(user);
+      const unsubscribe=agent.subscribe(e => this.onPi(active, e));
+      try {await agent.prompt(user);} finally {unsubscribe();}
       if (a.persistenceFailed) fail('PERSISTENCE_ERROR');
       const assistant = agent.state.messages.filter(m => m.role === 'assistant').at(-1);
-      const saveIncomplete = () => this.persist(active, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages: [{ kind: 'user', content: input }], source: [...active.source], observedAt: Date.now(), complete: false, effects: active.effects }));
+      const saveIncomplete = () => this.saveTurn(active,false);
       if (a.controller.signal.aborted) {
         await saveIncomplete();
         a.run.error = a.stopReason ?? 'CANCELLED'; await this.state(a, 'stopping');
@@ -302,18 +328,14 @@ export class ThorRuntime {
         // Do not persist upstream error bodies/headers that may echo credentials.
         a.run.error = a.failure ?? 'IO_ERROR'; await this.state(a, 'failed');
       } else {
-        const messages: DomainMessage[] = [{ kind: 'user', content: input }];
-        for (const m of agent.state.messages) {
-          if (m.role === 'assistant') messages.push({ kind: 'assistant', text: m.content.filter(c => c.type === 'text').map(c => c.text).join(''), calls: m.content.filter(c => c.type === 'toolCall').map(c => ({ id: c.id, name: c.name, arguments: c.arguments })) });
-          if (m.role === 'toolResult') messages.push({ kind: 'tool_result', toolCallId: m.toolCallId, toolName: m.toolName, content: a.resultRefs.get(m.toolCallId) ?? m.content.filter(c => c.type === 'text').map(c => ({ type: 'text', text: c.text })), isError: m.isError });
-        }
-        await this.persist(a, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages, source: [...active.source], observedAt: Date.now(), complete: true, effects: active.effects }));
+        await this.saveTurn(active,true);
         await this.state(a, 'completed');
       }
       return structuredClone(a.run);
     } catch (error) {
       if (!a) throw pending.reason ? new RuntimeError(pending.reason) : error;
       const code = error instanceof RuntimeError ? error.code : 'IO_ERROR';
+      if(!a.persistenceFailed)await this.saveTurn(a,false);
       a.controller.abort(); a.agent?.abort(); a.run.error = code;
       // A broken durable store cannot confirm a terminal transition. Surface the failure,
       // retain the last committed nonterminal state for interrupted recovery, and stop work.

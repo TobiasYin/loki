@@ -41,8 +41,8 @@ class MainActivity : Activity() {
         }
         web.settings.textZoom = (resources.configuration.fontScale * 100).toInt().coerceIn(75, 200)
         WebView.setWebContentsDebuggingEnabled(false)
-        uiStates=LatestValue({task->web.postDelayed({task()},50)},{state->
-            if(!isFinishing && !isDestroyed)web.evaluateJavascript("window.receiveProductState?.(JSON.parse(${JSONObject.quote(state.toString())}))",null)
+        uiStates=LatestValue({task->web.postDelayed({task()},50)},{state,delivered->
+            if(!isFinishing && !isDestroyed)web.evaluateJavascript("window.receiveProductState?.(JSON.parse(${JSONObject.quote(state.toString())}))") {delivered()} else delivered()
         })
         try { host = ProductHost.create(this) { state -> runOnUiThread {uiStates.offer(state)} }
         } catch(error:Exception) {if(BuildConfig.DEBUG)android.util.Log.e("ThorInit",error.javaClass.simpleName+"\n"+error.stackTrace.joinToString("\n"));setContentView(LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;addView(TextView(this@MainActivity).apply {text="本地存储或安全配置初始化失败；历史保留，未执行网络或设备操作。"});addView(Button(this@MainActivity).apply {text="重试打开";setOnClickListener {recreate()}})});return}

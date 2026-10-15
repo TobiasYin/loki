@@ -56,13 +56,15 @@ class HttpTransport(private val authority: Authority, private val policy: Networ
         requireBridge((start.body?.size ?: 0) <= limits.requestBytes && start.method.matches(Regex("[A-Z]{1,12}")), Code.LIMIT_EXCEEDED)
         requireBridge(start.method !in setOf("GET", "HEAD") || start.body == null, Code.INVALID_REQUEST)
         val p = policy.prepare(start)
+        val model=start.envelope.purpose==Purpose.model
         val client = OkHttpClient.Builder().dns(p.dns).followRedirects(false).followSslRedirects(false).retryOnConnectionFailure(false)
-            .connectTimeout(limits.connectMs, TimeUnit.MILLISECONDS).readTimeout(limits.idleMs, TimeUnit.MILLISECONDS)
-            .writeTimeout(limits.idleMs, TimeUnit.MILLISECONDS).callTimeout(limits.totalMs, TimeUnit.MILLISECONDS).build()
+            .connectTimeout(limits.connectMs, TimeUnit.MILLISECONDS).readTimeout(if(model)0 else limits.idleMs, TimeUnit.MILLISECONDS)
+            .writeTimeout(limits.idleMs, TimeUnit.MILLISECONDS).callTimeout(if(model)0 else limits.totalMs, TimeUnit.MILLISECONDS).build()
         val stream = Stream(start.copy(body = start.body?.copyOf(), headers = start.headers.toMap()), sink, client)
         seen.add(start.envelope.requestId); active[start.envelope.requestId] = stream
-        val duration = minOf(limits.totalMs, start.envelope.deadlineMs - authority.clock.nowMs(), authority.remainingLeaseMs(start.envelope.binding))
-        stream.deadline = timer.schedule({ stream.fail(Code.TIMEOUT) }, duration, TimeUnit.MILLISECONDS)
+        val duration = minOf(if(model)Long.MAX_VALUE else limits.totalMs, start.envelope.deadlineMs - authority.clock.nowMs(), authority.remainingLeaseMs(start.envelope.binding))
+        // JS uses its largest safe integer for an unbounded foreground deadline.
+        if(duration<9_000_000_000_000_000L)stream.deadline = timer.schedule({ stream.fail(Code.TIMEOUT) }, duration, TimeUnit.MILLISECONDS)
         workers.execute {
             try {
                 var url = p.url
