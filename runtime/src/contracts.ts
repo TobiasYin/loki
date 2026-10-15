@@ -15,7 +15,7 @@ export interface ModelProfile {
 export interface SessionConfig { sessionId: string; title: string; model: ModelProfile; enabled: Capabilities; capabilityEpoch: number }
 export interface RunLease { sessionId: string; runId: string; leaseId: string; capabilityEpoch: number; expiresAt: number }
 export interface L0 { snapshotId: string; device?: string; upperApp?: { packageName: string; label: string }; displaySnapshotId?: string }
-export interface AuthoritySnapshot { session: SessionConfig; lease: RunLease; availability: Record<string, Availability>; l0: L0 }
+export interface AuthoritySnapshot { session: SessionConfig; lease: RunLease; availability: Record<string, Availability>; l0: L0; skills?: { name: string; description: string; hash: string }[] }
 export interface AuthorityPort {
   /** Caller-owned mirror of Native's authority. No method here grants authority. */
   read(sessionId: string, runId: string, refresh?: boolean): Promise<AuthoritySnapshot>;
@@ -54,7 +54,7 @@ export type RunState = 'queued' | 'preparing' | 'generating' | 'executing_tools'
 export interface AgentRun { sessionId: string; runId: string; state: RunState; modelProfileRevision: number; capabilityEpoch: number; startedAt: number; error?: ErrorCode }
 export interface RunEvent {
   sessionId: string; runId: string; eventId: string; sequence: number; wallTime: number; elapsedMs: number;
-  type: 'state' | 'text_delta' | 'tool_intent' | 'tool_started' | 'tool_result' | 'authorization_changed' | 'context' | 'diagnostic';
+  type: 'state' | 'text_delta' | 'thinking_delta' | 'tool_call_update' | 'tool_intent' | 'tool_started' | 'tool_result' | 'authorization_changed' | 'context' | 'diagnostic';
   toolCallId?: string; data: Record<string, unknown>;
 }
 export type DomainMessage =

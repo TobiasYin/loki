@@ -1,0 +1,47 @@
+{
+  "version": "0.3.0-integration",
+  "device": "AYN Thor / Android 13",
+  "chatDisplay": 4,
+  "javascriptTests": {
+    "runtime": 33,
+    "fetchBridge": 12,
+    "ui": 12,
+    "failed": 0
+  },
+  "jvmTests": {
+    "bridge": 33,
+    "device": 44,
+    "authority": 7,
+    "app": 29,
+    "inputLab": 64
+  },
+  "jvmTotal": 177,
+  "physicalTests": 1,
+  "cloudAsrVerified": false,
+  "microphonePermissionRestoredToUngranted": true,
+  "audioUploaded": false,
+  "artifacts": {
+    "debug": {
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 5929465,
+      "sha256": "e124b04c7cf30051040590af39222cb9a62eb3f1753d6452c6e77ee9c5a34638"
+    },
+    "releaseUnsigned": {
+      "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+      "bytes": 4868904,
+      "sha256": "b9b25d85de20f9af516d8bc5f6cc11bbcfcd0a3b770fed566387a2564c4d0494"
+    },
+    "instrumentation": {
+      "path": "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "bytes": 2322876,
+      "sha256": "674db4797cf74e37ac2105fcfcbe43ba32410e91b7e2595623d5fa2eb29e1430"
+    }
+  },
+  "evidenceSha256": {
+    "README.md": "ef1d1eb3cdb6cc102852b73e6c43d35f9c04026e33a94a9f48eda8fd284cbcd2",
+    "physical-features-instrumentation.txt": "af4a0b688efd55ea121a865a3f9d8b28e71b1c209eeda885272d532ead3bda81",
+    "physical-features.json": "76120b3bbf2b2df2cfc2927c2c33cb3e0abfd27bfb72abce6c924a27de46427b",
+    "skills-ui.png": "d490eb181ffcc2fb6cf5aa0bb1526e1fa903f9c3d8f170b91b92252d2f0b3b5d",
+    "voice-ui.png": "1827fc59952990146bd198da27c0a8ff5c202a95d0ff1dd0cb55ad7aa3aabf36"
+  }
+}

@@ -21,7 +21,7 @@ interface Active {
   persistenceFailed: boolean; requestMessages: Message[]; resultRefs: Map<string, Content[]>;
   failure?: ErrorCode;
   effects: EffectRecord[];
-  turnId: string;
+  turnId: string; streamMessage: number;
 }
 function fail(code: ErrorCode): never { throw new RuntimeError(code); }
 export function assertRuntimeFeatures(): void {
@@ -130,7 +130,7 @@ export class ThorRuntime {
         let timedOut = false;
         const timer = setTimeout(() => { timedOut = true; controller.abort(); }, Math.max(0, deadline - Date.now()));
         try {
-          await this.event(a, 'tool_started', { toolId: t.toolId }, callId);
+          await this.event(a, 'tool_started', { toolId: t.toolId, arguments: args }, callId);
           await this.toolCheck(a, t);
           const outcome = await abortable(this.ports.tools.execute(envelope, controller.signal, async waiting => { await this.state(a, waiting ? 'awaiting_user' : 'executing_tools'); }), controller.signal);
           if (effect) Object.assign(effect, { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef });
@@ -213,7 +213,16 @@ export class ThorRuntime {
   }
   private async onPi(a: Active, e: AgentEvent): Promise<void> {
     if (terminal.has(a.run.state)) return;
-    if (e.type === 'message_update' && e.assistantMessageEvent.type === 'text_delta' && !a.controller.signal.aborted) await this.event(a, 'text_delta', { text: e.assistantMessageEvent.delta });
+    if (e.type === 'message_start' && e.message.role === 'assistant') a.streamMessage++;
+    if (e.type === 'message_update' && !a.controller.signal.aborted) {
+      const delta = e.assistantMessageEvent;
+      if (delta.type === 'text_delta' || delta.type === 'thinking_delta') {
+        await this.event(a, delta.type, { text: delta.delta, blockId: `${a.streamMessage}:${delta.contentIndex}` });
+      } else if (delta.type === 'toolcall_start' || delta.type === 'toolcall_delta' || delta.type === 'toolcall_end') {
+        const call = delta.partial.content[delta.contentIndex];
+        if (call?.type === 'toolCall') await this.event(a, 'tool_call_update', { toolName: call.name, arguments: call.arguments, complete: delta.type === 'toolcall_end' }, call.id);
+      }
+    }
     if (e.type === 'tool_execution_start' && !a.controller.signal.aborted) await this.state(a, 'executing_tools');
     if (e.type === 'tool_execution_end' && e.isError) await this.event(a, 'diagnostic', { code: 'TOOL_FAILED', toolName: e.toolName }, e.toolCallId);
   }
@@ -234,7 +243,7 @@ export class ThorRuntime {
       const initial = await abortable(this.ports.authority.read(lease.sessionId, lease.runId), pending.controller.signal);
       const profile = structuredClone(initial.session.model); checkProfile(profile);
       a = { run: { sessionId: lease.sessionId, runId: lease.runId, state: 'queued', modelProfileRevision: profile.revision, capabilityEpoch: lease.capabilityEpoch, startedAt: Date.now() },
-        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], turnId: crypto.randomUUID() };
+        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], streamMessage: 0, turnId: crypto.randomUUID() };
       this.active = a; const active = a; const model = toModel(profile);
       await this.event(a, 'state', { state: 'queued' }, undefined, a.run); await this.state(a, 'preparing');
       await this.persist(a, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages: [{ kind: 'user', content: input }], source: [], observedAt: Date.now(), complete: false }));

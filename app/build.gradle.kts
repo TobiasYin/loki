@@ -9,8 +9,8 @@ android {
         applicationId = "dev.thor.agent"
         minSdk = 30
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.2.0-integration"
+        versionCode = 2
+        versionName = "0.3.0-integration"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { buildConfig = true }
@@ -25,6 +25,9 @@ dependencies {
     implementation(project(":device-android"))
     implementation(project(":device-authority"))
     implementation("androidx.webkit:webkit:1.14.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.yaml:snakeyaml:2.5")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     testImplementation("junit:junit:4.13.2")

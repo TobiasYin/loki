@@ -4,6 +4,7 @@ import { RuntimeError, type RuntimePorts, type ToolDescriptor, type ToolEnvelope
 // The bridge is a browser-only module with deliberately bounded Fetch support.
 // @ts-ignore JS module
 import { createNativeFetch, decodeFrame } from '../native-bridge/js/fetch-adapter.js';
+import { skillTools } from './skill-tools.js';
 import contract from '../tools/contracts/toolpack-v1.json';
 
 declare const __THOR_DEBUG__: boolean;
@@ -69,7 +70,7 @@ const probe: ToolDescriptor = { toolId: 'probe.picture', modelName: 'probe_pictu
   outputPolicy: { maxTextBytes: 1024, maxImageBytes: 2097152, maxImages: 1, imageTokenEstimate: 4096 } };
 const webTools: ToolDescriptor[] = ['search','fetch'].map(name=>({toolId:`web.${name}`,modelName:`web_${name}`,schemaVersion:'1',description:name==='search'?'Search Brave and return source titles, URLs, snippets and source time when present.':'Read a public HTTPS page as bounded untrusted text; private networks are denied.',
     inputSchema:{type:'object',properties:{[name==='search'?'query':'url']:{type:'string',minLength:1,maxLength:name==='search'?400:8192}},required:[name==='search'?'query':'url'],additionalProperties:false},requiredCapabilities:['web_search'],platformPrerequisites:[`web.${name}`],executor:'native-fetch',resources:['public-web'],effectClass:'network',timeoutMs:30000,cancellable:true,concurrencyKey:'network',provenance:'builtin',modelVisibility:true,outputPolicy:{maxTextBytes:65536,maxImageBytes:0,maxImages:0,imageTokenEstimate:4096}}));
-const registry = new ToolRegistry(); registry.register({packId:'thor.web',packVersion:'1',tools:webTools}); registry.register({ packId: contract.packId, packVersion: contract.packVersion, tools }); registry.register({ packId: 'configuration-probe', packVersion: '1', tools: [probe] });
+const registry = new ToolRegistry(); registry.register({packId:'thor.skills',packVersion:'1',tools:skillTools}); registry.register({packId:'thor.web',packVersion:'1',tools:webTools}); registry.register({ packId: contract.packId, packVersion: contract.packVersion, tools }); registry.register({ packId: 'configuration-probe', packVersion: '1', tools: [probe] });
 const persist = (kind: string, value: any, event?: any) => rpc('persist', bound({ kind, value, ...(event ? { event } : {}) })).then(() => undefined);
 const ports: RuntimePorts = {
   authority: { read: (sessionId, runId, refresh) => rpc('authority', bound({ sessionId, runId, refresh: !!refresh })) },
@@ -135,8 +136,8 @@ window.runNativeProbe = (token, sessionId) => start(sessionId, 'Configuration pr
 window.ThorUI = { postMessage(raw) {
   if(!connectionId) { queue.push(raw); return; }
   const command = JSON.parse(raw);
-  if(command.op === 'settings' || command.op === 'pickImage') { send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId: crypto.randomUUID(), op: command.op, data: {} })); return; }
-  if(command.op === 'send') { void start(command.sessionId, command.text).catch(() => update({ ...currentState, error: '发送失败：请先配置模型并完成图片/工具探测；无模拟回答。' })); return; }
+  if(['settings','pickImage','skillImport','voiceSettings','voice.start','voice.finish','voice.cancel','voice.permission'].includes(command.op)) { send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId: crypto.randomUUID(), op: command.op, data: command })); return; }
+  if(command.op === 'send') { void start(command.sessionId, command.text).catch(() => { (window as any).receiveSendFailure?.(command.text); update({ ...currentState, error: '发送失败：请先配置模型并完成图片/工具探测；文字已保留。' }); }); return; }
   if(command.op === 'stop') runtime.stop();
   void rpc('ui', command).then(update).catch(() => update({ ...currentState, error: '操作被拒绝：检查授权、活动运行或本地存储。' }));
 } };

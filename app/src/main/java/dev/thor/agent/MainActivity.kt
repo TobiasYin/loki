@@ -20,10 +20,15 @@ class MainActivity : Activity() {
     private lateinit var host: ProductHost
     private var bridge: dev.thor.bridge.android.TrustedWebViewBridge? = null
     private var pickerSession: String? = null
+    private var pickerKind="image"
+    private var microphonePermissionPending=false
+    private var voice:VoiceInput?=null
+    private var voiceId:String?=null
     private val origin = BridgePolicy.ORIGIN
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pickerSession=savedInstanceState?.getString("pickerSession")
+        pickerKind=savedInstanceState?.getString("pickerKind") ?: "image"
         web = WebView(this); web.id = android.R.id.custom
         val container = FrameLayout(this).apply { addView(web, FrameLayout.LayoutParams(-1, -1)) }
         setContentView(container)
@@ -41,9 +46,17 @@ class MainActivity : Activity() {
         val toolGateway = dev.thor.bridge.ToolGateway(host.authority, emptyList(), { emptyMap() })
         bridge = dev.thor.bridge.android.TrustedWebViewBridge(web, host.authority, transport, toolGateway,
             { c -> host.bootstrap(c) }, "$origin/assets/chat/index.html", { c, request ->
-                if(request.optString("op") == "pickImage") {
+                if(request.optString("op").startsWith("voice.")) {
+                    runOnUiThread { handleVoice(request.optString("op"),request.optJSONObject("data") ?: JSONObject()) }
+                    java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
+                } else if(request.optString("op") == "voiceSettings") {
+                    runOnUiThread {showVoiceSettings(this)};java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
+                } else if(request.optString("op") == "skillImport") {
+                    runOnUiThread {runCatching {pickerSession=host.requestImagePicker();pickerKind="skill";startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("*/*").putExtra(android.content.Intent.EXTRA_MIME_TYPES,arrayOf("text/markdown","text/plain","application/zip","application/octet-stream")),72)}.onFailure {pickerSession=null;Toast.makeText(this,"请先停止活动运行再导入 Skill",Toast.LENGTH_LONG).show()}}
+                    java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
+                } else if(request.optString("op") == "pickImage") {
                     runOnUiThread {
-                        runCatching { pickerSession=host.requestImagePicker();startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("image/*"),71) }
+                        runCatching { pickerSession=host.requestImagePicker();pickerKind="image";startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("image/*"),71) }
                             .onFailure { Toast.makeText(this,"请先停止活动运行再附图",Toast.LENGTH_LONG).show() }
                     }; java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
                 } else if(request.optString("op") == "settings") {
@@ -57,28 +70,65 @@ class MainActivity : Activity() {
     }
     override fun onPause() {
         super.onPause()
+        voice?.close();voice=null;voiceId=null
         // Android may create the next Activity before destroying this one. Release the single writer before that handoff.
-        if(pickerSession == null) {bridge?.close();if(::host.isInitialized)host.close()}
+        if(pickerSession == null && !microphonePermissionPending) {bridge?.close();if(::host.isInitialized)host.close()}
     }
     override fun onStop() {
         super.onStop()
         bridge?.close(); if(::host.isInitialized)host.interrupt("应用离开前台；不重放任何动作")
     }
-    override fun onRestart() { super.onRestart(); if(pickerSession == null)recreate() }
+    override fun onRestart() { super.onRestart(); if(pickerSession == null && !microphonePermissionPending)recreate() }
     override fun onDestroy() {
         bridge?.close(); if(::host.isInitialized)host.close()
         if(::web.isInitialized) { (web.parent as? android.view.ViewGroup)?.removeView(web); web.destroy() }
         super.onDestroy()
     }
-    override fun onSaveInstanceState(out: Bundle) {super.onSaveInstanceState(out);out.putString("pickerSession",pickerSession)}
+    override fun onSaveInstanceState(out: Bundle) {super.onSaveInstanceState(out);out.putString("pickerSession",pickerSession);out.putString("pickerKind",pickerKind)}
     @Deprecated("System document picker result")
     override fun onActivityResult(requestCode: Int,resultCode: Int,data: android.content.Intent?) {
         super.onActivityResult(requestCode,resultCode,data)
+        if(requestCode==72) {
+            val uri=data?.data
+            if(resultCode==RESULT_OK && uri!=null)host.importSkill(uri).whenComplete {_,error->runOnUiThread {pickerSession=null;Toast.makeText(this,if(error==null)"Skill 已导入，可在管理页面查看" else "导入失败：检查 Skill 格式、大小和重名",Toast.LENGTH_LONG).show();recreate()}}
+            else {pickerSession=null;recreate()}
+        }
         if(requestCode == 71) {
             val sid=pickerSession;val uri=data?.data
             if(resultCode == RESULT_OK && uri != null && sid != null)host.addUserImage(sid,uri).whenComplete {_,error ->runOnUiThread {pickerSession=null;Toast.makeText(this,if(error==null)"图片已保存在本会话，随下一条消息发送" else "图片导入失败：检查格式/大小或存储",Toast.LENGTH_LONG).show();recreate()} }
             else {pickerSession=null;recreate()}
         }
+    }
+    private fun sendVoice(state:JSONObject,id:String?,sid:String?) {
+        if(isDestroyed || isFinishing)return
+        state.put("id",id).put("sessionId",sid)
+        web.evaluateJavascript("window.receiveVoiceState?.(JSON.parse(${JSONObject.quote(state.toString())}))",null)
+    }
+    private fun handleVoice(op:String,data:JSONObject) {
+        val id=data.optString("id");val sid=data.optString("sessionId")
+        when(op) {
+            "voice.permission" -> if(checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)!=android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                microphonePermissionPending=true;requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO),73)
+            }
+            "voice.cancel" -> if(id==voiceId) {voice?.close();voice=null;voiceId=null}
+            "voice.finish" -> if(id==voiceId)voice?.finish()
+            "voice.start" -> {
+                try {
+                    require(id.length in 1..100);host.requestVoiceSession(sid)
+                    require(checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)==android.content.pm.PackageManager.PERMISSION_GRANTED)
+                    voice?.close();voiceId=id
+                    val prefs=getSharedPreferences("voice",MODE_PRIVATE);val vault=CredentialVault(this)
+                    val config=VoiceConfig(if(prefs.getInt("auth",0)==0)vault.readNative("voice.api") else null,prefs.getString("appId",null),if(prefs.getInt("auth",0)==1)vault.readNative("voice.access") else null,prefs.getString("resource","volc.bigasr.sauc.duration")!!)
+                    voice=VoiceInput(config,{MicrophoneInput(this)},{event->runOnUiThread {if(voiceId==id)sendVoice(event,id,sid)}})
+                    voice!!.start()
+                } catch(_:Exception) {voiceId=null;val failed=voice;voice=null;failed?.close();sendVoice(obj("phase" to "error","error" to "语音不可用：请在语音设置配置火山凭据，并允许麦克风权限；活动回答需先停止。"),id,sid)}
+            }
+        }
+    }
+    @Deprecated("Android permission callback")
+    override fun onRequestPermissionsResult(requestCode:Int,permissions:Array<out String>,grantResults:IntArray) {
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults)
+        if(requestCode==73) {microphonePermissionPending=false;Toast.makeText(this,if(grantResults.firstOrNull()==android.content.pm.PackageManager.PERMISSION_GRANTED)"麦克风已允许，请长按开始说话" else "麦克风未允许，可继续文字输入或在系统设置开启",Toast.LENGTH_LONG).show()}
     }
     private fun showSettings() {
         val prefs = getSharedPreferences("profiles", MODE_PRIVATE); val vault = CredentialVault(this)
@@ -115,6 +165,7 @@ class MainActivity : Activity() {
                 Toast.makeText(this, "已开始真实配置探测；请返回聊天观察结果", Toast.LENGTH_LONG).show()
             } catch (_: Exception) { Toast.makeText(this, "请先保存有效配置，且停止活动运行", Toast.LENGTH_LONG).show() }
         }
+        content.addView(Button(this).apply {text="实时语音输入设置 · 火山流式识别";setOnClickListener {showVoiceSettings(this@MainActivity)}})
         val facts = dev.thor.tools.diagnostic.displayFacts(this)
         val upper = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, facts.map { "目标上屏 ${it.id}: ${it.width}×${it.height}" }); content.addView(this) }
         val lower = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, facts.map { "聊天下屏 ${it.id}: ${it.width}×${it.height}" }); content.addView(this); if(facts.size > 1) setSelection(1) }

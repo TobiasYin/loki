@@ -54,7 +54,25 @@
       const text=element('span',label);text.append(element('small',`${s.capabilities[cap]?'意愿：已选择':'意愿：未选择'} · ${state.availability[cap]}`));row.append(check,text);panel.append(row);
     }
     panel.append(element('p','选择按会话保存。运行中撤销会停止当前运行；重新开启只授权新的运行。模型配置需从设置完成实际图片/工具探测。'));
-    panel.append(button('打开 Native 设置',()=>command({op:'settings'}),'wide'));
+    panel.append(button('打开 Native 设置',()=>{cancelVoice();refreshVoice();command({op:'settings'});},'wide'));
+  }
+  const disclosures=new Map();
+  function rememberDisclosure(node,key,initial) {
+    node.open=disclosures.has(key)?disclosures.get(key):initial;
+    node.querySelector('summary').addEventListener('click',()=>disclosures.set(key,!node.open));
+    return node;
+  }
+  const fieldNames={query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
+  function structured(value,depth=0) {
+    if(value===null || value===undefined)return element('span','无','muted');
+    if(typeof value!=='object')return element('div',typeof value==='boolean'?(value?'是':'否'):String(value),'text');
+    if(depth>=7)return element('div','内容层级过深，请展开更具体的结果','muted');
+    const list=element('dl',undefined,'structured');
+    for(const [key,entry] of Object.entries(value).slice(0,80)) {
+      list.append(element('dt',Array.isArray(value)?`第 ${Number(key)+1} 项`:(fieldNames[key]??key)));
+      const row=element('dd');row.append(structured(entry,depth+1));list.append(row);
+    }
+    return list;
   }
   function runView(run) {
     const events=state.events.filter(e=>e.runId===run.id).sort((a,b)=>a.sequence-b.sequence);
@@ -62,25 +80,54 @@
     // Actionable summaries live outside the collapsed disclosure, including unknown side effects.
     if(run.stopReason)container.append(element('div',run.stopReason,'attention'));
     const unknown=events.filter(e=>e.outcome==='unknown' && (e.type==='tool_result' || !events.some(r=>r.type==='tool_result' && r.toolCallId===e.toolCallId)));
-    for(const e of unknown)container.append(element('div',`副作用未知 · ${e.summary}`,'attention'));
+    for(const e of unknown)container.append(element('div',`副作用未知 · ${e.toolId??e.data?.toolId??'工具操作'}，请检查目标状态`,'attention'));
     if(run.status==='awaiting_user') {
       const waiting=events.findLast(e=>e.type==='awaiting_user');
       const card=element('div',run.approval?.summary??waiting?.summary??'等待用户','wait');
       card.append(document.createElement('br'),button('批准此操作',()=>command({op:'approve',runId:run.id,approvalId:run.approval?.id}),'primary'),button('拒绝',()=>command({op:'reject',runId:run.id,approvalId:run.approval?.id})));container.append(card);
     }
+    const thinking=events.filter(e=>e.type==='thinking_delta').map(e=>e.data?.text??'').join('');
+    if(thinking) {
+      const thought=element('details',undefined,'thinking');thought.open=!terminal.has(run.status);
+      thought.append(element('summary',terminal.has(run.status)?'思考过程':'正在思考…'),element('div',thinking,'text'));rememberDisclosure(thought,`${run.id}:thinking`,!terminal.has(run.status));container.append(thought);
+    }
     const disclosure=element('details',undefined,'run');disclosure.open=run.expanded;
     const count=events.filter(e=>e.type==='tool_started').length;
     disclosure.append(element('summary',`${statuses[run.status]??run.status} · ${count} 项工具操作`));
+    const calls=new Map();
+    const toolLabels={'skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','debug.shell':'运行设备指令'};
+    const outcomeLabels={observed:'已完成',submitted:'已提交',unknown:'结果未知'};
     for(const event of events) {
-      const result=event.type==='tool_started'?events.find(e=>e.type==='tool_result'&&e.toolCallId===event.toolCallId):null;
-      const outcome=result?.outcome??event.outcome;
-      const summary=result?event.summary.replace('模拟执行中',`已结束 · ${statuses[outcome]??'副作用未知'}`):event.summary;
-      const card=element('div',summary,'event');card.append(element('small',`#${event.sequence} · ${outcome||event.type} · ${(event.elapsedMs/1000).toFixed(1)}s`));
-      if(event.toolCallId) {
-        const detail=element('details');detail.append(element('summary','事件详情'),element('pre',JSON.stringify({toolId:event.toolId,toolCallId:event.toolCallId,capability:event.capability,outcome:event.outcome},null,2)));card.append(detail);
-      }
-      disclosure.append(card);
+      if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type))continue;
+      const id=event.toolCallId??`event:${event.sequence}`;
+      const current=calls.get(id)??{id};const data=event.data??{};
+      Object.assign(current,{toolId:data.toolId??event.toolId??current.toolId,toolName:data.toolName??current.toolName});
+      if(event.type==='tool_call_update')current.arguments=data.arguments;
+      if(event.type==='tool_started'){current.started=true;current.arguments=data.arguments??current.arguments;}
+      if(event.type==='tool_result'){current.result=data;current.outcome=data.outcome??event.outcome;current.error=data.error??event.error;}
+      calls.set(id,current);
     }
+    for(const call of calls.values()) {
+      const card=element('details',undefined,'tool-card');
+      const title=toolLabels[call.toolId]??call.toolId??call.toolName??'工具';
+      const status=call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
+      card.append(element('summary',`${title} · ${status}`));
+      if(call.arguments && Object.keys(call.arguments).length) {card.append(element('small','输入'));card.append(structured(call.arguments));}
+      if(call.result) {
+        if(call.error)card.append(element('div',`失败原因：${call.error}`,'attention'));
+        for(const content of call.result.content??[]) {
+          if(content.type==='attachment')card.append(element('div','已返回本地图片附件','muted'));
+          else if(content.type==='text') {
+            let value=content.text;try {value=JSON.parse(value);}catch{if(/^[\s]*[\[{]/.test(value))value='结构化结果不完整，请请求更小的结果或重试。';}
+            card.append(structured(value));
+          }
+        }
+        if(call.result.truncated)card.append(element('small','结果已按长度限制截断'));
+        if(call.result.source)card.append(element('small',`来源：${call.result.source}`));
+      }
+      rememberDisclosure(card,`${run.id}:tool:${call.id}`,false);disclosure.append(card);
+    }
+    const last=events.findLast(e=>e.type==='diagnostic');if(last)disclosure.append(element('div',`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
     disclosure.addEventListener('toggle',()=> { if(disclosure.isConnected && disclosure.open!==run.expanded)command({op:'expanded',runId:run.id,expanded:disclosure.open}); });
     container.append(disclosure);return container;
   }
@@ -106,8 +153,87 @@
     const running=active();const banner=$('active');banner.hidden=!running;banner.replaceChildren();
     if(running){const s=state.sessions.find(s=>s.id===running.sessionId);banner.append(element('span',`活动：${s?.title} · ${statuses[running.status]}（切会话不会停止）`),button('停止',()=>command({op:'stop',runId:running.id})));}
     $('send').textContent=running?'停止':'发送';
-    renderSessions();renderCapabilities();renderChat();if(switched)$('chat').scrollTop=$('chat').scrollHeight;
+    renderSessions();renderCapabilities();renderChat();renderSkills();refreshVoice();if(switched)$('chat').scrollTop=$('chat').scrollHeight;
   };
+  function renderSkills() {
+    const list=$('skills-list');list.replaceChildren();
+    for(const skill of state.skills??[]) {
+      const row=element('div',undefined,'skill-row');row.append(element('strong',skill.name),element('p',skill.description),element('small',`${skill.builtin?'内置':'已导入 / 已创建'} · ${skill.enabled?'已启用':'已停用'} · ${skill.fileCount} 个文件`));
+      const read=button('查看',()=>command({op:'skillRead',name:skill.name}));read.disabled=!!active();row.append(read);
+      const toggle=button(skill.enabled?'停用':'启用',()=>command({op:'skillEnable',name:skill.name,hash:skill.hash,enabled:!skill.enabled}));toggle.disabled=!!active();row.append(toggle);
+      if(!skill.builtin) {const remove=button('删除',()=>modal('删除 Skill',`将删除 ${skill.name} 及其附带资料。`,null,()=>command({op:'skillDelete',name:skill.name,hash:skill.hash})));remove.disabled=!!active();row.append(remove);}
+      list.append(row);
+    }
+    $('skills-import').disabled=!!active();
+    const detail=state.skillDetail;$('skill-detail').hidden=!detail;
+    if(detail) {
+      $('skill-name').textContent=detail.name;$('skill-content').textContent=detail.content;
+      const resources=$('skill-resource');resources.replaceChildren();
+      for(const path of detail.resources??[]) {const option=element('option',path);option.value=path;resources.append(option);}resources.value=detail.path;
+    }
+  }
+  $('skills-open').addEventListener('click',()=>{drawer(false);$('skills-dialog').showModal();});
+  $('skills-close').addEventListener('click',()=>$('skills-dialog').close());
+  $('skills-dialog').addEventListener('close',()=>command({op:'skillClose'}));
+  $('skills-import').addEventListener('click',()=>{cancelVoice();command({op:'skillImport'});});
+  $('skill-resource').addEventListener('change',()=>command({op:'skillRead',name:state.skillDetail.name,path:$('skill-resource').value}));
+  let voiceMode=false,hold=null,voiceText='',voicePhase='idle',voiceError='',submitted=new Set();
+  function refreshVoice() {
+    if(hold && (hold.sessionId!==state?.selected || active()))cancelVoice();
+    $('input').hidden=voiceMode;$('voice-panel').hidden=!voiceMode;
+    $('voice-toggle').textContent=voiceMode?'键盘':'语音';$('voice-toggle').setAttribute('aria-pressed',String(voiceMode));$('voice-toggle').setAttribute('aria-label',voiceMode?'切换到文字输入':'切换到语音输入');
+    $('voice-hold').disabled=!!active() || voicePhase==='finalizing';
+    $('voice-hold').classList.toggle('holding',!!hold && ['connecting','recording'].includes(voicePhase));
+    $('voice-hold').textContent=['connecting','recording'].includes(voicePhase)?'松手发送 · 上滑取消':voicePhase==='finalizing'?'正在完成识别…':'按住说话';
+    $('voice-status').textContent=voiceError || ({connecting:'正在连接语音服务…',recording:'正在听 · 识别文字会实时更新',finalizing:'已松手，等待最终结果…',complete:'已发送',empty:'未识别到文字，请重试',cancelled:'已取消'}[voicePhase]??'按住说话，松手发送；上滑取消');
+    $('voice-transcript').textContent=voiceText;$('voice-cancel').hidden=!hold;$('voice-edit').hidden=!voiceText || !!hold;
+    $('send').hidden=voiceMode && !active();
+  }
+  function cancelVoice() {
+    const wasHolding=!!hold;
+    if(hold)command({op:'voice.cancel',id:hold.id,sessionId:hold.sessionId});
+    hold=null;if(wasHolding)voicePhase='cancelled';voiceError='';
+  }
+  function changeVoiceMode() {
+    cancelVoice();voiceMode=!voiceMode;
+    if(voiceMode){$('input').blur();command({op:'voice.permission'});}
+    refreshVoice();if(!voiceMode)$('input').focus();
+  }
+  $('voice-toggle').addEventListener('click',changeVoiceMode);
+  $('voice-hold').addEventListener('contextmenu',e=>e.preventDefault());
+  function beginVoice(event) {
+    if(!state || active() || hold || voicePhase==='finalizing')return;
+    if(event.type==='pointerdown' && (event.isPrimary===false || event.button>0))return;
+    event.preventDefault();voiceText='';voiceError='';voicePhase='connecting';
+    hold={id:window.crypto.randomUUID(),sessionId:state.selected,pointerId:event.pointerId,y:event.clientY,released:false};
+    if(event.pointerId!==undefined)$('voice-hold').setPointerCapture?.(event.pointerId);
+    command({op:'voice.start',id:hold.id,sessionId:hold.sessionId});refreshVoice();
+  }
+  function finishVoice(event) {
+    if(!hold || hold.released || (event.pointerId!==undefined && event.pointerId!==hold.pointerId))return;
+    event.preventDefault();hold.released=true;voicePhase='finalizing';command({op:'voice.finish',id:hold.id,sessionId:hold.sessionId});refreshVoice();
+  }
+  $('voice-hold').addEventListener('pointerdown',beginVoice);
+  $('voice-hold').addEventListener('pointerup',finishVoice);
+  $('voice-hold').addEventListener('pointermove',event=>{if(hold && event.pointerId===hold.pointerId && hold.y-event.clientY>70){cancelVoice();refreshVoice();}});
+  for(const type of ['pointercancel','lostpointercapture'])$('voice-hold').addEventListener(type,()=>{if(hold && !hold.released){cancelVoice();refreshVoice();}});
+  $('voice-hold').addEventListener('keydown',event=>{if([' ','Enter'].includes(event.key) && !event.repeat)beginVoice(event);});
+  $('voice-hold').addEventListener('keyup',event=>{if([' ','Enter'].includes(event.key))finishVoice(event);});
+  $('voice-cancel').addEventListener('click',()=>{cancelVoice();refreshVoice();});
+  $('voice-edit').addEventListener('click',()=>{cancelVoice();voiceMode=false;$('input').value=voiceText;refreshVoice();$('input').focus();});
+  $('voice-settings').addEventListener('click',()=>{cancelVoice();refreshVoice();command({op:'voiceSettings'});});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelVoice();refreshVoice();}});
+  window.addEventListener('pagehide',()=>{cancelVoice();});
+  window.receiveVoiceState=next=>{
+    if(!hold || next.id!==hold.id || next.sessionId!==hold.sessionId || next.sessionId!==state?.selected)return;
+    voiceText=typeof next.text==='string'?next.text:voiceText;voicePhase=next.phase;voiceError=next.error??'';
+    if(next.phase==='complete' && hold.released && !submitted.has(next.id) && typeof next.submit==='string' && next.submit.trim() && !active()) {
+      submitted.add(next.id);if(submitted.size>100)submitted.delete(submitted.values().next().value);
+      command({op:'send',sessionId:hold.sessionId,text:next.submit.trim()});hold=null;
+    } else if(['error','cancelled','empty'].includes(next.phase))hold=null;
+    refreshVoice();
+  };
+  window.receiveSendFailure=text=>{voiceMode=false;$('input').value=text;voiceError='发送未完成，文字已恢复到输入框';refreshVoice();};
   $('attach').addEventListener('click',()=>command({op:'pickImage'}));
   $('composer').addEventListener('submit',event=>{
     event.preventDefault();if(!state)return;
@@ -115,9 +241,9 @@
     const text=$('input').value.trim();if(!text)return;
     command({op:'send',sessionId:state.selected,text,scenario:$('scenario').value});$('input').value='';$('cap-panel').hidden=true;
   });
-  $('menu').addEventListener('click',()=>drawer(true));$('close-drawer').addEventListener('click',()=>drawer(false));$('shade').addEventListener('click',()=>drawer(false));
+  $('menu').addEventListener('click',()=>{cancelVoice();refreshVoice();drawer(true);});$('close-drawer').addEventListener('click',()=>drawer(false));$('shade').addEventListener('click',()=>drawer(false));
   for(const id of ['new','drawer-new'])$(id).addEventListener('click',()=>{command({op:'new'});drawer(false);});
-  for(const id of ['settings','drawer-settings'])$(id).addEventListener('click',()=>command({op:'settings'}));
+  for(const id of ['settings','drawer-settings'])$(id).addEventListener('click',()=>{cancelVoice();refreshVoice();command({op:'settings'});});
   $('archives').addEventListener('click',()=>{showArchives=!showArchives;renderSessions();});
   $('seed').addEventListener('click',()=>modal('加载长历史示例','向当前会话添加 200 条模拟消息，并新建 49 个会话。此操作会保存到本地，可逐个删除。',null,()=>command({op:'seed'})));
   $('capabilities').addEventListener('click',()=>{const open=$('cap-panel').hidden;$('cap-panel').hidden=!open;$('capabilities').setAttribute('aria-expanded',String(open));});

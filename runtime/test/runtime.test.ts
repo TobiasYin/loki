@@ -212,3 +212,55 @@ test('only the audited internal configuration fixture can omit public capabiliti
   assert.throws(()=>new ToolRegistry().register({packId:'untrusted',packVersion:'1',tools:[probe]}));
   assert.throws(()=>new ToolRegistry().register({packId:'configuration-probe',packVersion:'1',tools:[{...probe,effectClass:'arbitrary-shell'}]}));
 });
+
+test('Skill metadata is discoverable, bodies and referenced files enter context only after explicit read',async()=>{
+ const f=fixture('openai-responses',[{call:{name:'skills_read',args:'{"name":"game-guide"}'}},{text:'已按攻略完成'}]);
+ f.snapshot.skills=[{name:'game-guide',description:'通关游戏时使用',hash:'v1'}];f.snapshot.availability['skills.read']={status:'ready'};
+ const reg=new ToolRegistry();reg.register({packId:'thor.skills',packVersion:'1',tools:[{...descriptor('skills_read',[]),toolId:'skills.read',executor:'native-skills',provenance:'builtin',resources:['local-skills'],platformPrerequisites:['skills.read'],inputSchema:{type:'object',properties:{name:{type:'string'}},required:['name'],additionalProperties:false}}]});
+ f.setTool(async()=>({content:[{type:'text',text:'BODY_SENTINEL. Read references/boss.md only when needed.'}],observedAt:Date.now(),source:'native-skills',truncated:false,outcome:'observed'}));
+ assert.equal((await new ThorRuntime(f.ports,reg).run(f.lease,[{type:'text',text:'使用攻略'}])).state,'completed');
+ assert.match(JSON.stringify(f.requests[0]!.body),/game-guide/);assert.doesNotMatch(JSON.stringify(f.requests[0]!.body),/BODY_SENTINEL/);assert.match(JSON.stringify(f.requests[1]!.body),/BODY_SENTINEL/);
+ assert.equal(f.executions.length,1);assert.equal(f.executions[0]!.toolId,'skills.read');
+});
+
+test('provider thinking deltas are decoded separately from answer text and never stored as raw events',async()=>{
+ for(const protocol of ['anthropic-messages','openai-responses'] as const) {
+  const f=fixture(protocol);const original=f.ports.network.fetch;
+  f.ports.network.fetch=async(...args)=>{
+   const response=await original(...args);await response.body?.cancel();
+   const raw=protocol==='anthropic-messages'?[
+    {type:'message_start',message:{id:'m',type:'message',role:'assistant',model:'fixture-model',content:[],stop_reason:null,usage:{input_tokens:10,output_tokens:0}}},
+    {type:'content_block_start',index:0,content_block:{type:'thinking',thinking:''}},
+    {type:'content_block_delta',index:0,delta:{type:'thinking_delta',thinking:'先看'}},
+    {type:'content_block_delta',index:0,delta:{type:'thinking_delta',thinking:'攻略'}},
+    {type:'content_block_stop',index:0},
+    {type:'content_block_start',index:1,content_block:{type:'text',text:''}},
+    {type:'content_block_delta',index:1,delta:{type:'text_delta',text:'完成'}},
+    {type:'content_block_stop',index:1},{type:'message_delta',delta:{stop_reason:'end_turn'},usage:{output_tokens:4}},{type:'message_stop'}
+   ]:[
+    {type:'response.created',response:{id:'r',status:'in_progress'}},
+    {type:'response.output_item.added',output_index:0,item:{type:'reasoning',id:'reason',summary:[]}},
+    {type:'response.reasoning_summary_part.added',output_index:0,summary_index:0,part:{type:'summary_text',text:''}},
+    {type:'response.reasoning_summary_text.delta',output_index:0,summary_index:0,delta:'先看'},
+    {type:'response.reasoning_summary_text.delta',output_index:0,summary_index:0,delta:'攻略'},
+    {type:'response.output_item.done',output_index:0,item:{type:'reasoning',id:'reason',summary:[{type:'summary_text',text:'先看攻略'}]}},
+    {type:'response.output_item.added',output_index:1,item:{type:'message',id:'m',role:'assistant',content:[],status:'in_progress'}},
+    {type:'response.content_part.added',output_index:1,content_index:0,part:{type:'output_text',text:'',annotations:[]}},
+    {type:'response.output_text.delta',output_index:1,content_index:0,delta:'完成'},
+    {type:'response.output_item.done',output_index:1,item:{type:'message',id:'m',role:'assistant',content:[{type:'output_text',text:'完成',annotations:[]}],status:'completed'}},
+    {type:'response.completed',response:{id:'r',status:'completed',output:[],usage:{input_tokens:10,output_tokens:4,total_tokens:14}}}
+   ];
+   return new Response(raw.map(e=>`event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join(''),{headers:{'content-type':'text/event-stream'}});
+  };
+  assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'hello'}])).state,'completed');
+  assert.equal(f.events.filter(e=>e.type==='thinking_delta').map(e=>e.data.text).join(''),'先看攻略');
+  assert.equal(f.events.filter(e=>e.type==='text_delta').map(e=>e.data.text).join(''),'完成');
+  assert.ok(f.events.filter(e=>e.type==='thinking_delta').every(e=>Object.keys(e.data).sort().join() === 'blockId,text'));
+ }
+});
+
+test('large Skill catalogs stay bounded and advertise explicit paginated discovery',async()=>{
+ const f=fixture();f.snapshot.skills=Array.from({length:64},(_,i)=>({name:`guide-${i}`,description:'介绍'.repeat(500),hash:'v1'}));
+ assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'hello'}])).state,'completed');
+ const request=JSON.stringify(f.requests[0]!.body);assert.match(request,/skills_list/);assert.doesNotMatch(request,/guide-63/);assert.ok(request.length<20000);
+});

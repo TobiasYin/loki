@@ -8,3 +8,37 @@ test('capability choice and unavailable reason are distinct and bound to session
 test('waiting confirmation remains outside disclosure and approves exact run',()=>{const{window,doc,calls}=setup();const s=state();s.runs.push({id:'r',sessionId:'a',status:'awaiting_user',expanded:false,approval:{id:'approval-1',summary:'volume 60 → 70'}});s.messages.push({id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'streaming'});s.events.push({runId:'r',type:'awaiting_user',sequence:1,summary:'volume 60 → 70',elapsedMs:10});window.receiveNative(s);assert.match(doc.querySelector('.wait').textContent,/volume 60 → 70/);doc.querySelector('.wait button').click();assert.deepEqual(calls.at(-1),{op:'approve',runId:'r',approvalId:'approval-1'});});
 test('long histories render 200 messages and 50 sessions without persistence in web storage',()=>{const{window,doc}=setup();const s=state();for(let i=1;i<50;i++)s.sessions.push({...s.sessions[0],id:'s'+i});for(let i=0;i<200;i++)s.messages.push({id:'m'+i,sessionId:'a',role:i%2?'assistant':'user',text:'long/url/'.repeat(100),status:'completed'});window.receiveNative(s);assert.equal(doc.querySelectorAll('.message').length,200);assert.equal(doc.querySelectorAll('.session-row').length,50);assert.equal(window.localStorage.length,0);});
 test('storage recovery failure is explicit and disables sending without clearing history',()=>{const{window,doc}=setup();window.receiveNative({fatal:'存储恢复失败；历史保留'});assert.equal(doc.querySelector('#notice').hidden,false);assert.match(doc.querySelector('#notice').textContent,/历史保留/);assert.equal(doc.querySelector('#send').disabled,true);});
+function pointer(window,node,type,extra={}) {const e=new window.Event(type,{bubbles:true,cancelable:true});Object.assign(e,{pointerId:1,isPrimary:true,button:0,clientY:200,...extra});node.dispatchEvent(e);}
+test('voice mode hides composer, replaces interim transcript, releases once and ignores duplicate finals',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();assert.equal(doc.querySelector('#input').hidden,true);assert.equal(doc.querySelector('#voice-panel').hidden,false);
+ const hold=doc.querySelector('#voice-hold');pointer(window,hold,'pointerdown');const start=calls.at(-1);assert.equal(start.op,'voice.start');
+ window.receiveVoiceState({id:start.id,sessionId:'a',phase:'recording',text:'你哈'});assert.equal(doc.querySelector('#voice-transcript').textContent,'你哈');
+ window.receiveVoiceState({id:start.id,sessionId:'a',phase:'recording',text:'你好'});assert.equal(doc.querySelector('#voice-transcript').textContent,'你好');
+ assert.equal(calls.filter(c=>c.op==='send').length,0);pointer(window,hold,'pointerup');pointer(window,hold,'pointerup');assert.equal(calls.filter(c=>c.op==='voice.finish').length,1);
+ const final={id:start.id,sessionId:'a',phase:'complete',text:'你好世界',submit:'你好世界'};window.receiveVoiceState(final);window.receiveVoiceState(final);
+ assert.equal(calls.filter(c=>c.op==='send').length,1);assert.equal(calls.find(c=>c.op==='send').text,'你好世界');
+});
+test('voice swipe cancellation and session switch discard late final callbacks',()=>{
+ const{window,doc,calls}=setup();const s=state();window.receiveNative(s);doc.querySelector('#voice-toggle').click();const node=doc.querySelector('#voice-hold');
+ pointer(window,node,'pointerdown');let started=calls.at(-1);pointer(window,node,'pointermove',{clientY:100});assert.equal(calls.at(-1).op,'voice.cancel');
+ window.receiveVoiceState({id:started.id,sessionId:'a',phase:'complete',text:'late',submit:'late'});assert.equal(calls.filter(c=>c.op==='send').length,0);
+ pointer(window,node,'pointerdown');started=calls.at(-1);s.selected='b';s.sessions.push({...s.sessions[0],id:'b'});window.receiveNative(s);
+ window.receiveVoiceState({id:started.id,sessionId:'a',phase:'complete',submit:'wrong session'});assert.equal(calls.filter(c=>c.op==='send').length,0);
+});
+test('failed recognition keeps transcript editable without sending partial speech',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();pointer(window,doc.querySelector('#voice-hold'),'pointerdown');const started=calls.at(-1);
+ window.receiveVoiceState({id:started.id,sessionId:'a',phase:'error',text:'保留草稿',error:'网络断开'});assert.match(doc.querySelector('#voice-status').textContent,/网络断开/);
+ doc.querySelector('#voice-edit').click();assert.equal(doc.querySelector('#input').value,'保留草稿');assert.equal(doc.querySelector('#input').hidden,false);assert.equal(calls.filter(c=>c.op==='send').length,0);
+});
+test('stream events become one tool card and an aggregated thinking panel without raw event JSON',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'回答',status:'streaming'}];
+ s.events=[{type:'thinking_delta',data:{text:'先看'},summary:'{"type":"thinking_delta"}'},{type:'thinking_delta',data:{text:'攻略'}},{type:'text_delta',data:{text:'回答'}},{type:'tool_call_update',toolCallId:'c',data:{toolName:'skills_read',arguments:{name:'game-guide'}}},{type:'tool_started',toolCallId:'c',data:{toolId:'skills.read',arguments:{name:'game-guide'}}},{type:'tool_result',toolCallId:'c',data:{toolId:'skills.read',outcome:'observed',content:[{type:'text',text:JSON.stringify({content:'安全文本 <script>bad()</script>',resources:['references/a.md']})}]}}].map((e,i)=>({...e,runId:'r',sequence:i+1,elapsedMs:10}));
+ window.receiveNative(s);assert.equal(doc.querySelectorAll('.tool-card').length,1);assert.match(doc.querySelector('.thinking').textContent,/先看攻略/);assert.match(doc.querySelector('.tool-card').textContent,/读取 Skill · 已完成/);assert.ok(doc.querySelector('.structured dt'));assert.equal(doc.querySelector('#chat pre'),null);assert.equal(doc.querySelector('#chat script'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/thinking_delta|text_delta|"toolId"/);
+});
+test('Skill manager exposes metadata and explicit read, enable and import actions',()=>{
+ const{window,doc,calls}=setup();const s=state();s.skills=[{name:'game-guide',description:'需要攻略时使用',hash:'version',enabled:true,builtin:false,fileCount:2}];window.receiveNative(s);
+ assert.match(doc.querySelector('#skills-list').textContent,/game-guide/);assert.equal(doc.querySelector('#skill-detail').hidden,true);
+ doc.querySelector('.skill-row button').click();assert.deepEqual(calls.at(-1),{op:'skillRead',name:'game-guide'});doc.querySelectorAll('.skill-row button')[1].click();assert.deepEqual(calls.at(-1),{op:'skillEnable',name:'game-guide',hash:'version',enabled:false});
+ s.skillDetail={name:'game-guide',path:'SKILL.md',content:'<img src="evil">',resources:['SKILL.md','references/a.md']};window.receiveNative(s);assert.equal(doc.querySelector('#skill-content').textContent,'<img src="evil">');assert.equal(doc.querySelector('#skill-content img'),null);
+ doc.querySelector('#skills-import').click();assert.equal(calls.at(-1).op,'skillImport');
+});
