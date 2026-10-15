@@ -51,6 +51,8 @@ APK：
 
 ## 仅软件模拟器验证
 
+当前真机测试按用户要求暂停，可拔掉设备；已完成项、实际状态和剩余缺口见 [续测清单](docs/physical-test-resume.md)。暂停期间只使用独立 AVD，不复制真机凭据或重置真机资料。
+
 ```sh
 # 先启动明确选定的 AVD。脚本拒绝实体设备和未指定 serial。
 # API36 可创建受控 overlay 显示；记录 dumpsys display 中真实生成的 ID，不猜 ID。
@@ -58,6 +60,8 @@ adb -s emulator-XXXX shell settings put global overlay_display_devices 720x1280/
 adb -s emulator-XXXX shell dumpsys display
 python3 scripts/emulator-verify.py --serial emulator-XXXX --lab-display ACTUAL_OVERLAY_ID
 ```
+
+脚本只运行明确选定的软件测试类，覆盖模型协议与网页桥接、Skill 页面、语音模式、SQLite 和生命周期，不自动发现真机风扇/亮度等硬件测试。模型和搜索使用本机受控服务；匿名 HTTP 跨端口跳转用于检查 Android 原生桥接与无凭据请求。结束时移除测试端口转发并恢复无障碍设置。
 
 runner 只通过 signature 保护的 debug provider 准备/读报告，经真实 Pi → Native → Accessibility → Android dispatch 施加输入；没有 setPassed/事件回放入口。准备和报告通道不注册为模型工具。receiver 的 `unqualified-physical-baseline-pending` 保持不变，不把 AVD 结果冒充 Thor POC-11。
 

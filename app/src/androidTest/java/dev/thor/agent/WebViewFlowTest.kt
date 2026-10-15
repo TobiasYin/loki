@@ -98,6 +98,29 @@ class WebViewFlowTest {
             } finally { finish(activity) }
         }
     }
+    @Test fun anonymousHttpRedirectCrossesAndroidBridgeWithoutCredentials() {
+        // This regression exercises Android JSONObject null parsing, not the JVM shim.
+        for(protocol in 0..1) {
+            configure(protocol, 101+protocol)
+            val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
+            try {
+                waitFor(web,"window.productReady === true")
+                probe(activity,web)
+                send(web,"WEB_FETCH: read the anonymous local HTTP page")
+                waitFor(web,"document.getElementById('send').textContent === '停止'")
+                waitFor(web,"document.getElementById('send').textContent === '发送'")
+                val state=SqliteStore(context,"product.db").use {it.load()}
+                val run=state.getJSONArray("runs").objects().last()
+                assertEquals("completed",run.getString("status"))
+                val result=state.getJSONArray("events").objects().single {it.getString("runId")==run.getString("id") && it.getString("type")=="tool_result"}.getJSONObject("data")
+                assertEquals("web.fetch",result.getString("toolId"))
+                assertTrue("Anonymous native request failed: $result",result.isNull("error"))
+                assertTrue(result.getJSONArray("content").toString().contains("ANONYMOUS_WEB_OK"))
+                assertTrue(javascript(web,"document.getElementById('chat').textContent.includes('ANONYMOUS_WEB_OK')")=="true")
+                assertFalse(javascript(web,"document.body.textContent").contains("integration-only-secret"))
+            } finally {finish(activity)}
+        }
+    }
     @Test fun productInputReachesIndependentReceiverAndReportsNativeAssociation() {
         val displayId=androidx.test.platform.app.InstrumentationRegistry.getArguments().getString("labDisplay")?.toInt() ?: throw AssertionError("Explicit emulator labDisplay argument required")
         configure(0,201)

@@ -12,6 +12,10 @@ const server = http.createServer(async (req,res) => {
     appendFileSync(join(output,'model-requests.jsonl'),JSON.stringify({purpose:'web_search',credentialMatched:true,path:'/res/v1/web/search'})+'\n');
     res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({web:{results:[{title:'Fixture source',url:'https://example.org/source',description:'Controlled search boundary result',page_age:'2026-10-13'}]}}));return;
   }
+  if(req.url === '/web/redirect') {
+    if(req.headers.authorization || req.headers['x-subscription-token']) {res.writeHead(400);res.end('unexpected credential');return;}
+    res.writeHead(302,{location:'http://127.0.0.1:8878/web/anonymous%20page'});res.end();return;
+  }
   const protocol = req.url.startsWith('/v1/responses') ? 'openai-responses' : 'anthropic-messages';
   const auth = protocol === 'openai-responses' ? req.headers.authorization : req.headers['x-api-key'];
   if(auth !== (protocol === 'openai-responses' ? 'Bearer integration-only-secret' : 'integration-only-secret')) {res.writeHead(401);res.end('invalid credential');return;}
@@ -44,7 +48,9 @@ const server = http.createServer(async (req,res) => {
   } else if(probing) {
     if(imageCount < 2) {res.writeHead(422);res.end('image result missing');return;}
     reply={text:'PROBE_OK：输入与工具图片均已收到，红色测试图。'};
-  } else if(userText.includes('WEB_SEARCH') && !result) reply={call:{name:'web_search',args:'{"query":"thor integration"}'}};
+  } else if(userText.includes('WEB_FETCH') && !result) reply={call:{name:'web_fetch',args:JSON.stringify({url:'http://127.0.0.1:8877/web/redirect'})}};
+  else if(userText.includes('WEB_FETCH')) reply={text:'ANONYMOUS_WEB_OK：网页内容已读取。'};
+  else if(userText.includes('WEB_SEARCH') && !result) reply={call:{name:'web_search',args:'{"query":"thor integration"}'}};
   else if(userText.includes('WRITE_CONFIG') && !result) {const old=userText.match(/WRITE_CONFIG_([0-9a-f]{64})/)[1];reply={call:{name:'files_backup',args:JSON.stringify({path:'settings.json',expectedHash:old})}};}
   else if(userText.includes('WRITE_CONFIG') && !currentSerialized.includes('files_write')) {const old=userText.match(/WRITE_CONFIG_([0-9a-f]{64})/)[1];reply={call:{name:'files_write',args:JSON.stringify({path:'settings.json',expectedHash:old,content:'{"volume":70,"unknown":"keep"}',backupId:backupId(current)})}};}
   else if(userText.includes('DEVICE_INFO') && !result) reply={call:{name:'perception_device_info',args:'{"sections":["system"]}'}};
@@ -63,3 +69,11 @@ const server = http.createServer(async (req,res) => {
   res.end();
 });
 server.listen(8877,'127.0.0.1',()=>process.stdout.write('Fixture listening on 127.0.0.1:8877\n'));
+
+// A second origin proves anonymous HTTP redirects through the Android bridge.
+http.createServer((req,res)=>{
+  const clean=!req.headers.authorization && !req.headers['x-subscription-token'];
+  appendFileSync(join(output,'model-requests.jsonl'),JSON.stringify({purpose:'anonymous_web',path:req.url,credentialsAbsent:clean})+'\n');
+  res.writeHead(clean && req.url==='/web/anonymous%20page'?200:400,{'content-type':'text/plain; charset=utf-8'});
+  res.end(clean?'ANONYMOUS_WEB_OK：无凭据网页内容。':'unexpected credential');
+}).listen(8878,'127.0.0.1');

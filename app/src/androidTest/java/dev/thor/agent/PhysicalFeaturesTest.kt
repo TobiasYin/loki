@@ -21,7 +21,9 @@ import java.util.zip.ZipOutputStream
 class PhysicalFeaturesTest {
     @Test fun skillsVoiceAndStructuredPresentationPreserveExistingInstallation() {
         val instrumentation=InstrumentationRegistry.getInstrumentation();val args=InstrumentationRegistry.getArguments()
-        org.junit.Assume.assumeTrue(args.getString("physicalAcceptance")=="true")
+        val software=args.getString("softwareAcceptance")=="true"
+        org.junit.Assume.assumeTrue(software || args.getString("physicalAcceptance")=="true")
+        if(software)assertTrue("Software acceptance requires an emulator",android.os.Build.HARDWARE in setOf("ranchu","goldfish"))
         val context=instrumentation.targetContext
         val profiles=context.getSharedPreferences("profiles",0).all.toString()
         val encrypted=context.getSharedPreferences("native-credentials",0).all.toString()
@@ -37,7 +39,7 @@ class PhysicalFeaturesTest {
             assertTrue(latch.await(5,TimeUnit.SECONDS));return result
         }
         fun until(condition:()->Boolean) {val end=System.nanoTime()+TimeUnit.SECONDS.toNanos(12);while(System.nanoTime()<end){if(condition())return;Thread.sleep(80)};fail("Feature acceptance timed out")}
-        val name="acceptance-${System.currentTimeMillis()}";val report=JSONObject();val file=File(context.cacheDir,"$name.zip")
+        val name="acceptance-${System.currentTimeMillis()}";val report=JSONObject().put("emulator",software).put("scope",if(software) "emulator-software" else "physical-features");val file=File(context.cacheDir,"$name.zip")
         val content="---\nname: $name\ndescription: 实机验收专用 Skill\n---\nBODY_DEVICE_SENTINEL\n按需读取 references/guide.md。"
         try {
             until {js("window.productReady===true")=="true"}
@@ -89,7 +91,7 @@ class PhysicalFeaturesTest {
             }
             val mic=MicrophoneInput(context);var bytes=0
             try {mic.start();bytes=mic.read(ByteArray(6400));assertTrue(bytes>0 && bytes%2==0)}finally {mic.close()}
-            report.put("physicalMicrophoneBytes",bytes).put("audioUploaded",false)
+            report.put("microphoneBytes",bytes).put("audioUploaded",false)
             js("document.getElementById('voice-toggle').click()")
             val fake=JSONObject(host().view().toString());val sid=fake.getString("selected")
             fake.put("runs",org.json.JSONArray().put(obj("id" to "presentation-test","sessionId" to sid,"status" to "generating","expanded" to true)))

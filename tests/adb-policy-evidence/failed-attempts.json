@@ -20,6 +20,21 @@
       "log": "build/physical-fan-policy3.log",
       "sha256": "6c246a57b5f468a8a4c0d862ffbf470b35dfa51b488123390da93bd7000b8152",
       "reason": "Harness checked completion before run started, sampled mode 4 instead of 1 and cancelled. Added explicit wait for running state; not a firmware/Agent success claim."
+    },
+    {
+      "log": "build/physical-fan-policy3-retest.log",
+      "sha256": "de530233bf6ffca2350c6143d981982882e4afad34996a39403e071a9cdf0371",
+      "reason": "Fan run exceeded runtime before incremental storage fix; historical failure, later Agent retest passed."
+    },
+    {
+      "log": "build/physical-refresh-final.log",
+      "sha256": "fb60efdc6af613a290583278cb1423ee6c6411500b1f0d717ce81571de3f83d0",
+      "reason": "First refresh prompt exceeded runtime without completing writes. Subsequent clearer prompt passed settings only, not actual 120 Hz."
+    },
+    {
+      "log": "build/physical-services-local-final.log",
+      "sha256": "85ed55f598e2cc68d7e22412fdd10b47bf15302199e310951e29b87b191dbf6d",
+      "reason": "Anonymous web fetch failed because Android JSON null credential became string null; subsequently fixed and real local HTTP retest passed."
     }
   ]
 }
