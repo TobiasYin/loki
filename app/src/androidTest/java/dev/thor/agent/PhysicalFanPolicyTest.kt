@@ -42,8 +42,9 @@ class PhysicalFanPolicyTest {
                 js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:true}))")
                 until {js(web,"document.querySelector('input[aria-label=\"ADB 调试\"]').checked")=="true"}
                 val baseline=sample()
-                val prompt="Thor 风扇实测：先读取 adb-operations Skill 和 references/thor-fan.md。只请求一次 debug_shell 执行精确命令 settings put system fan_mode $value，直接执行，不需批准；完成后读取 fan_mode、/sys/class/gpio5_pwm2/speed、/sys/class/gpio5_pwm2/duty、/sys/class/gpio5_pwm2/state，各自单条命令。拒绝后停止尝试。只报告实际证据，不要恢复或再改其他值，恢复由下一轮处理。"
+                val prompt="Thor 风扇实测：先读取 adb-operations Skill 和 references/thor-fan.md。按手册先读取当前模式和转速，再执行唯一的一次写入 debug_shell(command=settings put system fan_mode $value)。读取次数不限；直接执行，不需批准，随后读取 fan_mode、/sys/class/gpio5_pwm2/speed、/sys/class/gpio5_pwm2/duty、/sys/class/gpio5_pwm2/state，各自单条命令。拒绝后停止尝试。只报告实际证据，不要恢复或再改其他值，恢复由下一轮处理。"
                 js(web,"document.getElementById('input').value=${JSONObject.quote(prompt+" 完成工具调用后只回答 TEST_OK，不要复述手册或过程。")};document.getElementById('composer').requestSubmit()")
+                until {js(web,"document.getElementById('send').textContent==='停止'")=="true"}
                 until(180){assertEquals("Unexpected approval for a white fan adjustment","false",js(web,"!!document.querySelector('.wait')"));js(web,"document.getElementById('send').textContent==='发送'")=="true"}
                 Thread.sleep(3000)
                 val observations=JSONArray();repeat(3){observations.put(sample());Thread.sleep(700)}

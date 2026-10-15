@@ -1,0 +1,22 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "endpoint": "https://opencode.ai/zen/go/v1/responses",
+  "protocol": "openai-responses",
+  "credentialsStored": "native-keystore",
+  "chatDisplay": 4,
+  "passed": true,
+  "probe": {
+    "status": "passed",
+    "httpStatuses": [
+      200,
+      200
+    ],
+    "contexts": 2
+  },
+  "deviceInfoStatus": "completed",
+  "braveSearchStatus": "completed",
+  "sourceCommit": "51efc98",
+  "apkSha256": "f120ac209ad9f590fec369abd22fb3bf95d15d526a5f9c7244d4139f6802b78a",
+  "network": "Original device DNS restored; unrestricted system DNS/proxy transport",
+  "temporaryPrivateDnsUsed": false
+}

@@ -30,7 +30,7 @@ debug.command_policy 读取规则或分类，不执行命令。灰名单批准�
 
 ## 验证状态
 
-软件回归已完成：59 项 JavaScript 测试、190 项 JVM 测试、Android lint、debug/release 与 instrumentation 构建、产物隔离检查通过。新增测试包含命令解析/绕过、黑名单不能批准、精确灰名单批准、直接 argv 不解释脚本、Thor 参数约束、内置 Skill 升级、结构化 UI，以及工具目录增大时的 L0 限制。
+软件回归已完成：59 项 JavaScript 测试、191 项 JVM 测试、Android lint、debug/release 与 instrumentation 构建、产物隔离检查通过。新增测试包含命令解析/绕过、黑名单不能批准、精确灰名单批准、直接 argv 不解释脚本、Thor 参数约束、内置 Skill 升级、结构化 UI，以及工具目录增大时的 L0 限制。
 
 真实 OpenCode Go Responses 的文字/图片/工具/图片回传探测已重新完成，两个 HTTP 200，Native 配置状态为 passed；设备信息与 Brave 搜索 completed。此前本地预算 32K 导致多轮 Skill 操作提前超限，本机已通过实际 Native 设置页调整到 131072，修订 1002，保存后真实重探测；模型、端点与密钥不变。
 
@@ -38,15 +38,21 @@ debug.command_policy 读取规则或分类，不执行命令。灰名单批准�
 
 另完成真实 SQLite 临时库回归：1000 条历史事件、20 次增量保存共 201 ms，重新打开、更新和事务回滚通过，临时库已删除。保存路径改为事务内批量读取比较，页面只投影当前会话及活动运行；完整历史仍保存在 Native。
 
-2026-10-15 用户要求拔出设备，**全部真机测试已暂停**。双屏独立调亮及上屏恢复已有真实 Agent 通过证据；整套测试在下屏恢复阶段超时，灰名单 UI 正负分支未到达。清理已执行，旧系统亮度回读 42、模式 0、风扇回读 4；双屏固件最终回读尚缺。风扇仅完成主机固件对照，Agent 风扇、刷新率及最终接收端重复测试待续。最新策略 3 已离线回归并构建，设备仍是策略 2，不混算验证版本。
+2026-10-15 曾按用户要求暂停，随后用户通知设备重连并继续。暂停检查点保留于 [续测记录](physical-test-resume.md)。最新策略 3 的完整亮度/命令分级真机套件现已通过（738.074 秒）：手册按需读取、白名单 Shell 亮度、双屏各自调整及恢复、灰名单实际批准和拒绝 UI，两屏互不影响，白名单没有 awaiting_user。清理后通过真实 UID2000 固件接口确认 upper=41、lower=40，旧系统亮度 42、模式 0。原下屏恢复超时保留为失败历史，不覆盖。
 
-完整暂停点、证据范围、安装身份与重连顺序见 [真机续测清单](physical-test-resume.md)，摘要证据见 `tests/adb-policy-evidence/`。用户随后通知设备恢复并要求继续，现已恢复真机工作；清单保留暂停检查点，最终结果随后补记。
+对应摘要 `tests/adb-policy-evidence/brightness-policy3.json` 记录八个 completed 运行、直接服务拦截与最终回读。此套件 APK SHA-256 为 f120ac209ad9f590fec369abd22fb3bf95d15d526a5f9c7244d4139f6802b78a；随后仅更新了网页工具说明及网页跳转，设备执行代码不变。最终 APK 的风扇、刷新率、网页读取与接收端复验仍在进行。
+
+## 联网访问要求与复验
+
+用户明确要求网络自由访问。正式 debug/release 均允许 HTTP/HTTPS、LAN、回环及保留/fake-IP 地址，使用系统 DNS 与代理，不再按公网地址段过滤。无凭据网页可跨站跳转，跨站时清除调用方 header；模型和搜索凭据分别绑定配置的服务。HTTPS 正常验证证书，超时、字节预算和停止继续生效。
+
+本机 Wi-Fi 曾将模型域名解析为保留地址，旧策略因而拒绝，独立 Native 直连却为 HTTP 200。临时加密 DNS 对照完成后已经恢复原设置；移除地址限制后的真实产品探测、设备信息和 Brave 全部通过。证据为 `tests/adb-policy-evidence/live-services-open-network.json`。最新 APK 还将用真实模型读取本地 HTTP 网页，核对请求不携带模型/搜索凭据。
 
 ## 可复现入口
 
 使用根工程构建，保留现有 Native 连接资料与数据库，不运行会重置资料的 WebViewFlowTest/fixture 安装流程。
 
-- scripts/physical-live.py --reuse-profile：真实图片/工具探测、设备信息和 Brave；--configure-budget-128k 通过 Native 设置页保存预算并重新真实探测。
+- scripts/physical-live.py --reuse-profile：真实图片/工具探测、设备信息和 Brave；--configure-budget-128k 通过 Native 设置页保存预算并重新真实探测；--local-web-smoke 增加真实模型读取无害本地 HTTP 页面，结束后移除测试转发和网页服务。
 - scripts/physical-adb.py：真实 Agent 白/灰/黑名单与双屏亮度；--fan 测风扇，--refresh 测刷新率。只有灰名单验收自动点击产品实际批准/拒绝按钮，不冒充真人确认。
 - scripts/physical-device.py：真实模型、Native 触控和独立接收端闭环，包含原始事件前缀哈希核对。
 

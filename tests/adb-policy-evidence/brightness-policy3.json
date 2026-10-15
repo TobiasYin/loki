@@ -1,0 +1,414 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "policyVersion": "3",
+  "passed": true,
+  "originalBrightness": 42,
+  "originalMode": "0",
+  "originalPanels": {
+    "upper": 41,
+    "lower": 40
+  },
+  "guardControls": [
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "rm -rf /data",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "mkfs.ext4 /dev/block/does-not-exist",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "sh -c 'id'",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "settings put global adb_enabled 0",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "real UID2000 Binder; direct backend bypass control",
+      "command": "rm -rf /data",
+      "result": {
+        "error": "COMMAND_BLOCKED",
+        "message": "禁止抹除、格式化、刷写、分区、重启恢复模式和提权操作"
+      },
+      "jobCreated": false
+    },
+    {
+      "layer": "real UID2000 Binder; direct backend bypass control",
+      "command": "dumpsys display",
+      "result": {
+        "error": "APPROVAL_REQUIRED",
+        "message": "灰名单命令需要用户在页面确认本次具体操作：读取诊断信息，可能包含应用、窗口或使用状态"
+      },
+      "jobCreated": false
+    }
+  ],
+  "finalBrightness": "42",
+  "finalMode": "0",
+  "finalPanels": {
+    "upper": {
+      "data": {
+        "screen": "upper",
+        "displayId": 0,
+        "displayName": "内置屏幕",
+        "before": 41,
+        "brightness": 41,
+        "requested": null,
+        "verified": true,
+        "quantizationTolerance": 1,
+        "policyTier": "white",
+        "policyVersion": "3",
+        "uid": 2000
+      },
+      "submitted": false
+    },
+    "lower": {
+      "data": {
+        "screen": "lower",
+        "displayId": 4,
+        "displayName": "Screen-2",
+        "before": 40,
+        "brightness": 40,
+        "requested": null,
+        "verified": true,
+        "quantizationTolerance": 1,
+        "policyTier": "white",
+        "policyVersion": "3",
+        "uid": 2000
+      },
+      "submitted": false
+    }
+  },
+  "runs": [
+    {
+      "label": "white-read-and-lazy-manual",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.command_policy",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.command_policy",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.shell",
+          "error": null,
+          "outcome": "submitted"
+        }
+      ]
+    },
+    {
+      "label": "white-shell-brightness",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.command_policy",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.shell",
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "debug.shell",
+          "error": null,
+          "outcome": "submitted"
+        }
+      ]
+    },
+    {
+      "label": "upper-independent",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        }
+      ]
+    },
+    {
+      "label": "lower-independent",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        }
+      ]
+    },
+    {
+      "label": "upper-restore",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        }
+      ]
+    },
+    {
+      "label": "lower-restore",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.thor_brightness",
+          "error": null,
+          "outcome": "observed"
+        }
+      ]
+    },
+    {
+      "label": "gray-diagnostic-approved",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.shell",
+          "error": null,
+          "outcome": "submitted"
+        }
+      ]
+    },
+    {
+      "label": "gray-diagnostic-rejected",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "toolResults": [
+        {
+          "toolId": "skills.read",
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "debug.shell",
+          "error": "PERMISSION_MISSING",
+          "outcome": "observed"
+        }
+      ]
+    }
+  ],
+  "white-shell-brightness": {
+    "before": 42,
+    "after": 90,
+    "approvalRequired": false
+  },
+  "upper-independent": {
+    "screen": "upper",
+    "requested": 96,
+    "before": [
+      89,
+      40
+    ],
+    "after": [
+      96,
+      40
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "lower-independent": {
+    "screen": "lower",
+    "requested": 80,
+    "before": [
+      96,
+      40
+    ],
+    "after": [
+      96,
+      80
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "upper-restore": {
+    "screen": "upper",
+    "requested": 41,
+    "before": [
+      96,
+      80
+    ],
+    "after": [
+      41,
+      80
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "lower-restore": {
+    "screen": "lower",
+    "requested": 40,
+    "before": [
+      41,
+      80
+    ],
+    "after": [
+      41,
+      40
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "rawEvidence": "build/physical/adb-policy-attempt-8/physical-adb-policy.json",
+  "rawSha256": "1f0443047db517f208662acbc1499136f20f990c8e679f27684537b13966dd78",
+  "apkSha256": "f120ac209ad9f590fec369abd22fb3bf95d15d526a5f9c7244d4139f6802b78a",
+  "scope": "Policy 3 brightness/gray UI acceptance before web-fetch wording and redirect-only updates; device execution code unchanged"
+}

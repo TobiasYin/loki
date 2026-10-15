@@ -14,7 +14,7 @@ a=p.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1];os.chdir(root)
 out=root/'build/physical';out.mkdir(parents=True,exist_ok=True)
 # Preserve previous successful and failed attempts before refreshing the latest view.
-previous=['live-suite.log','physical-live-services.json','physical-live-chat.png','profile-budget-suite.log','physical-profile-budget.json']
+previous=['live-suite.log','physical-live-services.json','physical-live-chat.png','physical-local-web-server.json','profile-budget-suite.log','physical-profile-budget.json']
 if any((out/name).exists() for name in previous):
     ordinal=1
     while (out/f'live-services-attempt-{ordinal}').exists():ordinal+=1
@@ -65,6 +65,7 @@ try:
         assert re.search(rb'OK \(\d+ tests?\)',budget) and b'FAILURES' not in budget,'Native budget UI update failed'
         (out/'physical-profile-budget.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/physical-profile-budget.json'))
     adb('shell','input','keyevent','224')
+    adb('shell','run-as','dev.thor.agent','rm','-f','files/physical-live-services.json','files/physical-live-chat.png')
     result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','reuseProfile',str(a.reuse_profile).lower(),'-e','chatDisplay',str(a.chat_display),*(['-e','localWebUrl',local_url] if local_url else []),'-e','class','dev.thor.agent.PhysicalRealServiceTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'live-suite.log').write_bytes(result)
     print(result.decode(),flush=True)

@@ -1,0 +1,34 @@
+{
+  "agent-debug": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "667abbd113bfe0686ee8d4ca7ffc3c201fd57d53a5785de15cb7310b81935826",
+    "bytes": 6334841,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='dev.thor.inputlab.permission.CONTROL'\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "agent-release-unsigned": {
+    "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+    "sha256": "a12baa922d076432b2e3f366166ddb31d3e144cac1e2dd457402602f5ac29008",
+    "bytes": 4909767,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "input-lab-debug": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+    "sha256": "4712c6482bf630c0a59cd89cdfdea12e24b2e032ad5138faf93215ec6fd657ae",
+    "bytes": 2783647,
+    "permissions": "package: dev.thor.inputlab\npermission: dev.thor.inputlab.permission.CONTROL"
+  },
+  "input-lab-release-unsigned": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+    "sha256": "539b840c0331144d3e859b39572893d8852de9d8b491fde949cec03ebea831d6",
+    "bytes": 2226740,
+    "permissions": "package: dev.thor.inputlab"
+  },
+  "provenance": {
+    "sourceCommit": "54019b1",
+    "appFrozen": true,
+    "testRunnerOnlyChangesAfterFreeze": true,
+    "javaScriptTests": 59,
+    "jvmTests": 191,
+    "note": "Brightness suite used earlier f120ac2 APK; same device execution code, later changes affect web descriptions/redirects only."
+  }
+}
