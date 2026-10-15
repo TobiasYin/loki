@@ -7,8 +7,12 @@ export const defaultCapabilities = (): Capabilities => ({ screen_perception: tru
 export type Availability = { status: 'ready' | 'permission_missing' | 'backend_missing' | 'unsupported' | 'temporarily_unavailable'; reason?: string };
 export interface ModelProfile {
   profileId: string; revision: number; label: string;
-  protocol: 'openai-responses' | 'anthropic-messages'; baseUrl: string; modelId: string;
+  protocol: 'openai-responses' | 'anthropic-messages' | 'openai-completions'; baseUrl: string; modelId: string;
   credentialRef: string; contextWindow: number; maxOutput: number;
+  input?: ('text'|'image')[];
+  provider?: string;
+  thinkingEffort?: 'off'|'minimal'|'low'|'medium'|'high'|'xhigh'|'max';
+  reasoning?: boolean; thinkingLevelMap?: Record<string,string|null>; compat?: Record<string,unknown>;
   customHeaders?: Record<string, string>;
   lastProbe: { revision: number; textStream: boolean; imageInput: boolean; toolCalling: boolean; imageToolRoundTrip: boolean };
 }

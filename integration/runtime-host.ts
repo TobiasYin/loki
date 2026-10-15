@@ -15,24 +15,22 @@ declare global { interface Window {
   runNativeProbe: (token: string, sessionId: string) => Promise<void>;
   productReady?: boolean;
 } }
-let connectionId = '', networkContext: any, activeLease: any;
+let connectionId = '';
+const executions=new Map<string,ReturnType<typeof createExecution>>();
+const starting=new Set<string>();
+let profileChecks:Promise<void>=Promise.resolve();
 const pending = new Map<string, { resolve: (v: any) => void; reject: (e: any) => void; timer: ReturnType<typeof setTimeout> }>();
 const queue: string[] = [];
-let toolNetworkContext: any;
 
-let runtime: ThorRuntime;
 let currentState: any;
 const send = (data: string | ArrayBuffer) => window.ThorNative.postMessage(data);
-const toolFetchBridge = createNativeFetch({send,context:()=>toolNetworkContext});
 const rpc = (op: string, data: any = {}, timeout = 185000): Promise<any> => new Promise((resolve, reject) => {
   if (!connectionId) { reject(new RuntimeError('BACKEND_UNAVAILABLE')); return; }
   const requestId = crypto.randomUUID();
-  const timer = setTimeout(() => { pending.delete(requestId); reject(new RuntimeError('TIMEOUT')); runtime?.stop(); }, timeout);
+  const timer = setTimeout(() => { pending.delete(requestId); reject(new RuntimeError('TIMEOUT')); executions.get(data.runId)?.runtime.stop(); }, timeout);
   pending.set(requestId, { resolve, reject, timer });
   send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId, op, data }));
 });
-const bound = (extra: any = {}) => ({ ...activeLease, ...extra });
-const fetchBridge = createNativeFetch({ send, context: () => networkContext, onUnhandled: handle });
 function handle(message: any) {
   if (message.type === 'bridge.ready') {
     connectionId = message.connectionId; window.productReady = true;
@@ -47,18 +45,19 @@ function handle(message: any) {
 }
 function update(state: any) {
   currentState = state;
-  if (activeLease) {
-    const s = state.sessions?.find((s: any) => s.id === activeLease.sessionId);
-    if (s) runtime.authorizationChanged(s.id, s.capabilityEpoch);
-    const r = state.runs?.find((r: any) => r.id === activeLease.runId);
-    if (r?.stopReason) runtime.stop();
+  for(const execution of executions.values()) {
+    const lease=execution.lease;
+    const s=state.sessions?.find((s:any)=>s.id===lease.sessionId);
+    if(s)execution.runtime.authorizationChanged(s.id,s.capabilityEpoch);
+    const r=(state.activeRuns??state.runs)?.find((r:any)=>r.id===lease.runId);
+    if(r?.stopReason)execution.runtime.stop();
   }
   if (window.receiveNative) window.receiveNative(state);
 }
 (window as any).receiveProductState = update;
 window.ThorNative.onmessage = event => {
-  try { const message = decodeFrame(event.data); if (message.type === 'host.result' || message.type === 'bridge.ready') handle(message); else { fetchBridge.receive(event.data); toolFetchBridge.receive(event.data); } }
-  catch { runtime?.stop(); }
+  try { const message = decodeFrame(event.data); if (message.type === 'host.result' || message.type === 'bridge.ready') handle(message); else for(const execution of executions.values())execution.receive(event.data); }
+  catch { for(const execution of executions.values())execution.runtime.stop(); }
 };
 const tools = (contract.tools as any[]).map(t => ({ ...t,
   schemaVersion: String(t.schemaVersion), modelName: t.toolId.replaceAll('.', '_'),
@@ -71,6 +70,12 @@ const probe: ToolDescriptor = { toolId: 'probe.picture', modelName: 'probe_pictu
 const webTools: ToolDescriptor[] = ['search','fetch'].map(name=>({toolId:`web.${name}`,modelName:`web_${name}`,schemaVersion:'1',description:name==='search'?'Search Brave and return source titles, URLs, snippets and source time when present.':'Read an HTTP/HTTPS page as bounded untrusted text over the system network. LAN, loopback and proxy DNS are supported.',
     inputSchema:{type:'object',properties:{[name==='search'?'query':'url']:{type:'string',minLength:1,maxLength:name==='search'?400:8192}},required:[name==='search'?'query':'url'],additionalProperties:false},requiredCapabilities:['web_search'],platformPrerequisites:[`web.${name}`],executor:'native-fetch',resources:['public-web'],effectClass:'network',timeoutMs:30000,cancellable:true,concurrencyKey:'network',provenance:'builtin',modelVisibility:true,outputPolicy:{maxTextBytes:65536,maxImageBytes:0,maxImages:0,imageTokenEstimate:4096}}));
 const registry = new ToolRegistry(); registry.register({packId:'thor.skills',packVersion:'1',tools:skillTools}); registry.register({packId:'thor.web',packVersion:'1',tools:webTools}); registry.register({ packId: contract.packId, packVersion: contract.packVersion, tools }); registry.register({ packId: 'configuration-probe', packVersion: '1', tools: [probe] });
+function createExecution(begun:any) {
+const activeLease=begun.lease,networkContext=begun.network;
+let toolNetworkContext:any;
+const bound=(extra:any={})=>({...activeLease,...extra});
+const fetchBridge=createNativeFetch({send,context:()=>networkContext});
+const toolFetchBridge=createNativeFetch({send,context:()=>toolNetworkContext});
 const persist = (kind: string, value: any, event?: any) => rpc('persist', bound({ kind, value, ...(event ? { event } : {}) })).then(() => undefined);
 const ports: RuntimePorts = {
   authority: { read: (sessionId, runId, refresh) => rpc('authority', bound({ sessionId, runId, refresh: !!refresh })) },
@@ -118,27 +123,39 @@ const ports: RuntimePorts = {
   persistence: { appendEvent: e => persist('event', e), commitRun: (r,e) => persist('commit',r,e), saveRun: r => persist('run',r), saveContext: s => persist('context',s), saveTurn: (_sid,t) => persist('turn',t) },
   attachments: { put: a => rpc('attachment.put', bound({ value: a })).then(() => undefined), get: async id => { const a = await rpc('attachment.get', bound({ id })); return a.attachmentId ? a : undefined; } }
 };
-runtime = new ThorRuntime(ports, registry);
-async function start(sessionId: string, text: string, probeToken?: string) {
-  if(activeLease) throw new RuntimeError('BACKEND_UNAVAILABLE');
-  const begun = await rpc('begin', { sessionId, text, ...(probeToken ? { probeToken } : {}) });
-  await executeBegun(begun);
+const runtime=new ThorRuntime(ports,registry);
+return {runtime,lease:activeLease,receive:(raw:any)=>{fetchBridge.receive(raw);toolFetchBridge.receive(raw);},run:()=>runtime.run(activeLease,begun.input,begun.history)};
 }
-async function executeBegun(begun: any) {
-  if(activeLease) throw new RuntimeError('BACKEND_UNAVAILABLE');
-  activeLease = begun.lease; networkContext = begun.network;
-  try { await runtime.run(activeLease, begun.input, begun.history); }
-  catch { /* Native end records failure, and old intents are never replayed. */ }
-  finally { await rpc('end', bound()).catch(() => {}); activeLease = undefined; networkContext = undefined; void rpc('view').then(update); }
+async function start(sessionId:string,text:string,probeToken?:string) {
+  if(starting.has(sessionId) || [...executions.values()].some(e=>e.lease.sessionId===sessionId))throw new RuntimeError('BACKEND_UNAVAILABLE');
+  starting.add(sessionId);
+  try {
+    if(!probeToken) {
+      const check=profileChecks.catch(()=>{}).then(async()=>{
+        const status=await rpc('profile.check',{sessionId});
+        if(status.probeNeeded)await executeBegun(await rpc('begin',{sessionId,text:probeText,probeToken:status.token}));
+      });
+      profileChecks=check;await check;
+    }
+    await executeBegun(await rpc('begin',{sessionId,text,...(probeToken?{probeToken}:{})}));
+  } finally {starting.delete(sessionId);}
 }
+async function executeBegun(begun:any) {
+  if([...executions.values()].some(e=>e.lease.sessionId===begun.lease.sessionId))throw new RuntimeError('BACKEND_UNAVAILABLE');
+  const execution=createExecution(begun);const lease=execution.lease;executions.set(lease.runId,execution);
+  try {await execution.run();}
+  catch { /* Native end records failure; no intent replay. */ }
+  finally {await rpc('end',lease).catch(()=>{});executions.delete(lease.runId);void rpc('view').then(update);}
+}
+const probeText='Configuration probe: inspect the attached red image, call probe_picture once, inspect its returned image, and finish with PROBE_OK. Do not call any device tool.';
 if(__THOR_DEBUG__) (window as any).runPreparedNative = executeBegun;
-window.runNativeProbe = (token, sessionId) => start(sessionId, 'Configuration probe: inspect the attached red image, call probe_picture once, inspect its returned image, and finish with PROBE_OK. Do not call any device tool.', token);
+window.runNativeProbe = (token, sessionId) => start(sessionId,probeText,token);
 window.ThorUI = { postMessage(raw) {
   if(!connectionId) { queue.push(raw); return; }
   const command = JSON.parse(raw);
   if(['settings','pickImage','skillImport','voiceSettings','voice.start','voice.finish','voice.cancel','voice.permission'].includes(command.op)) { send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId: crypto.randomUUID(), op: command.op, data: command })); return; }
-  if(command.op === 'send') { void start(command.sessionId, command.text).catch(() => { (window as any).receiveSendFailure?.(command.text); update({ ...currentState, error: '发送失败：请先配置模型并完成图片/工具探测；文字已保留。' }); }); return; }
-  if(command.op === 'stop') runtime.stop();
+  if(command.op === 'send') { void start(command.sessionId, command.text).catch(() => { (window as any).receiveSendFailure?.(command.text,command.sessionId); update({ ...currentState, error: '发送失败：请先配置模型并完成图片/工具探测；文字已保留。' }); }); return; }
+  if(command.op === 'stop')executions.get(command.runId)?.runtime.stop();
   void rpc('ui', command).then(update).catch(() => update({ ...currentState, error: '操作被拒绝：检查授权、活动运行或本地存储。' }));
 } };
 // SDK receives only the supplied native Fetch. CSP and WebView interception also block all direct requests.

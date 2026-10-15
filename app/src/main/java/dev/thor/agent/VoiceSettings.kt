@@ -6,7 +6,7 @@ import android.text.InputType
 import android.view.View
 import android.widget.*
 
-fun showVoiceSettings(activity:Activity) {
+fun showVoiceSettings(activity:Activity,present:(android.view.View,()->Unit)->Unit) {
     val prefs=activity.getSharedPreferences("voice",0);val vault=CredentialVault(activity)
     val content=LinearLayout(activity).apply {orientation=LinearLayout.VERTICAL;setPadding(28,20,28,20)}
     fun label(text:String) {content.addView(TextView(activity).apply {this.text=text;setPadding(0,12,0,6)})}
@@ -23,8 +23,7 @@ fun showVoiceSettings(activity:Activity) {
     label("选择已开通的资源（1.0/2.0 小时版或并发版）")
     val resource=Spinner(activity).apply {adapter=ArrayAdapter(activity,android.R.layout.simple_spinner_dropdown_item,options);setSelection(options.indexOf(prefs.getString("resource",options[0])).coerceAtLeast(0));content.addView(this)}
     val remove=CheckBox(activity).apply {text="删除所有已保存语音密钥";content.addView(this)}
-    val dialog=AlertDialog.Builder(activity).setTitle("语音输入设置").setView(ScrollView(activity).apply {addView(content)}).setNegativeButton("返回",null).setPositiveButton("保存",null).create()
-    dialog.setOnShowListener {dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+    present(content) {
         try {
             require(api.length()<=8192 && access.length()<=8192 && app.length()<=200)
             if(remove.isChecked) {vault.remove("voice.api");vault.remove("voice.access")} else {
@@ -32,8 +31,7 @@ fun showVoiceSettings(activity:Activity) {
                 if(access.length()>0)vault.put("voice.access",access.text.toString().trim())
             }
             check(prefs.edit().putInt("auth",auth.selectedItemPosition).putString("appId",app.text.toString().trim()).putString("resource",options[resource.selectedItemPosition]).commit())
-            dialog.dismiss();Toast.makeText(activity,"语音设置已保存",Toast.LENGTH_SHORT).show()
+            api.text.clear();access.text.clear();Toast.makeText(activity,"语音设置已保存",Toast.LENGTH_SHORT).show()
         } catch(_:Exception) {Toast.makeText(activity,"语音设置保存失败，请检查输入或密钥存储",Toast.LENGTH_LONG).show()}
-    }}
-    dialog.setOnDismissListener {api.text.clear();access.text.clear()};dialog.show()
+    }
 }

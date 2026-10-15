@@ -26,9 +26,9 @@ python3 -m unittest discover -s fixtures
 
 ## 覆盖的行为
 
-TransportTest（18 项）通过真实本地 socket 和 MockWebServer 检查：中文/emoji 分块保持原始字节、sequence 连续；400/429/500 body 和响应头；无 credit 不交付、有限 credit、幂等 abort 和唯一终态；消费者停滞总时限；请求/响应大小与重复 ID；通用 gzip 解码及 header 一致；凭据绑定和 302 不跟随；逐跳 path 复核、POST 不重放；搜索撤销不取消 model、旧 epoch 无法新 start；连接失效、伪造 Session 不能取消别人的请求；HEAD 无 body 无需 credit；中途断流；header/credential/method/path 约束；混合 DNS、LAN/回环与代理 fake-IP 地址允许；无凭据 HTTP 抓取可跨源重定向到本地地址；自签名 HTTPS 证书拒绝，错误仅返回 code。
+TransportTest（19 项）通过真实本地 socket 和 MockWebServer 检查：中文/emoji 分块保持原始字节、sequence 连续；400/429/500 body 和响应头；无 credit 不交付、有限 credit、幂等 abort 和唯一终态；消费者停滞总时限；请求/响应大小与重复 ID；通用 gzip 解码及 header 一致；凭据绑定和 302 不跟随；逐跳 path 复核、POST 不重放；搜索撤销不取消 model、旧 epoch 无法新 start；连接失效、伪造 Session 不能取消别人的请求；HEAD 无 body 无需 credit；中途断流；header/credential/method/path 约束；混合 DNS、LAN/回环与代理 fake-IP 地址允许；无凭据 HTTP 抓取可跨源重定向到本地地址；自签名 HTTPS 证书拒绝，错误仅返回 code。
 
-GatewayTest（16 项）检查：可信 origin/main-frame/当前文档/连接 metadata；默认能力及 Session 隔离；伪造 Session、lease、未知工具和 schema；参数和资源/快照/后端拒绝；关闭再开启旧调用不复活、重复 call 不重放；排队后撤销零新副作用；分段执行中撤销、已提交副作用如实报告；目标变化/后端丢失在提交前拒绝；过期 deadline/停止 Run/新 lease；UTF-8 输出预算和执行器超时；队列 32 槽上限；后端恢复后未发布工具仍拒绝；提交异常 outcome=unknown；租约过期/连接死亡旧 Run 拒绝；UI 待交付数据的独立每请求/全局预算；已知凭据值不允许进入工具参数且结果遮蔽。
+GatewayTest（17 项）检查：可信 origin/main-frame/当前文档/连接 metadata；默认能力及 Session 隔离；伪造 Session、lease、未知工具和 schema；参数和资源/快照/后端拒绝；关闭再开启旧调用不复活、重复 call 不重放；排队后撤销零新副作用；分段执行中撤销、已提交副作用如实报告；目标变化/后端丢失在提交前拒绝；过期 deadline/停止 Run/新 lease；UTF-8 输出预算和执行器超时；队列 32 槽上限；后端恢复后未发布工具仍拒绝；提交异常 outcome=unknown；租约过期/连接死亡旧 Run 拒绝；UI 待交付数据的独立每请求/全局预算；已知凭据值不允许进入工具参数且结果遮蔽。
 
 JS 测试检查 base64 与二进制 codec、UTF-8 跨块、需求驱动 credit、HTTP 错误 Response、多值 header、string/bytes/ArrayBuffer/Request、序列化 body/header 合并、不支持的上传/选项和 body 上限、AbortSignal/迟到消息、bodyUsed 和 clone（并发/顺序消费、慢分支 256 KiB 限制）、坏 sequence/流错误、HEAD/204/205/304、frame 长度边界，以及 Request body 停滞的 timeout/桥关闭取消。
 
@@ -50,3 +50,5 @@ host 的 4 个 warning 是 target API 35 非最新、Android 12+ backup rule 建
 - 正式 App：Native 持久化、Keystore、设置和网络 profile 修订、真实工具注册和看门狗、审计写入/重启 interrupted 处理、产品 UI 状态镜像。
 
 可用 [README 的运行步骤](README.md) 在设备运行自有页面；后续执行应另记录设备/固件/WebView 版本和结果，不覆盖这份“本地已测、实机未测”的事实。
+
+0.5.0 新增跨会话并行授权、按 runId 停止隔离、8 个并行 HTTP 流及第 9 个拒绝的边界检查。停止一条 lease 后其他连接继续完成，旧授权与跨会话凭据/资料混用仍拒绝。

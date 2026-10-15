@@ -1,0 +1,15 @@
+import {chromium} from '../runtime/node_modules/@playwright/test/index.mjs';
+import {createServer} from 'node:http';
+import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+const base='app/src/main/assets/chat/';
+const server=createServer((req,res)=>{let name=req.url==='/'?'index.html':req.url.slice(1);if(name==='runtime-host.js'){res.setHeader('content-type','text/javascript');res.end('');return;}if(!['index.html','style.css','ui.js'].includes(name)){res.writeHead(404);res.end();return;}res.setHeader('content-type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(readFileSync(base+name));});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));const url=`http://127.0.0.1:${server.address().port}/`;
+const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
+mkdirSync('build/ui-preview',{recursive:true});const checks=[];
+try {for(const [width,height] of [[620,540],[620,180],[360,640]]) {
+ const page=await browser.newPage({viewport:{width,height},colorScheme:'dark',reducedMotion:'reduce'});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>window.ThorUI={postMessage(){}});await page.goto(url);await page.evaluate(()=>window.receiveNative({selected:'a',sessions:[{id:'a',title:'新会话',archivedAt:null,updatedAt:Date.now(),capabilities:{perception:true,search:true,screen_control:false,debug:false}}],messages:[],events:[],runs:[],activeRuns:[],availability:{perception:'已就绪',search:'已配置',screen_control:'需授权',debug:'需授权'},modelStatus:'配置探测已通过',modelChoices:[{id:'deepseek-v4.1-flash',name:'DeepSeek V4.1 Flash'}],modelSelection:{modelId:'deepseek-v4.1-flash',label:'DeepSeek V4.1 Flash',efforts:['low','high','max'],thinkingEffort:'high',contextWindow:1000000},skills:[{name:'adb-operations',description:'设备操作',enabled:true,builtin:true}]}));
+ const metrics=await page.evaluate(()=>({height:innerHeight,width:innerWidth,composer:document.querySelector('#composer').getBoundingClientRect().toJSON(),send:document.querySelector('#send').getBoundingClientRect().toJSON(),overflow:document.documentElement.scrollWidth>innerWidth,probeVisible:!document.querySelector('#notice').hidden}));assert.deepEqual(errors,[]);assert.equal(metrics.overflow,false);assert.ok(metrics.send.bottom<=height);assert.ok(metrics.composer.height<=140);assert.ok(metrics.send.width>=44 && metrics.send.height>=44);assert.equal(metrics.probeVisible,false);checks.push(metrics);await page.screenshot({path:`build/ui-preview/composer-${width}x${height}.png`});
+ if(height===540){await page.click('#more');await page.screenshot({path:'build/ui-preview/plus-menu.png'});await page.click('#model-picker');await page.screenshot({path:'build/ui-preview/model-picker.png'});}
+ await page.close();
+}writeFileSync('build/ui-preview/layout-checks.json',JSON.stringify({passed:true,checks},null,2));}finally{await browser.close();await new Promise(r=>server.close(r));}

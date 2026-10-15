@@ -16,13 +16,13 @@ const server = http.createServer(async (req,res) => {
     if(req.headers.authorization || req.headers['x-subscription-token']) {res.writeHead(400);res.end('unexpected credential');return;}
     res.writeHead(302,{location:'http://127.0.0.1:8878/web/anonymous%20page'});res.end();return;
   }
-  const protocol = req.url.startsWith('/v1/responses') ? 'openai-responses' : 'anthropic-messages';
-  const auth = protocol === 'openai-responses' ? req.headers.authorization : req.headers['x-api-key'];
-  if(auth !== (protocol === 'openai-responses' ? 'Bearer integration-only-secret' : 'integration-only-secret')) {res.writeHead(401);res.end('invalid credential');return;}
+  const protocol=req.url.startsWith('/v1/responses')?'openai-responses':req.url.includes('/chat/completions')?'openai-completions':'anthropic-messages';
+  const auth = protocol !== 'anthropic-messages' ? req.headers.authorization : req.headers['x-api-key'];
+  if(auth !== (protocol !== 'anthropic-messages' ? 'Bearer integration-only-secret' : 'integration-only-secret')) {res.writeHead(401);res.end('invalid credential');return;}
   const body = JSON.parse(raw); const serialized = JSON.stringify(body);
   const messages = body.input ?? body.messages ?? [];
   let userIndex = 0;
-  for(let i=0;i<messages.length;i++) if(messages[i].role === 'user' && Array.isArray(messages[i].content) && messages[i].content.some(c=>c.type==='input_text'||c.type==='text')) userIndex=i;
+  for(let i=0;i<messages.length;i++) if(messages[i].role === 'user' && !(Array.isArray(messages[i].content) && messages[i].content.some(c=>c.text==='Attached image(s) from tool result:')) && (typeof messages[i].content==='string' || Array.isArray(messages[i].content) && messages[i].content.some(c=>c.type==='input_text'||c.type==='text'))) userIndex=i;
   const current = messages.slice(userIndex);
   const userText = JSON.stringify(current);
   const currentSerialized=JSON.stringify(current);
@@ -31,7 +31,7 @@ const server = http.createServer(async (req,res) => {
     if(value&&typeof value==='object') {if(value.backupId)return value.backupId;for(const v of Object.values(value)){const id=backupId(v);if(id)return id;}}
   }
   const probing = userText.includes('Configuration probe:');
-  const result = protocol === 'openai-responses' ? current.some(m=>m.type==='function_call_output') : current.some(m=>Array.isArray(m.content) && m.content.some(c=>c.type==='tool_result'));
+  const result = protocol==='openai-completions'?current.some(m=>m.role==='tool'):protocol === 'openai-responses' ? current.some(m=>m.type==='function_call_output') : current.some(m=>Array.isArray(m.content) && m.content.some(c=>c.type==='tool_result'));
   const imageCount = (serialized.match(/image_url|"type":"image"/g) ?? []).length;
   const names = (body.tools ?? []).map(t=>t.name ?? t.function?.name);
   function frameId(value) {
@@ -43,10 +43,10 @@ const server = http.createServer(async (req,res) => {
   if(userText.includes('HTTP_500')) {res.writeHead(500);res.end('fixture HTTP failure');return;}
   if(userText.includes('WAIT_CANCEL')) {res.writeHead(200,{'content-type':'text/event-stream'});res.write(': open\n\n');req.on('close',()=>res.end());return;}
   if(probing && !result) {
-    if(imageCount < 1 || !names.includes('probe_picture')) {res.writeHead(422);res.end('missing image or probe tool');return;}
+    if((!userText.includes('text-only') && imageCount < 1) || !names.includes('probe_picture')) {res.writeHead(422);res.end('missing image or probe tool');return;}
     reply={call:{name:'probe_picture',args:'{}'}};
   } else if(probing) {
-    if(imageCount < 2) {res.writeHead(422);res.end('image result missing');return;}
+    if(!userText.includes('text-only') && imageCount < 2) {res.writeHead(422);res.end('image result missing');return;}
     reply={text:'PROBE_OK：输入与工具图片均已收到，红色测试图。'};
   } else if(userText.includes('WEB_FETCH') && !result) reply={call:{name:'web_fetch',args:JSON.stringify({url:'http://127.0.0.1:8877/web/redirect'})}};
   else if(userText.includes('WEB_FETCH')) reply={text:'ANONYMOUS_WEB_OK：网页内容已读取。'};
@@ -61,7 +61,7 @@ const server = http.createServer(async (req,res) => {
   else if(userText.includes('SHELL_WAIT') && !result) reply={call:{name:'debug_shell',args:'{"command":"settings put system screen_focus_lock 1"}'}};
   else if(userText.includes('SHELL_REJECT') && !result) reply={call:{name:'debug_shell',args:'{"command":"settings put system screen_focus_lock 1"}'}};
   else reply={text:'集成中文流式回答：真实 Pi 经 Native Fetch 完成。'};
-  appendFileSync(join(output,'model-requests.jsonl'), JSON.stringify({index:count++,protocol,url:req.url,imageCount,names,result,credentialMatched:true,requestBytes:Buffer.byteLength(raw)})+'\n');
+  appendFileSync(join(output,'model-requests.jsonl'), JSON.stringify({index:count++,protocol,url:req.url,imageCount,names,result,credentialMatched:true,requestBytes:Buffer.byteLength(raw),model:body.model,reasoningEffort:body.reasoning?.effort??body.reasoning_effort??null})+'\n');
   res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-store'});
   const bytes=Buffer.from(protocolSse(protocol,reply,count));
   // Split every UTF-8 character across several writes, including Chinese text.

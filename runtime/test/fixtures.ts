@@ -17,6 +17,11 @@ export type Reply = { text?: string; call?: { id?: string; name: string; args?: 
 function sse(event: Record<string, unknown>): string { return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`; }
 export function protocolSse(protocol: ModelProfile['protocol'], reply: Reply, index = 0): string {
   const call = reply.call; const text = reply.text ?? '完成中文'; const id = call?.id ?? `call_${index}`;
+  if(protocol==='openai-completions') {
+    const chunk=(delta:unknown,finish:string|null=null)=>`data: ${JSON.stringify({id:`chat_${index}`,object:'chat.completion.chunk',created:0,model:'fixture-model',choices:[{index:0,delta,finish_reason:finish}]})}\n\n`;
+    if(call)return chunk({role:'assistant',tool_calls:[{index:0,id,type:'function',function:{name:call.name,arguments:''}}]})+chunk({tool_calls:[{index:0,function:{arguments:call.args??'{"text":"hello"}'}}]})+(reply.disconnect?'':chunk({},'tool_calls')+'data: [DONE]\n\n');
+    return chunk({role:'assistant',content:text.slice(0,2)})+chunk({content:text.slice(2)})+(reply.disconnect?'':chunk({},'stop')+'data: [DONE]\n\n');
+  }
   if (protocol === 'anthropic-messages') {
     const events: Record<string, unknown>[] = [ { type: 'message_start', message: { id: `msg_${index}`, type: 'message', role: 'assistant', model: 'fixture-model', content: [], stop_reason: null, usage: { input_tokens: 10, output_tokens: 0 } } } ];
     if (call) events.push({ type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id, name: call.name, input: {} } }, { type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: call.args ?? '{"text":"hello"}' } });

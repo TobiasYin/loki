@@ -36,3 +36,7 @@
 仅选取明确的 `emulator-*` 目标：复验 Native HTTP 无凭据桥接、两种模型协议、流式文字/工具显示、取消和生命周期、SQLite 事务、Skill 导入与按需读取、语音模式页面。受控服务只替代远端响应，结果标注模拟器，不冒充真实云模型或 Thor 硬件通过。不得在真机运行会重置资料的 WebViewFlowTest/fixture。
 
 本轮暂停后的软件验收已经完成，结果见 [软件验收记录](software-pause-validation.md)：13 项 Android 产品测试通过、1 项 Shizuku 条件跳过，另 4 项解析检查通过；虚拟显示 3 的 inconclusive 保留，overlay 显示 2 的输入链路通过。离线 59 项 JS / 194 项 JVM 及构建检查通过，未恢复真机操作。
+
+## 0.5.0 软件变更后的续测注意
+
+2026-10-16 增加紧凑输入区、完整设置页面、provider 模型资料、思考强度和多会话并行。本轮只在 AVD 验证，真机最后安装仍是上文记录的 0.4.0，未安装 0.5.0。未来获准续测时，需补新布局的真机 IME/双屏验证及多会话下设备工具的授权和恢复；原硬件缺口保留。Go 上下文改为读取模型 profile（DeepSeek V4.1 Flash 为 1M），旧 --configure-budget-128k / PhysicalProfileBudgetTest 是 0.4.0 的历史入口，不应用于 0.5.0 的 Go 自动预算。设置与连接检查交互也已改变，续测前更新旧版 UI 定位，不照搬旧坐标或旧对话框假设。

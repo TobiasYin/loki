@@ -49,6 +49,17 @@ class TransportTest {
         fun await() { assertTrue("terminal missing", terminal.await(4, TimeUnit.SECONDS)) }
         fun bytes() = all.filterIsInstance<HttpEvent.Chunk>().fold(ByteArray(0)) { acc, e -> acc + e.bytes }
     }
+    @Test fun eightIndependentStreamsAreBoundedAndStoppingOnePreservesTheOthers()=Lab().use {l->
+        val bindings=(0 until 8).map {i->if(i==0)l.binding else {l.authority.createSession("s$i");l.authority.beginRun("s$i",l.connection,mapOf(Purpose.model to setOf("p")))}}
+        val events=bindings.mapIndexed {i,b->
+            l.server.enqueue(MockResponse().setBody("hello").setHeadersDelay(500,TimeUnit.MILLISECONDS))
+            Events().also {e->l.transport.start(l.request("parallel-$i").copy(envelope=l.request("parallel-$i").envelope.copy(binding=b)),e.sink())}
+        }
+        assertEquals(Code.LIMIT_EXCEEDED,assertThrows(BridgeFailure::class.java){l.transport.start(l.request("ninth"),Events().sink())}.code)
+        l.authority.stopRun(bindings.first().runId);events.first().await()
+        assertEquals(Code.STALE_AUTHORIZATION,(events.first().all.last() as HttpEvent.Error).code)
+        for(i in 1 until 8){assertTrue(events[i].head.await(3,TimeUnit.SECONDS));l.transport.credit("parallel-$i",bindings[i],32);events[i].await();assertTrue(events[i].all.last() is HttpEvent.End)}
+    }
     @Test fun selfSignedTlsIsRejectedWithoutLeakingExceptionDetails() = Lab(tls = true).use { l ->
         l.server.enqueue(MockResponse().setBody("untrusted")); val e = Events(); l.transport.start(l.request(), e.sink()); e.await()
         assertEquals(Code.IO_ERROR, (e.all.last() as HttpEvent.Error).code); assertTrue(e.all.none { it is HttpEvent.Head || it is HttpEvent.Chunk })

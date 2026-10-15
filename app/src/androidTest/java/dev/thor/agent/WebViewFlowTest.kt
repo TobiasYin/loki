@@ -36,7 +36,7 @@ class WebViewFlowTest {
         assertTrue("Existing live profile must not be reset by fixture tests",existingUrl.isBlank() || existingUrl in setOf("http://127.0.0.1:8877/v1","http://127.0.0.1:8877"))
         context.deleteDatabase("product.db")
         val base = if(protocol==0) "http://127.0.0.1:8877/v1" else "http://127.0.0.1:8877"
-        assertTrue(context.getSharedPreferences("profiles",0).edit().clear().putString("name","Integration Fixture").putString("url",base).putString("model","fixture-model").putInt("protocol",protocol).putInt("revision",revision).putString("probe","untested").commit())
+        assertTrue(context.getSharedPreferences("profiles",0).edit().clear().putString("provider","custom").putString("name","Integration Fixture").putString("url",base).putString("model","fixture-model").putInt("protocol",protocol).putInt("revision",revision).putString("probe","untested").commit())
         CredentialVault(context).put("model","integration-only-secret")
         CredentialVault(context).put("search","integration-search-secret")
         assertTrue(context.getSharedPreferences("profiles",0).edit().putString("searchBackend","Brave").putString("searchUrl","http://127.0.0.1:8877/res/v1/web/search").commit())
@@ -49,21 +49,19 @@ class WebViewFlowTest {
         var token="";var sid=""
         instrumentation.runOnMainSync { token=host(activity).requestProbe();sid=host(activity).selectedSession() }
         javascript(web,"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(sid)});true")
-        waitFor(web,"document.getElementById('chat').textContent.includes('PROBE_OK')",60)
+        waitFor(web,"document.getElementById('send').textContent === '停止'",60)
         waitFor(web,"document.getElementById('send').textContent === '发送'",30)
         assertEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
     }
-    @Test fun bothProtocolsImagesToolRoundTripTextDevicePersistenceErrorsAndCancellation() {
-        for(protocol in 0..1) {
+    @Test fun allProtocolsImagesToolRoundTripTextDevicePersistenceErrorsAndCancellation() {
+        for(protocol in 0..2) {
             configure(protocol, protocol+1)
             val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
             try {
                 waitFor(web,"window.productReady === true && document.querySelectorAll('.session-row').length > 0")
-                // UI cannot mark a profile passed or send an untested real Run.
-                send(web,"untested must be blocked")
-                waitFor(web,"document.getElementById('notice').textContent.includes('发送失败')")
-                assertEquals(0,SqliteStore(context,"product.db").use { it.load().getJSONArray("runs").length() })
+                // Probe runs remain Native-owned and are hidden from the conversation.
                 probe(activity,web)
+                assertFalse(javascript(web,"document.getElementById('chat').textContent").contains("PROBE_OK"))
                 send(web,"DEVICE_INFO: inspect actual device")
                 waitFor(web,"document.getElementById('send').textContent === '停止'")
                 waitFor(web,"document.getElementById('send').textContent === '发送'")
@@ -98,9 +96,113 @@ class WebViewFlowTest {
             } finally { finish(activity) }
         }
     }
+    @Test fun fullSettingsPageDoesNotInterruptRunsAndKeepsVoiceConfigurationOutOfComposer() {
+        configure(0,901)
+        val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
+        fun capture(name:String) {
+            instrumentation.runOnMainSync {
+                val view=activity.window.decorView;val bitmap=android.graphics.Bitmap.createBitmap(view.width,view.height,android.graphics.Bitmap.Config.ARGB_8888)
+                view.draw(android.graphics.Canvas(bitmap));java.io.File(context.filesDir,name).outputStream().use {bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)};bitmap.recycle()
+            }
+        }
+        fun buttons(view:android.view.View):List<android.widget.Button> = when(view) {
+            is android.widget.Button->listOf(view)
+            is android.view.ViewGroup->(0 until view.childCount).flatMap {buttons(view.getChildAt(it))}
+            else->emptyList()
+        }
+        try {
+            waitFor(web,"window.productReady===true");probe(activity,web)
+            assertEquals("true",javascript(web,"document.getElementById('voice-settings')===null && document.getElementById('notice').hidden"))
+            capture("integrated-composer-native.png")
+            send(web,"WAIT_CANCEL settings page")
+            waitFor(web,"document.getElementById('send').textContent==='停止'")
+            val rid=host(activity).view().getString("activeRunId")
+            javascript(web,"document.getElementById('settings').click()")
+            var page:android.view.View?=null
+            repeat(30){instrumentation.runOnMainSync {page=activity.window.decorView.findViewWithTag("thor-settings-page")};if(page==null)Thread.sleep(50)}
+            assertNotNull("Settings must be a full page in the Activity",page)
+            capture("integrated-settings-native.png")
+            instrumentation.runOnMainSync {buttons(page!!).single {it.text.toString()=="火山流式语音识别 ›"}.performClick()}
+            capture("integrated-voice-settings-native.png")
+            instrumentation.runOnMainSync {buttons(activity.window.decorView.findViewWithTag("thor-settings-page")).single {it.text.toString()=="‹ 返回"}.performClick()}
+            instrumentation.runOnMainSync {buttons(activity.window.decorView.findViewWithTag("thor-settings-page")).single {it.text.toString()=="‹ 返回"}.performClick()}
+            assertTrue(host(activity).view().getJSONArray("activeRuns").objects().any {it.getString("id")==rid && it.optString("status") !in terminal})
+            javascript(web,"document.getElementById('send').click()")
+            waitFor(web,"document.getElementById('send').textContent==='发送'")
+            java.io.File(context.filesDir,"integrated-settings-page.json").writeText(obj("passed" to true,"fullPage" to true,"runPreserved" to true,"voiceNestedInSettings" to true,"probeHidden" to true).toString(2))
+        } finally {finish(activity)}
+    }
+    @Test fun approvalWaitingDoesNotBlockAnotherSessionsDeviceTool() {
+        configure(0,951)
+        val config=java.io.File(context.filesDir,"approved-synthetic-config/settings.json").apply {parentFile!!.mkdirs();writeText("{\"volume\":60,\"unknown\":\"keep\"}")}
+        val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
+        try {
+            waitFor(web,"window.productReady===true");probe(activity,web);val first=host(activity).selectedSession()
+            javascript(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(first)},capability:'debug',enabled:true}))")
+            waitFor(web,"document.querySelector('input[aria-label=\"ADB 调试\"]').checked")
+            send(web,"WRITE_CONFIG_${dev.thor.tools.hash(config.readBytes())}: adjust synthetic volume")
+            waitFor(web,"!!document.querySelector('.wait')")
+            javascript(web,"document.getElementById('new').click()")
+            waitFor(web,"document.getElementById('send').textContent==='发送'")
+            send(web,"DEVICE_INFO while another session waits for approval")
+            waitFor(web,"document.getElementById('send').textContent==='停止'");waitFor(web,"document.getElementById('send').textContent==='发送'")
+            assertTrue(host(activity).view().getJSONArray("activeRuns").objects().any {it.getString("sessionId")==first && it.getString("status")=="awaiting_user"})
+            assertEquals(60,JSONObject(config.readText()).getInt("volume"))
+            javascript(web,"ThorUI.postMessage(JSON.stringify({op:'select',sessionId:${JSONObject.quote(first)}}))")
+            waitFor(web,"!!document.querySelector('.wait')");javascript(web,"document.querySelectorAll('.wait button')[1].click()")
+            waitFor(web,"document.getElementById('send').textContent==='发送'")
+            assertEquals(60,JSONObject(config.readText()).getInt("volume"))
+            java.io.File(context.filesDir,"integrated-parallel-approval.json").writeText(obj("passed" to true,"otherSessionToolCompleted" to true,"waitingWriteNotSubmitted" to true).toString(2))
+        } finally {finish(activity)}
+    }
+    @Test fun concurrentSessionsInheritOptionsAndStopOnlyTheirOwnRun() {
+        configure(0,801)
+        assertTrue(context.getSharedPreferences("profiles",0).edit().putString("provider","opencode-go").putString("model","deepseek-v4.1-flash").commit())
+        val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
+        try {
+            waitFor(web,"window.productReady===true")
+            val first=host(activity).selectedSession()
+            probe(activity,web)
+            assertEquals(1000000,host(activity).view().getJSONObject("modelSelection").getInt("contextWindow"))
+            javascript(web,"ThorUI.postMessage(JSON.stringify({op:'sessionOptions',sessionId:${JSONObject.quote(first)},thinkingEffort:'max',selectedSkills:['adb-operations']}))")
+            waitFor(web,"document.getElementById('effort-select').value==='max'")
+            javascript(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(first)},capability:'search',enabled:false}))")
+            waitFor(web,"!document.querySelector('input[aria-label=\"联网搜索\"]').checked")
+            send(web,"WAIT_CANCEL first session")
+            waitFor(web,"document.getElementById('send').textContent==='停止'")
+            val firstRun=host(activity).view().getString("activeRunId")
+            javascript(web,"document.getElementById('new').click()")
+            waitFor(web,"document.getElementById('send').textContent==='发送'")
+            val second=host(activity).selectedSession()
+            assertNotEquals(first,second)
+            val inherited=host(activity).view();assertEquals("max",inherited.getJSONObject("modelSelection").getString("thinkingEffort"))
+            assertFalse(inherited.getJSONArray("sessions").objects().single {it.getString("id")==second}.getJSONObject("capabilities").getBoolean("search"))
+            assertEquals("[\"adb-operations\"]",inherited.getJSONArray("sessions").objects().single {it.getString("id")==second}.getJSONArray("selectedSkills").toString())
+            send(web,"DEVICE_INFO concurrent second")
+            waitFor(web,"document.getElementById('send').textContent==='停止'");waitFor(web,"document.getElementById('send').textContent==='发送'")
+            assertEquals("completed",SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().last().getString("status")})
+            assertTrue(host(activity).view().getJSONArray("activeRuns").objects().any {it.getString("id")==firstRun && it.optString("status") !in terminal})
+            send(web,"WAIT_CANCEL second session")
+            waitFor(web,"document.getElementById('send').textContent==='停止'")
+            val secondRun=host(activity).view().getString("activeRunId")
+            javascript(web,"ThorUI.postMessage(JSON.stringify({op:'select',sessionId:${JSONObject.quote(first)}}))")
+            waitFor(web,"document.querySelector('.session-row.selected')?.dataset.sessionId===${JSONObject.quote(first)}")
+            waitFor(web,"document.getElementById('send').textContent==='停止'")
+            javascript(web,"document.getElementById('send').click()")
+            waitFor(web,"document.getElementById('send').textContent==='发送'")
+            val after=SqliteStore(context,"product.db").use {it.load()}
+            assertEquals("cancelled",after.getJSONArray("runs").objects().single {it.getString("id")==firstRun}.getString("status"))
+            assertTrue(after.getJSONArray("runs").objects().single {it.getString("id")==secondRun}.getString("status") !in terminal)
+            javascript(web,"ThorUI.postMessage(JSON.stringify({op:'select',sessionId:${JSONObject.quote(second)}}))")
+            waitFor(web,"document.querySelector('.session-row.selected')?.dataset.sessionId===${JSONObject.quote(second)}")
+            waitFor(web,"document.getElementById('send').textContent==='停止'");javascript(web,"document.getElementById('send').click()")
+            waitFor(web,"document.getElementById('send').textContent==='发送'")
+            java.io.File(context.filesDir,"integrated-concurrent-sessions.json").writeText(obj("passed" to true,"contextWindow" to 1000000,"effort" to "max","optionsInherited" to true,"backgroundRunPreserved" to true,"targetedStop" to true).toString(2))
+        } finally {finish(activity)}
+    }
     @Test fun anonymousHttpRedirectCrossesAndroidBridgeWithoutCredentials() {
         // This regression exercises Android JSONObject null parsing, not the JVM shim.
-        for(protocol in 0..1) {
+        for(protocol in 0..2) {
             configure(protocol, 101+protocol)
             val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
             try {

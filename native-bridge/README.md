@@ -63,7 +63,7 @@ adb shell am start -n dev.thor.bridge.host/.MainActivity
 | `host/` | 最小独立 Android 宿主、本地 JS 页面、无副作用 mock 工具 |
 | `fixtures/` | 只监听 loopback 的 HTTP 服务 |
 
-HTTP 默认单块 32 KiB、credit 最大 256 KiB、请求 body 16 MiB、响应 32 MiB；连接 15 秒、读写空闲 60 秒、总时限 180 秒，且不超过 Native Run 租约与信封 deadline。最多两个 HTTP 请求；单 Run 最多 512 个请求 ID，终态后也不能重用。工具单执行线程、32 个排队槽、单 Run 最多 512 个 call/request ID、结果最大 64 KiB。错误显式返回，不静默丢块。
+HTTP 默认单块 32 KiB、credit 最大 256 KiB、请求 body 16 MiB、响应 32 MiB；连接 15 秒、读写空闲 60 秒、总时限 180 秒，且不超过 Native Run 租约与信封 deadline。最多八个 HTTP 请求，分别验证所属 Run；当前桥连接最多 512 个请求 ID，终态后也不能重用。工具单执行线程、32 个排队槽、单 Run 最多 512 个 call/request ID、结果最大 64 KiB。错误显式返回，不静默丢块。
 
 网关先检查 Native 已发布的工具集合、Session/Run/lease/epoch、严格参数、资源 snapshot 与后端状态，入队后在每个 `ExecutionContext.step` 内再次检查，短副作用提交与撤销共用授权锁。停止后尚未提交的段不得执行；已经提交的动作报告 `submitted`，提交发生异常报告 `unknown`。这不是设备系统调用回滚保证。
 

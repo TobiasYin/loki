@@ -15,6 +15,14 @@ class DeviceAuthorityTest {
     private fun begin(): Binding = native.beginRun("a", native.connect(), emptyMap()).also { port.bind(it); port.publish(it, setOf("perception.device_info")) }
     private fun e(b: Binding, call: String = "c") = Envelope(b.sessionId, b.runId, call, "perception.device_info", b.capabilityEpoch, now + 5000, requestId = call)
     private fun rejected(action: () -> Unit) { try { action(); fail("Expected rejection") } catch(_: ToolFailure) { } }
+    @Test fun concurrentRunsKeepPublicationCancellationAndReplayLedgersSeparate() {
+        val a=begin();val b=native.beginRun("b",a.connectionId,emptyMap());port.bind(b);port.publish(b,setOf("perception.device_info"))
+        val ca=port.validate(e(a));val cb=port.validate(e(b));port.claim(e(a));port.claim(e(b))
+        rejected {port.validate(e(a).copy(sessionId="b"))}
+        native.stopRun(a.runId);port.stop(a.runId);assertTrue(ca.cancelled);assertFalse(cb.cancelled)
+        var effects=0;port.commit(e(b,"next")){effects++};assertEquals(1,effects)
+        rejected {port.claim(e(b))};rejected {port.validate(e(a))}
+    }
     @Test fun realGatewayUsesNativeCapabilitySourceAndRejectsOffOn() {
         val b = begin(); val cancel = port.validate(e(b)); var effects = 0
         native.setEnabled("a", Capability.screen_perception, false)

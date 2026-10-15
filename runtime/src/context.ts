@@ -32,10 +32,11 @@ export async function resolveContent(content: Content[], attachments: Attachment
   }));
 }
 export async function project(messages: DomainMessage[], model: Model<any>, attachments: AttachmentPort, snapshot: AuthoritySnapshot): Promise<Message[]> {
+  const resolve=async(content:Content[])=> (await resolveContent(content,attachments,snapshot.session.enabled)).map(c=>c.type==='image' && !model.input.includes('image')?{type:'text' as const,text:'[Image unavailable: selected model supports text only]'}:c);
   return Promise.all(messages.map(async m => {
     const timestamp = Date.now();
-    if (m.kind === 'user') return { role: 'user' as const, content: await resolveContent(m.content, attachments, snapshot.session.enabled), timestamp };
-    if (m.kind === 'tool_result') return { role: 'toolResult' as const, toolCallId: m.toolCallId, toolName: m.toolName, content: await resolveContent(m.content, attachments, snapshot.session.enabled), isError: m.isError, timestamp };
+    if (m.kind === 'user') return { role: 'user' as const, content: await resolve(m.content), timestamp };
+    if (m.kind === 'tool_result') return { role: 'toolResult' as const, toolCallId: m.toolCallId, toolName: m.toolName, content: await resolve(m.content), isError: m.isError, timestamp };
     return { role: 'assistant' as const, content: [...(m.text ? [{ type: 'text' as const, text: m.text }] : []), ...m.calls.map(c => ({ type: 'toolCall' as const, ...c, arguments: c.arguments as any }))], api: model.api, provider: model.provider, model: model.id, usage: structuredClone(ZERO_USAGE), stopReason: m.calls.length ? 'toolUse' as const : 'stop' as const, timestamp };
   }));
 }
@@ -92,7 +93,7 @@ export async function compileContext(options: {
     const messages = await project(domain, model, options.attachments, s);
     assertPaired(messages); units.push({ id: turn.turnId, messages });
   }
-  const budget = Math.floor(model.contextWindow * 0.7) - model.maxTokens;
+  const budget = model.contextWindow - model.maxTokens;
   const assemble = () => [system, ...units.flatMap(u => u.messages), ...current];
   while (estimateTokens(assemble(), options.imageTokens) > budget && units.length) dropped.push(units.shift()!.id);
   const messages = assemble(); const estimatedTokens = estimateTokens(messages, options.imageTokens);

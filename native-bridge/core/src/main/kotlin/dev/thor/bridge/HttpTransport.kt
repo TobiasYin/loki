@@ -52,7 +52,7 @@ class HttpTransport(private val authority: Authority, private val policy: Networ
         requireBridge(start.envelope.requestId.matches(Regex("[a-zA-Z0-9_-]{1,100}")), Code.INVALID_REQUEST)
         if (seenRun != start.envelope.binding.runId) { seen.clear(); seenRun = start.envelope.binding.runId }
         requireBridge(start.envelope.requestId !in seen, Code.DUPLICATE_CALL)
-        requireBridge(active.size < 2 && seen.size < 512, Code.LIMIT_EXCEEDED)
+        requireBridge(active.size < 8 && seen.size < 512, Code.LIMIT_EXCEEDED)
         requireBridge((start.body?.size ?: 0) <= limits.requestBytes && start.method.matches(Regex("[A-Z]{1,12}")), Code.LIMIT_EXCEEDED)
         requireBridge(start.method !in setOf("GET", "HEAD") || start.body == null, Code.INVALID_REQUEST)
         val p = policy.prepare(start)

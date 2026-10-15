@@ -9,7 +9,7 @@ flowchart TB
   User --> Runtime[本地 Web UI / Run Coordinator]
   Session --> Runtime
   Runtime --> Pi[Pi Agent Core]
-  Pi --> Models[pi-ai 两种模型协议]
+  Pi --> Models[pi-ai 三种模型协议]
   Models --> Fetch[JS Fetch 兼容层]
   Fetch --> Transport[Native 通用 HTTP 传输]
   Transport --> API[用户配置模型服务]
@@ -74,3 +74,10 @@ Native Capability Store 是唯一授权事实源，Runtime 只有版本化镜像
 产品授权由 Native Authority 拥有，持久化由 ProductHost/SQLite拥有；原独立 Coordinator 和 ManualTestAuthority 不参与正式授权。前台只保留一个 Native Run，Activity singleTask；页面连接/前台生命周期失效立即撤销执行。UI 在 Native 收尾完成前仍阻止新发送。
 
 设备工具经真实 Gateway 与 bundled复杂 schema 校验；网络工具也登记 purpose/profile，并受 Native 搜索能力控制；按用户要求，网络地址和 DNS 不做公网/内网限制，凭据仍绑定配置端点。Native transport 不解析模型 JSON/SSE。批准卡、领域回合、ContextSnapshot/附件及图片工具回传已接入，详细限制与证据见集成报告。
+
+
+## 0.5.0 会话与界面更新
+
+不同会话拥有各自的 ThorRuntime、网络上下文和 Native lease；Authority 与设备授权镜像按 runId 保存授权、取消与重放台账。最多 8 个不同会话并行，单会话至多一个活动运行。实际设备动作仍经过同一个串行执行器，审批等待不会占用该执行器；停止或撤销只影响对应运行。系统授权/设备资源整体失效、宿主离开前台或 renderer 退出仍会停止相关运行，不扩展为后台服务。
+
+设置是宿主内完整导航页面，打开设置不暂停 WebView/Runtime；服务密钥修改须在运行结束后保存。任务页可以选择模型和思考强度，开始后固定为运行快照。OpenCode Go 模型资料从 Pi 公共目录刷新并本地缓存，密钥仍只由 Native 持有。三种协议为 Responses、Anthropic Messages、Chat Completions，工具参数均经完整 JSON 审核后才能提交。

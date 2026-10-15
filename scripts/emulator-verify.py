@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Run only on an explicitly selected emulator; controlled service replaces only the remote model."""
 import argparse, pathlib, subprocess, os, time, socket, json, hashlib, re
-p=argparse.ArgumentParser();p.add_argument('--serial',required=True);p.add_argument('--lab-display',required=True,type=int);p.add_argument('--adb',default=str(pathlib.Path(os.environ.get('ANDROID_HOME',''))/'platform-tools/adb'));p.add_argument('--fixture-running',action='store_true');p.add_argument('--require-shizuku',action='store_true');a=p.parse_args()
-root=pathlib.Path(__file__).resolve().parents[1];os.chdir(root);output=root/'build/integration';output.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--serial',required=True);p.add_argument('--output',default='build/integration');p.add_argument('--lab-display',required=True,type=int);p.add_argument('--adb',default=str(pathlib.Path(os.environ.get('ANDROID_HOME',''))/'platform-tools/adb'));p.add_argument('--fixture-running',action='store_true');p.add_argument('--require-shizuku',action='store_true');a=p.parse_args()
+root=pathlib.Path(__file__).resolve().parents[1];os.chdir(root);output=(root/a.output).resolve();output.mkdir(parents=True,exist_ok=True)
 assert re.fullmatch(r'emulator-\d+',a.serial),'Only an explicit emulator serial is allowed'
 def adb(*args,binary=False):return subprocess.check_output([a.adb,'-s',a.serial,*args],text=not binary)
 assert adb('shell','getprop','ro.kernel.qemu').strip()=='1','Selected target is not an emulator'
@@ -21,7 +21,7 @@ try:
  if not a.fixture_running:
   for port in (8877,8878):
    with socket.socket() as probe:probe.bind(('127.0.0.1',port))
-  server=subprocess.Popen(['node','scripts/model-fixture.mjs'],stdout=open(output/'model-fixture.log','w'),stderr=subprocess.STDOUT)
+  server=subprocess.Popen(['node','scripts/model-fixture.mjs'],stdout=open(output/'model-fixture.log','w'),env={**os.environ,'THOR_FIXTURE_OUTPUT':str(output)},stderr=subprocess.STDOUT)
   for _ in range(50):
    try:
     with socket.create_connection(('127.0.0.1',8877),timeout=.2):break
@@ -37,7 +37,7 @@ try:
  (output/'lab-parser-final.log').write_text(result);print(result,flush=True)
  assert '4 Android parser fixture checks passed.' in result,'Lab parser instrumentation failed'
  if a.require_shizuku:(output/'integrated-shell-result.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/integrated-shell-result.json',binary=True))
- for name in ['physical-features.json','physical-storage-streaming-regression.json','physical-storage-regression.json','integrated-lab-report.json','integrated-lab-native.json','integrated-capture-result.json','integrated-frame-report.json','integrated-frame-native.json','integrated-chat.png']:
+ for name in ['integrated-parallel-approval.json','integrated-concurrent-sessions.json','integrated-settings-page.json','integrated-composer-native.png','integrated-settings-native.png','integrated-voice-settings-native.png','physical-features.json','physical-storage-streaming-regression.json','physical-storage-regression.json','integrated-lab-report.json','integrated-lab-native.json','integrated-capture-result.json','integrated-frame-report.json','integrated-frame-native.json','integrated-chat.png']:
   (output/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name,binary=True))
  report=json.loads((output/'integrated-lab-report.json').read_text());attempt=report['metadata']['attemptId']
  raw=adb('exec-out','run-as','dev.thor.inputlab','cat',f'files/reports/{attempt}/events.jsonl',binary=True)
@@ -50,7 +50,7 @@ try:
  assert report['sceneAfter']['rawCount']==2 and report['sceneAfter']['hits']==1
  (output/'integrated-lab-events.jsonl').write_bytes(raw)
  assert report['status']=='pass' and report['agentRunId'] == json.loads((output/'integrated-lab-native.json').read_text())['runId']
- evidence=['physical-features.json','physical-storage-streaming-regression.json','physical-storage-regression.json','integrated-lab-report.json','integrated-lab-native.json','integrated-chat.png','integrated-lab-events.jsonl','product-suite-final.log','lab-parser-final.log']
+ evidence=['integrated-parallel-approval.json','integrated-concurrent-sessions.json','integrated-settings-page.json','integrated-composer-native.png','integrated-settings-native.png','integrated-voice-settings-native.png','physical-features.json','physical-storage-streaming-regression.json','physical-storage-regression.json','integrated-lab-report.json','integrated-lab-native.json','integrated-chat.png','integrated-lab-events.jsonl','product-suite-final.log','lab-parser-final.log']
  if a.require_shizuku:evidence.append('integrated-shell-result.json')
  metadata={'sourceCommit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'serial':a.serial,'labDisplay':a.lab_display,'emulator':True,'requireShizuku':a.require_shizuku,'deviceFingerprint':adb('shell','getprop','ro.build.fingerprint').strip(),'webView':adb('shell','dumpsys','webviewupdate'),'reportQualification':report['receiverQualificationVersion'],'files':{name:hashlib.sha256((output/name).read_bytes()).hexdigest() for name in evidence}}
  metadata['workingTreeChanges']=subprocess.check_output(['git','status','--short'],text=True).splitlines()

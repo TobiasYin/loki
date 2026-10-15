@@ -1,6 +1,7 @@
 import { Agent, type AgentEvent, type AgentTool } from '@earendil-works/pi-agent-core';
 import type { Message, Model } from '@earendil-works/pi-ai';
 import { streamSimple as responses } from '@earendil-works/pi-ai/api/openai-responses';
+import { streamSimple as completions } from '@earendil-works/pi-ai/api/openai-completions';
 import { streamSimple as anthropic } from '@earendil-works/pi-ai/api/anthropic-messages';
 import { compileContext, project, resolveContent } from './context.js';
 import { DEFAULT_LIMITS, RuntimeError, type AgentRun, type AuthoritySnapshot, type Content, type DomainMessage, type EffectRecord, type HistoryTurn, type ModelProfile, type RunEvent, type RunLease, type RunState, type RuntimeLimits, type RuntimePorts, type ToolDescriptor, type ToolEnvelope, type ToolOutcome, type ErrorCode, type Capability } from './contracts.js';
@@ -30,15 +31,15 @@ export function assertRuntimeFeatures(): void {
 function checkProfile(p: ModelProfile): void {
   const u = new URL(p.baseUrl);
   if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || u.search || u.hash) fail('UNSUPPORTED');
-  if (!['openai-responses', 'anthropic-messages'].includes(p.protocol) || !p.modelId || !p.credentialRef || p.contextWindow <= p.maxOutput || p.maxOutput < 16 || !Number.isSafeInteger(p.contextWindow) || !Number.isSafeInteger(p.maxOutput)) fail('UNSUPPORTED');
-  if (p.lastProbe.revision !== p.revision || !p.lastProbe.textStream || !p.lastProbe.imageInput || !p.lastProbe.toolCalling || !p.lastProbe.imageToolRoundTrip) fail('UNSUPPORTED');
+  if (!['openai-responses', 'anthropic-messages','openai-completions'].includes(p.protocol) || !p.modelId || !p.credentialRef || p.contextWindow <= p.maxOutput || p.maxOutput < 16 || !Number.isSafeInteger(p.contextWindow) || !Number.isSafeInteger(p.maxOutput)) fail('UNSUPPORTED');
+  if (p.lastProbe.revision !== p.revision || !p.lastProbe.textStream || !p.lastProbe.toolCalling || (p.input??['text','image']).includes('image') && (!p.lastProbe.imageInput || !p.lastProbe.imageToolRoundTrip)) fail('UNSUPPORTED');
   for (const [h, v] of Object.entries(p.customHeaders ?? {})) if (!/^[a-z0-9-]+$/i.test(h) || /^(host|authorization|x-api-key|cookie|proxy-authorization|content-length|connection)$/i.test(h) || /[\r\n]/.test(v)) fail('UNSUPPORTED');
 }
 function toModel(p: ModelProfile): Model<any> {
-  return { id: p.modelId, name: p.label, api: p.protocol, provider: p.protocol === 'openai-responses' ? 'openai' : 'anthropic', baseUrl: p.baseUrl.replace(/\/+$/, ''),
-    reasoning: false, input: ['text', 'image'], contextWindow: p.contextWindow, maxTokens: p.maxOutput,
+  return { id: p.modelId, name: p.label, api: p.protocol, provider:p.provider==='opencode-go'?'opencode-go':p.protocol==='anthropic-messages'?'anthropic':'openai', baseUrl: p.baseUrl.replace(/\/+$/, ''),
+    reasoning: p.reasoning??(p.thinkingEffort!==undefined && p.thinkingEffort!=='off'), thinkingLevelMap:p.thinkingLevelMap as Model<any>['thinkingLevelMap'], input:p.input??['text','image'], contextWindow: p.contextWindow, maxTokens: p.maxOutput,
     // Pi requires a price object. Zero is an internal sentinel, never a displayed price claim.
-    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, compat: { supportsMidConvoSystemMessages: false } };
+    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, compat: { ...p.compat, supportsMidConvoSystemMessages: false } };
 }
 function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -49,7 +50,7 @@ function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-/** One coordinator per device. All Pi/model protocol processing lives in this JS module. */
+/** One coordinator per active run. Native owns cross-run authorization and device serialization. */
 export class ThorRuntime {
   private active?: Active;
   private reserved = false;
@@ -172,7 +173,7 @@ export class ThorRuntime {
     return async (input, init) => {
       await this.authority(a);
       const request = new Request(input, init); const u = new URL(request.url); const base = new URL(a.profile.baseUrl);
-      const expectedPath = a.profile.protocol === 'openai-responses' ? `${base.pathname.replace(/\/$/, '')}/responses` : `${base.pathname.replace(/\/$/, '').replace(/\/v1$/, '')}/v1/messages`;
+      const expectedPath = a.profile.protocol === 'openai-responses' ? `${base.pathname.replace(/\/$/, '')}/responses` : a.profile.protocol==='openai-completions' ? `${base.pathname.replace(/\/$/,'')}/chat/completions` : `${base.pathname.replace(/\/$/, '').replace(/\/v1$/, '')}/v1/messages`;
       const allowedQuery = a.profile.protocol === 'anthropic-messages' ? u.search === '?beta=true' || u.search === '' : u.search === '';
       if (request.method !== 'POST' || u.origin !== base.origin || u.pathname !== expectedPath || !allowedQuery) fail('UNSUPPORTED');
       const body = new Uint8Array(await request.clone().arrayBuffer());
@@ -250,7 +251,7 @@ export class ThorRuntime {
       await this.authority(a);
       const user = await project([{ kind: 'user', content: input }], model, this.ports.attachments, initial);
       let audit = new ProtocolAudit();
-      const agent = new Agent({ initialState: { model, thinkingLevel: 'off', messages: [] }, toolExecution: 'sequential', transport: 'sse',
+      const agent = new Agent({ initialState: { model, thinkingLevel: profile.thinkingEffort??'off', messages: [] }, toolExecution: 'sequential', transport: 'sse',
         beforeToolCall: async ({ toolCall }) => audit.permits(toolCall.id, toolCall.arguments) ? undefined : { block: true, reason: 'PROTOCOL_ERROR: incomplete or conflicting JSON', terminate: true },
         prepareRequest: async request => {
           try {
@@ -280,8 +281,8 @@ export class ThorRuntime {
         },
         convertToLlm: () => active.requestMessages,
         streamFn: (_model, context, options) => {
-          const common = { ...options, onProviderStreamEvent: (event: unknown) => audit.observe(profile.protocol, event), apiKey: 'sk-thor-native-placeholder', fetch: this.fetch(active), transport: 'sse' as const, maxTokens: profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
-          return profile.protocol === 'openai-responses' ? responses(model, context, common) : anthropic(model, context, common);
+          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onProviderStreamEvent: (event: unknown) => audit.observe(profile.protocol, event), apiKey: 'sk-thor-native-placeholder', fetch: this.fetch(active), transport: 'sse' as const, maxTokens: profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
+          return profile.protocol === 'openai-responses' ? responses(model, context, common) : profile.protocol==='openai-completions' ? completions(model,context,common) : anthropic(model, context, common);
         },
       });
       a.agent = agent;

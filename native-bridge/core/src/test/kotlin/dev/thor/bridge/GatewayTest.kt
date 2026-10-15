@@ -44,7 +44,20 @@ class GatewayTest {
     @Test fun defaultsAndSessionIsolation() {
         val a = Authority(); a.createSession("one"); a.createSession("two"); val c = a.connect(); val one = a.beginRun("one", c, emptyMap())
         assertEquals(setOf(Capability.screen_perception, Capability.web_search), a.enabled(one)); a.setEnabled("two", Capability.web_search, false); assertTrue(Capability.web_search in a.enabled(one))
-        assertEquals(Code.LIMIT_EXCEEDED, (runCatching { a.beginRun("two", c, emptyMap()) }.exceptionOrNull() as BridgeFailure).code)
+        val two=a.beginRun("two",c,emptyMap());a.validate(one);a.validate(two)
+        assertEquals(Code.LIMIT_EXCEEDED,(runCatching {a.beginRun("one",c,emptyMap())}.exceptionOrNull() as BridgeFailure).code)
+        a.stopRun(one.runId);assertEquals(Code.STALE_AUTHORIZATION,(runCatching {a.validate(one)}.exceptionOrNull() as BridgeFailure).code);a.validate(two)
+    }
+    @Test fun concurrentNetworkLeasesAndRevocationStaySessionScoped() {
+        val a=Authority();a.createSession("a");a.createSession("b");val c=a.connect()
+        val first=a.beginRun("a",c,mapOf(Purpose.model to setOf("first")))
+        val second=a.beginRun("b",c,mapOf(Purpose.model to setOf("second")))
+        a.validateNetwork(NetworkEnvelope(1,"a",first,Purpose.model,"first",a.clock.nowMs()+1000),true)
+        a.validateNetwork(NetworkEnvelope(1,"b",second,Purpose.model,"second",a.clock.nowMs()+1000),true)
+        assertEquals(Code.PERMISSION_MISSING,(runCatching {a.validateNetwork(NetworkEnvelope(1,"cross",first,Purpose.model,"second",a.clock.nowMs()+1000),true)}.exceptionOrNull() as BridgeFailure).code)
+        a.setEnabled("a",Capability.web_search,false);a.validate(second)
+        a.stopRun(first.runId);a.validate(second);a.disconnect(c)
+        assertEquals(Code.UNTRUSTED_BRIDGE,(runCatching {a.validate(second)}.exceptionOrNull() as BridgeFailure).code)
     }
     @Test fun forgedSessionLeaseUnknownToolAndSchemaFailClosed() = Lab().use { l ->
         assertEquals(Code.STALE_AUTHORIZATION, l.result(l.call(b = l.binding.copy(sessionId = "b"))).code)

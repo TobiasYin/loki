@@ -4,6 +4,8 @@
 
 已完成一轮 **Thor 真机测试与修复**：真实 OpenCode Go Responses、Brave 搜索、完整下屏输入法、Shizuku 自动无障碍、手指和实体手柄接收基线，以及真实模型的逻辑坐标/截图坐标触摸已有实测证据，见 [实机测试报告](docs/physical-test-report.md)。原生手柄注入、完整故障矩阵和真实模拟器私有配置权限仍未完成，完整四能力产品尚不能宣称发布就绪。此前本地受控模型服务、JVM、DOM 与 Android AVD 的历史证据见 [中文软件集成报告](docs/integration-report.md)。
 
+0.5.0 的紧凑输入区、完整设置页、OpenCode Go 模型/思考强度选择与多会话并行见 [本轮界面与模型配置说明](docs/composer-models-parallel.md)。新会话继承上次选择的能力、模型、思考强度和 Skill；下表是首次安装的初始默认值。真机仍保持暂停。
+
 | 能力 | 新 Session | 当前实现与限制 |
 |---|---|---|
 | 上屏感知 | ON | 真实设备信息；校准显示与 Accessibility 后提供应用/窗口/UI 树/截图；每次模型请求仅注入最小上下文 |

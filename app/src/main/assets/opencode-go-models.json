@@ -1,0 +1,899 @@
+{
+  "source": "https://github.com/earendil-works/pi",
+  "provider": "opencode-go",
+  "generatedAt": "2026-10-15",
+  "models": [
+    {
+      "id": "claude-haiku-5-5",
+      "name": "Claude Haiku 5.5",
+      "protocol": "anthropic-messages",
+      "contextWindow": 1000000,
+      "maxOutput": 128000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "xhigh": "xhigh",
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "forceAdaptiveThinking": true,
+        "supportsTemperature": false
+      }
+    },
+    {
+      "id": "minimax-m3",
+      "name": "MiniMax-M3",
+      "protocol": "anthropic-messages",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {}
+    },
+    {
+      "id": "qwen3.7-plus",
+      "name": "Qwen3.7 Plus",
+      "protocol": "anthropic-messages",
+      "contextWindow": 1000000,
+      "maxOutput": 65536,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {}
+    },
+    {
+      "id": "qwen3.8-flash",
+      "name": "Qwen3.8 Flash",
+      "protocol": "anthropic-messages",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "allowEmptySignature": true
+      }
+    },
+    {
+      "id": "qwen3.8-max",
+      "name": "Qwen3.8 Max",
+      "protocol": "anthropic-messages",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {}
+    },
+    {
+      "id": "deepseek-v4-flash",
+      "name": "DeepSeek V4 Flash",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 384000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "low",
+        "high",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "minimal": null,
+        "low": "low",
+        "medium": null,
+        "high": "high",
+        "max": "max"
+      },
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens",
+        "requiresReasoningContentOnAssistantMessages": true,
+        "thinkingFormat": "deepseek"
+      }
+    },
+    {
+      "id": "deepseek-v4-flash-vision-exp",
+      "name": "DeepSeek V4 Flash Vision Exp",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 384000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "low",
+        "high",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "minimal": null,
+        "low": "low",
+        "medium": null,
+        "high": "high",
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens",
+        "requiresReasoningContentOnAssistantMessages": true,
+        "thinkingFormat": "deepseek"
+      }
+    },
+    {
+      "id": "deepseek-v4-pro",
+      "name": "DeepSeek V4 Pro (New)",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 384000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "high",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "minimal": null,
+        "low": null,
+        "medium": null,
+        "high": "high",
+        "max": "max"
+      },
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens",
+        "requiresReasoningContentOnAssistantMessages": true,
+        "thinkingFormat": "deepseek"
+      }
+    },
+    {
+      "id": "deepseek-v4.1-flash",
+      "name": "DeepSeek V4.1 Flash",
+      "protocol": "openai-responses",
+      "contextWindow": 1000000,
+      "maxOutput": 384000,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "high",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": null,
+        "high": "high",
+        "xhigh": null,
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens",
+        "requiresReasoningContentOnAssistantMessages": true,
+        "thinkingFormat": "deepseek"
+      }
+    },
+    {
+      "id": "glm-5.2",
+      "name": "GLM-5.2",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "high",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": null,
+        "medium": null,
+        "high": "high",
+        "xhigh": null,
+        "max": "max"
+      },
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "glm-5.3",
+      "name": "GLM-5.3",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "high",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": null,
+        "high": "high",
+        "xhigh": null,
+        "max": "max"
+      },
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "glm-5.3-flash",
+      "name": "GLM-5.3-Flash",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "high",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": null,
+        "high": "high",
+        "xhigh": null,
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "hy3",
+      "name": "Hy3",
+      "protocol": "openai-completions",
+      "contextWindow": 256000,
+      "maxOutput": 128000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "low",
+        "high"
+      ],
+      "thinkingLevelMap": {
+        "off": "none",
+        "minimal": null,
+        "low": "low",
+        "medium": null,
+        "high": "high",
+        "xhigh": null,
+        "max": null
+      },
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "hy4-preview",
+      "name": "Hy4 preview",
+      "protocol": "openai-completions",
+      "contextWindow": 1024000,
+      "maxOutput": 64000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "high"
+      ],
+      "thinkingLevelMap": {
+        "off": "none",
+        "minimal": null,
+        "low": null,
+        "medium": null,
+        "high": "high",
+        "xhigh": null,
+        "max": null
+      },
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "kimi-k2.7-code",
+      "name": "Kimi K2.7 Code",
+      "protocol": "openai-completions",
+      "contextWindow": 262144,
+      "maxOutput": 262144,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "kimi-k3",
+      "name": "Kimi K3",
+      "protocol": "openai-completions",
+      "contextWindow": 1048576,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": null,
+        "medium": null,
+        "high": null,
+        "xhigh": null,
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens",
+        "supportsMidConvoSystemMessages": true,
+        "supportsMidConvoToolAdditions": true
+      }
+    },
+    {
+      "id": "longcat-2.0",
+      "name": "LongCat-2.0",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "longcat-2.5-preview-free",
+      "name": "LongCat 2.5 Preview Free",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "mimo-v2.5",
+      "name": "MiMo V2.5",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 128000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "mimo-v2.5-pro",
+      "name": "MiMo V2.5 Pro",
+      "protocol": "openai-completions",
+      "contextWindow": 1048576,
+      "maxOutput": 128000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "mimo-v2.6-flash",
+      "name": "MiMo-V2.6-Flash",
+      "protocol": "openai-completions",
+      "contextWindow": 1048576,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "mimo-v2.6-pro",
+      "name": "MiMo-V2.6-Pro",
+      "protocol": "openai-completions",
+      "contextWindow": 1048576,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "minimax-m2.7",
+      "name": "MiniMax-M2.7",
+      "protocol": "openai-completions",
+      "contextWindow": 204800,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": null,
+      "input": [
+        "text"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "space-bunny",
+      "name": "Space Bunny",
+      "protocol": "openai-completions",
+      "contextWindow": 1048576,
+      "maxOutput": 524288,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": "xhigh",
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "step-5-preview-free",
+      "name": "Step 5 Preview Free",
+      "protocol": "openai-completions",
+      "contextWindow": 1000000,
+      "maxOutput": 65536,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": null,
+        "max": null
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsStrictMode": true,
+        "maxTokensField": "max_tokens"
+      }
+    },
+    {
+      "id": "gpt-5.6-luna",
+      "name": "GPT-5.6 Luna",
+      "protocol": "openai-responses",
+      "contextWindow": 1050000,
+      "maxOutput": 128000,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": "xhigh",
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "sessionAffinityFormat": "openai-nosession",
+        "supportsMidConvoSystemMessages": true,
+        "supportsAdditionalTools": true
+      }
+    },
+    {
+      "id": "gpt-6-luna",
+      "name": "GPT-6 Luna",
+      "protocol": "openai-responses",
+      "contextWindow": 1050000,
+      "maxOutput": 128000,
+      "reasoning": true,
+      "efforts": [
+        "off",
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "thinkingLevelMap": {
+        "off": "none",
+        "minimal": null,
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": "xhigh",
+        "max": "max"
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "sessionAffinityFormat": "openai-nosession",
+        "supportsMidConvoSystemMessages": true,
+        "supportsAdditionalTools": true
+      }
+    },
+    {
+      "id": "grok-4.6",
+      "name": "Grok 4.6",
+      "protocol": "openai-responses",
+      "contextWindow": 500000,
+      "maxOutput": 500000,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": "xhigh",
+        "max": null
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "sessionAffinityFormat": "openai-nosession"
+      }
+    },
+    {
+      "id": "grok-4.7",
+      "name": "Grok 4.7",
+      "protocol": "openai-responses",
+      "contextWindow": 500000,
+      "maxOutput": 500000,
+      "reasoning": true,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": null,
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": "xhigh",
+        "max": null
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "sessionAffinityFormat": "openai-nosession"
+      }
+    },
+    {
+      "id": "muse-spark-1.2-contributor",
+      "name": "Muse Spark 1.2 Contributor",
+      "protocol": "openai-responses",
+      "contextWindow": 1048576,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": "minimal",
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": "xhigh",
+        "max": null
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "sessionAffinityFormat": "openai-nosession"
+      }
+    },
+    {
+      "id": "muse-spark-1.3-contributor",
+      "name": "Muse Spark 1.3 Contributor",
+      "protocol": "openai-responses",
+      "contextWindow": 1048576,
+      "maxOutput": 131072,
+      "reasoning": true,
+      "efforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "thinkingLevelMap": {
+        "off": null,
+        "minimal": "minimal",
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "xhigh": "xhigh",
+        "max": null
+      },
+      "input": [
+        "text",
+        "image"
+      ],
+      "compat": {
+        "sessionAffinityFormat": "openai-nosession"
+      }
+    }
+  ],
+  "piVersion": "1.2.0"
+}

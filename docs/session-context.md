@@ -39,7 +39,7 @@ stateDiagram-v2
 
 awaiting_user 用于明确的危险操作确认或缺少必要信息；不要求普通只读工具每步确认。进程退出时所有非终态 Run 恢复为 interrupted。终态只能确定一次；迟到模型 token、工具事件附为诊断，不重新把 Run 置回运行中。
 
-一个 Session 可以有多个历史 Run；同设备首版只运行一个。切换 Session 只改变查看对象，原 Run 可以继续前台执行，主界面持续显示运行所属 Session 和停止入口。在另一 Session 发送时提示先停止或加入待运行队列；排队项真正开始时重新取得权限和环境，不沿用旧快照。
+0.5.0 起，不同 Session 可以同时运行，每个 Session 至多一个活动 Run，Native 同时接纳最多 8 个。各运行独立持有 Runtime、模型/思考强度快照、网络上下文、授权 lease、工具发布集合、取消和去重记录。切换只改变查看对象；输入框发送按钮仅停止当前会话，侧栏标识其他运行。实际设备动作仍串行执行，等待批准不占用执行队列。创建新会话复制上次选择的能力、模型、思考强度和 Skill 挂载选择，不复制历史、草稿或待发送图片。
 
 ## 事件与一致性
 
@@ -55,7 +55,7 @@ awaiting_user 用于明确的危险操作确认或缺少必要信息；不要求
 
 ## 压缩策略
 
-触发阈值为已配置上下文预算的 70%（初值），预留最大输出和当前工具回合开销。token 计数可用 provider usage 校正，不支持精确 tokenizer 时标记 estimated。图像成本单独估算，不用字符长度当图片 token 数。
+0.5.0 起按当前 provider/model profile 的 contextWindow 分配上下文，并预留 maxOutput；不再额外固定截到 70%。OpenCode Go 使用可刷新、带缓存的 Pi 模型资料；DeepSeek V4.1 Flash 为 1,000,000 tokens。自定义 API 使用用户填写的上限。token 计数可用 provider usage 校正，不支持精确 tokenizer 时标记 estimated。图像成本单独估算，不用字符长度当图片 token 数。
 
 1. 保留当前用户目标、明确约束、最近必要对话和所有尚未闭合的 tool call/result；不拆孤立 toolResult。
 2. 去掉过期截图、重复窗口/UI 树大段输出，用带来源 ID 的短摘要代替；附件留在本地，不每轮上传。
