@@ -1,0 +1,60 @@
+[
+  {
+    "case": "unrelated",
+    "prompt": "请只计算 17×23，直接给出结果，不用展开解释。",
+    "answer": "391",
+    "skillReadPaths": [],
+    "runId": "f44a1ef3-c285-4bb9-88e5-0b97d570decb"
+  },
+  {
+    "case": "unmounted",
+    "prompt": "请简短说明这个会话现在可使用哪些已挂载的 Skill。只根据当前提供的目录回答，不需要读取正文，也不要创建技能。",
+    "answer": "当前会话目录中共挂载 3 个 Skill（仅元数据，未读取正文）：\n\n| 名称 | 说明（来自目录） |\n|---|---|\n| `adb-operations` | 读取 Thor 系统状态、调整双屏亮度/风扇/刷新率、用 curl 请求网络、下载安装应用、复现设备配置；含白灰黑名单与操作手册 |\n| `skill-creator` | 把修改流程、游戏攻略或经验保存为可复用 Skill，或修改已有 Skill |\n| `skill-manager` | 查看、读取、启用、停用或删除 Thor 已安装 Skill |\n\n补充两点与本次会话状态相关的观察（来自 L0 快照，非目录内容）：\n\n- L0 显示 `adb_debug` 为 `false`，且 `debug.shell`、`debug.thor_brightness` 等后端为 `backend_missing`。因此即使目录中存在 `adb-operations`，当前也无实际可执行的设备调试通道。\n- 目录列表未标注任何禁用项，故这 3 个均视为已安装可见；但“可见”不等于“当前可用”。\n\n如需实际使用其中某个 Skill，我可以再按需读取其 SKILL.md 正文。",
+    "skillReadPaths": [],
+    "runId": "89c523c0-00bc-4d1b-85ec-465f9d0e3e5f"
+  },
+  {
+    "case": "fish",
+    "prompt": "我在星露谷物语 1.6 第一年春季第 6 天，雨天上午 11 点，刚拿到普通竹鱼竿，钓鱼等级 2，没有魔法鱼饵，也进不了秘密森林。想给普通社区中心留鲶鱼，现在站在山湖边。今天该怎么行动？请用本会话已有资料，给出地点、有效时间、原因和收获后要保留什么，不需要重新联网。简洁回答。",
+    "answer": "**结论：现在这个湖钓不到鲶鱼，得换地方。**\n\n**地点**：鲶鱼（Catfish）只在**河流**（鹈鹕镇内河 / 煤矿森林的河）以及 Riverlands/Forest/Hill-Top 农场出现；秘密森林也算，但你进不去。你现在站的山湖（Mountain Lake）不在钓点内 —— 先去鹈鹕镇河边或煤矿森林河边。\n\n**有效时间**：春季雨天 **6:00–24:00**，现在 11:00 完全来得及，走过去的路上不耽误。\n\n**原因 / 今天的钓具现实**：\n- 你拿的是**竹鱼竿（Bamboo Pole）**：bait 装不了、tackle 也装不了（槽位只看鱼竿，跟等级无关）。\n- 所以魔法鱼饵、Trap Bobber 今天都用不上。Trap Bobber 属于 tackle，只有 **Iridium Rod** 能装，且需钓鱼等级 6 —— 等级 2 现在既装不了也不该买（Fiberglass 1,800g 只是能挂 bait，仍装不了 tackle）。\n- 今天就是纯靠等级 2 + 操作硬钓（鲶鱼难度 75、混合行为，会比较费劲，可能要多次尝试）。\n\n**收获后要保留什么**：\n- 钓到的**鲶鱼至少留 1 条**，放进社区中心 Fish Tank 的 **River Fish Bundle**，别卖。\n- 同 Bundle 还要 **Sunfish、Shad、Tiger Trout**，雨天正好也是钓 Shad / Tiger Trout 的好时机，可以一起留意。\n- 今天没钓到也没关系：春季还能等雨天，或等秋季雨天再来。",
+    "skillReadPaths": [
+      "SKILL.md",
+      "references/rainy-catfish.md"
+    ],
+    "runId": "b6340feb-59f9-40af-9443-bd9fa526bf60"
+  },
+  {
+    "case": "crops",
+    "prompt": "我在星露谷物语 1.6 第一年春季第 19 天，普通社区中心春季作物献祭，已留防风草、土豆和花椰菜，缺豆类，手上只有现在可以买到的种子；没有温室、种植加速职业或肥料，也不算随机商店购买。请根据本会话已有资料判断今年春天还能种出来完成吗？列出缺的作物、基础生长天数、最迟种植日和下一步处理；不要假定我已种过。简洁回答。",
+    "answer": "**结论：今年春天做不完了。**\n\n- **缺的作物**：绿豆（Green Bean）1 个，任意品质。其余三项（防风草、土豆、花椰菜）你已留好，无需补种。\n- **基础生长天数**：绿豆 10 天（不含播种当天，且需每天浇水；成熟后每 3 天再生一次）。\n- **最迟种植日**：春 18。今天春 19 播种 → 收获日 = 19 + 10 = **春 29**，已超过春 28，所以不行。\n- **为什么没有补救**：你没有温室、没有种植加速职业、也没有肥料（Speed-Gro 是完成本 Bundle 才给的奖励，属循环依赖，用不上）；绿豆是春季作物，季节切换未成熟就会枯死，所以不能用夏天绕。\n- **下一步**：\n  1. 把已有的防风草、土豆、花椰菜放进社区中心金卷轴的 Spring Crops Bundle（部分投入没问题），并顺手核对是否四项都还在。\n  2. 绿豆留到**第二年春季**：春 1 直接去皮埃尔买 Bean Starter 播种；若中途出现非随机商店途径（如旅行商车）再考虑提前完成。\n  3. 本季剩余时间用来做春天内还能完成的其它 Bundle（如其它季节作物/钓鱼等），别把春季作物献祭当成现实目标。",
+    "skillReadPaths": [
+      "SKILL.md",
+      "references/spring-crops-bundle.md"
+    ],
+    "runId": "266fa71b-54a8-414d-8467-8ec677a65828"
+  },
+  {
+    "case": "equipment",
+    "prompt": "我在星露谷物语 1.6 联机普通存档里，朋友已把一根 Iridium Rod 和一个 Trap Bobber 放到我的背包中，我的钓鱼等级只有 2。这两个东西已经实际持有，不讨论商店购买或制作。我现在能把这个钓具装到这根竿上吗？请用本会话资料说明原因，不重新联网，简洁回答。",
+    "answer": "能装。\n\n理由（按本会话资料）：\n- 钓具槽位只看鱼竿本身：Iridium Rod 可以装 bait，并且可以装 1 件 tackle；Bamboo Pole 两者都不能，Fiberglass Rod 只能装 bait。你手上是 Iridium Rod，所以有 tackle 槽位。\n- 钓鱼等级 6 是 Trap Bobber 的**获得**条件（Willy 处 500g 购买，或用 Copper Bar ×1 + Sap ×10 制作），不是**装备**条件；装备与玩家等级无关。\n- Trap Bobber 属于 tackle，只需竿上有 tackle 槽位即可。\n\n所以：东西已在背包里，直接把它拖到 Iridium Rod 的钓具槽即可。等级 2 只影响你能买/能做的竿和钓具，不影响这次安装。（另外这正是资料里为雨天鲶鱼准备的配置：Iridium Rod 挂 bait + Trap Bobber。）",
+    "skillReadPaths": [
+      "SKILL.md",
+      "references/rainy-catfish.md"
+    ],
+    "runId": "24d3e83b-a43b-412b-adac-21fbc33c4b53"
+  },
+  {
+    "case": "continuedAfterFailure",
+    "prompt": "现在请根据本会话之前的记录，告诉我刚才保存的 Skill 名称和两个专题。无需重读、联网或修改。",
+    "answer": "刚才保存的 Skill 名称是 **stardew-valley-guide**，两个专题是：\n\n1. **春季作物献祭与补种期限**（references/spring-crops-bundle.md）——普通社区中心 Pantry 的 Spring Crops Bundle：防风草、绿豆、花椰菜、土豆各 1 个，含各作物生长天数与最晚播种日。\n2. **雨天鲶鱼安排**（references/rainy-catfish.md）——春季（含秋季）下雨天、6:00–24:00 在河流/秘密森林钓 Catfish，用于 Fish Tank 的 River Fish Bundle。\n\n适用条件：星露谷物语 1.6、普通（非混合）社区中心路线。",
+    "skillReadPaths": [],
+    "runId": "cfea4956-ec72-45ac-8f6e-b4ae5c69e364"
+  },
+  {
+    "case": "sameSessionFollowup",
+    "prompt": "承接上一条，请再用一句话概括这个 Skill 的用途，并带上它的名称。不要调用工具。",
+    "answer": "**stardew-valley-guide** 用于在星露谷物语 1.6 普通（非混合）社区中心路线下，指导春季作物献祭与补种期限、以及雨天鲶鱼安排这两项专题。",
+    "skillReadPaths": [],
+    "runId": "5fad8cc8-0e14-43c1-8f8c-dbe18a2b688e"
+  }
+]

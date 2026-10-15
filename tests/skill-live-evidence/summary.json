@@ -1,0 +1,532 @@
+{
+  "date": "2026-10-16",
+  "sourceCommit": "c2520afd25700660f00e49825c36b9966b9413c7",
+  "emulatorOnly": true,
+  "model": "OpenCode Go Responses / deepseek-v4.1-flash",
+  "appApkSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+  "skill": {
+    "name": "stardew-valley-guide",
+    "description": "星露谷物语 1.6 普通社区中心的两个春季专题：春季作物献祭与补种期限、雨天鲶鱼安排（含鱼竿槽位与 Trap Bobber 装备前提）。需要这两类规划或操作时使用。",
+    "enabled": true,
+    "builtin": false,
+    "hash": "ae10191293e4dc6277d77ff2181c94140a4b69098f9de0fba74a62811d73ead0",
+    "fileCount": 3,
+    "updatedAt": 1792091616172
+  },
+  "fileHashes": {
+    "SKILL.md": "966d3cc068785f8b5243f3e6402429bccad3ed7186ee18cb61bd46cb7c5bb788",
+    "references/rainy-catfish.md": "304559fd009ae64c7a676557c2a48d154dd9b2adc0463ea0ac44576714802794",
+    "references/spring-crops-bundle.md": "faf2c1295c6993d63c0f5134af9ef9200833635a69e8119a67806824feb8ba1a"
+  },
+  "zipSha256": "38e642b6186b3cb3ac8d695664477ffabeff5ecb3d7e13691daa1f094f6b1d75",
+  "aggregateFlowPassed": true,
+  "answerAccuracyPassed": false,
+  "overallQualified": false,
+  "manualReview": {
+    "fish": {
+      "passed": false,
+      "coreDecisionPassed": true,
+      "currentBambooConstraintPassed": true,
+      "findings": [
+        {
+          "excerpt": "雨天正好也是钓 Shad / Tiger Trout 的好时机，可以一起留意。",
+          "issue": "该场景为春季且没有魔法鱼饵；Tiger Trout 的普通出现季节是秋、冬。属于超出当前专题资料后的错误扩展。",
+          "source": "https://stardewvalleywiki.com/Tiger_Trout"
+        },
+        {
+          "excerpt": "Trap Bobber 属于 tackle，只有 Iridium Rod 能装，且需钓鱼等级 6",
+          "issue": "当前竹竿不能装钓具的结论正确，但附加表述仍混淆了常规购买/制作解锁与持有后装备条件；独立装备题另测。",
+          "source": "https://stardewvalleywiki.com/Tackle"
+        }
+      ]
+    },
+    "crops": {
+      "passed": false,
+      "coreDecisionPassed": true,
+      "findings": [
+        {
+          "excerpt": "若中途出现非随机商店途径（如旅行商车）再考虑提前完成。",
+          "issue": "旅行货车销售属于随机途径，且问题已经明确排除随机商店；主结论春19来不及正确，附加建议违反题设。",
+          "source": "https://stardewvalleywiki.com/Traveling_Cart"
+        },
+        {
+          "excerpt": "Speed-Gro 是完成本 Bundle 才给的奖励，属循环依赖，用不上",
+          "issue": "完成 Bundle 会给奖励，不代表只能通过该奖励获得；本题已排除肥料，无需自行扩展这个错误的获得限制。",
+          "source": "https://stardewvalleywiki.com/Speed-Gro"
+        }
+      ]
+    },
+    "equipment": {
+      "passed": true,
+      "coreDecisionPassed": true,
+      "findings": [],
+      "qualification": "针对已实际持有 Iridium Rod 和 Trap Bobber 的场景，回答能装、单个 tackle 槽位及购买/制作与装备条件的区分正确。",
+      "sources": [
+        "https://stardewvalleywiki.com/Iridium_Rod",
+        "https://stardewvalleywiki.com/Tackle"
+      ]
+    }
+  },
+  "cases": {
+    "unrelated": {
+      "runId": "f44a1ef3-c285-4bb9-88e5-0b97d570decb",
+      "sessionId": "96c58fbd-e97d-40aa-9422-9fc499281796",
+      "flowVerified": true,
+      "durationSeconds": 5.201,
+      "model": "deepseek-v4.1-flash",
+      "thinkingEffort": "low",
+      "contextWindow": 1000000,
+      "skillReadPaths": [],
+      "toolNames": [],
+      "requests": [
+        {
+          "requestId": "js_5dbabdddbae245e58aa12ca40c40f7ab_1",
+          "runId": "f44a1ef3-c285-4bb9-88e5-0b97d570decb",
+          "sessionId": "96c58fbd-e97d-40aa-9422-9fc499281796",
+          "httpStatus": 200,
+          "sha256": "5e1aa735580c0a948a60b196aa98a57450969d40716329339a7452e04e6d5005",
+          "bytes": 5619
+        }
+      ],
+      "proof": {
+        "metadataOnlyInitially": true,
+        "unreadFilesAbsentFromEveryRequest": true,
+        "readBodiesAppearOnlyAfterExplicitRead": true
+      },
+      "rawReport": "build/integration/skill-live-attempt-15/verify/report.json",
+      "rawReportSha256": "f02a5a662808e7ca71bb5b1a4950d23393578db78747c1995e76866bde77c72b"
+    },
+    "unmounted": {
+      "runId": "89c523c0-00bc-4d1b-85ec-465f9d0e3e5f",
+      "sessionId": "223d08c1-03a6-4f06-8b62-6edf63973d1c",
+      "flowVerified": true,
+      "durationSeconds": 34.415,
+      "model": "deepseek-v4.1-flash",
+      "thinkingEffort": "low",
+      "contextWindow": 1000000,
+      "skillReadPaths": [],
+      "toolNames": [],
+      "requests": [
+        {
+          "requestId": "js_ca453fe97f9e42ef968fba5b6ad8adc3_1",
+          "runId": "89c523c0-00bc-4d1b-85ec-465f9d0e3e5f",
+          "sessionId": "223d08c1-03a6-4f06-8b62-6edf63973d1c",
+          "httpStatus": 200,
+          "sha256": "6ef6c7c707e5ad9c88fca02147974e07b8bd52723defde5fb0992ce83910eada",
+          "bytes": 5444
+        }
+      ],
+      "proof": {
+        "metadataOnlyInitially": true,
+        "unreadFilesAbsentFromEveryRequest": true,
+        "readBodiesAppearOnlyAfterExplicitRead": true
+      },
+      "rawReport": "build/integration/skill-live-attempt-15/verify/report.json",
+      "rawReportSha256": "f02a5a662808e7ca71bb5b1a4950d23393578db78747c1995e76866bde77c72b"
+    },
+    "fish": {
+      "runId": "b6340feb-59f9-40af-9443-bd9fa526bf60",
+      "sessionId": "ccc6e66c-76ca-464c-96d5-4bc5b8c46df3",
+      "flowVerified": true,
+      "durationSeconds": 120.908,
+      "model": "deepseek-v4.1-flash",
+      "thinkingEffort": "low",
+      "contextWindow": 1000000,
+      "skillReadPaths": [
+        "SKILL.md",
+        "references/rainy-catfish.md"
+      ],
+      "toolNames": [
+        "skills_read",
+        "skills_read"
+      ],
+      "requests": [
+        {
+          "requestId": "js_1de529db2d0b47028685a00c973de9f3_1",
+          "runId": "b6340feb-59f9-40af-9443-bd9fa526bf60",
+          "sessionId": "ccc6e66c-76ca-464c-96d5-4bc5b8c46df3",
+          "httpStatus": 200,
+          "sha256": "41ff8d612234d4920765f0395379650fdeb28a34e343f6e34ce27df5f9a9e9db",
+          "bytes": 5941
+        },
+        {
+          "requestId": "js_1de529db2d0b47028685a00c973de9f3_2",
+          "runId": "b6340feb-59f9-40af-9443-bd9fa526bf60",
+          "sessionId": "ccc6e66c-76ca-464c-96d5-4bc5b8c46df3",
+          "httpStatus": 200,
+          "sha256": "e3e75478f97dbb10eea157455b85300be3b3c5557276913c9c0b18e59ab28c80",
+          "bytes": 8711
+        },
+        {
+          "requestId": "js_1de529db2d0b47028685a00c973de9f3_3",
+          "runId": "b6340feb-59f9-40af-9443-bd9fa526bf60",
+          "sessionId": "ccc6e66c-76ca-464c-96d5-4bc5b8c46df3",
+          "httpStatus": 200,
+          "sha256": "e344cbad1eeb1b468709a8f1b72886e94c14aff359f690fa93728772b361ab14",
+          "bytes": 11990
+        }
+      ],
+      "proof": {
+        "metadataOnlyInitially": true,
+        "unreadFilesAbsentFromEveryRequest": true,
+        "readBodiesAppearOnlyAfterExplicitRead": true
+      },
+      "rawReport": "build/integration/skill-live-attempt-15/verify/report.json",
+      "rawReportSha256": "f02a5a662808e7ca71bb5b1a4950d23393578db78747c1995e76866bde77c72b"
+    },
+    "crops": {
+      "runId": "266fa71b-54a8-414d-8467-8ec677a65828",
+      "sessionId": "376b907e-a42b-4fb1-9141-231ea67ac46b",
+      "flowVerified": true,
+      "durationSeconds": 79.922,
+      "model": "deepseek-v4.1-flash",
+      "thinkingEffort": "low",
+      "contextWindow": 1000000,
+      "skillReadPaths": [
+        "SKILL.md",
+        "references/spring-crops-bundle.md"
+      ],
+      "toolNames": [
+        "skills_read",
+        "skills_read"
+      ],
+      "requests": [
+        {
+          "requestId": "js_73bdfee26e14446d847bb16f808c879a_1",
+          "runId": "266fa71b-54a8-414d-8467-8ec677a65828",
+          "sessionId": "376b907e-a42b-4fb1-9141-231ea67ac46b",
+          "httpStatus": 200,
+          "sha256": "54309d5252d3633c4a5d91f16952675ab298058a8305bf19618fe825ec46fef6",
+          "bytes": 6011
+        },
+        {
+          "requestId": "js_73bdfee26e14446d847bb16f808c879a_2",
+          "runId": "266fa71b-54a8-414d-8467-8ec677a65828",
+          "sessionId": "376b907e-a42b-4fb1-9141-231ea67ac46b",
+          "httpStatus": 200,
+          "sha256": "ed60ff4a77aed520f35bac11112750bafc45b37b76ca3f1d459a18649ce04c03",
+          "bytes": 11127
+        },
+        {
+          "requestId": "js_73bdfee26e14446d847bb16f808c879a_3",
+          "runId": "266fa71b-54a8-414d-8467-8ec677a65828",
+          "sessionId": "376b907e-a42b-4fb1-9141-231ea67ac46b",
+          "httpStatus": 200,
+          "sha256": "ee2b82638150666ee127bcc5c3121e3e7347050ddfbc167e8dbbe6134abd9d28",
+          "bytes": 12882
+        }
+      ],
+      "proof": {
+        "metadataOnlyInitially": true,
+        "unreadFilesAbsentFromEveryRequest": true,
+        "readBodiesAppearOnlyAfterExplicitRead": true
+      },
+      "rawReport": "build/integration/skill-live-attempt-17/verify/report.json",
+      "rawReportSha256": "a0a5629c1c36135c3b818a7658be18b4753cf559fb3727ed2326adaf13b111ea"
+    },
+    "equipment": {
+      "runId": "24d3e83b-a43b-412b-adac-21fbc33c4b53",
+      "sessionId": "0abf3804-67d2-4ff5-be64-94215ac8935d",
+      "flowVerified": true,
+      "durationSeconds": 42.195,
+      "model": "deepseek-v4.1-flash",
+      "thinkingEffort": "low",
+      "contextWindow": 1000000,
+      "skillReadPaths": [
+        "SKILL.md",
+        "references/rainy-catfish.md"
+      ],
+      "toolNames": [
+        "skills_read",
+        "skills_read"
+      ],
+      "requests": [
+        {
+          "requestId": "js_49e822e2bd91480a9ac1bdc2cb27d588_1",
+          "runId": "24d3e83b-a43b-412b-adac-21fbc33c4b53",
+          "sessionId": "0abf3804-67d2-4ff5-be64-94215ac8935d",
+          "httpStatus": 200,
+          "sha256": "a0a7c7753c1b6830fd916c7e633c76694ea7c92552d59cec116c84cb92ec9fa8",
+          "bytes": 5900
+        },
+        {
+          "requestId": "js_49e822e2bd91480a9ac1bdc2cb27d588_2",
+          "runId": "24d3e83b-a43b-412b-adac-21fbc33c4b53",
+          "sessionId": "0abf3804-67d2-4ff5-be64-94215ac8935d",
+          "httpStatus": 200,
+          "sha256": "e1e1aecd2350cae933d1a03edcb17ebeda607199befea3b9671c9f2013224a1e",
+          "bytes": 8657
+        },
+        {
+          "requestId": "js_49e822e2bd91480a9ac1bdc2cb27d588_3",
+          "runId": "24d3e83b-a43b-412b-adac-21fbc33c4b53",
+          "sessionId": "0abf3804-67d2-4ff5-be64-94215ac8935d",
+          "httpStatus": 200,
+          "sha256": "ce723c95bcc76a8af94b1e896f8b868067ea6bd47f7d98b4361fdd7deb04e4a7",
+          "bytes": 11902
+        }
+      ],
+      "proof": {
+        "metadataOnlyInitially": true,
+        "unreadFilesAbsentFromEveryRequest": true,
+        "readBodiesAppearOnlyAfterExplicitRead": true
+      },
+      "rawReport": "build/integration/skill-live-attempt-17/verify/report.json",
+      "rawReportSha256": "a0a5629c1c36135c3b818a7658be18b4753cf559fb3727ed2326adaf13b111ea"
+    },
+    "continuedAfterFailure": {
+      "runId": "cfea4956-ec72-45ac-8f6e-b4ae5c69e364",
+      "sessionId": "863b10f4-17d1-47cd-8cc4-7e545f33b7ee",
+      "flowVerified": true,
+      "durationSeconds": 36.987,
+      "model": "deepseek-v4.1-flash",
+      "thinkingEffort": "minimal",
+      "contextWindow": 1000000,
+      "skillReadPaths": [],
+      "toolNames": [],
+      "requests": [
+        {
+          "requestId": "js_5b186a4b17654af98d9f89cee62ee6be_1",
+          "runId": "cfea4956-ec72-45ac-8f6e-b4ae5c69e364",
+          "sessionId": "863b10f4-17d1-47cd-8cc4-7e545f33b7ee",
+          "httpStatus": 200,
+          "sha256": "4ab36a9903fa9323abb2b6073ff0b776dad7d7b27576d742dd0eb4c4a007a89e",
+          "bytes": 69687
+        }
+      ],
+      "proof": {},
+      "rawReport": "build/integration/skill-live-attempt-11/verify/report.json",
+      "rawReportSha256": "dafaae6b1aaf31f381ba8673ac4239c6642e15e041a95e00b3e445541c0ad010"
+    },
+    "sameSessionFollowup": {
+      "runId": "5fad8cc8-0e14-43c1-8f8c-dbe18a2b688e",
+      "sessionId": "863b10f4-17d1-47cd-8cc4-7e545f33b7ee",
+      "flowVerified": true,
+      "durationSeconds": 16.765,
+      "model": "deepseek-v4.1-flash",
+      "thinkingEffort": "minimal",
+      "contextWindow": 1000000,
+      "skillReadPaths": [],
+      "toolNames": [],
+      "requests": [
+        {
+          "requestId": "js_ad7a92c93344433eaa3b319c37f1427e_1",
+          "runId": "5fad8cc8-0e14-43c1-8f8c-dbe18a2b688e",
+          "sessionId": "863b10f4-17d1-47cd-8cc4-7e545f33b7ee",
+          "httpStatus": 200,
+          "sha256": "b622daf87b3b76f5de3a5ebaa32b304e3f8d41f3a907dc1d39fbce43594291b1",
+          "bytes": 70583
+        }
+      ],
+      "proof": {},
+      "rawReport": "build/integration/skill-live-attempt-11/verify/report.json",
+      "rawReportSha256": "dafaae6b1aaf31f381ba8673ac4239c6642e15e041a95e00b3e445541c0ad010"
+    }
+  },
+  "creation": {
+    "initialSaveRunId": "ad25dbd1-88da-44a5-8f84-5b70ec2f6781",
+    "initialRunStatus": "failed",
+    "resumedSaveRunId": "7d8f1b1a-1476-43e8-b49d-39f716f4732e",
+    "resumedRunStatus": "completed",
+    "failedResearchHistoryRetained": true,
+    "savedFilesWrittenBy": "tested Agent, not instrumentation",
+    "approvalInteraction": "instrumentation clicked actual product approval UI; not a human click"
+  },
+  "refinement": {
+    "researchRunId": "7cd7cb50-bf66-48ff-8a8c-e82c643b04ce",
+    "focusedRevisionRunId": "c8988a4a-aa21-4421-9dba-e63af8494fe6",
+    "unchangedCropReferenceVerified": true
+  },
+  "context": {
+    "samePiAgentVerified": true,
+    "restartHistoryVerified": true,
+    "automaticReplay": false,
+    "newSessionInheritedSkillSelection": true,
+    "modelRunTimeoutMs": 0,
+    "observedModelResponseToNextRequestSeconds": 271,
+    "timingSource": "Native HTTP Head request-file mtimes, second to third model request in focused revision"
+  },
+  "softwareChecks": {
+    "javascript": 77,
+    "jvm": 210,
+    "nativeReportedTests": 22,
+    "nativeExecutedPassed": 21,
+    "nativeShizukuAssumptionSkips": 1,
+    "receiverParserChecks": 4,
+    "lintAndDebugReleaseTestApks": "passed",
+    "regressionMetadataSha256": "594cd650086c169ef31ec25271bc73d5eba9fb7b10147d3dc9daa9af2bdce053"
+  },
+  "history": [
+    {
+      "attempt": 1,
+      "note": "V8 renderer heap OOM; fixed state backpressure/projection",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-1/create/report.json",
+          "sha256": "1938a4b3b48c47afdabcae9d5899e75b401051a812ecf0f4811550fff5e9cdad"
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "note": "test startup/session UI race",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-2/create/report.json",
+          "sha256": "f5fbbb3e56b39e2e37407bcb8c9181103ec339a74cfeaf6dda0a8de919527ecb"
+        }
+      ]
+    },
+    {
+      "attempt": 3,
+      "note": "old 3-minute task timeout",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-3/create/report.json",
+          "sha256": "aef27e1d969a29c06abdafb3db9b1253c62744348887b2673115db39059b840f"
+        }
+      ]
+    },
+    {
+      "attempt": 4,
+      "note": "invalid resource nesting followed by timeout",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-4/create/report.json",
+          "sha256": "9d9e93171b634ba64479794e54d3e2a714b05cea51594d6357accfb1c3933a01"
+        }
+      ]
+    },
+    {
+      "attempt": 5,
+      "note": "one page timeout revoked whole run; fixed per-tool cancellation",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-5/create/report.json",
+          "sha256": "d203bbc766064f0572bf8f87a08d84cf89154b69ab9f2fbb43e6d26bdadc35a9"
+        }
+      ]
+    },
+    {
+      "attempt": 6,
+      "note": "model over-researched until old 10-minute task timeout",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-6/create/report.json",
+          "sha256": "d83fe4f75a8cc19df7ebe77d35f3c0869a0e78c9f6703556dc3e6a693b2eeb63"
+        }
+      ]
+    },
+    {
+      "attempt": 7,
+      "note": "Skill saved successfully but final reply hit old task timeout",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-7/create/report.json",
+          "sha256": "2af776d49e3975cbe0ff0e731ebc396ed898fdfd9658e3e484b14a7694edffd6"
+        }
+      ]
+    },
+    {
+      "attempt": 8,
+      "note": "save/update completed; follow-up omitted current user input and received HTTP 400",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-8/create/report.json",
+          "sha256": "119130664285094e1f2a26fe7c307a89760b8912e13082e7a5a0d51e68c29874"
+        }
+      ]
+    },
+    {
+      "attempt": 9,
+      "note": "test submitted while previous run was closing; operator stopped idle harness",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-9/verify/report.json",
+          "sha256": "9f936ae7d4f3008982e1f1f10c0949935a56eda76f76c0db82dc0962cfa2dcfd"
+        }
+      ]
+    },
+    {
+      "attempt": 10,
+      "note": "test incorrectly rejected a repeated historical user question",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-10/verify/report.json",
+          "sha256": "d9f0b3e09233a48ef84e88179bd209cf1a3e8a1dcc8a2b24285a843f452e9bf2"
+        }
+      ]
+    },
+    {
+      "attempt": 11,
+      "note": "flow reached both topics; wording assertion rejected valid crop answer; manual review found invalid Bamboo tackle advice",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-11/verify/report.json",
+          "sha256": "dafaae6b1aaf31f381ba8673ac4239c6642e15e041a95e00b3e445541c0ad010"
+        }
+      ]
+    },
+    {
+      "attempt": 12,
+      "note": "Agent researched equipment restrictions and saved revision",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-12/refine/report.json",
+          "sha256": "4e4b2e7de2280bf33bb78c75be6d123c5bec03da8a10f7e6c51094a57406ec33"
+        }
+      ]
+    },
+    {
+      "attempt": 13,
+      "note": "Agent reused research context and saved focused revision",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-13/tighten/report.json",
+          "sha256": "46045ad8711b6657098565063517e1ecc06f4d424f61d6f0f06e8bf2f56ffec9"
+        }
+      ]
+    },
+    {
+      "attempt": 14,
+      "note": "test checked selection before Native persistence completed; no model request",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-14/verify/report.json",
+          "sha256": "16a3f1c9e1a379779c4947e38a5f83eba0c3b8d1490f8d96f2f1c0a2c096f4ee"
+        }
+      ]
+    },
+    {
+      "attempt": 15,
+      "note": "read paths verified; wording assertion rejected 装不了; manual review found wrong cross-season Tiger Trout advice",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-15/verify/report.json",
+          "sha256": "f02a5a662808e7ca71bb5b1a4950d23393578db78747c1995e76866bde77c72b"
+        }
+      ]
+    },
+    {
+      "attempt": 16,
+      "note": "test observer opened SQLite during a write; no model request",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-16/verify/report.json",
+          "sha256": "16a3f1c9e1a379779c4947e38a5f83eba0c3b8d1490f8d96f2f1c0a2c096f4ee"
+        }
+      ]
+    },
+    {
+      "attempt": 17,
+      "note": "remaining independent cases collected",
+      "reports": [
+        {
+          "path": "build/integration/skill-live-attempt-17/verify/report.json",
+          "sha256": "a0a5629c1c36135c3b818a7658be18b4753cf559fb3727ed2326adaf13b111ea"
+        }
+      ]
+    }
+  ],
+  "scope": "Skill authoring and knowledge workflow; no game process or physical Thor operated"
+}
