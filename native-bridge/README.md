@@ -51,7 +51,7 @@ adb shell am start -n dev.thor.bridge.host/.MainActivity
 
 点“运行本地 HTTP 检查”，页面检查中文/emoji 跨块、400/500 body、AbortSignal、携带 fixture 凭据的 302 不被自动跟随，最后调用 `mock.echo`。可检查服务端的 `/auth` 验证通用 header 替换。页面日志只有固定的结果摘要。Run 有 175 秒 deadline；返回前台会重建宿主与新租约，网络和工具检查需用户再次点击，旧调用不会重放。离开前台、renderer 退出或非法主文档导航都会终止当前连接。
 
-宿主仅 debug manifest 允许显式登记的 `127.0.0.1:8877` HTTP fixture；release 默认禁用 cleartext，该 fixture 页面只用于 debug 验收。Native 配置之外的 URL/method/path/profile 都被拒绝。生产应用应使用自己的 HTTPS profile 和私有凭据存储，不能复用该测试配置。
+宿主仅 debug manifest 允许显式登记的 `127.0.0.1:8877` HTTP fixture；release 默认禁用 cleartext，该 fixture 页面只用于 debug 验收。Native 配置之外的 URL/method/path/profile 都被拒绝。生产应用使用自己配置的 HTTP/HTTPS profile 和 Native 私有凭据存储，不复用测试配置。2026-10-15 按用户要求，正式 Agent 已允许系统 DNS/代理、内网和 fake-IP；此处独立诊断宿主的 debug fixture 配置不代表正式 Agent 的网络限制。
 
 ## 目录与边界
 

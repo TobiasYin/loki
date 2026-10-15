@@ -129,6 +129,11 @@ class PhysicalRealServiceTest {
             save();assertEquals("passed",prefs.getString("probe",null))
             request("deviceInfo","请调用 perception_device_info 工具，sections 只选 system，读取当前真实设备型号与 Android 版本，然后用中文简短报告。不要调用其他工具。","perception.device_info")
             request("braveSearch","请只调用一次 web_search，查询 AYN Thor official specifications，返回搜索结果中一个来源链接和一行摘要。不要调用 web_fetch 或其他工具。","web.search")
+            args.getString("localWebUrl")?.let {url ->
+                assertTrue(url.matches(Regex("http://127\\.0\\.0\\.1:[0-9]+/reachability")))
+                request("localWebFetch","请只调用一次 web_fetch，url=$url。这是用户指定的本地 HTTP 网页，按当前网络访问。获取后只回答其中的测试标记，不要调用其他工具。","web.fetch")
+                assertTrue(evidence.getJSONObject("localWebFetch").toString().contains("THOR_LOCAL_WEB_OK"))
+            }
             val bitmap=android.graphics.Bitmap.createBitmap(web.width,web.height,android.graphics.Bitmap.Config.ARGB_8888)
             instrumentation.runOnMainSync {web.draw(android.graphics.Canvas(bitmap))}
             File(context.filesDir,"physical-live-chat.png").outputStream().use {bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)};bitmap.recycle()

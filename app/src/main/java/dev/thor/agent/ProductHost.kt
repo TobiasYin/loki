@@ -262,7 +262,7 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         deviceAuthority.publish(b, allowed)
         available.put("web.search", obj("status" to if(searchConfigured && b.runId != probeRun) "ready" else "backend_missing", "reason" to "Brave 搜索需独立配置/key"))
-        available.put("web.fetch", obj("status" to if(b.runId != probeRun) "ready" else "backend_missing", "reason" to "只读取公开 HTTPS；Native 拒绝私网"))
+        available.put("web.fetch", obj("status" to if(b.runId != probeRun) "ready" else "backend_missing", "reason" to "通过系统网络读取 HTTP/HTTPS，支持内网与代理 DNS"))
         val enabled = JSONObject(); for(cap in dev.thor.bridge.Capability.entries) enabled.put(cap.name, cap in authority.enabled(b))
         val profile = JSONObject(model.toString())
         val probed = prefs.getString("probe", "") == "passed" && prefs.getInt("probeRevision", -1) == revision
@@ -591,7 +591,7 @@ class ProductHost private constructor(private val context: Context, private val 
         val v = chatSnapshot(state,binding?.runId)
         if(storageFailed)v.put("fatal","本地存储失败；已停止网络和设备执行。历史保留；失败的变更未保存，重新打开将恢复上次已保存的开关。修复存储后重开，不会重放副作用。")
         v.put("availability", obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else "需校准显示；按工具检查",
-            "search" to if(searchConfigured) "Brave 搜索已配置；公开网页读取可用" else "搜索未配置；公开 HTTPS 网页读取可用", "screen_control" to "触摸需校准/无障碍；手柄 unsupported", "debug" to "Shell: ${debug.availability().reason}；白名单常用调整直接执行，灰名单逐项确认；文件仅合成目录"))
+            "search" to if(searchConfigured) "Brave 搜索已配置；HTTP/HTTPS 网页读取可用" else "搜索未配置；HTTP/HTTPS 网页读取可用", "screen_control" to "触摸需校准/无障碍；手柄 unsupported", "debug" to "Shell: ${debug.availability().reason}；白名单常用调整直接执行，灰名单逐项确认；文件仅合成目录"))
         v.put("skills",skills.catalog()).put("skillDetail",skillDetail ?: JSONObject.NULL)
         v.put("activeRunId", binding?.runId ?: JSONObject.NULL)
         v.put("error", lastError ?: JSONObject.NULL)

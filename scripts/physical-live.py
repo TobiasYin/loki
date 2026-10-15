@@ -2,12 +2,13 @@
 """Import JSON credentials from stdin into the selected app's private Native cache.
 Never prints credentials, headers or provider response bodies. No fixture resets.
 """
-import argparse, json, os, pathlib, re, subprocess, sys, shlex, time, shutil
+import argparse, json, os, pathlib, re, subprocess, sys, shlex, time, shutil, http.server, threading
 p=argparse.ArgumentParser()
 p.add_argument('--serial',required=True)
 p.add_argument('--adb-port',required=True,type=int)
 p.add_argument('--chat-display',required=True,type=int)
 p.add_argument('--reuse-profile',action='store_true')
+p.add_argument('--local-web-smoke',action='store_true',help='Use a real model to fetch a harmless localhost HTTP page over the production web tool')
 p.add_argument('--configure-budget-128k',action='store_true',help='Save 128K local budget through Native UI, then perform a genuine fresh probe')
 a=p.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1];os.chdir(root)
@@ -32,7 +33,23 @@ if not a.reuse_profile:
     subprocess.run(prefix+['shell','run-as','dev.thor.agent','sh','-c',"'umask 077; mkdir -p cache; cat > cache/physical-credentials.json'"],input=json.dumps(config).encode(),check=True,stdout=subprocess.DEVNULL)
 config.clear()
 original_secure={}
+local_server=None;local_port=None;local_url=None;local_requests=[]
 try:
+    if a.local_web_smoke:
+        class Page(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                local_requests.append({'path':self.path,'authorizationReceived':self.headers.get('Authorization') is not None,'searchTokenReceived':self.headers.get('X-Subscription-Token') is not None})
+                payload=b'THOR_LOCAL_WEB_OK: harmless local HTTP reachability test.'
+                self.send_response(200);self.send_header('Content-Type','text/plain; charset=utf-8');self.send_header('Content-Length',str(len(payload)));self.end_headers();self.wfile.write(payload)
+            def log_message(self,*args):pass
+        local_server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Page)
+        threading.Thread(target=local_server.serve_forever,daemon=True).start()
+        used=adb('reverse','--list').decode()
+        local_port=18879
+        while f'tcp:{local_port} ' in used:local_port+=1
+        adb('reverse',f'tcp:{local_port}',f'tcp:{local_server.server_port}')
+        local_url=f'http://127.0.0.1:{local_port}/reachability'
+
     if a.configure_budget_128k:
         assert a.reuse_profile,'Budget adjustment requires the existing real profile'
         original_secure={k:adb('shell','settings','get','secure',k).decode().strip() for k in ['enabled_accessibility_services','accessibility_enabled']}
@@ -48,7 +65,7 @@ try:
         assert re.search(rb'OK \(\d+ tests?\)',budget) and b'FAILURES' not in budget,'Native budget UI update failed'
         (out/'physical-profile-budget.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/physical-profile-budget.json'))
     adb('shell','input','keyevent','224')
-    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','reuseProfile',str(a.reuse_profile).lower(),'-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalRealServiceTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','reuseProfile',str(a.reuse_profile).lower(),'-e','chatDisplay',str(a.chat_display),*(['-e','localWebUrl',local_url] if local_url else []),'-e','class','dev.thor.agent.PhysicalRealServiceTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'live-suite.log').write_bytes(result)
     print(result.decode(),flush=True)
     for name in ['physical-live-services.json','physical-live-chat.png']:
@@ -56,7 +73,12 @@ try:
             adb('shell','run-as','dev.thor.agent','test','-f','files/'+name)
             (out/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name))
         except subprocess.CalledProcessError: pass
+    if local_url:
+        (out/'physical-local-web-server.json').write_text(json.dumps({'scope':'Real model web.fetch to harmless local HTTP target; no model fixture','requests':local_requests},indent=2)+'\n')
+        assert local_requests and all(not x['authorizationReceived'] and not x['searchTokenReceived'] for x in local_requests)
     assert re.search(rb'OK \(\d+ tests?\)',result) and b'FAILURES' not in result, 'Live acceptance failed; inspect the redacted report'
 finally:
+    if local_port is not None:adb('reverse','--remove',f'tcp:{local_port}')
+    if local_server is not None:local_server.shutdown();local_server.server_close()
     adb('shell','run-as','dev.thor.agent','rm','-f','cache/physical-credentials.json')
     for key,value in original_secure.items():adb('shell',f'settings delete secure {key}' if value=='null' else f'settings put secure {key} {shlex.quote(value)}')
