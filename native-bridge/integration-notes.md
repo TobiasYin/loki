@@ -61,7 +61,7 @@ Native profile 是深复制后固定的配置：origin 精确 scheme/host/port�
 
 模板使用 `{{credential}}`，例如 `Authorization: Bearer {{credential}}` 或 `X-Token: Token {{credential}}`。JS 可省略模板头，或提交与 Native 模板完全一致的 placeholder；Native 从端点绑定的 credentialRef 替换。错误 ref、方法、目的地、原始秘密值、危险 header 或伪造鉴权头均拒绝。profile/store 没有 JS get-secret 方法；异常只暴露错误 code，既不把异常 message 返回 JS，也不打印 URL、header、payload。
 
-按用户最新要求，HTTP/HTTPS、LAN/回环/保留地址、代理 fake-IP 与混合 DNS 结果均交给系统网络连接，不限制为公网；默认使用系统 DNS 和代理。HTTPS 仍执行正常证书验证。模型/搜索凭据绑定配置端点、方法与路径；带凭据重定向作为 3xx 返回，不跨目标转发凭据。无凭据 GET/HEAD 最多 5 跳，逐跳校验用途和配置范围；跨 origin 不转发 caller header，POST 不重放。web_fetch 无服务凭据。超时、字节预算、撤销和停止仍生效。
+按用户最新要求，HTTP/HTTPS、LAN/回环/保留地址、代理 fake-IP 与混合 DNS 结果均交给系统网络连接，不限制为公网；默认使用系统 DNS 和代理。HTTPS 仍执行正常证书验证。模型/搜索凭据绑定配置端点、方法与路径；带凭据重定向作为 3xx 返回，不跨目标转发凭据。无凭据 GET/HEAD 最多 5 跳，逐跳校验用途和配置范围；跨 origin 清除 caller header 后继续访问，POST 不重放。web_fetch 无服务凭据。超时、字节预算、撤销和停止仍生效。
 
 HTTP body 是不透明字节，**不会为了脱敏去重写协议内容**。宿主给 ToolGateway 注入同一 vault redactor，用它拒绝含已知凭据的 string 参数并遮蔽工具结果。请求服务本来就会接收凭据；恶意服务可能在 body 反射凭据或其他敏感内容，原始 body 不应作为日志或导出。已知 secret 的 headers/异常/工具结果脱敏不是任意远端内容的数据防泄漏保证。正式 Runtime 的可见错误摘要、存储和导出仍需独立的通用脱敏与范围确认。
 

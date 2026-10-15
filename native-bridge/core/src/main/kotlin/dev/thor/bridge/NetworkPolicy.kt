@@ -73,7 +73,7 @@ class NetworkPolicy(profiles: List<NetworkProfile>, val vault: CredentialVault, 
         requireBridge(p.origin == null || "${url.scheme}://${url.host}:${url.port}" == canonicalOrigin(p.origin), Code.PERMISSION_MISSING)
         requireBridge(p.origin == null || url.encodedPath in p.paths, Code.PERMISSION_MISSING)
         // Reject ambiguous paths even if a settings mistake accidentally allowed them.
-        requireBridge(!Regex("(?i)%2f|%5c|%2e").containsMatchIn(url.encodedPath) && '\\' !in raw.substringBefore('?'), Code.PERMISSION_MISSING)
+        if(p.origin != null) requireBridge(!Regex("(?i)%2f|%5c|%2e").containsMatchIn(url.encodedPath) && '\\' !in raw.substringBefore('?'), Code.PERMISSION_MISSING)
         return url
     }
     private fun canonicalOrigin(value: String): String { val u = value.toHttpUrlOrNull() ?: throw BridgeFailure(Code.INVALID_REQUEST); return "${u.scheme}://${u.host}:${u.port}" }

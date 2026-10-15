@@ -24,19 +24,19 @@ class PhysicalFanPolicyTest {
     private fun js(web:WebView,code:String):String {val latch=CountDownLatch(1);var result="";ins.runOnMainSync {web.evaluateJavascript(code){result=it;latch.countDown()}};assertTrue(latch.await(5,TimeUnit.SECONDS));return result}
     private fun until(seconds:Int=30,condition:()->Boolean) {val end=System.nanoTime()+TimeUnit.SECONDS.toNanos(seconds.toLong());while(System.nanoTime()<end){if(condition())return;Thread.sleep(100)};fail("Physical fan condition timed out")}
     private fun sample()=obj("mode" to shell("settings get system fan_mode").toInt(),"rpm" to shell("cat /sys/class/gpio5_pwm2/speed").toInt(),"duty" to shell("cat /sys/class/gpio5_pwm2/duty").toInt(),"period" to shell("cat /sys/class/gpio5_pwm2/period").toInt(),"state" to shell("cat /sys/class/gpio5_pwm2/state").toInt())
-    @Test fun liveAgentChangesFanModesWithUiApprovalAndRestoresOriginal() {
+    @Test fun liveAgentChangesFanModesWithoutApprovalAndRestoresOriginal() {
         val args=InstrumentationRegistry.getArguments();org.junit.Assume.assumeTrue(args.getString("physicalAcceptance")=="true")
         assertEquals("AYN Thor",android.os.Build.MODEL);assertEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
         val before=sample();val original=before.getInt("mode");assertTrue("Do not begin if restoring would require disabled cooling",original in setOf(1,4,5))
         val activity=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay")!!.toInt()).toBundle()) as MainActivity
         ins.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
         val web=activity.findViewById<WebView>(android.R.id.custom);val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
-        val evidence=obj("model" to "deepseek-v4.1-flash","before" to before,"approvalDriver" to "automated actual product UI clicks","samples" to JSONArray(),"runs" to JSONArray())
+        val evidence=obj("model" to "deepseek-v4.1-flash","before" to before,"approvalDriver" to "white fan adjustments execute directly; no approval UI clicks","samples" to JSONArray(),"runs" to JSONArray())
         fun save(){File(context.filesDir,"physical-fan-policy.json").writeText(evidence.toString(2))}
         try {
             until {js(web,"window.productReady===true && document.querySelectorAll('.session-row').length>0 && !document.getElementById('new').disabled")=="true"}
-            val phases=listOf(Triple("low",1,true),Triple("high",5,true),Triple("restore",original,true))
-            for((label,value,approve) in phases) {
+            val phases=listOf("low" to 1,"high" to 5,"restore" to original)
+            for((label,value) in phases) {
                 val count=js(web,"document.querySelectorAll('.session-row').length").toInt();js(web,"document.getElementById('new').click()")
                 until {js(web,"document.querySelectorAll('.session-row').length===${count+1}")=="true"}
                 js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:true}))")
@@ -48,13 +48,13 @@ class PhysicalFanPolicyTest {
                 Thread.sleep(3000)
                 val observations=JSONArray();repeat(3){observations.put(sample());Thread.sleep(700)}
                 val after=observations.getJSONObject(2)
-                assertEquals(if(approve)value else baseline.getInt("mode"),after.getInt("mode"));assertEquals(1,after.getInt("state"));assertTrue(after.getInt("rpm")>0)
+                assertEquals(value,after.getInt("mode"));assertEquals(1,after.getInt("state"));assertTrue(after.getInt("rpm")>0)
                 val state=SqliteStore(context,"product.db").use {it.load()};val run=state.getJSONArray("runs").objects().last();val events=state.getJSONArray("events").objects().filter {it.getString("runId")==run.getString("id")}
-                evidence.getJSONArray("samples").put(obj("label" to label,"approved" to approve,"before" to baseline,"observations" to observations,"approvalRequired" to false))
+                evidence.getJSONArray("samples").put(obj("label" to label,"before" to baseline,"observations" to observations,"approvalRequired" to false))
                 evidence.getJSONArray("runs").put(obj("label" to label,"run" to run,"events" to JSONArray(events)));save()
                 assertEquals("completed",run.getString("status"))
                 val results=events.filter {it.getString("type")=="tool_result" && it.getJSONObject("data").optString("toolId")=="debug.shell"}.map {it.getJSONObject("data")}
-                if(approve)assertTrue(results.any {it.isNull("error") && it.toString().contains("white")}) else assertTrue(results.any {it.optString("error")=="PERMISSION_MISSING"})
+                assertTrue(results.any {it.isNull("error") && it.toString().contains("white")});assertFalse(events.any {it.getString("type")=="awaiting_user"})
                 js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false}))")
             }
             val samples=evidence.getJSONArray("samples")

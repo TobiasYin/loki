@@ -138,7 +138,7 @@ class TransportTest {
         val binding = Binding("a", "b", "c", "d", 1)
         val start = HttpStart(NetworkEnvelope(1, "id", binding, Purpose.web_fetch, "crawl", 1), "https://public.example/page", "GET")
         assertEquals(answers,policy.prepare(start).dns.lookup("public.example"))
-        for(url in listOf("http://127.0.0.1/page","http://localhost/page","http://192.168.1.1/page","https://198.18.0.1/page","http://[::1]/page"))assertEquals(url,policy.prepare(start.copy(url=url)).url.toString())
+        for(url in listOf("http://127.0.0.1/page","http://localhost/page","http://192.168.1.1/page","https://198.18.0.1/page","http://[::1]/page","http://127.0.0.1/a%2Fb?next=x%2Fy"))assertEquals(url,policy.prepare(start.copy(url=url)).url.toString())
     }
     @Test fun webFetchFollowsReachableHttpRedirectAcrossOriginsWithoutCredentials() {
         MockWebServer().use { first -> MockWebServer().use { second ->
@@ -149,11 +149,13 @@ class TransportTest {
             val binding=authority.beginRun("local-web",authority.connect(),mapOf(Purpose.web_fetch to setOf("crawl")))
             val policy=NetworkPolicy(listOf(NetworkProfile("crawl",null,emptySet(),setOf("GET"),setOf(Purpose.web_fetch))),CredentialVault(emptyMap()))
             HttpTransport(authority,policy).use { transport ->
-                val start=HttpStart(NetworkEnvelope(1,"local-web-request",binding,Purpose.web_fetch,"crawl",authority.clock.nowMs()+5000),first.url("/redirect").toString(),"GET")
+                val start=HttpStart(NetworkEnvelope(1,"local-web-request",binding,Purpose.web_fetch,"crawl",authority.clock.nowMs()+5000),first.url("/redirect").toString(),"GET",headers=mapOf("Accept" to "text/plain","X-Caller" to "drop-on-redirect"))
                 val e=Events();transport.start(start,e.sink {if(it is HttpEvent.Head)transport.credit(start.envelope.requestId,binding,256)})
                 e.await();assertEquals("local page",e.bytes().toString(Charsets.UTF_8));assertTrue(e.all.last() is HttpEvent.End)
                 assertEquals(1,first.requestCount);assertEquals(1,second.requestCount)
-                assertNull(second.takeRequest().getHeader("Authorization"))
+                val redirected=second.takeRequest()
+                assertNull(redirected.getHeader("Authorization"));assertNull(redirected.getHeader("X-Caller"))
+                assertEquals("drop-on-redirect",first.takeRequest().getHeader("X-Caller"))
             }
         } }
     }

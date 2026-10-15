@@ -66,9 +66,10 @@ class HttpTransport(private val authority: Authority, private val policy: Networ
         workers.execute {
             try {
                 var url = p.url
+                var headers = p.headers
                 var redirects = 0
                 while (true) {
-                    val request = Request.Builder().url(url).apply { p.headers.forEach { (key, value) -> addHeader(key, value) } }
+                    val request = Request.Builder().url(url).apply { headers.forEach { (key, value) -> addHeader(key, value) } }
                         .method(start.method, stream.start.body?.toRequestBody() ?: if (start.method in setOf("POST", "PUT", "PATCH")) ByteArray(0).toRequestBody() else null).build()
                     val call = client.newCall(request)
                     authority.atomic { authority.validateNetwork(start.envelope, false); stream.attachCall(call) }
@@ -78,7 +79,7 @@ class HttpTransport(private val authority: Authority, private val policy: Networ
                             requireBridge(++redirects <= 5, Code.LIMIT_EXCEEDED)
                             val next = url.resolve(location) ?: throw BridgeFailure(Code.PERMISSION_MISSING)
                             // Do not forward caller headers across origins, even without stored credentials.
-                            requireBridge(next.host == url.host && next.port == url.port && next.scheme == url.scheme || p.headers.isEmpty(), Code.PERMISSION_MISSING)
+                            if(next.host != url.host || next.port != url.port || next.scheme != url.scheme) headers = emptyMap()
                             url = policy.validateUrl(p.profile, next.toString(), start.method, start.envelope.purpose)
                         } else {
                             requireBridge(response.headers.size <= 64 && (0 until response.headers.size).sumOf { response.headers.name(it).length + response.headers.value(it).length } <= 16384, Code.LIMIT_EXCEEDED)
