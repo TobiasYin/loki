@@ -81,6 +81,7 @@
     const container=element('div');
     // Actionable summaries live outside the collapsed disclosure, including unknown side effects.
     if(run.stopReason)container.append(element('div',run.stopReason,'attention'));
+    else if(run.status==='failed')container.append(element('div','这次任务未能完成，请重试或检查设置。','attention'));
     const unknown=events.filter(e=>e.outcome==='unknown' && (e.type==='tool_result' || !events.some(r=>r.type==='tool_result' && r.toolCallId===e.toolCallId)));
     for(const e of unknown)container.append(element('div',`副作用未知 · ${e.toolId??e.data?.toolId??'工具操作'}，请检查目标状态`,'attention'));
     if(run.status==='awaiting_user') {
@@ -97,7 +98,7 @@
     const count=events.filter(e=>e.type==='tool_started').length;
     disclosure.append(element('summary',`查看 ${count} 项操作`));
     const calls=new Map();
-    const toolLabels={'skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
+    const toolLabels={'skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
     const outcomeLabels={observed:'已完成',submitted:'已提交',unknown:'结果未知'};
     for(const event of events) {
       if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type))continue;
@@ -177,7 +178,9 @@
       const text=element('span',skill.name);text.append(element('small',skill.builtin?'内置':skill.description));row.append(input,text);list.append(row);
     }
   }
-  function popover(id) {const open=$(id).hidden;for(const p of ['more-panel','model-panel','skill-panel','cap-panel'])$(p).hidden=true;$(id).hidden=!open;}
+  function fitPopovers() {const available=Math.max(44,Math.min(innerHeight*.65,$('composer').getBoundingClientRect().top-12));for(const id of ['more-panel','model-panel','skill-panel','cap-panel'])$(id).style.maxHeight=available+'px';}
+  function popover(id) {$('input').blur();const open=$(id).hidden;for(const p of ['more-panel','model-panel','skill-panel','cap-panel'])$(p).hidden=true;$(id).hidden=!open;fitPopovers();}
+  window.addEventListener('resize',fitPopovers);
   $('more').addEventListener('click',()=>{popover('more-panel');$('more').setAttribute('aria-expanded',String(!$('more-panel').hidden));});
   $('model-picker').addEventListener('click',()=>popover('model-panel'));
   $('skill-choose').addEventListener('click',()=>popover('skill-panel'));

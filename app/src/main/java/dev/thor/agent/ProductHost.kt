@@ -174,7 +174,7 @@ class ProductHost private constructor(private val context: Context, private val 
     private fun modelChoices():JSONArray=if(isGo())catalog.models() else JSONArray().put(obj(
         "id" to prefs.getString("model", ""),"name" to prefs.getString("name","自定义模型"),
         "protocol" to ModelCatalog.protocols[prefs.getInt("protocol",0).coerceIn(0,2)],"contextWindow" to prefs.getInt("contextBudget",32768),
-        "maxOutput" to prefs.getInt("maxOutput",2048),"efforts" to JSONArray(listOf("off","minimal","low","medium","high"))))
+        "maxOutput" to prefs.getInt("maxOutput",2048),"input" to JSONArray(if(prefs.getBoolean("supportsImages",true))listOf("text","image") else listOf("text")),"efforts" to JSONArray(listOf("off","minimal","low","medium","high"))))
     private fun selectedProfile(s:JSONObject,required:Boolean=true):JSONObject {
         if(required)require(model!=null) {"Configure model first"}
         val chosen=modelChoices().objects().let {choices->choices.find {it.optString("id")==s.optString("modelId",prefs.getString("model",""))} ?: choices.first()}

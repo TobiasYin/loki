@@ -182,6 +182,7 @@ class MainActivity : Activity() {
         val url = field("模型基础 URL（HTTP / HTTPS）", "url"); val model = field("模型 ID", "model")
         val contextBudget = field("自定义模型上下文上限（tokens）", "contextBudgetText")
         val maxOutput = field("最大输出预算（默认 2048；按服务实际限制填写）", "maxOutputText")
+        val imageSupport=CheckBox(this).apply {text="支持图片输入";isChecked=prefs.getBoolean("supportsImages",true);content.addView(this)}
         val catalog=ModelCatalog(this)
         val modelPicker=Spinner(this);content.addView(modelPicker)
         val catalogStatus=TextView(this).apply {text=catalog.source();content.addView(this)}
@@ -208,7 +209,7 @@ class MainActivity : Activity() {
             override fun onNothingSelected(parent:android.widget.AdapterView<*>?)=Unit
             override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long) {
                 val go=position==0;modelPicker.visibility=if(go)View.VISIBLE else View.GONE;refreshModels.visibility=modelPicker.visibility;catalogStatus.visibility=modelPicker.visibility
-                protocol.visibility=if(go)View.GONE else View.VISIBLE;model.visibility=protocol.visibility;contextBudget.isEnabled=!go
+                protocol.visibility=if(go)View.GONE else View.VISIBLE;model.visibility=protocol.visibility;imageSupport.visibility=protocol.visibility;contextBudget.isEnabled=!go
                 if(go){url.setText("https://opencode.ai/zen/go/v1");updateModels()}
             }
         }
@@ -274,7 +275,7 @@ class MainActivity : Activity() {
                     check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
                     if(removeModel.isChecked) vault.remove("model") else if(modelKey.length() > 0) vault.put("model", modelKey.text.toString())
                     if(removeSearch.isChecked) vault.remove("search") else if(searchKey.length() > 0) vault.put("search", searchKey.text.toString())
-                    check(prefs.edit().putString("provider",if(provider.selectedItemPosition==0)"opencode-go" else "custom").putString("name", name.text.toString().take(80)).putInt("protocol", protocol.selectedItemPosition)
+                    check(prefs.edit().putBoolean("supportsImages",imageSupport.isChecked).putString("provider",if(provider.selectedItemPosition==0)"opencode-go" else "custom").putString("name", name.text.toString().take(80)).putInt("protocol", protocol.selectedItemPosition)
                         .putString("url", url.text.toString()).putString("model", model.text.toString().take(200)).putString("searchBackend", backend.text.toString().take(80))
                         .putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString()).putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName", headerName.text.toString()).putString("headerTemplate", headerTemplate.text.toString()).putString("searchUrl", searchUrl.text.toString()).putInt("revision", nextRevision).putString("probe", "untested").commit())
                     modelKey.text.clear();searchKey.text.clear();closeSettings();recreate();Toast.makeText(this,"设置已保存；首次使用模型时自动检查连接",Toast.LENGTH_SHORT).show()

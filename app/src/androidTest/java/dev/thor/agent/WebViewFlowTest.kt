@@ -80,7 +80,8 @@ class WebViewFlowTest {
                 instrumentation.runOnMainSync {web.draw(android.graphics.Canvas(bitmap))}
                 java.io.File(context.filesDir,"integrated-chat.png").outputStream().use {bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)};bitmap.recycle()
                 send(web,"HTTP_429")
-                waitFor(web,"document.getElementById('send').textContent === '停止'");waitFor(web,"document.getElementById('send').textContent === '发送'")
+                // A fast error may finish before the coalesced UI paints a running frame.
+                waitFor(web,"document.getElementById('chat').textContent.includes('HTTP_429') && document.getElementById('send').textContent === '发送'")
                 assertEquals("failed",SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().last().getString("status")})
                 send(web,"WAIT_CANCEL")
                 waitFor(web,"document.getElementById('send').textContent === '停止'")
@@ -95,6 +96,20 @@ class WebViewFlowTest {
                 }
             } finally { finish(activity) }
         }
+    }
+    @Test fun textOnlyCustomProfileChecksToolsWithoutRequiringImages() {
+        configure(2,1001)
+        assertTrue(context.getSharedPreferences("profiles",0).edit().putBoolean("supportsImages",false).commit())
+        val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
+        try {
+            waitFor(web,"window.productReady===true");probe(activity,web)
+            assertEquals("[\"text\"]",host(activity).view().getJSONObject("modelSelection").getJSONArray("input").toString())
+            assertEquals(0,SqliteStore(context,"product.db").use {it.load().getJSONArray("attachments").length()})
+            send(web,"DEVICE_INFO: text-only profile remains usable")
+            waitFor(web,"document.getElementById('send').textContent==='停止'");waitFor(web,"document.getElementById('send').textContent==='发送'")
+            assertEquals("completed",SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().last().getString("status")})
+            java.io.File(context.filesDir,"integrated-text-only-profile.json").writeText(obj("passed" to true,"imagesRequired" to false,"toolConnectionVerified" to true).toString(2))
+        } finally {finish(activity)}
     }
     @Test fun fullSettingsPageDoesNotInterruptRunsAndKeepsVoiceConfigurationOutOfComposer() {
         configure(0,901)

@@ -18,7 +18,7 @@
 
 任务页可选择模型和该资料声明、Pi 实际支持的思考强度。显式 null 的档位不展示；基本档位和扩展档位的处理与 Pi getSupportedThinkingLevels 一致。DeepSeek V4.1 Flash 的上下文为 1,000,000 tokens，思考强度为 low/high/max，保留本项目已实测的 Responses 接入。其他模型按资料指定协议处理，增加 Chat Completions 和其完整工具参数流校验。
 
-上下文编译按模型 contextWindow 分配，并预留 maxOutput，不再固定缩减到 70%。自定义模型使用用户填写的上限。1M 是 provider profile 的上限声明，token 使用量仍为保守估计；本轮没有发送百万 token 的收费云端请求来测量容量。
+上下文编译按模型 contextWindow 分配，并预留 maxOutput，不再固定缩减到 70%。自定义模型使用用户填写的上限，并可明确选择是否支持图片输入。1M 是 provider profile 的上限声明，token 使用量仍为保守估计；本轮没有发送百万 token 的收费云端请求来测量容量。
 
 未测试过的模型在第一次任务前自动检查连接；检查串行协调，正常任务可并行。文字模型检查文字与工具，支持图片的模型另检查图片输入和图片工具回传。检查记录按连接修订、模型 ID 和协议保存；不同模型不互相冒用结果。首次检查不会清除用户待发送的图片。
 
