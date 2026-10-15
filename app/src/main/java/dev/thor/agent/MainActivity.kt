@@ -274,10 +274,9 @@ class MainActivity : Activity() {
                     val nextRevision = prefs.getInt("revision",0)+1
                     check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
                     if(removeModel.isChecked) vault.remove("model") else if(modelKey.length() > 0) vault.put("model", modelKey.text.toString())
-                    if(removeSearch.isChecked) vault.remove("search") else if(searchKey.length() > 0) vault.put("search", searchKey.text.toString())
                     check(prefs.edit().putBoolean("supportsImages",imageSupport.isChecked).putString("provider",if(provider.selectedItemPosition==0)"opencode-go" else "custom").putString("name", name.text.toString().take(80)).putInt("protocol", protocol.selectedItemPosition)
-                        .putString("url", url.text.toString()).putString("model", model.text.toString().take(200)).putString("searchBackend", backend.text.toString().take(80))
-                        .putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString()).putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName", headerName.text.toString()).putString("headerTemplate", headerTemplate.text.toString()).putString("searchUrl", searchUrl.text.toString()).putInt("revision", nextRevision).putString("probe", "untested").commit())
+                        .putString("url", url.text.toString()).putString("model", model.text.toString().take(200))
+                        .putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString()).putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName", headerName.text.toString()).putString("headerTemplate", headerTemplate.text.toString()).putInt("revision", nextRevision).putString("probe", "untested").commit())
                     modelKey.text.clear();searchKey.text.clear();closeSettings();recreate();Toast.makeText(this,"设置已保存；首次使用模型时自动检查连接",Toast.LENGTH_SHORT).show()
                 } catch(_: Exception) { Toast.makeText(this, "保存失败：请先停止活动任务，并检查地址、预算和密钥配置", Toast.LENGTH_LONG).show() }
         },back={showSettings()})

@@ -62,6 +62,9 @@ class WebViewFlowTest {
                 // Probe runs remain Native-owned and are hidden from the conversation.
                 probe(activity,web)
                 assertFalse(javascript(web,"document.getElementById('chat').textContent").contains("PROBE_OK"))
+                val receipt=SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().last().getJSONObject("probeTransport")}
+                java.io.File(context.filesDir,"integrated-probe-$protocol.json").writeText(receipt.toString(2))
+                if(protocol==2)assertTrue("Delayed EOF must exercise successful SDK reader close: $receipt",receipt.getInt("clientClosedAfterBodyRequests")>0)
                 send(web,"DEVICE_INFO: inspect actual device")
                 waitFor(web,"document.getElementById('send').textContent === '停止'")
                 waitFor(web,"document.getElementById('send').textContent === '发送'")
@@ -96,6 +99,21 @@ class WebViewFlowTest {
                 }
             } finally { finish(activity) }
         }
+    }
+    @Test fun cancelledConfigurationCheckNeverPasses() {
+        configure(2,1051)
+        val activity=launch();val web=activity.findViewById<WebView>(android.R.id.custom)
+        try {
+            waitFor(web,"window.productReady===true")
+            var token="";instrumentation.runOnMainSync {token=host(activity).requestProbe()}
+            javascript(web,"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(host(activity).selectedSession())});true")
+            waitFor(web,"document.getElementById('send').textContent==='停止'")
+            javascript(web,"document.getElementById('send').click()")
+            waitFor(web,"document.getElementById('send').textContent==='发送'")
+            assertNotEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
+            val r=SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().last()}
+            assertEquals("cancelled",r.getString("status"));assertFalse(r.optBoolean("probePassed"))
+        } finally {finish(activity)}
     }
     @Test fun textOnlyCustomProfileChecksToolsWithoutRequiringImages() {
         configure(2,1001)

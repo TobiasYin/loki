@@ -66,6 +66,9 @@ const server = http.createServer(async (req,res) => {
   const bytes=Buffer.from(protocolSse(protocol,reply,count));
   // Split every UTF-8 character across several writes, including Chinese text.
   for(let i=0;i<bytes.length;i+=3) {if(res.destroyed)break;res.write(bytes.subarray(i,i+3));await new Promise(r=>setTimeout(r,1));}
+  // Leave the HTTP body open briefly after Completions' protocol marker, as
+  // real SSE servers may do. The SDK's successful reader close must be handled.
+  if(protocol==='openai-completions')await new Promise(r=>setTimeout(r,250));
   res.end();
 });
 server.listen(8877,'127.0.0.1',()=>process.stdout.write('Fixture listening on 127.0.0.1:8877\n'));

@@ -106,13 +106,23 @@ class ProductHost private constructor(private val context: Context, private val 
     private var skillDetail: JSONObject?=null
     private val skillToolIds=setOf("skills.list","skills.read","skills.save","skills.enable","skills.delete")
     private val probeHeads = java.util.concurrent.ConcurrentHashMap<String,Int>()
+    private val probeBodies=java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+    private val probeConsumerClosed=java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     private val probeCompleted = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     fun auditHttp(start: dev.thor.bridge.HttpStart,event: dev.thor.bridge.HttpEvent) {
         if(start.envelope.purpose != Purpose.configuration_test || start.envelope.binding.runId != probeRun)return
         when(event) {
             is dev.thor.bridge.HttpEvent.Head -> probeHeads[event.requestId]=event.status
             is dev.thor.bridge.HttpEvent.End -> if(probeHeads[event.requestId] in 200..299)probeCompleted.add(event.requestId)
-            is dev.thor.bridge.HttpEvent.Error -> probeCompleted.remove(event.requestId)
+            is dev.thor.bridge.HttpEvent.Chunk -> if(event.bytes.isNotEmpty())probeBodies.add(event.requestId)
+            is dev.thor.bridge.HttpEvent.Error -> {
+                probeCompleted.remove(event.requestId)
+                // SDKs may close a reader after their terminal SSE marker, before
+                // HTTP EOF. Only a completed Run with real 2xx bodies and the
+                // independently observed tool/image round trip can use this receipt.
+                if(event.code==dev.thor.bridge.Code.CANCELLED && probeHeads[event.requestId] in 200..299 && event.requestId in probeBodies)probeConsumerClosed.add(event.requestId)
+                else probeConsumerClosed.remove(event.requestId)
+            }
             else -> Unit
         }
     }
@@ -266,7 +276,7 @@ class ProductHost private constructor(private val context: Context, private val 
         require(bindings.values.none {it.sessionId==sid} && bindings.size<8)
         require(probe || profilePassed(profile))
         require(!probe || probeRun==null)
-        if (probe) { probeToken = null; probeTools = 0; probeImageReads = 0;probeHeads.clear();probeCompleted.clear() }
+        if (probe) { probeToken = null; probeTools = 0; probeImageReads = 0;probeHeads.clear();probeCompleted.clear();probeBodies.clear();probeConsumerClosed.clear() }
         val pendingImages=if(probe)JSONArray() else s.optJSONArray("pendingAttachments") ?: JSONArray()
         val text=if(probe && !supportsImages(profile))"Configuration probe: text-only model. Call probe_picture once, read its returned text, then answer PROBE_OK." else d.getString("text"); require(text.isNotBlank() && text.length <= 8000)
         val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } })
@@ -520,11 +530,15 @@ class ProductHost private constructor(private val context: Context, private val 
     private fun end(c: String, d: JSONObject): JSONObject {
         val b = bindingFor(d); require(c == connection && d.getString("runId") == b.runId && d.getString("sessionId") == b.sessionId)
         val r = run(b.runId)
-        if(r.optString("status") !in terminal) r.put("status", "failed").put("stopReason", "Runtime 未完成；不重放")
+        if(r.optString("status") !in terminal) {
+            if(r.optString("stopReason")=="用户停止")r.put("status","cancelled")
+            else r.put("status","failed").put("stopReason","Runtime 未完成；不重放")
+        }
         if(b.runId == probeRun) {
             val turn = r.optJSONObject("turn")
-            val passed = r.getString("status") == "completed" && probeCompleted.size >= 2 && probeTools > 0 && (!supportsImages(scope(b).profile) || probeImageReads >= 2) && r.getJSONArray("contexts").length() >= 2 && turn?.optBoolean("complete") == true && rows("events").any { it.getString("runId") == b.runId && it.getString("type") == "text_delta" }
+            val passed = r.getString("status") == "completed" && (probeCompleted+probeConsumerClosed).size >= 2 && probeTools > 0 && (!supportsImages(scope(b).profile) || probeImageReads >= 2) && r.getJSONArray("contexts").length() >= 2 && turn?.optBoolean("complete") == true && rows("events").any { it.getString("runId") == b.runId && it.getString("type") == "text_delta" }
             if(scope(b).profile.getString("modelId")==prefs.getString("model","") && scope(b).profile.getString("protocol")==ModelCatalog.protocols[prefs.getInt("protocol",0).coerceIn(0,2)])check(prefs.edit().putString("probe",if(passed)"passed" else "failed").putInt("probeRevision",revision).commit())
+            r.put("probeTransport",obj("httpStatuses" to JSONArray(probeHeads.values.toList()),"eofRequests" to probeCompleted.size,"clientClosedAfterBodyRequests" to probeConsumerClosed.size,"nonemptyBodies" to probeBodies.size,"toolCalls" to probeTools,"imageReads" to probeImageReads))
             r.put("probePassed", passed)
             check(prefs.edit().putBoolean(probeKey(scope(b).profile),passed).commit())
         }
