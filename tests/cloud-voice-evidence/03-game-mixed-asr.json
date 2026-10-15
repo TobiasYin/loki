@@ -1,0 +1,194 @@
+{
+  "endpoint": "wss:\/\/openspeech.bytedance.com\/api\/v3\/sauc\/bigmodel_async",
+  "resource": "volc.seedasr.sauc.duration",
+  "audioSource": "known-synthetic-pcm",
+  "reference": "请查看星露谷物语攻略，打开 Skill 管理，检查 Wi-Fi 和 USB 连接状态。",
+  "expectedPhrase": "攻略",
+  "ttsProvider": "Volcengine TTS",
+  "pcmSha256": "f4b3ce58f4bb9087aac175ccb96aec97c2406ad60bac840bfb759108178f2787",
+  "referenceDurationMs": 6990,
+  "uploadedAudio": true,
+  "events": [
+    {
+      "phase": "connecting",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 53
+    },
+    {
+      "phase": "recording",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 535
+    },
+    {
+      "phase": "recording",
+      "text": "请",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1303
+    },
+    {
+      "phase": "recording",
+      "text": "请查看",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1823
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1990
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2490
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2659
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2882
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 3340
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 3947
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4263
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4566
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理检查",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4954
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理，检查 Wifi",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5584
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理，检查 Wifi 和",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5783
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理，检查 Wifi 和 USB",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 6599
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理，检查 Wifi 和 USB 连接",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 6928
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 skill 管理，检查 Wifi 和 USB 连接状态",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 7215
+    },
+    {
+      "phase": "recording",
+      "text": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+      "confirmed": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 8360
+    },
+    {
+      "phase": "finalizing",
+      "text": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 8377
+    },
+    {
+      "phase": "complete",
+      "text": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+      "confirmed": "",
+      "error": null,
+      "submit": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+      "elapsedMs": 8515
+    }
+  ],
+  "packets": 40,
+  "releasedAtMs": 8377,
+  "final": {
+    "phase": "complete",
+    "text": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+    "confirmed": "",
+    "error": null,
+    "submit": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+    "elapsedMs": 8515
+  },
+  "firstTextMs": 1303,
+  "finalAfterReleaseMs": 138,
+  "passed": true
+}

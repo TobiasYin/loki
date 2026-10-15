@@ -1,0 +1,97 @@
+{
+  "version": "0.3.1-integration",
+  "date": "2026-10-15",
+  "device": "AYN Thor / Android 13",
+  "asrEndpoint": "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_async",
+  "asrResource": "volc.seedasr.sauc.duration",
+  "credentialsStoredNativeKeystore": true,
+  "temporaryCredentialRemoved": true,
+  "offlineTtsProvider": "Volcengine TTS",
+  "offlineTtsFixtures": 3,
+  "ttsIntegratedIntoApk": false,
+  "cloudAsrVerified": true,
+  "cases": [
+    {
+      "case": "01-short-command",
+      "durationMs": 3817,
+      "transcript": "请只回复语音测试成功，不要使用任何工具。",
+      "exactMatch": true,
+      "normalizedMatch": true,
+      "firstTextMs": 2409,
+      "finalAfterReleaseMs": 185,
+      "submittedExactlyOnce": true
+    },
+    {
+      "case": "02-numbers-settings",
+      "durationMs": 7786,
+      "transcript": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+      "exactMatch": true,
+      "normalizedMatch": true,
+      "firstTextMs": 991,
+      "finalAfterReleaseMs": 708,
+      "submittedExactlyOnce": true
+    },
+    {
+      "case": "03-game-mixed",
+      "durationMs": 6990,
+      "transcript": "请查看星露谷物语攻略，打开 Skill 管理，检查 WiFi 和 USB 连接状态。",
+      "exactMatch": false,
+      "normalizedMatch": true,
+      "firstTextMs": 1303,
+      "finalAfterReleaseMs": 138,
+      "submittedExactlyOnce": true
+    }
+  ],
+  "physicalMicrophoneAgentVerified": true,
+  "cancelDidNotSend": true,
+  "modelProbePassed": true,
+  "braveSearchPassed": true,
+  "appJvmTests": 29,
+  "lintPassed": true,
+  "buildPassed": true,
+  "artifacts": {
+    "debug": {
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "37424dfaedda9807faf1e3124034c6a50e5f4cd43a2f30c0b66407456bc62b57",
+      "bytes": 5920783
+    },
+    "releaseUnsigned": {
+      "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+      "sha256": "9a2b8e67818eccafc4dd235ff226db196d8936ed47ef4a07e51091ccc2e647d8",
+      "bytes": 4868948
+    },
+    "instrumentation": {
+      "path": "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "sha256": "c61f6d225e343965b29ae5e6c1ca096e5da11045b7259fc1482b8a2eff998ab4",
+      "bytes": 2346276
+    }
+  },
+  "filesSha256": {
+    "tests/cloud-voice-evidence/01-short-command-asr.json": "12a9023e7fee311fa0878397a82579311d3f7e4265533e52e3f394e807514d4d",
+    "tests/cloud-voice-evidence/01-short-command-instrumentation.txt": "c6edeccadbc7ee17bea214a1f6d77cb60fdd29ed417f954317e3c3efdafc0817",
+    "tests/cloud-voice-evidence/02-numbers-settings-asr.json": "f1ddc45498946de2d46fd66ef9160e96128820e6f844488430879fd5f1bf1ca9",
+    "tests/cloud-voice-evidence/02-numbers-settings-instrumentation.txt": "1ca30a2519e33dc95cf9cd13c6793433b55f8f8bdf0472a4e25bf29d4398b062",
+    "tests/cloud-voice-evidence/03-game-mixed-asr.json": "432f8c05746f5706306ff6ef2cec6909ec2c00de46cd707ebea241faf56896a9",
+    "tests/cloud-voice-evidence/03-game-mixed-instrumentation.txt": "189ac2d6f827401b64479ef20d304b469288ed43e31bc5e35561a7f13743aea7",
+    "tests/cloud-voice-evidence/README.md": "8d8c889e93fb2f81ba8fc7db3c25d47ea1f0fd2ab413953a2978be6c0cbdfab5",
+    "tests/cloud-voice-evidence/microphone-fixture.json": "04cdf8e5148419f28154c4b91a095e0d26c3e4d2ac57efef72ce882772bdefb9",
+    "tests/cloud-voice-evidence/microphone-macos-tts-instrumentation.txt": "86f58137ae4958eccb554ce33d0ed5e4cf7e1a1da1b0245bd35bbb68098a6a2a",
+    "tests/cloud-voice-evidence/microphone-macos-tts.json": "1a3ebd93593de3052d88dec7b4830b5f97279f0012a67474e755884f73ba3473",
+    "tests/cloud-voice-evidence/microphone-volc-tts-instrumentation.txt": "8d057318dcb37746ed685761fa826a05427ae2da8cc7c1e9f692cb01f59a60d5",
+    "tests/cloud-voice-evidence/microphone-volc-tts.json": "d95e395d98eadb7e2491d329ac97848da5d0ffe6723ebcf744a50f6d55d3c3a9",
+    "tests/cloud-voice-evidence/model-services.json": "821be8d803520f12f32f84ebe7a7290b98f8f08691a797be52a8c6c4c96209d6",
+    "tests/cloud-voice-evidence/pcm-flo-instrumentation.txt": "22a336d07c9d89fe58eb9e9ac58bbd36048a5146d72ab735589667835b407ead",
+    "tests/cloud-voice-evidence/pcm-flo.json": "1e59d21c3e91ced9c4720f9911de6605e42fcd9dff8b966fbdfbd52f04255c98",
+    "tests/cloud-voice-evidence/pcm-tingting-instrumentation.txt": "0d966ed2a3b9d4f9063783fb41e902451b6c2455ef63bbe42be77a5a6b229448",
+    "tests/cloud-voice-evidence/pcm-tingting.json": "f5ee5396fc8d3d6e1123fc993d8bafca34030cc87d4f65cc1265dece69e48469",
+    "tests/cloud-voice-evidence/voice-agent-ui.png": "2ba204e5d37a78a24f7a30507db6dee479af9cc647ccdd96bbad829f545ce26e",
+    "tests/fixtures/volc-voice/01-short-command.json": "05356e38cf6f924aad11b47bee7c83605e8d1d8bd0c635d7f36766d4a1396bb7",
+    "tests/fixtures/volc-voice/01-short-command.wav": "364613fee37eebbc0600de20dbb3d59ea2138f5f204eab3c689c82616b1ed084",
+    "tests/fixtures/volc-voice/02-numbers-settings.json": "7b14deeeb99ee3fc38d035da7008522737586a5c265b01596c1e9c62c0f51061",
+    "tests/fixtures/volc-voice/02-numbers-settings.wav": "bcc591b23e27339e169d07299807df1da5a2963d0e36caf574def9a04d8870b8",
+    "tests/fixtures/volc-voice/03-game-mixed.json": "d5160ffa54988a621feed530c82837200ee214cf8c81df229d9f7c6f2d00f060",
+    "tests/fixtures/volc-voice/03-game-mixed.wav": "4456efbc9bf5da911270e69ecac80c8ac79c1077875f8aa3c7392e01d6a16859",
+    "tests/fixtures/volc-voice/README.md": "928b209e63f75fbb9714813d33d9fd3d1909e83ba4cbc0c2bc00f485a5ee6d18",
+    "tests/fixtures/volc-voice/manifest.json": "c334e47865f5e20188671a629c05694d3045314e67afe6bde56dbb3db3042b23"
+  }
+}

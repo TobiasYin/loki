@@ -33,7 +33,8 @@ class MicrophoneInput(context:Context):PcmInput {
 data class VoiceConfig(val apiKey:String?,val appId:String?,val accessKey:String?,val resource:String) {
     fun request(endpoint:String=VolcAsrProtocol.ENDPOINT):Request {
         require(resource in setOf("volc.bigasr.sauc.duration","volc.bigasr.sauc.concurrent","volc.seedasr.sauc.duration","volc.seedasr.sauc.concurrent"))
-        val request=Request.Builder().url(endpoint).header("X-Api-Resource-Id",resource).header("X-Api-Connect-Id",UUID.randomUUID().toString())
+        val requestId=UUID.randomUUID().toString()
+        val request=Request.Builder().url(endpoint).header("X-Api-Resource-Id",resource).header("X-Api-Request-Id",requestId).header("X-Api-Connect-Id",requestId)
         if(!apiKey.isNullOrBlank())request.header("X-Api-Key",apiKey)
         else {require(!appId.isNullOrBlank() && !accessKey.isNullOrBlank());request.header("X-Api-App-Key",appId).header("X-Api-Access-Key",accessKey)}
         return request.build()

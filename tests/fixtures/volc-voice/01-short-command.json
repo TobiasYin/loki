@@ -1,0 +1,18 @@
+{
+  "id": "01-short-command",
+  "text": "请只回复语音测试成功，不要使用任何工具。",
+  "expectedPhrase": "语音测试成功",
+  "speechRate": 0,
+  "purpose": "短句、松手后发送与取消对照",
+  "file": "01-short-command.wav",
+  "durationMs": 3817,
+  "pcmSha256": "10d4261f9ba53ce4690d594e7d23499869358fe296be2dbcbcf6526cf6654a4d",
+  "wavSha256": "364613fee37eebbc0600de20dbb3d59ea2138f5f204eab3c689c82616b1ed084",
+  "ttsPackets": 10,
+  "terminalReceived": true,
+  "serviceCodes": [
+    0,
+    20000000
+  ],
+  "generationMs": 1512
+}

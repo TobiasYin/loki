@@ -1,0 +1,18 @@
+{
+  "id": "03-game-mixed",
+  "text": "请查看星露谷物语攻略，打开 Skill 管理，检查 Wi-Fi 和 USB 连接状态。",
+  "expectedPhrase": "攻略",
+  "speechRate": 0,
+  "purpose": "游戏名称、中英混合与英文缩写；只做转写测试",
+  "file": "03-game-mixed.wav",
+  "durationMs": 6990,
+  "pcmSha256": "f4b3ce58f4bb9087aac175ccb96aec97c2406ad60bac840bfb759108178f2787",
+  "wavSha256": "4456efbc9bf5da911270e69ecac80c8ac79c1077875f8aa3c7392e01d6a16859",
+  "ttsPackets": 18,
+  "terminalReceived": true,
+  "serviceCodes": [
+    0,
+    20000000
+  ],
+  "generationMs": 1703
+}

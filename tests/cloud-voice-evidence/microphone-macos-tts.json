@@ -1,0 +1,81 @@
+{
+  "audioSource": "device-speaker-to-physical-microphone",
+  "uploadedAudio": true,
+  "events": [
+    {
+      "phase": "connecting",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "95ba425a-997f-4db2-a2a2-66b4b32a64e0",
+      "sessionId": "6b6318ff-eedc-473a-b29c-d4ca11afbf57",
+      "at": 1792065563215
+    },
+    {
+      "phase": "recording",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "95ba425a-997f-4db2-a2a2-66b4b32a64e0",
+      "sessionId": "6b6318ff-eedc-473a-b29c-d4ca11afbf57",
+      "at": 1792065563579
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试成功，不要使用。",
+      "confirmed": "请知回复语音测试成功，不要使用。",
+      "error": null,
+      "submit": null,
+      "id": "95ba425a-997f-4db2-a2a2-66b4b32a64e0",
+      "sessionId": "6b6318ff-eedc-473a-b29c-d4ca11afbf57",
+      "at": 1792065569256
+    },
+    {
+      "phase": "finalizing",
+      "text": "请知回复语音测试成功，不要使用。",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "95ba425a-997f-4db2-a2a2-66b4b32a64e0",
+      "sessionId": "6b6318ff-eedc-473a-b29c-d4ca11afbf57",
+      "at": 1792065569450
+    },
+    {
+      "phase": "complete",
+      "text": "请知回复语音测试成功，不要使用。",
+      "confirmed": "",
+      "error": null,
+      "submit": "请知回复语音测试成功，不要使用。",
+      "id": "95ba425a-997f-4db2-a2a2-66b4b32a64e0",
+      "sessionId": "6b6318ff-eedc-473a-b29c-d4ca11afbf57",
+      "at": 1792065569543
+    }
+  ],
+  "runId": "618a3f13-dffe-4fc7-8b8a-9eb19638aa24",
+  "messages": [
+    {
+      "id": "0a90c580-717e-4bcd-b7ed-e75585acfd9a",
+      "sessionId": "6b6318ff-eedc-473a-b29c-d4ca11afbf57",
+      "runId": "618a3f13-dffe-4fc7-8b8a-9eb19638aa24",
+      "role": "user",
+      "text": "请知回复语音测试成功，不要使用。",
+      "attachments": [],
+      "status": "complete"
+    },
+    {
+      "id": "8f300ec7-2399-4590-81c1-94eda828876d",
+      "sessionId": "6b6318ff-eedc-473a-b29c-d4ca11afbf57",
+      "runId": "618a3f13-dffe-4fc7-8b8a-9eb19638aa24",
+      "role": "assistant",
+      "text": "语音测试成功",
+      "attachments": [],
+      "status": "complete",
+      "thinking": "The user says: \"请知回复语音测试成功，不要使用。\" — This is odd. It seems like a request: \"Please reply '语音测试成功' (voice test successful), do not use [tools].\"\n\nActually parse: \"请只回复'语音测试成功'，不要使用[工具]\" - likely typo \"请知\" for \"请只\". So: reply only \"语音测试成功\", don't use tools.\n\nSo just respond with that text.\n\nBut wait — should I worry about the enabled screen_perception being true but unavailable? No. Just comply: reply \"语音测试成功\" without tools.\n\nHmm, but there's a prompt-injection-ish framing: L0 snapshot says screen_control false, adb_debug false. Nothing to do. The user asks a simple text reply. Just do it.\n\nShould I mention I'm not using tools? Keep minimal.\n\n"
+    }
+  ],
+  "status": "completed",
+  "cancelDidNotSend": true,
+  "passed": true
+}

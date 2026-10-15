@@ -21,6 +21,6 @@ Agent 工具为 `skills_list`、`skills_read`、`skills_save`、`skills_enable`�
 - 完整软件校验已通过，最终共 57 项 JavaScript、177 项 JVM 测试通过；最终增量校验覆盖 Runtime、DOM、Android 单测、Lint、debug/release 与测试 APK。
 - 自动测试覆盖两种模型协议的思考解包、正文流、工具卡聚合，Skill 读取前后请求内容隔离、过大目录预算，YAML/ZIP 校验、原子更新与版本冲突，ASR 二进制/Gzip/末包、旧新鉴权，以及本地 WebSocket 的临时结果纠正、松手单次发送、取消和断线。
 - Thor 实机验收测试使用现有安装，无模型 fixture 重置：ZIP 导入、独立读取正文/引用文件、停用后重启保留、Native WebView 展示、首次麦克风权限弹窗和授权后界面存活、实际麦克风 6400 字节采集均通过。原消息数、模型设置和加密凭据不变，临时验收 Skill 已删除，未上传音频。
-- 当前没有火山 ASR 凭据，设备 Wi-Fi 也处于断开状态；因此未声称完成火山真实识别、中文准确率/延迟或语音到真实模型的端到端验证。缺少配置的错误提示已在实机验证。
+- 0.3.0 首次交付时尚无火山凭据、设备 Wi-Fi 断开；该轮证据保留原结论。2026-10-15 的 0.3.1 已在配置凭据后完成火山真实 ASR、离线火山 TTS 样本及真机麦克风到真实 Agent 的验收，详见 [云端语音验收](cloud-voice-acceptance.md)。固定样本结果不代表任意真人语音的准确率。
 
 参考：[火山大模型流式语音识别 API](https://docs.volcengine.com/docs/DoubaoVoice/LargemodelstreamingautomaticspeechrecognitionAPI?lang=zh)、[Agent Skills 规范](https://agentskills.io/specification)、[Pi 的 Skill 发现与目录生成实现](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/src/core/skills.ts)。内置创建指南按本地 [内置 skill-creator 技能](../app/src/main/assets/skills/skill-creator/SKILL.md) 的渐进披露原则编写。

@@ -38,7 +38,7 @@ class VolcAsrProtocolTest {
     }
     @Test fun authModesStayInNativeHeadersAtFixedEndpoint() {
         val modern=VoiceConfig("test-secret",null,null,"volc.seedasr.sauc.duration").request()
-        assertEquals("openspeech.bytedance.com",modern.url.host);assertEquals("test-secret",modern.header("X-Api-Key"));assertNull(modern.header("X-Api-Access-Key"))
+        assertEquals(modern.header("X-Api-Connect-Id"),modern.header("X-Api-Request-Id"));assertNotNull(modern.header("X-Api-Request-Id"));assertEquals("openspeech.bytedance.com",modern.url.host);assertEquals("test-secret",modern.header("X-Api-Key"));assertNull(modern.header("X-Api-Access-Key"))
         val old=VoiceConfig(null,"123","test-access","volc.bigasr.sauc.duration").request()
         assertEquals("123",old.header("X-Api-App-Key"));assertEquals("test-access",old.header("X-Api-Access-Key"));assertNull(old.header("X-Api-Key"))
     }

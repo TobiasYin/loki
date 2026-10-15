@@ -71,4 +71,4 @@ runner 只通过 signature 保护的 debug provider 准备/读报告，经真实
 
 侧栏的 Skill 管理支持导入 SKILL.md 或单个 Skill 的 ZIP，查看/启停/删除；Agent 自带 skill-creator 与 skill-manager，可在用户要求时提出创建和管理操作。模型默认只看到名称和简介，正文与引用资料必须通过读取工具按需加载。思考、回答与工具调用分别解包和聚合，页面以思考面板和工具卡显示。
 
-配置方法、按需加载边界与测试范围见 [功能说明](docs/voice-skills-streaming.md)；[本轮实机证据](tests/feature-evidence/README.md)独立于之前的输入设备验收。真实火山识别仍需配置语音凭据和联网；测试没有伪造云端通过。
+配置方法、按需加载边界与测试范围见 [功能说明](docs/voice-skills-streaming.md)；[本轮实机证据](tests/feature-evidence/README.md)独立于之前的输入设备验收。0.3.1 已配置语音凭据并通过真实火山识别与真机麦克风到 Agent 的端到端验收，见 [云端语音验收](docs/cloud-voice-acceptance.md)。火山 TTS 仅用于电脑端预生成离线测试 WAV，不进入 APK。

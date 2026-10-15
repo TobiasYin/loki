@@ -1,0 +1,18 @@
+{
+  "id": "02-numbers-settings",
+  "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+  "expectedPhrase": "亮度",
+  "speechRate": -10,
+  "purpose": "百分比、数字、日期与多分句；只做转写测试",
+  "file": "02-numbers-settings.wav",
+  "durationMs": 7786,
+  "pcmSha256": "c998af18495b38ad191e84dd49e07a4445de2e7d24dad280d97294049ee0098a",
+  "wavSha256": "bcc591b23e27339e169d07299807df1da5a2963d0e36caf574def9a04d8870b8",
+  "ttsPackets": 19,
+  "terminalReceived": true,
+  "serviceCodes": [
+    0,
+    20000000
+  ],
+  "generationMs": 1644
+}

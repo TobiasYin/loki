@@ -22,6 +22,9 @@ for name,path in artifacts.items():
    assert "name='dev.thor.agent'" in badging
    assert 'android.permission.INTERNET' in permissions
    assert 'assets/chat/runtime-host.js' in files
+   offline_tts={p.name for p in (root/'tests/fixtures/volc-voice').glob('*.wav')}
+   assert not any(pathlib.Path(f).name in offline_tts for f in files), 'Offline TTS fixtures must not enter APK'
+   assert not any(b'/api/v3/tts/' in z.read(f) for f in files if f.endswith('.dex') or f.startswith('assets/')), 'TTS integration must remain host-only'
    bundle=z.read('assets/chat/runtime-host.js').decode()
    assert 'sk-thor-native-placeholder' in bundle and 'integration-only-secret' not in bundle
    assert not any('node_modules' in f or f.endswith('.test.mjs') or f.endswith('package-lock.json') for f in files)

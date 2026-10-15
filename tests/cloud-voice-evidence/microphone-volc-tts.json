@@ -1,0 +1,72 @@
+{
+  "audioSource": "device-speaker-to-physical-microphone",
+  "uploadedAudio": true,
+  "ttsProvider": "Volcengine TTS",
+  "reference": "请只回复语音测试成功，不要使用任何工具。",
+  "events": [
+    {
+      "phase": "connecting",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "455edc77-a313-4689-9708-7c64f3289c2f",
+      "sessionId": "9a8ff4ac-4272-4fec-a51d-cf45e427ed28",
+      "at": 1792065880049
+    },
+    {
+      "phase": "recording",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "455edc77-a313-4689-9708-7c64f3289c2f",
+      "sessionId": "9a8ff4ac-4272-4fec-a51d-cf45e427ed28",
+      "at": 1792065880395
+    },
+    {
+      "phase": "finalizing",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "455edc77-a313-4689-9708-7c64f3289c2f",
+      "sessionId": "9a8ff4ac-4272-4fec-a51d-cf45e427ed28",
+      "at": 1792065885712
+    },
+    {
+      "phase": "complete",
+      "text": "请只回复语音测试成功，不要使用任何工具。",
+      "confirmed": "",
+      "error": null,
+      "submit": "请只回复语音测试成功，不要使用任何工具。",
+      "id": "455edc77-a313-4689-9708-7c64f3289c2f",
+      "sessionId": "9a8ff4ac-4272-4fec-a51d-cf45e427ed28",
+      "at": 1792065886151
+    }
+  ],
+  "runId": "cf646a9a-68df-48cf-add2-91ea966043db",
+  "messages": [
+    {
+      "id": "d23f37c9-295e-4624-ac39-19b52149780f",
+      "sessionId": "9a8ff4ac-4272-4fec-a51d-cf45e427ed28",
+      "runId": "cf646a9a-68df-48cf-add2-91ea966043db",
+      "role": "user",
+      "text": "请只回复语音测试成功，不要使用任何工具。",
+      "attachments": [],
+      "status": "complete"
+    },
+    {
+      "id": "4369f225-a934-4d72-ba78-7487892d77c8",
+      "sessionId": "9a8ff4ac-4272-4fec-a51d-cf45e427ed28",
+      "runId": "cf646a9a-68df-48cf-add2-91ea966043db",
+      "role": "assistant",
+      "text": "语音测试成功",
+      "attachments": [],
+      "status": "complete"
+    }
+  ],
+  "status": "completed",
+  "cancelDidNotSend": true,
+  "passed": true
+}

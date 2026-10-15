@@ -1,0 +1,150 @@
+{
+  "endpoint": "wss:\/\/openspeech.bytedance.com\/api\/v3\/sauc\/bigmodel_async",
+  "resource": "volc.seedasr.sauc.duration",
+  "audioSource": "known-synthetic-pcm",
+  "reference": "请只回复语音测试成功，不要使用任何工具。",
+  "uploadedAudio": true,
+  "events": [
+    {
+      "phase": "connecting",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 54
+    },
+    {
+      "phase": "recording",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 941
+    },
+    {
+      "phase": "recording",
+      "text": "请",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1363
+    },
+    {
+      "phase": "recording",
+      "text": "请知",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1551
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1713
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1890
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2154
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试成功",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2509
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试成功",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2917
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试成功不要",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 3558
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试成功不要使用",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4021
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试成功，不要使用任何",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4536
+    },
+    {
+      "phase": "recording",
+      "text": "请知回复语音测试成功，不要使用任何工具",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4748
+    },
+    {
+      "phase": "finalizing",
+      "text": "请知回复语音测试成功，不要使用任何工具",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5717
+    },
+    {
+      "phase": "finalizing",
+      "text": "请知回复语音测试成功，不要使用任何工具。",
+      "confirmed": "请知回复语音测试成功，不要使用任何工具。",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5771
+    },
+    {
+      "phase": "complete",
+      "text": "请知回复语音测试成功，不要使用任何工具。",
+      "confirmed": "",
+      "error": null,
+      "submit": "请知回复语音测试成功，不要使用任何工具。",
+      "elapsedMs": 6103
+    }
+  ],
+  "packets": 27,
+  "releasedAtMs": 5717,
+  "final": {
+    "phase": "complete",
+    "text": "请知回复语音测试成功，不要使用任何工具。",
+    "confirmed": "",
+    "error": null,
+    "submit": "请知回复语音测试成功，不要使用任何工具。",
+    "elapsedMs": 6103
+  },
+  "firstTextMs": 1363,
+  "finalAfterReleaseMs": 386,
+  "passed": true
+}

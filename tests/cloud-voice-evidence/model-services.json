@@ -1,0 +1,28 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "endpoint": "https://opencode.ai/zen/go/v1/responses",
+  "protocol": "openai-responses",
+  "credentialsStored": "native-keystore",
+  "chatDisplay": 4,
+  "passed": true,
+  "probe": {
+    "status": "passed",
+    "httpStatuses": [
+      200,
+      200
+    ],
+    "contexts": 2
+  },
+  "deviceInfo": {
+    "status": "completed",
+    "tools": [
+      "perception.device_info"
+    ]
+  },
+  "braveSearch": {
+    "status": "completed",
+    "tools": [
+      "web.search"
+    ]
+  }
+}

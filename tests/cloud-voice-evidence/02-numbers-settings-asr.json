@@ -1,0 +1,226 @@
+{
+  "endpoint": "wss:\/\/openspeech.bytedance.com\/api\/v3\/sauc\/bigmodel_async",
+  "resource": "volc.seedasr.sauc.duration",
+  "audioSource": "known-synthetic-pcm",
+  "reference": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+  "expectedPhrase": "亮度",
+  "ttsProvider": "Volcengine TTS",
+  "pcmSha256": "c998af18495b38ad191e84dd49e07a4445de2e7d24dad280d97294049ee0098a",
+  "referenceDurationMs": 7786,
+  "uploadedAudio": true,
+  "events": [
+    {
+      "phase": "connecting",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 55
+    },
+    {
+      "phase": "recording",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 777
+    },
+    {
+      "phase": "recording",
+      "text": "把",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 991
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1345
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1716
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 1954
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到百",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2348
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到7%",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2518
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 2969
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%音量",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 3969
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4118
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为百分之",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4569
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4958
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5121
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%，今天",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5756
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%，今天是",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 6137
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%，今天是202",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 6595
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%，今天是2026",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 6784
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%，今天是2026年",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 7604
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 7792
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 7941
+    },
+    {
+      "phase": "recording",
+      "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 8207
+    },
+    {
+      "phase": "finalizing",
+      "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 9163
+    },
+    {
+      "phase": "finalizing",
+      "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+      "confirmed": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 9863
+    },
+    {
+      "phase": "complete",
+      "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+      "confirmed": "",
+      "error": null,
+      "submit": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+      "elapsedMs": 9871
+    }
+  ],
+  "packets": 44,
+  "releasedAtMs": 9163,
+  "final": {
+    "phase": "complete",
+    "text": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+    "confirmed": "",
+    "error": null,
+    "submit": "把屏幕亮度调到70%，音量设为30%。今天是2026年10月15日。",
+    "elapsedMs": 9871
+  },
+  "firstTextMs": 991,
+  "finalAfterReleaseMs": 708,
+  "passed": true
+}

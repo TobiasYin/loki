@@ -1,0 +1,70 @@
+{
+  "endpoint": "wss:\/\/openspeech.bytedance.com\/api\/v3\/sauc\/bigmodel_async",
+  "resource": "volc.seedasr.sauc.duration",
+  "audioSource": "known-synthetic-pcm",
+  "reference": "请只回复语音测试成功，不要使用任何工具。",
+  "uploadedAudio": true,
+  "events": [
+    {
+      "phase": "connecting",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 35
+    },
+    {
+      "phase": "recording",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 623
+    },
+    {
+      "phase": "recording",
+      "text": "不要使用任何",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 4122
+    },
+    {
+      "phase": "recording",
+      "text": "停止回复语音测试成功，不要使用任何工具。",
+      "confirmed": "停止回复语音测试成功，不要使用任何工具。",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5318
+    },
+    {
+      "phase": "finalizing",
+      "text": "停止回复语音测试成功，不要使用任何工具。",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "elapsedMs": 5693
+    },
+    {
+      "phase": "complete",
+      "text": "停止回复语音测试成功，不要使用任何工具。",
+      "confirmed": "",
+      "error": null,
+      "submit": "停止回复语音测试成功，不要使用任何工具。",
+      "elapsedMs": 5884
+    }
+  ],
+  "packets": 27,
+  "releasedAtMs": 5692,
+  "final": {
+    "phase": "complete",
+    "text": "停止回复语音测试成功，不要使用任何工具。",
+    "confirmed": "",
+    "error": null,
+    "submit": "停止回复语音测试成功，不要使用任何工具。",
+    "elapsedMs": 5884
+  },
+  "firstTextMs": 4122,
+  "finalAfterReleaseMs": 192,
+  "passed": true
+}
