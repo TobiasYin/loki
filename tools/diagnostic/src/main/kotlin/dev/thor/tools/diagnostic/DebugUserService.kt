@@ -9,7 +9,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 /** Real Shizuku UserService. No input method or shell shortcut exists in the screen-control interface. */
-class DebugUserService : IDebugService.Stub() {
+class DebugUserService @JvmOverloads constructor(private val hostContext: android.content.Context? = null) : IDebugService.Stub() {
     private val clock = Clock { SystemClock.elapsedRealtime() }
     private data class Lease(val token: String, val caller: Int, val deadline: Long, val root: String, val cancel: Cancellation, val owner: IBinder, val death: IBinder.DeathRecipient)
     private data class ShellJob(val token: String,val process: java.lang.Process,val timeout: Int,val max: Int)
@@ -47,6 +47,45 @@ class DebugUserService : IDebugService.Stub() {
             requireTool(request.toByteArray().size <= 16 * 1024, Code.LIMIT_EXCEEDED, "Binder request too large")
             val obj = JSONObject(request); val args = obj.args()
             val data: Map<String, Any?> = when (args.string("operation")) {
+                "accessibility.ensure" -> {
+                    args.only("operation","reconnect")
+                    val reconnect=args["reconnect"] as? Boolean ?: false
+                    val host=hostContext ?: fail(Code.UNSUPPORTED,"Shizuku v13 application context required")
+                    requireTool(host.packageManager.getPackagesForUid(l.caller).orEmpty().contains(host.packageName),Code.PERMISSION_MISSING,"Caller must own the bound application")
+                    // Android's per-user UID range, also used by Shizuku's factory.
+                    val user=(l.caller/100000).toString()
+                    fun setting(action: String, name: String, value: String? = null): String {
+                        check(token)
+                        val command=mutableListOf("/system/bin/settings","--user",user,action,"secure",name)
+                        if(value!=null)command.add(value)
+                        val process=ProcessBuilder(command).redirectErrorStream(true).start()
+                        try {
+                            requireTool(process.waitFor(3,TimeUnit.SECONDS),Code.TIMEOUT,"Accessibility settings command timed out")
+                            val output=process.inputStream.use {Budgets.read(it,16384) {check(token)}}
+                            requireTool(process.exitValue()==0 && !output.truncated,Code.IO_ERROR,"Accessibility settings command failed")
+                            check(token);return output.bytes.toString(Charsets.UTF_8).trim()
+                        } finally {if(process.isAlive)process.destroyForcibly()}
+                    }
+                    val current=setting("get","enabled_accessibility_services")
+                    val merged=AccessibilitySetup.mergedServices(current,host.packageName)
+                    // Refresh immediately before the read/merge/write; retain every observed service.
+                    val latest=setting("get","enabled_accessibility_services")
+                    val desired=AccessibilitySetup.mergedServices(if(latest==current)current else latest,host.packageName)
+                    val own="${host.packageName}/dev.thor.tools.diagnostic.ThorAccessibilityService"
+                    // Android can retain the enabled setting while a crashed service
+                    // is disconnected. Cycle only our component when Native detects it.
+                    if(reconnect && own in latest.split(':')) {
+                        setting("put","enabled_accessibility_services",desired.split(':').filter {it!=own}.joinToString(":"))
+                        // Let AccessibilityManager observe removal before re-adding;
+                        // adjacent settings writes can otherwise be coalesced.
+                        Thread.sleep(400);check(token)
+                    }
+                    if(reconnect || latest!=desired)setting("put","enabled_accessibility_services",desired)
+                    setting("put","accessibility_enabled","1")
+                    val actual=setting("get","enabled_accessibility_services")
+                    requireTool(actual.split(':').toSet().containsAll(desired.split(':')),Code.IO_ERROR,"Accessibility readback differs")
+                    mapOf("enabled" to true,"uid" to Process.myUid(),"component" to own,"changed" to (current!=merged),"reconnectRequested" to reconnect)
+                }
                 "shell" -> fail(Code.UNSUPPORTED, "Use guarded short shell submission")
                 "files.read", "files.list" -> {
                     args.only("operation", "path", "maxBytes", "limit")

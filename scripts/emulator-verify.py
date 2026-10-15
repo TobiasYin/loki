@@ -19,7 +19,7 @@ try:
  adb('reverse','tcp:8877','tcp:8877')
  for apk in ['tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk','app/build/outputs/apk/debug/app-debug.apk','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk','tests/input-lab-app/app/build/outputs/apk/androidTest/debug/input-lab-debug-androidTest.apk']:
   print(adb('install','-r',apk).strip(),flush=True)
- result=adb('shell','am','instrument','-w','-r','-e','labDisplay',str(a.lab_display),'-e','requireShizuku',str(a.require_shizuku).lower(),'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+ result=adb('shell','am','instrument','-w','-r','-e','labDisplay',str(a.lab_display),'-e','disposableInstallation','true','-e','requireShizuku',str(a.require_shizuku).lower(),'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
  (output/'product-suite-final.log').write_text(result);print(result,flush=True)
  assert re.search(r'OK \(\d+ tests\)',result) and 'FAILURES' not in result,'Product instrumentation failed'
  result=adb('shell','am','instrument','-w','dev.thor.inputlab.test/dev.thor.inputlab.SnapshotInstrumentation')

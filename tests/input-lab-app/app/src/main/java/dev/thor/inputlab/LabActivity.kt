@@ -23,11 +23,14 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
     private var runnerTestRunId: String? = null
     private var runnerAgentRunId: String? = null
     private var runnerTrace: String? = null
-    fun runnerPrepare(case: String, testRun: String, agentRun: String, trace: String) {
+    fun runnerPrepare(case: String, testRun: String, agentRun: String, trace: String, observationSeconds: Int = 5, evidenceMode: String = RunnerEvidenceMode.DEFAULT) {
         check(BuildConfig.DEBUG && active?.active() != true && !finishing)
         require(case in caseNames && testRun.length in 1..100 && agentRun.length in 1..100 && trace.length in 1..512)
+        val runnerWindow=RunnerWindow.parse(observationSeconds)
+        val selectedEvidenceMode=RunnerEvidenceMode.parse(evidenceMode)
         runnerTestRunId = testRun; runnerAgentRunId = agentRun; runnerTrace = trace
-        cases.setSelection(caseNames.indexOf(case)); modes.setSelection(3); duration.setText("5"); role.isChecked = true
+        cases.setSelection(caseNames.indexOf(case)); modes.setSelection((0 until modes.count).single { modes.getItemAtPosition(it)==selectedEvidenceMode })
+        duration.setText(runnerWindow.observationSeconds.toString()); role.isChecked = true
         scheduleArm()
     }
     fun runnerDescription(): String {
@@ -63,16 +66,22 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
     private var mode = "physical_baseline"
     private var initialEnvironment: Map<String,Any?> = emptyMap()
     private var initialSceneState: Map<String,Any?> = emptyMap()
+    private var frozenDevices: Map<Int, Map<String,Any?>> = emptyMap()
+    private var frozenRanges: Map<Int, List<Range>> = emptyMap()
+    private var deviceContinuity: DeviceContinuity? = null
+    private var axisProfile = AxisProfile.standard
     private var lifecycleState="created"
     private var report: Map<String,Any?>? = null
     private var finishing = false
     private var currentDispatchSequence: Long? = null
     private var lastInput = 0L
     private var physicalTouch = false
+    private var physicalTouchDevice: Int? = null
     private val physicalKeys = mutableSetOf<Pair<Int,Int>>()
     private val observedAxes = mutableMapOf<Pair<Int,Int>,Float>()
     private var selectedExport: File? = null
     private var lastGeometry = ""
+    private var lastWindowInsets: Map<String,Any?> = emptyMap()
     private var faultProbe = "none"
     private var lastUiRawRefresh = 0L
     private var armedInstructions = ""
@@ -83,6 +92,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         super.onCreate(state)
         if(BuildConfig.DEBUG) runnerActivity = java.lang.ref.WeakReference(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.setDecorFitsSystemWindows(false)
         dm = getSystemService(DisplayManager::class.java)
         im = getSystemService(InputManager::class.java)
         recoverInterrupted()
@@ -118,6 +128,14 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         output = TextView(this).apply { textSize=12f; maxLines=6; text="Choose case, release all inputs, Arm. Automatic finish after window + 300 ms silence.\nNo input injection or external control interface. Qualification: Thor physical baseline pending." }
         root.addView(output,LinearLayout.LayoutParams(-1,dp(if(compact) 48 else 96)))
         root.setOnApplyWindowInsetsListener { v,insets ->
+            val currentInsets=windowInsetsSnapshot(insets)
+            if(lastWindowInsets.isNotEmpty() && currentInsets != lastWindowInsets) {
+                active?.takeIf { it.active() }?.let { a ->
+                    a.fault("window_insets_changed")
+                    emit("window_insets_changed",mapOf("before" to lastWindowInsets,"after" to currentInsets))
+                }
+            }
+            lastWindowInsets=currentInsets
             val bars=insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime())
             v.setPadding(dp(8)+bars.left,dp(4)+bars.top,dp(8)+bars.right,dp(4)+bars.bottom)
             insets
@@ -143,7 +161,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
                 val previousJson=org.json.JSONObject(previous)
                 val previousHeader=previousJson.getJSONObject("metadata")
                 val restartKind=if(previousJson.optJSONObject("environment")?.optInt("pid") == android.os.Process.myPid()) "activity_recreated" else "process_restart"
-                val interruptedHeader=mapOf("testRunId" to previousHeader.getString("testRunId"),"caseId" to previousHeader.getString("caseId"),"attemptId" to previousHeader.getString("attemptId"),"receiverEpoch" to previousHeader.getString("receiverEpoch"),"scenarioVersion" to 1,"phase" to "INTERRUPTED")
+                val interruptedHeader=mapOf("testRunId" to previousHeader.getString("testRunId"),"caseId" to previousHeader.getString("caseId"),"attemptId" to previousHeader.getString("attemptId"),"receiverEpoch" to previousHeader.getString("receiverEpoch"),"scenarioVersion" to previousHeader.optInt("scenarioVersion",1),"phase" to "INTERRUPTED")
                 File(dir,"recovery.jsonl").appendText(Json.encode(mapOf("schemaVersion" to 1,"metadata" to interruptedHeader,"sequence" to 1,"eventKind" to restartKind,"receiverEpoch" to receiverEpoch,"recordOrigin" to "receiver_diagnostic","previousAttemptMetadataRef" to "interrupted-metadata.json","receivedUptimeMs" to SystemClock.uptimeMillis()))+"\n")
                 val recovered=mapOf("reportSchemaVersion" to 1,"status" to "inconclusive","reasons" to listOf("receiver_interrupted",restartKind,"tail_may_be_missing"),"receiverEpoch" to receiverEpoch,"metadata" to interruptedHeader,"previousAttemptMetadataRef" to "interrupted-metadata.json","eventLogSha256" to File(dir,"events.jsonl").takeIf { it.exists() }?.let { sha256(it) },"receiverQualificationVersion" to "unqualified-physical-baseline-pending")
                 atomicFile(File(dir,"report.json"),Json.encode(recovered))
@@ -165,6 +183,9 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         controls.visibility=View.INVISIBLE // Keeps geometry fixed. Re-arm cannot race.
         handler.postDelayed({
             if(physicalTouch || physicalKeys.isNotEmpty() || !axesNeutral()) { controls.visibility=View.VISIBLE; output.text="Blocked: release not observed. Last input remains unknown; do not synthesize UP/neutral."; return@postDelayed }
+            if(windowInsetsSnapshot(window.decorView.rootWindowInsets)["fullscreenReady"] != true) {
+                controls.visibility=View.VISIBLE; output.text="Arm blocked: wait for fullscreen system bars and keyboard to hide, then Arm again."; return@postDelayed
+            }
             try {
                 if(rootDir().listFiles().orEmpty().count { it.isDirectory }>=50 || rootDir().walkTopDown().filter { it.isFile }.sumOf { it.length() } >= 200L*1024*1024) error("Report retention budget full: export and explicitly delete private reports via device settings/adb before new attempt")
                 journal?.let { previous -> Thread { previous.close() }.start() }
@@ -172,9 +193,17 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
                 attemptDir=File(rootDir(),attemptId)
                 journal=Journal(attemptDir!!,maxSamples=if(faultProbe=="budget") 4 else 100_000)
                 mode=selectedMode
-                initialEnvironment=environment()
-                active=Attempt(caseId,arena.targetWindow(),arena.endWindow(),SystemClock.uptimeMillis(),seconds*1000,roleConfirmed=confirmed,touchSlopPx=dp(12).toFloat())
-                InputDevice.getDeviceIds().forEach { id -> active?.ranges(id,Capture.ranges(InputDevice.getDevice(id))) }
+                val inputDevices=InputDevice.getDeviceIds().associateWith { InputDevice.getDevice(it) }
+                frozenDevices=inputDevices.mapValues { Capture.device(it.value) }
+                frozenRanges=inputDevices.mapValues { Capture.ranges(it.value) }
+                val frozenWindow=windowSnapshot()
+                val frozenDisplays=displaySnapshots()
+                deviceContinuity=DeviceContinuity(frozenDevices,frozenWindow,frozenDisplays)
+                axisProfile=AxisProfile.select(android.os.Build.MANUFACTURER,android.os.Build.MODEL,frozenDevices,frozenRanges)
+                initialEnvironment=environment()+mapOf("window" to frozenWindow,"displays" to frozenDisplays,"inputDevices" to frozenDevices.values.toList())
+                active=Attempt(caseId,arena.targetWindow(),arena.endWindow(),SystemClock.uptimeMillis(),seconds*1000,requiredAxes=axisProfile.axes,
+                    roleConfirmed=confirmed,touchSlopPx=dp(12).toFloat(),requiredAxisDeviceId=axisProfile.deviceId)
+                frozenRanges.forEach { (id,ranges) -> active?.ranges(id,ranges) }
                 atomicFile(File(attemptDir,"active.json"),Json.encode(mapOf("metadata" to metadata(),"environment" to initialEnvironment,"expectations" to expectations())))
                 active!!.arm(); initialSceneState=active!!.state(); lastInput=SystemClock.uptimeMillis(); armedInstructions=instructions(caseId)
                 emit("armed",mapOf("metadata" to metadata(),"environment" to initialEnvironment,"expectations" to expectations()))
@@ -218,14 +247,15 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
             } catch(e: Exception) { handler.post { a.fault("report_write_failed"); finishing=false; controls.visibility=View.VISIBLE; output.text="INCONCLUSIVE: report write failed ${e.message}. Active marker retained." } }
         }.start()
     }
-    private fun metadata() = mapOf("schemaVersion" to 1,"labVersion" to BuildConfig.VERSION_NAME,"versionCode" to BuildConfig.VERSION_CODE,"buildId" to "input-lab-v1",
-        "testRunId" to testRunId,"attemptId" to attemptId,"caseId" to active?.caseId,"receiverEpoch" to receiverEpoch,"scenarioVersion" to 1,"seed" to 1101,
+    private fun metadata() = mapOf("schemaVersion" to 1,"labVersion" to BuildConfig.VERSION_NAME,"versionCode" to BuildConfig.VERSION_CODE,"buildId" to "input-lab-v3",
+        "testRunId" to testRunId,"attemptId" to attemptId,"caseId" to active?.caseId,"receiverEpoch" to receiverEpoch,"scenarioVersion" to 3,"seed" to 1101,
         "mode" to mode,"layoutEpoch" to layoutEpoch,"sceneRevision" to active?.sceneRevision,"deviceRevision" to deviceRevision,"phase" to active?.phase?.name,
         "clockIds" to mapOf("eventTime" to "android_uptime_ms","receivedUptimeMs" to "android_uptime_ms","receivedElapsedRealtimeNanos" to "android_elapsed_realtime_ns","wallTimeMs" to "unix_epoch_ms"))
     private fun expectations() = mapOf("stimulusDescription" to instructions(active?.caseId ?: ""),"inputMode" to if(active?.caseId in setOf("LAB-06","LAB-07","LAB-08","LAB-08-AXIS","LAB-09")) "controller" else "touch_or_explicit_semantic",
         "observationWindowMs" to active?.durationMs,"quietWindowMs" to 300,"cleanupPolicy" to "observe_actual_up_and_neutral_never_synthesize",
         "targetWindowBounds" to active?.target?.map(),"endTargetWindowBounds" to active?.endTarget?.map(),"touchSlopPx" to active?.touchSlopPx,"tapMaxMs" to 500,"longPressMinMs" to 600,"swipeDurationMs" to listOf(100,5000),"expectedKeyCode" to 96,"comboKeyCodes" to listOf(96,97),
-        "requiredAxisIds" to listOf(0,1,11,14,17,18),"axisExcursionFraction" to 0.5,"axisNeutralFraction" to 0.05,"upperRoleConfirmed" to (active?.roleConfirmed ?: false))
+        "requiredAxisIds" to axisProfile.axes.toList(),"axisProfile" to axisProfile.map(),"axisExcursionFraction" to 0.5,"axisNeutralFraction" to 0.05,"upperRoleConfirmed" to (active?.roleConfirmed ?: false),
+        "deviceChangePolicy" to "unchanged_public_configuration_when_idle_v2")
     private fun summary(r: Map<String,Any?>) = "# Thor Input Lab ${active?.caseId}\n\nStatus: ${r["status"]}\n\nAssertions: ${Json.encode(r["assertions"])}\n\nAttempt: $attemptId; receiver epoch: $receiverEpoch; mode: $mode\n\nQualification: unqualified, Thor physical baseline pending. Android dispatch is not proof of input sender identity or cross-screen injection.\n\nFrozen expectations: ${Json.encode(r["expectations"])}\n\nState: ${Json.encode(r["sceneAfter"])}\n\nIntegrity: ${Json.encode(r["integrity"])}\n\nClock: event/receive uptime milliseconds; receive elapsedRealtime nanoseconds includes deep sleep. Never subtract across clock IDs.\n\nEnvironment: ${Json.encode(r["environmentBefore"])}\n"
     private fun emit(kind: String, body: Map<String,Any?>, origin: String="receiver_diagnostic", samples: Int=1): Long? {
         val a=active ?: return null
@@ -233,7 +263,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         val seq=++sequence
         val row=mapOf("schemaVersion" to 1,"testRunId" to testRunId,"caseId" to a.caseId,"attemptId" to attemptId,"receiverEpoch" to receiverEpoch,"sequence" to seq,
             "eventKind" to kind,"recordOrigin" to origin,"receivedUptimeMs" to SystemClock.uptimeMillis(),"receivedElapsedRealtimeNanos" to SystemClock.elapsedRealtimeNanos(),"wallTimeMs" to System.currentTimeMillis(),
-            "scenarioVersion" to 1,"sceneRevision" to a.sceneRevision,"layoutEpoch" to layoutEpoch,"deviceRevision" to deviceRevision,"late" to (a.phase==Phase.FINISHED && kind!="finished"),"window" to windowSnapshot(),"data" to body)
+            "scenarioVersion" to 3,"sceneRevision" to a.sceneRevision,"layoutEpoch" to layoutEpoch,"deviceRevision" to deviceRevision,"late" to (a.phase==Phase.FINISHED && kind!="finished"),"window" to windowSnapshot(),"data" to body)
         if(!journal!!.append(row,samples)) { a.fault(journal!!.error ?: "log_incomplete"); output.text="INCOMPLETE: ${journal!!.error}, dropped=${journal!!.dropped.get()}" }
         return seq
     }
@@ -244,7 +274,11 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         val a=active ?: return
         if(!a.active()) return
         val before=a.state()
-        a.ranges(raw.device,Capture.ranges(InputDevice.getDevice(raw.device)))
+        val currentDevice=Capture.device(InputDevice.getDevice(raw.device))
+        if(currentDevice["available"] != true || currentDevice != frozenDevices[raw.device]) {
+            a.stale=true; a.fault("input_device_configuration_changed_at_dispatch")
+            emit("device_configuration_mismatch",mapOf("deviceId" to raw.device,"frozenDevice" to frozenDevices[raw.device],"device" to currentDevice))
+        }
         if(SystemClock.uptimeMillis() > a.started+a.durationMs) a.fault("input_after_observation_deadline")
         a.accept(raw)
         if(SystemClock.uptimeMillis()-lastUiRawRefresh>100) {
@@ -257,6 +291,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
     }
     override fun dispatchTouchEvent(e: MotionEvent): Boolean {
         physicalTouch = e.actionMasked != MotionEvent.ACTION_UP && e.actionMasked != MotionEvent.ACTION_CANCEL
+        physicalTouchDevice = if(physicalTouch) e.deviceId else null
         val (raw,payload)=Capture.motion(e,"touch"); receive(raw,payload)
         return try { super.dispatchTouchEvent(e) } finally { currentDispatchSequence=null }
     }
@@ -277,7 +312,16 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
     private fun axesNeutral() = observedAxes.all { (p,v) -> Capture.ranges(InputDevice.getDevice(p.first)).find { it.axis==p.second }?.neutral(v) ?: (v==0f) }
     override fun onWindowFocusChanged(hasFocus: Boolean) { super.onWindowFocusChanged(hasFocus); active?.focus(hasFocus); emit("window_focus",mapOf("hasFocus" to hasFocus)); if(::header.isInitialized) refresh() }
     override fun onPause() { lifecycleState="paused"; super.onPause(); emit("lifecycle",mapOf("state" to "paused")); active?.takeIf { it.active() && it.caseId !in setOf("LAB-01","LAB-09") }?.fault("activity_paused") }
-    override fun onResume() { lifecycleState="resumed"; super.onResume(); emit("lifecycle",mapOf("state" to "resumed")) }
+    override fun onResume() {
+        lifecycleState="resumed"; super.onResume()
+        window.decorView.post {
+            window.insetsController?.apply {
+                systemBarsBehavior=WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                hide(WindowInsets.Type.systemBars())
+            }
+        }
+        emit("lifecycle",mapOf("state" to "resumed"))
+    }
     override fun onDestroy() {
         if(runnerActivity?.get() === this) runnerActivity = null
         lifecycleState="destroyed"
@@ -295,23 +339,57 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
     override fun onInputDeviceAdded(id: Int) = deviceChanged(id,"added")
     override fun onInputDeviceRemoved(id: Int) = deviceChanged(id,"removed")
     override fun onInputDeviceChanged(id: Int) = deviceChanged(id,"changed")
-    private fun deviceChanged(id: Int, change: String) { deviceRevision++; if(change!="added") active?.takeIf { it.active() }?.let { it.stale=true; it.fault("input_device_$change") }; emit("device_changed",mapOf("change" to change,"device" to Capture.device(InputDevice.getDevice(id)))); refresh() }
+    private fun deviceChanged(id: Int, change: String) {
+        deviceRevision++
+        val currentDevices=InputDevice.getDeviceIds().associateWith { Capture.device(InputDevice.getDevice(it)) }
+        val a=active?.takeIf { it.active() }
+        val held=physicalTouchDevice==id || physicalKeys.any { it.first==id } || a?.hasHeldInputs(id)==true ||
+            observedAxes.any { (p,v) -> p.first==id && (frozenRanges[id]?.find { it.axis==p.second }?.neutral(v) ?: (v==0f)) != true }
+        val decision=if(a==null) null else deviceContinuity?.assess(id,change,currentDevices,windowSnapshot(),displaySnapshots(),held,a.stale || a.faults.isNotEmpty())
+            ?: DeviceContinuity.Decision(listOf("input_device_snapshot_unavailable"))
+        if(a!=null && decision?.continuous != true) {
+            a.stale=true; a.fault("input_device_$change")
+            decision?.reasons?.forEach { a.fault(it) }
+        }
+        emit("device_changed",mapOf("change" to change,"deviceId" to id,"device" to (currentDevices[id] ?: Capture.device(null)),
+            "frozenDevice" to frozenDevices[id],"affectedDeviceInputHeld" to held,"continuity" to decision?.map()))
+        // An unchanged public configuration only appends evidence. It changes no rendered state.
+        // Keep faults visible, including a journal failure raised by emit() after the decision.
+        if(a==null || decision?.continuous != true || journal?.incomplete?.get()==true) refresh()
+    }
     private fun windowSnapshot(): Map<String,Any?> {
         if(!::arena.isInitialized) return emptyMap()
         val pos=IntArray(2); window.decorView.getLocationOnScreen(pos)
         val insets=window.decorView.rootWindowInsets?.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime())
         return mapOf("actualWindowDisplayId" to display?.displayId,"rotation" to display?.rotation,"hasWindowFocus" to hasWindowFocus(),"windowScreenX" to pos[0],"windowScreenY" to pos[1],
-            "windowWidth" to window.decorView.width,"windowHeight" to window.decorView.height,"arenaWindowBounds" to arena.windowBounds().map(),"layoutHash" to digest(geometry()),"insets" to insets?.let { listOf(it.left,it.top,it.right,it.bottom) },"lifecycle" to lifecycleState)
+            "windowWidth" to window.decorView.width,"windowHeight" to window.decorView.height,"arenaWindowBounds" to arena.windowBounds().map(),"layoutHash" to digest(geometry()),"insets" to insets?.let { listOf(it.left,it.top,it.right,it.bottom) },"lifecycle" to lifecycleState,
+            "windowMode" to "immersive_transient_system_bars_by_swipe","windowInsets" to windowInsetsSnapshot(window.decorView.rootWindowInsets))
+    }
+    private fun windowInsetsSnapshot(insets: WindowInsets?): Map<String,Any?> {
+        if(insets==null) return mapOf("available" to false,"fullscreenReady" to false)
+        val statusVisible=insets.isVisible(WindowInsets.Type.statusBars())
+        val navigationVisible=insets.isVisible(WindowInsets.Type.navigationBars())
+        val captionVisible=insets.isVisible(WindowInsets.Type.captionBar())
+        val imeVisible=insets.isVisible(WindowInsets.Type.ime())
+        fun bounds(type: Int) = insets.getInsets(type).let { listOf(it.left,it.top,it.right,it.bottom) }
+        return mapOf("available" to true,"statusBarsVisible" to statusVisible,"navigationBarsVisible" to navigationVisible,
+            "captionBarVisible" to captionVisible,"imeVisible" to imeVisible,
+            "systemBarsInsets" to bounds(WindowInsets.Type.systemBars()),"imeInsets" to bounds(WindowInsets.Type.ime()),
+            "fullscreenReady" to (!statusVisible && !navigationVisible && !captionVisible && !imeVisible))
     }
     private fun geometry() = if(::arena.isInitialized) Json.encode(mapOf("arena" to arena.windowBounds().map(),"width" to window.decorView.width,"height" to window.decorView.height,"display" to display?.displayId,"rotation" to display?.rotation)) else ""
     private fun environment() = mapOf("labVersion" to BuildConfig.VERSION_NAME,"applicationId" to packageName,"uid" to android.os.Process.myUid(),"pid" to android.os.Process.myPid(),"androidApi" to android.os.Build.VERSION.SDK_INT,"androidRelease" to android.os.Build.VERSION.RELEASE,
         "manufacturer" to android.os.Build.MANUFACTURER,"model" to android.os.Build.MODEL,"firmwareFingerprint" to android.os.Build.FINGERPRINT,"window" to windowSnapshot(),
-        "displays" to dm.displays.map { d -> val m=d.mode; mapOf("displayId" to d.displayId,"name" to d.name,"rotation" to d.rotation,"state" to d.state,"physicalWidth" to m.physicalWidth,"physicalHeight" to m.physicalHeight,"refreshRate" to m.refreshRate) },
+        "displays" to displaySnapshots(),
         "inputDevices" to InputDevice.getDeviceIds().map { Capture.device(InputDevice.getDevice(it)) })
+    private fun displaySnapshots() = dm.displays.sortedBy { it.displayId }.map { d -> val m=d.mode
+        mapOf("displayId" to d.displayId,"name" to d.name,"rotation" to d.rotation,"state" to d.state,
+            "physicalWidth" to m.physicalWidth,"physicalHeight" to m.physicalHeight,"refreshRate" to m.refreshRate)
+    }
     private fun refresh() {
         if(!::header.isInitialized || !::arena.isInitialized) return
         val a=active
-        val headerText="THOR INPUT LAB 0.1.0 · display ${display?.displayId} · ${if(hasWindowFocus()) "FOCUSED" else "NO FOCUS"}\n${a?.caseId ?: "PREPARED"} / ${a?.phase ?: "idle"} · rev ${a?.sceneRevision ?: 0} · layout $layoutEpoch · raw ${a?.rawCount ?: 0} · ${attemptId.take(8)}\nIntegrity ${if(journal?.incomplete?.get()==true) "INCOMPLETE" else "no known gap"} · qualification pending"
+        val headerText="THOR INPUT LAB ${BuildConfig.VERSION_NAME} · display ${display?.displayId} · ${if(hasWindowFocus()) "FOCUSED" else "NO FOCUS"}\n${a?.caseId ?: "PREPARED"} / ${a?.phase ?: "idle"} · rev ${a?.sceneRevision ?: 0} · layout $layoutEpoch · raw ${a?.rawCount ?: 0} · ${attemptId.take(8)}\nIntegrity ${if(journal?.incomplete?.get()==true) "INCOMPLETE" else "no known gap"} · qualification pending"
         if(header.text.toString()!=headerText) header.text=headerText
         arena.invalidate()
     }
@@ -362,7 +440,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         "LAB-04-CANCEL" -> "Deliver a real DOWN/CANCEL touch sequence; UP must not count as cancel."
         "LAB-05" -> "Activate the native semantic button. Semantic evidence is separate from raw touch; self-drawn shapes have no fine UI tree."
         "LAB-06" -> "Press/release controller A (key 96); repeats do not count as new presses. Keyboard source fails."
-        "LAB-07" -> "Scan X/Y/Z/RZ/LTRIGGER/RTRIGGER at least 50% advertised range, then actual neutral (5% or flat). Missing axes fail."
+        "LAB-07" -> "Scan ${axisProfile.name}: axes ${axisProfile.axes} on device ${axisProfile.deviceId ?: "one controller"}, at least 50% advertised range, then actual neutral (5% or flat). Missing axes fail."
         "LAB-08" -> "Hold controller A+B together on same device, release both; any observed axes must return neutral. Sequential taps fail."
         "LAB-08-AXIS" -> "Hold controller A while moving an advertised joystick axis at least 50% range; release A and return axis to actual neutral."
         "LAB-09" -> "Confirm upper role, change focus and receive controller A DOWN/UP. Does not infer where missing input went."
@@ -419,7 +497,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
                 paint.color=Color.CYAN; c.drawCircle(cx+normalized(xAxis)*radius,cy+normalized(yAxis)*radius,8f,paint)
                 paint.color=Color.WHITE; paint.textSize=13f; c.drawText(if(i==0) "LEFT X/Y" else "RIGHT Z/RZ",cx-radius,cy+radius+18,paint)
             }
-            listOf(17 to "LT",18 to "RT").forEachIndexed { i,(axis,label) ->
+            listOf((if(axisProfile.axes.contains(23)) 23 else 17) to "LT",(if(axisProfile.axes.contains(22)) 22 else 18) to "RT").forEachIndexed { i,(axis,label) ->
                 val x=width*(if(i==0) 0.12f else 0.58f); val y=height*0.79f; val bar=width*0.3f
                 paint.color=Color.rgb(65,79,95); c.drawRect(x,y,x+bar,y+16,paint)
                 paint.color=Color.YELLOW; c.drawRect(x,y,x+bar*normalized(axis),y+16,paint)

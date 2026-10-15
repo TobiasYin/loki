@@ -41,7 +41,8 @@ data class Verdict(val status: String, val reasons: List<String>)
 class Attempt(
     val caseId: String, val target: Bounds, val endTarget: Bounds, val started: Long,
     val durationMs: Long = 5000, val expectedKey: Int = 96,
-    val requiredAxes: Set<Int> = setOf(0, 1, 11, 14, 17, 18), val roleConfirmed: Boolean = false, val touchSlopPx: Float = 24f
+    val requiredAxes: Set<Int> = setOf(0, 1, 11, 14, 17, 18), val roleConfirmed: Boolean = false, val touchSlopPx: Float = 24f,
+    val requiredAxisDeviceId: Int? = null
 ) {
     var phase = Phase.PREPARED
     var sceneRevision = 0L
@@ -84,6 +85,9 @@ class Attempt(
     }
     fun semantic() { if(active()) { semanticCount++; sceneRevision++ } }
     fun active() = phase == Phase.ARMED || phase == Phase.RECORDING
+    fun hasHeldInputs(deviceId: Int) = touchDown?.device == deviceId || pressed.any { it.first == deviceId } || axes.any { (p,v) ->
+        p.first == deviceId && deviceRanges[p.first]?.find { it.axis == p.second }?.neutral(v) != true
+    }
     fun accept(e: Raw) {
         if(!active()) return
         phase = Phase.RECORDING
@@ -166,7 +170,9 @@ class Attempt(
         if(now-started < durationMs) faults += "observation_window_short"
         if(faults.isNotEmpty()) return Verdict("inconclusive", faults.toList())
         if(touchDown != null || pressed.isNotEmpty()) return Verdict(if(stale) "inconclusive" else "fail", listOf("release_not_observed"))
-        val axisPass = neutralAxes.map { it.first }.distinct().any { device -> requiredAxes.all { device to it in neutralAxes } }
+        val axisPass = neutralAxes.map { it.first }.distinct().any { device ->
+            (requiredAxisDeviceId == null || device == requiredAxisDeviceId) && requiredAxes.all { device to it in neutralAxes }
+        } && axes.all { (p,v) -> deviceRanges[p.first]?.find { it.axis == p.second }?.neutral(v) == true }
         val axisDevices=deviceRanges.filterValues { ranges -> requiredAxes.all { axis -> ranges.any { it.axis==axis && Sources.has(it.source,Sources.JOYSTICK) } } }.keys
         if(caseId == "LAB-07" && !axisPass) {
             val absent=requiredAxes.filter { axis -> deviceRanges.values.none { ranges -> ranges.any { it.axis==axis && Sources.has(it.source,Sources.JOYSTICK) } } }

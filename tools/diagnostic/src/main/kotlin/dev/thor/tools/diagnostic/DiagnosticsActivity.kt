@@ -209,6 +209,7 @@ class DiagnosticsActivity : Activity() {
                 val envelope = Envelope(lease.session, lease.run, java.util.UUID.randomUUID().toString(), tool, lease.epoch,
                     minOf(lease.deadline, clock.now() + 60_000), snapshot)
                 val result = gateway.execute(envelope, args)
+                if(tool=="perception.capture_screen" && result.error==null)pendingSnapshot=result.snapshotId
                 show("TEST authority / $tool\nINPUT:\n${Budgets.safeText(raw)}\nRESULT:\n${result.toJson()}")
                 if (result.error == null) (result.data["attachmentRef"] as? String)?.let { path -> runOnUiThread { if (!destroyed) image.setImageBitmap(BitmapFactory.decodeFile(path)) } }
             } catch (t: ToolFailure) { show("${t.code}: ${t.message}") }

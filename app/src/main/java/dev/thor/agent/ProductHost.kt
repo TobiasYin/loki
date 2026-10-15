@@ -45,6 +45,7 @@ class ProductHost private constructor(private val context: Context, private val 
     @Volatile private var closing = false
     private var connection: String? = null
     private var snapshot: Snapshot? = null
+    private var pendingPerceptionSnapshot: Snapshot? = null
     private val deviceAuthority = DeviceAuthority(authority) { snapshots.update(displayFacts(context)) }
     private val snapshots = Snapshots(clock) { ThorAccessibilityService.instance?.target(it) ?: Target(null, "unknown", "no-accessibility") }
     private val displayManager=context.getSystemService(android.hardware.display.DisplayManager::class.java)
@@ -118,7 +119,8 @@ class ProductHost private constructor(private val context: Context, private val 
             val headerTemplate = prefs.getString("headerTemplate", "").orEmpty().ifBlank { defaultTemplate }
             require(headerName.matches(Regex("[A-Za-z0-9-]+")) && headerTemplate.split("{{credential}}").size == 2 && !headerTemplate.contains('\r') && !headerTemplate.contains('\n'))
             val header = mapOf(headerName to headerTemplate)
-            profiles.add(NetworkProfile(ref, "${u.scheme}://${u.rawAuthority}", setOf(path), setOf("POST"), setOf(Purpose.model, Purpose.configuration_test), credentialRef, header, explicitLocal = localDebug))
+            val goSessionHeader = if(u.scheme == "https" && u.host == "opencode.ai" && u.port in setOf(-1,443) && u.path.trimEnd('/') == "/zen/go/v1") "x-opencode-session" else null
+            profiles.add(NetworkProfile(ref, "${u.scheme}://${u.rawAuthority}", setOf(path), setOf("POST"), setOf(Purpose.model, Purpose.configuration_test), credentialRef, header, explicitLocal = localDebug, nativeSessionHeader = goSessionHeader))
             val passed = prefs.getInt("probeRevision", -1) == revision && prefs.getString("probe", "") == "passed"
             model = obj("profileId" to ref, "revision" to revision, "label" to prefs.getString("name", "模型"), "protocol" to protocol,
                 "baseUrl" to base, "modelId" to prefs.getString("model", ""), "credentialRef" to credentialRef, "contextWindow" to prefs.getInt("contextBudget",32768), "maxOutput" to prefs.getInt("maxOutput",2048),
@@ -211,7 +213,7 @@ class ProductHost private constructor(private val context: Context, private val 
         val pendingImages = s.optJSONArray("pendingAttachments") ?: JSONArray()
         val text = d.getString("text"); require(text.isNotBlank() && text.length <= 8000)
         val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(ref)); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } })
-        binding = b; networkCalls.clear(); deviceAuthority.bind(b); probeRun = if(probe) b.runId else null; snapshot = null
+        binding = b; networkCalls.clear(); deviceAuthority.bind(b); probeRun = if(probe) b.runId else null; snapshot = null; pendingPerceptionSnapshot = null
         val r = obj("id" to b.runId, "sessionId" to sid, "status" to "queued", "expanded" to true, "startedAt" to System.currentTimeMillis(), "probe" to probe,
             "modelProfileRevision" to revision, "capabilityEpoch" to b.capabilityEpoch, "contexts" to JSONArray())
         state.getJSONArray("runs").put(r)
@@ -233,7 +235,9 @@ class ProductHost private constructor(private val context: Context, private val 
         snapshots.update(displayFacts(context))
         if (refresh || snapshot == null) {
             // Preserve a valid frame/snapshot identity across model requests; changed/expired resources get a new identity.
-            snapshot = snapshot?.let { old -> runCatching { snapshots.validate(old.id) }.getOrNull() } ?: runCatching { snapshots.capture() }.getOrNull()
+            snapshot = pendingPerceptionSnapshot?.let { fresh -> runCatching { snapshots.validate(fresh.id) }.getOrNull() }
+                ?: snapshot?.let { old -> runCatching { snapshots.validate(old.id) }.getOrNull() } ?: runCatching { snapshots.capture() }.getOrNull()
+            pendingPerceptionSnapshot=null
         }
         val available = JSONObject(); val allowed = mutableSetOf<String>()
         for (t in ToolPack.descriptors.values) {
@@ -341,6 +345,7 @@ class ProductHost private constructor(private val context: Context, private val 
                 serial.execute {
                     try {
                         bound(c, j)
+                        val freshObservation=if(e.toolId=="perception.capture_screen" && result.error==null)snapshots.validate(result.snapshotId) else null
                         val data = result.data.toMutableMap(); val content = JSONArray()
                         val path = data.remove("attachmentRef") as? String
                         if(path != null && result.error == null) {
@@ -350,9 +355,12 @@ class ProductHost private constructor(private val context: Context, private val 
                             state.getJSONArray("attachments").put(a); persist(); content.put(obj("type" to "attachment", "attachmentId" to aid))
                         }
                         content.put(obj("type" to "text", "text" to redactor.redact(JSONObject(json(data + mapOf("message" to result.message)).toString()).toString())))
+                        // The next model request receives this fresh observation;
+                        // tools still in the old response retain their old target.
+                        if(freshObservation!=null)pendingPerceptionSnapshot=snapshots.validate(freshObservation.id)
                         future.complete(obj("content" to content, "observedAt" to (System.currentTimeMillis() - (clock.now()-result.observedAt).coerceAtLeast(0)), "source" to result.source, "truncated" to result.truncated,
                             "evidenceRef" to (data["backupId"]?.let {"backup:$it"} ?: "native-event:${e.runId}:${e.requestId}"), "error" to result.error?.name, "outcome" to if(result.outcome == "not_submitted") "observed" else result.outcome))
-                    } catch (_: Exception) { future.complete(obj("error" to "STALE_AUTHORIZATION", "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "unknown")) }
+                    } catch (error: Exception) { future.complete(obj("error" to ((error as? ToolFailure)?.code?.name ?: "STALE_AUTHORIZATION"), "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "unknown")) }
                 }
             } catch(e: Exception) { future.complete(obj("error" to (e as? ToolFailure)?.code?.name.orEmpty().ifEmpty { "CANCELLED" }, "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "observed")) }
             finally { backend.approval = null; backend.shellApproval = null }
@@ -435,6 +443,7 @@ class ProductHost private constructor(private val context: Context, private val 
     private fun revokeResources() { if(closing)return;runCatching { serial.execute { binding?.let { authority.invalidateResources(it.sessionId); stop("系统授权或后端失效"); persist(); publish() } } } }
     fun calibrate(upper: Int, lower: Int) { snapshots.update(displayFacts(context)); snapshots.calibrate(upper, lower); revokeResources() }
     fun bindDebug() = debug.requestAndBind()
+    fun accessibilitySetupStatus() = debug.accessibilitySetup
     fun requestProbe(): String { require(binding == null && model != null); val token = id(); probeToken = token; return token }
     fun requestImagePicker(): String { require(binding == null);return selectedSession() }
     fun addUserImage(sid: String,uri: android.net.Uri): CompletableFuture<JSONObject> {

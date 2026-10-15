@@ -11,6 +11,18 @@ import java.net.InetAddress
 import java.util.concurrent.*
 
 class TransportTest {
+    @Test fun nativeSessionRoutingOverridesCallerHeaderAndIsProfileScoped() {
+        val binding=Binding("native-session","run","lease","connection",1)
+        val profile=NetworkProfile("go","https://opencode.ai",setOf("/zen/go/v1/responses"),setOf("POST"),setOf(Purpose.model),nativeSessionHeader="x-opencode-session")
+        val start=HttpStart(NetworkEnvelope(1,"request",binding,Purpose.model,"go",1),"https://opencode.ai/zen/go/v1/responses",headers=mapOf("X-OpenCode-Session" to "caller-forged-session"))
+        val policy=NetworkPolicy(listOf(profile),CredentialVault(emptyMap()))
+        assertEquals("native-session",policy.prepare(start).headers["x-opencode-session"])
+        assertEquals("another-native-session",policy.prepare(start.copy(envelope=start.envelope.copy(binding=binding.copy(sessionId="another-native-session")))).headers["x-opencode-session"])
+        assertThrows(BridgeFailure::class.java) {policy.prepare(start.copy(envelope=start.envelope.copy(binding=binding.copy(sessionId="bad\r\nheader"))))}
+        val ordinary=NetworkPolicy(listOf(profile.copy(nativeSessionHeader=null)),CredentialVault(emptyMap()))
+        assertFalse(ordinary.prepare(start.copy(headers=emptyMap())).headers.containsKey("x-opencode-session"))
+        assertThrows(IllegalArgumentException::class.java) {profile.copy(nativeSessionHeader="authorization")}
+    }
     private class Lab(val limits: Limits = Limits(chunkBytes = 3), val credential: Boolean = false, tls: Boolean = false): AutoCloseable {
         val server = MockWebServer().apply {
             if (tls) {

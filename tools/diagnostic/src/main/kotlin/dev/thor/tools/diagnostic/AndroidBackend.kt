@@ -174,12 +174,16 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         visit(root, 0, "${e.snapshotId}/${window.id}")
         return result(e, mapOf("nodes" to nodes, "windowId" to window.id, "nodeRefsReusable" to false, "emptyReason" to if (nodes.size == 1 && nodes[0]["text"] == null) "may_be_self_drawn_surface" else null), truncated)
     }
-    private fun screenshot(e: Envelope, args: Map<String, Any?>, cp: Checkpoint): ToolResult {
+    private fun screenshot(e: Envelope, args: Map<String, Any?>, requestCheckpoint: Checkpoint): ToolResult {
         args.only("maxEdge", "quality", "region", "format")
         requireTool(args.string("format", "jpeg") == "jpeg", Code.UNSUPPORTED, "Only JPEG implemented")
         val edge = args.int("maxEdge", 1280); val quality = args.int("quality", 80)
         requireTool(edge in 64..1280 && quality in 30..95, Code.LIMIT_EXCEEDED, "Screenshot edge/quality budget exceeded")
-        val snap = snapshots.validate(e.snapshotId)
+        // A screenshot is a new observation, not permission to rebind an input.
+        // Its own identity/10s expiry begin now; every image callback still checks
+        // this fresh target and discards output if it changes during capture.
+        val snap = snapshots.captureForRead(e.snapshotId)
+        val cp=Checkpoint({requestCheckpoint.check();snapshots.validate(snap.id)},requestCheckpoint.cancellation)
         val region = args["region"] as? List<*>
         val rect = if (region == null) Rect(0, 0, snap.display.width, snap.display.height) else {
             requireTool(region.size == 4 && region.all { it is Number }, message = "Region is [left,top,right,bottom]")
@@ -243,8 +247,11 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 val output = File(attachments, "$frame.jpg"); output.writeBytes(encoded)
                 frames.entries.removeIf { !File(attachments, "${it.key}.jpg").exists() }
                 val transform = FrameTransform(rect.left, rect.top, rect.width(), rect.height(), scaled!!.width, scaled!!.height)
-                frames[frame] = e.snapshotId!! to transform
-                return result(e, mapOf("displayRole" to "upper", "displayId" to snap.display.id, "frameId" to frame, "attachmentRef" to output.absolutePath,
+                cp.check()
+                frames[frame] = snap.id to transform
+                return result(e.copy(snapshotId=snap.id), mapOf("displayRole" to "upper", "displayId" to snap.display.id, "frameId" to frame, "attachmentRef" to output.absolutePath,
+                    "requestSnapshotId" to e.snapshotId,"targetSnapshotId" to snap.id,"observedTargetPackage" to snap.target.packageName,
+                    "touchableWindowBounds" to snap.target.touchableBounds?.let {mapOf("left" to it.left,"top" to it.top,"right" to it.right,"bottom" to it.bottom)},
                     "mime" to "image/jpeg", "bytes" to encoded.size, "width" to scaled!!.width, "height" to scaled!!.height, "quality" to maxOf(30, q + 15), "rotation" to snap.display.rotation,
                     "transform" to mapOf("left" to rect.left, "top" to rect.top, "displayWidth" to rect.width(), "displayHeight" to rect.height(), "imageWidth" to scaled!!.width, "imageHeight" to scaled!!.height)))
             } finally { if (scaled !== crop) scaled?.recycle(); if (crop !== original) crop.recycle() }
@@ -271,13 +278,16 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         } else raw
         val duration = args.int("durationMs", when (e.toolId) { "input.tap" -> 80; "input.long_press" -> 700; else -> 500 }).toLong()
         val input = Gesture(points, duration); input.validate(snap.display)
+        snapshots.validateInputPoints(e.snapshotId,points)
         val path = Path().apply { moveTo(points[0].x.toFloat(), points[0].y.toFloat()); points.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) } }
         val gesture = GestureDescription.Builder().setDisplayId(snap.display.id).addStroke(GestureDescription.StrokeDescription(path, 0, duration)).build()
         val done = CountDownLatch(1); var completed = false; var accepted = false; var dispatchError: ToolFailure? = null
         main.post {
             try {
                 cp.check() // Final target/auth check immediately before the actual system dispatch.
-                cp.effect { accepted = service().dispatchGesture(gesture, object : AccessibilityService.GestureResultCallback() {
+                cp.effect {
+                    snapshots.validateInputPoints(e.snapshotId,points)
+                    accepted = service().dispatchGesture(gesture, object : AccessibilityService.GestureResultCallback() {
                     override fun onCompleted(g: GestureDescription?) { completed = true; activeInputs.remove(e.runId); inputUnknown = activeInputs.isNotEmpty(); done.countDown() }
                     override fun onCancelled(g: GestureDescription?) { activeInputs.remove(e.runId); inputUnknown = activeInputs.isNotEmpty(); done.countDown() }
                 }, main)

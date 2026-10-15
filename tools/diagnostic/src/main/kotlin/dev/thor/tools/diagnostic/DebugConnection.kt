@@ -10,19 +10,35 @@ import java.util.UUID
 
 class DebugConnection(private val context: Context, private val invalidated: () -> Unit) : ServiceConnection {
     @Volatile private var service: IDebugService? = null
+    @Volatile private var closed = false
+    @Volatile private var bindingRequested = false
+    @Volatile private var accessibilityPrepared = false
+    @Volatile private var setupMessage = "等待已授权的 Shizuku shell 服务"
+    val accessibilitySetup: String get() = when {
+        accessibilityPrepared && ThorAccessibilityService.instance!=null -> "已通过 Shizuku 自动开启本应用无障碍"
+        accessibilityPrepared -> "Shizuku 已启用本应用无障碍，等待系统连接"
+        else -> setupMessage
+    }
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(1)
-    private val dead = Shizuku.OnBinderDeadListener { service = null; invalidated() }
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(3)
+    private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
             requireTool(Shizuku.getUid() == 2000,Code.UNSUPPORTED,"Root backend refused")
-            Shizuku.bindUserService(args,this)
+            bindGranted()
         }.onFailure { invalidated() }
     }
-    private val received = Shizuku.OnBinderReceivedListener { /* User must explicitly bind after permission */ }
+    private val received = Shizuku.OnBinderReceivedListener { bindGranted() }
     init { Shizuku.addRequestPermissionResultListener(permission); Shizuku.addBinderDeadListener(dead); Shizuku.addBinderReceivedListenerSticky(received) }
+    @Synchronized private fun bindGranted() {
+        if(closed || bindingRequested || service!=null)return
+        runCatching {
+            if(!Shizuku.pingBinder() || Shizuku.getUid()!=2000 || Shizuku.checkSelfPermission()!=PackageManager.PERMISSION_GRANTED)return
+            bindingRequested=true;Shizuku.bindUserService(args,this)
+        }.onFailure {bindingRequested=false;setupMessage="Shizuku 绑定失败；可在设置中重试"}
+    }
     fun availability(): Availability = try {
         val backend = "shizuku-userservice/shell-uid-2000"
         when {
@@ -37,17 +53,32 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         requireTool(Shizuku.pingBinder(), Code.BACKEND_UNAVAILABLE, "Install/start Shizuku first")
         requireTool(Shizuku.getUid() == 2000, Code.UNSUPPORTED, "Root backend is refused")
         if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) Shizuku.requestPermission(41)
-        else Shizuku.bindUserService(args, this)
+        else bindGranted()
     }
     override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
         try {
             val actual = IDebugService.Stub.asInterface(binder)
             requireTool(actual.identity() == 2000, Code.UNSUPPORTED, "Actual UserService UID is not shell")
-            binder?.linkToDeath({ service = null; invalidated() }, 0)
-            service = actual
-        } catch (_: Exception) { service = null; invalidated() }
+            binder?.linkToDeath({ bindingRequested=false; service = null; invalidated() }, 0)
+            worker.submit {
+                val token="accessibility:${UUID.randomUUID()}"
+                try {
+                    check(!closed)
+                    actual.openLease(token,SystemClock.elapsedRealtime()+15000,DebugUserService.ROOT,hostBinder)
+                    val request=JSONObject().put("operation","accessibility.ensure").put("reconnect",ThorAccessibilityService.instance==null)
+                    val result=JSONObject(actual.execute(token,request.toString()))
+                    check(!result.has("error") && result.getJSONObject("data").getBoolean("enabled"))
+                    accessibilityPrepared=true
+                } catch (_: Exception) {accessibilityPrepared=false;setupMessage="自动开启无障碍失败；可在系统设置中手动开启"}
+                finally {
+                    runCatching {actual.cancel(token)}
+                    if(!closed)service=actual
+                    bindingRequested=false
+                }
+            }
+        } catch (_: Exception) { bindingRequested=false;service = null; invalidated() }
     }
-    override fun onServiceDisconnected(name: ComponentName?) { service = null; invalidated() }
+    override fun onServiceDisconnected(name: ComponentName?) { bindingRequested=false;service = null; invalidated() }
     fun call(runId: String, request: Map<String, Any?>, cp: Checkpoint): Map<String, Any?> {
         val available = availability()
         requireTool(available.status == Status.READY, Code.BACKEND_UNAVAILABLE, available.reason)
@@ -73,5 +104,5 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         } finally { runCatching { remote.cancel(token) } }
     }
     fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max), cp)
-    fun close() { invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
+    fun close() { closed=true;invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
 }

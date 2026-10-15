@@ -7,7 +7,7 @@ import java.net.InetAddress
 import java.net.URLDecoder
 
 /** Installed by Native settings, never from bridge payloads. Paths are exact, canonical encoded paths. */
-data class NetworkProfile(val ref: String, val origin: String?, val paths: Set<String>, val methods: Set<String>, val purposes: Set<Purpose>, val credentialRef: String? = null, val headerTemplates: Map<String, String> = emptyMap(), val explicitLocal: Boolean = false) {
+data class NetworkProfile(val ref: String, val origin: String?, val paths: Set<String>, val methods: Set<String>, val purposes: Set<Purpose>, val credentialRef: String? = null, val headerTemplates: Map<String, String> = emptyMap(), val explicitLocal: Boolean = false, val nativeSessionHeader: String? = null) {
     init {
         require(ref.isNotBlank() && methods.isNotEmpty() && purposes.isNotEmpty())
         require(origin != null || purposes.all { it == Purpose.web_fetch })
@@ -15,6 +15,7 @@ data class NetworkProfile(val ref: String, val origin: String?, val paths: Set<S
         require(!explicitLocal || origin != null)
         require(paths.isNotEmpty() || origin == null)
         require(headerTemplates.values.all { "{{credential}}" in it })
+        require(nativeSessionHeader == null || nativeSessionHeader == "x-opencode-session" && origin != null && purposes.all { it == Purpose.model || it == Purpose.configuration_test } && headerTemplates.keys.none { it.equals(nativeSessionHeader, true) })
     }
 }
 class CredentialVault(values: Map<String, String>) {
@@ -52,6 +53,13 @@ class NetworkPolicy(profiles: List<NetworkProfile>, val vault: CredentialVault, 
             requireBridge(name.lowercase() !in forbiddenHeaders && name.matches(Regex("[A-Za-z0-9-]+")), Code.PERMISSION_MISSING)
             val secret = vault.value(p.credentialRef ?: throw BridgeFailure(Code.PERMISSION_MISSING))
             headers[name.lowercase()] = template.replace("{{credential}}", secret)
+        }
+        p.nativeSessionHeader?.let { name ->
+            val session = start.envelope.binding.sessionId
+            requireBridge(session.matches(Regex("[A-Za-z0-9_-]{1,100}")), Code.INVALID_REQUEST)
+            // Routing identity is always derived from the Native-authorized binding.
+            // A caller-supplied header cannot route a turn into another conversation.
+            headers[name] = session
         }
         return Prepared(p, url, headers, object : Dns {
             override fun lookup(hostname: String): List<InetAddress> = resolver.lookup(hostname).also { addresses ->

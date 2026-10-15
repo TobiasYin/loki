@@ -61,7 +61,10 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
             cp = Checkpoint({
                 authority.validate(e)
                 val descriptor = ToolPack.descriptors.getValue(e.toolId)
-                if (descriptor.targetRequired && !(descriptor.effect == Effect.INPUT && cp?.submitted == true)) snapshots.validate(e.snapshotId)
+                if (descriptor.targetRequired && !(descriptor.effect == Effect.INPUT && cp?.submitted == true)) {
+                    if(e.toolId=="perception.capture_screen")snapshots.validateReadSource(e.snapshotId)
+                    else snapshots.validate(e.snapshotId)
+                }
                 val a = backend.availability(e.toolId, args)
                 if (a.status != Status.READY) fail(if (a.status == Status.PERMISSION_MISSING) Code.PERMISSION_MISSING else Code.BACKEND_UNAVAILABLE, a.reason)
             }, cancellation) { action -> authority.commit(e) { action() } }
@@ -71,6 +74,12 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                 authority.claim(e)
                 val result = backend.execute(e, args, cp)
                 cp.check() // Discard late perception output after stop/revoke/target invalidation.
+                if(e.toolId=="perception.capture_screen" && result.error==null) {
+                    val source=snapshots.validateReadSource(e.snapshotId)
+                    val observed=snapshots.validate(result.snapshotId)
+                    requireTool(observed.id!=source.id && observed.displayEpoch==source.displayEpoch && observed.display==source.display,
+                        Code.TARGET_CHANGED,"Screenshot must return a fresh observation on the authorized display")
+                }
                 return result
             } finally { resource.unlock() }
         } catch (t: ToolFailure) {

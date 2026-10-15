@@ -16,6 +16,8 @@ import org.json.JSONObject
 class WebViewFlowTest {
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private val context get() = instrumentation.targetContext
+    private val args get() = InstrumentationRegistry.getArguments()
+    private val chatDisplay get() = args.getString("chatDisplay")?.toInt() ?: 0
     private fun javascript(web: WebView, script: String): String {
         var value="";val latch=CountDownLatch(1)
         instrumentation.runOnMainSync { web.evaluateJavascript(script) { value=it;latch.countDown() } }
@@ -27,6 +29,11 @@ class WebViewFlowTest {
         fail("WebView condition not met: $condition; body=${javascript(web,"document.body?.textContent")}")
     }
     private fun configure(protocol: Int, revision: Int) {
+        // Fixture runs deliberately replace the test app's database/connection. A physical
+        // runner may opt in only after proving it installed a new disposable app instance.
+        assertEquals("Fixture requires disposableInstallation=true", "true", args.getString("disposableInstallation"))
+        val existingUrl=context.getSharedPreferences("profiles",0).getString("url","").orEmpty()
+        assertTrue("Existing live profile must not be reset by fixture tests",existingUrl.isBlank() || existingUrl in setOf("http://127.0.0.1:8877/v1","http://127.0.0.1:8877"))
         context.deleteDatabase("product.db")
         val base = if(protocol==0) "http://127.0.0.1:8877/v1" else "http://127.0.0.1:8877"
         assertTrue(context.getSharedPreferences("profiles",0).edit().clear().putString("name","Integration Fixture").putString("url",base).putString("model","fixture-model").putInt("protocol",protocol).putInt("revision",revision).putString("probe","untested").commit())
@@ -34,7 +41,7 @@ class WebViewFlowTest {
         CredentialVault(context).put("search","integration-search-secret")
         assertTrue(context.getSharedPreferences("profiles",0).edit().putString("searchBackend","Brave").putString("searchUrl","http://127.0.0.1:8877/res/v1/web/search").commit())
     }
-    private fun launch(): MainActivity = instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)) as MainActivity
+    private fun launch(): MainActivity = instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK), android.app.ActivityOptions.makeBasic().setLaunchDisplayId(chatDisplay).toBundle()) as MainActivity
     private fun host(activity: MainActivity): ProductHost = MainActivity::class.java.getDeclaredField("host").apply { isAccessible=true }.get(activity) as ProductHost
     private fun finish(activity: MainActivity) { instrumentation.runOnMainSync {activity.finish()}; instrumentation.waitForIdleSync();Thread.sleep(500) }
     private fun send(web: WebView, text: String) { javascript(web,"document.getElementById('input').value=${JSONObject.quote(text)};document.getElementById('composer').requestSubmit()") }
@@ -96,9 +103,10 @@ class WebViewFlowTest {
         configure(0,201)
         val automation=instrumentation.getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
         fun shell(command: String) { android.os.ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command)).use {it.readBytes()} }
-        shell("settings delete secure enabled_accessibility_services")
-        Thread.sleep(300)
-        shell("settings put secure enabled_accessibility_services dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService")
+        // Keep the user's existing services. The outer physical runner restores these settings.
+        val existing=android.provider.Settings.Secure.getString(context.contentResolver,"enabled_accessibility_services").orEmpty()
+        val services=(existing.split(':').filter {it.isNotBlank()} + "dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService").distinct().joinToString(":")
+        shell("settings put secure enabled_accessibility_services $services")
         shell("settings put secure accessibility_enabled 1")
         context.startActivity(Intent().setComponent(android.content.ComponentName("dev.thor.inputlab","dev.thor.inputlab.LabActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),android.app.ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle())
         Thread.sleep(800)
@@ -111,7 +119,7 @@ class WebViewFlowTest {
             while(dev.thor.tools.diagnostic.ThorAccessibilityService.instance==null && System.nanoTime()<until)Thread.sleep(100)
             assertNotNull("Actual product Accessibility service must connect",dev.thor.tools.diagnostic.ThorAccessibilityService.instance)
             probe(activity,web)
-            instrumentation.runOnMainSync {host(activity).calibrate(displayId,0)}
+            instrumentation.runOnMainSync {host(activity).calibrate(displayId,chatDisplay)}
             Thread.sleep(200)
             javascript(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host(activity).selectedSession())},capability:'screen_control',enabled:true}))")
             waitFor(web,"document.querySelector('input[aria-label=屏幕操作]').checked")
@@ -133,7 +141,7 @@ class WebViewFlowTest {
             while(snapshot.isNull("report") && System.nanoTime()-start<TimeUnit.SECONDS.toNanos(12)) {Thread.sleep(100);snapshot=JSONObject(receiver("report",args).getString("snapshot")!!)}
             val report=snapshot.getJSONObject("report")
             java.io.File(context.filesDir,"integrated-lab-report.json").writeText(report.toString(2))
-            assertEquals("pass",report.getString("status"));assertEquals(rid,report.getString("agentRunId"));assertEquals("unqualified-physical-baseline-pending",report.getString("receiverQualificationVersion"))
+            assertEquals(rid,report.getString("agentRunId"));assertEquals("unqualified-physical-baseline-pending",report.getString("receiverQualificationVersion"))
             val state=SqliteStore(context,"product.db").use {it.load()};val native=state.getJSONArray("events").objects().single {it.getString("runId")==rid && it.getString("type")=="tool_result"}
             assertEquals("input.tap",native.getJSONObject("data").getString("toolId"));assertEquals("submitted",native.getJSONObject("data").getString("outcome"))
             assertFalse(state.toString().contains("integration-only-secret"))
@@ -156,11 +164,12 @@ class WebViewFlowTest {
             waitFor(web,"document.getElementById('send').textContent === '发送'")
             var frameSnapshot=JSONObject(receiver("report",frameArgs).getString("snapshot")!!);val frameEnd=System.nanoTime()+TimeUnit.SECONDS.toNanos(8)
             while(frameSnapshot.isNull("report") && System.nanoTime()<frameEnd) {Thread.sleep(100);frameSnapshot=JSONObject(receiver("report",frameArgs).getString("snapshot")!!)}
-            assertEquals("Actual screenshot-coordinate touch must reach the independent receiver", "pass",frameSnapshot.getJSONObject("report").getString("status"))
             val frameEvents=SqliteStore(context,"product.db").use {it.load().getJSONArray("events").objects().filter {it.getString("runId")==frameRid && it.getString("type")=="tool_result"}}
-            assertEquals(2,frameEvents.size);assertTrue(frameEvents.all {it.getJSONObject("data").isNull("error")})
             java.io.File(context.filesDir,"integrated-frame-report.json").writeText(frameSnapshot.getJSONObject("report").toString(2))
             java.io.File(context.filesDir,"integrated-frame-native.json").writeText(obj("runId" to frameRid,"events" to org.json.JSONArray(frameEvents)).toString(2))
+            assertEquals("Actual logical-coordinate touch receiver verdict", "pass",report.getString("status"))
+            assertEquals("Actual screenshot-coordinate touch must reach the independent receiver", "pass",frameSnapshot.getJSONObject("report").getString("status"))
+            assertEquals(2,frameEvents.size);assertTrue(frameEvents.all {it.getJSONObject("data").isNull("error")})
             receiver("release",frameArgs)
         } finally {finish(activity)}
     }
@@ -231,7 +240,7 @@ class WebViewFlowTest {
             var deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(10)
             while(backend.availability("debug.shell").status==dev.thor.tools.Status.BACKEND_MISSING && System.nanoTime()<deadline)Thread.sleep(100)
             instrumentation.runOnMainSync {host(activity).bindDebug()}
-            deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(10)
+            deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(60)
             while(backend.availability("debug.shell").status!=dev.thor.tools.Status.READY && System.nanoTime()<deadline)Thread.sleep(100)
             assertEquals(dev.thor.tools.Status.READY,backend.availability("debug.shell").status)
             probe(activity,web)

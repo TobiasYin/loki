@@ -22,16 +22,23 @@ class RunnerProvider : ContentProvider() {
         require(names.any { it == "dev.thor.agent" || it == "dev.thor.agent.test" })
         require(context!!.checkCallingPermission("dev.thor.inputlab.permission.CONTROL") == android.content.pm.PackageManager.PERMISSION_GRANTED)
         val e = extras ?: error("Missing request"); require(e.getInt("version") == 1)
+        require(method in setOf("prepare", "report", "describe", "release"))
         val a = LabActivity.runnerActivity?.get() ?: error("Receiver is not running")
         val done = CountDownLatch(1); var response = ""; var failure: Throwable? = null
+        @Suppress("DEPRECATION") // Inspect the actual Bundle value: typed getters can silently default malformed input.
+        val runnerWindow = if(method == "prepare") RunnerWindow.parse(e.get("observationSeconds")) else null
+        @Suppress("DEPRECATION") // A present null or wrong type must be rejected rather than attributed to the default mode.
+        val evidenceMode = if(method == "prepare") {
+            if(e.containsKey("evidenceMode")) RunnerEvidenceMode.parse(e.get("evidenceMode")) else RunnerEvidenceMode.parse()
+        } else null
         if(method == "prepare") {
             require(lease == null || SystemClock.elapsedRealtime() >= deadline)
-            owner = caller; lease = UUID.randomUUID().toString(); testRun = e.getString("testRunId"); deadline = SystemClock.elapsedRealtime()+15000
+            owner = caller; lease = UUID.randomUUID().toString(); testRun = e.getString("testRunId"); deadline = SystemClock.elapsedRealtime()+runnerWindow!!.leaseDurationMs
         } else if(method != "describe") require(caller == owner && e.getString("lease") == lease && e.getString("testRunId") == testRun && SystemClock.elapsedRealtime() < deadline)
         Handler(Looper.getMainLooper()).post {
             try {
                 when(method) {
-                    "prepare" -> a.runnerPrepare(e.getString("caseId")!!, testRun!!, e.getString("agentRunId")!!, e.getString("senderTraceRef")!!)
+                    "prepare" -> a.runnerPrepare(e.getString("caseId")!!, testRun!!, e.getString("agentRunId")!!, e.getString("senderTraceRef")!!,runnerWindow!!.observationSeconds,evidenceMode!!)
                     "report", "describe" -> Unit
                     "release" -> { lease = null; owner = -1 }
                     else -> error("Unsupported runner operation")

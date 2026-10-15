@@ -153,6 +153,70 @@ class CoreTest {
         val r=Gateway(authority,b,s,time).execute(Envelope(l.session,l.run,"c","input.tap",l.epoch,l.deadline,snapshot.id),emptyMap())
         assertEquals(Code.TARGET_CHANGED,r.error);assertEquals(0,b.executions)
     }
+    @Test fun freshReadGetsNewIdentityAndExpiryWithoutRevivingOldInputSnapshot() {
+        val time=Time();var target=Target("game","valid","old");val s=Snapshots(time) {target}
+        s.update(listOf(upper,lower));s.calibrate(7,9);val old=s.capture()
+        time.time+=11_000;target=Target("current.app","valid","new")
+        val fresh=s.captureForRead(old.id)
+        assertNotEquals(old.id,fresh.id);assertEquals(target,fresh.target)
+        assertEquals(time.time+10_000,fresh.expires)
+        expect(Code.TARGET_CHANGED) {s.validate(old.id)}
+        assertEquals(fresh,s.validate(fresh.id))
+        time.time+=10_000;expect(Code.TARGET_CHANGED) {s.validate(fresh.id)}
+    }
+    @Test fun freshReadCannotCrossCalibrationRotationRemovalOrInventedSource() {
+        val s=Snapshots(Time()) {Target("game","valid","v1")};s.update(listOf(upper,lower));s.calibrate(7,9)
+        expect(Code.TARGET_CHANGED) {s.captureForRead("invented")}
+        val old=s.capture();s.calibrate(9,7);expect(Code.TARGET_CHANGED) {s.captureForRead(old.id)}
+        val swapped=s.capture();s.update(listOf(upper,lower.copy(rotation=1)));expect(Code.TARGET_CHANGED) {s.captureForRead(swapped.id)}
+        s.calibrate(7,9);val last=s.capture();s.update(listOf(lower));expect(Code.TARGET_CHANGED) {s.captureForRead(last.id)}
+    }
+    @Test fun onlyCaptureUsesCurrentReadAndStaleInputAndTreeStillStopBeforeBackend() {
+        val time=Time();val a=ManualTestAuthority(time);a.set(Capability.SCREEN_CONTROL,true)
+        var target=Target("game","valid","v1");val s=Snapshots(time) {target};s.update(listOf(upper,lower));s.calibrate(7,9)
+        val old=s.capture();target=target.copy(revision="v2")
+        var executions=0
+        val backend=object:DeviceBackend {
+            override fun availability(toolId: String)=Availability(Status.READY,"test","test")
+            override fun execute(envelope: Envelope,args:Map<String,Any?>,checkpoint:Checkpoint):ToolResult {
+                executions++;val observed=s.captureForRead(envelope.snapshotId)
+                return ToolResult(time.now(),"test",availability(envelope.toolId),snapshotId=observed.id)
+            }
+            override fun release(runId:String)="test"
+        }
+        val lease=a.begin(backend);val gate=Gateway(a,backend,s,time)
+        fun envelope(tool: String)=Envelope(lease.session,lease.run,tool,tool,lease.epoch,lease.deadline,old.id)
+        assertNull(gate.execute(envelope("perception.capture_screen"),emptyMap()).error)
+        assertEquals(1,executions)
+        assertEquals(Code.TARGET_CHANGED,gate.execute(envelope("perception.capture_screen").copy(snapshotId="invented"),emptyMap()).error)
+        for(tool in listOf("input.tap","input.long_press","input.swipe","perception.ui_tree")) {
+            assertEquals(Code.TARGET_CHANGED,gate.execute(envelope(tool),emptyMap()).error)
+        }
+        assertEquals(1,executions)
+    }
+    @Test fun freshObservationStillBecomesInvalidImmediatelyWhenTargetChangesAgain() {
+        val sTime=Time();var target=Target("game","valid","v1");val s=Snapshots(sTime) {target};s.update(listOf(upper,lower));s.calibrate(7,9)
+        val fresh=s.captureForRead(s.capture().id);target=target.copy(revision="changed-during-image-callback")
+        expect(Code.TARGET_CHANGED) {s.validate(fresh.id)}
+    }
+    @Test fun captureGatewayDiscardsMissingOrChangedObservationBeforeReturningPixels() {
+        for(mode in listOf("missing","changed","old-identity")) {
+            val time=Time();var target=Target("game","valid","v1");val s=Snapshots(time) {target}
+            s.update(listOf(upper,lower));s.calibrate(7,9);val source=s.capture()
+            val backend=object:DeviceBackend {
+                override fun availability(toolId:String)=Availability(Status.READY,"test","test")
+                override fun execute(envelope:Envelope,args:Map<String,Any?>,checkpoint:Checkpoint):ToolResult {
+                    val fresh=s.captureForRead(envelope.snapshotId)
+                    if(mode=="changed")target=target.copy(revision="after-image")
+                    return ToolResult(time.now(),"test",availability(envelope.toolId),mapOf("pixels" to "must-not-escape"),snapshotId=when(mode) {"missing" -> null;"old-identity" -> source.id;else -> fresh.id})
+                }
+                override fun release(runId:String)="test"
+            }
+            val authority=ManualTestAuthority(time);val lease=authority.begin(backend)
+            val result=Gateway(authority,backend,s,time).execute(Envelope(lease.session,lease.run,"capture","perception.capture_screen",lease.epoch,lease.deadline,source.id),emptyMap())
+            assertEquals(Code.TARGET_CHANGED,result.error);assertTrue(result.data.isEmpty())
+        }
+    }
     @Test fun gestureRejectsDurationOversizedPathNanAndOffscreen() {
         expect(Code.INVALID_ARGUMENT) { Gesture(listOf(Point(1.0,1.0)),5001).validate(upper) }
         expect(Code.INVALID_ARGUMENT) { Gesture(listOf(Point(Double.NaN,1.0)),50).validate(upper) }

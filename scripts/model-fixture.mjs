@@ -1,13 +1,15 @@
 import http from 'node:http';
 import { appendFileSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { protocolSse } from '../runtime/dist/test/fixtures.js';
-mkdirSync('build/integration', { recursive: true });
+const output = process.env.THOR_FIXTURE_OUTPUT ?? 'build/integration';
+mkdirSync(output, { recursive: true });
 let count = 0;
 const server = http.createServer(async (req,res) => {
   let raw = ''; for await(const bytes of req) { raw += bytes; if(raw.length > 16777216) {res.writeHead(413);res.end();return;} }
   if(req.url.startsWith('/res/v1/web/search')) {
     if(req.headers['x-subscription-token'] !== 'integration-search-secret') {res.writeHead(401);res.end();return;}
-    appendFileSync('build/integration/model-requests.jsonl',JSON.stringify({purpose:'web_search',credentialMatched:true,path:'/res/v1/web/search'})+'\n');
+    appendFileSync(join(output,'model-requests.jsonl'),JSON.stringify({purpose:'web_search',credentialMatched:true,path:'/res/v1/web/search'})+'\n');
     res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({web:{results:[{title:'Fixture source',url:'https://example.org/source',description:'Controlled search boundary result',page_age:'2026-10-13'}]}}));return;
   }
   const protocol = req.url.startsWith('/v1/responses') ? 'openai-responses' : 'anthropic-messages';
@@ -53,7 +55,7 @@ const server = http.createServer(async (req,res) => {
   else if(userText.includes('SHELL_WAIT') && !result) reply={call:{name:'debug_shell',args:'{"command":"sleep 30; echo LATE_SHELL_MARKER"}'}};
   else if(userText.includes('SHELL_REJECT') && !result) reply={call:{name:'debug_shell',args:'{"command":"echo integration-approved-only"}'}};
   else reply={text:'集成中文流式回答：真实 Pi 经 Native Fetch 完成。'};
-  appendFileSync('build/integration/model-requests.jsonl', JSON.stringify({index:count++,protocol,url:req.url,imageCount,names,result,credentialMatched:true,requestBytes:Buffer.byteLength(raw)})+'\n');
+  appendFileSync(join(output,'model-requests.jsonl'), JSON.stringify({index:count++,protocol,url:req.url,imageCount,names,result,credentialMatched:true,requestBytes:Buffer.byteLength(raw)})+'\n');
   res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-store'});
   const bytes=Buffer.from(protocolSse(protocol,reply,count));
   // Split every UTF-8 character across several writes, including Chinese text.

@@ -6,11 +6,14 @@ import android.view.MotionEvent
 
 object Capture {
     val standardAxes = listOf(0,1,11,14,12,13,17,18,23,22,15,16)
+    private val keyCodes = (1..KeyEvent.getMaxKeyCode()).toList().toIntArray()
     fun ranges(d: InputDevice?) = d?.motionRanges?.map { Range(it.axis,it.source,it.min,it.max,it.flat) } ?: emptyList()
     fun device(d: InputDevice?): Map<String,Any?> = if(d == null) mapOf("available" to false,"reason" to "device_not_available") else mapOf(
         "available" to true, "deviceId" to d.id,"name" to d.name,"descriptor" to d.descriptor,"vendorId" to d.vendorId,
         "productId" to d.productId,"isVirtual" to d.isVirtual,"sources" to d.sources,
-        "motionRanges" to d.motionRanges.map { mapOf("axis" to it.axis,"source" to it.source,"min" to it.min,"max" to it.max,"flat" to it.flat,"fuzz" to it.fuzz,"resolution" to it.resolution) })
+        "isExternal" to d.isExternal,"isEnabled" to d.isEnabled,"keyboardType" to d.keyboardType,"controllerNumber" to d.controllerNumber,
+        "supportedKeyCodes" to d.hasKeys(*keyCodes).mapIndexed { i, present -> if(present) keyCodes[i] else null }.filterNotNull(),
+        "motionRanges" to d.motionRanges.sortedWith(compareBy({ it.axis },{ it.source })).map { mapOf("axis" to it.axis,"source" to it.source,"min" to it.min,"max" to it.max,"flat" to it.flat,"fuzz" to it.fuzz,"resolution" to it.resolution) })
     fun key(e: KeyEvent): Pair<Raw, Map<String,Any?>> = Raw("key",e.action,e.eventTime,e.downTime,e.source,e.deviceId,e.keyCode,e.repeatCount) to mapOf(
         "action" to e.action,"keyCode" to e.keyCode,"scanCode" to e.scanCode,"repeatCount" to e.repeatCount,
         "metaState" to e.metaState,"flags" to e.flags,"source" to e.source,"deviceId" to e.deviceId,
