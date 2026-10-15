@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "contextWindow": 1000000,
+  "effort": "max",
+  "optionsInherited": true,
+  "backgroundRunPreserved": true,
+  "targetedStop": true
+}

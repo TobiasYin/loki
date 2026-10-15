@@ -1,0 +1,83 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "height": 540,
+      "width": 620,
+      "composer": {
+        "x": 10,
+        "y": 414,
+        "width": 600,
+        "height": 116,
+        "top": 414,
+        "right": 610,
+        "bottom": 530,
+        "left": 10
+      },
+      "send": {
+        "x": 555,
+        "y": 478,
+        "width": 44,
+        "height": 44,
+        "top": 478,
+        "right": 599,
+        "bottom": 522,
+        "left": 555
+      },
+      "overflow": false,
+      "probeVisible": false
+    },
+    {
+      "height": 180,
+      "width": 620,
+      "composer": {
+        "x": 6,
+        "y": 93,
+        "width": 608,
+        "height": 84,
+        "top": 93,
+        "right": 614,
+        "bottom": 177,
+        "left": 6
+      },
+      "send": {
+        "x": 562,
+        "y": 129,
+        "width": 44,
+        "height": 44,
+        "top": 129,
+        "right": 606,
+        "bottom": 173,
+        "left": 562
+      },
+      "overflow": false,
+      "probeVisible": false
+    },
+    {
+      "height": 640,
+      "width": 360,
+      "composer": {
+        "x": 6,
+        "y": 520,
+        "width": 348,
+        "height": 113,
+        "top": 520,
+        "right": 354,
+        "bottom": 633,
+        "left": 6
+      },
+      "send": {
+        "x": 302,
+        "y": 581,
+        "width": 44,
+        "height": 44,
+        "top": 581,
+        "right": 346,
+        "bottom": 625,
+        "left": 302
+      },
+      "overflow": false,
+      "probeVisible": false
+    }
+  ]
+}

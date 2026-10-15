@@ -32,6 +32,10 @@ Native 最多接纳 8 个不同会话，每个会话至多一个活动运行。�
 
 ## 验证范围
 
-测试覆盖与原始证据将在最终模拟器回归完成后写入 `tests/ui-redesign-evidence/`。本轮使用受控模型与搜索服务替代远端响应，实际运行 Android WebView、Native Fetch、SQLite、授权与 UI；不冒充真机或逐模型云端验收。已公开拉取当前 Pi 目录，核对 DeepSeek V4.1 Flash 的 1M 和 low/high/max。
+最终源码 `b9d6d45`，0.5.0-integration / versionCode 5：68 项 JS、201 项 JVM、lint、debug/release/test APK 构建与产物隔离检查通过。Android API36 产品套件 85.987 秒，19 项中 18 项通过、1 项实际 Shizuku 分支按条件跳过；另有 4 项解析 fixture 检查通过。摘要和截图位于 `tests/ui-redesign-evidence/`，含 APK 与原始报告哈希。本轮使用受控模型与搜索服务替代远端响应，实际运行 Android WebView、Native Fetch、SQLite、授权与 UI；不冒充真机或逐模型云端验收。已公开拉取当前 Pi 目录，核对 DeepSeek V4.1 Flash 的 1M 和 low/high/max。
 
 可复现入口：根目录 `npm run verify`；`node scripts/ui-layout-check.mjs` 检查 620×540、620×180、360×640 布局；专用 AVD 上运行 `scripts/emulator-verify.py --serial emulator-5554 --lab-display 实际_OVERLAY_ID --output 独立证据目录`。模型 fixture 会替换可丢弃 AVD 中的测试连接资料，禁止在真机或真实资料安装中执行。
+
+最终专项确认：1M 与 max 选择进入实际 Android 请求（对端为受控模型）；新会话复制非默认能力开关、模型、思考与 Skill 选择；后台 Run 保持执行，停止只影响当前会话；一个会话等待文件批准时另一个的设备工具仍完成，拒绝后文件不变；文字模型无图片仍能完成文字/工具检查；取消配置检查不记通过。延迟 HTTP EOF 的 Completions 探查记录两次 HTTP 200、两次非空响应，其中一次由 SDK 正常关闭 reader，图片读取和工具回传满足要求。
+
+布局检查覆盖 620×540、620×180、360×640：输入框高度分别为 116、84、113 CSS px，发送/停止点击区域均为 44×44；180 高度下菜单也限制在剩余可见区域。设置首页截图来自真实 AVD 原生界面；深色输入框截图是使用同一 HTML/CSS/JS 与受控状态的浏览器布局预览。所有服务与端口转发清理完成；真机未安装或测试 0.5.0。

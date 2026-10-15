@@ -1,0 +1,210 @@
+{
+  "sourceCommit": "b9d6d45168ff6f7848cb3de672d090a60eee296c",
+  "appVersion": "0.5.0-integration",
+  "versionCode": 5,
+  "realDeviceTestsResumed": false,
+  "cloudModelCallsInThisSuite": false,
+  "emulator": true,
+  "serial": "emulator-5554",
+  "api": 36,
+  "labDisplay": 2,
+  "softwareTests": {
+    "javascript": 68,
+    "jvm": 201,
+    "androidProductPassed": 18,
+    "androidProductSkipped": 1,
+    "skipReason": "Actual Shizuku companion branch not requested on this AVD",
+    "androidParserFixtures": 4,
+    "instrumentationSeconds": 85.987
+  },
+  "artifacts": {
+    "agent-debug": {
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "b58d5fd549d24a1e87a7760bafcb190e7c83aab811de0b0dcc3be7816c8ba578",
+      "bytes": 6348921
+    },
+    "agent-release-unsigned": {
+      "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+      "sha256": "5232ccbe423c5a5dcba9ae67ce07f94416b34d5c31e139d0a2e7117b637d6890",
+      "bytes": 4957275
+    }
+  },
+  "features": {
+    "integrated-concurrent-sessions.json": {
+      "passed": true,
+      "contextWindow": 1000000,
+      "effort": "max",
+      "optionsInherited": true,
+      "backgroundRunPreserved": true,
+      "targetedStop": true
+    },
+    "integrated-parallel-approval.json": {
+      "passed": true,
+      "otherSessionToolCompleted": true,
+      "waitingWriteNotSubmitted": true
+    },
+    "integrated-settings-page.json": {
+      "passed": true,
+      "fullPage": true,
+      "runPreserved": true,
+      "voiceNestedInSettings": true,
+      "probeHidden": true
+    },
+    "integrated-text-only-profile.json": {
+      "passed": true,
+      "imagesRequired": false,
+      "toolConnectionVerified": true
+    }
+  },
+  "probeReceipts": {
+    "0": {
+      "httpStatuses": [
+        200,
+        200
+      ],
+      "eofRequests": 2,
+      "clientClosedAfterBodyRequests": 0,
+      "nonemptyBodies": 2,
+      "toolCalls": 1,
+      "imageReads": 6
+    },
+    "1": {
+      "httpStatuses": [
+        200,
+        200
+      ],
+      "eofRequests": 2,
+      "clientClosedAfterBodyRequests": 0,
+      "nonemptyBodies": 2,
+      "toolCalls": 1,
+      "imageReads": 6
+    },
+    "2": {
+      "httpStatuses": [
+        200,
+        200
+      ],
+      "eofRequests": 1,
+      "clientClosedAfterBodyRequests": 1,
+      "nonemptyBodies": 2,
+      "toolCalls": 1,
+      "imageReads": 6
+    }
+  },
+  "reasoningMaxObservedInActualAndroidRequestToFixture": true,
+  "layout": {
+    "passed": true,
+    "checks": [
+      {
+        "height": 540,
+        "width": 620,
+        "composer": {
+          "x": 10,
+          "y": 414,
+          "width": 600,
+          "height": 116,
+          "top": 414,
+          "right": 610,
+          "bottom": 530,
+          "left": 10
+        },
+        "send": {
+          "x": 555,
+          "y": 478,
+          "width": 44,
+          "height": 44,
+          "top": 478,
+          "right": 599,
+          "bottom": 522,
+          "left": 555
+        },
+        "overflow": false,
+        "probeVisible": false
+      },
+      {
+        "height": 180,
+        "width": 620,
+        "composer": {
+          "x": 6,
+          "y": 93,
+          "width": 608,
+          "height": 84,
+          "top": 93,
+          "right": 614,
+          "bottom": 177,
+          "left": 6
+        },
+        "send": {
+          "x": 562,
+          "y": 129,
+          "width": 44,
+          "height": 44,
+          "top": 129,
+          "right": 606,
+          "bottom": 173,
+          "left": 562
+        },
+        "overflow": false,
+        "probeVisible": false
+      },
+      {
+        "height": 640,
+        "width": 360,
+        "composer": {
+          "x": 6,
+          "y": 520,
+          "width": 348,
+          "height": 113,
+          "top": 520,
+          "right": 354,
+          "bottom": 633,
+          "left": 6
+        },
+        "send": {
+          "x": 302,
+          "y": 581,
+          "width": 44,
+          "height": 44,
+          "top": 581,
+          "right": 346,
+          "bottom": 625,
+          "left": 302
+        },
+        "overflow": false,
+        "probeVisible": false
+      }
+    ]
+  },
+  "rawEvidenceSha256": {
+    "build/integration/ui-sse-final/product-suite-final.log": "259871913fbe8acc75293aa8520a51ec415b4ba74b1c2fa0992a800c3ad7b33e",
+    "build/integration/ui-sse-final/emulator-verification.json": "5ee45128e10a5fea0a9d383ebfcbf8e472153c48b9920a60ca49b8655a6d4849",
+    "build/integration/ui-sse-final/model-requests.jsonl": "eef467dd428c6881996b5a847125a7abc07d6454ec48bf258ebb19aa3184202a",
+    "build/integration/ui-sse-final/lab-parser-final.log": "064c8f422cf57a46dd3afd8d4835ac67d414fdd179eb554517ab8cc4733c03d1",
+    "build/ui-final-release-verify.log": "08631ab961dccacac351d86566a8d7100aa7e276655e2aad4d4ce8395c67230f",
+    "build/ui-final-sse-source.log": "1f98e0e2290078cda11b5922575e9dfde1e251ef7dcede90c6d6ef545fcf112c",
+    "build/ui-last-dom.log": "90968d0000c21f429cab59605810e26ebc054a92003fe24625f4076c0de603c6",
+    "build/ui-sse-test-final.log": "1c9dff79822f38e8323c631d1744e74e6a2a9bd055eb98ed9c7beb38bb8decfb"
+  },
+  "historicalAttempts": [
+    {
+      "path": "build/integration/ui-emulator-suite.log",
+      "sha256": "4f176128a9b3b952b0d45ce8c960a15aa06c85f0557fe03f8782c39bba3a364b",
+      "reason": "Fixture selection after Completions tool images and UI session-switch wait were corrected."
+    },
+    {
+      "path": "build/integration/ui-final-suite.log",
+      "sha256": "8935d6e90ec207f64e53790ab6ff264500292eb037af5c63aa937fc2bdcf8daa",
+      "reason": "Immediate HTTP 429 completed before a running frame; assertions now check durable terminal outcome."
+    },
+    {
+      "path": "build/integration/ui-accepted-suite.log",
+      "sha256": "df3fc7847a02074d089a182fe9d2650679f60ba35430d55e81dd9de114d5ffd7",
+      "reason": "Completions SDK reader close after its terminal marker was incorrectly required to reach HTTP EOF. Native successful-body receipts added without accepting cancellation or incomplete Runs."
+    }
+  ],
+  "cleanup": {
+    "portForwardsRemoved": true,
+    "fixtureServersStopped": true,
+    "accessibilityConfigurationRestored": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "httpStatuses": [
+    200,
+    200
+  ],
+  "eofRequests": 1,
+  "clientClosedAfterBodyRequests": 1,
+  "nonemptyBodies": 2,
+  "toolCalls": 1,
+  "imageReads": 6
+}
