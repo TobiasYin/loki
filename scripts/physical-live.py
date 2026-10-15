@@ -47,6 +47,7 @@ try:
         (out/'profile-budget-suite.log').write_bytes(budget);print(budget.decode(),flush=True)
         assert re.search(rb'OK \(\d+ tests?\)',budget) and b'FAILURES' not in budget,'Native budget UI update failed'
         (out/'physical-profile-budget.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/physical-profile-budget.json'))
+    adb('shell','input','keyevent','224')
     result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','reuseProfile',str(a.reuse_profile).lower(),'-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalRealServiceTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'live-suite.log').write_bytes(result)
     print(result.decode(),flush=True)

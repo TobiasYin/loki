@@ -53,6 +53,7 @@ class PhysicalRealServiceTest {
         }
         val display=args.getString("chatDisplay")!!.toInt()
         val activity=instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(display).toBundle()) as MainActivity
+        instrumentation.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
         val web=activity.findViewById<WebView>(android.R.id.custom)
         val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
         val evidence=JSONObject().put("model","deepseek-v4.1-flash").put("endpoint","https://opencode.ai/zen/go/v1/responses").put("protocol","openai-responses").put("credentialsStored","native-keystore").put("chatDisplay",display)

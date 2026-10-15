@@ -29,6 +29,7 @@ class PhysicalFanPolicyTest {
         assertEquals("AYN Thor",android.os.Build.MODEL);assertEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
         val before=sample();val original=before.getInt("mode");assertTrue("Do not begin if restoring would require disabled cooling",original in setOf(1,4,5))
         val activity=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay")!!.toInt()).toBundle()) as MainActivity
+        ins.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
         val web=activity.findViewById<WebView>(android.R.id.custom);val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
         val evidence=obj("model" to "deepseek-v4.1-flash","before" to before,"approvalDriver" to "automated actual product UI clicks","samples" to JSONArray(),"runs" to JSONArray())
         fun save(){File(context.filesDir,"physical-fan-policy.json").writeText(evidence.toString(2))}

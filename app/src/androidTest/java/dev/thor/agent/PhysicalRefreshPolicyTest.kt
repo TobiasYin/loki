@@ -33,6 +33,7 @@ class PhysicalRefreshPolicyTest {
         val before=sample();val min=before.getString("min");val peak=before.getString("peak")
         assertTrue(min in setOf("60.0","60","120.0","120") && peak in setOf("60.0","60","120.0","120"))
         val activity=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay")!!.toInt()).toBundle()) as MainActivity
+        ins.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
         val web=activity.findViewById<WebView>(android.R.id.custom);val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
         val evidence=obj("model" to "deepseek-v4.1-flash","before" to before,"runs" to JSONArray())
         try {

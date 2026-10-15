@@ -43,6 +43,7 @@ class PhysicalImeTest {
         assertEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
         val display=args.getString("chatDisplay")!!.toInt()
         val activity=instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(display).toBundle()) as MainActivity
+        instrumentation.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
         val web=activity.findViewById<WebView>(android.R.id.custom)
         val ime=context.getSystemService(InputMethodManager::class.java)
         val evidence=JSONObject().put("displayId",display)
