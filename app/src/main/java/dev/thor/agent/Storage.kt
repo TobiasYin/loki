@@ -75,6 +75,35 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
             db.setTransactionSuccessful()
         } finally { db.endTransaction() }
     }
+
+    /** Current-run streaming transaction. Full snapshots still handle deletion and UI changes.
+     * Updating parents in place preserves their existing children. Events only append;
+     * a duplicate ID/sequence rolls back the run, message and selection together.
+     */
+    fun saveRunUpdate(state: JSONObject, run: JSONObject, event: JSONObject?) {
+        val rid=run.getString("id");val sid=run.getString("sessionId")
+        require(event==null || event.getString("runId")==rid && event.getString("sessionId")==sid)
+        val db=writableDatabase
+        fun values(table:String,row:JSONObject)=ContentValues().apply {
+            put("id",row.getString("id"));put("payload",row.toString())
+            if(table!="sessions")put("sessionId",row.getString("sessionId"))
+            if(table=="messages" || table=="events") {if(row.isNull("runId"))putNull("runId") else put("runId",row.getString("runId"))}
+            if(table=="events")put("sequence",row.getInt("sequence"))
+        }
+        fun upsert(table:String,row:JSONObject) {
+            val v=values(table,row)
+            if(db.update(table,v,"id=?",arrayOf(row.getString("id")))==0)db.insertOrThrow(table,null,v)
+        }
+        db.beginTransaction()
+        try {
+            state.getJSONArray("sessions").objects().forEach {upsert("sessions",it)}
+            upsert("runs",run)
+            state.getJSONArray("messages").objects().filter {it.optString("runId")==rid}.forEach {upsert("messages",it)}
+            if(event!=null)db.insertOrThrow("events",null,values("events",event))
+            db.insertWithOnConflict("metadata",null,ContentValues().apply {put("name","selected");put("value",state.optString("selected"))},SQLiteDatabase.CONFLICT_REPLACE)
+            db.setTransactionSuccessful()
+        } finally {db.endTransaction()}
+    }
 }
 
 /** Secrets only enter through Native widgets. The web bridge has no key read/write API. */

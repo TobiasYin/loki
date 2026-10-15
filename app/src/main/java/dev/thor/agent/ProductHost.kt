@@ -162,9 +162,9 @@ class ProductHost private constructor(private val context: Context, private val 
     private fun session(sid: String) = rows("sessions").single { it.getString("id") == sid }
     private fun run(rid: String) = rows("runs").single { it.getString("id") == rid }
     private fun enabled(s: JSONObject) = capNames.filter { s.getJSONObject("capabilities").optBoolean(it.key) }.values.toSet()
-    private fun persist() { try {
+    private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null) { try {
         for(s in rows("sessions")) {s.put("capabilityEpoch",authority.sessionEpoch(s.getString("id")));val granted=authority.sessionEnabled(s.getString("id"));for((name,cap) in capNames)s.getJSONObject("capabilities").put(name,cap in granted)}
-        store.save(state) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;binding=null;prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
+        if(currentRun==null)store.save(state) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;binding=null;prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
     private fun newSession(): String {
         val sid = id(); authority.createSession(sid)
         state.getJSONArray("sessions").put(obj("id" to sid, "title" to "新会话", "createdAt" to System.currentTimeMillis(), "updatedAt" to System.currentTimeMillis(), "archivedAt" to null,
@@ -440,6 +440,7 @@ class ProductHost private constructor(private val context: Context, private val 
         // Terminal/cancellation events can persist after Native has revoked the execution lease.
         val kind = d.getString("kind"); val value = d.getJSONObject("value"); val r = run(b.runId)
         require(redactor.redact(value.toString()) == value.toString())
+        var appendedEvent: JSONObject?=null
         when(kind) {
             "event", "commit" -> {
                 val event = if(kind == "commit") d.getJSONObject("event") else value
@@ -449,6 +450,7 @@ class ProductHost private constructor(private val context: Context, private val 
                 val copy = JSONObject(event.toString()).put("id", event.getString("eventId")).put("summary", eventSummary(event))
                 for(key in listOf("toolId","outcome","error")) if(event.getJSONObject("data").has(key))copy.put(key,event.getJSONObject("data").get(key))
                 state.getJSONArray("events").put(copy)
+                appendedEvent=copy
                 val data = event.getJSONObject("data")
                 if(event.getString("type") == "text_delta") rows("messages").single { it.getString("runId") == b.runId && it.getString("role") == "assistant" }.let { m -> val text = m.getString("text") + data.getString("text"); require(text.length <= 65536); m.put("text", text) }
                 if(event.getString("type")=="thinking_delta") rows("messages").single {it.getString("runId")==b.runId && it.getString("role")=="assistant"}.let {m->val text=m.optString("thinking")+data.getString("text");require(text.length<=65536);m.put("thinking",text)}
@@ -459,7 +461,7 @@ class ProductHost private constructor(private val context: Context, private val 
             "turn" -> { require(value.getString("runId") == b.runId); r.put("turn", value) }
             else -> error("Unsupported persistence method")
         }
-        persist(); publish(); return obj()
+        persist(r,appendedEvent); publish(); return obj()
     }
     private fun end(c: String, d: JSONObject): JSONObject {
         val b = binding ?: error("No run"); require(c == connection && d.getString("runId") == b.runId && d.getString("sessionId") == b.sessionId)

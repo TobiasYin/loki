@@ -31,8 +31,9 @@ try:
     adb('shell','run-as','dev.thor.agent','rm','-f','files/'+report)
     result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.'+test,'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'suite.log').write_bytes(result);print(result.decode(),flush=True)
-    try:(out/report).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+report))
-    except subprocess.CalledProcessError:pass
+    for name in [report]+(['physical-storage-streaming-regression.json'] if a.storage else []):
+        try:(out/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name))
+        except subprocess.CalledProcessError:pass
     assert re.search(rb'OK \(\d+ tests?\)',result) and b'FAILURES' not in result,'Physical ADB acceptance failed; inspect redacted evidence'
 finally:
     for key,value in original.items():adb('shell',f'settings delete secure {key}' if value=='null' else f'settings put secure {key} {shlex.quote(value)}')
