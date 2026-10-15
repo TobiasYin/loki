@@ -149,7 +149,7 @@ class PhysicalAdbPolicyTest {
                 listOf("lower-restore","lower",originalPanels.getValue("lower"),true))) {
                 val target=screen as String;val level=value as Int;val accepted=approve as Boolean
                 newSession();val before=listOf(panel("upper"),panel("lower"))
-                send("Thor 双屏独立亮度验收：先读取 adb-operations 和 references/thor-brightness.md。然后只调用一次 debug_thor_brightness，action=set,screen=$target,value=$level。直接执行，不需批准；完成后分别读取上屏和下屏亮度并报告；拒绝后停止尝试。不要执行 Shell 或其他写操作，也不要自行恢复，恢复由下一轮处理。")
+                send("Thor 双屏独立亮度验收：先读取 adb-operations 和 references/thor-brightness.md。按手册先分别读取两屏原值，再执行唯一的一次写入 debug_thor_brightness(action=set,screen=$target,value=$level)，最后分别读取两屏回验。读取操作不限制次数，写入仅这一次，无需批准；拒绝后停止。不要执行 Shell 或其他写操作。本轮目标值就是测试指定值；下一轮负责恢复。")
                 val events=finished(label as String);assertFalse(events.any {it.getString("type")=="awaiting_user"});val after=listOf(panel("upper"),panel("lower"));val index=if(target=="upper")0 else 1
                 assertEquals("Other screen must stay unchanged",before[1-index],after[1-index])
                 if(accepted)assertTrue("Requested brightness within firmware quantization",kotlin.math.abs(level-after[index])<=1) else assertEquals(before,after)
@@ -181,6 +181,14 @@ class PhysicalAdbPolicyTest {
                 }
                 if(originalPanels.isEmpty())shell("cmd display set-brightness $restore")
                 Thread.sleep(300);shell("settings put system screen_brightness $original")
+            }
+            runCatching {
+                val finalPanels=JSONObject()
+                for(screen in listOf("upper","lower")) {
+                    val token="cleanup-read:${id()}";val remote=firmware!!;remote.openLease(token,SystemClock.elapsedRealtime()+10000,DebugUserService.ROOT,Binder())
+                    try {val reply=JSONObject(remote.thorBrightness(token,"read",screen,-1));finalPanels.put(screen,reply)} finally {remote.cancel(token)}
+                }
+                evidence.put("finalPanels",finalPanels)
             }
             evidence.put("finalBrightness",shell("settings get system screen_brightness")).put("finalMode",shell("settings get system screen_brightness_mode"));save()
             runCatching {js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false}))")}

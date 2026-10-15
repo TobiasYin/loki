@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "endpoint": "https://opencode.ai/zen/go/v1/responses",
+  "protocol": "openai-responses",
+  "credentialsStored": "native-keystore",
+  "chatDisplay": 4,
+  "passed": true,
+  "probe": {
+    "status": "passed",
+    "httpStatuses": [
+      200,
+      200
+    ],
+    "contexts": 2
+  },
+  "deviceInfoStatus": "completed",
+  "braveSearchStatus": "completed",
+  "scope": "Real service validation before final policy-3 APK; repeat frozen-build smoke test after reconnection",
+  "rawSha256": "43a25d3c2f60e39ea101354fb729dc5e0e26170a0d0660362e2131875e6c5434"
+}

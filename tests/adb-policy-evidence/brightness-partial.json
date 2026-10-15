@@ -1,0 +1,154 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "policyVersion": "2",
+  "originalBrightness": 42,
+  "originalMode": "0",
+  "originalPanels": {
+    "upper": 41,
+    "lower": 40
+  },
+  "guardControls": [
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "rm -rf /data",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "mkfs.ext4 /dev/block/does-not-exist",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "sh -c 'id'",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "settings put global adb_enabled 0",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "real UID2000 Binder; direct backend bypass control",
+      "command": "rm -rf /data",
+      "result": {
+        "error": "COMMAND_BLOCKED",
+        "message": "禁止抹除、格式化、刷写、分区、重启恢复模式和提权操作"
+      },
+      "jobCreated": false
+    },
+    {
+      "layer": "real UID2000 Binder; direct backend bypass control",
+      "command": "dumpsys display",
+      "result": {
+        "error": "APPROVAL_REQUIRED",
+        "message": "灰名单命令需要用户在页面确认本次具体操作：读取诊断信息，可能包含应用、窗口或使用状态"
+      },
+      "jobCreated": false
+    }
+  ],
+  "finalBrightness": "42",
+  "finalMode": "0",
+  "date": "2026-10-15",
+  "deviceTesting": "paused_by_user",
+  "suitePassed": false,
+  "suiteFailure": "Physical ADB policy condition timed out at lower-restore; gray UI phases not reached",
+  "installedSourceCommit": "52b9f03",
+  "pendingSourcePolicyVersion": "3",
+  "rawEvidence": "build/physical/adb-policy-attempt-7/physical-adb-policy.json",
+  "rawSha256": "e500b24b37a476a0aa50a85d2a5865c62810b94dc4ce8921f3fc33b2e1007bd4",
+  "runs": [
+    {
+      "label": "white-read-and-lazy-manual",
+      "status": "completed",
+      "modelProfileRevision": 1002,
+      "awaitingUserEvents": 0
+    },
+    {
+      "label": "white-shell-brightness",
+      "status": "completed",
+      "modelProfileRevision": 1002,
+      "awaitingUserEvents": 0
+    },
+    {
+      "label": "upper-independent",
+      "status": "completed",
+      "modelProfileRevision": 1002,
+      "awaitingUserEvents": 0
+    },
+    {
+      "label": "lower-independent",
+      "status": "completed",
+      "modelProfileRevision": 1002,
+      "awaitingUserEvents": 0
+    },
+    {
+      "label": "upper-restore",
+      "status": "completed",
+      "modelProfileRevision": 1002,
+      "awaitingUserEvents": 0
+    }
+  ],
+  "cleanup": {
+    "harnessFinished": true,
+    "panelRestoreAttempted": {
+      "upper": 41,
+      "lower": 40
+    },
+    "panelRestoreReadbackVerified": false,
+    "legacyBrightnessReadback": "42",
+    "fanModeReadback": "4",
+    "lowerFinalFirmwareReadback": "not captured; verify after reconnection"
+  },
+  "white-shell-brightness": {
+    "before": 42,
+    "after": 90,
+    "approvalRequired": false
+  },
+  "upper-independent": {
+    "screen": "upper",
+    "requested": 96,
+    "before": [
+      89,
+      40
+    ],
+    "after": [
+      96,
+      40
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "lower-independent": {
+    "screen": "lower",
+    "requested": 80,
+    "before": [
+      96,
+      40
+    ],
+    "after": [
+      96,
+      80
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "upper-restore": {
+    "screen": "upper",
+    "requested": 41,
+    "before": [
+      96,
+      80
+    ],
+    "after": [
+      41,
+      80
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  }
+}

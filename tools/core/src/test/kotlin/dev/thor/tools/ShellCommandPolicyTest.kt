@@ -54,7 +54,7 @@ class ShellCommandPolicyTest {
     }
     @Test fun thorHardwareReadsAndSafeFanModesAreBounded() {
         for(path in listOf("/sys/class/gpio5_pwm2/speed","/sys/class/gpio5_pwm2/duty","/sys/class/gpio5_pwm2/state","/sys/class/backlight/panel1-backlight/brightness"))assertEquals(ShellCommandPolicy.Tier.WHITE,ShellCommandPolicy.classify("cat $path").tier)
-        for(mode in 1..4)assertEquals(ShellCommandPolicy.Tier.WHITE,ShellCommandPolicy.classify("settings put system fan_mode $mode").tier)
-        for(command in listOf("settings put system fan_mode 0","settings put system fan_mode 5","settings put system fan_speed 0","cat /sys/class/gpio5_pwm2/speed extra","echo 0 > /sys/class/gpio5_pwm2/state","service call SettingsController 16386 i32 4 i32 80"))assertEquals(ShellCommandPolicy.Tier.BLACK,ShellCommandPolicy.classify(command).tier)
+        for(mode in listOf(1,4,5))assertEquals(ShellCommandPolicy.Tier.WHITE,ShellCommandPolicy.classify("settings put system fan_mode $mode").tier)
+        for(command in listOf("settings put system fan_mode 0","settings put system fan_mode 2","settings put system fan_mode 3","settings put system fan_mode 6","settings put system fan_speed 0","cat /sys/class/gpio5_pwm2/speed extra","echo 0 > /sys/class/gpio5_pwm2/state","service call SettingsController 16386 i32 4 i32 80"))assertEquals(ShellCommandPolicy.Tier.BLACK,ShellCommandPolicy.classify(command).tier)
     }
 }

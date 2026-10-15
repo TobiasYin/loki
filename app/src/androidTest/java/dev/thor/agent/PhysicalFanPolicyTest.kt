@@ -27,14 +27,14 @@ class PhysicalFanPolicyTest {
     @Test fun liveAgentChangesFanModesWithUiApprovalAndRestoresOriginal() {
         val args=InstrumentationRegistry.getArguments();org.junit.Assume.assumeTrue(args.getString("physicalAcceptance")=="true")
         assertEquals("AYN Thor",android.os.Build.MODEL);assertEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
-        val before=sample();val original=before.getInt("mode");assertTrue("Do not begin if restoring would require disabled cooling",original in 1..4)
+        val before=sample();val original=before.getInt("mode");assertTrue("Do not begin if restoring would require disabled cooling",original in setOf(1,4,5))
         val activity=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay")!!.toInt()).toBundle()) as MainActivity
         val web=activity.findViewById<WebView>(android.R.id.custom);val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
         val evidence=obj("model" to "deepseek-v4.1-flash","before" to before,"approvalDriver" to "automated actual product UI clicks","samples" to JSONArray(),"runs" to JSONArray())
         fun save(){File(context.filesDir,"physical-fan-policy.json").writeText(evidence.toString(2))}
         try {
             until {js(web,"window.productReady===true && document.querySelectorAll('.session-row').length>0 && !document.getElementById('new').disabled")=="true"}
-            val phases=listOf(Triple("medium",2,true),Triple("high",3,true),Triple("restore",original,true),Triple("low",1,true),Triple("restore-after-low",original,true))
+            val phases=listOf(Triple("low",1,true),Triple("high",5,true),Triple("restore",original,true))
             for((label,value,approve) in phases) {
                 val count=js(web,"document.querySelectorAll('.session-row').length").toInt();js(web,"document.getElementById('new').click()")
                 until {js(web,"document.querySelectorAll('.session-row').length===${count+1}")=="true"}
@@ -57,9 +57,9 @@ class PhysicalFanPolicyTest {
                 js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false}))")
             }
             val samples=evidence.getJSONArray("samples")
-            val medium=samples.getJSONObject(0).getJSONArray("observations").getJSONObject(2);val high=samples.getJSONObject(1).getJSONArray("observations").getJSONObject(2)
-            assertNotEquals("Actual PWM must change between medium and high",medium.getInt("duty"),high.getInt("duty"))
-            assertTrue("Actual high RPM must exceed medium RPM",high.getInt("rpm")>medium.getInt("rpm"))
+            val low=samples.getJSONObject(0).getJSONArray("observations").getJSONObject(2);val high=samples.getJSONObject(1).getJSONArray("observations").getJSONObject(2)
+            assertNotEquals("Actual PWM must change between low and high",low.getInt("duty"),high.getInt("duty"))
+            assertTrue("Actual high RPM must exceed low RPM",high.getInt("rpm")>low.getInt("rpm"))
             assertEquals(original,sample().getInt("mode"));evidence.put("passed",true)
         } finally {
             runCatching {js(web,"document.getElementById('send').textContent==='停止' && document.getElementById('send').click()")}

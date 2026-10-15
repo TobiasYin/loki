@@ -102,3 +102,10 @@ python3 scripts/physical-accessibility-denied.py --serial SERIAL --adb-port PORT
 无授权脚本通过 Shizuku 管理器 UI 仅切换 Thor Agent 自身条目，读取实际控件位置、核对前后状态，并在 finally 恢复；其管理器 UI 使用本机已确认的 default display 0。所有平台刺激与组件 TEST authority 均明确标注，不作为云模型输入成功证据。不同阶段 APK 不混算：实体初次 v2 使用 `9db59d901fddc8915844092ea5c2c0b54d7209b0bdae41e01d85746291be14a6`，60 秒轴/负例重测使用 `1ad423ec66d239820a4ce5b40752d33ebf0314b4b6a09a87bb4d72e1ed27df2f`，v3 全屏自动用例使用 `4712c6482bf630c0a59cd89cdfdea12e24b2e032ad5138faf93215ec6fd657ae`。最终构建和证据文件 hash 见证据清单。
 
 `physical-live.py` 的真实凭据首次导入只走 stdin/Native 私有缓存并清理；再次运行使用已保存的资料。`physical-verify.py` 和受控 WebView fixture 会重置测试安装，**不能对已有真实资料的安装运行**；它们有 disposable 标记和现有非 fixture 资料拒绝检查。
+
+
+## 2026-10-15 续测进展与暂停
+
+本轮真实 OpenCode Go Responses 已重新探测通过（两个 HTTP 200，文字/图片/工具/图片回传），设备信息和 Brave 搜索 completed。Native 资料修订 1002，通过实际设置页保存预算 131072 后真实重探测，未伪造 passed。此处更新早期网络失败状态，不覆盖历史记录；最终 APK 的独立输入接收端重复尚未完成。
+
+用户准备拔出设备，全部真机测试现已暂停。双屏亮度已有部分真实通过证据，整套在下屏恢复阶段超时；风扇仅主机对照通过，Agent 风扇、刷新率、灰名单 UI 正负分支待续。设备仍安装策略 2，最新策略 3 尚未安装。清理结果、最终双屏回读缺口、证据及重连顺序见 [真机测试暂停与续测清单](physical-test-resume.md)。用户随后通知重连并要求继续，现已恢复测试；该段保留暂停时的检查点。

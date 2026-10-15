@@ -1,0 +1,103 @@
+{
+  "scope": "host firmware enum verification, not Agent acceptance",
+  "original": {
+    "mode": 4,
+    "fan_speed_setting": "null",
+    "speed": 7200,
+    "duty": 16000,
+    "state": 1
+  },
+  "samples": [
+    {
+      "mode": 1,
+      "fan_speed_setting": "null",
+      "speed": 6000,
+      "duty": 12000,
+      "state": 1
+    },
+    {
+      "mode": 1,
+      "fan_speed_setting": "null",
+      "speed": 6000,
+      "duty": 12000,
+      "state": 1
+    },
+    {
+      "mode": 1,
+      "fan_speed_setting": "null",
+      "speed": 5700,
+      "duty": 12000,
+      "state": 1
+    },
+    {
+      "mode": 1,
+      "fan_speed_setting": "null",
+      "speed": 6000,
+      "duty": 12000,
+      "state": 1
+    },
+    {
+      "mode": 5,
+      "fan_speed_setting": "null",
+      "speed": 8400,
+      "duty": 25000,
+      "state": 1
+    },
+    {
+      "mode": 5,
+      "fan_speed_setting": "null",
+      "speed": 9600,
+      "duty": 25000,
+      "state": 1
+    },
+    {
+      "mode": 5,
+      "fan_speed_setting": "null",
+      "speed": 9600,
+      "duty": 25000,
+      "state": 1
+    },
+    {
+      "mode": 5,
+      "fan_speed_setting": "null",
+      "speed": 9900,
+      "duty": 25000,
+      "state": 1
+    },
+    {
+      "mode": 4,
+      "fan_speed_setting": "null",
+      "speed": 7500,
+      "duty": 16500,
+      "state": 1
+    },
+    {
+      "mode": 4,
+      "fan_speed_setting": "null",
+      "speed": 7500,
+      "duty": 16500,
+      "state": 1
+    },
+    {
+      "mode": 4,
+      "fan_speed_setting": "null",
+      "speed": 7200,
+      "duty": 15500,
+      "state": 1
+    },
+    {
+      "mode": 4,
+      "fan_speed_setting": "null",
+      "speed": 7200,
+      "duty": 15500,
+      "state": 1
+    }
+  ],
+  "final": {
+    "mode": 4,
+    "fan_speed_setting": "null",
+    "speed": 7200,
+    "duty": 15500,
+    "state": 1
+  }
+}

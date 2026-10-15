@@ -1,0 +1,8 @@
+{
+  "contextBudget": 131072,
+  "maxOutput": 2048,
+  "revision": 1002,
+  "probe": "untested",
+  "savedThroughNativeUi": true,
+  "credentialsUnchanged": true
+}
