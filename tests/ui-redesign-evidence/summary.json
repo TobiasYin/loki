@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "b9d6d45168ff6f7848cb3de672d090a60eee296c",
+  "sourceCommit": "0773fc88b60d69ef9775573e1582fbcbf01f544a",
   "appVersion": "0.5.0-integration",
   "versionCode": 5,
   "realDeviceTestsResumed": false,
@@ -15,18 +15,18 @@
     "androidProductSkipped": 1,
     "skipReason": "Actual Shizuku companion branch not requested on this AVD",
     "androidParserFixtures": 4,
-    "instrumentationSeconds": 85.987
+    "instrumentationSeconds": 85.593
   },
   "artifacts": {
     "agent-debug": {
       "path": "app/build/outputs/apk/debug/app-debug.apk",
-      "sha256": "b58d5fd549d24a1e87a7760bafcb190e7c83aab811de0b0dcc3be7816c8ba578",
-      "bytes": 6348921
+      "sha256": "a13189390c104e39705b92b3d994b89da83599a3943eedb6f74e868aec87b1e2",
+      "bytes": 6349053
     },
     "agent-release-unsigned": {
       "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
-      "sha256": "5232ccbe423c5a5dcba9ae67ce07f94416b34d5c31e139d0a2e7117b637d6890",
-      "bytes": 4957275
+      "sha256": "14b750a1b2080ea0af61b748bcbbbe4c0a114b58d4c3124970a6cb55d06566be",
+      "bytes": 4957407
     }
   },
   "features": {
@@ -53,7 +53,8 @@
     "integrated-text-only-profile.json": {
       "passed": true,
       "imagesRequired": false,
-      "toolConnectionVerified": true
+      "toolConnectionVerified": true,
+      "newImageCapabilityRequiresProbe": true
     }
   },
   "probeReceipts": {
@@ -176,12 +177,12 @@
     ]
   },
   "rawEvidenceSha256": {
-    "build/integration/ui-sse-final/product-suite-final.log": "259871913fbe8acc75293aa8520a51ec415b4ba74b1c2fa0992a800c3ad7b33e",
-    "build/integration/ui-sse-final/emulator-verification.json": "5ee45128e10a5fea0a9d383ebfcbf8e472153c48b9920a60ca49b8655a6d4849",
-    "build/integration/ui-sse-final/model-requests.jsonl": "eef467dd428c6881996b5a847125a7abc07d6454ec48bf258ebb19aa3184202a",
-    "build/integration/ui-sse-final/lab-parser-final.log": "064c8f422cf57a46dd3afd8d4835ac67d414fdd179eb554517ab8cc4733c03d1",
+    "build/integration/ui-profile-final/product-suite-final.log": "3523fba50a60dacf3a738bea049ecd12e7070614a43d50a3d701311f5eb9c40a",
+    "build/integration/ui-profile-final/emulator-verification.json": "aec825cea496f113e743d5b383481abdb95190fff6b4949159652f78de93d797",
+    "build/integration/ui-profile-final/model-requests.jsonl": "eef467dd428c6881996b5a847125a7abc07d6454ec48bf258ebb19aa3184202a",
+    "build/integration/ui-profile-final/lab-parser-final.log": "064c8f422cf57a46dd3afd8d4835ac67d414fdd179eb554517ab8cc4733c03d1",
     "build/ui-final-release-verify.log": "08631ab961dccacac351d86566a8d7100aa7e276655e2aad4d4ce8395c67230f",
-    "build/ui-final-sse-source.log": "1f98e0e2290078cda11b5922575e9dfde1e251ef7dcede90c6d6ef545fcf112c",
+    "build/ui-profile-identity-build.log": "aef68569b6b33b3cb7e4d084e9e0d3b5870e53bcdc755088576bcdc1ba0315e4",
     "build/ui-last-dom.log": "90968d0000c21f429cab59605810e26ebc054a92003fe24625f4076c0de603c6",
     "build/ui-sse-test-final.log": "1c9dff79822f38e8323c631d1744e74e6a2a9bd055eb98ed9c7beb38bb8decfb"
   },
@@ -205,6 +206,8 @@
   "cleanup": {
     "portForwardsRemoved": true,
     "fixtureServersStopped": true,
-    "accessibilityConfigurationRestored": true
-  }
+    "accessibilityConfigurationRestored": true,
+    "emulatorStoppedAfterVerification": true
+  },
+  "priorPassingSourceCommit": "b9d6d45"
 }

@@ -1,5 +1,6 @@
 {
   "passed": true,
   "imagesRequired": false,
-  "toolConnectionVerified": true
+  "toolConnectionVerified": true,
+  "newImageCapabilityRequiresProbe": true
 }
