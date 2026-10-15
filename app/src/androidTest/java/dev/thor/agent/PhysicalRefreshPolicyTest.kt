@@ -43,7 +43,7 @@ class PhysicalRefreshPolicyTest {
                 until {js(web,"document.querySelectorAll('.session-row').length===${count+1}")=="true"}
                 js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:true}))")
                 until {js(web,"document.querySelector('input[aria-label=\"ADB 调试\"]').checked")=="true"}
-                val prompt="Thor 刷新率实测：读取 adb-operations Skill，再读取 references/thor-refresh.md。只按此顺序各调用一次 debug_shell：${commands.joinToString("，然后")}。均是白名单，不需批准。之后分别读取 min_refresh_rate、peak_refresh_rate（settings get system），简短报告。不要做其他修改或自行恢复，恢复由下一轮处理。"
+                val prompt="Thor 刷新率分阶段实测：读取 adb-operations Skill 和 references/thor-refresh.md。允许并需要按手册读取原值和检查分类，读取次数不限。写入操作仅以下两条，严格按给定顺序各执行一次 debug_shell：${commands.joinToString("，然后")}。两条都是白名单，不需批准。写完再分别读取 min_refresh_rate、peak_refresh_rate 回验。本阶段不要追加其他写入；恢复阶段由下一条请求处理。"
                 js(web,"document.getElementById('input').value=${JSONObject.quote(prompt+" 完成工具调用后只回答 TEST_OK，不要复述手册或过程。")};document.getElementById('composer').requestSubmit()")
                 until {js(web,"document.getElementById('send').textContent==='停止'")=="true"}
                 until(180){assertEquals("false",js(web,"!!document.querySelector('.wait')"));js(web,"document.getElementById('send').textContent==='发送'")=="true"}

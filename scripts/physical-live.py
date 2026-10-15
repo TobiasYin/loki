@@ -8,6 +8,7 @@ p.add_argument('--serial',required=True)
 p.add_argument('--adb-port',required=True,type=int)
 p.add_argument('--chat-display',required=True,type=int)
 p.add_argument('--reuse-profile',action='store_true')
+p.add_argument('--install-app',action='store_true',help='Upgrade the existing APK while preserving the real profile and Accessibility services')
 p.add_argument('--local-web-smoke',action='store_true',help='Use a real model to fetch a harmless localhost HTTP page over the production web tool')
 p.add_argument('--configure-budget-128k',action='store_true',help='Save 128K local budget through Native UI, then perform a genuine fresh probe')
 a=p.parse_args()
@@ -50,8 +51,8 @@ try:
         adb('reverse',f'tcp:{local_port}',f'tcp:{local_server.server_port}')
         local_url=f'http://127.0.0.1:{local_port}/reachability'
 
-    if a.configure_budget_128k:
-        assert a.reuse_profile,'Budget adjustment requires the existing real profile'
+    if a.configure_budget_128k or a.install_app:
+        assert a.reuse_profile,'APK upgrade/budget adjustment requires the existing real profile'
         original_secure={k:adb('shell','settings','get','secure',k).decode().strip() for k in ['enabled_accessibility_services','accessibility_enabled']}
         own='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
         services=':'.join(s for s in original_secure['enabled_accessibility_services'].split(':') if s not in [own,'null',''])

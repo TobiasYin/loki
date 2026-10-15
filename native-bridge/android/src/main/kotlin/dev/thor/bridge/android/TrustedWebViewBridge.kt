@@ -106,7 +106,10 @@ class TrustedWebViewBridge(
                             "request.start" -> {
                                 val e = NetworkEnvelope(1, requestId, b, Purpose.valueOf(json.getString("purpose")), json.getString("profileRef"), json.getLong("deadlineMs"))
                                 val h = json.getJSONObject("headers"); val headers = h.keys().asSequence().associateWith { h.getString(it) }
-                                val start = HttpStart(e, json.getString("url"), json.getString("method"), headers, if (json.optBoolean("hasBody")) body else null, json.optString("credentialRef").takeIf { it.isNotEmpty() })
+                                // Android JSONObject.optString turns explicit JSON null into
+                                // the literal "null"; unauthenticated web requests need null.
+                                val credentialRef=if(json.isNull("credentialRef")) null else json.getString("credentialRef").takeIf {it.isNotEmpty()}
+                                val start = HttpStart(e, json.getString("url"), json.getString("method"), headers, if (json.optBoolean("hasBody")) body else null, credentialRef)
                                 val c = connection!!
                                 transport.start(start) { event -> networkObserver?.invoke(start,event); postEvent(c, reply, e, event) }
                             }
