@@ -1,0 +1,9 @@
+{
+  "historyRows": 1000,
+  "streamUpdates": 20,
+  "privateTemporaryDatabaseOnly": true,
+  "streamPersistenceMs": 670,
+  "passed": true,
+  "atomicRollbackVerified": true,
+  "temporaryDatabaseDeleted": true
+}

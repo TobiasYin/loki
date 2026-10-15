@@ -1,0 +1,126 @@
+{
+  "emulator": true,
+  "serial": "emulator-5554",
+  "api": 36,
+  "labDisplay": 2,
+  "sourceCommit": "f09d10d",
+  "sourceHashMappingVerified": true,
+  "rawMetadataSourceCommit": "353474dda6cf27e49230093db0ad4905592d7062",
+  "rawMetadataContainedWorkingTreeChanges": true,
+  "apks": {
+    "app/build/outputs/apk/debug/app-debug.apk": "6903433fbe52cd46f29de509912d05162f80e62617fe626c9e311cd0ce793b9c",
+    "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "05dada435fb46958a3d5f37e18abd87ac82719a92bd0518a868e74f05d0acd5f"
+  },
+  "scope": "Controlled model/search responses; actual Android WebView, Native HTTP, SQLite, Accessibility and independent receiver. No Thor tests resumed.",
+  "instrumentation": {
+    "reportedTests": 14,
+    "passed": 13,
+    "skipped": 1,
+    "skipReason": "Real Shizuku branch not requested; requireShizuku=false",
+    "elapsedSeconds": 69.525,
+    "parserFixtureChecks": 4
+  },
+  "features": {
+    "emulator": true,
+    "scope": "emulator-software",
+    "skillZipImport": true,
+    "metadataOnly": true,
+    "explicitResourceRead": true,
+    "disabledSurvivesRestart": true,
+    "missingVoiceConfigActionable": true,
+    "microphoneBytes": 6400,
+    "audioUploaded": false,
+    "webViewStructuredEvents": true,
+    "profilesAndEncryptedCredentialsPreserved": true,
+    "messagesPreserved": true,
+    "cloudAsrVerified": false,
+    "passed": true
+  },
+  "input": {
+    "integrated-lab-report.json": {
+      "status": "pass",
+      "assertions": {
+        "status": "pass",
+        "reasons": [
+          "receiver_assertions_satisfied"
+        ]
+      },
+      "sceneAfter": {
+        "hits": 1,
+        "wrong": 0,
+        "semanticCount": 0,
+        "sceneRevision": 1,
+        "pressed": [],
+        "axes": [],
+        "staleOrUnknown": false,
+        "rawCount": 2,
+        "sampleCount": 2
+      },
+      "qualification": "unqualified-physical-baseline-pending",
+      "eventPrefixSha256": "d1f558fc0d6184607ef2556a4085a756445510ea39bffcf8a0d74c1b32159daa",
+      "systemInjectionProven": false
+    },
+    "integrated-frame-report.json": {
+      "status": "pass",
+      "assertions": {
+        "status": "pass",
+        "reasons": [
+          "receiver_assertions_satisfied"
+        ]
+      },
+      "sceneAfter": {
+        "hits": 1,
+        "wrong": 0,
+        "semanticCount": 0,
+        "sceneRevision": 1,
+        "pressed": [],
+        "axes": [],
+        "staleOrUnknown": false,
+        "rawCount": 2,
+        "sampleCount": 2
+      },
+      "qualification": "unqualified-physical-baseline-pending",
+      "eventPrefixSha256": "82c4025b12c580d0d95808c17955f875bf7a282230d08844b4a97db282587de6",
+      "systemInjectionProven": false
+    }
+  },
+  "anonymousWeb": {
+    "bothProtocolsPassed": true,
+    "redirectOrigins": [
+      "http://127.0.0.1:8877",
+      "http://127.0.0.1:8878"
+    ],
+    "encodedPath": "/web/anonymous%20page",
+    "credentialsAbsentAtServer": true
+  },
+  "cleanup": {
+    "reverseListEmpty": true,
+    "fixtureServerExited": true,
+    "accessibilitySettingsRestored": true
+  },
+  "historicalAttempts": [
+    {
+      "log": "build/integration/software-paused-hardware-suite.log",
+      "sha256": "021ef40feb7eff5006162b48d88297d8673468df9f4e70d6f45d2d7be600d498",
+      "reason": "Old enabled Accessibility service marked crashed after upgrade; fixed test setup lifecycle."
+    },
+    {
+      "log": "build/integration/software-paused-hardware-retest.log",
+      "sha256": "916eb2052c5881ac8da0c900a89a962c964df5203fa63fc636d841cba0b6becc",
+      "reason": "Feature test used Thor display 4; corrected explicit emulator chat display 0. Lab on emulator virtual display 3 returned inconclusive due display_changed callbacks from display 0; preserved, no receiver checks relaxed."
+    }
+  ],
+  "rawFiles": {
+    "build/integration/product-suite-final.log": "32352a7b53b2fba07fd600657070afe2511748efb6999b1e489b2f85920fe1ac",
+    "build/integration/lab-parser-final.log": "064c8f422cf57a46dd3afd8d4835ac67d414fdd179eb554517ab8cc4733c03d1",
+    "build/integration/software-paused-hardware-overlay.log": "2d2f77bfe69e24f3aa48d23d65838babdf4e9fb5b16c194b8bfde1cb1610a9b7",
+    "build/integration/software-paused-hardware-verify.log": "fa3e322466b66dee65c7cba0c8604a0eeec996339803d96d613b5d50f3b6827a",
+    "build/integration/emulator-verification.json": "6ad25ffa5b530d5f5603576c1da7e971b60dc79a8752999702baf4eeaabda6c5",
+    "build/integration/physical-features.json": "a457e75a6ce39df7df32b34e736bdd7f372948fd38a04f32cb2bc014559a7923",
+    "build/integration/physical-storage-streaming-regression.json": "18de79b2ff7b1ede6599e553357c8afcb7a2df025f54eeea1954c13088c06151",
+    "build/integration/integrated-lab-report.json": "300b4f9eba18a86d1dcf7314f8f37017f1a9e16cc252052155b3870d831f0b15",
+    "build/integration/integrated-frame-report.json": "2657af4ac4844079de51c7f75974e4313a9fc41ad0ab3fe52555831cab48525c",
+    "build/integration/integrated-lab-events.jsonl": "d1f558fc0d6184607ef2556a4085a756445510ea39bffcf8a0d74c1b32159daa"
+  },
+  "passed": true
+}

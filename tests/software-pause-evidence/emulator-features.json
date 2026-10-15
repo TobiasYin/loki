@@ -1,0 +1,16 @@
+{
+  "emulator": true,
+  "scope": "emulator-software",
+  "skillZipImport": true,
+  "metadataOnly": true,
+  "explicitResourceRead": true,
+  "disabledSurvivesRestart": true,
+  "missingVoiceConfigActionable": true,
+  "microphoneBytes": 6400,
+  "audioUploaded": false,
+  "webViewStructuredEvents": true,
+  "profilesAndEncryptedCredentialsPreserved": true,
+  "messagesPreserved": true,
+  "cloudAsrVerified": false,
+  "passed": true
+}

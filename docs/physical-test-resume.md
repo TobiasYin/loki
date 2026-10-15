@@ -34,3 +34,5 @@
 ## 暂停期间继续的软件工作
 
 仅选取明确的 `emulator-*` 目标：复验 Native HTTP 无凭据桥接、两种模型协议、流式文字/工具显示、取消和生命周期、SQLite 事务、Skill 导入与按需读取、语音模式页面。受控服务只替代远端响应，结果标注模拟器，不冒充真实云模型或 Thor 硬件通过。不得在真机运行会重置资料的 WebViewFlowTest/fixture。
+
+本轮暂停后的软件验收已经完成，结果见 [软件验收记录](software-pause-validation.md)：13 项 Android 产品测试通过、1 项 Shizuku 条件跳过，另 4 项解析检查通过；虚拟显示 3 的 inconclusive 保留，overlay 显示 2 的输入链路通过。离线 59 项 JS / 194 项 JVM 及构建检查通过，未恢复真机操作。
