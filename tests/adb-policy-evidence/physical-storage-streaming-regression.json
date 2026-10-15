@@ -1,0 +1,13 @@
+{
+  "historyRows": 10000,
+  "streamUpdates": 200,
+  "privateTemporaryDatabaseOnly": true,
+  "fullSnapshotUpdates": 20,
+  "fullSnapshotMs": 1321,
+  "incrementalMs": 298,
+  "passed": true,
+  "historyAndOtherSessionPreserved": true,
+  "duplicateEventAtomicRollbackVerified": true,
+  "fullSaveAfterStreamingVerified": true,
+  "temporaryDatabaseDeleted": true
+}

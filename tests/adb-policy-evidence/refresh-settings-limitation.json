@@ -1,0 +1,93 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "before": {
+    "min": "60.0",
+    "peak": "60.0",
+    "displays": [
+      {
+        "displayId": 0,
+        "name": "内置屏幕",
+        "refreshRate": 60.000004
+      },
+      {
+        "displayId": 4,
+        "name": "Screen-2",
+        "refreshRate": 60.000004
+      }
+    ]
+  },
+  "final": {
+    "min": "60.0",
+    "peak": "60.0",
+    "displays": [
+      {
+        "displayId": 0,
+        "name": "内置屏幕",
+        "refreshRate": 60.000004
+      },
+      {
+        "displayId": 4,
+        "name": "Screen-2",
+        "refreshRate": 60.000004
+      }
+    ]
+  },
+  "settingsWriteReadRestorePassed": true,
+  "actual120HzVerified": false,
+  "sourceCommit": "60487d6",
+  "scope": "Setting values and no-approval path passed; actual two-screen refresh stayed about 60 Hz. Not a 120 Hz success claim.",
+  "runs": [
+    {
+      "label": "120-hz",
+      "status": "completed",
+      "after": {
+        "min": "120.0",
+        "peak": "120.0",
+        "displays": [
+          {
+            "displayId": 0,
+            "name": "内置屏幕",
+            "refreshRate": 60.000004
+          },
+          {
+            "displayId": 4,
+            "name": "Screen-2",
+            "refreshRate": 60.000004
+          }
+        ]
+      },
+      "writes": [
+        "settings put system peak_refresh_rate 120.0",
+        "settings put system min_refresh_rate 120.0"
+      ],
+      "approvalWaitTransitions": 0
+    },
+    {
+      "label": "restore",
+      "status": "completed",
+      "after": {
+        "min": "60.0",
+        "peak": "60.0",
+        "displays": [
+          {
+            "displayId": 0,
+            "name": "内置屏幕",
+            "refreshRate": 60.000004
+          },
+          {
+            "displayId": 4,
+            "name": "Screen-2",
+            "refreshRate": 60.000004
+          }
+        ]
+      },
+      "writes": [
+        "settings put system min_refresh_rate 60.0",
+        "settings put system peak_refresh_rate 60.0"
+      ],
+      "approvalWaitTransitions": 0
+    }
+  ],
+  "rawEvidence": "build/physical/refresh-policy-attempt-1/physical-refresh-policy.json",
+  "rawSha256": "d624fb0aff6b53b865fc77390c5cf52077d756c4cd00785c084c3192c26aa718"
+}

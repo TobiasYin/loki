@@ -1,0 +1,148 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "before": {
+    "mode": 4,
+    "rpm": 6900,
+    "duty": 16500,
+    "period": 50000,
+    "state": 1
+  },
+  "approvalDriver": "white fan adjustments execute directly; no approval UI clicks",
+  "samples": [
+    {
+      "label": "low",
+      "before": {
+        "mode": 4,
+        "rpm": 7500,
+        "duty": 16500,
+        "period": 50000,
+        "state": 1
+      },
+      "observations": [
+        {
+          "mode": 1,
+          "rpm": 6000,
+          "duty": 12000,
+          "period": 50000,
+          "state": 1
+        },
+        {
+          "mode": 1,
+          "rpm": 6000,
+          "duty": 12000,
+          "period": 50000,
+          "state": 1
+        },
+        {
+          "mode": 1,
+          "rpm": 6000,
+          "duty": 12000,
+          "period": 50000,
+          "state": 1
+        }
+      ],
+      "approvalRequired": false
+    },
+    {
+      "label": "high",
+      "before": {
+        "mode": 1,
+        "rpm": 6000,
+        "duty": 12000,
+        "period": 50000,
+        "state": 1
+      },
+      "observations": [
+        {
+          "mode": 5,
+          "rpm": 9900,
+          "duty": 25000,
+          "period": 50000,
+          "state": 1
+        },
+        {
+          "mode": 5,
+          "rpm": 9900,
+          "duty": 25000,
+          "period": 50000,
+          "state": 1
+        },
+        {
+          "mode": 5,
+          "rpm": 9900,
+          "duty": 25000,
+          "period": 50000,
+          "state": 1
+        }
+      ],
+      "approvalRequired": false
+    },
+    {
+      "label": "restore",
+      "before": {
+        "mode": 5,
+        "rpm": 10200,
+        "duty": 25000,
+        "period": 50000,
+        "state": 1
+      },
+      "observations": [
+        {
+          "mode": 4,
+          "rpm": 7200,
+          "duty": 15000,
+          "period": 50000,
+          "state": 1
+        },
+        {
+          "mode": 4,
+          "rpm": 7200,
+          "duty": 15000,
+          "period": 50000,
+          "state": 1
+        },
+        {
+          "mode": 4,
+          "rpm": 7200,
+          "duty": 15000,
+          "period": 50000,
+          "state": 1
+        }
+      ],
+      "approvalRequired": false
+    }
+  ],
+  "passed": true,
+  "final": {
+    "mode": 4,
+    "rpm": 7200,
+    "duty": 14500,
+    "period": 50000,
+    "state": 1
+  },
+  "runs": [
+    {
+      "label": "low",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "elapsedMs": 112016
+    },
+    {
+      "label": "high",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "elapsedMs": 58861
+    },
+    {
+      "label": "restore",
+      "status": "completed",
+      "awaitingUserEvents": 0,
+      "elapsedMs": 122084
+    }
+  ],
+  "sourceCommit": "08f32c6",
+  "apkSha256": "fb430711f1dfb14c4d6b95f3a0fc20a13d1669aad304f51e3b20f5278d4fc2d7",
+  "rawEvidence": "build/physical/fan-policy-attempt-2/physical-fan-policy.json",
+  "rawSha256": "b7e9c789161d8f8d14cccae52411cb4b52028662c93137fbacabc8ff46b39c4d",
+  "scope": "Real model fan control after incremental persistence; before presentation-only 50ms coalescing"
+}

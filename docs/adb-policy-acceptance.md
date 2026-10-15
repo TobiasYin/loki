@@ -30,7 +30,7 @@ debug.command_policy 读取规则或分类，不执行命令。灰名单批准�
 
 ## 验证状态
 
-软件回归已完成：59 项 JavaScript 测试、191 项 JVM 测试、Android lint、debug/release 与 instrumentation 构建、产物隔离检查通过。新增测试包含命令解析/绕过、黑名单不能批准、精确灰名单批准、直接 argv 不解释脚本、Thor 参数约束、内置 Skill 升级、结构化 UI，以及工具目录增大时的 L0 限制。
+软件回归已完成：59 项 JavaScript 测试、194 项 JVM 测试、Android lint、debug/release 与 instrumentation 构建、产物隔离检查通过。新增测试包含命令解析/绕过、黑名单不能批准、精确灰名单批准、直接 argv 不解释脚本、Thor 参数约束、内置 Skill 升级、结构化 UI，以及工具目录增大时的 L0 限制。
 
 真实 OpenCode Go Responses 的文字/图片/工具/图片回传探测已重新完成，两个 HTTP 200，Native 配置状态为 passed；设备信息与 Brave 搜索 completed。此前本地预算 32K 导致多轮 Skill 操作提前超限，本机已通过实际 Native 设置页调整到 131072，修订 1002，保存后真实重探测；模型、端点与密钥不变。
 
@@ -38,15 +38,17 @@ debug.command_policy 读取规则或分类，不执行命令。灰名单批准�
 
 另完成真实 SQLite 临时库回归：1000 条历史事件、20 次增量保存共 201 ms，重新打开、更新和事务回滚通过，临时库已删除。保存路径改为事务内批量读取比较，页面只投影当前会话及活动运行；完整历史仍保存在 Native。
 
-2026-10-15 曾按用户要求暂停，随后用户通知设备重连并继续。暂停检查点保留于 [续测记录](physical-test-resume.md)。最新策略 3 的完整亮度/命令分级真机套件现已通过（738.074 秒）：手册按需读取、白名单 Shell 亮度、双屏各自调整及恢复、灰名单实际批准和拒绝 UI，两屏互不影响，白名单没有 awaiting_user。清理后通过真实 UID2000 固件接口确认 upper=41、lower=40，旧系统亮度 42、模式 0。原下屏恢复超时保留为失败历史，不覆盖。
+2026-10-15 再次按用户要求暂停真机，转向离线和模拟器工作，当前检查点见 [续测记录](physical-test-resume.md)。最终亮度/命令分级重复套件通过（322.311 秒），八个 completed 运行、灰名单批准/拒绝以及两层拦截见 `brightness-final.json`。本轮起点和恢复值为 upper=124、lower=124、旧设置125/模式0；较早 738.074 秒套件的 41/40、42 是历史时间点，不能作为拔机时状态。
 
-对应摘要 `tests/adb-policy-evidence/brightness-policy3.json` 记录八个 completed 运行、直接服务拦截与最终回读。此套件 APK SHA-256 为 f120ac209ad9f590fec369abd22fb3bf95d15d526a5f9c7244d4139f6802b78a；随后仅更新了网页工具说明及网页跳转，设备执行代码不变。最终 APK 的风扇、刷新率、网页读取与接收端复验仍在进行。
+真实 Agent 风扇闭环通过，1→5→4 的转速变化及无批准见 `fan-agent-policy3.json`。刷新率只确认设置写入、读取与恢复，实际两屏仍约 60 Hz，**120 Hz 未通过**，见 `refresh-settings-limitation.json`。后续刷新率对照后未再次回读双屏亮度，此项保留待确认。
+
+改为逐运行增量保存后，真实 Android SQLite 的 10000 条历史、200 次增量提交共 298 ms；事务回滚和会话隔离通过，见 `physical-storage-streaming-regression.json`。此前旧测试和失败证据仍保留。
 
 ## 联网访问要求与复验
 
 用户明确要求网络自由访问。正式 debug/release 均允许 HTTP/HTTPS、LAN、回环及保留/fake-IP 地址，使用系统 DNS 与代理，不再按公网地址段过滤。无凭据网页可跨站跳转，跨站时清除调用方 header；模型和搜索凭据分别绑定配置的服务。HTTPS 正常验证证书，超时、字节预算和停止继续生效。
 
-本机 Wi-Fi 曾将模型域名解析为保留地址，旧策略因而拒绝，独立 Native 直连却为 HTTP 200。临时加密 DNS 对照完成后已经恢复原设置；移除地址限制后的真实产品探测、设备信息和 Brave 全部通过。证据为 `tests/adb-policy-evidence/live-services-open-network.json`。最新 APK 还将用真实模型读取本地 HTTP 网页，核对请求不携带模型/搜索凭据。
+本机 Wi-Fi 曾将模型域名解析为保留地址，旧策略因而拒绝，独立 Native 直连却为 HTTP 200。临时加密 DNS 对照完成后已经恢复原设置；移除地址限制后的真实产品探测、设备信息和 Brave 全部通过。证据为 `tests/adb-policy-evidence/live-services-open-network.json`。最新 APK 的真实模型、本地 HTTP 网页读取回归已通过，服务确实收到请求且未携带模型/搜索凭据；见 `tests/adb-policy-evidence/live-services-local-final.json`。Android 桥接对显式 JSON null 的解析已修复。临时转发与 HTTP 服务均已清理。
 
 ## 可复现入口
 

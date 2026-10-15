@@ -1,0 +1,206 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "policyVersion": "3",
+  "passed": true,
+  "originalBrightness": 125,
+  "originalMode": "0",
+  "originalPanels": {
+    "upper": 124,
+    "lower": 124
+  },
+  "guardControls": [
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "rm -rf /data",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "mkfs.ext4 /dev/block/does-not-exist",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "sh -c 'id'",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "AndroidBackend + TEST authority",
+      "command": "settings put global adb_enabled 0",
+      "error": "COMMAND_BLOCKED",
+      "outcome": "not_submitted"
+    },
+    {
+      "layer": "real UID2000 Binder; direct backend bypass control",
+      "command": "rm -rf /data",
+      "result": {
+        "error": "COMMAND_BLOCKED",
+        "message": "禁止抹除、格式化、刷写、分区、重启恢复模式和提权操作"
+      },
+      "jobCreated": false
+    },
+    {
+      "layer": "real UID2000 Binder; direct backend bypass control",
+      "command": "dumpsys display",
+      "result": {
+        "error": "APPROVAL_REQUIRED",
+        "message": "灰名单命令需要用户在页面确认本次具体操作：读取诊断信息，可能包含应用、窗口或使用状态"
+      },
+      "jobCreated": false
+    }
+  ],
+  "finalBrightness": "125",
+  "finalMode": "0",
+  "finalPanels": {
+    "upper": {
+      "data": {
+        "screen": "upper",
+        "displayId": 0,
+        "displayName": "内置屏幕",
+        "before": 124,
+        "brightness": 124,
+        "requested": null,
+        "verified": true,
+        "quantizationTolerance": 1,
+        "policyTier": "white",
+        "policyVersion": "3",
+        "uid": 2000
+      },
+      "submitted": false
+    },
+    "lower": {
+      "data": {
+        "screen": "lower",
+        "displayId": 4,
+        "displayName": "Screen-2",
+        "before": 124,
+        "brightness": 124,
+        "requested": null,
+        "verified": true,
+        "quantizationTolerance": 1,
+        "policyTier": "white",
+        "policyVersion": "3",
+        "uid": 2000
+      },
+      "submitted": false
+    }
+  },
+  "runs": [
+    {
+      "label": "white-read-and-lazy-manual",
+      "status": "completed",
+      "approvalWaitTransitions": 0,
+      "elapsedMs": 22236
+    },
+    {
+      "label": "white-shell-brightness",
+      "status": "completed",
+      "approvalWaitTransitions": 0,
+      "elapsedMs": 84231
+    },
+    {
+      "label": "upper-independent",
+      "status": "completed",
+      "approvalWaitTransitions": 0,
+      "elapsedMs": 31054
+    },
+    {
+      "label": "lower-independent",
+      "status": "completed",
+      "approvalWaitTransitions": 0,
+      "elapsedMs": 33373
+    },
+    {
+      "label": "upper-restore",
+      "status": "completed",
+      "approvalWaitTransitions": 0,
+      "elapsedMs": 43239
+    },
+    {
+      "label": "lower-restore",
+      "status": "completed",
+      "approvalWaitTransitions": 0,
+      "elapsedMs": 30002
+    },
+    {
+      "label": "gray-diagnostic-approved",
+      "status": "completed",
+      "approvalWaitTransitions": 1,
+      "elapsedMs": 25362
+    },
+    {
+      "label": "gray-diagnostic-rejected",
+      "status": "completed",
+      "approvalWaitTransitions": 1,
+      "elapsedMs": 27623
+    }
+  ],
+  "white-shell-brightness": {
+    "before": 125,
+    "after": 90,
+    "approvalRequired": false
+  },
+  "upper-independent": {
+    "screen": "upper",
+    "requested": 96,
+    "before": [
+      89,
+      124
+    ],
+    "after": [
+      96,
+      124
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "lower-independent": {
+    "screen": "lower",
+    "requested": 80,
+    "before": [
+      96,
+      124
+    ],
+    "after": [
+      96,
+      80
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "upper-restore": {
+    "screen": "upper",
+    "requested": 124,
+    "before": [
+      96,
+      80
+    ],
+    "after": [
+      124,
+      80
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "lower-restore": {
+    "screen": "lower",
+    "requested": 124,
+    "before": [
+      124,
+      80
+    ],
+    "after": [
+      124,
+      124
+    ],
+    "approvalRequired": false,
+    "otherScreenUnchanged": true
+  },
+  "sourceCommit": "60487d6",
+  "apkSha256": "a225beb5c4175816be017858b340c46b2d5a376ddcfa783e8620b37fe5ab02bc",
+  "rawEvidence": "build/physical/adb-policy-attempt-9/physical-adb-policy.json",
+  "rawSha256": "651ba6c0a696bf863eefa8ca292f7f98a1eaca6e3a6189019ba1630c3e329e9b"
+}

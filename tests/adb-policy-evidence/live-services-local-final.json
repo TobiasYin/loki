@@ -1,0 +1,68 @@
+{
+  "sourceCommit": "4aee34c",
+  "apkSha256": "6903433fbe52cd46f29de509912d05162f80e62617fe626c9e311cd0ce793b9c",
+  "passed": true,
+  "model": "deepseek-v4.1-flash",
+  "endpoint": "https://opencode.ai/zen/go/v1/responses",
+  "protocol": "openai-responses",
+  "probe": {
+    "status": "passed",
+    "httpStatuses": [
+      200,
+      200
+    ],
+    "contexts": 2
+  },
+  "runs": {
+    "deviceInfo": {
+      "status": "completed",
+      "tools": [
+        {
+          "toolId": "perception.device_info",
+          "source": "android-sdk/accessibility",
+          "error": null,
+          "outcome": "observed"
+        }
+      ]
+    },
+    "braveSearch": {
+      "status": "completed",
+      "tools": [
+        {
+          "toolId": "web.search",
+          "source": "BraveSearch",
+          "error": null,
+          "outcome": "observed"
+        }
+      ]
+    },
+    "localWebFetch": {
+      "status": "completed",
+      "tools": [
+        {
+          "toolId": "web.fetch",
+          "source": "web-page",
+          "error": null,
+          "outcome": "observed"
+        }
+      ]
+    }
+  },
+  "localServer": {
+    "scope": "Real model web.fetch to harmless local HTTP target; no model fixture",
+    "requests": [
+      {
+        "path": "/reachability",
+        "authorizationReceived": false,
+        "searchTokenReceived": false
+      }
+    ]
+  },
+  "cleanup": {
+    "reverseListEmpty": true,
+    "testProcessExited": true,
+    "appStopped": true
+  },
+  "rawEvidence": "build/physical/physical-live-services.json",
+  "rawSha256": "7d9eef843d0a7789f46a0b965141864243b24875ae29c2ea23a9c393f2bc67be"
+}

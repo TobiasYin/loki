@@ -1,0 +1,21 @@
+{
+  "scope": "Native route diagnostics only; not product model acceptance",
+  "dnsFamilies": [
+    "IPv4"
+  ],
+  "dnsPublicChecks": [
+    false
+  ],
+  "attempts": [
+    {
+      "route": "system",
+      "bodySent": true,
+      "httpStatus": 200
+    },
+    {
+      "route": "ipv4",
+      "bodySent": true,
+      "httpStatus": 200
+    }
+  ]
+}

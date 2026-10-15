@@ -1,0 +1,25 @@
+{
+  "historicalFailuresPreserved": true,
+  "attempts": [
+    {
+      "log": "build/physical-adb-storage-final.log",
+      "sha256": "556248c9fd6bea3d5a666d94a36aa26785039609d6560434472348b1272dbf74",
+      "reason": "Policy-2 lower restore exceeded 180-second runtime; interrupted, finally cleanup executed. Historical partial evidence preserved."
+    },
+    {
+      "log": "build/physical-services-resumed.log",
+      "sha256": "7f864c15b882f4d80726946f31db5355ebf11b15e8ccc5fe025e5784a4ed905a",
+      "reason": "Old address policy rejected proxy/reserved DNS results; Native direct controls returned HTTP 200. Address restriction later removed at user request."
+    },
+    {
+      "log": "build/physical-services-open-network.log",
+      "sha256": "7828fbc0e3dbb21a8c3095c296d65bfad17d474c932c1bd3d9f1151d35741c98",
+      "reason": "Device asleep; test did not reach product-ready before timeout. Fixed explicit wake and KEEP_SCREEN_ON in test windows."
+    },
+    {
+      "log": "build/physical-fan-policy3.log",
+      "sha256": "6c246a57b5f468a8a4c0d862ffbf470b35dfa51b488123390da93bd7000b8152",
+      "reason": "Harness checked completion before run started, sampled mode 4 instead of 1 and cancelled. Added explicit wait for running state; not a firmware/Agent success claim."
+    }
+  ]
+}
