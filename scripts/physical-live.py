@@ -2,7 +2,7 @@
 """Import JSON credentials from stdin into the selected app's private Native cache.
 Never prints credentials, headers or provider response bodies. No fixture resets.
 """
-import argparse, json, os, pathlib, re, subprocess, sys, shlex, time
+import argparse, json, os, pathlib, re, subprocess, sys, shlex, time, shutil
 p=argparse.ArgumentParser()
 p.add_argument('--serial',required=True)
 p.add_argument('--adb-port',required=True,type=int)
@@ -12,6 +12,14 @@ p.add_argument('--configure-budget-128k',action='store_true',help='Save 128K loc
 a=p.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1];os.chdir(root)
 out=root/'build/physical';out.mkdir(parents=True,exist_ok=True)
+# Preserve previous successful and failed attempts before refreshing the latest view.
+previous=['live-suite.log','physical-live-services.json','physical-live-chat.png','profile-budget-suite.log','physical-profile-budget.json']
+if any((out/name).exists() for name in previous):
+    ordinal=1
+    while (out/f'live-services-attempt-{ordinal}').exists():ordinal+=1
+    archive=out/f'live-services-attempt-{ordinal}';archive.mkdir()
+    for name in previous:
+        if (out/name).exists():shutil.copy2(out/name,archive/name)
 adb_bin=pathlib.Path(os.environ.get('ANDROID_HOME',pathlib.Path.home()/'Library/Android/sdk'))/'platform-tools/adb'
 prefix=[str(adb_bin),'-P',str(a.adb_port),'-s',a.serial]
 def adb(*args):return subprocess.check_output(prefix+list(args),stdin=subprocess.DEVNULL)

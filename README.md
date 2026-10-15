@@ -7,7 +7,7 @@
 | 能力 | 新 Session | 当前实现与限制 |
 |---|---|---|
 | 上屏感知 | ON | 真实设备信息；校准显示与 Accessibility 后提供应用/窗口/UI 树/截图；每次模型请求仅注入最小上下文 |
-| 联网搜索 | ON | Brave 独立 Native 凭据和端点；未配置时不发布搜索；公开 HTTPS 网页读取经 Native SSRF/重定向策略 |
+| 联网搜索 | ON | Brave 独立 Native 凭据和端点；未配置时不发布搜索；HTTP/HTTPS 网页按系统 DNS/代理访问，支持内网与代理 fake-IP；服务凭据分别绑定端点 |
 | 屏幕操作 | OFF | 真实 Accessibility 定向触摸、过期目标拒绝；原生 gamepad 后端明确 unsupported |
 | ADB 调试 | OFF | Shizuku shell UID、Native 白/灰/黑名单；结构化文件只允许明确的应用私有合成配置目录，写前备份、hash 冲突、读回及恢复 |
 
@@ -47,7 +47,7 @@ APK：
 
 已实测模型配置：协议 `OpenAI Responses`，基础 URL `https://opencode.ai/zen/go/v1`，模型 `deepseek-v4.1-flash`。OpenCode 所需会话路由头由 Native 自动安装，Key 仍仅保存在 Native。
 
-生产配置只允许 HTTPS。debug APK 的 HTTP 例外只限明确登记的 `127.0.0.1`，供受控服务使用；release 无明文例外、受信 receiver 测试权限或 runner provider。
+按用户要求，debug/release 均支持 HTTP/HTTPS、公网/内网/回环及代理 DNS，不限制地址段；使用系统 DNS 与代理。HTTPS 正常验证证书，模型/搜索凭据绑定各自配置的端点。release 不携带受信 receiver 测试权限或 runner provider。
 
 ## 仅软件模拟器验证
 

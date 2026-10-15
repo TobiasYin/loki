@@ -121,8 +121,7 @@ class ProductHost private constructor(private val context: Context, private val 
         try {
             val base = prefs.getString("url", "")!!.trimEnd('/')
             val u = URI(base)
-            val localDebug = BuildConfig.DEBUG && u.scheme == "http" && u.host == "127.0.0.1"
-            require((u.scheme == "https" || localDebug) && u.userInfo == null && u.rawQuery == null && u.fragment == null && !u.host.isNullOrBlank())
+            require(u.scheme in setOf("http", "https") && u.userInfo == null && u.rawQuery == null && u.fragment == null && !u.host.isNullOrBlank())
             require(!prefs.getString("model", "").isNullOrBlank() && secret != null)
             val protocol = if (prefs.getInt("protocol", 0) == 0) "openai-responses" else "anthropic-messages"
             val path = if (protocol == "openai-responses") "${u.path.trimEnd('/')}/responses" else "${u.path.trimEnd('/').removeSuffix("/v1")}/v1/messages"
@@ -133,7 +132,7 @@ class ProductHost private constructor(private val context: Context, private val 
             require(headerName.matches(Regex("[A-Za-z0-9-]+")) && headerTemplate.split("{{credential}}").size == 2 && !headerTemplate.contains('\r') && !headerTemplate.contains('\n'))
             val header = mapOf(headerName to headerTemplate)
             val goSessionHeader = if(u.scheme == "https" && u.host == "opencode.ai" && u.port in setOf(-1,443) && u.path.trimEnd('/') == "/zen/go/v1") "x-opencode-session" else null
-            profiles.add(NetworkProfile(ref, "${u.scheme}://${u.rawAuthority}", setOf(path), setOf("POST"), setOf(Purpose.model, Purpose.configuration_test), credentialRef, header, explicitLocal = localDebug, nativeSessionHeader = goSessionHeader))
+            profiles.add(NetworkProfile(ref, "${u.scheme}://${u.rawAuthority}", setOf(path), setOf("POST"), setOf(Purpose.model, Purpose.configuration_test), credentialRef, header, nativeSessionHeader = goSessionHeader))
             val passed = prefs.getInt("probeRevision", -1) == revision && prefs.getString("probe", "") == "passed"
             model = obj("profileId" to ref, "revision" to revision, "label" to prefs.getString("name", "模型"), "protocol" to protocol,
                 "baseUrl" to base, "modelId" to prefs.getString("model", ""), "credentialRef" to credentialRef, "contextWindow" to prefs.getInt("contextBudget",32768), "maxOutput" to prefs.getInt("maxOutput",2048),
@@ -143,10 +142,9 @@ class ProductHost private constructor(private val context: Context, private val 
         try {
             require(prefs.getString("searchBackend", "")?.lowercase() == "brave" && searchSecret != null)
             val raw = prefs.getString("searchUrl", "")!!.trimEnd('/'); val u = URI(raw)
-            val localDebug = BuildConfig.DEBUG && u.scheme == "http" && u.host == "127.0.0.1"
-            require((u.scheme == "https" || localDebug) && u.userInfo == null && u.query == null && u.fragment == null)
+            require(u.scheme in setOf("http", "https") && u.userInfo == null && u.query == null && u.fragment == null)
             require(u.path.endsWith("/res/v1/web/search"))
-            profiles.add(NetworkProfile("search@$revision", "${u.scheme}://${u.rawAuthority}", setOf(u.rawPath), setOf("GET"), setOf(Purpose.web_search), "search@$revision", mapOf("X-Subscription-Token" to "{{credential}}"), explicitLocal = localDebug))
+            profiles.add(NetworkProfile("search@$revision", "${u.scheme}://${u.rawAuthority}", setOf(u.rawPath), setOf("GET"), setOf(Purpose.web_search), "search@$revision", mapOf("X-Subscription-Token" to "{{credential}}")))
             searchConfigured = true; searchUrl = raw
         } catch(_: Exception) { searchConfigured = false }
         policy = NetworkPolicy(profiles, redactor)

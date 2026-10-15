@@ -73,4 +73,4 @@ Native Capability Store 是唯一授权事实源，Runtime 只有版本化镜像
 
 产品授权由 Native Authority 拥有，持久化由 ProductHost/SQLite拥有；原独立 Coordinator 和 ManualTestAuthority 不参与正式授权。前台只保留一个 Native Run，Activity singleTask；页面连接/前台生命周期失效立即撤销执行。UI 在 Native 收尾完成前仍阻止新发送。
 
-设备工具经真实 Gateway 与 bundled复杂 schema 校验；网络工具也登记 purpose/profile，并受 Native 搜索能力和 SSRF 控制。Native transport 不解析模型 JSON/SSE。批准卡、领域回合、ContextSnapshot/附件及图片工具回传已接入，详细限制与证据见集成报告。
+设备工具经真实 Gateway 与 bundled复杂 schema 校验；网络工具也登记 purpose/profile，并受 Native 搜索能力控制；按用户要求，网络地址和 DNS 不做公网/内网限制，凭据仍绑定配置端点。Native transport 不解析模型 JSON/SSE。批准卡、领域回合、ContextSnapshot/附件及图片工具回传已接入，详细限制与证据见集成报告。

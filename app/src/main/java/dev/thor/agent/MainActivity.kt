@@ -144,7 +144,7 @@ class MainActivity : Activity() {
         label("连接资料 · Native 设置\n保存后需要重新测试模型连接；文字、图片与工具测试通过后即可发送。搜索需单独配置。密钥不会回填聊天页面。")
         val name = field("模型显示名", "name")
         val protocol = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, arrayOf("OpenAI Responses", "Anthropic Messages")); setSelection(prefs.getInt("protocol", 0)); content.addView(this) }
-        val url = field("模型基础 URL（HTTPS）", "url"); val model = field("模型 ID", "model")
+        val url = field("模型基础 URL（HTTP / HTTPS）", "url"); val model = field("模型 ID", "model")
         val contextBudget = field("本地上下文预算（不是模型能力声明；默认 32768）", "contextBudgetText")
         val maxOutput = field("最大输出预算（默认 2048；按服务实际限制填写）", "maxOutputText")
         val headerName = field("Native 凭据头名称（留空使用协议默认）", "headerName")
@@ -153,7 +153,7 @@ class MainActivity : Activity() {
         val modelKey = field("替换模型 Key（仅 Native）", "", true)
         val removeModel = CheckBox(this).apply { text = "删除已保存模型 Key"; content.addView(this) }
         label("搜索连接资料：Brave；密钥独立绑定端点")
-        val backend = field("搜索后端：当前支持 Brave", "searchBackend"); val searchUrl = field("搜索 URL：完整 /res/v1/web/search（HTTPS）", "searchUrl")
+        val backend = field("搜索后端：当前支持 Brave", "searchBackend"); val searchUrl = field("搜索 URL：完整 /res/v1/web/search（HTTP / HTTPS）", "searchUrl")
         label("搜索 Key：${vault.status("search")}")
         val searchKey = field("替换搜索 Key（仅 Native）", "", true)
         val removeSearch = CheckBox(this).apply { text = "删除已保存搜索 Key"; content.addView(this) }
@@ -180,7 +180,7 @@ class MainActivity : Activity() {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 try {
                     for(value in listOf(url.text.toString(), searchUrl.text.toString())) if(value.isNotBlank()) {
-                        val uri = URI(value); require((uri.scheme == "https" || BuildConfig.DEBUG && uri.scheme == "http" && uri.host == "127.0.0.1") && !uri.host.isNullOrBlank() && uri.userInfo == null && uri.rawQuery == null && uri.fragment == null) { "请输入无凭据、查询或片段的 HTTPS URL" }
+                        val uri = URI(value); require(uri.scheme in setOf("http", "https") && !uri.host.isNullOrBlank() && uri.userInfo == null && uri.rawQuery == null && uri.fragment == null) { "请输入无凭据、查询或片段的 HTTP / HTTPS URL" }
                     }
                     require(modelKey.length() <= 8192 && searchKey.length() <= 8192)
                     require(headerName.text.isBlank() || headerName.text.toString().matches(Regex("[A-Za-z0-9-]+")))

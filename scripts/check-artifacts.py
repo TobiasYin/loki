@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check actual APK manifests/resources and build provenance, never infer packaging from sources."""
-import os, pathlib, subprocess, zipfile, hashlib, json
+import os, pathlib, subprocess, zipfile, hashlib, json, re
 root=pathlib.Path(__file__).resolve().parents[1]
 sdk=pathlib.Path(os.environ['ANDROID_HOME'])
 aapt=sdk/'build-tools/35.0.0/aapt'
@@ -21,6 +21,7 @@ for name,path in artifacts.items():
   if name.startswith('agent'):
    assert "name='dev.thor.agent'" in badging
    assert 'android.permission.INTERNET' in permissions
+   assert re.search(r'android:usesCleartextTraffic.*0xffffffff', manifest), 'HTTP must work in both debug and release'
    assert 'assets/chat/runtime-host.js' in files
    offline_tts={p.name for p in (root/'tests/fixtures/volc-voice').glob('*.wav')}
    assert not any(pathlib.Path(f).name in offline_tts for f in files), 'Offline TTS fixtures must not enter APK'

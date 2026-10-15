@@ -36,7 +36,7 @@ class TransportTest {
         val connection = authority.connect()
         val binding = authority.beginRun("a", connection, mapOf(Purpose.model to setOf("p"), Purpose.web_search to setOf("p")))
         val vault = CredentialVault(mapOf("key" to "secret-123"))
-        val policy = NetworkPolicy(listOf(NetworkProfile("p", server.url("/").toString(), setOf("/test", "/next"), setOf("GET", "POST", "HEAD"), setOf(Purpose.model, Purpose.web_search), if (credential) "key" else null, if (credential) mapOf("X-Token" to "Token {{credential}}") else emptyMap(), true)), vault)
+        val policy = NetworkPolicy(listOf(NetworkProfile("p", server.url("/").toString(), setOf("/test", "/next"), setOf("GET", "POST", "HEAD"), setOf(Purpose.model, Purpose.web_search), if (credential) "key" else null, if (credential) mapOf("X-Token" to "Token {{credential}}") else emptyMap())), vault)
         val transport = HttpTransport(authority, policy, limits)
         fun request(id: String = "r", purpose: Purpose = Purpose.model, body: ByteArray? = null, method: String = "GET") = HttpStart(NetworkEnvelope(1, id, binding, purpose, "p", authority.clock.nowMs() + limits.totalMs), server.url("/test").toString(), method, body = body, credentialRef = if (credential) "key" else null)
         override fun close() { transport.close(); server.shutdown() }
@@ -130,15 +130,31 @@ class TransportTest {
             assertEquals(Code.PERMISSION_MISSING, (runCatching { l.policy.prepare(request) }.exceptionOrNull() as BridgeFailure).code)
         }
     }
-    @Test fun searchDnsRejectsMixedPrivateAnswersAndReservedAddresses() {
+    @Test fun networkAllowsSystemDnsAndReachableLocalOrProxyDestinations() {
         val profile = NetworkProfile("crawl", null, emptySet(), setOf("GET"), setOf(Purpose.web_fetch))
-        val dns = object : Dns { override fun lookup(hostname: String) = listOf(InetAddress.getByName("8.8.8.8"), InetAddress.getByName("127.0.0.1")) }
+        val answers=listOf("8.8.8.8","127.0.0.1","10.1.2.3","169.254.169.254","100.64.0.1","198.18.0.1","::1","fc00::1").map(InetAddress::getByName)
+        val dns = object : Dns { override fun lookup(hostname: String) = answers }
         val policy = NetworkPolicy(listOf(profile), CredentialVault(emptyMap()), dns)
         val binding = Binding("a", "b", "c", "d", 1)
         val start = HttpStart(NetworkEnvelope(1, "id", binding, Purpose.web_fetch, "crawl", 1), "https://public.example/page", "GET")
-        assertEquals(Code.PERMISSION_MISSING, (runCatching { policy.prepare(start).dns.lookup("public.example") }.exceptionOrNull() as BridgeFailure).code)
-        for (ip in listOf("127.0.0.1", "10.1.2.3", "169.254.169.254", "100.64.0.1", "198.18.0.1", "::1", "fc00::1", "2001:db8::1", "::ffff:127.0.0.1")) assertFalse(ip, isPublicAddress(InetAddress.getByName(ip)))
-        assertTrue(isPublicAddress(InetAddress.getByName("8.8.8.8")))
-        assertEquals(Code.PERMISSION_MISSING, (runCatching { policy.prepare(start.copy(url = "https://127.0.0.1/")) }.exceptionOrNull() as BridgeFailure).code)
+        assertEquals(answers,policy.prepare(start).dns.lookup("public.example"))
+        for(url in listOf("http://127.0.0.1/page","http://localhost/page","http://192.168.1.1/page","https://198.18.0.1/page","http://[::1]/page"))assertEquals(url,policy.prepare(start.copy(url=url)).url.toString())
+    }
+    @Test fun webFetchFollowsReachableHttpRedirectAcrossOriginsWithoutCredentials() {
+        MockWebServer().use { first -> MockWebServer().use { second ->
+            first.start();second.start()
+            first.enqueue(MockResponse().setResponseCode(302).setHeader("Location",second.url("/lan-page")))
+            second.enqueue(MockResponse().setBody("local page"))
+            val authority=Authority().apply {createSession("local-web")}
+            val binding=authority.beginRun("local-web",authority.connect(),mapOf(Purpose.web_fetch to setOf("crawl")))
+            val policy=NetworkPolicy(listOf(NetworkProfile("crawl",null,emptySet(),setOf("GET"),setOf(Purpose.web_fetch))),CredentialVault(emptyMap()))
+            HttpTransport(authority,policy).use { transport ->
+                val start=HttpStart(NetworkEnvelope(1,"local-web-request",binding,Purpose.web_fetch,"crawl",authority.clock.nowMs()+5000),first.url("/redirect").toString(),"GET")
+                val e=Events();transport.start(start,e.sink {if(it is HttpEvent.Head)transport.credit(start.envelope.requestId,binding,256)})
+                e.await();assertEquals("local page",e.bytes().toString(Charsets.UTF_8));assertTrue(e.all.last() is HttpEvent.End)
+                assertEquals(1,first.requestCount);assertEquals(1,second.requestCount)
+                assertNull(second.takeRequest().getHeader("Authorization"))
+            }
+        } }
     }
 }

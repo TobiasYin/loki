@@ -19,8 +19,8 @@ class MainActivity : Activity() {
         authority.createSession("lab")
         val vault = CredentialVault(mapOf("fixture" to "fixture-secret"))
         val policy = NetworkPolicy(listOf(
-            NetworkProfile("local", "http://127.0.0.1:8877", setOf("/stream", "/echo", "/status400", "/status500", "/slow", "/redirect"), setOf("GET", "POST", "HEAD"), setOf(Purpose.model), explicitLocal = true),
-            NetworkProfile("local-auth", "http://127.0.0.1:8877", setOf("/redirect", "/auth"), setOf("GET"), setOf(Purpose.model), "fixture", mapOf("Authorization" to "Bearer {{credential}}"), explicitLocal = true)
+            NetworkProfile("local", "http://127.0.0.1:8877", setOf("/stream", "/echo", "/status400", "/status500", "/slow", "/redirect"), setOf("GET", "POST", "HEAD"), setOf(Purpose.model)),
+            NetworkProfile("local-auth", "http://127.0.0.1:8877", setOf("/redirect", "/auth"), setOf("GET"), setOf(Purpose.model), "fixture", mapOf("Authorization" to "Bearer {{credential}}"))
         ), vault)
         val transport = HttpTransport(authority, policy)
         val gateway = ToolGateway(authority, listOf(ToolDescriptor("mock.echo", 1, emptySet(), mapOf("text" to ParamRule(ParamType.STRING)), setOf("fixture"), executor = ToolExecutor { ctx, params -> ctx.check(); params.getValue("text") as String })), { mapOf("fixture" to "fixture-v1") }, vault::redact)
