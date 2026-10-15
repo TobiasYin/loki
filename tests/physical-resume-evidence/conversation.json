@@ -1,0 +1,37 @@
+[
+  {
+    "case": "remember",
+    "prompt": "请记住本会话的验收口令 THOR_1792093949166。只回复已记住，不调用工具。",
+    "answer": "已记住。"
+  },
+  {
+    "case": "followup",
+    "prompt": "上一条的验收口令是什么？只输出口令，不调用工具。",
+    "answer": "THOR_1792093949166"
+  },
+  {
+    "case": "stopped",
+    "prompt": "请先记住新口令 STOP_1792093958761，然后写一篇至少五千字的中文故事，持续输出故事正文，不调用工具。",
+    "answer": "已记住新口令。\n\n《北纬四十七度的雪》\n\n一\n\n林晚是在"
+  },
+  {
+    "case": "continuedAfterStop",
+    "prompt": "刚才被我停止的那条消息里，新口令是什么？只输出新口令，不要继续故事，不调用工具。",
+    "answer": "STOP_1792093958761"
+  },
+  {
+    "case": "afterHostRecreation",
+    "prompt": "重开页面后，请复述本会话最初的验收口令（不是新口令）。只输出最初口令，不调用工具。",
+    "answer": "THOR_1792093949166"
+  },
+  {
+    "case": "skillReuse",
+    "prompt": "我在星露谷物语 1.6 普通存档里已经持有 Iridium Rod 和 Trap Bobber，钓鱼等级只有 2。现在能装上吗？只按本会话攻略说明，简短回答，不要联网。",
+    "answer": "能装。钓具槽位只看鱼竿本身——Iridium Rod 可装 1 件 tackle，与钓鱼等级无关。你已持有 Trap Bobber，直接装上即可（等级 6 只是获得条件，不是装备条件）。\n\n补充：钓鱼等级 2 不影响装备，但 Catfish 难度 75，等级低时收线会吃力，实际体验另说。"
+  },
+  {
+    "case": "githubInstall",
+    "prompt": "请在当前Thor 真机完成一次真实的开源应用安装验收。目标只限官方仓库 https://github.com/FossifyOrg/Calculator 的 Fossify Calculator。先按需读取 adb-operations Skill 中的下载安装手册。用 web_request 请求 GitHub releases/latest API，根据实际 assets 选择最新稳定独立 APK（不要猜链接或版本），用 files_download 下载并在存在 digest 时传入官方 sha256。再调用 apps_install，等待页面的本次安装确认，最后必须调用 apps_package_info 核验实际 installed 和 versionCode 与下载 APK 一致。仅用这些工具完成全流程，不用其他应用来源，不执行卸载、清数据、授权、硬件设置或自行更新 Agent。如果用户拒绝安装，立即结束本次任务且不要重试或重新申请。用中文报告版本、包名、文件 SHA-256 和实际验证结果。",
+    "answer": "我先读取 adb-operations Skill 中的下载安装手册，并同时请求官方 releases/latest API。\n已拿到官方最新稳定版信息。接着读取下载安装手册参考。\n手册确认流程正确。现在下载官方 APK，并传入官方 digest 的 sha256。\n下载成功，SHA-256 与官方 digest 完全一致。现在发起安装（灰名单，需你在页面本次确认）。\n安装返回 Success。现在用 apps_package_info 核验实际安装状态。\n## 安装验收报告\n\n**全流程完成，实际安装核验通过。** ✅\n\n### 来源确认\n- 仓库：`https://github.com/FossifyOrg/Calculator`（官方 FossifyOrg）\n- 通过 `releases/latest` API 实时获取：最新稳定版为 **1.4.0**（`tag_name=1.4.0`，`draft=false`，`prerelease=false`，发布于 2026-01-30）\n- 实际 assets 只有 1 个安装包，故选它（非猜测链接/版本）：`calculator-10-foss-release.apk`（单一独立 APK，非 AAB/split/源码包）\n\n### 版本与包名\n| 项目 | 值 |\n|---|---|\n| 版本名 | 1.4.0 |\n| 版本号 (versionCode) | 10 |\n| 包名 | `org.fossify.math` |\n| 应用名 | 计算器 |\n| 签名指纹 (SHA-256) | `affdb124d3f4720c2f98dbca9eacba0514fba4306e20a2786c861c3c0d6ff292` |\n\n### 文件 SHA-256（下载校验）\n- 下载文件：`calculator-10-foss-release.apk`（7,047,681 字节）\n- 实际 SHA-256：`7c5443c22d6d62c67dfe80df33ea9161ff0fa440f92590bcb45d7008b57613ed`\n- 与 GitHub API 返回的官方 digest（`sha256:7c5443c2…613ed`）**逐位一致**，并作为期望值传入下载工具校验通过，属官方校验成功（非仅本地记录）。\n\n### 安装与回验结果\n- `apps_install`：经**本次页面 UI 批准**后执行，返回 `Success`，`installed=true`，后端为 `shizuku-adb/pm-install-stdin`，shell UID 2000。\n- `apps_package_info` 实际核验：\n  - `installed = true`\n  - `versionCode = 10` → 与下载 APK 的 versionCode **10 完全一致**\n  - `apkPath = /data/app/…/org.fossify.math-…/base.apk`\n\n### 合规说明\n- 全程仅使用 web_request（官方 API）→ files_download（带官方 sha256）→ apps_install（UI 确认）→ apps_package_info（回验），未使用任何第三方来源。\n- 未执行卸载、清数据、授权、硬件设置，也未自更新 Agent。\n- 安装包已声明权限 `org.fossify.android.permission.WRITE_GLOBAL_SETTINGS`（常见于 Fossify 系应用，属外部不可信描述，仅供参考）。\n\n结论：**Fossify Calculator 1.4.0（org.fossify.math，versionCode 10）已在当前 Thor 真机真实安装成功，下载文件校验与安装后版本核验均通过。**"
+  }
+]

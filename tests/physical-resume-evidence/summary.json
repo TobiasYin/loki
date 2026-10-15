@@ -1,0 +1,588 @@
+{
+  "date": "2026-10-16",
+  "harnessCommit": "b9859487c1ee75111cbef2a69dbd93dcbdb0b745",
+  "physical": true,
+  "app": {
+    "version": "0.5.0-integration",
+    "versionCode": 5,
+    "sha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+    "productionCodeChangedThisRound": false
+  },
+  "environment": {
+    "device": "AYN Thor",
+    "androidApi": 33,
+    "firmware": "Thor_V1.0.0.377_20260206_165408_user",
+    "webView": "com.android.webview 109.0.5414.123",
+    "shizukuManager": "13.6.0.r1086.2650830c",
+    "upperDisplay": 0,
+    "chatDisplay": 4,
+    "inputLab": "0.3.0 / scenario v3",
+    "model": "OpenCode Go Responses / deepseek-v4.1-flash",
+    "thinkingEffort": "low",
+    "contextWindow": 1000000,
+    "onlineCatalogRefreshTested": false
+  },
+  "suites": [
+    {
+      "name": "readback",
+      "passed": true,
+      "durationSeconds": 3.066,
+      "appApkSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+      "testApkSha256": "d8763807f948ba0eb32cd2d3a64b9fd08ea27abec03c5cdde8393b648feec312"
+    },
+    {
+      "name": "context-2",
+      "passed": true,
+      "durationSeconds": 70.012,
+      "appApkSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+      "testApkSha256": "ac000da5442baba1c13c080f676248e4551c51f053b161c6f325ad125e2bda94"
+    },
+    {
+      "name": "ime-3",
+      "passed": true,
+      "durationSeconds": 9.524,
+      "appApkSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+      "testApkSha256": "7ed87a0cb5e5d6f3217faec0d5fde186c3c6275c9cbe56f4adfc334e170f10d3"
+    },
+    {
+      "name": "receiver",
+      "passed": true,
+      "durationSeconds": 74.657,
+      "appApkSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+      "testApkSha256": "5232f0c9ea183dacf9c71ad650c5bbb425c0d3257d2eef7d43993c782991e72f"
+    },
+    {
+      "name": "install",
+      "passed": true,
+      "durationSeconds": 81.909,
+      "appApkSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+      "testApkSha256": "5232f0c9ea183dacf9c71ad650c5bbb425c0d3257d2eef7d43993c782991e72f"
+    },
+    {
+      "name": "final-readback",
+      "passed": true,
+      "durationSeconds": 3.176,
+      "appApkSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f",
+      "testApkSha256": "5755ef4679b6b0f6fc9812fb19fbce2b95cdc2cd337cc9a7decc24ed71a5e6d8"
+    }
+  ],
+  "suiteCount": 6,
+  "cases": {
+    "remember": {
+      "runId": "e40a7f5e-79ff-475f-9f4e-1092bf9cd73c",
+      "status": "completed",
+      "contextWindow": 1000000,
+      "thinkingEffort": "low",
+      "piSessionReused": [
+        false
+      ],
+      "requests": [
+        {
+          "requestId": "js_b6751ada039243c8a4e6c020e8a9d1e0_1",
+          "runId": "e40a7f5e-79ff-475f-9f4e-1092bf9cd73c",
+          "status": 200,
+          "bodySha256": "e1372c61a14f60562a84711160c586a982b30c4a9f7bacd181b74577d1f17a46"
+        }
+      ]
+    },
+    "followup": {
+      "runId": "ec5ee30f-7d43-4c1a-b538-4f68f950f56c",
+      "status": "completed",
+      "contextWindow": 1000000,
+      "thinkingEffort": "low",
+      "piSessionReused": [
+        true
+      ],
+      "requests": [
+        {
+          "requestId": "js_bdaa7f9a38f542a0ad68be8b4eeff6ed_1",
+          "runId": "ec5ee30f-7d43-4c1a-b538-4f68f950f56c",
+          "status": 200,
+          "bodySha256": "faf82c376dc6982f9cb99fafd3f327f08847a773bf2c701d3b268b90b949eee8"
+        }
+      ]
+    },
+    "stopped": {
+      "runId": "849eb4d1-7774-4ef6-b11b-885a6bc62351",
+      "status": "cancelled",
+      "contextWindow": 1000000,
+      "thinkingEffort": "low",
+      "piSessionReused": [
+        true
+      ],
+      "requests": [
+        {
+          "requestId": "js_1e0fabb93b8d452d8dff37dde55d810d_1",
+          "runId": "849eb4d1-7774-4ef6-b11b-885a6bc62351",
+          "status": 200,
+          "bodySha256": "9b04fd1322ebb85bccc2984e965908398fab08d991d910c165523c845d6df781"
+        }
+      ]
+    },
+    "continuedAfterStop": {
+      "runId": "d36e30ee-d62b-4592-ad7d-59af38b21b42",
+      "status": "completed",
+      "contextWindow": 1000000,
+      "thinkingEffort": "low",
+      "piSessionReused": [
+        true
+      ],
+      "requests": [
+        {
+          "requestId": "js_797ae6f7a33a4b13a9f2230365fba90b_1",
+          "runId": "d36e30ee-d62b-4592-ad7d-59af38b21b42",
+          "status": 200,
+          "bodySha256": "c411c4cf9ed9590d58d572f3a8c88283c59a64463f7a2eb2777c0336f14aac3e"
+        }
+      ]
+    },
+    "afterHostRecreation": {
+      "runId": "af349b42-0e0f-4ecf-be1b-de845ab2ea8e",
+      "status": "completed",
+      "contextWindow": 1000000,
+      "thinkingEffort": "low",
+      "piSessionReused": [
+        false
+      ],
+      "requests": [
+        {
+          "requestId": "js_8d9ed0bfbab24ca0a3d952a0580b8028_1",
+          "runId": "af349b42-0e0f-4ecf-be1b-de845ab2ea8e",
+          "status": 200,
+          "bodySha256": "b1d553835b17e12d57fa31fc9eb23356794a69813434fc7703241efe41037c7d"
+        }
+      ]
+    },
+    "skillReuse": {
+      "runId": "2129a182-0efa-4804-96c1-684955e7d22f",
+      "status": "completed",
+      "contextWindow": 1000000,
+      "thinkingEffort": "low",
+      "piSessionReused": [
+        false,
+        false,
+        false
+      ],
+      "requests": [
+        {
+          "requestId": "js_f15cb796df6b404b8dfee6cc8e07c0aa_1",
+          "runId": "2129a182-0efa-4804-96c1-684955e7d22f",
+          "status": 200,
+          "bodySha256": "e4fbcb48ffb5a596c0f3477c40e15ebbff52ba6bf0b345a83e1c201d7ec06299"
+        },
+        {
+          "requestId": "js_f15cb796df6b404b8dfee6cc8e07c0aa_2",
+          "runId": "2129a182-0efa-4804-96c1-684955e7d22f",
+          "status": 200,
+          "bodySha256": "33a48c652ee42a4c56f17c4466f297865e8eda7221009a3353e282206ae40ce1"
+        },
+        {
+          "requestId": "js_f15cb796df6b404b8dfee6cc8e07c0aa_3",
+          "runId": "2129a182-0efa-4804-96c1-684955e7d22f",
+          "status": 200,
+          "bodySha256": "f7092ba490bee78f3a5b417ace1df251b0d8967364f8b973cf78d57d540eb443"
+        }
+      ]
+    }
+  },
+  "skillLoadingProof": {
+    "firstRequestMetadataOnly": true,
+    "explicitlyReadBodiesInSubsequentRequests": true,
+    "unreadCropFileAbsentFromAllRequests": true,
+    "profilesPreserved": true,
+    "credentialsPreserved": true,
+    "newSessionInheritance": true
+  },
+  "receiver": {
+    "logical": {
+      "status": "pass",
+      "agentRunId": "4e089083-5267-4827-827a-528bfd3819cf",
+      "metadata": {
+        "schemaVersion": 1,
+        "labVersion": "0.3.0",
+        "versionCode": 3,
+        "buildId": "input-lab-v3",
+        "testRunId": "245dd7d8-039a-4587-b2c5-664df0fcd0ac",
+        "attemptId": "12aa8f7b-e746-42da-8c44-9d12ce3ce86c",
+        "caseId": "LAB-02",
+        "receiverEpoch": "9585a606-e623-4726-8eda-96e8ab17714e",
+        "scenarioVersion": 3,
+        "seed": 1101,
+        "mode": "agent_e2e",
+        "layoutEpoch": 1,
+        "sceneRevision": 1,
+        "deviceRevision": 15,
+        "phase": "FINISHED",
+        "clockIds": {
+          "eventTime": "android_uptime_ms",
+          "receivedUptimeMs": "android_uptime_ms",
+          "receivedElapsedRealtimeNanos": "android_elapsed_realtime_ns",
+          "wallTimeMs": "unix_epoch_ms"
+        }
+      },
+      "assertions": {
+        "status": "pass",
+        "reasons": [
+          "receiver_assertions_satisfied"
+        ]
+      },
+      "eventPrefixBytes": 64009,
+      "eventPrefixSha256": "a4097581abd77befc82a350fe7739f6eb6e2282032a1098482730761b1b91a05",
+      "integrity": {
+        "incomplete": false,
+        "droppedSamples": 0,
+        "error": null,
+        "lateEvents": "append_to_events_jsonl_after_cutoff_until_next_arm"
+      },
+      "recordOrigin": "android_dispatch",
+      "systemInjectionProven": false,
+      "association": "time_window_only_not_sender_authentication",
+      "receiverQualificationVersion": "unqualified-physical-baseline-pending",
+      "reportSha256": "13353727807643cc3df4c129368f450db81e2cb14546b9e0dde52fc9d87bc133"
+    },
+    "frame": {
+      "status": "pass",
+      "agentRunId": "7279e880-7c9d-4725-9293-2cc6057757d2",
+      "metadata": {
+        "schemaVersion": 1,
+        "labVersion": "0.3.0",
+        "versionCode": 3,
+        "buildId": "input-lab-v3",
+        "testRunId": "cee2246e-87e3-43b8-a579-bf7ccdc602a3",
+        "attemptId": "143b0b57-a4fb-4e89-ab1f-4cf519ef048f",
+        "caseId": "LAB-02",
+        "receiverEpoch": "aa2d07e1-2289-4a86-8551-2222996adb63",
+        "scenarioVersion": 3,
+        "seed": 1101,
+        "mode": "agent_e2e",
+        "layoutEpoch": 1,
+        "sceneRevision": 1,
+        "deviceRevision": 6,
+        "phase": "FINISHED",
+        "clockIds": {
+          "eventTime": "android_uptime_ms",
+          "receivedUptimeMs": "android_uptime_ms",
+          "receivedElapsedRealtimeNanos": "android_elapsed_realtime_ns",
+          "wallTimeMs": "unix_epoch_ms"
+        }
+      },
+      "assertions": {
+        "status": "pass",
+        "reasons": [
+          "receiver_assertions_satisfied"
+        ]
+      },
+      "eventPrefixBytes": 36840,
+      "eventPrefixSha256": "35dd3fa5690e097dc05c942a7077000a3e1028ff3a75257b3ea128e9314fa2a3",
+      "integrity": {
+        "incomplete": false,
+        "droppedSamples": 0,
+        "error": null,
+        "lateEvents": "append_to_events_jsonl_after_cutoff_until_next_arm"
+      },
+      "recordOrigin": "android_dispatch",
+      "systemInjectionProven": false,
+      "association": "time_window_only_not_sender_authentication",
+      "receiverQualificationVersion": "unqualified-physical-baseline-pending",
+      "reportSha256": "e9c0872931d2ff5eba90c02f582247f7773008c5ce4fac293c653db67f6edd6a"
+    }
+  },
+  "ime": {
+    "displayId": 4,
+    "settledBounds": {
+      "inputBottom": 111.31436157226562,
+      "inputTop": 81.31436157226562,
+      "sendBottom": 155.31164932250977,
+      "sendHeight": 43.99728775024414,
+      "sendTop": 111.31436157226562,
+      "sendWidth": 43.99728775024414,
+      "viewportHeight": 162
+    },
+    "nativeGeometry": {
+      "webWidth": 1240,
+      "webHeight": 373,
+      "decorHeight": 1080,
+      "imeBottom": 707
+    },
+    "composer": {
+      "inputBottom": 111.31436157226562,
+      "inputTop": 81.31436157226562,
+      "sendBottom": 155.31164932250977,
+      "sendHeight": 43.99728775024414,
+      "sendTop": 111.31436157226562,
+      "sendWidth": 43.99728775024414,
+      "viewportHeight": 162
+    },
+    "imeBottomPixels": 707,
+    "activeStop": {
+      "inputBottom": 111.31436157226562,
+      "inputTop": 81.31436157226562,
+      "sendBottom": 155.31164932250977,
+      "sendHeight": 43.99728775024414,
+      "sendTop": 111.31436157226562,
+      "sendWidth": 43.99728775024414,
+      "viewportHeight": 162
+    },
+    "runId": "3d4ee095-155c-4959-8c6e-a17c532a8651",
+    "status": "completed",
+    "responseMarker": "IME_OK",
+    "passed": true
+  },
+  "install": {
+    "runId": "feb3714d-1223-48aa-baa3-f70588360179",
+    "status": "completed",
+    "repository": "https://github.com/FossifyOrg/Calculator",
+    "release": "1.4.0",
+    "packageName": "org.fossify.math",
+    "versionCode": "10",
+    "bytes": 7047681,
+    "sha256": "7c5443c22d6d62c67dfe80df33ea9161ff0fa440f92590bcb45d7008b57613ed",
+    "officialDigestMatches": true,
+    "officialAssetUrl": "https://github.com/FossifyOrg/Calculator/releases/download/1.4.0/calculator-10-foss-release.apk",
+    "installed": true,
+    "uid": 2000,
+    "approvedViaProductUi": true,
+    "approvalInteraction": "instrumentation clicked actual product UI; not human approval",
+    "packageBeforeApproval": ""
+  },
+  "preservation": {
+    "sessions": {
+      "before": 100,
+      "after": 110,
+      "allOriginalIdsRetained": true,
+      "originalRowsChanged": 0
+    },
+    "runs": {
+      "before": 92,
+      "after": 102,
+      "allOriginalIdsRetained": true,
+      "originalRowsChanged": 0
+    },
+    "messages": {
+      "before": 184,
+      "after": 204,
+      "allOriginalIdsRetained": true,
+      "originalRowsChanged": 0
+    },
+    "events": {
+      "before": 19298,
+      "after": 20763,
+      "allOriginalIdsRetained": true,
+      "originalRowsChanged": 0
+    },
+    "allRunsTerminal": true,
+    "credentialsCiphertextUnchanged": true,
+    "accessibilityServicesUnchanged": true,
+    "selectedSessionId": "e9d30c3a-3521-4122-9449-4023546d7384",
+    "selectedCapabilities": {
+      "perception": true,
+      "search": true,
+      "screen_control": false,
+      "debug": false
+    },
+    "selectedSkills": [
+      "stardew-valley-guide"
+    ],
+    "installedAppSha256": "4875a8d185dd0c1af54bdadd24dd932777500141a49e96846025a3ca5df51f4f"
+  },
+  "hardwareBefore": {
+    "upper": {
+      "screen": "upper",
+      "displayId": 0,
+      "displayName": "内置屏幕",
+      "before": 124,
+      "brightness": 124,
+      "requested": null,
+      "verified": true,
+      "quantizationTolerance": 1,
+      "policyTier": "white",
+      "policyVersion": "4",
+      "uid": 2000
+    },
+    "lower": {
+      "screen": "lower",
+      "displayId": 4,
+      "displayName": "Screen-2",
+      "before": 124,
+      "brightness": 124,
+      "requested": null,
+      "verified": true,
+      "quantizationTolerance": 1,
+      "policyTier": "white",
+      "policyVersion": "4",
+      "uid": 2000
+    },
+    "settings": {
+      "screen_brightness": "125",
+      "screen_brightness_mode": "0",
+      "fan_mode": "4",
+      "min_refresh_rate": "60.0",
+      "peak_refresh_rate": "60.0"
+    },
+    "privateDns": {
+      "private_dns_mode": "null",
+      "private_dns_specifier": "null"
+    },
+    "displays": [
+      {
+        "id": 0,
+        "refreshRate": 60.000004
+      },
+      {
+        "id": 4,
+        "refreshRate": 60.000004
+      }
+    ]
+  },
+  "hardwareAfter": {
+    "upper": {
+      "screen": "upper",
+      "displayId": 0,
+      "displayName": "内置屏幕",
+      "before": 124,
+      "brightness": 124,
+      "requested": null,
+      "verified": true,
+      "quantizationTolerance": 1,
+      "policyTier": "white",
+      "policyVersion": "4",
+      "uid": 2000
+    },
+    "lower": {
+      "screen": "lower",
+      "displayId": 4,
+      "displayName": "Screen-2",
+      "before": 124,
+      "brightness": 124,
+      "requested": null,
+      "verified": true,
+      "quantizationTolerance": 1,
+      "policyTier": "white",
+      "policyVersion": "4",
+      "uid": 2000
+    },
+    "settings": {
+      "screen_brightness": "125",
+      "screen_brightness_mode": "0",
+      "fan_mode": "4",
+      "min_refresh_rate": "60.0",
+      "peak_refresh_rate": "60.0"
+    },
+    "privateDns": {
+      "private_dns_mode": "null",
+      "private_dns_specifier": "null"
+    },
+    "displays": [
+      {
+        "id": 0,
+        "refreshRate": 60.000004
+      },
+      {
+        "id": 4,
+        "refreshRate": 60.000004
+      }
+    ]
+  },
+  "priorHardwareSettingsUnchanged": true,
+  "fullInputQualificationPassed": false,
+  "skillAnswerAccuracyFullyQualified": false,
+  "notRetested": [
+    "120 Hz activation",
+    "full POC-11/system bar/failure matrix",
+    "physical finger/gamepad baselines",
+    "native gamepad injection",
+    "actual games",
+    "Volcano ASR cloud",
+    "Brave search",
+    "online model catalog refresh",
+    "physical install rejection"
+  ],
+  "harnessFailures": [
+    {
+      "directory": "context",
+      "reason": "Unsupported minimal effort selected before any model request; provider catalog advertises low/high/max"
+    },
+    {
+      "directory": "ime",
+      "reason": "44 CSS px measured 43.9973 after device-density rounding; strict size assertion failed"
+    },
+    {
+      "directory": "ime-2",
+      "reason": "Captured bounds confirmed same rounding issue, composer visible; added half-pixel tolerance"
+    }
+  ],
+  "rawProofs": [
+    {
+      "path": "build/physical/resume-2026-10-16/readback/metadata.json",
+      "sha256": "a3bdf33428fb0b5a078a74176080c295fddd2f2ad8dda87d49b5f1e970bec1df"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/readback/suite.log",
+      "sha256": "04ce864590bcc6fbb2612f8e6d82d39e73bc0f94dddf3a628df20a71ec0814b7"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/context-2/metadata.json",
+      "sha256": "130f40ba51c844c514f68bb19c2f0bf5cd1c3dd59feea691ae97f786b5331f2a"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/context-2/suite.log",
+      "sha256": "f10dde912c0018c9c23190964193292367a690e37cd805bb8737af38ff71d284"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/ime-3/metadata.json",
+      "sha256": "c39cea305693a66405368c0a71d91a4241f52f5f2148139ca71261c33d6239a6"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/ime-3/suite.log",
+      "sha256": "99ce2d7beba226660efd0d46d75fd9b14ea7081dd3951fd44d8aa314ebf109b0"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/receiver/metadata.json",
+      "sha256": "899cb41722e891f1346c5fce81dc3884f00c0326b1cbc027185768c4fdd3abfa"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/receiver/suite.log",
+      "sha256": "4adf3ecff4a79228ae2134e7792b658d659a71a861492984d7e0bb0e15a86b34"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/install/metadata.json",
+      "sha256": "ddf5b2419f4afc4ce3b190fd02910051055e7310dd235650224df99056c023b3"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/install/suite.log",
+      "sha256": "f77092a00966a1b386c5ea54cafbd381d7541e5cd02a64d0f0c48f6f8216f274"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/final-readback/metadata.json",
+      "sha256": "670783daf79bca3144ffb3af43d2f1fd32d721b3d36504e0c8d7137e4b33a4b9"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/final-readback/suite.log",
+      "sha256": "495c71d28b9a1b0af44e4f9dec62330190629c8000c326695605c151fc5d42fc"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/receiver/logical-report.json",
+      "sha256": "13353727807643cc3df4c129368f450db81e2cb14546b9e0dde52fc9d87bc133"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/receiver/frame-report.json",
+      "sha256": "e9c0872931d2ff5eba90c02f582247f7773008c5ce4fac293c653db67f6edd6a"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/context-2/physical-resume/report.json",
+      "sha256": "967d78837415ad6f97d798807f73f7c0d69c363d0f0e0ea873a620476735a8b6"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/install/physical-live-install.json",
+      "sha256": "0a98fd5bf2e42a6cb42ff974cf14e66096c81279d2fe318b934317a058bab389"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/preservation-proof.json",
+      "sha256": "26d5b4424371a90d142bf9fdbc5988999feab58cc4fcf20e8dcab56d0159cec7"
+    },
+    {
+      "path": "build/physical/resume-2026-10-16/final-readback/state.json",
+      "sha256": "d25a8c69316b9a61142226d22be55ad8d7bcef84fb59e393e6cca496caf961c1"
+    }
+  ]
+}
