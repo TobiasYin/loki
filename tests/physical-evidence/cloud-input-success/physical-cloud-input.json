@@ -1,0 +1,186 @@
+{
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "model": "deepseek-v4.1-flash",
+  "remoteService": "live OpenCode Go Responses",
+  "attempts": [
+    {
+      "kind": "logical",
+      "runId": "87010c16-6f53-406c-8c36-57037bdb2590",
+      "receiverStatus": "pass",
+      "attemptId": "a78e2c51-0521-44e0-96fa-1a41157fffb7",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 588765893,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4168:1:0:true:root-layout:VisibleBounds(left=0, top=0, right=1920, bottom=1080):8",
+          "visibleBounds": "VisibleBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4168,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 588771407,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4168:1:0:true:root-layout:VisibleBounds(left=0, top=0, right=1920, bottom=1080):9",
+          "visibleBounds": "VisibleBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4168,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 588771521,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4168:1:0:true:root-layout:VisibleBounds(left=0, top=0, right=1920, bottom=1080):10",
+          "visibleBounds": "VisibleBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4168,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": [
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792058482699,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": null,
+          "outcome": "submitted",
+          "evidenceRef": "native-event:87010c16-6f53-406c-8c36-57037bdb2590:c5a92a44-c093-4c4b-98df-67362e4e7161",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ]
+        }
+      ],
+      "runStatus": "completed"
+    },
+    {
+      "kind": "frame",
+      "runId": "7dd8683c-5472-48b6-8771-125627712a20",
+      "receiverStatus": "pass",
+      "attemptId": "1d595b07-6dee-4a32-9895-9c9735f05db1",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 588798496,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4176:1:0:true:root-layout:VisibleBounds(left=0, top=0, right=1920, bottom=1080):22",
+          "visibleBounds": "VisibleBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4176,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 588803689,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4176:1:0:true:root-layout:VisibleBounds(left=0, top=0, right=1920, bottom=1080):22",
+          "visibleBounds": "VisibleBounds(left=0, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4176,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 588809085,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4176:1:0:true:root-layout:VisibleBounds(left=0, top=0, right=1920, bottom=1080):23",
+          "visibleBounds": "VisibleBounds(left=0, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4176,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 588809196,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4176:1:0:true:root-layout:VisibleBounds(left=0, top=0, right=1920, bottom=1080):24",
+          "visibleBounds": "VisibleBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4176,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": [
+        {
+          "toolId": "perception.capture_screen",
+          "observedAt": 1792058515409,
+          "source": "android-sdk\/accessibility",
+          "truncated": false,
+          "error": null,
+          "outcome": "observed",
+          "evidenceRef": "native-event:7dd8683c-5472-48b6-8771-125627712a20:28c47bb6-ea29-445f-a12e-9944d93a1a4d",
+          "content": [
+            {
+              "type": "attachment",
+              "attachmentId": "7f2877ce-fff5-4e60-81dd-821664e7b783"
+            },
+            {
+              "type": "text",
+              "text": "{\"displayRole\":\"upper\",\"displayId\":0,\"frameId\":\"0c819a18-1b84-47b6-ba6d-f7c1928a63be\",\"requestSnapshotId\":\"994d8371-0948-4748-a458-63b018dc0235\",\"targetSnapshotId\":\"f49b2a3e-0a71-433b-b11e-f5d7456f6ef5\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"visibleWindowBounds\":{\"left\":0,\"top\":0,\"right\":1920,\"bottom\":1079},\"mime\":\"image\\\/jpeg\",\"bytes\":914,\"width\":100,\"height\":100,\"quality\":80,\"rotation\":1,\"transform\":{\"left\":420,\"top\":549,\"displayWidth\":100,\"displayHeight\":100,\"imageWidth\":100,\"imageHeight\":100},\"message\":null}"
+            }
+          ]
+        },
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792058520335,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": null,
+          "outcome": "submitted",
+          "evidenceRef": "native-event:7dd8683c-5472-48b6-8771-125627712a20:11d0de76-2f26-46c7-9953-fb5658371a81",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ]
+        }
+      ],
+      "freshFrameSnapshotId": "f49b2a3e-0a71-433b-b11e-f5d7456f6ef5",
+      "runStatus": "completed"
+    }
+  ],
+  "passed": true
+}

@@ -2,7 +2,7 @@
 
 面向 AYN Thor 的 Android Agent：本地 WebView 聊天与锁定版本 Pi，模型协议由 JS 处理，网络与设备授权由 Native 执行。五个独立任务的精确提交已保留历史整合，正式入口已连接真实 Runtime、通用 Native Fetch、持久化与设备 ToolPack；不返回模拟成功。
 
-当前是**实机验收前的软件集成版本**。本地受控模型服务、JVM、DOM 与 Android AVD 的证据见 [中文集成报告](docs/integration-report.md)。Thor 双屏、实体手柄、厂商焦点/IME、目标模拟器私有配置权限，以及真实模型/搜索账户仍须验收；完整四能力产品尚不能宣称发布就绪。
+已完成一轮 **Thor 真机测试与修复**：真实 OpenCode Go Responses、Brave 搜索、完整下屏输入法、Shizuku 自动无障碍、手指和实体手柄接收基线，以及真实模型的逻辑坐标/截图坐标触摸已有实测证据，见 [实机测试报告](docs/physical-test-report.md)。原生手柄注入、完整故障矩阵和真实模拟器私有配置权限仍未完成，完整四能力产品尚不能宣称发布就绪。此前本地受控模型服务、JVM、DOM 与 Android AVD 的历史证据见 [中文软件集成报告](docs/integration-report.md)。
 
 | 能力 | 新 Session | 当前实现与限制 |
 |---|---|---|
@@ -43,7 +43,9 @@ APK：
 1. Native 设置填协议、基础 URL、模型 ID、Key；可配置通用凭据 header 名称及含 `{{credential}}` 的模板。真实 Key 不返回 JS。保存先使探测失效，再更新凭据与配置修订。
 2. 点击“测试当前已保存模型”，经真实 Pi 和 Native Fetch 发送合成图片、调用探测工具并回传图片。Native 要求当前修订、实际完成的 HTTP、Native 工具和图片读取证据。测试会调用服务并可能计费。普通 UI 没有设置 passed 的入口。
 3. 探测成功后才可发送。原生“附图”经系统文档选择器导入，图片保存在 Native，并与下一条消息关联；每条最多两张，图片解码/上传有界。停止、授权变化、离开前台、页面或 renderer 失效撤销旧 lease，不自动重放。
-4. 开启系统 Accessibility 后，选择本次上下屏映射；可将聊天移动到所选下屏。映射不是 Thor 物理资格证明。Shell/配置写的批准卡绑定具体命令或完整差异；拒绝、停止、hash 冲突都不能写入。
+4. 已授予 Shizuku shell 权限时，应用自动开启自身无障碍并保留其他服务；没有该权限时可从设置手动开启。选择本次上下屏映射，可将聊天移动到所选下屏；会话的屏幕操作、调试开关仍默认关闭。Shell/配置写的批准卡绑定具体命令或完整差异；拒绝、停止、hash 冲突都不能写入。
+
+已实测模型配置：协议 `OpenAI Responses`，基础 URL `https://opencode.ai/zen/go/v1`，模型 `deepseek-v4.1-flash`。OpenCode 所需会话路由头由 Native 自动安装，Key 仍仅保存在 Native。
 
 生产配置只允许 HTTPS。debug APK 的 HTTP 例外只限明确登记的 `127.0.0.1`，供受控服务使用；release 无明文例外、受信 receiver 测试权限或 runner provider。
 

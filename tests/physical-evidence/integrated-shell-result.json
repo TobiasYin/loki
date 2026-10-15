@@ -1,0 +1,15 @@
+{
+  "toolId": "debug.shell",
+  "observedAt": 1791894327648,
+  "source": "shizuku-userservice\/shell-uid-2000",
+  "truncated": false,
+  "error": null,
+  "outcome": "submitted",
+  "evidenceRef": "native-event:51113b63-c06f-4906-a10d-54f8aaa4bc70:ecbd2b0e-526c-4bed-b4f0-28ca5818f36c",
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"stdout\":\"integration-approved-only\\n\",\"stderr\":\"\",\"exitCode\":0,\"durationMs\":27,\"truncated\":false,\"error\":null,\"terminationConfirmed\":false,\"descendantsMayRemain\":true,\"uid\":2000,\"message\":null}"
+    }
+  ]
+}

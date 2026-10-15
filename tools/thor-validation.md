@@ -1,6 +1,6 @@
 # Thor 手动验收与未支持能力验证
 
-以下用例全部 **待执行**。先使用合成配置和独立测试接收 APK，不触碰游戏存档；不需要等待其他开发聊天或合并其代码。保留设备型号、Android/API、Thor 固件、APK SHA-256、Shizuku 版本/实际 UID、工具输入和结构化结果。测试报告区分 API 提交、接收端真实事件和场景效果。
+2026-10-15 已执行部分 Thor 实机用例：真实模型/Brave、下屏完整输入法、Shizuku shell 与自动无障碍、实体手指/A 键/摇杆扳机基线。精确结果与尚未覆盖的负例见 [实机报告](../docs/physical-test-report.md)；以下是完整验收矩阵，不能把已测子集当作全表通过。使用合成配置和独立测试接收 APK，不触碰游戏存档；保留设备型号、Android/API、Thor 固件、APK SHA-256、Shizuku 版本/实际 UID、工具输入和结构化结果。报告区分 API 提交、接收端真实事件和场景效果。
 
 ## display / perception / touch
 

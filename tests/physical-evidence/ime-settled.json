@@ -1,0 +1,26 @@
+{
+  "displayId": 4,
+  "composer": {
+    "inputBottom": 109.17344093322754,
+    "inputTop": 77.17479705810547,
+    "sendBottom": 157.16801834106445,
+    "sendHeight": 47.99457931518555,
+    "sendTop": 109.1734390258789,
+    "sendWidth": 53.98373794555664,
+    "viewportHeight": 162
+  },
+  "imeBottomPixels": 707,
+  "activeStop": {
+    "inputBottom": 109.17344093322754,
+    "inputTop": 77.17479705810547,
+    "sendBottom": 157.16801834106445,
+    "sendHeight": 47.99457931518555,
+    "sendTop": 109.1734390258789,
+    "sendWidth": 53.98373794555664,
+    "viewportHeight": 162
+  },
+  "runId": "3e0d5fa0-0cfd-47ac-9945-6dbfb86e969e",
+  "status": "completed",
+  "responseMarker": "IME_OK",
+  "passed": true
+}

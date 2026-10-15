@@ -1,0 +1,41 @@
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalReceiverNegativeTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.PhysicalReceiverNegativeTest:
+INSTRUMENTATION_STATUS: test=fullscreenReceiverRejectsNoInputWrongTargetAndInsetsChange
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalReceiverNegativeTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Each negative control must produce its expected independent verdict
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at dev.thor.agent.PhysicalReceiverNegativeTest.fullscreenReceiverRejectsNoInputWrongTargetAndInsetsChange(PhysicalReceiverNegativeTest.kt:78)
+
+INSTRUMENTATION_STATUS: stream=
+Error in fullscreenReceiverRejectsNoInputWrongTargetAndInsetsChange(dev.thor.agent.PhysicalReceiverNegativeTest):
+java.lang.AssertionError: Each negative control must produce its expected independent verdict
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at dev.thor.agent.PhysicalReceiverNegativeTest.fullscreenReceiverRejectsNoInputWrongTargetAndInsetsChange(PhysicalReceiverNegativeTest.kt:78)
+
+INSTRUMENTATION_STATUS: test=fullscreenReceiverRejectsNoInputWrongTargetAndInsetsChange
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 20.586
+There was 1 failure:
+1) fullscreenReceiverRejectsNoInputWrongTargetAndInsetsChange(dev.thor.agent.PhysicalReceiverNegativeTest)
+java.lang.AssertionError: Each negative control must produce its expected independent verdict
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at dev.thor.agent.PhysicalReceiverNegativeTest.fullscreenReceiverRejectsNoInputWrongTargetAndInsetsChange(PhysicalReceiverNegativeTest.kt:78)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

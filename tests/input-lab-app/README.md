@@ -1,6 +1,6 @@
 > 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
 
-# Thor Input Lab 0.1.0
+# Thor Input Lab 0.3.0
 
 独立 Kotlin / Android View 接收器，applicationId `dev.thor.inputlab`，默认独立进程与 UID。所有工程、锁文件、测试、说明和证据只在本目录中；不依赖 Thor Agent 或其他子项目。APK 无网络权限、Pi、Shizuku、模型配置、输入注入器或外部 setup/report IPC。
 
@@ -11,13 +11,13 @@
 需要 JDK 17、Android SDK platform 35 / build-tools 35.0.0、网络下载依赖或现有 Gradle cache。工具版本：Gradle **8.14.3**（wrapper 内固定 SHA-256）、AGP **8.10.1**、Kotlin **2.2.10**、JUnit **4.13.2**；实际传递依赖锁在 `app/gradle.lockfile`。minSdk 30、compile/targetSdk 35。无动态版本。
 
 ```sh
-cd tests/input-lab-app
+cd path/to/thor-agent
 # 设置到自己的 JDK/SDK；本项目不修改全局设置。
 export JAVA_HOME=path/to/jdk-17
 export ANDROID_HOME=path/to/android-sdk
-./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+./gradlew :input-lab:assembleDebug :input-lab:testDebugUnitTest :input-lab:lintDebug
 # Android 平台解析器测试 APK（不注入任何输入、不创建接收证据）
-./gradlew :app:assembleDebugAndroidTest
+./gradlew :input-lab:assembleDebugAndroidTest
 ```
 
 也可在本目录的忽略文件 `local.properties` 设置 `sdk.dir=path/to/android-sdk`。输出：
@@ -35,6 +35,8 @@ adb -s DEVICE shell am start --display CONFIRMED_DISPLAY -n dev.thor.inputlab/.L
 ```
 
 应用不硬编码上/下屏 ID，也不改变系统多屏设置。可用 Thor 启动器移动窗口；Environment 展示实际显示、窗口位置/尺寸、旋转、insets、API/固件、UID/PID、设备来源和运动范围。`I confirm this window is upper` 是每次冻结进报告的人工校准声明，不是自动证明。
+
+0.3.0/scenarioVersion 3 新增沉浸式全屏测试窗口：使用公开 WindowInsetsController 隐藏系统栏，支持系统边缘滑动临时显示；Arm 前必须确认系统栏和键盘已经隐藏，冻结实际全屏状态、insets 与几何。观察中系统栏可见性或 insets 变化仍产生 sticky inconclusive。新模式的 target 坐标必须重新读取；此前普通窗口物理基线不改写。此模式不代表已经解决普通窗口中系统状态栏事件导致的发送端 TARGET_CHANGED 限制，发送端目标校验保持原样。
 
 ## 人工验收流程
 
@@ -55,7 +57,7 @@ Activity 的三个 dispatch 入口各记录一次 raw。Arena 不再次记录 ra
 | LAB-04-CANCEL | 真实 DOWN/CANCEL；取消不能当正常 UP/命中。 |
 | LAB-05 | 原生语义按钮＋无细粒度节点自绘色块/文字，要求语义回调；报告 sceneRevision 可检验截图/UI 树新鲜度。 |
 | LAB-06 | controller A（96）恰好一对 DOWN/UP；repeat 不新增按住，键盘和错键失败。 |
-| LAB-07 | 同一设备的 X/Y/Z/RZ/LTRIGGER/RTRIGGER 逐轴达到 50% 运动范围，再实际归零；neutral 容差 max(flat, 5% range)。缺轴明确失败；RX/RY 等其他实际轴仍完整记录。 |
+| LAB-07 | prepare 阶段冻结命名轴 profile。标准 X/Y/Z/RZ/LTRIGGER/RTRIGGER；符合明确物理元数据及广告范围的 AYN Thor Odin Controller 使用 X/Y/Z/RZ/BRAKE/GAS（axes 0/1/11/14/23/22），并冻结 deviceId。逐轴达到 50% 运动范围，再实际 neutral；容差 max(flat, 5% range)。缺轴失败，任何额外广告轴亦须实际 neutral。 |
 | LAB-08 | 同一设备 A+B 持有区间重叠，实际释放；顺序点击失败。任何实际观测轴须 neutral。 |
 | LAB-08-AXIS | A 持有期间有实际轴 excursion，并观测 A UP 和轴 neutral。 |
 | LAB-09 | 确认上屏、焦点变化并接收 A DOWN/UP；不推断未收到的输入发去了哪屏。 |
@@ -63,6 +65,8 @@ Activity 的三个 dispatch 入口各记录一次 raw。Arena 不再次记录 ra
 | LAB-13 | Fault probe 选择 budget/layout/restart；日志满、布局失效或 kill/reopen 后必须 inconclusive。 |
 
 失焦/设备断开不会伪造 UP 或轴值；保留最后真实观测并标记 stale/unknown。尚未看到释放不等同于证明系统仍持续按住。错误 source 与设备能力来源通过位掩码区分；source/deviceId 不认证真人/Agent。
+
+v2 将 `InputDeviceListener.changed` 与断连区分：所有冻结公开设备能力、窗口与显示环境完全一致、被变更设备没有持有输入且 attempt 无既有不确定性时，回调保留为诊断（`continuity.disposition=diagnostic_only`）。持有中重配置、added/removed、缺失/未知设备或环境变化仍 inconclusive。公开 API 无法认证隐藏输入路由，因此 `routingProven=false`、资格状态仍 pending。详见 [integration-notes.md](integration-notes.md)。历史 v1 inconclusive 报告保持原样。
 
 ## 日志、完整性与导出
 

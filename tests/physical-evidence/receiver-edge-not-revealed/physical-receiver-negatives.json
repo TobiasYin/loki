@@ -1,0 +1,39 @@
+{
+  "stimulusSource": "platform UiAutomation shell; no model or product input tool",
+  "upperDisplay": 0,
+  "cases": [
+    {
+      "kind": "no-input",
+      "expected": "fail",
+      "actual": "fail",
+      "correct": true,
+      "reasons": [
+        "expected_evidence_missing_or_wrong",
+        "wrong=0 raw=0 hits=0 semantic=0"
+      ],
+      "attemptId": "23b5a355-e557-4904-aeef-5f2cc37492d0"
+    },
+    {
+      "kind": "wrong-target",
+      "expected": "fail",
+      "actual": "fail",
+      "correct": true,
+      "reasons": [
+        "expected_evidence_missing_or_wrong",
+        "wrong=1 raw=2 hits=0 semantic=0"
+      ],
+      "attemptId": "987af1e0-65a5-4939-8486-a2ee0f6e83d0"
+    },
+    {
+      "kind": "insets-change",
+      "expected": "inconclusive",
+      "actual": "fail",
+      "correct": false,
+      "reasons": [
+        "expected_evidence_missing_or_wrong",
+        "wrong=1 raw=27 hits=0 semantic=0"
+      ],
+      "attemptId": "aabd4e62-7361-496f-824e-80aa69b20f77"
+    }
+  ]
+}

@@ -3,6 +3,8 @@
 import hashlib,json,pathlib,re
 root=pathlib.Path(__file__).resolve().parents[1]/'tests/physical-evidence'
 manifest=json.loads((root/'manifest.json').read_text())
+derived={root/'manifest.json',root/'integrity-check.json'}
+assert {p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and p not in derived}=={item['path'] for item in manifest['files']},'Evidence file set differs from manifest'
 for item in manifest['files']:
     path=root/item['path'];data=path.read_bytes()
     assert len(data)==item['bytes'] and hashlib.sha256(data).hexdigest()==item['sha256'],path
@@ -10,6 +12,7 @@ for item in manifest['files']:
         assert not re.search(rb'oc_sk_[A-Za-z0-9_-]{20,}|BSA[A-Za-z0-9_-]{20,}',data),f'Credential-shaped value in {path}'
 reports=0
 for path in root.rglob('*.json'):
+    if path in derived:continue
     report=json.loads(path.read_text())
     if not isinstance(report,dict) or 'eventPrefixSha256' not in report:continue
     raw_path=path.parent/'events.jsonl'

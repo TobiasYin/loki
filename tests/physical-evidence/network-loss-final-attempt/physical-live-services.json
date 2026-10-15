@@ -1,0 +1,96 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "endpoint": "https:\/\/opencode.ai\/zen\/go\/v1\/responses",
+  "protocol": "openai-responses",
+  "credentialsStored": "native-keystore",
+  "chatDisplay": 4,
+  "probe": {
+    "status": "failed",
+    "runId": "cabe1919-ef5e-4ecb-a858-a48166279461",
+    "httpStatuses": [],
+    "contexts": 1,
+    "events": [
+      {
+        "sessionId": "3920323f-7138-49ef-a73b-3659e8f667c4",
+        "runId": "cabe1919-ef5e-4ecb-a858-a48166279461",
+        "eventId": "2efacf5c-3957-445b-9ebe-d439b68524f6",
+        "sequence": 1,
+        "wallTime": 1792059111279,
+        "elapsedMs": 0,
+        "type": "state",
+        "data": {
+          "state": "queued"
+        },
+        "id": "2efacf5c-3957-445b-9ebe-d439b68524f6",
+        "summary": "{\"state\":\"queued\"}"
+      },
+      {
+        "sessionId": "3920323f-7138-49ef-a73b-3659e8f667c4",
+        "runId": "cabe1919-ef5e-4ecb-a858-a48166279461",
+        "eventId": "d52caaf3-7a9f-4fc0-b468-b797ece737cd",
+        "sequence": 2,
+        "wallTime": 1792059111459,
+        "elapsedMs": 180,
+        "type": "state",
+        "data": {
+          "state": "preparing"
+        },
+        "id": "d52caaf3-7a9f-4fc0-b468-b797ece737cd",
+        "summary": "{\"state\":\"preparing\"}"
+      },
+      {
+        "sessionId": "3920323f-7138-49ef-a73b-3659e8f667c4",
+        "runId": "cabe1919-ef5e-4ecb-a858-a48166279461",
+        "eventId": "8c9c8a05-1c61-4407-8a00-b83f7e527175",
+        "sequence": 3,
+        "wallTime": 1792059112053,
+        "elapsedMs": 774,
+        "type": "context",
+        "data": {
+          "snapshotId": "e2f000bd-05b7-45ca-8b43-4b0dfc3995a0",
+          "estimatedTokens": 5947,
+          "droppedTurnIds": []
+        },
+        "id": "8c9c8a05-1c61-4407-8a00-b83f7e527175",
+        "summary": "{\"snapshotId\":\"e2f000bd-05b7-45ca-8b43-4b0dfc3995a0\",\"estimatedTokens\":5947,\"droppedTurnIds\":[]}"
+      },
+      {
+        "sessionId": "3920323f-7138-49ef-a73b-3659e8f667c4",
+        "runId": "cabe1919-ef5e-4ecb-a858-a48166279461",
+        "eventId": "fc8bb7ea-0504-44b8-9212-1393d0248d8f",
+        "sequence": 4,
+        "wallTime": 1792059112261,
+        "elapsedMs": 982,
+        "type": "state",
+        "data": {
+          "state": "generating"
+        },
+        "id": "fc8bb7ea-0504-44b8-9212-1393d0248d8f",
+        "summary": "{\"state\":\"generating\"}"
+      },
+      {
+        "sessionId": "3920323f-7138-49ef-a73b-3659e8f667c4",
+        "runId": "cabe1919-ef5e-4ecb-a858-a48166279461",
+        "eventId": "434a79d3-0171-4e3b-936a-0d0889b07869",
+        "sequence": 5,
+        "wallTime": 1792059112705,
+        "elapsedMs": 1427,
+        "type": "state",
+        "data": {
+          "state": "failed",
+          "error": "IO_ERROR"
+        },
+        "id": "434a79d3-0171-4e3b-936a-0d0889b07869",
+        "summary": "{\"state\":\"failed\",\"error\":\"IO_ERROR\"}",
+        "error": "IO_ERROR"
+      }
+    ]
+  },
+  "probeError": "No structured HTTP error",
+  "nativeMinimalResponses": {
+    "exceptionClass": "UnknownHostException"
+  },
+  "nativeBraveConnectivity": {
+    "exceptionClass": "UnknownHostException"
+  }
+}

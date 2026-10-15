@@ -1,0 +1,26 @@
+{
+  "agent-debug": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "1e998933b795158cdb33f1d2cbc331677e7edbfeb0bcf82b3bd5d772a49dbfc5",
+    "bytes": 5914897,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='dev.thor.inputlab.permission.CONTROL'\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "agent-release-unsigned": {
+    "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+    "sha256": "cd6fccda2a845f75e00258fa202eb61aeba1916a28c1e12a6d82a0a319231eda",
+    "bytes": 4581328,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "input-lab-debug": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+    "sha256": "4712c6482bf630c0a59cd89cdfdea12e24b2e032ad5138faf93215ec6fd657ae",
+    "bytes": 2783647,
+    "permissions": "package: dev.thor.inputlab\npermission: dev.thor.inputlab.permission.CONTROL"
+  },
+  "input-lab-release-unsigned": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+    "sha256": "8fa236594b804e8c1d4c8b3bf07aed000cc4cbbda8147b0d076172af3f3e35ff",
+    "bytes": 2226744,
+    "permissions": "package: dev.thor.inputlab"
+  }
+}

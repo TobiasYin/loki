@@ -50,6 +50,8 @@ Native 可以实现通用流式压缩解码、TLS、连接取消和 HTTP redirec
 
 Native credentialRef 绑定精确 scheme/host/port、允许路径前缀和 header 模板。JS provider 决定协议鉴权格式，Native 只做通用安全替换；不按模型品牌写条件分支。请求头/错误体/诊断日志中遮蔽秘密值；凭据不得出现在 URL、tool 参数和模型上下文。
 
+2026-10-15 实机接入补充：OpenCode Go 的 Responses 已用 `deepseek-v4.1-flash` 实测通过，基础 URL 为 `https://opencode.ai/zen/go/v1`，最终路径 `/responses`。该精确 HTTPS 端点另需 `x-opencode-session` 路由头；Native 从当前授权的 Session ID 安装并覆盖调用方同名值，不能借 JS 请求路由到其他会话。这是端点路由适配，Native 仍不解析模型 JSON/SSE；其他端点不添加此头。模型图片、工具与图片工具回传及真实 Brave 搜索结果见 [实机报告](physical-test-report.md)。
+
 默认 HTTPS，正常证书验证，不忽略证书错误。首版拒绝自动重定向带凭据请求；可向用户显示新地址并要求重新配置。网页抓取重定向每一跳重新检查公共地址范围，避免 localhost、私有地址、link-local 和 DNS 重绑定；本地模型服务只通过用户显式登记的独立配置使用，不向任意搜索 URL开放。
 
 模型网络是聊天必需，不等于联网搜索能力。搜索 OFF 不切断模型请求；反之模型 profile 不能成为任意 URL fetch 工具。外部网页在无 Native 桥的外部浏览器打开。
@@ -62,6 +64,6 @@ Native credentialRef 绑定精确 scheme/host/port、允许路径前缀和 heade
 
 ## 配置验证流程
 
-用户点击测试才对选定端点发请求：连接/鉴权 → 文本增量 → 应用内非敏感测试图片 → 无副作用 echo 工具 → 图片工具结果后续回答。报告各项单独通过/失败；支持模型不代表 endpoint 兼容，不能只收到 HTTP 200 就显示“可用”。测试会调用用户服务，设置页应说明可能计费；本轮已经通过真实 Pi/Native Fetch 发送到本地受控协议服务；真实外部模型账户尚未测试。
+用户点击测试才对选定端点发请求：连接/鉴权 → 文本增量 → 应用内非敏感测试图片 → 无副作用 echo 工具 → 图片工具结果后续回答。报告各项单独通过/失败；支持模型不代表 endpoint 兼容，不能只收到 HTTP 200 就显示“可用”。测试会调用用户服务，设置页应说明可能计费；本地受控协议服务和上文指定的真实 OpenCode Go 配置均已测试，不能据此推断所有模型或第三方端点兼容。
 
 POC-04 用随机分块、半个中文字符、多行事件、空闲心跳、4xx/5xx、取消和背压验证。最终请求中的工具声明与有效权限以 POC-05 审查。

@@ -1,0 +1,421 @@
+{
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "model": "deepseek-v4.1-flash",
+  "remoteService": "live OpenCode Go Responses",
+  "attempts": [
+    {
+      "kind": "logical",
+      "runId": "ac50ee49-1b9c-4652-bd60-0e50376d0c8d",
+      "receiverStatus": "fail",
+      "attemptId": "a73a7944-f32f-4c12-9e41-6d381b796d2a",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 586700404,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):6"
+        },
+        {
+          "elapsedRealtimeMs": 586702172,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):8"
+        },
+        {
+          "elapsedRealtimeMs": 586704167,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):10"
+        },
+        {
+          "elapsedRealtimeMs": 586706130,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):11"
+        },
+        {
+          "elapsedRealtimeMs": 586706240,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):12"
+        },
+        {
+          "elapsedRealtimeMs": 586708109,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):13"
+        },
+        {
+          "elapsedRealtimeMs": 586708219,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):14"
+        },
+        {
+          "elapsedRealtimeMs": 586708486,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):14"
+        },
+        {
+          "elapsedRealtimeMs": 586708812,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):15"
+        },
+        {
+          "elapsedRealtimeMs": 586708923,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):16"
+        },
+        {
+          "elapsedRealtimeMs": 586710116,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):17"
+        },
+        {
+          "elapsedRealtimeMs": 586710224,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):18"
+        },
+        {
+          "elapsedRealtimeMs": 586712078,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):19"
+        },
+        {
+          "elapsedRealtimeMs": 586712188,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):20"
+        },
+        {
+          "elapsedRealtimeMs": 586714083,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):21"
+        },
+        {
+          "elapsedRealtimeMs": 586716105,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):22"
+        },
+        {
+          "elapsedRealtimeMs": 586716220,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):23"
+        },
+        {
+          "elapsedRealtimeMs": 586718137,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):24"
+        },
+        {
+          "elapsedRealtimeMs": 586718252,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):25"
+        },
+        {
+          "elapsedRealtimeMs": 586720157,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):26"
+        },
+        {
+          "elapsedRealtimeMs": 586720270,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):27"
+        },
+        {
+          "elapsedRealtimeMs": 586721608,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1079):27"
+        },
+        {
+          "elapsedRealtimeMs": 586722166,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1079):29"
+        },
+        {
+          "elapsedRealtimeMs": 586724066,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1079):30"
+        },
+        {
+          "elapsedRealtimeMs": 586724177,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1079):31"
+        },
+        {
+          "elapsedRealtimeMs": 586726081,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1079):32"
+        },
+        {
+          "elapsedRealtimeMs": 586726190,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1079):33"
+        },
+        {
+          "elapsedRealtimeMs": 586727677,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1079):33"
+        },
+        {
+          "elapsedRealtimeMs": 586728128,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1079):34"
+        },
+        {
+          "elapsedRealtimeMs": 586728240,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1079):35"
+        }
+      ],
+      "results": [
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792056415631,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": "TARGET_CHANGED",
+          "outcome": "observed",
+          "evidenceRef": "native-event:ac50ee49-1b9c-4652-bd60-0e50376d0c8d:44ae15e5-badc-4452-ab83-881767fa03ff",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"message\":\"Upper windows\\\/app\\\/layout changed\"}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "frame",
+      "runId": "3fcff6f2-7dc8-4c4b-959d-b79e8f0ae4bf",
+      "receiverStatus": "fail",
+      "attemptId": "9e6c6776-f3e9-462e-9c85-150c00e17083",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 586731699,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):43"
+        },
+        {
+          "elapsedRealtimeMs": 586732145,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):44"
+        },
+        {
+          "elapsedRealtimeMs": 586732254,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):45"
+        },
+        {
+          "elapsedRealtimeMs": 586734136,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):46"
+        },
+        {
+          "elapsedRealtimeMs": 586734248,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):47"
+        },
+        {
+          "elapsedRealtimeMs": 586736099,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):48"
+        },
+        {
+          "elapsedRealtimeMs": 586736208,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):49"
+        },
+        {
+          "elapsedRealtimeMs": 586738078,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):50"
+        },
+        {
+          "elapsedRealtimeMs": 586738185,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(1, 0 - 1920, 55);4070:1:0:true:Rect(1, 0 - 1920, 1080):51"
+        },
+        {
+          "elapsedRealtimeMs": 586739839,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):51"
+        },
+        {
+          "elapsedRealtimeMs": 586740168,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):53"
+        },
+        {
+          "elapsedRealtimeMs": 586742134,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):54"
+        },
+        {
+          "elapsedRealtimeMs": 586742243,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):55"
+        },
+        {
+          "elapsedRealtimeMs": 586744141,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):56"
+        },
+        {
+          "elapsedRealtimeMs": 586744249,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):57"
+        },
+        {
+          "elapsedRealtimeMs": 586746095,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):58"
+        },
+        {
+          "elapsedRealtimeMs": 586748181,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):60"
+        },
+        {
+          "elapsedRealtimeMs": 586750160,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):61"
+        },
+        {
+          "elapsedRealtimeMs": 586750270,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):62"
+        },
+        {
+          "elapsedRealtimeMs": 586752103,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):63"
+        },
+        {
+          "elapsedRealtimeMs": 586752209,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):64"
+        },
+        {
+          "elapsedRealtimeMs": 586754153,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):65"
+        },
+        {
+          "elapsedRealtimeMs": 586754261,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):66"
+        },
+        {
+          "elapsedRealtimeMs": 586756086,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):67"
+        },
+        {
+          "elapsedRealtimeMs": 586756194,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):68"
+        },
+        {
+          "elapsedRealtimeMs": 586758128,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):69"
+        },
+        {
+          "elapsedRealtimeMs": 586758236,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):70"
+        },
+        {
+          "elapsedRealtimeMs": 586760176,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "11:3:1:false:Rect(0, 0 - 1920, 55);4070:1:0:true:Rect(0, 0 - 1920, 1080):72"
+        }
+      ],
+      "results": [
+        {
+          "toolId": "perception.capture_screen",
+          "observedAt": 1792056447046,
+          "source": "android-sdk\/accessibility",
+          "truncated": false,
+          "error": "TARGET_CHANGED",
+          "outcome": "observed",
+          "evidenceRef": "native-event:3fcff6f2-7dc8-4c4b-959d-b79e8f0ae4bf:b7d8a441-33fa-4829-ab04-023b580aedd8",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"message\":\"Upper windows\\\/app\\\/layout changed\"}"
+            }
+          ]
+        },
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792056456204,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": "TARGET_CHANGED",
+          "outcome": "observed",
+          "evidenceRef": "native-event:3fcff6f2-7dc8-4c4b-959d-b79e8f0ae4bf:d9f2f4e9-23ab-4b8e-b2a2-b17d10854b60",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"message\":\"Upper windows\\\/app\\\/layout changed\"}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

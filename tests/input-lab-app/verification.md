@@ -1,3 +1,47 @@
+# 主流程实机结果补充 · 2026-10-15
+
+后续根工程主流程已经用此处最新 0.3.0 APK 完成真实云模型的逻辑坐标和截图坐标触摸，两份独立报告 pass；平台 no-input / wrong-target / 上屏应用切换负例，以及 Native 触摸区域边缘、过期快照、换目标零分发控制均另有证据。发送端随后修复了新拍摄资源身份和根布局/可触摸区域分离；以下“发送端未修改”是相应子任务当时的范围记录，不能代表最终根工程。详见 [完整实机报告](../../docs/physical-test-report.md)。实体手指/手柄基线仍属于此前 0.2.0，不回写为 v3 物理资格通过；qualification 仍 pending。
+
+# v3 沉浸式全屏测试窗口 — 2026-10-15
+
+## 同日追加：平台负例的 evidenceMode
+
+debug prepare 新增可选字符串 `evidenceMode`，缺省 `agent_e2e`，显式仅允许 `agent_e2e` / `manual_platform_api`；present null、非字符串、不支持的 mode 或空白/大小写变体均在分配 lease 前拒绝。该值经现有 mode 选择与 metadata.mode 路径记录，不改变输入权限或判定。新增 4 个 RunnerEvidenceModeTest，当前 64 tests 全通过（0 failures/errors/skipped）。根工程 lab test/lint/assemble、签名校验和 diff-check 通过；Lint 0 errors / 40 warnings。
+
+最新 APK 2,783,647 bytes，SHA-256 `4712c6482bf630c0a59cd89cdfdea12e24b2e032ad5138faf93215ec6fd657ae`，仍为 0.3.0/code3/scenario3。本次未操作设备。以下 hash/测试数属于该参数追加前的追溯记录。
+
+主流程 metadata-only target-events.log 已定位普通窗口上屏 SystemUI window11 每约两秒 TYPE_WINDOW_CONTENT_CHANGED，而 Lab raw/sceneRevision 均为 0。发送端保守目标保护保持不变。本次新增标准全屏窗口准备，独立标为 0.3.0/code3/scenario3；不会回写此前 0.2.0 物理手指/A键/轴基线，也不据此宣称修复普通窗口的状态栏事件限制。
+
+resume 通过公开 WindowInsetsController 隐藏系统栏并允许 transient-by-swipe；Arm 前系统栏与 IME 必须已隐藏，窗口环境记录实际 insets 与各栏可见性。观察中 visibility/insets 改变 sticky inconclusive，布局/显示故障判定保留。全屏后的 target 坐标须重新读取。此轮未操作设备，隐藏系统栏能否消除该固件的 SystemUI事件仍交由主流程实机验证。
+
+根工程 lab test/lint/assemble 成功，60 JVM tests 全部通过（0 failures/errors/skipped）；Lint 0 errors / 40 warnings。新增一条静态英文提示的 SetTextI18n；编译还提示 API35 已弃用 setDecorFitsSystemWindows，该公开API仍用于本机 API33，未引入新库或隐藏API。APK `app/build/outputs/apk/debug/input-lab-debug.apk`，2,608,570 bytes，SHA-256 `577975f5aead5c45c573b1c615e8f57a7e74b9fb65dea5bcf976c2e8c9b5be4c`。资格状态仍 pending。
+
+# v2 重配置修复验证 — 2026-10-15
+
+## 同日追加：诊断回调无状态变化时省略重绘
+
+对安全证据 `build/physical/resume-2026-10-15/cloud-input/physical-cloud-logical-report.json` 与 `logical-events.jsonl` 的复核显示：观察窗前后 rawCount/sceneRevision 均为 0，15 条设备回调均 diagnostic_only。`emit()` 仅递增日志 sequence，header 不显示 sequence/deviceRevision；没有证据证明此次 TARGET_CHANGED 来自 header 内容变更。该失败仍须主流程排查，不据此宣称根因修复。
+
+本次仅让 active 且 diagnostic_only、日志完整的设备回调在 emit 后省略 refresh/arena.invalidate；真实输入、场景变化、焦点/布局、不连续或日志失败保持刷新。日志与报告内容不删减，发送端目标校验未修改。根工程 lab test/lint/assemble 重新成功，60 tests 全部通过，0 failures/errors/skipped；Lint 0 errors / 39 warnings。最新 APK 2,772,975 bytes，SHA-256 `41b7242107e4d1743f86852baa15b3e785ed0b555d09185257f418befdca280a`。以下为更早构建的追溯记录。
+
+## 同日追加：debug runner 有界观察窗
+
+prepare 新增可选整数 `observationSeconds`，默认 5、仅允许 5..30；lease 为 `(seconds+10)s`，最多 40 秒。签名权限、调用包/UID、testRunId、lease 与方法校验保留，没有新增输入或 verdict 操作。普通 UI 时长范围不变。新增 4 个 RunnerWindowTest 覆盖默认值、所有有效时长的 ten-second margin/cap、边界/溢出拒绝和错误 Bundle 类型拒绝。
+
+根工程同一 lab test/lint/assemble 命令重新成功：当前共 60 tests，全部 0 failures/errors/skipped；Lint 0 errors / 39 warnings（相较前次增加一条数值 EditText 的 SetTextI18n 提示）。签名校验成功。最新 APK 2,772,903 bytes，SHA-256 `1ad423ec66d239820a4ce5b40752d33ebf0314b4b6a09a87bb4d72e1ed27df2f`；仍为 0.2.0/code2/scenario2。未执行设备操作。本段以下 hash/测试数属于 runner 扩展前的重配置修复产物，保留追溯。
+
+## 重配置修复首次构建
+
+从根工程运行 `JAVA_HOME=path/to/jdk-17 ANDROID_HOME=path/to/android-sdk ./gradlew :input-lab:testDebugUnitTest :input-lab:lintDebug :input-lab:assembleDebug --console=plain` 成功。仅构建 Input Lab；未运行会重置 Native 配置的 fixture runner，未安装/启动 APK、注入输入或修改设备设置。
+
+当前 56 个 JVM 测试全部通过：AttemptTest 37、JournalTest 7、DeviceContinuityTest 7、AxisProfileTest 5；0 failures/errors/skipped。新增测试覆盖相同空闲回调、真实 tap/A 键完成后的回调、增删/未知/缺失设备、身份/来源/range/fuzz/能力变化、焦点/生命周期/布局/显示变化、既有不确定性、被变更设备的持有状态、其他设备持有不污染、Thor BRAKE/GAS profile 冻结、键盘/虚拟/不明确设备拒绝、跨设备借用与缺轴/未归零拒绝。结果位于 `app/build/test-results/testDebugUnitTest/`。Lint 0 errors / 38 warnings（英文 UI 本地化、固定 target35、较新版 Gradle 提示），位于 `app/build/reports/lint-results-debug.html`。
+
+根工程 APK：`app/build/outputs/apk/debug/input-lab-debug.apk`，2,770,419 bytes，versionName 0.2.0 / versionCode 2 / scenarioVersion 2；SHA-256 `9db59d901fddc8915844092ea5c2c0b54d7209b0bdae41e01d85746291be14a6`。此轮未执行实机复测，不能将 JVM 与构建成功当作物理基线通过。旧 v1 基线仍为 inconclusive，`receiverQualificationVersion=unqualified-physical-baseline-pending` 不变。
+
+主流程最小实机复测：15 秒观察窗内，分别完成 LAB-02 真实手指单击、LAB-06 实体 A DOWN/UP、LAB-07 两摇杆及两扳机逐轴充分 excursion 后实际 neutral；三个正例均需捕获重复 changed，核对其 `continuity.disposition=diagnostic_only`、完整冻结 profile、窗口显示信息和 Android raw 来源。LAB-14 无动作应 fail（重复 changed 不能产生成功）。再于 LAB-04-LONG 中持有上屏触摸跨越该触屏自身 changed 后释放，应因 `input_device_changed_while_input_held` sticky inconclusive。并用 dumpsys/logcat核对两屏路由，公开能力一致本身不证明隐藏 InputReader association。
+
+以下为历史 v1 记录，保留原结果与 hash。
+
 # 第一版验证记录 — 2026-10-13
 
 产物仅位于 `tests/input-lab-app/`。结论：独立 debug APK 已构建、签名校验、安装和运行；接收器判定/日志本地测试与 API36 emulator 回归完成。**Thor 实机 POC-11、物理手柄基线、上下屏/IME 与真实游戏兼容未验证；资格版本仍为 unqualified-physical-baseline-pending。**

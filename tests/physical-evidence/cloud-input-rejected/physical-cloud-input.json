@@ -1,0 +1,31 @@
+{
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "model": "deepseek-v4.1-flash",
+  "remoteService": "live OpenCode Go Responses",
+  "attempts": [
+    {
+      "kind": "logical",
+      "runId": "bf7b377a-6616-404e-ac1e-a89bc507e7ff",
+      "receiverStatus": "fail",
+      "attemptId": "d609de66-45d4-47e7-bd53-4ef9357b2b8a",
+      "results": [
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792054904588,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": "TARGET_CHANGED",
+          "outcome": "observed",
+          "evidenceRef": "native-event:bf7b377a-6616-404e-ac1e-a89bc507e7ff:4dcb734f-767b-4d6f-bb7c-f2b913d56408",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"message\":\"Upper windows\\\/app\\\/layout changed\"}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

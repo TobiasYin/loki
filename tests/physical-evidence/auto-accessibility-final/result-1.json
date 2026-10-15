@@ -1,0 +1,22 @@
+{
+  "before": [
+    "com.aure.clustertune\/com.aure.clustertune.apps.AppProfileAccessibilityService",
+    "app.wayfinder\/app.wayfinder.ForegroundAppService",
+    "com.odin.gameassistant\/com.ro.gameassistant.service.ForegroundAppMonitorV4Service",
+    "com.mastercook777.heimdall\/com.mastercook777.heimdall.ThorAccessibilityService"
+  ],
+  "manualEnable": false,
+  "manualBind": false,
+  "after": [
+    "com.aure.clustertune\/com.aure.clustertune.apps.AppProfileAccessibilityService",
+    "app.wayfinder\/app.wayfinder.ForegroundAppService",
+    "com.odin.gameassistant\/com.ro.gameassistant.service.ForegroundAppMonitorV4Service",
+    "com.mastercook777.heimdall\/com.mastercook777.heimdall.ThorAccessibilityService",
+    "dev.thor.agent\/dev.thor.tools.diagnostic.ThorAccessibilityService"
+  ],
+  "status": "已通过 Shizuku 自动开启本应用无障碍",
+  "serviceConnected": true,
+  "screenControl": false,
+  "debug": false,
+  "passed": true
+}

@@ -1,0 +1,48 @@
+{
+  "authority": "ManualTestAuthority: component control, no model or product-authority Run",
+  "expectedInputCount": 0,
+  "cases": [
+    {
+      "kind": "clipping",
+      "capturedSnapshotId": "736a216b-d358-450b-a1f2-69c2216cc825",
+      "results": [
+        {
+          "name": "clipped-frame-point",
+          "error": "TARGET_CHANGED",
+          "message": "Input leaves observed\/current touchable region",
+          "outcome": "not_submitted"
+        },
+        {
+          "name": "expired-snapshot",
+          "error": "TARGET_CHANGED",
+          "message": "Display snapshot expired\/changed",
+          "outcome": "not_submitted"
+        }
+      ],
+      "observedTouchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1079)",
+      "requestedDisplayPoint": [
+        960,
+        1079.5
+      ],
+      "receiverStatus": "fail",
+      "inputCount": 0,
+      "passed": true
+    },
+    {
+      "kind": "switch",
+      "capturedSnapshotId": "db6022ab-2f6c-4b7b-88f1-aed4869d6833",
+      "results": [
+        {
+          "name": "changed-upper-app",
+          "error": "TARGET_CHANGED",
+          "message": "Upper windows\/app\/layout changed",
+          "outcome": "not_submitted"
+        }
+      ],
+      "receiverStatus": "inconclusive",
+      "inputCount": 0,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

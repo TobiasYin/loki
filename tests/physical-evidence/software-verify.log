@@ -1,0 +1,875 @@
+
+> thor-agent-integration@0.2.0 verify
+> bash scripts/verify.sh
+
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 93 packages, and audited 94 packages in 3s
+
+5 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+up to date, audited 1 package in 191ms
+
+found 0 vulnerabilities
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+
+added 39 packages, and audited 40 packages in 842ms
+
+7 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> @thor-agent/runtime@0.1.0 test
+> npm run build && node --test dist/test/*.test.js
+
+
+> @thor-agent/runtime@0.1.0 build
+> tsc -p tsconfig.json && node scripts/build.mjs
+
+✔ openai-responses: streamed text + user image + image tool round trip through injected fetch (34.771792ms)
+✔ openai-responses: one-byte SSE chunks preserve UTF-8 and deliver multiple deltas (24.053167ms)
+✔ openai-responses: malformed complete tool JSON never executes (4.023ms)
+✔ openai-responses: disconnect with partial tool arguments never executes (2.535125ms)
+✔ openai-responses: HTTP 429/500 fails without retry or leaking provider errors (6.735916ms)
+✔ openai-responses: stop cancels an open stream and terminal state persists once (1.940333ms)
+✔ anthropic-messages: streamed text + user image + image tool round trip through injected fetch (10.268ms)
+✔ anthropic-messages: one-byte SSE chunks preserve UTF-8 and deliver multiple deltas (13.992ms)
+✔ anthropic-messages: malformed complete tool JSON never executes (2.757333ms)
+✔ anthropic-messages: disconnect with partial tool arguments never executes (2.070791ms)
+✔ anthropic-messages: HTTP 429/500 fails without retry or leaking provider errors (8.932125ms)
+✔ anthropic-messages: stop cancels an open stream and terminal state persists once (1.434833ms)
+✔ default capabilities and unavailable backend produce exact effective set (0.285791ms)
+✔ Anthropic completed zero-argument tool block is valid without JSON deltas (0.038167ms)
+✔ off/on epoch change after model response rejects old call; a fresh lease can execute (7.999542ms)
+✔ epoch rechecked after durable intent before executor; Native remains final gate (2.17175ms)
+✔ revoked late image result is never delivered to model (1.818375ms)
+✔ unknown/uninjected tools, invalid schema and duplicate call IDs do not execute (38.028208ms)
+✔ tool failures are error tool results, text truncates at valid UTF-8 boundary (14.190958ms)
+✔ bounded deterministic compression drops whole pairs; revoked derived history is filtered (1.958416ms)
+✔ required current content cannot fit: stops without a request (0.515708ms)
+✔ consumed leases do not run twice and a second Session cannot run concurrently (3.826333ms)
+✔ expired images are reloaded before every request and L0 is replaced (8.843667ms)
+✔ tool deadline stops waiting for an uncooperative executor; late data cannot re-enter (17.266667ms)
+✔ compression retains explicit constraints and side-effect ledger; oversized required memory stops (0.64425ms)
+✔ authority bootstrap can be cancelled and configuration changes affect only new Runs (4.924375ms)
+✔ timeout, request/response budgets and bounded tool loop fail (43.258792ms)
+✔ session/run mismatch, expired lease, incomplete probes reject before network (0.577584ms)
+✔ failed intent persistence prevents execution; recovery never replays (3.069834ms)
+✔ only the audited internal configuration fixture can omit public capabilities (0.204084ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 505.792875
+
+> thor-native-fetch@0.1.0 test
+> node --test *.test.mjs
+
+✔ base64 and ArrayBuffer keep split UTF-8 raw until JS decode (14.179875ms)
+✔ 4xx/5xx are ordinary Responses with complete body and duplicate headers (1.214625ms)
+✔ string/bytes/ArrayBuffer and Request inputs serialize and merge headers (4.797416ms)
+✔ unsupported uploads/options and oversized bodies fail before posting (2.918375ms)
+✔ abort before start and during body cancels Native call, rejects readers, ignores late bytes (0.441542ms)
+✔ clone preserves independent bodyUsed and bounded consumers (0.527041ms)
+✔ clone permits sequential consumers below the buffer budget (5.556ms)
+✔ abandoned clone fails at the 256 KiB branch limit (15.258916ms)
+✔ invalid chunk sequence/credit and error after head fail body (0.414792ms)
+✔ HEAD and no-body statuses have null body and no consumer credits (0.386959ms)
+✔ binary frame bounds and arbitrary bytes round-trip (0.082166ms)
+✔ stalled Request serialization times out or cancels on bridge close (22.724833ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110.776708
+
+> thor-agent-chat-tests@0.1.0 test
+> node --test web-tests/*.test.cjs
+
+✔ untrusted text never creates HTML, scripts, remote links or images (67.274875ms)
+✔ failed and unknown remain visible outside collapsed disclosure (9.708917ms)
+✔ active banner belongs to originating session after switching and stop is reachable (9.282834ms)
+✔ capability choice and unavailable reason are distinct and bound to session (7.917ms)
+✔ waiting confirmation remains outside disclosure and approves exact run (7.160458ms)
+✔ long histories render 200 messages and 50 sessions without persistence in web storage (19.634375ms)
+✔ storage recovery failure is explicit and disables sending without clearing history (6.684125ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 369.351916
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:compileKotlin UP-TO-DATE
+> Task :core:compileJava NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :core:compileTestKotlin UP-TO-DATE
+> Task :core:compileTestJava NO-SOURCE
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses UP-TO-DATE
+> Task :core:test UP-TO-DATE
+> Task :device-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :device-core:processResources NO-SOURCE
+> Task :device-core:processTestResources NO-SOURCE
+> Task :device-authority:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :device-authority:processResources NO-SOURCE
+> Task :device-authority:processTestResources NO-SOURCE
+> Task :android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :android:copyFetchAssets UP-TO-DATE
+> Task :android:preBuild UP-TO-DATE
+> Task :android:preDebugBuild UP-TO-DATE
+> Task :android:generateDebugResValues UP-TO-DATE
+> Task :android:generateDebugResources UP-TO-DATE
+> Task :android:packageDebugResources UP-TO-DATE
+> Task :android:parseDebugLocalResources UP-TO-DATE
+> Task :android:generateDebugRFile UP-TO-DATE
+> Task :android:compileDebugKotlin UP-TO-DATE
+> Task :android:javaPreCompileDebug UP-TO-DATE
+> Task :android:compileDebugJavaWithJavac NO-SOURCE
+> Task :android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :android:processDebugJavaRes UP-TO-DATE
+> Task :android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :device-core:compileKotlin
+> Task :bundleRuntime
+> Task :device-core:compileJava NO-SOURCE
+> Task :device-core:classes UP-TO-DATE
+> Task :device-core:jar
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :android:compileDebugLibraryResources UP-TO-DATE
+> Task :android:writeDebugAarMetadata UP-TO-DATE
+> Task :device-android:preBuild UP-TO-DATE
+> Task :device-android:preDebugBuild UP-TO-DATE
+> Task :device-android:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :device-android:generateDebugResValues UP-TO-DATE
+> Task :device-android:generateDebugResources UP-TO-DATE
+> Task :device-android:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :device-authority:compileKotlin
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :device-authority:compileJava NO-SOURCE
+> Task :device-authority:classes UP-TO-DATE
+> Task :device-authority:jar UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android:extractDeepLinksDebug UP-TO-DATE
+> Task :android:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :device-android:extractDeepLinksDebug UP-TO-DATE
+> Task :device-android:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :device-android:compileDebugLibraryResources UP-TO-DATE
+> Task :device-android:parseDebugLocalResources UP-TO-DATE
+> Task :device-android:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :device-android:compileDebugAidl UP-TO-DATE
+> Task :device-android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :device-android:javaPreCompileDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:preDebugUnitTestBuild
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :input-lab:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :input-lab:preBuild UP-TO-DATE
+> Task :input-lab:preDebugBuild UP-TO-DATE
+> Task :input-lab:generateDebugBuildConfig UP-TO-DATE
+> Task :input-lab:checkDebugAarMetadata UP-TO-DATE
+> Task :input-lab:generateDebugResValues UP-TO-DATE
+> Task :input-lab:mapDebugSourceSetPaths UP-TO-DATE
+> Task :input-lab:generateDebugResources UP-TO-DATE
+> Task :input-lab:mergeDebugResources UP-TO-DATE
+> Task :input-lab:packageDebugResources UP-TO-DATE
+> Task :input-lab:parseDebugLocalResources UP-TO-DATE
+> Task :input-lab:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :input-lab:extractDeepLinksDebug UP-TO-DATE
+> Task :input-lab:processDebugMainManifest UP-TO-DATE
+> Task :input-lab:processDebugManifest UP-TO-DATE
+> Task :input-lab:processDebugManifestForPackage UP-TO-DATE
+> Task :input-lab:processDebugResources UP-TO-DATE
+> Task :input-lab:compileDebugKotlin UP-TO-DATE
+> Task :input-lab:javaPreCompileDebug UP-TO-DATE
+> Task :input-lab:compileDebugJavaWithJavac UP-TO-DATE
+> Task :input-lab:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :input-lab:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :input-lab:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :input-lab:preDebugUnitTestBuild UP-TO-DATE
+> Task :input-lab:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :input-lab:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :input-lab:processDebugJavaRes UP-TO-DATE
+> Task :input-lab:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :input-lab:testDebugUnitTest UP-TO-DATE
+> Task :android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :android:mergeDebugNativeLibs NO-SOURCE
+> Task :android:stripDebugDebugSymbols NO-SOURCE
+> Task :android:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :android:extractDebugAnnotations UP-TO-DATE
+> Task :android:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :android:mergeDebugShaders UP-TO-DATE
+> Task :android:compileDebugShaders NO-SOURCE
+> Task :android:generateDebugAssets UP-TO-DATE
+> Task :android:mergeDebugAssets UP-TO-DATE
+> Task :android:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :android:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :android:prepareDebugArtProfile UP-TO-DATE
+> Task :android:prepareLintJarForPublish UP-TO-DATE
+> Task :android:mergeDebugJavaResource UP-TO-DATE
+> Task :android:syncDebugLibJars UP-TO-DATE
+> Task :android:bundleDebugLocalLintAar UP-TO-DATE
+> Task :android:createFullJarDebug UP-TO-DATE
+> Task :android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :android:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :android:writeDebugLintModelMetadata UP-TO-DATE
+> Task :android:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :android:extractProguardFiles UP-TO-DATE
+> Task :android:generateDebugLintReportModel UP-TO-DATE
+> Task :android:preDebugUnitTestBuild UP-TO-DATE
+> Task :android:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :android:lintAnalyzeDebug UP-TO-DATE
+> Task :android:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :android:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :android:lintReportDebug UP-TO-DATE
+> Task :android:lintDebug
+> Task :android:generateDebugLintModel UP-TO-DATE
+> Task :device-android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :device-android:mergeDebugNativeLibs NO-SOURCE
+> Task :device-android:stripDebugDebugSymbols NO-SOURCE
+> Task :device-android:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :device-android:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :device-android:mergeDebugShaders UP-TO-DATE
+> Task :device-android:compileDebugShaders NO-SOURCE
+> Task :device-android:generateDebugAssets UP-TO-DATE
+> Task :device-android:mergeDebugAssets UP-TO-DATE
+> Task :device-android:prepareDebugArtProfile UP-TO-DATE
+> Task :device-android:prepareLintJarForPublish UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :device-android:writeDebugLintModelMetadata UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :device-android:extractProguardFiles UP-TO-DATE
+> Task :device-android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :device-android:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :device-android:preDebugUnitTestBuild UP-TO-DATE
+> Task :input-lab:preDebugAndroidTestBuild SKIPPED
+> Task :input-lab:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :input-lab:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :input-lab:extractProguardFiles UP-TO-DATE
+> Task :input-lab:generateDebugLintReportModel UP-TO-DATE
+> Task :input-lab:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :input-lab:lintAnalyzeDebug UP-TO-DATE
+> Task :input-lab:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :input-lab:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :input-lab:lintReportDebug UP-TO-DATE
+> Task :input-lab:lintDebug
+> Task :diagnostic:preBuild UP-TO-DATE
+> Task :diagnostic:preDebugBuild UP-TO-DATE
+> Task :diagnostic:compileDebugAidl UP-TO-DATE
+> Task :diagnostic:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :diagnostic:generateDebugBuildConfig UP-TO-DATE
+> Task :diagnostic:checkDebugAarMetadata UP-TO-DATE
+> Task :diagnostic:generateDebugResValues UP-TO-DATE
+> Task :diagnostic:mapDebugSourceSetPaths UP-TO-DATE
+> Task :diagnostic:generateDebugResources UP-TO-DATE
+> Task :diagnostic:mergeDebugResources UP-TO-DATE
+> Task :diagnostic:packageDebugResources UP-TO-DATE
+> Task :diagnostic:parseDebugLocalResources UP-TO-DATE
+> Task :diagnostic:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :diagnostic:extractDeepLinksDebug UP-TO-DATE
+> Task :diagnostic:processDebugMainManifest UP-TO-DATE
+> Task :diagnostic:processDebugManifest UP-TO-DATE
+> Task :diagnostic:processDebugManifestForPackage UP-TO-DATE
+> Task :diagnostic:processDebugResources UP-TO-DATE
+> Task :device-authority:compileTestKotlin
+> Task :device-authority:compileTestJava NO-SOURCE
+> Task :device-authority:testClasses UP-TO-DATE
+> Task :device-core:compileTestKotlin
+> Task :device-authority:test
+> Task :device-core:compileTestJava NO-SOURCE
+> Task :device-core:testClasses UP-TO-DATE
+> Task :device-android:compileDebugKotlin
+> Task :diagnostic:compileDebugKotlin
+
+> Task :device-core:test
+
+AccessibilitySetupTest > emptyAndNullSettingsOnlyAddOwnFixedComponent PASSED
+
+AccessibilitySetupTest > preservesOtherServicesAndDoesNotDuplicateOwnService PASSED
+
+AccessibilitySetupTest > malformedOrOversizedSettingsCannotBecomeCommandsOrOtherComponents PASSED
+
+CoreTest > finalCommitCheckDetectsConcurrentWriterAndSymlinkSwap PASSED
+
+CoreTest > displayRolesRequireTwoDistinctKnownDisplays PASSED
+
+CoreTest > configurationSizeAndFormatLimitsPreventWrites PASSED
+
+CoreTest > screenshotCropScalingHasIndependentExpectedCoordinates PASSED
+
+CoreTest > snapshotsExpireAndCacheIsBounded PASSED
+
+CoreTest > gestureRejectsDurationOversizedPathNanAndOffscreen PASSED
+
+CoreTest > restoreConflictPreservesCurrentFileAndBackupQuotaRefusesWithoutDeleting PASSED
+
+CoreTest > encryptedBackupSurvivesReopenAndTamperFails PASSED
+
+CoreTest > postCommitCorruptionIsFailureWithRecoveryAndSubmittedMarker PASSED
+
+CoreTest > byteBudgetDistinguishesExactEofAndTruncationAndChecksCancellation PASSED
+
+CoreTest > inputEffectMayChangeItsOwnLayoutAfterSubmission PASSED
+
+CoreTest > detachedShellChildCannotHoldOutputDrainForever PASSED
+
+CoreTest > gatewayDiscardsLateReadAfterRevocation PASSED
+
+CoreTest > defaultsAndEffectiveSetAreLeastPrivilege PASSED
+
+CoreTest > shellTimeoutAndCancellationStopDirectChildWithoutClaimingDescendants PASSED
+
+CoreTest > writesRequireExactApprovalMatchingBackupAndCurrentHash PASSED
+
+CoreTest > requestSpecificBackendPermissionIsCheckedAndReportedBeforeDispatch PASSED
+
+CoreTest > submittedCancellationIsUnknownAndInvokesOwnedCleanup PASSED
+
+CoreTest > freshReadGetsNewIdentityAndExpiryWithoutRevivingOldInputSnapshot PASSED
+
+CoreTest > capabilityDisabledHasExplicitError PASSED
+
+CoreTest > finalAtomicEffectGuardRejectsRevokedQueuedCommit PASSED
+
+CoreTest > onlyCaptureUsesCurrentReadAndStaleInputAndTreeStillStopBeforeBackend PASSED
+
+CoreTest > shellOutputIsCombinedBoundedAndNonzeroExitPreserved PASSED
+
+CoreTest > freshObservationStillBecomesInvalidImmediatelyWhenTargetChangesAgain PASSED
+
+CoreTest > crossSessionUnknownToolSchemaAndDeadlineAreRejected PASSED
+
+CoreTest > replayAndRunToolBudgetAreRejected PASSED
+
+CoreTest > pathTraversalSymlinksAndNonexistentTargetsAreDenied PASSED
+
+CoreTest > queuedAuthorizationNeverRevivesAfterOffOn PASSED
+
+CoreTest > rotationGeometryRemovalAndAppChangeInvalidateSnapshots PASSED
+
+CoreTest > singleDeviceRunAndResourceLockPreventParallelEffects PASSED
+
+CoreTest > freshReadCannotCrossCalibrationRotationRemovalOrInventedSource PASSED
+
+CoreTest > cancelledCommitDoesNotWriteOrAutoRestore PASSED
+
+CoreTest > captureGatewayDiscardsMissingOrChangedObservationBeforeReturningPixels PASSED
+
+CoreTest > cancellationRegistrationAfterStopStillRuns PASSED
+
+CoreTest > backupWriteVerifyRestorePreservesUnknownFieldsAndBeforeRestoreBackup PASSED
+
+CoreTest > staleTargetNeverReachesInputBackend PASSED
+
+DisplayVisibilityTest > canonicalLayoutRequiresCompleteSoleFullscreenRectangularEvidence PASSED
+
+DisplayVisibilityTest > clippingDoesNotRebindLayoutButCurrentClippedEdgesCannotReceiveInput PASSED
+
+DisplayVisibilityTest > newlyVisibleEdgesCannotBeUsedFromAnImageThatNeverObservedThem PASSED
+
+DisplayVisibilityTest > clippingNormalizationNeverExtendsTheTenSecondInputExpiry PASSED
+
+DisplayVisibilityTest > unknownVisibilityAndRealRootOrAppChangesStillInvalidateTheTarget PASSED
+
+> Task :device-android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :device-android:processDebugJavaRes UP-TO-DATE
+> Task :device-android:bundleLibRuntimeToJarDebug
+> Task :device-android:bundleLibCompileToJarDebug
+> Task :device-android:extractDebugAnnotations
+> Task :device-android:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :device-android:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :device-android:mergeDebugJavaResource UP-TO-DATE
+> Task :device-android:syncDebugLibJars
+> Task :device-android:bundleDebugLocalLintAar
+> Task :device-android:createFullJarDebug
+> Task :device-android:generateDebugLintModel
+> Task :device-android:generateDebugAndroidTestLintModel
+> Task :device-android:generateDebugUnitTestLintModel
+> Task :device-android:lintAnalyzeDebugAndroidTest
+> Task :device-android:lintAnalyzeDebugUnitTest
+> Task :device-android:generateDebugLintReportModel
+> Task :diagnostic:javaPreCompileDebug UP-TO-DATE
+> Task :diagnostic:compileDebugJavaWithJavac UP-TO-DATE
+> Task :diagnostic:preDebugAndroidTestBuild SKIPPED
+> Task :diagnostic:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :diagnostic:extractProguardFiles UP-TO-DATE
+> Task :diagnostic:generateDebugLintReportModel
+> Task :diagnostic:preDebugUnitTestBuild UP-TO-DATE
+> Task :diagnostic:bundleDebugClassesToCompileJar
+> Task :diagnostic:generateDebugAndroidTestLintModel
+> Task :diagnostic:generateDebugUnitTestLintModel
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :diagnostic:lintAnalyzeDebugAndroidTest
+> Task :app:testDebugUnitTest
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :bridge-host:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :bridge-host:preBuild UP-TO-DATE
+> Task :bridge-host:preDebugBuild UP-TO-DATE
+> Task :bridge-host:checkDebugAarMetadata UP-TO-DATE
+> Task :bridge-host:generateDebugResValues UP-TO-DATE
+> Task :bridge-host:mapDebugSourceSetPaths UP-TO-DATE
+> Task :bridge-host:generateDebugResources UP-TO-DATE
+> Task :bridge-host:mergeDebugResources UP-TO-DATE
+> Task :bridge-host:packageDebugResources UP-TO-DATE
+> Task :bridge-host:parseDebugLocalResources UP-TO-DATE
+> Task :bridge-host:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :bridge-host:extractDeepLinksDebug UP-TO-DATE
+> Task :bridge-host:processDebugMainManifest UP-TO-DATE
+> Task :bridge-host:processDebugManifest UP-TO-DATE
+> Task :bridge-host:processDebugManifestForPackage UP-TO-DATE
+> Task :bridge-host:processDebugResources UP-TO-DATE
+> Task :bridge-host:compileDebugKotlin UP-TO-DATE
+> Task :bridge-host:javaPreCompileDebug UP-TO-DATE
+> Task :bridge-host:compileDebugJavaWithJavac NO-SOURCE
+> Task :bridge-host:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :bridge-host:preDebugAndroidTestBuild SKIPPED
+> Task :bridge-host:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :bridge-host:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :bridge-host:extractProguardFiles UP-TO-DATE
+> Task :bridge-host:generateDebugLintReportModel UP-TO-DATE
+> Task :bridge-host:preDebugUnitTestBuild UP-TO-DATE
+> Task :bridge-host:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :device-android:lintAnalyzeDebug
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugJavaResource
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :android:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :device-android:bundleLibRuntimeToDirDebug
+> Task :diagnostic:lintAnalyzeDebug
+> Task :app:mergeLibDexDebug
+> Task :app:mergeProjectDexDebug
+> Task :android:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :device-android:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug
+> Task :android:preReleaseBuild UP-TO-DATE
+> Task :android:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :android:mergeReleaseNativeLibs NO-SOURCE
+> Task :android:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:preReleaseBuild
+> Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :device-android:preReleaseBuild UP-TO-DATE
+> Task :device-android:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :device-android:mergeReleaseNativeLibs NO-SOURCE
+> Task :device-android:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :android:generateReleaseResValues UP-TO-DATE
+> Task :android:generateReleaseResources UP-TO-DATE
+> Task :android:packageReleaseResources UP-TO-DATE
+> Task :android:parseReleaseLocalResources UP-TO-DATE
+> Task :android:generateReleaseRFile UP-TO-DATE
+> Task :android:compileReleaseKotlin UP-TO-DATE
+> Task :android:javaPreCompileRelease UP-TO-DATE
+> Task :android:compileReleaseJavaWithJavac NO-SOURCE
+> Task :android:bundleLibRuntimeToDirRelease UP-TO-DATE
+> Task :device-android:compileReleaseAidl UP-TO-DATE
+> Task :device-android:generateReleaseResValues UP-TO-DATE
+> Task :device-android:generateReleaseResources UP-TO-DATE
+> Task :device-android:packageReleaseResources UP-TO-DATE
+> Task :device-android:parseReleaseLocalResources UP-TO-DATE
+> Task :device-android:generateReleaseRFile UP-TO-DATE
+> Task :device-android:compileReleaseKotlin
+> Task :device-android:javaPreCompileRelease UP-TO-DATE
+> Task :device-android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :device-android:bundleLibRuntimeToDirRelease
+> Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :android:compileReleaseLibraryResources UP-TO-DATE
+> Task :android:writeReleaseAarMetadata UP-TO-DATE
+> Task :device-android:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :android:extractDeepLinksRelease UP-TO-DATE
+> Task :android:processReleaseManifest UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :device-android:extractDeepLinksRelease UP-TO-DATE
+> Task :device-android:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :device-android:compileReleaseLibraryResources UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :device-android:bundleLibCompileToJarRelease
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :app:lintAnalyzeDebug
+
+> Task :device-android:lintReportDebug
+Wrote HTML report to ./integration/device-android/build/reports/lint-results-debug.html
+
+> Task :device-android:lintDebug
+> Task :bridge-host:lintAnalyzeDebug UP-TO-DATE
+> Task :bridge-host:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :bridge-host:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :bridge-host:lintReportDebug UP-TO-DATE
+> Task :bridge-host:lintDebug
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app:desugarReleaseFileDependencies UP-TO-DATE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexRelease UP-TO-DATE
+> Task :android:prepareReleaseArtProfile UP-TO-DATE
+> Task :device-android:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :device-android:bundleLibRuntimeToJarRelease
+> Task :app:lintAnalyzeDebugAndroidTest
+
+> Task :app:lintReportDebug
+Wrote HTML report to ./app/build/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+> Task :android:mergeReleaseShaders UP-TO-DATE
+> Task :android:compileReleaseShaders NO-SOURCE
+> Task :android:generateReleaseAssets UP-TO-DATE
+> Task :android:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseShaders UP-TO-DATE
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :device-android:mergeReleaseShaders UP-TO-DATE
+> Task :device-android:compileReleaseShaders NO-SOURCE
+> Task :device-android:generateReleaseAssets UP-TO-DATE
+> Task :device-android:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets UP-TO-DATE
+> Task :app:compressReleaseAssets UP-TO-DATE
+> Task :app:extractReleaseVersionControlInfo UP-TO-DATE
+> Task :android:generateReleaseLintVitalModel UP-TO-DATE
+> Task :android:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :android:processReleaseJavaRes UP-TO-DATE
+> Task :android:createFullJarRelease UP-TO-DATE
+> Task :android:generateReleaseLintModel UP-TO-DATE
+> Task :device-android:processReleaseJavaRes UP-TO-DATE
+> Task :device-android:createFullJarRelease
+> Task :device-android:generateReleaseLintModel
+> Task :android:stripReleaseDebugSymbols NO-SOURCE
+> Task :android:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :android:extractReleaseAnnotations UP-TO-DATE
+> Task :android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :android:mergeReleaseJavaResource UP-TO-DATE
+> Task :android:syncReleaseLibJars UP-TO-DATE
+> Task :android:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :device-android:stripReleaseDebugSymbols NO-SOURCE
+> Task :device-android:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :device-android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :device-android:extractReleaseAnnotations
+> Task :device-android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :device-android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :device-android:mergeReleaseJavaResource UP-TO-DATE
+> Task :device-android:syncReleaseLibJars
+> Task :device-android:bundleReleaseLocalLintAar
+> Task :android:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :device-android:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :device-android:generateReleaseLintVitalModel
+> Task :app:optimizeReleaseResources UP-TO-DATE
+> Task :app:collectReleaseDependencies UP-TO-DATE
+> Task :app:sdkReleaseDependencyData UP-TO-DATE
+> Task :app:writeReleaseAppMetadata UP-TO-DATE
+> Task :app:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :input-lab:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :input-lab:mergeDebugShaders UP-TO-DATE
+> Task :input-lab:compileDebugShaders NO-SOURCE
+> Task :input-lab:generateDebugAssets UP-TO-DATE
+> Task :input-lab:mergeDebugAssets UP-TO-DATE
+> Task :input-lab:compressDebugAssets UP-TO-DATE
+> Task :input-lab:desugarDebugFileDependencies UP-TO-DATE
+> Task :input-lab:dexBuilderDebug UP-TO-DATE
+> Task :input-lab:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :input-lab:mergeDebugJavaResource UP-TO-DATE
+> Task :input-lab:checkDebugDuplicateClasses UP-TO-DATE
+> Task :input-lab:mergeExtDexDebug UP-TO-DATE
+> Task :input-lab:mergeLibDexDebug UP-TO-DATE
+> Task :input-lab:mergeProjectDexDebug UP-TO-DATE
+> Task :input-lab:mergeDebugJniLibFolders UP-TO-DATE
+> Task :input-lab:mergeDebugNativeLibs NO-SOURCE
+> Task :input-lab:stripDebugDebugSymbols NO-SOURCE
+> Task :input-lab:validateSigningDebug UP-TO-DATE
+> Task :input-lab:writeDebugAppMetadata UP-TO-DATE
+> Task :input-lab:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :input-lab:packageDebug UP-TO-DATE
+> Task :input-lab:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :input-lab:assembleDebug UP-TO-DATE
+> Task :input-lab:preReleaseBuild UP-TO-DATE
+> Task :input-lab:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :input-lab:mergeReleaseNativeLibs NO-SOURCE
+> Task :input-lab:stripReleaseDebugSymbols NO-SOURCE
+> Task :input-lab:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :input-lab:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :input-lab:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :input-lab:buildKotlinToolingMetadata UP-TO-DATE
+> Task :input-lab:generateReleaseBuildConfig UP-TO-DATE
+> Task :input-lab:checkReleaseAarMetadata UP-TO-DATE
+> Task :input-lab:generateReleaseResValues UP-TO-DATE
+> Task :input-lab:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :input-lab:generateReleaseResources UP-TO-DATE
+> Task :input-lab:mergeReleaseResources UP-TO-DATE
+> Task :input-lab:packageReleaseResources UP-TO-DATE
+> Task :input-lab:parseReleaseLocalResources UP-TO-DATE
+> Task :input-lab:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :input-lab:extractDeepLinksRelease UP-TO-DATE
+> Task :input-lab:processReleaseMainManifest UP-TO-DATE
+> Task :input-lab:processReleaseManifest UP-TO-DATE
+> Task :input-lab:processReleaseManifestForPackage UP-TO-DATE
+> Task :input-lab:processReleaseResources UP-TO-DATE
+> Task :input-lab:compileReleaseKotlin UP-TO-DATE
+> Task :input-lab:javaPreCompileRelease UP-TO-DATE
+> Task :app:compileReleaseKotlin
+> Task :input-lab:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :app:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :diagnostic:lintAnalyzeDebugUnitTest
+> Task :app:dexBuilderRelease
+> Task :diagnostic:lintReportDebug UP-TO-DATE
+> Task :diagnostic:lintDebug
+> Task :app:mergeReleaseGlobalSynthetics UP-TO-DATE
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:processReleaseJavaRes UP-TO-DATE
+> Task :input-lab:dexBuilderRelease UP-TO-DATE
+> Task :input-lab:desugarReleaseFileDependencies UP-TO-DATE
+> Task :input-lab:mergeReleaseStartupProfile UP-TO-DATE
+> Task :input-lab:mergeExtDexRelease UP-TO-DATE
+> Task :input-lab:mergeDexRelease UP-TO-DATE
+> Task :input-lab:mergeReleaseArtProfile UP-TO-DATE
+> Task :input-lab:mergeReleaseGlobalSynthetics UP-TO-DATE
+> Task :input-lab:compileReleaseArtProfile UP-TO-DATE
+> Task :input-lab:mergeReleaseShaders UP-TO-DATE
+> Task :input-lab:compileReleaseShaders NO-SOURCE
+> Task :input-lab:generateReleaseAssets UP-TO-DATE
+> Task :input-lab:mergeReleaseAssets UP-TO-DATE
+> Task :input-lab:compressReleaseAssets UP-TO-DATE
+> Task :input-lab:extractReleaseVersionControlInfo UP-TO-DATE
+> Task :input-lab:generateReleaseLintVitalReportModel UP-TO-DATE
+> Task :input-lab:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :input-lab:lintVitalReportRelease UP-TO-DATE
+> Task :input-lab:lintVitalRelease
+> Task :input-lab:processReleaseJavaRes UP-TO-DATE
+> Task :input-lab:mergeReleaseJavaResource UP-TO-DATE
+> Task :input-lab:optimizeReleaseResources UP-TO-DATE
+> Task :input-lab:collectReleaseDependencies UP-TO-DATE
+> Task :input-lab:sdkReleaseDependencyData UP-TO-DATE
+> Task :input-lab:writeReleaseAppMetadata UP-TO-DATE
+> Task :input-lab:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :input-lab:packageRelease UP-TO-DATE
+> Task :input-lab:createReleaseApkListingFileRedirect UP-TO-DATE
+> Task :input-lab:assembleRelease UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:generateDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeReleaseJavaResource
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :app:compileDebugAndroidTestShaders NO-SOURCE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :input-lab:processDebugAndroidTestManifest UP-TO-DATE
+> Task :input-lab:generateDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :input-lab:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :input-lab:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :input-lab:generateDebugAndroidTestResources UP-TO-DATE
+> Task :input-lab:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :input-lab:processDebugAndroidTestResources UP-TO-DATE
+> Task :input-lab:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :input-lab:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :input-lab:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :input-lab:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :input-lab:compileDebugAndroidTestShaders NO-SOURCE
+> Task :input-lab:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :input-lab:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :input-lab:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :input-lab:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :input-lab:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :input-lab:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :input-lab:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :input-lab:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :input-lab:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :input-lab:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :input-lab:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :input-lab:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :input-lab:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :input-lab:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :input-lab:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :input-lab:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :input-lab:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :input-lab:packageDebugAndroidTest UP-TO-DATE
+> Task :input-lab:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :input-lab:assembleDebugAndroidTest UP-TO-DATE
+> Task :diagnostic:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :diagnostic:mergeDebugShaders UP-TO-DATE
+> Task :diagnostic:compileDebugShaders NO-SOURCE
+> Task :diagnostic:generateDebugAssets UP-TO-DATE
+> Task :diagnostic:mergeDebugAssets UP-TO-DATE
+> Task :diagnostic:compressDebugAssets UP-TO-DATE
+> Task :diagnostic:desugarDebugFileDependencies UP-TO-DATE
+> Task :diagnostic:dexBuilderDebug
+> Task :diagnostic:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :diagnostic:processDebugJavaRes UP-TO-DATE
+> Task :app:mergeDexRelease
+> Task :app:compileReleaseArtProfile
+> Task :diagnostic:checkDebugDuplicateClasses UP-TO-DATE
+> Task :diagnostic:mergeExtDexDebug UP-TO-DATE
+> Task :diagnostic:mergeDebugJavaResource
+> Task :app:compileDebugAndroidTestKotlin
+> Task :diagnostic:mergeLibDexDebug
+> Task :app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :diagnostic:mergeProjectDexDebug
+> Task :app:dexBuilderDebugAndroidTest
+> Task :device-android:lintVitalAnalyzeRelease
+> Task :app:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :diagnostic:mergeDebugJniLibFolders UP-TO-DATE
+> Task :diagnostic:mergeDebugNativeLibs NO-SOURCE
+> Task :diagnostic:stripDebugDebugSymbols NO-SOURCE
+> Task :diagnostic:validateSigningDebug UP-TO-DATE
+> Task :diagnostic:writeDebugAppMetadata UP-TO-DATE
+> Task :diagnostic:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :bridge-host:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :bridge-host:mergeDebugShaders UP-TO-DATE
+> Task :bridge-host:compileDebugShaders NO-SOURCE
+> Task :bridge-host:generateDebugAssets UP-TO-DATE
+> Task :bridge-host:mergeDebugAssets UP-TO-DATE
+> Task :bridge-host:compressDebugAssets UP-TO-DATE
+> Task :bridge-host:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest
+> Task :bridge-host:dexBuilderDebug UP-TO-DATE
+> Task :bridge-host:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :bridge-host:processDebugJavaRes UP-TO-DATE
+> Task :bridge-host:mergeDebugJavaResource UP-TO-DATE
+> Task :bridge-host:checkDebugDuplicateClasses UP-TO-DATE
+> Task :bridge-host:mergeExtDexDebug UP-TO-DATE
+> Task :bridge-host:mergeLibDexDebug UP-TO-DATE
+> Task :bridge-host:mergeProjectDexDebug UP-TO-DATE
+> Task :bridge-host:mergeDebugJniLibFolders UP-TO-DATE
+> Task :bridge-host:mergeDebugNativeLibs NO-SOURCE
+> Task :bridge-host:stripDebugDebugSymbols NO-SOURCE
+> Task :bridge-host:validateSigningDebug UP-TO-DATE
+> Task :bridge-host:writeDebugAppMetadata UP-TO-DATE
+> Task :bridge-host:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :bridge-host:packageDebug UP-TO-DATE
+> Task :bridge-host:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :bridge-host:assembleDebug UP-TO-DATE
+> Task :diagnostic:packageDebug
+> Task :diagnostic:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :diagnostic:assembleDebug
+> Task :app:packageDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebugAndroidTest
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease UP-TO-DATE
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleRelease
+
+[Incubating] Problems report is available at: ./build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 10s
+505 actionable tasks: 85 executed, 420 up-to-date
+{
+  "agent-debug": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "1e998933b795158cdb33f1d2cbc331677e7edbfeb0bcf82b3bd5d772a49dbfc5",
+    "bytes": 5914897,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='dev.thor.inputlab.permission.CONTROL'\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "agent-release-unsigned": {
+    "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+    "sha256": "cd6fccda2a845f75e00258fa202eb61aeba1916a28c1e12a6d82a0a319231eda",
+    "bytes": 4581328,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "input-lab-debug": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+    "sha256": "4712c6482bf630c0a59cd89cdfdea12e24b2e032ad5138faf93215ec6fd657ae",
+    "bytes": 2783647,
+    "permissions": "package: dev.thor.inputlab\npermission: dev.thor.inputlab.permission.CONTROL"
+  },
+  "input-lab-release-unsigned": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+    "sha256": "8fa236594b804e8c1d4c8b3bf07aed000cc4cbbda8147b0d076172af3f3e35ff",
+    "bytes": 2226744,
+    "permissions": "package: dev.thor.inputlab"
+  }
+}

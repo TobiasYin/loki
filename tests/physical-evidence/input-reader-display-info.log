@@ -1,0 +1,200 @@
+10-15 18:06:19.505  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:19.505  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:22.545  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:22.545  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:22.545  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:25.591  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:25.591  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:25.592  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:28.630  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:28.631  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:28.632  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:31.673  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:31.673  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:31.678  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:34.757  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:34.757  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:34.757  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:37.744  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:37.744  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:37.744  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:40.467  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:40.467  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:40.467  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:53.528  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:53.528  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:53.529  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:56.561  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:56.561  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:56.561  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:06:59.605  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:06:59.605  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:06:59.605  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:02.640  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:02.640  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:02.640  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:05.680  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:05.680  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:05.681  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:08.716  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:08.716  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:08.716  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:11.756  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:11.757  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:11.758  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:14.798  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:14.798  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:14.798  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:17.840  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:17.840  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:17.841  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:20.570  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:20.570  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:20.570  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:33.618  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:33.619  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:33.619  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:36.657  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:36.658  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:36.658  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:39.696  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:39.696  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:39.697  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:42.741  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:42.741  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:42.742  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:45.776  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:45.776  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:45.776  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:48.811  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:48.811  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:48.811  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:51.844  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:51.845  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:51.845  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:54.883  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:54.883  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:54.884  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:07:57.922  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:07:57.922  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:07:57.922  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:00.660  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:00.661  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:00.661  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:13.727  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:13.727  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:13.728  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:16.769  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:16.769  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:16.770  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:19.811  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:19.811  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:19.811  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:22.853  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:22.853  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:22.854  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:25.896  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:25.897  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:25.897  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:28.932  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:28.932  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:28.932  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:31.968  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:31.968  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:31.968  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:35.010  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:35.010  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:35.011  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:38.045  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:38.045  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:38.045  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:40.743  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:40.743  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:40.743  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:53.774  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:53.774  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:53.774  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:56.817  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:56.818  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:56.818  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:08:59.863  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:08:59.863  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:08:59.865  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:02.898  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:02.898  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:02.899  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:05.933  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:05.933  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:05.933  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:16.994  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:16.994  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:16.995  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:20.037  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:20.038  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:20.038  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:23.079  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:23.079  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:23.080  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:26.116  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:26.116  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:26.117  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:29.151  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:29.151  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:29.152  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:32.196  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:32.196  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:32.196  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:35.235  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:35.235  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:35.236  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:38.275  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:38.275  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:38.275  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:41.312  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:41.313  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:41.313  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:50.358  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:50.358  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:50.358  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:53.394  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:53.394  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:53.394  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:56.430  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:56.430  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:56.430  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:09:59.469  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:09:59.469  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:09:59.470  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:02.508  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:02.508  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:02.509  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:05.545  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:05.545  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:05.545  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:08.593  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:08.593  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:08.594  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:11.636  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:11.636  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:11.636  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:14.682  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:14.683  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:14.683  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:19.723  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:19.723  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:19.724  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:23.764  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:23.764  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:23.765  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:27.809  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:27.810  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:27.810  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:31.852  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:31.853  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:31.853  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:35.891  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:35.892  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:35.893  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4
+10-15 18:10:39.935  2164  2468 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+10-15 18:10:39.935  2164  2468 I InputReader: Device reconfigured: id=7, name='fts_ts', size 1080x1920, orientation 0, mode 1, display id 0
+10-15 18:10:39.938  2164  2468 I InputReader: Device reconfigured: id=6, name='fts_ts_3', size 1080x1240, orientation 0, mode 1, display id 4

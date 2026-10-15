@@ -1,0 +1,13 @@
+{
+  "sourceCommit": "3a8ad910c350f4d52408380529c4e1e2cf8dd1bf",
+  "ownAccessibilityEnabled": true,
+  "ownAccessibilityActuallyBound": true,
+  "otherServicesPreserved": true,
+  "otherServiceCount": 4,
+  "shizukuUserServiceUid2000": true,
+  "modelProbe": "failed",
+  "wifiConnected": false,
+  "chatDisplay": 4,
+  "upperDisplay": 0,
+  "testFixturesReset": false
+}

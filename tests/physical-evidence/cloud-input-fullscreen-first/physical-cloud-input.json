@@ -1,0 +1,116 @@
+{
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "model": "deepseek-v4.1-flash",
+  "remoteService": "live OpenCode Go Responses",
+  "attempts": [
+    {
+      "kind": "logical",
+      "runId": "ed29f1fa-5f6a-4893-b7e3-adaed42c1764",
+      "receiverStatus": "pass",
+      "attemptId": "4ad8b6f0-adc4-4f45-bacd-295aa96a82b8",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 587121147,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4087:1:0:true:Rect(0, 0 - 1920, 1080):8"
+        },
+        {
+          "elapsedRealtimeMs": 587127400,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4087:1:0:true:Rect(0, 0 - 1920, 1080):9"
+        },
+        {
+          "elapsedRealtimeMs": 587127507,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4087:1:0:true:Rect(0, 0 - 1920, 1080):10"
+        },
+        {
+          "elapsedRealtimeMs": 587148678,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4087:1:0:true:Rect(0, 0 - 1920, 1079):10"
+        }
+      ],
+      "results": [
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792056838656,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": null,
+          "outcome": "submitted",
+          "evidenceRef": "native-event:ed29f1fa-5f6a-4893-b7e3-adaed42c1764:8c3fe453-7084-4972-851c-619ba92f404b",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ]
+        }
+      ],
+      "runStatus": "completed"
+    },
+    {
+      "kind": "frame",
+      "runId": "3c226ceb-ef72-4554-b9fc-c2eb9c3d8044",
+      "receiverStatus": "fail",
+      "attemptId": "8ee08a06-c79c-4bbd-bf63-8e32eb651250",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 587152475,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4087:1:0:true:Rect(0, 0 - 1920, 1079):16"
+        },
+        {
+          "elapsedRealtimeMs": 587156681,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4087:1:0:true:Rect(1, 0 - 1920, 1079):16"
+        },
+        {
+          "elapsedRealtimeMs": 587163852,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4087:1:0:true:Rect(1, 0 - 1920, 1080):16"
+        }
+      ],
+      "results": [
+        {
+          "toolId": "perception.capture_screen",
+          "observedAt": 1792056870080,
+          "source": "android-sdk\/accessibility",
+          "truncated": false,
+          "error": "TARGET_CHANGED",
+          "outcome": "observed",
+          "evidenceRef": "native-event:3c226ceb-ef72-4554-b9fc-c2eb9c3d8044:6186596c-52fd-4ee7-9e09-3c4581399d45",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"message\":\"Upper windows\\\/app\\\/layout changed\"}"
+            }
+          ]
+        },
+        {
+          "toolId": "perception.capture_screen",
+          "observedAt": 1792056875600,
+          "source": "android-sdk\/accessibility",
+          "truncated": false,
+          "error": "TARGET_CHANGED",
+          "outcome": "observed",
+          "evidenceRef": "native-event:3c226ceb-ef72-4554-b9fc-c2eb9c3d8044:3fee3997-4387-4d5d-953c-364abf812005",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"message\":\"Upper windows\\\/app\\\/layout changed\"}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

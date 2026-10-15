@@ -1,0 +1,176 @@
+{
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "model": "deepseek-v4.1-flash",
+  "remoteService": "live OpenCode Go Responses",
+  "attempts": [
+    {
+      "kind": "logical",
+      "runId": "b58d1d55-3477-4b00-b2df-e06b44c9184e",
+      "receiverStatus": "fail",
+      "attemptId": "e89a2c7b-56eb-4a2c-a99b-baaeae69856d",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 589240415,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4198:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):5",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4198,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589245878,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4198:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):5",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4198,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589248852,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4198:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):5",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4198,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589254923,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4198:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):5",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4198,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589264049,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4198:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):5",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4198,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": []
+    },
+    {
+      "kind": "frame",
+      "runId": "3f699203-545f-4e4f-97da-eb6a83af1252",
+      "receiverStatus": "fail",
+      "attemptId": "c5a7ee7c-9989-41c7-9d08-97646fd1a6f8",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 589273005,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4203:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):16",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4203,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589279160,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4203:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):16",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4203,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589285258,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4203:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):16",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4203,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589294340,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4203:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):16",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4203,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 589300457,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4203:1:0:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):16",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4203,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": []
+    }
+  ]
+}
