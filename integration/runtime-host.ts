@@ -86,7 +86,7 @@ const ports: RuntimePorts = {
       if(signal.aborted) throw new RuntimeError('CANCELLED');
       const prepared = await rpc('tool.prepare', envelope);
       if(prepared.error) return prepared;
-      if(envelope.toolId.startsWith('web.')) {
+      if(envelope.toolId==='web.search'||envelope.toolId==='web.fetch') {
         const native = await rpc('network.tool.begin',envelope);toolNetworkContext=native.context;
         const search=envelope.toolId==='web.search';const args=envelope.arguments as any;
         const url=search ? `${native.url}?q=${encodeURIComponent(args.query)}&count=5` : native.url;

@@ -9,11 +9,13 @@
 | 能力 | 新 Session | 当前实现与限制 |
 |---|---|---|
 | 上屏感知 | ON | 真实设备信息；校准显示与 Accessibility 后提供应用/窗口/UI 树/截图；每次模型请求仅注入最小上下文 |
-| 联网搜索 | ON | Brave 独立 Native 凭据和端点；未配置时不发布搜索；HTTP/HTTPS 网页按系统 DNS/代理访问，支持内网与代理 fake-IP；服务凭据分别绑定端点 |
+| 联网搜索 | ON | curl 等价 HTTP 请求、持久文件下载与完整性校验；Brave 独立 Native 凭据和端点；未配置时不发布搜索；HTTP/HTTPS 网页按系统 DNS/代理访问，支持内网与代理 fake-IP；服务凭据分别绑定端点 |
 | 屏幕操作 | OFF | 真实 Accessibility 定向触摸、过期目标拒绝；原生 gamepad 后端明确 unsupported |
-| ADB 调试 | OFF | Shizuku shell UID、Native 白/灰/黑名单；结构化文件只允许明确的应用私有合成配置目录，写前备份、hash 冲突、读回及恢复 |
+| ADB 调试 | OFF | Shizuku shell UID、Native 白/灰/黑名单；已下载 APK 的逐次确认安装与版本回验；结构化文件只允许明确的应用私有合成配置目录，写前备份、hash 冲突、读回及恢复 |
 
 ADB 调试采用 Native 白/灰/黑名单：限定参数的状态读取、亮度、风扇和刷新率直接执行；含隐私的诊断或按键分配变更逐条 UI 确认；抹除、格式化、刷机、提权和未知命令禁止。执行已审查 argv，不开放任意脚本。Shell 不等于 Root。Thor 双屏与常用配置手册作为内置 adb-operations Skill 按需加载。
+
+下载/安装工具、边界与真实模型的模拟器验收见 [网络请求与 APK 安装说明](docs/download-install.md)。
 
 ## 全项目入口
 

@@ -68,7 +68,8 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                 val a = backend.availability(e.toolId, args)
                 if (a.status != Status.READY) fail(if (a.status == Status.PERMISSION_MISSING) Code.PERMISSION_MISSING else Code.BACKEND_UNAVAILABLE, a.reason)
             }, cancellation) { action -> authority.commit(e) { action() } }
-            requireTool(resource.tryLock(), Code.BACKEND_UNAVAILABLE, "Device resource busy")
+            val device=ToolPack.descriptors.getValue(e.toolId).concurrencyKey!="network"
+            if(device)requireTool(resource.tryLock(), Code.BACKEND_UNAVAILABLE, "Device resource busy")
             try {
                 cp.check()
                 authority.claim(e)
@@ -81,7 +82,7 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                         Code.TARGET_CHANGED,"Screenshot must return a fresh observation on the authorized display")
                 }
                 return result
-            } finally { resource.unlock() }
+            } finally { if(device)resource.unlock() }
         } catch (t: ToolFailure) {
             val preciseCode = if (t.code == Code.PERMISSION_MISSING && availability.status == Status.UNSUPPORTED) Code.UNSUPPORTED
                 else if (t.code == Code.PERMISSION_MISSING && availability.status in setOf(Status.BACKEND_MISSING, Status.TEMPORARILY_UNAVAILABLE)) Code.BACKEND_UNAVAILABLE else t.code

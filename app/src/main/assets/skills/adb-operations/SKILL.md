@@ -1,6 +1,6 @@
 ---
 name: adb-operations
-description: 在用户要求读取 Thor 系统状态、调整双屏亮度、风扇、刷新率或复现设备配置时使用。包含白灰黑名单与操作手册。
+description: 在用户要求读取 Thor 系统状态、调整双屏亮度、风扇、刷新率、用 curl 请求网络、下载和安装应用或复现设备配置时使用。包含白灰黑名单与操作手册。
 ---
 # Thor 设备操作手册
 
@@ -14,6 +14,7 @@ debug_shell 的 command 是单条设备命令，兼容开头 adb shell。直接�
 
 按任务只读取需要的资料：
 
+- curl 网络请求、GitHub 发布查询、下载 APK、ADB 安装与回验：[references/download-install.md](references/download-install.md)。安装需要本次 UI 确认，普通请求和下载无需批准。
 - 上/下屏分别调亮度：[references/thor-brightness.md](references/thor-brightness.md)。使用 debug_thor_brightness，不用百分比设置项冒充实际副屏控制。
 - 风扇模式与转速回验：[references/thor-fan.md](references/thor-fan.md)。不写硬件节点，不关闭散热。
 - 刷新率：[references/thor-refresh.md](references/thor-refresh.md)，包含 60/120 Hz 的写入先后与实际回验。

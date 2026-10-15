@@ -36,6 +36,7 @@ class ProductHost private constructor(private val context: Context, private val 
     val authority = Authority(dev.thor.bridge.MonotonicClock { SystemClock.elapsedRealtime() })
     private val serial = Executors.newSingleThreadExecutor()
     private val deviceWorker = Executors.newSingleThreadExecutor()
+    private val networkWorker = Executors.newFixedThreadPool(4)
     private val clock = Clock { SystemClock.elapsedRealtime() }
     private val store = SqliteStore(context, "product.db")
     private var state = store.load()
@@ -344,7 +345,7 @@ class ProductHost private constructor(private val context: Context, private val 
     private fun toolEnvelope(c: String, j: JSONObject): Envelope {
         val b = bound(c, j);val snapshot=scope(b).snapshot; require(j.getString("bridgeVersion") == "0.1" && j.getString("schemaVersion") == "1")
         require(j.getString("requestId").length in 1..100 && j.getString("toolCallId").length in 1..512)
-        if(j.getString("toolId").startsWith("web."))require(j.getJSONArray("resources").toString() == "[\"public-web\"]")
+        if(j.getString("toolId") in setOf("web.search","web.fetch","web.request"))require(j.getJSONArray("resources").toString() == "[\"public-web\"]")
         if(j.getString("toolId") == "probe.picture")require(j.getJSONArray("resources").toString() == "[\"fixture\"]")
         if(j.getString("toolId") in skillToolIds)require(j.getJSONArray("resources").toString()=="[\"local-skills\"]")
         val remaining = (j.getLong("deadline") - System.currentTimeMillis()).coerceAtMost(authority.remainingLeaseMs(b)).coerceAtMost(60000)
@@ -388,6 +389,10 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         deviceAuthority.validate(e); schemas.validate(e.toolId, args)
         require(redactor.redact(j.getJSONObject("arguments").toString()) == j.getJSONObject("arguments").toString())
+        if(e.toolId in setOf("web.request","files.download")) {
+            val decoded=java.net.URLDecoder.decode((args.getValue("url") as String).replace("+","%2B"),"UTF-8")
+            requireTool(redactor.redact(decoded)==decoded,Code.PERMISSION_MISSING,"Native credentials cannot be included in tool URLs")
+        }
         val shellPolicy=if(e.toolId=="debug.shell")ShellCommandPolicy.classify(args.getValue("command") as String) else null
         requireTool(shellPolicy?.tier!=ShellCommandPolicy.Tier.BLACK,Code.COMMAND_BLOCKED,shellPolicy?.reason.orEmpty())
         val brightness=if(e.toolId=="debug.thor_brightness")ThorBrightnessCommand.parse(args) else null
@@ -398,6 +403,11 @@ class ProductHost private constructor(private val context: Context, private val 
             else -> ToolPack.descriptors.getValue(e.toolId).effect==Effect.WRITE
         }
         var approval: Approval? = null; var summary = brightness?.summary.orEmpty()
+        if(e.toolId=="apps.install") {
+            val record=backend.downloads.installPreview(args.getValue("downloadId") as String,args.getValue("sha256") as String)
+            val apk=record.getJSONObject("apk")
+            summary="安装应用 · 需要本次确认\n${apk.getString("label")} (${apk.getString("packageName")})\n版本 ${apk.optString("versionName")} · ${apk.getLong("versionCode")}\n来源：${record.getString("url")}\n实际下载地址：${record.getString("finalUrl")}\n文件：${record.getString("filename")} · ${record.getLong("size")} 字节\nSHA-256：${record.getString("sha256")}\n签名：${apk.getJSONArray("signerSha256").let {a->(0 until a.length()).joinToString(", "){a.getString(it)}}}\n声明权限：${apk.getJSONArray("requestedPermissions").let {a->(0 until a.length()).joinToString(", "){a.getString(it)}}}\n\n通过 ADB 安装此文件，可能覆盖同签名的旧版本；不允许降级、不自动授予权限。确认仅适用于本次运行和此文件。"
+        }
         if (e.toolId == "debug.shell") summary = "灰名单 · 需要本次确认\n${args.getValue("command")}\n\n${shellPolicy!!.reason}\n确认仅适用于当前会话、本次运行和这条具体命令。"
         if (e.toolId in setOf("files.write", "files.restore")) {
             val path: String; val desired: ByteArray; val expected: String
@@ -436,7 +446,7 @@ class ProductHost private constructor(private val context: Context, private val 
         // Approval waiting does not occupy the shared device executor. Only the
         // short authorized operation is serialized against other device actions.
         p.approved.whenComplete {_,_->
-        try { deviceWorker.execute worker@{
+        try { (if(ToolPack.descriptors[p.e.toolId]?.concurrencyKey=="network")networkWorker else deviceWorker).execute worker@{
             try {
                 val permitted = p.approved.get((p.e.deadline - clock.now()).coerceAtLeast(1), TimeUnit.MILLISECONDS)
                 requireTool(permitted, Code.PERMISSION_MISSING, "用户拒绝审批")
@@ -452,10 +462,13 @@ class ProductHost private constructor(private val context: Context, private val 
                     return@worker
                 }
                 deviceAuthority.validate(p.e)
-                backend.approval = p.approval
-                backend.shellApproval = if(p.approvalId==null)null else when(p.e.toolId) {
-                    "debug.shell" -> hash((p.args.getValue("command") as String).toByteArray())
-                    else -> null
+                if(ToolPack.descriptors[p.e.toolId]?.concurrencyKey!="network") {
+                    backend.approval = p.approval
+                    backend.installApproval = if(p.e.toolId=="apps.install" && p.approvalId!=null)p.args.getValue("sha256") as String else null
+                    backend.shellApproval = if(p.approvalId==null)null else when(p.e.toolId) {
+                        "debug.shell" -> hash((p.args.getValue("command") as String).toByteArray())
+                        else -> null
+                    }
                 }
                 val result = gateway.execute(p.e, p.args)
                 serial.execute {
@@ -479,7 +492,7 @@ class ProductHost private constructor(private val context: Context, private val 
                     } catch (error: Exception) { future.complete(obj("error" to ((error as? ToolFailure)?.code?.name ?: "STALE_AUTHORIZATION"), "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "unknown")) }
                 }
             } catch(e: Exception) { future.complete(obj("error" to (e as? ToolFailure)?.code?.name.orEmpty().ifEmpty { "CANCELLED" }, "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "observed")) }
-            finally { backend.approval = null; backend.shellApproval = null }
+            finally { if(ToolPack.descriptors[p.e.toolId]?.concurrencyKey!="network") {backend.approval = null; backend.shellApproval = null; backend.installApproval=null} }
         } } catch(_:java.util.concurrent.RejectedExecutionException) {future.complete(obj("error" to "CANCELLED","content" to JSONArray(),"outcome" to "observed"))}
         }
     }
@@ -690,6 +703,6 @@ class ProductHost private constructor(private val context: Context, private val 
         authority.stopRun(); prepared.values.forEach { it.approved.complete(false) }
         ThorAccessibilityService.invalidated = null
         serial.execute { try {stop("宿主关闭");bindings.values.forEach {b->run(b.runId).takeIf {it.optString("status") !in terminal}?.put("status","interrupted")};persist();bindings.clear();scopes.clear();deviceAuthority.close()} finally {store.close();storageOwner.release()} }
-        debug.close(); deviceWorker.shutdownNow(); serial.shutdown()
+        debug.close(); deviceWorker.shutdownNow();networkWorker.shutdownNow(); serial.shutdown()
     }
 }

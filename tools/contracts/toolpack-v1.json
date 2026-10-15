@@ -871,6 +871,239 @@
       "modelVisibility": true,
       "provenance": "builtin",
       "description": "Restore an approved backup with expected current hash and a recovery copy of the current version."
+    },
+    {
+      "toolId": "web.request",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "web_search"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "HEAD",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE",
+              "OPTIONS"
+            ]
+          },
+          "headers": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 65536
+          },
+          "maxBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "network",
+      "resources": [
+        "public-web"
+      ],
+      "platformPrerequisites": [
+        "web.request"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Curl-style HTTP/HTTPS request. Supports method, headers, UTF-8 body, status, response headers and bounded text. Normal system network, LAN and redirects; credentials are never borrowed from model/search settings. Use files_download for binary or large files."
+    },
+    {
+      "toolId": "files.download",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "web_search"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          },
+          "filename": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "[a-f0-9]{64}"
+          },
+          "maxBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 268435456
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "network",
+      "resources": [
+        "native-downloads"
+      ],
+      "platformPrerequisites": [
+        "files.download"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Download an HTTP/HTTPS file into durable Native storage, stream without model context/base64. Returns downloadId, SHA-256, actual size, final URL and APK metadata. Optional expected sha256. Default 128 MiB, maximum 256 MiB; whole request 60 seconds. No shell needed."
+    },
+    {
+      "toolId": "files.download_info",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "web_search"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "downloadId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 36,
+            "format": "uuid"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "network",
+      "resources": [
+        "native-downloads"
+      ],
+      "platformPrerequisites": [
+        "files.download_info"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Inspect a saved download, recheck SHA-256 and APK signature/package/version. Omit downloadId to list the latest 20 downloads. Files persist across conversations; incomplete downloads are removed."
+    },
+    {
+      "toolId": "apps.install",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "write",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "downloadId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 36,
+            "format": "uuid"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "[a-f0-9]{64}"
+          }
+        },
+        "required": [
+          "downloadId",
+          "sha256"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "native-downloads"
+      ],
+      "platformPrerequisites": [
+        "apps.install"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Install exactly this verified downloaded standalone APK using Shizuku ADB shell UID 2000. Requires per-install UI confirmation of package/version/signature/hash. No arbitrary paths, downgrade, grant-all or uninstall flags. Stop after submission may leave an installed app; use apps_package_info to verify."
+    },
+    {
+      "toolId": "apps.package_info",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packageName": {
+            "type": "string",
+            "pattern": "[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z0-9_]+)+",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "packageName"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "native-downloads"
+      ],
+      "platformPrerequisites": [
+        "apps.package_info"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Verify one named installed package, versionCode and APK path via ADB shell UID 2000. Does not list unrelated applications."
     }
   ]
 }

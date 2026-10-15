@@ -4,7 +4,7 @@ package dev.thor.tools
  * This is an argv allowlist, not a filter in front of sh -c. Unknown forms fail closed.
  */
 object ShellCommandPolicy {
-    const val VERSION = "3"
+    const val VERSION = "4"
     enum class Tier { WHITE, GRAY, BLACK }
     data class Decision(val tier: Tier, val reason: String, val argv: List<String> = emptyList()) {
         fun requireAllowed(approvalHash: String? = null, command: String? = null): List<String> {
@@ -90,6 +90,8 @@ object ShellCommandPolicy {
             }
             "cat" -> if(a.size==1 && (a[0] in setOf("/proc/meminfo","/proc/cpuinfo","/proc/uptime","/sys/class/power_supply/battery/capacity","/sys/class/gpio5_pwm2/speed","/sys/class/gpio5_pwm2/duty","/sys/class/gpio5_pwm2/period","/sys/class/gpio5_pwm2/state","/sys/class/gpio5_pwm2/thermal") || a[0].matches(Regex("/sys/class/backlight/panel[01]-backlight/(?:brightness|max_brightness)"))))return white("读取公开硬件状态")
             "pm" -> {
+                if(a.size==4 && a.take(3)==listOf("list","packages","--show-versioncode") && a[3].matches(Regex("[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z0-9_]+)+")))return white("核验指定应用的包名和版本")
+                if(a.size==2 && a[0]=="path" && a[1].matches(Regex("[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z0-9_]+)+")))return white("核验指定应用的安装路径")
                 if(a==listOf("list","packages") || a==listOf("list","packages","-3") || a.size==2 && a[0]=="path" && a[1].matches(Regex("[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z0-9_]+)+")))return gray("读取已安装应用信息")
                 return blocked("禁止应用清除、卸载、安装、授权和其他未审查的包管理操作")
             }
@@ -98,7 +100,7 @@ object ShellCommandPolicy {
     }
     fun describe(): Map<String,Any?> = mapOf("policyVersion" to VERSION,
         "white" to listOf("id","getprop ro.product.model","settings get system screen_brightness","wm size","dumpsys battery","cmd display get-displays","cmd display set-brightness 0.5","settings put system fan_mode 5","settings put system peak_refresh_rate 60.0","settings put system screen_off_timeout 60000"),
-        "gray" to listOf("settings put system screen_focus_lock 1","settings put system flip_button_layout 1","dumpsys display","pm list packages -3"),
+        "gray" to listOf("apps.install：已下载 APK 的本次 UI 确认（不可通过 debug.shell 安装）","settings put system screen_focus_lock 1","settings put system flip_button_layout 1","dumpsys display","pm list packages -3"),
         "black" to listOf("抹除/格式化/刷机/分区/提权/重启","应用数据清除或卸载","权限和连接配置写入","脚本、管道、重定向、复合命令、未知命令或参数"),
         "thorBrightness" to "debug.thor_brightness: read and set upper/lower value 0..255 are white. Stored dual_screen_brightness_level is percent only, not an effective backlight command.",
         "execution" to "Native 与 shell UID 进程共同检查；直接执行已审核 argv，不调用 sh -c；灰名单逐条 UI 确认，黑名单不可放行")

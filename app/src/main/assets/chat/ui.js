@@ -64,9 +64,10 @@
     node.querySelector('summary').addEventListener('click',()=>disclosures.set(key,!node.open));
     return node;
   }
-  const fieldNames={screen:'目标屏幕',displayId:'显示编号',displayName:'显示名称',brightness:'亮度（0–255）',before:'修改前',requested:'请求值',verified:'回读一致',policyVersion:'策略版本',policyTier:'安全等级',reason:'原因',requiresApproval:'需要确认',allowed:'允许提交',executed:'已执行',white:'白名单示例',gray:'灰名单示例',black:'禁止执行',execution:'执行规则',stdout:'输出',stderr:'错误输出',exitCode:'退出码',uid:'执行身份',command:'具体命令',query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
+  const fieldNames={downloadId:'下载文件编号',filename:'文件名',sha256:'SHA-256 校验值',size:'字节数',finalUrl:'下载地址',mime:'文件类型',apk:'应用信息',packageName:'应用包名',versionName:'版本',versionCode:'版本编号',signerSha256:'签名指纹',requestedPermissions:'声明权限',downloadedAt:'下载时间',downloads:'下载记录',installed:'已安装',apkPath:'安装路径',headers:'响应头',method:'请求方法',screen:'目标屏幕',displayId:'显示编号',displayName:'显示名称',brightness:'亮度（0–255）',before:'修改前',requested:'请求值',verified:'回读一致',policyVersion:'策略版本',policyTier:'安全等级',reason:'原因',requiresApproval:'需要确认',allowed:'允许提交',executed:'已执行',white:'白名单示例',gray:'灰名单示例',black:'禁止执行',execution:'执行规则',stdout:'输出',stderr:'错误输出',exitCode:'退出码',uid:'执行身份',command:'具体命令',query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
   function structured(value,depth=0) {
     if(value===null || value===undefined)return element('span','无','muted');
+    if(typeof value==='string' && depth<7 && /^[\s]*[\[{]/.test(value)) {try {return structured(JSON.parse(value),depth+1);}catch{}}
     if(typeof value!=='object')return element('div',typeof value==='boolean'?(value?'是':'否'):String(value),'text');
     if(depth>=7)return element('div','内容层级过深，请展开更具体的结果','muted');
     const list=element('dl',undefined,'structured');
@@ -98,7 +99,7 @@
     const count=events.filter(e=>e.type==='tool_started').length;
     disclosure.append(element('summary',`查看 ${count} 项操作`));
     const calls=new Map();
-    const toolLabels={'skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
+    const toolLabels={'web.request':'网络请求 · curl','files.download':'下载文件','files.download_info':'查看下载','apps.install':'安装应用','apps.package_info':'核验应用安装','skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
     const outcomeLabels={observed:'已完成',submitted:'已提交',unknown:'结果未知'};
     for(const event of events) {
       if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type))continue;

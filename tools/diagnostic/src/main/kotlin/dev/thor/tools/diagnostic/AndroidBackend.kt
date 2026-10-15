@@ -24,20 +24,24 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     private val frames = java.util.concurrent.ConcurrentHashMap<String, Pair<String, FrameTransform>>()
     var approval: Approval? = null
     var shellApproval: String? = null
+    var installApproval: String? = null
+    val downloads=NativeDownloads(context)
     @Volatile private var inputUnknown = false
     private val gestureTools = setOf("input.tap", "input.long_press", "input.swipe")
     override fun availability(toolId: String): Availability {
         val backend = when {
+            toolId in setOf("web.request","files.download","files.download_info") -> "native-http/private-downloads"
+            toolId.startsWith("apps.") -> "shizuku-userservice/shell-uid-2000"
             toolId.startsWith("perception.") -> "android-sdk/accessibility"
             toolId.startsWith("input.") -> "accessibility-dispatchGesture"
             toolId.startsWith("debug.") -> "shizuku-userservice"
             else -> "synthetic-config/android-app-owned-root"
         }
         if (toolId in setOf("input.press_button", "input.set_axes")) return Availability(Status.UNSUPPORTED, "No verified native gamepad device/source/axis backend; Thor POC-07 required", "none/native-gamepad")
-        if (toolId in setOf("debug.shell","debug.thor_brightness")) return shizuku.availability()
+        if (toolId in setOf("debug.shell","debug.thor_brightness","apps.install","apps.package_info")) return shizuku.availability()
         if (toolId == "debug.command_policy") return Availability(Status.READY,"Native command policy; no device mutation","native-command-policy")
         if (toolId in gestureTools && inputUnknown) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
-        if (toolId == "perception.device_info" || toolId.startsWith("files.") || toolId == "input.release_inputs") return Availability(Status.READY, "Manual diagnostics only", backend)
+        if (toolId == "web.request" || toolId == "perception.device_info" || toolId.startsWith("files.") || toolId == "input.release_inputs") return Availability(Status.READY, "Manual diagnostics only", backend)
         if (ThorAccessibilityService.instance == null) return Availability(Status.PERMISSION_MISSING, "Enable this diagnostic Accessibility service in Android settings", backend)
         return Availability(Status.READY, "Android API exists; delivery on Thor is unverified", backend)
     }
@@ -55,6 +59,25 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val e = envelope; val cp = checkpoint
         schemas.validate(e.toolId, args)
         return when (e.toolId) {
+            "web.request", "files.download", "files.download_info" -> {
+                val data=try {downloads.execute(e.toolId,args,cp)}catch(t:Exception){cp.check();throw t}
+                result(e,data,truncated=data["truncated"]==true,actualBackend=null)
+            }
+            "apps.install" -> {
+                val preview=downloads.installPreview(args.string("downloadId"),args.string("sha256"))
+                val approved=installApproval;installApproval=null
+                val data=shizuku.install(e.runId,downloads.apkFile(args.string("downloadId")),args.string("sha256"),approved,cp)
+                result(e,data+mapOf("apk" to preview.getJSONObject("apk").args()),outcome="submitted")
+            }
+            "apps.package_info" -> {
+                val pkg=args.string("packageName")
+                requireTool(pkg.matches(Regex("[a-zA-Z][a-zA-Z0-9_]*(?:\\.[a-zA-Z0-9_]+)+")),message="Invalid package")
+                val data=shizuku.shell(e.runId,"pm list packages --show-versioncode $pkg",15000,16384,cp)
+                val stdout=data["stdout"] as? String ?: ""
+                val installed=stdout.lineSequence().firstOrNull {it.startsWith("package:$pkg versionCode:")}
+                val path=if(installed!=null)shizuku.shell(e.runId,"pm path $pkg",15000,16384,cp)["stdout"] else null
+                result(e,data+mapOf("packageName" to pkg,"installed" to (installed!=null),"versionCode" to installed?.substringAfter("versionCode:")?.trim(),"apkPath" to path))
+            }
             "perception.device_info" -> {
                 args.only("sections")
                 val sections = args["sections"] as? List<*> ?: listOf("system")

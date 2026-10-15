@@ -15,6 +15,8 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     private data class ShellJob(val token: String,val process: java.lang.Process,val timeout: Int,val max: Int)
     @Volatile private var shellJob: ShellJob? = null
     @Volatile private var lease: Lease? = null
+    private var staged: File? = null
+    private var stagedHash: String? = null
     private val watchdog = Executors.newSingleThreadScheduledExecutor().apply {
         scheduleWithFixedDelay({ synchronized(this@DebugUserService) { lease?.let { if (clock.now() >= it.deadline) retire(it) } } }, 100, 100, TimeUnit.MILLISECONDS)
     }
@@ -150,8 +152,39 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
             (json(mapOf("data" to (data+mapOf("uid" to Process.myUid())),"submitted" to submitted)) as JSONObject).toString()
         } catch(t: Exception) {JSONObject().put("error",(t as? ToolFailure)?.code?.name ?: Code.IO_ERROR.name).put("message",(t as? ToolFailure)?.message ?: "Firmware brightness operation failed: ${t.javaClass.simpleName}/${t.cause?.javaClass?.simpleName.orEmpty()} ${if(t is SecurityException)t.message.orEmpty().take(180) else ""}").put("submitted",submitted).toString()}
     }
+    @Synchronized override fun stageApk(token:String,source:ParcelFileDescriptor,size:Long,sha256:String):String {
+        return try {
+            check(token)
+            requireTool(size in 1..268435456 && sha256.matches(Regex("[a-f0-9]{64}")),message="Invalid APK budget/hash")
+            staged?.delete();staged=null;stagedHash=null
+            val f=File.createTempFile("thor-apk-",".apk",File("/data/local/tmp"));staged=f
+            f.setReadable(false,false);f.setReadable(true,true);f.setWritable(false,false);f.setWritable(true,true)
+            val md=java.security.MessageDigest.getInstance("SHA-256");var bytes=0L
+            ParcelFileDescriptor.AutoCloseInputStream(source).use {input->f.outputStream().use {out->val b=ByteArray(65536);while(true){check(token);val n=input.read(b);if(n<0)break;bytes+=n;requireTool(bytes<=size,Code.LIMIT_EXCEEDED,"APK exceeds declared size");md.update(b,0,n);out.write(b,0,n)};out.fd.sync()}}
+            val actual=md.digest().joinToString(""){"%02x".format(it)}
+            requireTool(bytes==size && actual==sha256,Code.HASH_CONFLICT,"Staged APK checksum differs")
+            check(token);stagedHash=actual
+            "{\"staged\":true}"
+        } catch(t:Exception){staged?.delete();staged=null;stagedHash=null;JSONObject().put("error",(t as? ToolFailure)?.code?.name ?: Code.IO_ERROR.name).toString()}
+    }
+    @Synchronized override fun startInstall(token:String,sha256:String,approvalHash:String):String {
+        return try {
+            val l=check(token);val f=staged ?: fail(Code.IO_ERROR,"No staged APK")
+            requireTool(shellJob==null && stagedHash==sha256 && approvalHash==sha256,Code.APPROVAL_REQUIRED,"Exact APK approval required")
+            // Fixed argv only. No caller flags, paths, uninstall, grant-all or downgrade.
+            val process=ProcessBuilder("/system/bin/pm","install","--user",(l.caller/100000).toString(),"--restrict-permissions","-r","-S",f.length().toString()).start()
+            shellJob=ShellJob(token,process,55000,Budgets.TEXT)
+            l.cancel.register {process.destroy();if(process.isAlive)process.destroyForcibly()}
+            Thread {
+                try {f.inputStream().use {input->process.outputStream.use {out->val b=ByteArray(65536);while(true){l.cancel.check();requireTool(clock.now()<l.deadline,Code.TIMEOUT,"Install expired");val n=input.read(b);if(n<0)break;out.write(b,0,n)}}}}
+                catch(_:Exception){runCatching {process.outputStream.close()};process.destroy()}
+            }.apply {isDaemon=true;start()}
+            "{\"started\":true}"
+        } catch(t:Exception){JSONObject().put("error",(t as? ToolFailure)?.code?.name ?: Code.IO_ERROR.name).toString()}
+    }
     @Synchronized private fun retire(l: Lease) {
         l.cancel.cancel()
+        staged?.delete();staged=null;stagedHash=null
         shellJob?.takeIf {it.token == l.token}?.let {if(it.process.isAlive)it.process.destroyForcibly();shellJob=null}
         runCatching { l.owner.unlinkToDeath(l.death, 0) }
         if (lease === l) lease = null

@@ -24,11 +24,25 @@ class CoreTest {
         }
         override fun release(runId: String) = "test release"
     }
+    @Test fun boundedNetworkWorkDoesNotOwnTheDeviceCommitLock() {
+        val time=Time();val started=CountDownLatch(1);val finish=CountDownLatch(1)
+        val backend=FakeBackend {e,cp->if(e.toolId=="files.download"){started.countDown();assertTrue(finish.await(3,TimeUnit.SECONDS));cp.check()}}
+        val authority=ManualTestAuthority(time);val lease=authority.begin(backend)
+        val gateway=Gateway(authority,backend,Snapshots(time){Target("app","valid","TEST")},time)
+        fun envelope(tool:String)=Envelope(lease.session,lease.run,tool,tool,lease.epoch,lease.deadline)
+        val task=java.util.concurrent.Executors.newSingleThreadExecutor()
+        try {
+            val network=task.submit<ToolResult> {gateway.execute(envelope("files.download"),emptyMap())}
+            assertTrue(started.await(2,TimeUnit.SECONDS))
+            assertNull(gateway.execute(envelope("perception.device_info"),emptyMap()).error)
+            finish.countDown();assertNull(network.get(2,TimeUnit.SECONDS).error)
+        } finally {finish.countDown();task.shutdownNow()}
+    }
     @Test fun defaultsAndEffectiveSetAreLeastPrivilege() {
         val authority = ManualTestAuthority(Time()); val lease = authority.begin(FakeBackend())
         assertTrue(authority.enabled(Capability.SCREEN_PERCEPTION)); assertTrue(authority.enabled(Capability.WEB_SEARCH))
         assertFalse(authority.enabled(Capability.SCREEN_CONTROL)); assertFalse(authority.enabled(Capability.ADB_DEBUG))
-        assertEquals(ToolPack.descriptors.values.filter { it.capability == Capability.SCREEN_PERCEPTION }.map { it.toolId }.toSet(), lease.tools)
+        assertEquals(ToolPack.descriptors.values.filter { it.capability in setOf(Capability.SCREEN_PERCEPTION,Capability.WEB_SEARCH) }.map { it.toolId }.toSet(), lease.tools)
     }
     @Test fun crossSessionUnknownToolSchemaAndDeadlineAreRejected() {
         val time = Time(); val authority = ManualTestAuthority(time); val lease = authority.begin(FakeBackend())

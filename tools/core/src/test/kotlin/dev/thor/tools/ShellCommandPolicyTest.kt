@@ -8,7 +8,7 @@ class ShellCommandPolicyTest {
         try {block();fail("Expected $code")}catch(e: ToolFailure){assertEquals(code,e.code)}
     }
     @Test fun publicReadsRunWithoutApprovalAndHaveCanonicalExecutable() {
-        for(command in listOf("id","id -u","getprop ro.product.model","settings get system screen_brightness","settings get system screen_brightness_float","cmd display get-displays","cmd display help","wm size","dumpsys battery","cat /proc/uptime","cmd display set-brightness 0.5","settings put system screen_brightness 128","settings put system peak_refresh_rate 120.0","settings put system screen_brightness_mode 0","settings put system screen_off_timeout 60000")) {
+        for(command in listOf("id","id -u","pm path org.fossify.math","pm list packages --show-versioncode org.fossify.math","getprop ro.product.model","settings get system screen_brightness","settings get system screen_brightness_float","cmd display get-displays","cmd display help","wm size","dumpsys battery","cat /proc/uptime","cmd display set-brightness 0.5","settings put system screen_brightness 128","settings put system peak_refresh_rate 120.0","settings put system screen_brightness_mode 0","settings put system screen_off_timeout 60000")) {
             val d=ShellCommandPolicy.classify(command)
             assertEquals(command,ShellCommandPolicy.Tier.WHITE,d.tier)
             assertTrue(d.requireAllowed().first().startsWith("/system/bin/"))
@@ -24,7 +24,7 @@ class ShellCommandPolicyTest {
         }
     }
     @Test fun destructiveCommandsCannotBeApproved() {
-        for(command in listOf("rm -rf /data","dd if=/dev/zero of=/dev/block/by-name/userdata","mkfs.ext4 /dev/block/x","fastboot flash boot x.img","adb reboot bootloader","reboot recovery","recovery --wipe_data","pm clear dev.thor.agent","pm uninstall dev.thor.agent","cmd recovery wipe","settings reset system","settings put global adb_enabled 0","settings put secure enabled_accessibility_services null","su -c id")) {
+        for(command in listOf("rm -rf /data","dd if=/dev/zero of=/dev/block/by-name/userdata","mkfs.ext4 /dev/block/x","fastboot flash boot x.img","adb reboot bootloader","reboot recovery","recovery --wipe_data","pm clear dev.thor.agent","pm install /sdcard/test.apk","pm install -r -g /data/local/tmp/test.apk","pm list packages --show-versioncode org.fossify.math extra","pm uninstall dev.thor.agent","cmd recovery wipe","settings reset system","settings put global adb_enabled 0","settings put secure enabled_accessibility_services null","su -c id")) {
             val d=ShellCommandPolicy.classify(command)
             assertEquals(command,ShellCommandPolicy.Tier.BLACK,d.tier)
             expect(Code.COMMAND_BLOCKED){d.requireAllowed(hash(command.toByteArray()),command)}

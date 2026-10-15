@@ -22,7 +22,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(5)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(6)
     private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
@@ -138,6 +138,22 @@ class DebugConnection(private val context: Context, private val invalidated: () 
             requireTool(availability().status == Status.READY, Code.PERMISSION_MISSING, "Shizuku readiness changed; discard late output")
             return data
         } finally { runCatching { remote.cancel(token) } }
+    }
+    fun install(run:String,file:java.io.File,sha:String,approval:String?,cp:Checkpoint):Map<String,Any?> {
+        requireTool(approval==sha,Code.APPROVAL_REQUIRED,"This APK requires UI confirmation")
+        requireTool(availability().status==Status.READY,Code.BACKEND_UNAVAILABLE,"ADB backend unavailable")
+        val remote=service ?: fail(Code.BACKEND_UNAVAILABLE,"ADB backend disappeared")
+        val token="$run:${UUID.randomUUID()}";cp.check()
+        remote.openLease(token,SystemClock.elapsedRealtime()+60000,DebugUserService.ROOT,hostBinder)
+        cp.cancellation.register {worker.submit {runCatching {remote.cancel(token)}}}
+        fun checked(raw:String):JSONObject {val o=JSONObject(raw);if(o.has("error"))fail(Code.valueOf(o.getString("error")),"ADB APK operation failed");return o}
+        try {
+            ParcelFileDescriptor.open(file,ParcelFileDescriptor.MODE_READ_ONLY).use {fd->checked(remote.stageApk(token,fd,file.length(),sha))}
+            cp.check();cp.effect {checked(remote.startInstall(token,sha,approval.orEmpty()))}
+            val data=checked(remote.awaitShell(token)).getJSONObject("data").args()
+            cp.check();requireTool(data["exitCode"]==0 && (data["stdout"] as? String)?.trim()=="Success",Code.IO_ERROR,"ADB install failed: "+("${data["stdout"]} ${data["stderr"]}").lineSequence().filter {it.isNotBlank()}.take(3).joinToString(" ").take(1000))
+            return data+mapOf("sha256" to sha,"installed" to true,"backend" to "shizuku-adb/pm-install-stdin")
+        } finally {runCatching {remote.cancel(token)}}
     }
     fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint, approvalHash: String? = null) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max,"approvalHash" to approvalHash), cp)
     fun close() { closed=true;invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }

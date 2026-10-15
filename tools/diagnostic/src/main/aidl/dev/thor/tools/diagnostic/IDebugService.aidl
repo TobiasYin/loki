@@ -1,5 +1,6 @@
 package dev.thor.tools.diagnostic;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 interface IDebugService {
     int identity() = 1;
     void openLease(String token, long deadlineElapsed, String root, IBinder owner) = 2;
@@ -8,5 +9,7 @@ interface IDebugService {
     String startShell(String token, String command, int timeoutMs, int maxBytes, String approvalHash) = 5;
     String awaitShell(String token) = 6;
     String thorBrightness(String token, String action, String screen, int value) = 7;
+    String stageApk(String token, in ParcelFileDescriptor source, long size, String sha256) = 8;
+    String startInstall(String token, String sha256, String approvalHash) = 9;
     void destroy() = 16777114;
 }
