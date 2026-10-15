@@ -43,4 +43,4 @@ python3 scripts/emulator-live-install.py --serial emulator-5554 \
 
 复用真实配置后不要在同一安装上直接运行会重置配置的 fixture 测试；原有 emulator-verify.py 会拒绝覆盖真实服务配置。真实密钥只留在此测试 AVD 的加密凭据区，不进入报告或 APK。
 
-最终结果与证据摘要见 [验收记录](../tests/download-install-evidence/summary.json)。原始日志、完整报告和 APK 指纹保留在忽略的 build/integration/ 对应目录中；早期重试证据不覆盖最终记录。真实模型正向安装结果在验收结束后写入该摘要。
+最终结果与证据摘要见 [验收记录](../tests/download-install-evidence/summary.json)。原始日志、完整报告和 APK 指纹保留在忽略的 build/integration/ 对应目录中；早期重试证据不覆盖最终记录。真实模型正向安装已通过（75.031 秒）：Calculator 1.4.0 / org.fossify.math / versionCode 10，7,047,681 字节，官方 SHA-256 与实际文件一致，实际 UID 2000，安装后版本与路径回验一致。最终同一 APK 的拒绝用例也已通过（87.803 秒），安装工具返回 PERMISSION_MISSING，已有应用路径保持不变。最终检查为 68 项 JS、202 项 JVM、lint、debug/release/test APK 与产物隔离；20 项 AVD 回归及最终扩展 HTTP 边界测试通过。

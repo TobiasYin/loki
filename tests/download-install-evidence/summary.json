@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-16",
+  "implementationCommit": "f6d6a17f45c2309b2ba9e924b83ccdbd1b638f9d",
+  "physicalTestingPaused": true,
+  "target": {
+    "serial": "emulator-5554",
+    "fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BP22.250325.006/13344233:user/release-keys",
+    "realModel": "deepseek-v4.1-flash",
+    "endpoint": "https://opencode.ai/zen/go/v1/responses",
+    "credentials": "Native Keystore only; no key in reports"
+  },
+  "agentApkSha256": "1267e694c2d259db51d15d31ac47a5a1ddec3ad52aa708f425b27ae8fef02865",
+  "positive": {
+    "passed": true,
+    "runId": "904d31c7-2caf-4ee0-9223-b8b7fae48264",
+    "status": "completed",
+    "durationSeconds": 75.031,
+    "repository": "https://github.com/FossifyOrg/Calculator",
+    "release": "1.4.0",
+    "download": {
+      "downloadId": "f6c01c04-56c9-4e20-b27b-0136135887c9",
+      "filename": "calculator-10-foss-release.apk",
+      "url": "https://github.com/FossifyOrg/Calculator/releases/download/1.4.0/calculator-10-foss-release.apk",
+      "finalUrl": "https://release-assets.githubusercontent.com/github-production-release-asset/498017491/cd420ced-07dc-4471-8a25-c6de86ac3e47?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-10-15T18%3A15%3A12Z&rscd=attachment%3B+filename%3Dcalculator-10-foss-release.apk&rsct=application%2Fvnd.android.package-archive&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-10-15T17%3A14%3A31Z&ske=2026-10-15T18%3A15%3A12Z&sks=b&skv=2018-11-09&sig=I38UHr%2ByDuMfMpRsMUNDD0yK1zxKsAQx3PC8y09wpfc%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc5MjA4NTM5MiwibmJmIjoxNzkyMDg1MDkyLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.ZBU4UXYFaLSCQmFGzK7AP0n-_oV7a5ibRlE1cWllYus&response-content-disposition=attachment%3B%20filename%3Dcalculator-10-foss-release.apk&response-content-type=application%2Fvnd.android.package-archive",
+      "sha256": "7c5443c22d6d62c67dfe80df33ea9161ff0fa440f92590bcb45d7008b57613ed",
+      "size": 7047681,
+      "mime": "application/vnd.android.package-archive",
+      "downloadedAt": 1792085094499,
+      "apk": {
+        "packageName": "org.fossify.math",
+        "versionName": "1.4.0",
+        "versionCode": 10,
+        "label": "Calculator",
+        "signerSha256": [
+          "affdb124d3f4720c2f98dbca9eacba0514fba4306e20a2786c861c3c0d6ff292"
+        ],
+        "requestedPermissions": [
+          "org.fossify.android.permission.WRITE_GLOBAL_SETTINGS"
+        ]
+      },
+      "message": null
+    },
+    "install": {
+      "stdout": "Success\n",
+      "stderr": "",
+      "exitCode": 0,
+      "durationMs": 583,
+      "truncated": false,
+      "error": null,
+      "terminationConfirmed": false,
+      "descendantsMayRemain": true,
+      "uid": 2000,
+      "sha256": "7c5443c22d6d62c67dfe80df33ea9161ff0fa440f92590bcb45d7008b57613ed",
+      "installed": true,
+      "backend": "shizuku-adb/pm-install-stdin",
+      "apk": {
+        "packageName": "org.fossify.math",
+        "versionName": "1.4.0",
+        "versionCode": 10,
+        "label": "Calculator",
+        "signerSha256": [
+          "affdb124d3f4720c2f98dbca9eacba0514fba4306e20a2786c861c3c0d6ff292"
+        ],
+        "requestedPermissions": [
+          "org.fossify.android.permission.WRITE_GLOBAL_SETTINGS"
+        ]
+      },
+      "message": null
+    },
+    "verification": {
+      "stdout": "package:org.fossify.math versionCode:10\n",
+      "stderr": "",
+      "exitCode": 0,
+      "durationMs": 53,
+      "truncated": false,
+      "error": null,
+      "terminationConfirmed": false,
+      "descendantsMayRemain": true,
+      "uid": 2000,
+      "packageName": "org.fossify.math",
+      "installed": true,
+      "versionCode": "10",
+      "apkPath": "package:/data/app/~~b63gN3E36Xvwe8guf64A2A==/org.fossify.math-Y52Vd7Z203oQDEQWd-mDMw==/base.apk\n",
+      "message": null
+    },
+    "approvalInteraction": "instrumentation clicked actual product UI; not human approval",
+    "approvedViaProductUi": true,
+    "toolSequence": [
+      "skills.read",
+      "web.request",
+      "skills.read",
+      "files.download",
+      "apps.install",
+      "apps.package_info"
+    ]
+  },
+  "validation": {
+    "javascript": {
+      "passed": 68
+    },
+    "jvm": {
+      "passed": 202
+    },
+    "baselineAndroidRegression": {
+      "passed": 20,
+      "requireShizuku": true,
+      "note": "Includes NativeDownloadsTest; earlier source before installer compatibility fix. Final HTTP test and real install validate final APK separately."
+    },
+    "finalNativeHttpBoundaries": {
+      "passed": 1,
+      "durationSeconds": 0.692
+    },
+    "inputLabParserChecks": {
+      "passed": 4
+    },
+    "buildLintArtifacts": "passed",
+    "finalDebugApkMatchesLiveTest": true
+  },
+  "failuresRetained": [
+    {
+      "directory": "build/integration/live-install-success",
+      "reason": "Test harness read an earlier completed run before new run publication; fixed by tracking new run IDs."
+    },
+    {
+      "directory": "build/integration/live-install-final",
+      "reason": "Android 16 rejected trailing stdin path dash as Unknown option -; final command omits path, specifies current user and restricts permission whitelisting; failed install was never reported successful."
+    }
+  ],
+  "files": {
+    "build/integration/live-install-fixed/result.json": {
+      "sha256": "226d7f563916f12288a1ca5fa5899a2a5fda54a1fa9b1e6fab4287495167b1de",
+      "bytes": 84698
+    },
+    "build/integration/live-install-fixed/metadata.json": {
+      "sha256": "a610196df27ad4cbbb773b3d934abb666c722e924fa37217b8819a3b7ee8b873",
+      "bytes": 1826
+    },
+    "build/integration/live-install-fixed/suite.log": {
+      "sha256": "c9cd4c86dd0f9451787a96fb8838230ef55c98bd1d615eea58f1ff71dd96b2b9",
+      "bytes": 803
+    },
+    "build/integration/live-install-rejection/result.json": {
+      "sha256": "60b81c1ad5368ad80b6498685ee9f8c106ee5df18f7d826a2a2b1d504a78a360",
+      "bytes": 79133
+    },
+    "build/integration/live-install-rejection/suite.log": {
+      "sha256": "3ae46eaaceff50c53a585254ed7ac7dcd6915593ddc8161f15076c52ef6dd360",
+      "bytes": 803
+    },
+    "build/integration/live-install-success/result.json": {
+      "sha256": "32ea076a47ba9a8bac9c829f5b5327813f817d271e81bd083002f2a618237b98",
+      "bytes": 29689
+    },
+    "build/integration/live-install-success/suite.log": {
+      "sha256": "e9f9f13878beaef97510d41036aae317aba86f98586f85998483a83f65b45ef2",
+      "bytes": 2035
+    },
+    "build/integration/live-install-final/result.json": {
+      "sha256": "0ab03de1aa94b5992e4dfe6853c41957ca15f1cf5f9860adfa5fbdf084dd057e",
+      "bytes": 58496
+    },
+    "build/integration/live-install-final/suite.log": {
+      "sha256": "ad7651c8d54e7ec9fa7021b398ac99ea5d96cd83bddc53e37dfab30a0f0ea26f",
+      "bytes": 2043
+    },
+    "build/integration/download-regression/product-suite-final.log": {
+      "sha256": "74a33222eaa8019f04aaa4546e8ea104d87e0e9130c2c316cca1a63bf19ce4ea",
+      "bytes": 13408
+    },
+    "build/integration/download-native-final.log": {
+      "sha256": "98a263b0cd400822f0a78245df8c2eb68aa74e52a98c80108bc550e8fb35f615",
+      "bytes": 776
+    },
+    "build/integration/download-verify-final.log": {
+      "sha256": "c5b8fb56272e989881611f9e93a480ebe67ff96c8a5169569b55a0b0d620bcad",
+      "bytes": 42082
+    },
+    "tests/download-install-evidence/chat.png": {
+      "sha256": "1ab01211f47e0c98d1e6085d8b65b9d4183d205cb20faf7c8815851bf7700c2e",
+      "bytes": 224257
+    },
+    "build/integration/live-install-rejection-final/result.json": {
+      "sha256": "a985b224307bfc3112ea261b5bcabdd77dedd9e5d0c1d73427f3725ddadd3ebb",
+      "bytes": 56422
+    },
+    "build/integration/live-install-rejection-final/metadata.json": {
+      "sha256": "6cf25c9353c1b4fd57e2983755b3cf9d3fa382c5dcc69a9bd415217c96ca585a",
+      "bytes": 433
+    },
+    "build/integration/live-install-rejection-final/suite.log": {
+      "sha256": "cbc001954a7f29f8e40c1e5bb0f9168d45e361bd0b1b159876a0ce39abb551dc",
+      "bytes": 803
+    }
+  },
+  "negative": {
+    "passed": true,
+    "runId": "27840fa1-4b2d-4951-9efd-a01a9c737a07",
+    "status": "interrupted",
+    "durationSeconds": 87.803,
+    "rejectedViaProductUi": true,
+    "installedStateUnchanged": true,
+    "installError": "PERMISSION_MISSING",
+    "agentApkSha256": "1267e694c2d259db51d15d31ac47a5a1ddec3ad52aa708f425b27ae8fef02865",
+    "sourceCommit": "f6d6a17f45c2309b2ba9e924b83ccdbd1b638f9d",
+    "approvalInteraction": "instrumentation clicked actual product UI; not human approval"
+  },
+  "sourceSha256": {
+    "app/src/main/java/dev/thor/agent/ProductHost.kt": "bb4bb5a58cad618d35aad4b740d726d9e9675de3afe601f8dda6272a20abedd9",
+    "integration/runtime-host.ts": "6f79205c846d4c9cdcbb8613fe35562bbd3b122a012e8f2c40e7f7e3e2c648c2",
+    "tools/contracts/toolpack-v1.json": "3459a4c1fbac30c8e4550db077615a1a54e4f75cdeaeb62b352503a7e2c83c33",
+    "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt": "307679b79418d200eead917bdae6fbc7c6e17fe47bd261703a1bb57182ab84d7",
+    "tools/core/src/main/kotlin/dev/thor/tools/Authorization.kt": "774039f96867558c4bd0ee7ea9ec1ad7b30767e962592ad2af7f0bfca7167db7",
+    "tools/core/src/main/kotlin/dev/thor/tools/ShellCommandPolicy.kt": "3ae2993f562cf546b483509eeae017f84f228d0d633f34c2916c8cbd96d005dd",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/NativeDownloads.kt": "aa5df07b8926218ca06edd65449c17d36d6b7d1cfdb51bee370ad2f6cb374d00",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugConnection.kt": "7226df0064803513d82ccb7079ed43507dace6afb0b073c959e65bf7178035cd",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugUserService.kt": "e3e8779160e52fb1d342ce7810736d4160343dbee88902e2cafc4c5a769661a6",
+    "app/src/androidTest/java/dev/thor/agent/EmulatorLiveInstallTest.kt": "47cb9ecbc33249dc5705a06fee110dcd31265a2b364808d953238d1b6f2b8cb0",
+    "app/src/androidTest/java/dev/thor/agent/NativeDownloadsTest.kt": "80c3faec71c8a7d1e43e20152d380550d0896236d9e875bf0b179b1aaacecb5e"
+  }
+}
