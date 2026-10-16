@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "scope": "Final fixed App03e853/Testd584 targeted ModernUI1 pass/Presentation1 fail before new global-error assertion; no retry. No transfer of prior7/fullrelease claim. Excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4651,
+      "sha256": "4c78c5f0aab303910ac92cf0f8473d94f49803eb519e0df479b99a21917318aa"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "95981e6f52cda8a63c9c3ea30eef3b6030f3283fffb179ebd26f912cb8ece70e"
+    },
+    {
+      "path": "modern-ui-explicit.log",
+      "bytes": 844,
+      "sha256": "f2005ec778690aad84a6e380db219a59ff4fc13a67ead3b077a45e64aaf80186"
+    },
+    {
+      "path": "modern-ui.json",
+      "bytes": 7510,
+      "sha256": "648e6f94c897227dd8b6e7f491be7aa9219fc4d7f90d7b5ca5c8ebd5d5140bd4"
+    },
+    {
+      "path": "presentation-explicit.log",
+      "bytes": 2293,
+      "sha256": "4b65ce5220761b08d9991f3de639e40c5221d6395bc7e7216cca1509e9968a13"
+    },
+    {
+      "path": "presentation-preservation.json",
+      "bytes": 2176,
+      "sha256": "1623420b74498e78bea79dca6d39472779c47830c996df31cafb4f536d7b7162"
+    },
+    {
+      "path": "presentation.json",
+      "bytes": 30681,
+      "sha256": "96139e87bb447477d33f6ef65b49a4ba47d81e2ec27d1eac92c3d9cd10040a30"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2176,
+      "sha256": "1623420b74498e78bea79dca6d39472779c47830c996df31cafb4f536d7b7162"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 2874,
+      "sha256": "c8b2e2f4405233b84f093aa2c6b98f3b40e41ff113f44267f5854c66090ce681"
+    }
+  ]
+}

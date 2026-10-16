@@ -355,8 +355,11 @@ class ProductHost private constructor(private val context: Context, private val 
                 }
                 future.complete(value)
             } catch (e: Exception) {
-                lastError = if(request.optString("op") == "begin") when {model==null->"模型未配置：请在设置填写 API Key 和服务地址。";storageFailed->"本地存储不可用，历史已保留。";else->"任务暂未启动：检查当前会话是否仍有任务，或查看模型设置中的具体错误。"} else "操作被拒绝：检查授权、活动运行或本地存储。"
                 val code=when(e) {is ToolFailure ->e.code.name;is dev.thor.bridge.BridgeFailure ->e.code.name;is IllegalArgumentException,is org.json.JSONException ->"INVALID_ARGUMENT";else ->"IO_ERROR"}
+                // Recoverable stale tool targets remain tool results; do not
+                // overwrite an unrelated page error while asking for a new observation.
+                if(!(request.optString("op")=="tool.prepare" && code=="TARGET_CHANGED"))
+                    lastError = if(request.optString("op") == "begin") when {model==null->"模型未配置：请在设置填写 API Key 和服务地址。";storageFailed->"本地存储不可用，历史已保留。";else->"任务暂未启动：检查当前会话是否仍有任务，或查看模型设置中的具体错误。"} else "操作被拒绝：检查授权、活动运行或本地存储。"
                 val content=JSONArray()
                 if(code=="COMMAND_BLOCKED")content.put(obj("type" to "text","text" to obj("policyVersion" to ShellCommandPolicy.VERSION,"policyTier" to "black","executed" to false,"reason" to (e as ToolFailure).message).toString()))
                 if(request.optString("op") == "tool.prepare")future.complete(obj("content" to content,"observedAt" to System.currentTimeMillis(),"source" to "native-gateway","truncated" to false,"outcome" to "observed","error" to code)) else future.complete(obj("error" to code)); publish()

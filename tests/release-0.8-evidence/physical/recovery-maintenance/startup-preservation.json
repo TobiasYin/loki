@@ -1,0 +1,53 @@
+{
+  "defaultLauncherMainDisplay": 4,
+  "verifiedByCurrentActivityAndLowerScreenshot": true,
+  "mainUiReady": true,
+  "nonterminalRuns": 0,
+  "history": {
+    "sessions": {
+      "rowCount": 176,
+      "idsPreserved": true,
+      "payloadsPreservedExceptExpectedSessionTimestamp": true
+    },
+    "runs": {
+      "rowCount": 184,
+      "idsPreserved": true,
+      "payloadsPreservedExceptExpectedSessionTimestamp": true
+    },
+    "messages": {
+      "rowCount": 368,
+      "idsPreserved": true,
+      "payloadsPreservedExceptExpectedSessionTimestamp": true
+    },
+    "events": {
+      "rowCount": 61419,
+      "idsPreserved": true,
+      "payloadsPreservedExceptExpectedSessionTimestamp": true
+    },
+    "attachments": {
+      "rowCount": 237,
+      "idsPreserved": true,
+      "payloadsPreservedExceptExpectedSessionTimestamp": true
+    }
+  },
+  "sessionUpdatedAtChanges": 0,
+  "originalSelectionPreserved": true,
+  "privatePreferenceBytesPreserved": {
+    "profiles": true,
+    "native-credentials": true,
+    "display-roles": true
+  },
+  "quickCheck": "ok",
+  "installed": [
+    {
+      "package": "dev.thor.agent",
+      "sha256": "485c1db024fff391ad576a2645a7522312a1c633a1f84e47684725cffffd7ef1"
+    },
+    {
+      "package": "dev.thor.agent.test",
+      "sha256": "fd6e6e5362e1fc28dd1b8ff90c3533caf71fca43486897ab5a3cde17333f7358"
+    }
+  ],
+  "hostGameInputs": [],
+  "scope": "data-preserving maintenance/startup only; no new game or model task, no full-save real-device stress claim"
+}

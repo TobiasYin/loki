@@ -286,7 +286,11 @@ class EmulatorPresentationControlTest {
             evidence.put("coordinateTargetReobservations",coordinateReobservations)
             until("Independent Presentation did not receive coordinate tap"){presentation("report",testRun,presentationLease).getJSONObject("snapshot").getInt("touchCount")==1}
             ok(tool(host!!,run,"perception.select_screen",obj("screen" to "upper")))
+            val errorBeforeStalePrepare=rpc(host!!,connection,"view",obj()).opt("error") ?: JSONObject.NULL
             assertEquals("TARGET_CHANGED",tool(host!!,run,"input.tap",obj("x" to 1,"y" to 1,"coordinateSpace" to "display_logical"),lowerSource).getString("error"))
+            val errorAfterStalePrepare=rpc(host!!,connection,"view",obj()).opt("error") ?: JSONObject.NULL
+            assertEquals("Recoverable stale tool.prepare must preserve the existing global page error",errorBeforeStalePrepare,errorAfterStalePrepare)
+            evidence.put("stalePreparePreservedGlobalError",true)
             assertEquals("TARGET_CHANGED",tool(host!!,run,"input.activate",obj("nodeRef" to touch.getString("nodeRef"))).getString("error"))
             assertEquals("TARGET_CHANGED",tool(host!!,run,"input.tap",obj("x" to 1,"y" to 1,"coordinateSpace" to "frame_pixels","frameId" to frame.getString("frameId"))).getString("error"))
             selectObservedLower(host!!,run,lower)

@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "scope": "Current JVM XML426, mixed executed/cached task states; new UI assertion is Android instrumentation, not counted here",
+  "totals": {
+    "tests": 426,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suiteCount": 64
+  },
+  "modules": [
+    {
+      "module": "app",
+      "gradleTask": ":app:testDebugUnitTest",
+      "taskStatus": "EXECUTED",
+      "tests": 100,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 23
+    },
+    {
+      "module": "device-core",
+      "gradleTask": ":device-core:test",
+      "taskStatus": "UP-TO-DATE",
+      "tests": 198,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 29
+    },
+    {
+      "module": "core",
+      "gradleTask": ":core:test",
+      "taskStatus": "UP-TO-DATE",
+      "tests": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 3
+    },
+    {
+      "module": "device-authority",
+      "gradleTask": ":device-authority:test",
+      "taskStatus": "UP-TO-DATE",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 1
+    },
+    {
+      "module": "input-lab",
+      "gradleTask": ":input-lab:testDebugUnitTest",
+      "taskStatus": "UP-TO-DATE",
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 8
+    }
+  ],
+  "files": [
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatBridgePolicyTest.xml",
+      "bytes": 903,
+      "sha256": "3fc74fbb158080a1abb7064a4861b7e0ecef1ebd5de6b815431aa01a2f4794ff",
+      "module": "app",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatEventProjectionTest.xml",
+      "bytes": 937,
+      "sha256": "9756f60b2a2948d937c1bd98b41d33f6476698645a67d75015c3d9f357427398",
+      "module": "app",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatSnapshotTest.xml",
+      "bytes": 741,
+      "sha256": "47c2f967b9068f3f04d7c5fcd6057b6321a124fb6e042115992318c61fc458a3",
+      "module": "app",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.CoordinatorTest.xml",
+      "bytes": 2405,
+      "sha256": "4bc738d07d902c3b63dcec538525558b94f8649bc4c1292ab9d69e99d1ce53e1",
+      "module": "app",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.DeepSeekCatalogTest.xml",
+      "bytes": 862,
+      "sha256": "641f62aed00f8cd8133d943ff39216a67e34a3041b3bc39df9c474460a57974a",
+      "module": "app",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.EventIndexIsolationTest.xml",
+      "bytes": 469,
+      "sha256": "499e6d8a9597dec15ddbb809822765f10f99f1e71142aefd0fdf6593fccf9d7e",
+      "module": "app",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ExecutionStateProjectionTest.xml",
+      "bytes": 1063,
+      "sha256": "91e1e5b3d7e44ac080bdabea80f0117d63316e9672d89fdf71f0f30acc4c9102",
+      "module": "app",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.HostRpcPayloadTest.xml",
+      "bytes": 1130,
+      "sha256": "6f92344372e2ff0661f58d8ae4d8202aa32d32a3aa125d21d44e2025302fa6a3",
+      "module": "app",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.InputFocusFailureTest.xml",
+      "bytes": 758,
+      "sha256": "9d939480d9b8bfa61bd6a1d44ba8e23952074ad8ae300846fdf862ef1df6f6bc",
+      "module": "app",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.LatestValueTest.xml",
+      "bytes": 798,
+      "sha256": "445d9082d243ee194ed046f1ecfd339d9fedccc8445f8278dc4852ecf1d9eab7",
+      "module": "app",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelCatalogTest.xml",
+      "bytes": 1307,
+      "sha256": "b99e6b33d005b9a4bee8a043854a9af2908406e231e5218ff83b35104dc7dfab",
+      "module": "app",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelConnectionTestTest.xml",
+      "bytes": 1572,
+      "sha256": "23f0b77a716570867a35dd065cacb3f9aa9758339be28b8554053d246a6ab897",
+      "module": "app",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.OfficialProfilePolicyTest.xml",
+      "bytes": 771,
+      "sha256": "64eee4e708fbf22713c20881af4c1d51a03f1bc618384def120dacd35f2839fd",
+      "module": "app",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.PreparedToolsTest.xml",
+      "bytes": 1039,
+      "sha256": "993ade833d3e3d17fa21fe1626480c129ec44155f9a26bbae70c5920245e9608",
+      "module": "app",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RecoveryHistoryTest.xml",
+      "bytes": 468,
+      "sha256": "f69081d3aff836730a29ffc47dd5993297d73e77d88ae32f20bcb285d7a9f4f4",
+      "module": "app",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RuntimeStartupDiagnosticsTest.xml",
+      "bytes": 643,
+      "sha256": "32a8947696792d4892fc2b49309c32181512c4164c922ee00742e98243984e19",
+      "module": "app",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SearchConnectionTestTest.xml",
+      "bytes": 579,
+      "sha256": "cddd54276ee3315d06d1786d7772a3b5cb8d632b08d3fe51db6a0793ef9047e6",
+      "module": "app",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillStoreTest.xml",
+      "bytes": 1201,
+      "sha256": "2205bcab7ce816b01a6f415680755875fb361577844fa6e4a0dc663def5e37c9",
+      "module": "app",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillTextResourcesTest.xml",
+      "bytes": 462,
+      "sha256": "a11cbf0dce0dd92b8fab138ef88fad99837a134070f05b7791caf8b0374edbf1",
+      "module": "app",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StartupRegressionTest.xml",
+      "bytes": 605,
+      "sha256": "d0a6aa604235aca5633e874d890f57c446fd5c55d0e21eb3201e243dafc5211a",
+      "module": "app",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StreamDisplayProjectionTest.xml",
+      "bytes": 982,
+      "sha256": "0e3658c2f7b50c9825439654e85eee6eb8797ace129be203a07c44807346247b",
+      "module": "app",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VoiceTransportTest.xml",
+      "bytes": 593,
+      "sha256": "edc7b428c65145a2ec5e144e49e1c1776cd4edcb3d8c6b9e9adbde30da288ac3",
+      "module": "app",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+      "bytes": 938,
+      "sha256": "d3d92a73b8600ea1c1562561c5dc6026a191ac08a533ee6cdff6d4f8097e0dd1",
+      "module": "app",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AccessibilitySetupTest.xml",
+      "bytes": 736,
+      "sha256": "9aa7b02d311bfbf7e0728abce30f8f898dc9b2db5eb8055bcd75eb268c33baa0",
+      "module": "device-core",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AgentBackgroundTest.xml",
+      "bytes": 1044,
+      "sha256": "da3c25088fb2e678ff339e73c8c16e0ba143011863b621e59811539e7db32459",
+      "module": "device-core",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.BoundedInputStateTest.xml",
+      "bytes": 1326,
+      "sha256": "5243d5f56c116d6d5e1e47dd6a90636f4340633ab302991abf76da96e5f1fd9b",
+      "module": "device-core",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CompanionObservationTest.xml",
+      "bytes": 1058,
+      "sha256": "859cd3cf064225abbd29d2e04df3902032390d2f4e0a2e3a32116485f14e3538",
+      "module": "device-core",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CoreTest.xml",
+      "bytes": 5132,
+      "sha256": "dd1b80065b985140489ca1fe0174f83c804860e767009ec446d869b982968e78",
+      "module": "device-core",
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayRolePolicyTest.xml",
+      "bytes": 740,
+      "sha256": "f3a0c72a473e8b2c449d99ebfc2215de8e1ea7b0843f3dfa5067f4500b159f61",
+      "module": "device-core",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayVisibilityTest.xml",
+      "bytes": 1049,
+      "sha256": "d0ea15dc6daa13abf180bcaf9fc1785e1f2ca3d86aa23b9ab1c623b912c17e5d",
+      "module": "device-core",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevAxesTest.xml",
+      "bytes": 1122,
+      "sha256": "9f93669d191a9f9c19590b96392b5c42861e3a6a40682c29e9b02e92aa3933c3",
+      "module": "device-core",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevButtonsTest.xml",
+      "bytes": 898,
+      "sha256": "74cc5755de430d4b4394d328eabea47c41f7b03df119a97d0771e8157bbcf2a0",
+      "module": "device-core",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCleanupTest.xml",
+      "bytes": 873,
+      "sha256": "b9dbbd74258e6b373c1a5265d10f0bb8298a2ecddc9849f5829ce7e1ec8aec6a",
+      "module": "device-core",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCommandTest.xml",
+      "bytes": 703,
+      "sha256": "19008a91abbe1ce76198431bbadda5463a8d53b5206119488a9040c05be50b12",
+      "module": "device-core",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadHoldTargetTest.xml",
+      "bytes": 916,
+      "sha256": "fb840770bf7988c5bb04709200017c2c733272319140407c1c2bc2e1939f8510",
+      "module": "device-core",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadLeaseGuardTest.xml",
+      "bytes": 725,
+      "sha256": "6472377fdb2da1204d2a502316c7a09251fb45419387a524f9882d9bbb338108",
+      "module": "device-core",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.InputTargetPolicyTest.xml",
+      "bytes": 628,
+      "sha256": "fd83733e135953199ebc4b8632b4fc8ee192cb944e75cb9085ff18fceb89f0ef",
+      "module": "device-core",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.LauncherAppsTest.xml",
+      "bytes": 899,
+      "sha256": "b8c9f695d6c609bc6e4e08a19745477463c1325223adfb619007cfa29b5e567c",
+      "module": "device-core",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationCommandTest.xml",
+      "bytes": 999,
+      "sha256": "5927266277b9a7087fc9b6a652ecd88c25dcbb472e5fe01d747194859afa5fa1",
+      "module": "device-core",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationFocusTest.xml",
+      "bytes": 855,
+      "sha256": "e90544974e0e2a244561e909783c2d030d493e1095653f8ddebac06127a18b2b",
+      "module": "device-core",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationCacheInvalidationTest.xml",
+      "bytes": 1539,
+      "sha256": "450e78793068808f2aa0fc22ed95bcccde8645b9df5607e24d40253177955082",
+      "module": "device-core",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationProofRefreshTest.xml",
+      "bytes": 1810,
+      "sha256": "7a381f3318074f4c12c78346e2b4e32718bfb03d592a976bd8f1b15d19f8973d",
+      "module": "device-core",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationWindowEvidenceTest.xml",
+      "bytes": 2307,
+      "sha256": "0b30b785edf79efebb658970aa3da9b1e9a56dc8a19939d68e8210dccb5412e7",
+      "module": "device-core",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ReadObservationTest.xml",
+      "bytes": 1375,
+      "sha256": "5262603282f9fcc1b578461317ca7daff44537ebc533416406c62b40e13850c6",
+      "module": "device-core",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ScreenSelectionTest.xml",
+      "bytes": 1306,
+      "sha256": "d2da1bf56bc319d3b8aa45c4df4b75aae2bd5f65481b1b6e56f723baf69d4127",
+      "module": "device-core",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.SemanticTreeTest.xml",
+      "bytes": 1472,
+      "sha256": "2a132957319dc1629f6d34240c7a836aa66e86c2545d64e293e8e5423f7f9665",
+      "module": "device-core",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ShellCommandPolicyTest.xml",
+      "bytes": 1346,
+      "sha256": "edfd2d83c8701ec4573edb83e4d6ab8469a8f69c79f7a0f7e0ec06b35a712f57",
+      "module": "device-core",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.TargetObservationAvailabilityTest.xml",
+      "bytes": 1315,
+      "sha256": "df5eed0360d7fd383612d53cc4c73a730cb137d98edc7f818cae1bf6d696e562",
+      "module": "device-core",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ThorBrightnessCommandTest.xml",
+      "bytes": 877,
+      "sha256": "1c52ae6de9a511e0bf3bd91f48e8b87f2a42865dc073eadda8b81de294a09b78",
+      "module": "device-core",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActionWindowTest.xml",
+      "bytes": 1168,
+      "sha256": "5682a3353d3035bd783cab851739ec69e1af26953fe4afecc0866451c432140e",
+      "module": "device-core",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActivationTest.xml",
+      "bytes": 997,
+      "sha256": "b684a308d3da6c366d83ce8aaf5c79a2291bd55de4a1e798feba45b4ac5719e3",
+      "module": "device-core",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UpperTargetResolverTest.xml",
+      "bytes": 1911,
+      "sha256": "57c3309e150ec45171cea28d5706c5d4dad9d0d9cedaaf4d18f30d366af41c0f",
+      "module": "device-core",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.AuthorityBudgetTest.xml",
+      "bytes": 901,
+      "sha256": "b903a9a455769e8d1cad3cef5531b8c2f59e8e46de11128b7a3b51ca06d6c007",
+      "module": "core",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.GatewayTest.xml",
+      "bytes": 2404,
+      "sha256": "eab28ebdaeb7b3a24d2763e414da699829caf204188b7d0d0b1b94211e87a357",
+      "module": "core",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.TransportTest.xml",
+      "bytes": 2776,
+      "sha256": "f186b50dbca0aba678a8979c82990f09b8d3776555dcff94a745516726e9b055",
+      "module": "core",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "integration/device-authority/build/test-results/test/TEST-dev.thor.integration.DeviceAuthorityTest.xml",
+      "bytes": 2166,
+      "sha256": "6b79328da5c94878a0d4f1f8c11ab6a37c3ccf47b6e4a095ed6ad6fcf1d6958e",
+      "module": "device-authority",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AttemptTest.xml",
+      "bytes": 4205,
+      "sha256": "0842d7501130f1fc48955c04bd64b38e2e18da0a108d7d359851e472d1ca59a2",
+      "module": "input-lab",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AxisProfileTest.xml",
+      "bytes": 1011,
+      "sha256": "c288ce7c864dfce77a101df18415f0d917c02d2c212a7f0f8314983765edc7ab",
+      "module": "input-lab",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.DeviceContinuityTest.xml",
+      "bytes": 1321,
+      "sha256": "0ad1bc111c7e30878ee4207e9952bd5e6db302570515e67a3df5a1ae9b59fcd2",
+      "module": "input-lab",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.JournalTest.xml",
+      "bytes": 1090,
+      "sha256": "807ce1bea8f1677ce9c1cf0bcfcbf4ec6c7d62aa52d7f4f54cde1f2400e3f2fe",
+      "module": "input-lab",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerEvidenceModeTest.xml",
+      "bytes": 891,
+      "sha256": "a93d0338c41899e81ebc9651c92186553e7f365045401a4dbddf5d8554dbf440",
+      "module": "input-lab",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerWindowTest.xml",
+      "bytes": 905,
+      "sha256": "3f241e0e9634a1a4893e0763c7cbf337df71f54c9dbc1b5420fcd3e23043ff29",
+      "module": "input-lab",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioModelTest.xml",
+      "bytes": 1032,
+      "sha256": "0f054fcf94b20efe904da45a4f9fd72a704c2e256b94b4dee4817975207a3590",
+      "module": "input-lab",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioSessionTest.xml",
+      "bytes": 1044,
+      "sha256": "7bd5f0c855e85b1264219f4c06311990e6329c4f23d9b6087f93d1f838852fdc",
+      "module": "input-lab",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}

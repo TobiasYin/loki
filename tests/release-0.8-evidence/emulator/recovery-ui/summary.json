@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "TARGETED_UI_PASS_PRESENTATION_FAILED_BEFORE_NEW_ASSERTION",
+  "collectedUtc": "2026-10-16T20:37:16.135437+00:00",
+  "scope": "Fixed final App03e853/Testd584/Lab5727 Presentation1 + ModernUI1 targeted acceptance only. No transfer of prior7 from App69a0.",
+  "passed": 1,
+  "failed": 1,
+  "skipped": 0,
+  "retries": 0,
+  "executedCases": 2,
+  "artifacts": {
+    "app-debug.apk": {
+      "sha256": "03e8534da9acdca9bd78c5bac83cab15cf25ef98b75748563cb4cdbc22281237",
+      "bytes": 7864725
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "d5841061d45cb387e997f6ec4af2bd89f17d1cef489e5335d81a227d63ac8d4b",
+      "bytes": 3397838
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "instrumentation": [
+    {
+      "name": "presentation-explicit.log",
+      "bytes": 2293,
+      "sha256": "4b65ce5220761b08d9991f3de639e40c5221d6395bc7e7216cca1509e9968a13",
+      "durationSeconds": 44.071,
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0
+    },
+    {
+      "name": "modern-ui-explicit.log",
+      "bytes": 844,
+      "sha256": "f2005ec778690aad84a6e380db219a59ff4fc13a67ead3b077a45e64aaf80186",
+      "durationSeconds": 18.396,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "explicitFlags": {
+    "Presentation": "emulatorAcceptance=true",
+    "ModernUI": "emulatorUiComponents=true"
+  },
+  "stalePreparePreservedGlobalErrorNotReached": true,
+  "firstSemanticActivationError": "PERMISSION_MISSING",
+  "presentationRemoteReaderError": "UNSUPPORTED",
+  "proofExpiredAtAgeMs": 5011,
+  "nearExpiryRefreshRemainingMs": [
+    1912,
+    1401,
+    978,
+    589,
+    310
+  ],
+  "sourceAnalysisOnly": {
+    "changedLastErrorPathUnrelatedToThisEarlierFailure": true,
+    "specificRemoteInspectStageNotObservable": true
+  },
+  "priorSevenCaseScope": "../execution-projection/ App69a0/Test1bea; no380-second or provider/notification/storage rerun on this finalpair",
+  "longBackgroundRerun": false,
+  "providerRerun": false,
+  "storageRerun": false,
+  "finalReleaseAllAndroidCasesClaim": false,
+  "preservationPassed": true,
+  "initialRunCount": 112,
+  "finalRunCount": 113,
+  "sessionUpdatedAtChanges": 0,
+  "cloudCalls": 0,
+  "thorOperations": false,
+  "sourceOrBuildByCollector": false,
+  "limitations": [
+    "Presentation manual Native platform component with independent synthetic receiver, no autonomous model or physical-gamepad claim.",
+    "Modern UI uses actual trusted touch/keyboard with synthetic state and intercepted Native commands.",
+    "No long background/provider/notification-stop/storage rerun on this final App/Test pair; prior independent7-case version remains separate.",
+    "No cloud/Thor/game completion claim; private DB/history/credentials/raw dumps/APKs not published."
+  ]
+}

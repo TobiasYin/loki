@@ -47,7 +47,7 @@ internal class AgentRuntimeEngine(private val owner:AgentRuntimeService):AutoClo
     private val uiStates=LatestValue<JSONObject>({task->main.postDelayed({task()},50)},{state,delivered->
         if(!closed && !failed) {
             if(chatVisible())chatBridge.post("state",state)
-            val text=state.toString();RuntimeStartupDiagnostics.payload(startupAttempt,RuntimeStartupPhase.EXEC_STATE_SEND,text)
+            val text=ExecutionStateProjection.project(state).toString();RuntimeStartupDiagnostics.payload(startupAttempt,RuntimeStartupPhase.EXEC_STATE_SEND,text)
             executionWeb.evaluateJavascript("window.receiveProductState?.(JSON.parse(${JSONObject.quote(text)}))"){RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.EXEC_STATE_ACK);delivered()}
         }else delivered()
     })

@@ -1,0 +1,17 @@
+[
+  {
+    "path": "README.md",
+    "sha256": "e9634cc19ff2abe354093da6a1ee19534a8d4eaa5210c215a4a87592323fbd6c",
+    "bytes": 1596
+  },
+  {
+    "path": "installation-summary.json",
+    "sha256": "5dce3f5e2a79bf379edd2b11f155197e88b947e59bbc7d157f9789b631154e54",
+    "bytes": 553
+  },
+  {
+    "path": "startup-preservation.json",
+    "sha256": "0a047589634caca22b3f320deb93b397afed45a3e24938e2fa17dd158d3db012",
+    "bytes": 1497
+  }
+]

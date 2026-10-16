@@ -24,3 +24,11 @@
 - `software-expiry-startup-final/`：临期完整读取新证明、启动专用保存和有限 DEBUG 阶段诊断，App `dbedacdc…`／Test `1bea4c10…`。实际 JVM419 中部分任务缓存，Runtime251／Chat69／Bridge13／relay3 明确同源沿用；新增三项真实 SQLite Android 用例的设备执行另证。统一构建、lint 和产物检查通过不代表 Android 或游戏目标通过。
 
 - `software-presentation-trace/`：仅补充固定阶段诊断与哈希格式化，App `387472aa…`／Test `1bea4c10…`。实际 JVM421，其他源码同源沿用与缓存任务逐项标注。对应 `emulator/presentation-trace/` 在同一包完成七项 Android 验收，零失败／跳过／重试；旧 dbed 的 SQLite 三项另证，不重复计数，也不把游戏目标写为通过。
+
+- `software-execution-projection/`：只将执行页面的被动状态推送缩为所有会话 epoch 与活跃 Run 状态，聊天显示／历史／Host RPC 和权限守卫不变。App `69a0f003…`／Test `1bea4c10…`，实际 JVM426（App100 本轮执行、其余缓存），其他 JS／Runtime 结果同源码沿用。巨历史不被序列化和小载荷属于合成测试事实，不代表量化真机提速；新 Android 结果另证。
+
+- `software-recovery-ui/`：仅避免 `tool.prepare/TARGET_CHANGED` 新写全局红字，保留既有无关错误与工具结果／提交／守卫。固定 App `03e8534d…`／Test `d5841061…`／Lab `57278e3c…`；实际 JVM426 为 App100 本轮执行、其余326缓存，Runtime251／Chat69／Bridge13／relay3 同源沿用。新增串行 view 前后错误比较属于 Android 测试断言，设备验收另证，不计入 JVM；执行状态投影旧包保持独立。
+
+- `software-full-snapshot/`：仅将全量保存的旧正文 Java Map 改为 ID 集合与 SQL 绑定比较，事务／历史／父子关系保持；App `485c1db0…`／Test `fd6e6e53…`／Lab `57278e3c…`。JVM426 为混合执行／缓存，Runtime251／其他 JS 同源沿用；新增四项真实 SQLite Android 用例编译待独立 AVD 验收，不算 JVM。game19 的 OOM 发生在 Run completed 后 interrupt／清理保存阶段；`load()` 的完整历史内存成本未改，不声称消除全部 OOM 或游戏任务通过。
+
+- `physical/recovery-maintenance/`：最终 App `485c1db0…` 在 Thor 保留数据安装，普通 Launcher 启动到下屏4，原数据库全部记录与配置字节保留；仅维护／启动验证，没有新游戏输入或模型任务，不代表游戏目标通过。

@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "status": "FULL_SNAPSHOT_SAVE_MEMORY_SOFTWARE_INCREMENT_NOT_ANDROID_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T20:43:58.861471+00:00",
+  "baseline": "../software-recovery-ui/summary.json",
+  "scope": "Full save uses old-ID sets and bound SQL payload equality rather than copying old payloads into a Java map; single production file change",
+  "triggerContext": "game19 Run had reached completed before host interrupt/cleanup called full save and exhausted memory; this is not evidence of model interruption or game-goal acceptance",
+  "gradle": {
+    "log": "gradle.log",
+    "success": true,
+    "seconds": 10,
+    "actionable": 506,
+    "executed": 33,
+    "upToDate": 473
+  },
+  "jvm": {
+    "totals": {
+      "tests": 426,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 64
+    },
+    "modules": [
+      {
+        "module": "app",
+        "gradleTask": ":app:testDebugUnitTest",
+        "taskStatus": "EXECUTED",
+        "tests": 100,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 23
+      },
+      {
+        "module": "device-core",
+        "gradleTask": ":device-core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 198,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 29
+      },
+      {
+        "module": "core",
+        "gradleTask": ":core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 3
+      },
+      {
+        "module": "device-authority",
+        "gradleTask": ":device-authority:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 1
+      },
+      {
+        "module": "input-lab",
+        "gradleTask": ":input-lab:testDebugUnitTest",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 8
+      }
+    ],
+    "newJvmCases": 0,
+    "allFreshRerunClaim": false,
+    "xmlHashes": "junit-xml-hashes.json",
+    "note": "App100 task executed; other326 current XML cached. New SQLite4 are Android instrumentation, not these JVM counts."
+  },
+  "retainedSoftware": {
+    "runtime": {
+      "tests": 251,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "chat": {
+      "tests": 69,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "bridge": {
+      "tests": 13,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "relay": {
+      "tests": 3,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "logsAndLimitations": "Retained software log/source limitations in linked baselines; no rerun claim"
+  },
+  "sourceHashes": "source-hashes.json",
+  "changedSourcePaths": [
+    "app/src/androidTest/java/dev/thor/agent/FullSnapshotStorageTest.kt",
+    "app/src/main/java/dev/thor/agent/Storage.kt"
+  ],
+  "saveSemantics": [
+    "Read SELECT id only into Java identity sets; never SELECT old payload for the full-save comparison",
+    "Bind new payload in id=? AND payload<>? so SQLite performs comparison; unchanged rows do not UPDATE/trigger or replace parents",
+    "Delete children first, then insert/update parents first; reread IDs after deletions so cascaded desired children can be reinserted under surviving parents",
+    "Single existing transaction includes deletes/updates/inserts/selection; no schema or REPLACE-parent change",
+    "Current row serialized one at a time; source state still contains full history"
+  ],
+  "androidTests": {
+    "class": "FullSnapshotStorageTest",
+    "cases": 4,
+    "classNamePresentInPinnedTestDex": true,
+    "softwareCompilationOnly": true,
+    "androidAcceptanceClaim": false,
+    "includedInJvm426": false,
+    "casesCover": [
+      "Oversized3MiB old event plus12x128KiB history, close/reopen3full-saves, changed terminal run/message plus append, unchanged triggers/rowid retention",
+      "Late foreign-key failure rolls back deletes/updates/inserts/selection and rowids",
+      "Final metadata failure rolls back complete transaction",
+      "Parent cascade with still-desired children reparented to surviving session retains all rows"
+    ],
+    "largeRowVerification": "Bound scalar COUNT WHERE id=? AND payload=?; no old body CursorWindow read",
+    "scope": "Random disposable databases only, no product.db/vault/profile writes"
+  },
+  "pins": [
+    {
+      "path": "build/emulator/full-snapshot-2026-10-17/run-01/app-debug.apk",
+      "sha256": "485c1db024fff391ad576a2645a7522312a1c633a1f84e47684725cffffd7ef1",
+      "bytes": 7864725
+    },
+    {
+      "path": "build/emulator/full-snapshot-2026-10-17/run-01/app-debug-androidTest.apk",
+      "sha256": "fd6e6e5362e1fc28dd1b8ff90c3533caf71fca43486897ab5a3cde17333f7358",
+      "bytes": 3409262
+    },
+    {
+      "path": "build/emulator/full-snapshot-2026-10-17/run-01/input-lab-debug.apk",
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  ],
+  "pinsVerifiedActualBytes": true,
+  "artifactCheck": {
+    "file": "artifacts.json",
+    "allFourActualFilesVerified": true
+  },
+  "acceptance": {
+    "androidTestsRunByCollector": false,
+    "newApkAndroidPassClaim": false,
+    "priorAppAcceptanceTransferred": false,
+    "thorOrGameCompletionClaim": false,
+    "allOomEliminatedClaim": false
+  },
+  "limits": [
+    "JVM426 is mixed App100 executed and326 UP-TO-DATE, not426 fresh executions",
+    "New SQLite4 compile but require separate real Android execution; not counted as JVM passes",
+    "Runtime251/Chat69/Bridge13/relay3 retained same-source results, not rerun",
+    "load() still reconstructs full history in memory; this patch does not solve every large-history memory or CursorWindow limit",
+    "No quantified physical-device speed/heap benchmark or automatic game-goal completion claim",
+    "Selected-file source inventory is not an atomic complete source archive",
+    "Collector wrote only this directory and one additive README index; no source modification/build/test/device action"
+  ]
+}

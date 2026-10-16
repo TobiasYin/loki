@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Recovery-UI software increment only; manifest excludes itself",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2892,
+      "sha256": "a44fb54e64916a397ca85601a6e720e4d134e94fae6fd32d7b7653da5572d50e"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "52604b8f6c4ed53717fa9e39cd069a7b5c8a95f933dc351bc68e18cb6d028292"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 33965,
+      "sha256": "0354b5064debb3b8c64bacebfeb6edfd205e4116cabc06aae44e65ee3a3c7178"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 22248,
+      "sha256": "1ea07eac2dd3a6314687c28619e11622e9073d5078f2064f674d3b2ac472b130"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 16586,
+      "sha256": "2065720c905c31dd2244e73d6d16e80a51ded4617cc919301b7ddff5dfe33bef"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 5303,
+      "sha256": "a4bd3ebe40a0eda01389cda248863265fa28fbb2dfea09ca3ff4b8482f776793"
+    }
+  ]
+}

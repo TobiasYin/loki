@@ -1,0 +1,17 @@
+{
+  "scope": "Unified build prior to device acceptance, not Android instrumentation. No tests rerun by evidence collector.",
+  "tests": 5,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "xmlPath": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ExecutionStateProjectionTest.xml",
+  "xmlSha256": "4019bafcd6a520954269331638e2836bd1ad66fe28cadf644c552ee3e8cb461b",
+  "names": [
+    "everySessionEpochAndConcurrentRunStopNoticeAreRetained",
+    "projectionDoesNotMutateOrShareWritableSessionAndRunRows",
+    "outputAndHistoryTraversalAreIndependentOfHugeHistoryPayload",
+    "onlyMissingActiveRunsFallsBackToLegacyRuns",
+    "messagesEventsAttachmentsTurnAndCredentialFieldsNeverReachExecutionPush"
+  ],
+  "softwareEvidence": "tests/release-0.8-evidence/software-execution-projection/"
+}

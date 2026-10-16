@@ -1,0 +1,18 @@
+{
+  "installed": [
+    {
+      "artifact": "app-debug.apk",
+      "sha256": "485c1db024fff391ad576a2645a7522312a1c633a1f84e47684725cffffd7ef1"
+    },
+    {
+      "artifact": "app-debug-androidTest.apk",
+      "sha256": "fd6e6e5362e1fc28dd1b8ff90c3533caf71fca43486897ab5a3cde17333f7358"
+    }
+  ],
+  "dataPreservingInstall": true,
+  "databaseBytesUnchangedBeforeLaunch": true,
+  "profileCredentialDisplayRoleBytesUnchangedBeforeLaunch": true,
+  "allRunsTerminalBeforeInstall": true,
+  "secureSettingsRestoredBeforeLaunch": true,
+  "hostGameInputs": []
+}

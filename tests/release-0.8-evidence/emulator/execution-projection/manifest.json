@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed App69a0/Test1bea/Lab5727 emulator7 actual passes; no failures/skips/retries. Prior isolated storage3 not rerun/counted; independent JVM5 from build XML. No cloud/Thor/game/final-release claim. Excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 6162,
+      "sha256": "7d434497ee537118f9198edb75c4b4d9c602b87c8e3d79eaec834e23cf8ddeb2"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "7a4d23477749eb51bd23089fab47ea405f493febf766412e3f11ab201611779a"
+    },
+    {
+      "path": "background-long-380.log",
+      "bytes": 846,
+      "sha256": "b5d9ce769ab4069196a3da7cf26f21b7ee69587e0e9ee2ada636556a8e9e0629"
+    },
+    {
+      "path": "combined-explicit-5.log",
+      "bytes": 3716,
+      "sha256": "0fcf248600c8baaa960708bbf329b75dd9d0fb43e247629f36043dc64d93dd6c"
+    },
+    {
+      "path": "execution-projection-jvm.json",
+      "bytes": 802,
+      "sha256": "3b8fa15bab58035f86d5bb80e5ce48db4e8843a507f11d3697f59a9e7c13b39d"
+    },
+    {
+      "path": "long-background.json",
+      "bytes": 2883,
+      "sha256": "91edd3967b9da3a814691928681ad045ee9b4a08e00eb59cfbb22f592b5f57f5"
+    },
+    {
+      "path": "per-test-preservation.json",
+      "bytes": 1330,
+      "sha256": "cd537b0ace2ef4f2d1929085fa7f43c33756116ba9ccbe39731e218173b7f540"
+    },
+    {
+      "path": "presentation-explicit.log",
+      "bytes": 811,
+      "sha256": "85a82c78750e09591289b5d44364998e53cc2ec3f473e79068093fe59555d8fd"
+    },
+    {
+      "path": "presentation.json",
+      "bytes": 33096,
+      "sha256": "16668b52180189b6c418556394e1c3e25ad91dee536a8ed3554ffdaed615ec96"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2177,
+      "sha256": "72b03c3afaef00ef08b015bffa38cbed04f81a8fe26755a80c669213884910f1"
+    },
+    {
+      "path": "short-background.json",
+      "bytes": 531,
+      "sha256": "849e3a3f1b29bc5433344cd6a0e0270bfecb92309c47cf80bbbcfd0d5298af5f"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 5333,
+      "sha256": "96586f0fdb87640f647d24cd9b2b36df41fec6258c0f677d62fa0fcdf62130e2"
+    },
+    {
+      "path": "ui-provider.json",
+      "bytes": 9223,
+      "sha256": "1047251e5886a38051fdea3e042d8e1df6dda60b57cb078f859ae0302c2da359"
+    }
+  ]
+}

@@ -45,30 +45,37 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         val db = writableDatabase
         db.beginTransaction()
         try {
-            // Read each table once inside the transaction. A per-row SELECT here
-            // makes every streamed fragment perform thousands of old-history queries.
-            val previousRows=tables.associateWith {table ->
-                val rows=mutableMapOf<String,String>()
-                db.rawQuery("SELECT id,payload FROM $table",null).use {c->while(c.moveToNext())rows[c.getString(0)]=c.getString(1)}
-                rows
+            // Keep identities only. Reading all committed payloads here duplicates
+            // the entire in-memory history, including images and durable Pi turns.
+            // Compare each bound new payload inside SQLite instead of materializing
+            // old bodies through CursorWindow into a second Java history map.
+            fun existingIds(table:String):MutableSet<String> {
+                val ids=mutableSetOf<String>()
+                db.rawQuery("SELECT id FROM $table",null).use {c->while(c.moveToNext())ids.add(c.getString(0))}
+                return ids
             }
-            // Delete children first, insert parents first; compare committed payloads.
+            // Delete children first, insert parents first; unchanged rows do not
+            // execute UPDATE triggers or replace parents/cascade their history.
             for (table in tables.asReversed()) {
                 val wanted = state.getJSONArray(table).objects().map { it.getString("id") }.toSet()
-                previousRows.getValue(table).keys.filter { it !in wanted }.forEach { db.delete(table, "id=?", arrayOf(it));previousRows.getValue(table).remove(it) }
+                existingIds(table).filter { it !in wanted }.forEach { db.delete(table, "id=?", arrayOf(it)) }
             }
-            for (table in tables) for (row in state.getJSONArray(table).objects()) {
-                val payload = row.toString(); val id = row.getString("id")
-                val previous = previousRows.getValue(table)[id]
-                if (previous == payload) continue
-                val values = ContentValues().apply {
-                    put("id", id); put("payload", payload)
-                    if(table != "sessions") put("sessionId", row.getString("sessionId"))
-                    if(table != "sessions" && table != "runs") { if(row.isNull("runId")) putNull("runId") else put("runId", row.getString("runId")) }
-                    if(table == "events") put("sequence", row.getInt("sequence"))
+            for (table in tables) {
+                // Parent deletion may have cascaded rows that remain in the desired
+                // snapshot under a different parent. Inspect current IDs after all
+                // deletions so those rows are inserted rather than silently lost.
+                val existing=existingIds(table)
+                for (row in state.getJSONArray(table).objects()) {
+                    val payload = row.toString(); val id = row.getString("id")
+                    val values = ContentValues().apply {
+                        put("id", id); put("payload", payload)
+                        if(table != "sessions") put("sessionId", row.getString("sessionId"))
+                        if(table != "sessions" && table != "runs") { if(row.isNull("runId")) putNull("runId") else put("runId", row.getString("runId")) }
+                        if(table == "events") put("sequence", row.getInt("sequence"))
+                    }
+                    if(id in existing) db.update(table, values, "id=? AND payload<>?", arrayOf(id,payload))
+                    else {db.insertOrThrow(table, null, values);existing.add(id)}
                 }
-                if(previous == null) db.insertOrThrow(table, null, values) else db.update(table, values, "id=?", arrayOf(id))
-                previousRows.getValue(table)[id]=payload
             }
             val selected = ContentValues().apply { put("name", "selected"); put("value", state.optString("selected")) }
             db.insertWithOnConflict("metadata", null, selected, SQLiteDatabase.CONFLICT_REPLACE)
@@ -78,7 +85,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
 
     /** Startup modifies session metadata and explicitly recovered nonterminal
      * Runs only. Never reread/compare every old payload or rewrite/delete child
-     * history merely to open the app. The normal full-save path is unchanged. */
+     * history merely to open the app. */
     fun saveStartupRecovery(state:JSONObject,recoveredRunIds:Set<String>) {
         val sessions=state.getJSONArray("sessions").objects()
         val recovered=state.getJSONArray("runs").objects().filter {it.getString("id") in recoveredRunIds}

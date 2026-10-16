@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "status": "EXECUTION_STATE_PROJECTION_SOFTWARE_INCREMENT_NOT_DEVICE_SPEED_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T20:23:16.192377+00:00",
+  "baseline": "../software-presentation-trace/summary.json",
+  "scope": "Only Engine execution-document state serialization replaced by minimal pure projection. Full chat/lastState/Host RPC/authority/database unchanged.",
+  "gradle": {
+    "log": "gradle.log",
+    "success": true,
+    "seconds": 11,
+    "actionable": 506,
+    "executed": 34,
+    "upToDate": 472
+  },
+  "jvm": {
+    "totals": {
+      "tests": 426,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 64
+    },
+    "modules": [
+      {
+        "module": "app",
+        "gradleTask": ":app:testDebugUnitTest",
+        "taskStatus": "EXECUTED",
+        "tests": 100,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 23
+      },
+      {
+        "module": "device-core",
+        "gradleTask": ":device-core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 198,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 29
+      },
+      {
+        "module": "core",
+        "gradleTask": ":core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 3
+      },
+      {
+        "module": "device-authority",
+        "gradleTask": ":device-authority:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 1
+      },
+      {
+        "module": "input-lab",
+        "gradleTask": ":input-lab:testDebugUnitTest",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 8
+      }
+    ],
+    "projectionCasesAdded": 5,
+    "includedIn426": true,
+    "xmlHashes": "junit-xml-hashes.json"
+  },
+  "retainedSoftware": {
+    "runtime": {
+      "tests": 251,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "chat": {
+      "tests": 69,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "bridge": {
+      "tests": 13,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "relay": {
+      "tests": 3,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "logsAndLimitations": "Retained logs/source limitations remain in linked baselines; no copied rerun claim"
+  },
+  "projectionContract": {
+    "sessions": "All sessions id/capabilityEpoch retained, independent of selected session",
+    "activeRuns": "All active Run id/sessionId/status/stopReason retained",
+    "legacyFallback": "Only absent activeRuns falls back to runs; explicit empty or null never resurfaces history",
+    "noSharedMutableRows": true,
+    "notProjected": [
+      "messages",
+      "events",
+      "attachments",
+      "turn",
+      "contexts",
+      "credentials",
+      "title",
+      "modelProfile"
+    ],
+    "debugBytes": "EXEC_STATE_SEND measures actual projected JSON, not original chat snapshot"
+  },
+  "runtimeConsumerAudit": {
+    "source": {
+      "path": "integration/runtime-host.ts",
+      "bytes": 18697,
+      "sha256": "41d7b794b2acd4aec1f4f8c502e5df7afdaf569d7ec1f411d7d9006f5ffd6274"
+    },
+    "byteIdenticalToBaseline": true,
+    "currentStateOccurrences": [
+      {
+        "line": 44,
+        "text": "let currentState: any;"
+      },
+      {
+        "line": 82,
+        "text": "currentState = state;"
+      },
+      {
+        "line": 180,
+        "text": "if((currentState?.activeRuns??currentState?.runs)?.some((r:any)=>r.id===state.runId))preparation(sessionId,state,'idle');"
+      }
+    ],
+    "nonDeclarationOccurrences": 2,
+    "updateConsumers": [
+      "sessions.id",
+      "sessions.capabilityEpoch",
+      "activeRuns/runs.id",
+      "activeRuns/runs.stopReason"
+    ],
+    "preparationConsumer": "activeRuns/runs.id membership",
+    "allSessionsAndRunsPreserved": true
+  },
+  "sourceHashes": "source-hashes.json",
+  "changedSourcePaths": [
+    "app/src/main/java/dev/thor/agent/AgentRuntimeEngine.kt",
+    "app/src/main/java/dev/thor/agent/ExecutionStateProjection.kt",
+    "app/src/test/java/dev/thor/agent/ExecutionStateProjectionTest.kt"
+  ],
+  "pins": [
+    {
+      "path": "build/emulator/execution-projection-2026-10-17/run-01/app-debug-androidTest.apk",
+      "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+      "bytes": 3398214
+    },
+    {
+      "path": "build/emulator/execution-projection-2026-10-17/run-01/app-debug.apk",
+      "sha256": "69a0f0033c16e34dea83681c420b17fbbc285189f22dd7fb8f98159bce518ae3",
+      "bytes": 7864725
+    },
+    {
+      "path": "build/emulator/execution-projection-2026-10-17/run-01/input-lab-debug.apk",
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  ],
+  "pinsVerifiedActualBytes": true,
+  "artifactCheck": {
+    "file": "artifacts.json",
+    "allFourActualFilesVerified": true
+  },
+  "syntheticTestScope": {
+    "giantHistorySerializationTrapPasses": true,
+    "historyText": "four UTF16 Chinese characters repeated500000, synthetic only",
+    "projectedUtf8BytesLessThan": 256,
+    "outputMatchesSmallState": true,
+    "liveThorLatencyMeasurement": false,
+    "devicePayloadReductionMeasurement": false
+  },
+  "acceptance": {
+    "androidTestsRunByCollector": false,
+    "newApkAndroidPassClaim": false,
+    "thorInstalledByCollector": false,
+    "thorOrGameCompletionClaim": false,
+    "measuredDeviceSpeedupClaim": false,
+    "SQLiteAndroidCasesIncludedInJvm": false
+  },
+  "limits": [
+    "App100 test task executed; other326 JVM cases are current retained XML from UP-TO-DATE tasks",
+    "Runtime251/Chat69/Bridge13/relay3 remain unchanged-source prior results, not rerun",
+    "Large-history <256B observation is synthetic regression evidence, not a real-device timing benchmark",
+    "CurrentState audit covers existing Runtime consumers; future consumer fields must be added deliberately",
+    "Selected-file inventory is not an atomic full source archive",
+    "Collector wrote only this new directory, without source modifications/build/test/device actions"
+  ]
+}

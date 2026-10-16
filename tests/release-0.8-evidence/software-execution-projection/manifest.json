@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Execution-state projection incremental software identity, not device speed acceptance; excludes manifest itself",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3553,
+      "sha256": "5afb3ea71eb96cf3e521cf5103c1a297162708992c23b983b2117c952c7b8b53"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "8ce3a043d0756142f973b910252f8310a487f8f5939e9f9397a83bc1230a05cc"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 33239,
+      "sha256": "383211edf20c98e09d56567460f441a588d6bbc573ae39f6c38f956da2515b39"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 22211,
+      "sha256": "c5cb86c9c9ff59105a2f333bb77b2b5c17b8e5a339a68a79fd3ad1ca6b37baec"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 16333,
+      "sha256": "762e6412ecf8e2b0edcf0920c9fed5b286f3bfbb5959ceaf3604ebdaabe3b4c3"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 6302,
+      "sha256": "a041fc88c88c319bfd309f3f0bf28b41f540bd99246036d3c14a9cbd90d98b8b"
+    }
+  ]
+}

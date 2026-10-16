@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed App485c/Testfd6e storage14+shortbackground2+ModernUI1 actual17passes. NoPresentation/380/cloud/Thor claim; prior failures unchanged. Excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 5243,
+      "sha256": "e6e331aa71985a9a3b55b1b2c7fa17786d7230ff9931124a309d5060f68e11f4"
+    },
+    {
+      "path": "adjacent-storage-10.log",
+      "bytes": 7225,
+      "sha256": "0da1a28b4bd19a11e790db4766ffc6a7b136d6fb929fa7ff29d3dbfcd7291f39"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "98a3b967c2000c7a613f12c4dfed3e58c5d238c784cdf0f41469c8ff8646fedd"
+    },
+    {
+      "path": "background-ui-3.log",
+      "bytes": 2313,
+      "sha256": "f52b3c1d3be3ad1d5a9a60ac2cc88e1060a34f925db2eb4dc076cd4f447950d8"
+    },
+    {
+      "path": "full-snapshot-storage-4.log",
+      "bytes": 2892,
+      "sha256": "785816bf34f285edb510a7d9dad5eb6ef2f1bdabaf522dbe1d59487fef365df3"
+    },
+    {
+      "path": "modern-ui.json",
+      "bytes": 7510,
+      "sha256": "648e6f94c897227dd8b6e7f491be7aa9219fc4d7f90d7b5ca5c8ebd5d5140bd4"
+    },
+    {
+      "path": "per-test-preservation.json",
+      "bytes": 891,
+      "sha256": "65d2f68707890886d6728eb3c18cdcd3a7c1863f29639b9f23576bee3eff2ad0"
+    },
+    {
+      "path": "physical-storage-regression.json",
+      "bytes": 208,
+      "sha256": "ffafdf9e101447c23595b72bee61f08025f50b9c85838377c999548a58ec8112"
+    },
+    {
+      "path": "physical-storage-streaming-regression.json",
+      "bytes": 359,
+      "sha256": "c2b5dcaeb3b67faf59e49c1d15847fbefe684a87826aed27339173cb5933e973"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2176,
+      "sha256": "fe4914a3a81e06f9add39482842b9166179151469286ae34ec575e0fe4d93938"
+    },
+    {
+      "path": "short-background.json",
+      "bytes": 531,
+      "sha256": "e559d6a1abdc86b0ac35279d9974dd485d51aadbda76010e22e5392bd686f02e"
+    },
+    {
+      "path": "source.json",
+      "bytes": 942,
+      "sha256": "b54ac9e4305637226a05583e10921e915a71c749763652948f6a9fda043fcb6c"
+    },
+    {
+      "path": "standalone-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 3025,
+      "sha256": "0b2378c3a083aa94a392163b54bf057afb3c80676f4a193b4314779512f19bd7"
+    }
+  ]
+}

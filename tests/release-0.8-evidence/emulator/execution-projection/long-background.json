@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "mode": "real-loopback-sse-wall-clock",
+  "cloudRequests": 0,
+  "deviceInputCalls": 0,
+  "modelAutonomyProven": false,
+  "passed": true,
+  "requestedBackgroundSeconds": 380,
+  "observer": "SQLite only during measured background interval",
+  "backgroundEvaluateJavascriptCalls": 0,
+  "backgroundUiLaunches": 0,
+  "fakeClockUsed": false,
+  "checkpoints": [
+    {
+      "elapsedMs": 30116,
+      "latestMarker": 30,
+      "persistedEventCount": 35,
+      "persistedEventBytes": 11918
+    },
+    {
+      "elapsedMs": 60339,
+      "latestMarker": 60,
+      "persistedEventCount": 65,
+      "persistedEventBytes": 22118
+    },
+    {
+      "elapsedMs": 90391,
+      "latestMarker": 90,
+      "persistedEventCount": 95,
+      "persistedEventBytes": 32318
+    },
+    {
+      "elapsedMs": 120522,
+      "latestMarker": 120,
+      "persistedEventCount": 125,
+      "persistedEventBytes": 42567
+    },
+    {
+      "elapsedMs": 150542,
+      "latestMarker": 150,
+      "persistedEventCount": 155,
+      "persistedEventBytes": 52827
+    },
+    {
+      "elapsedMs": 180626,
+      "latestMarker": 180,
+      "persistedEventCount": 185,
+      "persistedEventBytes": 63087
+    },
+    {
+      "elapsedMs": 210747,
+      "latestMarker": 210,
+      "persistedEventCount": 215,
+      "persistedEventBytes": 73347
+    },
+    {
+      "elapsedMs": 240908,
+      "latestMarker": 240,
+      "persistedEventCount": 245,
+      "persistedEventBytes": 83607
+    },
+    {
+      "elapsedMs": 270973,
+      "latestMarker": 270,
+      "persistedEventCount": 275,
+      "persistedEventBytes": 93867
+    },
+    {
+      "elapsedMs": 301258,
+      "latestMarker": 301,
+      "persistedEventCount": 306,
+      "persistedEventBytes": 104469
+    },
+    {
+      "elapsedMs": 331441,
+      "latestMarker": 331,
+      "persistedEventCount": 336,
+      "persistedEventBytes": 114729
+    },
+    {
+      "elapsedMs": 361637,
+      "latestMarker": 361,
+      "persistedEventCount": 366,
+      "persistedEventBytes": 124989
+    },
+    {
+      "elapsedMs": 380057,
+      "latestMarker": 380,
+      "persistedEventCount": 385,
+      "persistedEventBytes": 131487
+    }
+  ],
+  "runId": "7e74f529-9c27-4915-a1cb-1e27238fd74d",
+  "ordinaryUiSendAndRealProbe": true,
+  "executionUnattachedBeforeBackground": true,
+  "phase": "complete",
+  "measuredBackgroundMs": 380088,
+  "all380LiveMarkersObserved": true,
+  "completionHeldUntilUiReturn": true,
+  "activityDestroyedThroughoutMeasuredInterval": true,
+  "sameHost": true,
+  "sameUnattachedExecutionWeb": true,
+  "samePiSessionFollowup": true,
+  "durableCompleteTurnRetained": true,
+  "followupHttpContainsAll380Markers": true,
+  "longTextSha256": "1b2272e62438aa61e8255c35175a93d89eb5a0d5a662d3c8a39999b989c30083",
+  "longTextBytes": 3811,
+  "requestCount": 4,
+  "shortBackgroundNotificationStopCoveredSeparately": true
+}

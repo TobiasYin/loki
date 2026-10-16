@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "SEVENTEEN_PINNED_TARGETED_CASES_PASS",
+  "collectedUtc": "2026-10-16T20:45:56.970189+00:00",
+  "scope": "App485c/Testfd6e/Lab5727 only. FullSnapshot4+SessionUpdate3+ScopedSession2+StartupRecovery3+PhysicalStorageRegression2+shortBackground2+ModernUI1. NoPresentation/380-second/cloud/Thor run.",
+  "passed": 17,
+  "failed": 0,
+  "skipped": 0,
+  "retries": 0,
+  "executedCases": 17,
+  "artifacts": {
+    "app-debug.apk": {
+      "sha256": "485c1db024fff391ad576a2645a7522312a1c633a1f84e47684725cffffd7ef1",
+      "bytes": 7864725
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "fd6e6e5362e1fc28dd1b8ff90c3533caf71fca43486897ab5a3cde17333f7358",
+      "bytes": 3409262
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "instrumentation": [
+    {
+      "name": "full-snapshot-storage-4.log",
+      "bytes": 2892,
+      "sha256": "785816bf34f285edb510a7d9dad5eb6ef2f1bdabaf522dbe1d59487fef365df3",
+      "durationSeconds": 3.008,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "adjacent-storage-10.log",
+      "bytes": 7225,
+      "sha256": "0da1a28b4bd19a11e790db4766ffc6a7b136d6fb929fa7ff29d3dbfcd7291f39",
+      "durationSeconds": 27.735,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "background-ui-3.log",
+      "bytes": 2313,
+      "sha256": "f52b3c1d3be3ad1d5a9a60ac2cc88e1060a34f925db2eb4dc076cd4f447950d8",
+      "durationSeconds": 44.249,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "storageCases": 14,
+  "actualPrivateTemporarySQLite": true,
+  "newFullSnapshotCases": 4,
+  "oversizedOldTextBodyBytes": 3145728,
+  "additionalHistoryRows": 12,
+  "additionalHistoryBodyBytesEach": 131072,
+  "unchangedUpdateTriggerAndRowIdVerified": true,
+  "wholePayloadEqualityVerifiedInSQLiteWithoutFetchingBodies": true,
+  "reopenVerified": true,
+  "lateForeignKeyAndFinalMetadataAtomicRollbackVerified": true,
+  "parentCascadeWantedChildReinsertionVerified": true,
+  "shortBackgroundCases": 2,
+  "modernUiCases": 1,
+  "explicitFlags": {
+    "ModernUI": "emulatorUiComponents=true"
+  },
+  "presentationRerun": false,
+  "long380Rerun": false,
+  "previousPresentationFailureUnchanged": true,
+  "game19CauseBoundary": "RealThor game19 completed with1253events at442880ms; later interrupt/fullsave cleanup duplicated committed payloads and OOMed atStorage52. This is not evidence of model nontermination.",
+  "memoryBoundary": "Removes Java copy of all old committed bodies; full in-memory state/load and one-row serialization/binding still consume memory. No end-to-end heap or throughput ratio claimed.",
+  "preservationPassed": true,
+  "initialRunCount": 113,
+  "finalRunCount": 117,
+  "sessionUpdatedAtChanges": 0,
+  "cloudCalls": 0,
+  "thorOperations": false,
+  "sourceChangedDuringAcceptance": false,
+  "buildByCollector": false,
+  "finalReleaseAllAndroidCasesClaim": false
+}

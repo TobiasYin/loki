@@ -1,5 +1,5 @@
 {
-  "status": "GAME18_RUNNING_ORIGINAL_CONTEXT_RETAINED_NO_HOST_GAME_STEPS",
+  "status": "GAME19_MODEL_COMPLETED_GOAL_UNVERIFIED_CLEANUP_OOM",
   "sessionId": "7719b29a-9c06-46a3-b2ab-96975d1f8cb7",
   "harnessGameSteps": [],
   "goalVerified": {
@@ -1424,18 +1424,158 @@
         "accessibility_enabled": true
       },
       "note": "Agent completed its response after partial controller configuration; all three game goals unverified. Same Run survived 22 TARGET_CHANGED results and later inputs. No host game steps."
+    },
+    {
+      "attempt": "game-18",
+      "runs": [
+        {
+          "runId": "f835d303-9185-4305-b14d-a45b8e32e359",
+          "elapsedMs": 746099,
+          "eventCount": 748,
+          "runStatus": "failed",
+          "runtimeState": "failed",
+          "error": "IO_ERROR",
+          "targetChangedCount": 24,
+          "successfulToolCount": 26,
+          "profileConfigurationRestored": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true,
+          "fullGameGoalVerified": false
+        }
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "387472aab1c12d735253879288f895a98548ad0964ed06eb69c94837e3317c46",
+          "bytes": 7864725,
+          "copiedFrom": "build/emulator/presentation-trace-2026-10-17/run-01/app-debug.apk"
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+          "bytes": 3398214,
+          "copiedFrom": "build/emulator/presentation-trace-2026-10-17/run-01/app-debug-androidTest.apk"
+        }
+      },
+      "elapsedSeconds": 754.17,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      },
+      "note": "Natural model stream IO_ERROR after same-Run target recovery and partial controls; no model timeout or host stop. Exact upstream error not retained. All game goals remain unverified."
+    },
+    {
+      "attempt": "game-19",
+      "runs": [
+        {
+          "runId": "79712d06-6e20-4f7b-ae61-99db61c71cf0",
+          "status": "completed",
+          "runtimeState": "completed",
+          "error": null,
+          "elapsedMs": 442880,
+          "eventCount": 1253,
+          "targetChangedCount": 14,
+          "successfulToolCount": 16,
+          "durableTurnComplete": true,
+          "fullGameGoalVerified": false
+        }
+      ],
+      "observerSuitePassed": false,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "69a0f0033c16e34dea83681c420b17fbbc285189f22dd7fb8f98159bce518ae3",
+          "bytes": 7864725,
+          "copiedFrom": "build/emulator/execution-projection-2026-10-17/run-01/app-debug.apk"
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+          "bytes": 3398214,
+          "copiedFrom": "build/emulator/execution-projection-2026-10-17/run-01/app-debug-androidTest.apk"
+        }
+      },
+      "elapsedSeconds": 456.09,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      },
+      "note": "Run completed its response and complete Domain turn was persisted before a cleanup-stage OutOfMemoryError in SqliteStore.save through ProductHost.interrupt. Last observer JSON was stale generating; post-crash SQLite state is authoritative. No THOR save, obtained sword or first quest independently verified. No host game input.",
+      "cleanupFailure": {
+        "error": "OutOfMemoryError",
+        "phase": "interrupt full-store save after persisted completed",
+        "allocationBytes": 57752,
+        "heapLimitBytes": 268435456,
+        "observerLastSnapshotElapsedMs": 441583,
+        "observerLastSnapshotEvents": 1236,
+        "observerSnapshotStale": true,
+        "modelTerminalPersistedBeforeCrash": true
+      },
+      "postCrashReadOnlyIntegrity": {
+        "quickCheck": "ok",
+        "foreignKeyViolations": 0,
+        "databaseSha256": "a42b0d177c8960fff059389e607ad521fde3b9ac38125c9570e7fccebb008915",
+        "databaseBytes": 76800000,
+        "eventSequencesContiguous": true,
+        "priorSnapshotIdsPreserved": {
+          "sessions": {
+            "baselineRows": 176,
+            "missingIds": 0
+          },
+          "runs": {
+            "baselineRows": 182,
+            "missingIds": 0
+          },
+          "messages": {
+            "baselineRows": 364,
+            "missingIds": 0
+          },
+          "events": {
+            "baselineRows": 59143,
+            "missingIds": 0
+          },
+          "attachments": {
+            "baselineRows": 216,
+            "missingIds": 0
+          }
+        },
+        "priorSnapshotScope": "game17 private database snapshot, not an immediate game19 preflight snapshot; ID presence only"
+      },
+      "restorationAtReadOnlyReview": {
+        "finallyRestoreFlagsPresent": false,
+        "outputBudgetRestoredTo2048": false,
+        "outputBudgetStillTemporary16384": true,
+        "profileExceptMaxOutputMatchesReconnectBackup": true,
+        "encryptedCredentialsMatchReconnectBackup": true,
+        "scope": "Comparison after crash with earlier reconnect backup; not a successful instrumentation finally assertion. Maintenance restoration recorded separately."
+      },
+      "evidenceHashes": {
+        "suite.log": "51a7a2e120d081741a5ae406fd159af3a7b9d33eab270e9049880b9f1f036ae5",
+        "summary.json": "0e3d1e035d81e48d1c7caf3b7da838f13de1fc314d31b25bc15cf23923a996fc",
+        "observation.json": "008fdcf7e90420e918f1bef76ada2e9d77eccc674c86a2b5711cc2924f7f8a4a",
+        "maintenance-restoration.json": "a801dd4814492965498a12f7bdaa491f63f06a4253d334574a661659fd9ddce3"
+      },
+      "maintenanceRestoration": {
+        "temporaryMaxOutputRestored": true,
+        "originalMaxOutput": 2048,
+        "allOtherProfileBytesUnchanged": true,
+        "encryptedCredentialBytesUnchanged": true,
+        "mainProcessAbsentBeforeWrite": true,
+        "databaseQuickCheck": "ok",
+        "nonterminalRunsBeforeWrite": 0,
+        "gameInputs": []
+      }
     }
   ],
   "continuation": {
     "sessionId": "7719b29a-9c06-46a3-b2ab-96975d1f8cb7",
-    "runId": "f835d303-9185-4305-b14d-a45b8e32e359",
-    "reason": "Continue same original conversation after game17 partial final answer; Agent chooses only necessary configuration and performs every game step.",
-    "appSha256": "387472aab1c12d735253879288f895a98548ad0964ed06eb69c94837e3317c46",
+    "runId": "79712d06-6e20-4f7b-ae61-99db61c71cf0",
+    "reason": "Same original conversation continued after model-stream failure; only execution passive state no longer duplicates full chat history, all authority/target checks preserved.",
+    "appSha256": "69a0f0033c16e34dea83681c420b17fbbc285189f22dd7fb8f98159bce518ae3",
     "testSha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
     "hostGameInputAllowed": false,
     "game09": "Disconnected preflight failed before installation/model actions; excluded from gameplay attempts.",
-    "runStatus": "executing_tools",
-    "testOutputBudgetRestored": null,
+    "runStatus": "completed",
+    "testOutputBudgetRestored": true,
     "temporaryTestOutputBudget": 16384,
     "pageChangeRecovery": {
       "targetChangedCount": 10,
@@ -1528,27 +1668,36 @@
       "hostGameInputs": [],
       "fixStatus": "Historical combined-document failure; separate execution document continued beyond 12 minutes in game15 without host foreground/JS keepalive. This is a bounded observation, not unlimited survival."
     },
-    "runtimeStateAtTerminal": null,
+    "runtimeStateAtTerminal": "completed",
     "stopReason": null,
-    "observerSuitePassed": null,
+    "observerSuitePassed": false,
     "observerPassIsGameGoalPass": false,
     "gameGoalComplete": false,
-    "elapsedSeconds": null,
-    "secureRestored": null,
-    "next": "Observe same Run and independently verify game phases; no host game inputs.",
+    "elapsedSeconds": 456.09,
+    "secureRestored": {
+      "enabled_accessibility_services": true,
+      "accessibility_enabled": true
+    },
+    "next": "Preserve original conversation and all history; repair cleanup full-save memory pressure before further tests. Temporary output budget has been restored separately after crash; do not replay rejected game inputs.",
     "game12LastObservation": {
       "elapsedMsAtLastObservation": 1678058,
       "eventCountAtLastObservation": 1304,
       "runStatusAtLastObservation": "generating"
     },
     "currentRunObservation": {
-      "runId": "f835d303-9185-4305-b14d-a45b8e32e359",
-      "elapsedMs": 57191,
-      "eventCount": 41,
-      "runStatus": "executing_tools",
+      "runId": "79712d06-6e20-4f7b-ae61-99db61c71cf0",
+      "status": "completed",
+      "runtimeState": "completed",
+      "error": null,
+      "elapsedMs": 442880,
+      "eventCount": 1253,
+      "targetChangedCount": 14,
+      "successfulToolCount": 16,
+      "durableTurnComplete": true,
+      "fullGameGoalVerified": false,
       "harnessGameSteps": [],
       "periodicJavaScriptDiagnosticsEnabled": false,
-      "fullGameGoalVerified": false
+      "proofSource": "post-crash read-only SQLite; stale observer JSON excluded as terminal evidence"
     },
     "startupObservation": {
       "engineToExecutionReadyMs": 2874,
@@ -1594,6 +1743,60 @@
       "successfulScreenReads": 17,
       "proofScope": "Same Run fixed Native cause followed by successful observations and later submitted actions; does not assert any prior rejected input executed or game goal completion.",
       "gameGoalComplete": false
+    },
+    "game18Observation": {
+      "runId": "f835d303-9185-4305-b14d-a45b8e32e359",
+      "elapsedMs": 746099,
+      "eventCount": 748,
+      "runStatus": "failed",
+      "runtimeState": "failed",
+      "error": "IO_ERROR",
+      "targetChangedCount": 24,
+      "successfulToolCount": 26,
+      "profileConfigurationRestored": true,
+      "encryptedCredentialsUnchanged": true,
+      "originalRunIdsPreserved": true,
+      "fullGameGoalVerified": false
+    },
+    "game19Observation": {
+      "runId": "79712d06-6e20-4f7b-ae61-99db61c71cf0",
+      "status": "completed",
+      "runtimeState": "completed",
+      "error": null,
+      "elapsedMs": 442880,
+      "eventCount": 1253,
+      "targetChangedCount": 14,
+      "successfulToolCount": 16,
+      "durableTurnComplete": true,
+      "fullGameGoalVerified": false
+    },
+    "game19CleanupFailure": {
+      "error": "OutOfMemoryError",
+      "phase": "interrupt full-store save after persisted completed",
+      "allocationBytes": 57752,
+      "heapLimitBytes": 268435456,
+      "observerLastSnapshotElapsedMs": 441583,
+      "observerLastSnapshotEvents": 1236,
+      "observerSnapshotStale": true,
+      "modelTerminalPersistedBeforeCrash": true
+    },
+    "game19RestorationAtReadOnlyReview": {
+      "finallyRestoreFlagsPresent": false,
+      "outputBudgetRestoredTo2048": false,
+      "outputBudgetStillTemporary16384": true,
+      "profileExceptMaxOutputMatchesReconnectBackup": true,
+      "encryptedCredentialsMatchReconnectBackup": true,
+      "scope": "Comparison after crash with earlier reconnect backup; not a successful instrumentation finally assertion. Maintenance restoration recorded separately."
+    },
+    "game19MaintenanceRestoration": {
+      "temporaryMaxOutputRestored": true,
+      "originalMaxOutput": 2048,
+      "allOtherProfileBytesUnchanged": true,
+      "encryptedCredentialBytesUnchanged": true,
+      "mainProcessAbsentBeforeWrite": true,
+      "databaseQuickCheck": "ok",
+      "nonterminalRunsBeforeWrite": 0,
+      "gameInputs": []
     }
   },
   "withheldScreenshots": [

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Full-snapshot save software increment, no Android or all-OOM acceptance; excludes manifest itself",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3264,
+      "sha256": "ba8060ae0a469e7d1651dd2e4a29b70d82541e10ec5136a3f8c224aa4685b10b"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "4ae23de56e914acc17bd38c0a2a07ae9771efbf6975430853ac461a902e8c264"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 33250,
+      "sha256": "79cc149994423d5d0a1e0ae006780a6488c9b3266dcd8678c0ac75f972440fb7"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 22238,
+      "sha256": "8d0c9d9f133009110abe598cc3a877f65db3df8dd2ac9b13937749b95093bb0b"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 16875,
+      "sha256": "5f3de6951ba80952fbec39ee511eeef3fce2c610e19ec52692beb97dbfada4c5"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 6202,
+      "sha256": "8cad507361342e2c82eee5627ae8c576867d42f0cda06ae5ebdc6eb6b63e8522"
+    }
+  ]
+}

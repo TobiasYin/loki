@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "status": "RECOVERABLE_TARGET_UI_SOFTWARE_INCREMENT_NOT_ANDROID_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T20:33:25.567972+00:00",
+  "baseline": "../software-execution-projection/summary.json",
+  "scope": "Only suppress writing a new global lastError for fixed TARGET_CHANGED thrown by tool.prepare; preserve existing error and all ToolOutcome/Native guard behavior",
+  "gradle": {
+    "log": "gradle.log",
+    "success": true,
+    "seconds": 10,
+    "actionable": 506,
+    "executed": 33,
+    "upToDate": 473
+  },
+  "jvm": {
+    "totals": {
+      "tests": 426,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 64
+    },
+    "modules": [
+      {
+        "module": "app",
+        "gradleTask": ":app:testDebugUnitTest",
+        "taskStatus": "EXECUTED",
+        "tests": 100,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 23
+      },
+      {
+        "module": "device-core",
+        "gradleTask": ":device-core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 198,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 29
+      },
+      {
+        "module": "core",
+        "gradleTask": ":core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 3
+      },
+      {
+        "module": "device-authority",
+        "gradleTask": ":device-authority:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 1
+      },
+      {
+        "module": "input-lab",
+        "gradleTask": ":input-lab:testDebugUnitTest",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 8
+      }
+    ],
+    "newJvmCases": 0,
+    "allFreshRerunClaim": false,
+    "xmlHashes": "junit-xml-hashes.json",
+    "note": "App100 task executed; other326 current XML cached. No mirror-if JVM test added."
+  },
+  "retainedSoftware": {
+    "runtime": {
+      "tests": 251,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "chat": {
+      "tests": 69,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "bridge": {
+      "tests": 13,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "relay": {
+      "tests": 3,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "logsAndLimitations": "Retained logs and original-source limitations in linked baselines; no full-rerun claim"
+  },
+  "sourceHashes": "source-hashes.json",
+  "changedSourcePaths": [
+    "app/src/androidTest/java/dev/thor/agent/EmulatorPresentationControlTest.kt",
+    "app/src/main/java/dev/thor/agent/ProductHost.kt"
+  ],
+  "behavior": {
+    "suppressedGlobalWriteOnlyWhen": {
+      "rpcOp": "tool.prepare",
+      "fixedCode": "TARGET_CHANGED"
+    },
+    "existingGlobalErrorCleared": false,
+    "otherOpsAndCodesUnchanged": true,
+    "beginErrorMessagesUnchanged": true,
+    "toolOutcomeAndSubmissionUnchanged": true,
+    "publishUnchanged": true,
+    "authorizationTargetGuardsUnchanged": true
+  },
+  "androidAssertion": {
+    "class": "EmulatorPresentationControlTest",
+    "path": "Existing stale lower snapshot after selecting upper is rejected by actual tool.prepare",
+    "errorComparison": "Native serial view RPC before/after; compare existing value, not assume empty",
+    "evidenceFlag": "stalePreparePreservedGlobalError",
+    "oldSnapshotNodeFrameReceiverAssertionsRetained": true,
+    "acceptedByThisSoftwareRecord": false,
+    "extraInputActions": 0,
+    "jvmCountContribution": 0
+  },
+  "pins": [
+    {
+      "path": "build/emulator/recovery-ui-2026-10-17/run-01/app-debug.apk",
+      "sha256": "03e8534da9acdca9bd78c5bac83cab15cf25ef98b75748563cb4cdbc22281237",
+      "bytes": 7864725
+    },
+    {
+      "path": "build/emulator/recovery-ui-2026-10-17/run-01/app-debug-androidTest.apk",
+      "sha256": "d5841061d45cb387e997f6ec4af2bd89f17d1cef489e5335d81a227d63ac8d4b",
+      "bytes": 3397838
+    },
+    {
+      "path": "build/emulator/recovery-ui-2026-10-17/run-01/input-lab-debug.apk",
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  ],
+  "pinsVerifiedActualBytes": true,
+  "artifactCheck": {
+    "file": "artifacts.json",
+    "allFourActualFilesVerified": true
+  },
+  "acceptance": {
+    "androidTestsRunByCollector": false,
+    "newApkAndroidPassClaim": false,
+    "priorAppAcceptanceTransferred": false,
+    "thorOrGameCompletionClaim": false,
+    "measuredDeviceSpeedupClaim": false
+  },
+  "limits": [
+    "JVM426 is mixed App100 executed and326 UP-TO-DATE; not426 fresh executions",
+    "Runtime251/Chat69/Bridge13/relay3 source-identical prior results, not rerun",
+    "New serial before/after page-error assertion is compiled Android instrumentation and not accepted here",
+    "Execution projection remains separately documented in its prior package; no old snapshot changed",
+    "Selected-file source inventory is not atomic full source archive",
+    "Collector wrote only this new directory and one additive README index; no source modifications/build/test/device actions"
+  ]
+}

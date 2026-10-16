@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 1,
+  "emulator": true,
+  "syntheticFixture": true,
+  "nativeCommandsIntercepted": true,
+  "cloudInvoked": false,
+  "passed": true,
+  "webViewVersion": "133.0.6943.137",
+  "bridgeFailureUiRollbackVerified": true,
+  "trustedInputsBeforeReload": [
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 72
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 72
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 72
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 72
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 72
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 72
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 130.09375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 130.09375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 130
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 160
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 160
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 160
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 160
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 540,
+      "y": 159.59375
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 540,
+      "y": 160
+    },
+    {
+      "key": "Enter",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "keydown"
+    },
+    {
+      "key": "",
+      "target": "SUMMARY",
+      "trusted": true,
+      "type": "click",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "key": "",
+      "target": "model-picker",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 823.75,
+      "y": 2196
+    },
+    {
+      "key": "",
+      "target": "model-picker",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 823.75,
+      "y": 2196
+    },
+    {
+      "key": "",
+      "target": "model-picker",
+      "trusted": true,
+      "type": "click",
+      "x": 824,
+      "y": 2196
+    },
+    {
+      "key": "ArrowDown",
+      "target": "model-select",
+      "trusted": true,
+      "type": "keydown"
+    },
+    {
+      "key": "Enter",
+      "target": "model-select",
+      "trusted": true,
+      "type": "keydown"
+    },
+    {
+      "key": "",
+      "target": "model-select-option-1",
+      "trusted": false,
+      "type": "click",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "key": "",
+      "target": "effort-select-option-2",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 917,
+      "y": 2046.5
+    },
+    {
+      "key": "",
+      "target": "effort-select-option-2",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 917,
+      "y": 2046.5
+    },
+    {
+      "key": "",
+      "target": "effort-select-option-2",
+      "trusted": true,
+      "type": "click",
+      "x": 917,
+      "y": 2047
+    },
+    {
+      "key": "Escape",
+      "target": "effort-select",
+      "trusted": true,
+      "type": "keydown"
+    },
+    {
+      "key": "",
+      "target": "capabilities",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 188.9140625,
+      "y": 2196
+    },
+    {
+      "key": "",
+      "target": "capabilities",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 188.9140625,
+      "y": 2196
+    },
+    {
+      "key": "",
+      "target": "capabilities",
+      "trusted": true,
+      "type": "click",
+      "x": 189,
+      "y": 2196
+    },
+    {
+      "key": "",
+      "target": "INPUT",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 133,
+      "y": 1880
+    },
+    {
+      "key": "",
+      "target": "INPUT",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 133,
+      "y": 1880
+    },
+    {
+      "key": "",
+      "target": "INPUT",
+      "trusted": true,
+      "type": "click",
+      "x": 133,
+      "y": 1880
+    },
+    {
+      "key": "",
+      "target": "INPUT",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 133,
+      "y": 1872.75
+    },
+    {
+      "key": "",
+      "target": "INPUT",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 133,
+      "y": 1872.75
+    },
+    {
+      "key": "",
+      "target": "INPUT",
+      "trusted": true,
+      "type": "click",
+      "x": 133,
+      "y": 1873
+    },
+    {
+      "key": "",
+      "target": "menu",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 118,
+      "y": 23
+    },
+    {
+      "key": "",
+      "target": "menu",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 118,
+      "y": 23
+    },
+    {
+      "key": "",
+      "target": "menu",
+      "trusted": true,
+      "type": "click",
+      "x": 118,
+      "y": 23
+    },
+    {
+      "key": "",
+      "target": "close-drawer",
+      "trusted": true,
+      "type": "pointerdown",
+      "x": 300,
+      "y": 40
+    },
+    {
+      "key": "",
+      "target": "close-drawer",
+      "trusted": true,
+      "type": "pointerup",
+      "x": 300,
+      "y": 40
+    },
+    {
+      "key": "",
+      "target": "close-drawer",
+      "trusted": true,
+      "type": "click",
+      "x": 300,
+      "y": 40
+    }
+  ],
+  "actualTrustedTouchAndKeyboardVerified": true,
+  "serviceFixtureDocumentReleased": true,
+  "profileUnchanged": true,
+  "credentialsUnchanged": true
+}

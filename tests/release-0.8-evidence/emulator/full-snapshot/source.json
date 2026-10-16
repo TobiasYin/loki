@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact Storage+newtest source hashes compiled by unified fixedApp485c/Testfd6e; actual4newAndroid SQLite cases pass below. Initial standalone compile was source-only, not actual SQLite execution.",
+  "source": [
+    {
+      "path": "app/src/main/java/dev/thor/agent/Storage.kt",
+      "sha256": "e7487e5ea3a86aa438dffa6f5f21f51a4c387f3b8cf3b6b1b75358f869dd7636"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/FullSnapshotStorageTest.kt",
+      "sha256": "c1794248bd3997c448214a30ebf3906c6d2a87fb625b5ce30146048134bd5671"
+    }
+  ],
+  "newAndroidCases": 4,
+  "compileLog": "build/full-snapshot-storage-compile.log",
+  "causeEvidence": "game19 completed durable1253 events; OOM in later interrupt/fullsave cleanup; no model nontermination claim.",
+  "remainingBoundary": "Full state load/JSON ownership and serialization of one changed row are not made memory independent by this fix."
+}

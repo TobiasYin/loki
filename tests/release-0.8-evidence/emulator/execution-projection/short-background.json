@@ -1,0 +1,19 @@
+{
+  "mode": "local-real-sse",
+  "cloudRequests": 0,
+  "deviceInputCalls": 0,
+  "passed": true,
+  "backgroundProbeHandoff": true,
+  "firstRunId": "c51d1870-f9a8-4120-b9ac-98c73225debe",
+  "phase": "complete",
+  "sameUnattachedExecutionWeb": true,
+  "executionNeverAttached": true,
+  "sameWebView": true,
+  "sameHost": true,
+  "samePiSession": true,
+  "followupRunId": "fb70ae4a-489b-4d56-957c-25c8b2997f9d",
+  "foregroundNotification": true,
+  "notificationStoppedRun": true,
+  "partialContextRetained": true,
+  "requestCount": 5
+}
