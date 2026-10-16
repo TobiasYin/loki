@@ -1,0 +1,190 @@
+{
+  "date": "2026-10-16",
+  "sourceCommit": "ad89724b3ff2130252054e814598a5ff492eddac",
+  "physical": true,
+  "appVersion": "0.5.1-integration",
+  "versionCode": 6,
+  "appApkSha256": "43d90b359e67530bbeb60483a410ea9564a286939a20b0f877ce6b626e04d3bb",
+  "captureLoss": {
+    "passed": true,
+    "agentSubmissionSuppressed": true,
+    "requestedMovementPixels": {
+      "x": 12,
+      "y": 120
+    },
+    "touchEvents": [
+      {
+        "type": "pointerdown",
+        "pointerId": 2,
+        "at": 1966.300000011921,
+        "trusted": true,
+        "x": 268.8346862792969,
+        "y": 382.4390563964844,
+        "holding": false
+      },
+      {
+        "type": "gotpointercapture",
+        "pointerId": 2,
+        "at": 2015.6000000238419,
+        "trusted": true,
+        "x": 268.8377990722656,
+        "y": 382.4702453613281,
+        "holding": true
+      },
+      {
+        "type": "lostpointercapture",
+        "pointerId": 2,
+        "at": 3525.300000011921,
+        "trusted": true,
+        "x": 270.4529113769531,
+        "y": 398.6211242675781,
+        "holding": true
+      },
+      {
+        "type": "pointerup",
+        "pointerId": 2,
+        "at": 6965.200000047684,
+        "trusted": true,
+        "x": 274.0379333496094,
+        "y": 434.4715270996094,
+        "holding": true
+      }
+    ],
+    "commands": [
+      {
+        "op": "voice.permission",
+        "at": 1218.4000000357628
+      },
+      {
+        "op": "voice.start",
+        "at": 1967
+      },
+      {
+        "op": "voice.finish",
+        "at": 6967
+      }
+    ],
+    "targetTopValuesCssPx": [
+      361.3
+    ],
+    "durationSeconds": 9.473
+  },
+  "liveMicrophone": {
+    "passed": true,
+    "durationSeconds": 21.855,
+    "inputOrigin": "platform touchscreen; not synthetic DOM events",
+    "ttsProvider": "Volcengine TTS",
+    "reference": "请只回复语音测试成功，不要使用任何工具。",
+    "recognized": "请只回复语音测试成功，不要使用任何工具。",
+    "modelReply": "语音测试成功",
+    "holdDurationMs": 7500,
+    "noUserMessageBeforeRelease": true,
+    "cancelDidNotSend": true,
+    "touchEvents": [
+      {
+        "type": "pointerdown",
+        "trusted": true,
+        "at": 1792117193707
+      },
+      {
+        "type": "pointerup",
+        "trusted": true,
+        "at": 1792117201205
+      },
+      {
+        "type": "pointerdown",
+        "trusted": true,
+        "at": 1792117208712
+      },
+      {
+        "type": "pointercancel",
+        "trusted": true,
+        "at": 1792117209279
+      }
+    ],
+    "phaseSequence": [
+      "connecting",
+      "recording",
+      "recording",
+      "recording",
+      "recording",
+      "recording",
+      "recording",
+      "recording",
+      "recording",
+      "recording",
+      "finalizing",
+      "complete"
+    ],
+    "modelRunId": "d069b77f-033c-448d-861e-34c2ef6f8d85",
+    "preferencesAndEncryptedCredentialsUnchanged": true
+  },
+  "softwareChecks": {
+    "pageTests": 22,
+    "appJvmTests": 43,
+    "lintDebug": "passed",
+    "debugReleaseAndTestApks": "passed",
+    "layoutViewports": [
+      [
+        620,
+        540
+      ],
+      [
+        620,
+        180
+      ],
+      [
+        360,
+        640
+      ]
+    ],
+    "artifactPermissionIsolation": "passed"
+  },
+  "scopeLimit": "Old single-point holds also passed; the exact original human gesture was not captured. The fix addresses verified event-ownership/capture handling and target movement defects.",
+  "rawProofs": [
+    {
+      "path": "build/physical/voice-hold-2026-10-16/baseline/suite.log",
+      "sha256": "03ee30553fc9bf2aaf9a194a4c1ef8b1d5c76f3ca3ff7a71bffe3bedaa1dedf4"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/drift-baseline/suite.log",
+      "sha256": "0be8d3b39318bbfd7521a4f6f48c23bab7b804bc6bb23da88dd652c3e489b575"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/dom-baseline.log",
+      "sha256": "4c4d78589d265c6afca82abf275e2f851657c091ee8074e3c7f58418659b1618"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/dom-final.log",
+      "sha256": "4b396f72b24e6c9ec43a15f0bd9f220bff24c5c7b1678e3b39d3c84d7b357dd6"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/validation.log",
+      "sha256": "5be0dad053b3a27bcc1536fcf8710df2c113e4ae6a3472321c21fddd740a8191"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/final-capture-loss/suite.log",
+      "sha256": "64abb1195e2cf1c76aa398e76958482c2af7403b0d57206844bd363afef6b398"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/final-capture-loss/metadata.json",
+      "sha256": "1319c6be87fd76b42328617e9fa42ffc67a611a7e5611db9f529c936abc23607"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/final-capture-loss/physical-voice-hold.json.tar",
+      "sha256": "5f83eb80d632ebabeef15c15f5f326d85956669ce3ee350aea04bf9e278df93d"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/live-microphone/physical-voice-agent.json",
+      "sha256": "071e1e778c9db4415b786c359ba07cd4cf28147ffbae34bf5c98d27e3d136e94"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/live-microphone/microphone-instrumentation.txt",
+      "sha256": "8af5abbbbd8b72e13c6824f0f0a5a078e034ef8aed2b9d204d85c5adb83afeba"
+    },
+    {
+      "path": "build/physical/voice-hold-2026-10-16/live-microphone/metadata.json",
+      "sha256": "d057dfe4fe09beefc1df8d12f867207623b667fa56f52e6463537b40146e7149"
+    }
+  ]
+}
