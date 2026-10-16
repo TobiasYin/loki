@@ -18,6 +18,9 @@ data class Descriptor(val toolId: String, val capability: Capability, val effect
     val provenance: String = "builtin", val modelVisibility: Boolean = true)
 object ToolPack {
     const val VERSION = "0.1.0"
+    /** These tools observe the current upper display. Old observations remain
+     * invalid for input; no other READ tool implicitly receives this exception. */
+    val freshReads=setOf("perception.app_info","perception.window_info","perception.ui_tree","perception.capture_screen")
     val descriptors = listOf(
         Descriptor("perception.app_info", Capability.SCREEN_PERCEPTION, Effect.READ, true),
         Descriptor("perception.window_info", Capability.SCREEN_PERCEPTION, Effect.READ, true),
@@ -62,8 +65,21 @@ class Cancellation {
 class Checkpoint(private val checkAction: () -> Unit, val cancellation: Cancellation, private val commitAction: ((() -> Unit) -> Unit)? = null) {
     var submitted = false
         private set
+    private var submissionObserver:(()->Unit)?=null
     fun check() { cancellation.check(); checkAction() }
-    fun submitted() { submitted = true }
+    fun submitted() {
+        if(!submitted) {submitted=true;submissionObserver?.invoke()}
+    }
+    /** Bounded held inputs must keep validating their target after the first
+     * submission. Delegate commits so the outer gateway retains submitted state
+     * and its authority lock still encloses only the brief actual submission. */
+    fun checkingTarget(snapshots:Snapshots,snapshotId:String?)=Checkpoint(
+        {check();if(submitted)snapshots.validateHeld(snapshotId) else snapshots.validate(snapshotId)},cancellation
+    ) {action->effect(action)}.also {child->
+        // A remote may report a partial submission before throwing. Propagate
+        // immediately, even if the delegated effect never returns successfully.
+        child.submissionObserver={submitted()}
+    }
     /** Only wrap the brief actual commit, never a whole async/read/shell wait. */
     fun effect(action: () -> Unit) {
         val execute = { check(); action(); submitted() }

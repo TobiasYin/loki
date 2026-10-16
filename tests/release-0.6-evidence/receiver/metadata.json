@@ -1,0 +1,22 @@
+{
+  "serial": "THOR_DEVICE",
+  "port": 5037,
+  "physical": true,
+  "suite": "receiver",
+  "sourceCommit": "e026e13ab680ed8f55b24adb2503001024f55814",
+  "sourceDirty": true,
+  "apks": {
+    "app/build/outputs/apk/debug/app-debug.apk": "2bdaa96e7382ad48e13529699db731c155d306d67eb98f18f2689a6502d9ba88",
+    "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "37f9f078427eb561ee30e2d9a630a88bb2b662fd20f84c654c8f1262b9e084cc"
+  },
+  "sourceFiles": {
+    "app/src/androidTest/java/dev/thor/agent/PhysicalResumeTest.kt": "90acfe278b5a4283c08a8265d75b145a9c868eb3680ef776290d4653847863e5",
+    "app/src/androidTest/java/dev/thor/agent/PhysicalImeTest.kt": "eaa0873453b45c283a0d89a86787cbdab4a611f03b051f17844fa00e70fa752c",
+    "app/src/androidTest/java/dev/thor/agent/PhysicalDeviceFlowTest.kt": "b2564a9822a0c2dd265a16cee1d2cda0f35d5875d2d549d1d5c95c63a2f5a352",
+    "app/src/androidTest/java/dev/thor/agent/EmulatorLiveInstallTest.kt": "0e0ecb3a796cd5d583c23c10737b560f7b3866329bcfa8ee5128c693e0f25483",
+    "app/src/androidTest/java/dev/thor/agent/PhysicalDeviceStateTest.kt": "086cf4d3b9236d265e40e6c898484d012322d668713d85d8164bb44b6b2879ef",
+    "app/src/androidTest/java/dev/thor/agent/PhysicalVoiceHoldTest.kt": "77326c0f95313022eff908fa4c60efb77adaade6211675ae0085fcac2abaa99b",
+    "app/src/androidTest/java/dev/thor/agent/PhysicalCloudVoiceTest.kt": "586b74801fbc774659c4d72134bbc7a31c06ca6e167030d6bf11b2f7849ba61d"
+  },
+  "passed": true
+}

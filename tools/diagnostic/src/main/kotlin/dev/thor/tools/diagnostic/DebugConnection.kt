@@ -22,7 +22,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(6)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(10)
     private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
@@ -49,6 +49,41 @@ class DebugConnection(private val context: Context, private val invalidated: () 
             else -> Availability(Status.READY, "Bound UID-checked UserService; Thor permissions unverified", backend)
         }
     } catch (_: Exception) { Availability(Status.TEMPORARILY_UNAVAILABLE, "Shizuku binder/permission changed", "shizuku-userservice/shell-uid-2000") }
+    @Volatile private var gamepadCheckedAt=0L
+    @Volatile private var gamepadStatus: JSONObject?=null
+    fun gamepadInfo(): Map<String,Any?> {
+        val available=availability()
+        if(available.status!=Status.READY)return mapOf("availability" to available.status.name.lowercase(),"reason" to available.reason)
+        return try {
+            val response=JSONObject(service!!.gamepadStatus())
+            if(response.has("error"))mapOf("availability" to "unsupported","reason" to response.optString("message"))
+            else response.getJSONObject("data").args()+mapOf("availability" to "ready")
+        }catch(_:Exception){mapOf("availability" to "temporarily_unavailable","reason" to "Controller inspection interrupted")}
+    }
+    /** Read-only, lease-free inspection: availability polling must never cancel held input. */
+    fun gamepadAvailability(toolId: String): Availability {
+        val base=availability();if(base.status!=Status.READY)return base
+        val backend=if(toolId=="input.set_axes")"shizuku-evdev/odin-six-axes" else "shizuku-evdev/odin-buttons"
+        return try {
+            val now=SystemClock.elapsedRealtime()
+            val status=if(now-gamepadCheckedAt<1000)gamepadStatus ?: JSONObject(service!!.gamepadStatus()) else JSONObject(service!!.gamepadStatus()).also {gamepadStatus=it;gamepadCheckedAt=now}
+            if(status.has("error"))Availability(Status.UNSUPPORTED,status.optString("message","Native gamepad inspection failed"),backend)
+            else {
+                val data=status.getJSONObject("data")
+                val source=if(toolId=="input.press_button")"gamepad" else "joystick"
+                if(!data.optBoolean(source))Availability(Status.UNSUPPORTED,data.optString("evdevBackendError","Fixed physical evdev backend unavailable"),backend)
+                else Availability(Status.READY,"${data.optString("deviceName")} #${data.optInt("deviceId")}: bounded native $source submission available; receiver delivery requires independent verification",if(source=="joystick")"shizuku-evdev/odin-six-axes" else backend)
+            }
+        }catch(_:Exception){Availability(Status.TEMPORARILY_UNAVAILABLE,"Native gamepad inspection failed; refresh after Shizuku/controller reconnect",backend)}
+    }
+    fun gamepad(runId: String, toolId: String, args: Map<String,Any?>, displayId: Int, cp: Checkpoint,expectedPackage: String?=null): Map<String,Any?> {
+        GamepadCommand.parse(toolId,args)
+        return call(runId,mapOf("operation" to "gamepad","toolId" to toolId,"args" to args,"displayId" to displayId,"expectedPackage" to expectedPackage),cp)
+    }
+    fun releaseRunInputs(runId: String): String = runCatching {
+        val remote=service ?: return@runCatching "No bound gamepad backend"
+        remote.releaseGamepad(runId)
+    }.getOrDefault("Gamepad cleanup unavailable; service watchdog remains responsible for bounded release")
     fun requestAndBind() {
         requireTool(Shizuku.pingBinder(), Code.BACKEND_UNAVAILABLE, "Install/start Shizuku first")
         requireTool(Shizuku.getUid() == 2000, Code.UNSUPPORTED, "Root backend is refused")
@@ -100,6 +135,32 @@ class DebugConnection(private val context: Context, private val invalidated: () 
                     requireTool(start.optBoolean("started"),Code.IO_ERROR,"Command submission was not acknowledged")
                 }
                 remote.awaitShell(token)
+            } else if(request["operation"]=="gamepad") {
+                val payload=request.filterKeys {it in setOf("toolId","displayId","args","expectedPackage")}
+                val serialized=(json(payload) as JSONObject).toString()
+                val preparation=JSONObject(remote.prepareGamepad(token,serialized))
+                if(preparation.has("error"))fail(Code.valueOf(preparation.getString("error")),preparation.optString("message"))
+                requireTool(preparation.getJSONObject("data").optBoolean("prepared"),Code.IO_ERROR,"Gamepad preparation was not acknowledged")
+                cp.check()
+                cp.effect {
+                    val started=JSONObject(remote.startGamepad(token,serialized))
+                    if(started.has("error")) {
+                        if(started.optBoolean("submitted"))cp.submitted()
+                        fail(Code.valueOf(started.getString("error")),started.optString("message"))
+                    }
+                    requireTool(started.getJSONObject("data").optBoolean("started"),Code.IO_ERROR,"Gamepad submission was not acknowledged")
+                }
+                var result: String
+                while(true) {
+                    // Waiting is outside the authority commit lock. A stop, target change or permission
+                    // revocation can cancel the lease while the service timer owns final release.
+                    cp.check()
+                    result=remote.pollGamepad(token)
+                    val response=JSONObject(result)
+                    if(response.has("error") || response.getJSONObject("data").optBoolean("complete"))break
+                    Thread.sleep(25)
+                }
+                result
             } else if(request["operation"]=="thor.brightness") {
                 val args=request.filterKeys {it in setOf("action","screen","value")}
                 val command=ThorBrightnessCommand.parse(args)

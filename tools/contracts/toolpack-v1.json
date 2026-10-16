@@ -437,13 +437,30 @@
         "type": "object",
         "properties": {
           "button": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "X",
+              "Y",
+              "L1",
+              "R1",
+              "L2",
+              "R2",
+              "START",
+              "SELECT",
+              "MODE",
+              "L3",
+              "R3",
+              "DPAD_UP",
+              "DPAD_DOWN",
+              "DPAD_LEFT",
+              "DPAD_RIGHT"
+            ]
           },
           "phase": {
             "type": "string",
             "enum": [
-              "down",
-              "up",
               "hold"
             ]
           },
@@ -466,12 +483,14 @@
         "upper-display/snapshot"
       ],
       "platformPrerequisites": [
-        "Verified native gamepad device/source/axis backend (not provided)"
+        "Shizuku shell UID 2000 grant",
+        "Unique writable Odin Controller evdev node, reported button label/state, and verified firmware key layout",
+        "Authorized upper app is the physical controller focused target; requested button initially released"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "availabilityPolicy": "unsupported; no keyboard/touch fallback",
-      "description": "Native gamepad injection is unsupported; do not use keyboard/touch/Shell fallback."
+      "availabilityPolicy": "ready only when the fixed physical evdev backend is writable and its controller profile is validated; InputManager event identity is not a fallback",
+      "description": "Press and automatically release a real Odin controller button using a fixed EV_KEY+SYN evdev frame. Use phase=hold only, durationMs default 100 and maximum 5000. Firmware key layout and actual getevent button label/state must be verified; an initially pressed button is rejected. Physical controller input follows verified upper-app focus, not displayId injection. Never keyboard/touch/InputManager fallback. Stop releases only this action through its original fd; SIGKILL cannot guarantee release. Independently verify receiver source/deviceId and down/up before claiming effect."
     },
     {
       "toolId": "input.set_axes",
@@ -484,7 +503,40 @@
         "type": "object",
         "properties": {
           "axes": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "X": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "Y": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "Z": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "RZ": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "BRAKE": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "GAS": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false
           },
           "durationMs": {
             "type": "integer",
@@ -505,12 +557,14 @@
         "upper-display/snapshot"
       ],
       "platformPrerequisites": [
-        "Verified native gamepad device/source/axis backend (not provided)"
+        "Shizuku shell UID 2000 grant",
+        "Unique writable Odin Controller evdev node and verified six-axis min/max/key layout",
+        "Authorized upper app is the physical controller focused target; requested axes initially neutral"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "availabilityPolicy": "unsupported; no keyboard/touch fallback",
-      "description": "Native gamepad axis injection is unsupported until Thor delivery and release are verified."
+      "availabilityPolicy": "ready only when the fixed physical evdev backend is writable and its controller profile is validated; InputManager MotionEvent is not an axis fallback",
+      "description": "Hold bounded physical Odin controller axes and automatically return requested axes to neutral. Only X/Y (left stick), Z/RZ (right stick), GAS/BRAKE (triggers) are supported after discovering real firmware ranges. Sticks accept -1..1, triggers 0..1; durationMs 1..5000. Uses a fixed EV_ABS+SYN evdev writer, not MotionEvent injection. Physical controller input follows verified upper-app focus; displayId alone cannot route evdev events. Non-neutral requested axes, changed controller, unavailable routing evidence or wrong focus are rejected without changing focus locks. Stop writes neutral to this action original fd. SIGKILL cannot guarantee release; independently verify real controller source/deviceId and neutral at the receiver."
     },
     {
       "toolId": "input.release_inputs",

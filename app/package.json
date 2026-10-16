@@ -1,1 +1,1 @@
-{"name":"thor-agent-chat-tests","private":true,"version":"0.1.0","scripts":{"test":"node --test web-tests/*.test.cjs"},"devDependencies":{"jsdom":"26.1.0"}}
+{"name":"thor-agent-chat-tests","private":true,"version":"0.1.0","scripts":{"test":"node --test web-tests/*.test.cjs"},"devDependencies":{"jsdom":"26.1.0"},"dependencies":{"dompurify":"3.3.1","marked":"15.0.12"}}

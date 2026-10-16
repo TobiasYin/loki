@@ -47,7 +47,7 @@ class PhysicalVoiceHoldTest {
               document.getElementById('voice-toggle').click();
             })()""")
             Thread.sleep(700)
-            val position=JSONObject(js("(() => {const r=document.getElementById('voice-hold').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:innerWidth,h:innerHeight}})()"))
+            val position=JSONObject(js("(() => {const r=document.getElementById('voice-hold').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:innerWidth,h:innerHeight,height:r.height}})()"))
             val origin=IntArray(2);var x=0;var y=0
             ins.runOnMainSync {web.getLocationOnScreen(origin);x=(origin[0]+web.width*position.getDouble("x")/position.getDouble("w")).toInt();y=(origin[1]+web.height*position.getDouble("y")/position.getDouble("h")).toInt()}
             report.put("position",position).put("nativeX",x).put("nativeY",y);save()
@@ -69,7 +69,7 @@ class PhysicalVoiceHoldTest {
             report.put("touchEvents",JSONArray(json("window.__holdTrace"))).put("voiceEvents",JSONArray(json("window.__holdVoice"))).put("commands",JSONArray(json("window.__holdCommands")));save()
             val events=report.getJSONArray("touchEvents").objects();assertTrue(events.any {it.getString("type")=="pointerdown" && it.getBoolean("trusted")})
             assertTrue("Hold ended before physical release; inspect touch/voice trace",samples.objects().filter {it.getLong("elapsedMs") in 700..4200}.all {it.getBoolean("holding")})
-            assertTrue("Starting recording must not move the touch target",samples.objects().filter {it.optBoolean("holding")}.all {kotlin.math.abs(it.getDouble("top")-(position.getDouble("y")-22))<1})
+            assertTrue("Starting recording must not move the touch target",samples.objects().filter {it.optBoolean("holding")}.all {kotlin.math.abs(it.getDouble("top")-(position.getDouble("y")-position.getDouble("height")/2))<1})
             val commands=report.getJSONArray("commands").objects();assertEquals(1,commands.count {it.getString("op")=="voice.start"});assertEquals(1,commands.count {it.getString("op")=="voice.finish"});assertFalse(commands.any {it.getString("op")=="voice.cancel"})
             report.put("passed",true)
         } finally {

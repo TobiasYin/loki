@@ -177,7 +177,7 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         getSystemService(android.view.inputmethod.InputMethodManager::class.java).hideSoftInputFromWindow(window.decorView.windowToken,0)
         arena.requestFocus()
         val caseId=caseNames[cases.selectedItemPosition]
-        val seconds=duration.text.toString().toLongOrNull()?.coerceIn(5,60) ?: 5
+        val seconds=duration.text.toString().toLongOrNull()?.coerceIn(5,120) ?: 5
         val confirmed=role.isChecked
         val selectedMode=modes.selectedItem.toString()
         controls.visibility=View.INVISIBLE // Keeps geometry fixed. Re-arm cannot race.

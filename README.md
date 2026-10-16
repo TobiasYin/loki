@@ -2,15 +2,15 @@
 
 面向 AYN Thor 的 Android Agent：本地 WebView 聊天与锁定版本 Pi，模型协议由 JS 处理，网络与设备授权由 Native 执行。五个独立任务的精确提交已保留历史整合，正式入口已连接真实 Runtime、通用 Native Fetch、持久化与设备 ToolPack；不返回模拟成功。
 
-已完成一轮 **Thor 真机测试与修复**：真实 OpenCode Go Responses、Brave 搜索、完整下屏输入法、Shizuku 自动无障碍、手指和实体手柄接收基线，以及真实模型的逻辑坐标/截图坐标触摸已有实测证据，见 [实机测试报告](docs/physical-test-report.md)。原生手柄注入、完整故障矩阵和真实模拟器私有配置权限仍未完成，完整四能力产品尚不能宣称发布就绪。此前本地受控模型服务、JVM、DOM 与 Android AVD 的历史证据见 [中文软件集成报告](docs/integration-report.md)。
+已完成一轮 **Thor 真机测试与修复**：真实 OpenCode Go Responses、Brave 搜索、完整下屏输入法、Shizuku 自动无障碍、手指和实体手柄接收基线，以及真实模型的逻辑坐标/截图坐标触摸已有实测证据，见 [实机测试报告](docs/physical-test-report.md)。0.6 新增固定 evdev 原生手柄按钮与六轴后端，真实身份、归零与停止验收进度见 [0.6 手柄说明](docs/release-0.6-gamepad.md)；完整故障矩阵和真实模拟器私有配置权限仍未完成，不能宣称所有游戏兼容或完整四能力产品发布就绪。此前本地受控模型服务、JVM、DOM 与 Android AVD 的历史证据见 [中文软件集成报告](docs/integration-report.md)。
 
-0.5.0 的紧凑输入区、完整设置页、OpenCode Go 模型/思考强度选择与多会话并行见 [本轮界面与模型配置说明](docs/composer-models-parallel.md)。新会话继承上次选择的能力、模型、思考强度和 Skill；下表是首次安装的初始默认值。真机仍保持暂停。
+0.5.0 的紧凑输入区、完整设置页、OpenCode Go 模型/思考强度选择与多会话并行见 [本轮界面与模型配置说明](docs/composer-models-parallel.md)。新会话继承上次选择的能力、模型、思考强度和 Skill；下表是首次安装的初始默认值。本轮 0.6 已恢复并完成专项实机回归，详情见 [0.6 验收记录](docs/release-0.6-acceptance.md)。
 
 | 能力 | 新 Session | 当前实现与限制 |
 |---|---|---|
-| 上屏感知 | ON | 真实设备信息；校准显示与 Accessibility 后提供应用/窗口/UI 树/截图；每次模型请求仅注入最小上下文 |
+| 上屏感知 | ON | 真实设备信息；解析或校准显示角色并开启 Accessibility 后提供应用/窗口/UI 树/截图；每次模型请求仅注入最小上下文 |
 | 联网搜索 | ON | curl 等价 HTTP 请求、持久文件下载与完整性校验；Brave 独立 Native 凭据和端点；未配置时不发布搜索；HTTP/HTTPS 网页按系统 DNS/代理访问，支持内网与代理 fake-IP；服务凭据分别绑定端点 |
-| 屏幕操作 | OFF | 真实 Accessibility 定向触摸、过期目标拒绝；原生 gamepad 后端明确 unsupported |
+| 屏幕操作 | OFF | Accessibility 定向触摸与过期目标拒绝；已授权 Shizuku 下的固定 evdev 有界手柄按钮/六轴，要求真实设备与上屏焦点验证 |
 | ADB 调试 | OFF | Shizuku shell UID、Native 白/灰/黑名单；已下载 APK 的逐次确认安装与版本回验；结构化文件只允许明确的应用私有合成配置目录，写前备份、hash 冲突、读回及恢复 |
 
 ADB 调试采用 Native 白/灰/黑名单：限定参数的状态读取、亮度、风扇和刷新率直接执行；含隐私的诊断或按键分配变更逐条 UI 确认；抹除、格式化、刷机、提权和未知命令禁止。执行已审查 argv，不开放任意脚本。Shell 不等于 Root。Thor 双屏与常用配置手册作为内置 adb-operations Skill 按需加载。

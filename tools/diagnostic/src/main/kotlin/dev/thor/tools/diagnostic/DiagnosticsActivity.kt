@@ -146,7 +146,7 @@ class DiagnosticsActivity : Activity() {
                     cap.name.lowercase() to if (!authority.enabled(cap)) "disabled" else if (ready) "at_least_one_tool_ready" else "backend_missing"
                 })) as JSONObject
             requireTool(l0.toString().toByteArray().size <= 1024, Code.LIMIT_EXCEEDED, "L0 exceeds 1KiB")
-            show("Minimal L0 (no screenshot/version/UI tree)\n${l0.toString(2)}\nNative-only snapshotId=${s.id}, TTL=10s")
+            show("Minimal L0 (no screenshot/version/UI tree)\n${l0.toString(2)}\nNative-only snapshotId=${s.id}, TTL=${Snapshots.OBSERVATION_TTL_MS/1000}s")
         } catch (t: ToolFailure) { show("${t.code}: ${t.message}") }
     }
     private fun prepare() {

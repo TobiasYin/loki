@@ -1,0 +1,26 @@
+{
+  "agent-debug": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "2bdaa96e7382ad48e13529699db731c155d306d67eb98f18f2689a6502d9ba88",
+    "bytes": 6860810,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='dev.thor.inputlab.permission.CONTROL'\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "agent-release-unsigned": {
+    "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+    "sha256": "d8d8be3a9a420b406c9b3375e2e517d09c534aba2f1ea78fd9106730fe0a33ce",
+    "bytes": 5151607,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "input-lab-debug": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+    "sha256": "9ca8dd90d043536fd4c1bd27b6cc7e393c4235fd32bf59b744a86bea5d2337f0",
+    "bytes": 2785439,
+    "permissions": "package: dev.thor.inputlab\npermission: dev.thor.inputlab.permission.CONTROL"
+  },
+  "input-lab-release-unsigned": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+    "sha256": "c3f5af9dc8b100ed2d8a16b4329d947dc93cf3737554056d745b1ca9c27c723d",
+    "bytes": 2226744,
+    "permissions": "package: dev.thor.inputlab"
+  }
+}

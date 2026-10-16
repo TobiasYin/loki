@@ -1,0 +1,4 @@
+# Preserve upstream license and captured Android metadata bytes.
+app/src/main/assets/chat/vendor/dompurify.LICENSE whitespace=-blank-at-eof
+tools/core/src/test/resources/thor-odin-keylayout.kl whitespace=-blank-at-eof
+tools/core/src/test/resources/thor-odin-getevent-lp.txt whitespace=-blank-at-eol

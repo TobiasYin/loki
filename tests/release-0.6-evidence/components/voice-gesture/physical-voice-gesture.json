@@ -1,0 +1,569 @@
+{
+  "testScope": "installed-product-WebView\/UI-component; simulated-ASR-state",
+  "physicalDevice": true,
+  "platformTouch": true,
+  "humanFinger": false,
+  "microphoneUsed": false,
+  "audioUploaded": false,
+  "modelCalled": false,
+  "outgoingVoiceAndSendSuppressed": true,
+  "displayId": 4,
+  "stages": [
+    {
+      "cancelPending": false,
+      "disabled": false,
+      "height": 60,
+      "holding": false,
+      "label": "按住说话",
+      "left": 23.861787796020508,
+      "name": "idle",
+      "overlay": false,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": false,
+      "disabled": false,
+      "height": 60,
+      "holding": true,
+      "label": "松手发送 · 上滑取消",
+      "left": 23.861787796020508,
+      "name": "held",
+      "overlay": true,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": false,
+      "disabled": false,
+      "height": 60,
+      "holding": true,
+      "label": "松手发送 · 上滑取消",
+      "left": 23.861787796020508,
+      "name": "small-up",
+      "overlay": true,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": true,
+      "disabled": false,
+      "height": 60,
+      "holding": true,
+      "label": "松手发送 · 上滑取消",
+      "left": 23.861787796020508,
+      "name": "long-up-pending",
+      "overlay": true,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": false,
+      "disabled": false,
+      "height": 60,
+      "holding": true,
+      "label": "松手发送 · 上滑取消",
+      "left": 23.861787796020508,
+      "name": "returned",
+      "overlay": true,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": false,
+      "disabled": false,
+      "height": 60,
+      "holding": false,
+      "label": "按住说话",
+      "left": 23.861787796020508,
+      "name": "sent-idle",
+      "overlay": false,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": false,
+      "disabled": false,
+      "height": 60,
+      "holding": true,
+      "label": "松手发送 · 上滑取消",
+      "left": 23.861787796020508,
+      "name": "cancel-held",
+      "overlay": true,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": true,
+      "disabled": false,
+      "height": 60,
+      "holding": true,
+      "label": "松手发送 · 上滑取消",
+      "left": 23.861787796020508,
+      "name": "cancel-long-up-pending",
+      "overlay": true,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    },
+    {
+      "cancelPending": false,
+      "disabled": false,
+      "height": 60,
+      "holding": false,
+      "label": "按住说话",
+      "left": 23.861787796020508,
+      "name": "cancel-idle",
+      "overlay": false,
+      "threshold": 187.60000000000002,
+      "top": 347.2967529296875,
+      "transcript": "",
+      "transcriptHidden": true,
+      "viewportHeight": 469,
+      "viewportWidth": 538,
+      "width": 490.37939453125
+    }
+  ],
+  "injectorTrace": [
+    "READY uid=2000 display=4",
+    "ACK DOWN downTime=338023673 eventTime=338023677 display=4",
+    "ACK MOVE downTime=338023673 eventTime=338024185 display=4",
+    "ACK MOVE downTime=338023673 eventTime=338024567 display=4",
+    "ACK MOVE downTime=338023673 eventTime=338025008 display=4",
+    "ACK UP downTime=338023673 eventTime=338025162 display=4",
+    "ACK DOWN downTime=338025345 eventTime=338025347 display=4",
+    "ACK MOVE downTime=338025345 eventTime=338025623 display=4",
+    "ACK UP downTime=338025345 eventTime=338025637 display=4"
+  ],
+  "beforeHashes": {
+    "db:sessions": "b1d4dab72fc6c2f98c7603568890e17a9105f2ba52e9c134d1f5279d9a315d45",
+    "db:runs": "505204b3ead6a3e0419d302df3fb25f6dcb637b7c038d064b5133c851c1a4ef6",
+    "db:messages": "3756449777bcc99ed88be35921fb31026b106aaf53bc947f9694237ebde51204",
+    "db:events": "86b4c011ab0022a4ce217cf8f70e3908af9405cd1ca0e554a96edcdd122749b0",
+    "db:attachments": "e7a2b6be9eec1b01599c94871755030b48f2c8aa4c8e8ba1109f7879e7877e42",
+    "db:metadata": "246e5c18fbc42cc66e7d90be5f916f975d3cc3f2aca93f9a5d8a53c19636144f",
+    "prefs:profiles": "5dfbbaf09a1cf49ea7c5824293e10335f1c09ac83785c3fb8a3a8ebe22434ebd",
+    "prefs:voice": "9f91f58512a4be36ebdab30dda5c3b93225882ec860e5a8e3e17067c0af4c7f2",
+    "prefs:native-credentials": "0aeb6dc9107e8fc92e171c73d19798ed6031ec84bae243deeee61783163367fc",
+    "prefs:display-roles": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  "screenshots": [
+    {
+      "name": "idle",
+      "visualStateCallback": 338023334212665,
+      "draws": 2,
+      "method": "postVisualStateCallback + two actual draws + PixelCopy window buffer",
+      "pixelCopyResult": 0
+    },
+    {
+      "name": "held",
+      "visualStateCallback": 338023707875060,
+      "draws": 2,
+      "method": "postVisualStateCallback + two actual draws + PixelCopy window buffer",
+      "pixelCopyResult": 0
+    },
+    {
+      "name": "cancel-pending",
+      "visualStateCallback": 338024590276362,
+      "draws": 2,
+      "method": "postVisualStateCallback + two actual draws + PixelCopy window buffer",
+      "pixelCopyResult": 0
+    },
+    {
+      "name": "returned",
+      "visualStateCallback": 338025019286362,
+      "draws": 2,
+      "method": "postVisualStateCallback + two actual draws + PixelCopy window buffer",
+      "pixelCopyResult": 0
+    },
+    {
+      "name": "sent-idle",
+      "visualStateCallback": 338025194513914,
+      "draws": 2,
+      "method": "postVisualStateCallback + two actual draws + PixelCopy window buffer",
+      "pixelCopyResult": 0
+    }
+  ],
+  "helperCommand": "\/system\/bin\/env CLASSPATH=\/data\/app\/~~LpS2FgI2XHQxiGJvZr9YPw==\/dev.thor.agent.test-zcoNFCBUxxKomdDP7cfKtQ==\/base.apk \/system\/bin\/app_process \/ dev.thor.agent.testinput.VoiceGestureInjector 4",
+  "helperStartupAttempted": true,
+  "touchEvents": [
+    {
+      "type": "pointerdown",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 376.727783203125,
+      "at": 1583.2999999523163
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 367.9909362792969,
+      "at": 1823.2999999523163
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 359.2541198730469,
+      "at": 1854.2999999523163
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 350.517333984375,
+      "at": 1887.3999999761581
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 341.780517578125,
+      "at": 1921.5999999642372
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 333.04376220703125,
+      "at": 1957.5
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 324.3069152832031,
+      "at": 1988
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 315.5700988769531,
+      "at": 2025.0999999642372
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 306.83331298828125,
+      "at": 2075.199999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 288.4111328125,
+      "at": 2223
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 269.98895263671875,
+      "at": 2257.199999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 251.56678771972656,
+      "at": 2290.199999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 233.1446075439453,
+      "at": 2325.699999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 214.72242736816406,
+      "at": 2357.399999976158
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 196.3002471923828,
+      "at": 2398.099999964237
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 177.8780975341797,
+      "at": 2424.099999964237
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 159.45590209960938,
+      "at": 2458.099999964237
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 186.61489868164062,
+      "at": 2662.699999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 213.77386474609375,
+      "at": 2692
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 240.932861328125,
+      "at": 2725.699999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 268.091796875,
+      "at": 2759.2999999523163
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 295.25079345703125,
+      "at": 2792.699999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 322.4097900390625,
+      "at": 2828.2999999523163
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 349.56878662109375,
+      "at": 2862.199999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 376.727783203125,
+      "at": 2898.599999964237
+    },
+    {
+      "type": "pointerup",
+      "trusted": true,
+      "pointerId": 2,
+      "x": 268.88616943359375,
+      "y": 376.727783203125,
+      "at": 3070.099999964237
+    },
+    {
+      "type": "pointerdown",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 376.727783203125,
+      "at": 3253.199999988079
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 349.56878662109375,
+      "at": 3289.599999964237
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 309.6290588378906,
+      "at": 3313
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 295.25079345703125,
+      "at": 3345.599999964237
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 268.091796875,
+      "at": 3379.5
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 240.932861328125,
+      "at": 3417.399999976158
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 213.77386474609375,
+      "at": 3447.2999999523163
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 186.61489868164062,
+      "at": 3480
+    },
+    {
+      "type": "pointermove",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 159.45590209960938,
+      "at": 3513.5
+    },
+    {
+      "type": "pointerup",
+      "trusted": true,
+      "pointerId": 3,
+      "x": 268.88616943359375,
+      "y": 159.45590209960938,
+      "at": 3543.399999976158
+    }
+  ],
+  "commands": [
+    {
+      "op": "voice.permission",
+      "at": 1230.5
+    },
+    {
+      "op": "voice.start",
+      "id": "99779f15-72fb-4ec7-8a78-72db40ddecef",
+      "sessionId": "3a7fb27f-4746-4418-bfd4-311005bcaa94",
+      "at": 1583.699999988079
+    },
+    {
+      "op": "voice.finish",
+      "id": "99779f15-72fb-4ec7-8a78-72db40ddecef",
+      "sessionId": "3a7fb27f-4746-4418-bfd4-311005bcaa94",
+      "at": 3070.7999999523163
+    },
+    {
+      "op": "send",
+      "sessionId": "3a7fb27f-4746-4418-bfd4-311005bcaa94",
+      "text": "测试语音消息",
+      "at": 3084.399999976158
+    },
+    {
+      "op": "voice.start",
+      "id": "1a174716-b2cc-4688-874d-409a258dd554",
+      "sessionId": "3a7fb27f-4746-4418-bfd4-311005bcaa94",
+      "at": 3253.399999976158
+    },
+    {
+      "op": "voice.cancel",
+      "id": "1a174716-b2cc-4688-874d-409a258dd554",
+      "sessionId": "3a7fb27f-4746-4418-bfd4-311005bcaa94",
+      "at": 3543.599999964237
+    }
+  ],
+  "afterHashes": {
+    "db:sessions": "b1d4dab72fc6c2f98c7603568890e17a9105f2ba52e9c134d1f5279d9a315d45",
+    "db:runs": "505204b3ead6a3e0419d302df3fb25f6dcb637b7c038d064b5133c851c1a4ef6",
+    "db:messages": "3756449777bcc99ed88be35921fb31026b106aaf53bc947f9694237ebde51204",
+    "db:events": "86b4c011ab0022a4ce217cf8f70e3908af9405cd1ca0e554a96edcdd122749b0",
+    "db:attachments": "e7a2b6be9eec1b01599c94871755030b48f2c8aa4c8e8ba1109f7879e7877e42",
+    "db:metadata": "246e5c18fbc42cc66e7d90be5f916f975d3cc3f2aca93f9a5d8a53c19636144f",
+    "prefs:profiles": "5dfbbaf09a1cf49ea7c5824293e10335f1c09ac83785c3fb8a3a8ebe22434ebd",
+    "prefs:voice": "9f91f58512a4be36ebdab30dda5c3b93225882ec860e5a8e3e17067c0af4c7f2",
+    "prefs:native-credentials": "0aeb6dc9107e8fc92e171c73d19798ed6031ec84bae243deeee61783163367fc",
+    "prefs:display-roles": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  "historyProfilesAndKeysPreserved": true,
+  "passed": true,
+  "helperStderr": ""
+}

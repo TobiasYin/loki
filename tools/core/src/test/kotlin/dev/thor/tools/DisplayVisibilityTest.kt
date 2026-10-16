@@ -52,10 +52,10 @@ class DisplayVisibilityTest {
             target=changed;rejected {s.validateInputPoints(snapshot.id,listOf(Point(400.0,300.0)))}
         }
     }
-    @Test fun clippingNormalizationNeverExtendsTheTenSecondInputExpiry() {
+    @Test fun clippingNormalizationNeverExtendsTheConfiguredInputExpiry() {
         var now=1000L;var target=Target("lab","valid","same-root",full)
         val s=Snapshots(Clock {now}) {target};s.update(listOf(upper,lower));s.calibrate(0,4);val old=s.capture()
-        now+=10_000;target=target.copy(touchableBounds=TouchableBounds(1,0,800,599))
+        now+=Snapshots.OBSERVATION_TTL_MS;target=target.copy(touchableBounds=TouchableBounds(1,0,800,599))
         rejected {s.validateInputPoints(old.id,listOf(Point(400.0,300.0)))}
         val fresh=s.captureForRead(old.id)
         s.validateInputPoints(fresh.id,listOf(Point(400.0,300.0)))

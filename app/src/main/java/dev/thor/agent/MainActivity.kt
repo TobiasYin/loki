@@ -53,6 +53,13 @@ class MainActivity : Activity() {
                 if(request.optString("op").startsWith("voice.")) {
                     runOnUiThread { handleVoice(request.optString("op"),request.optJSONObject("data") ?: JSONObject()) }
                     java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
+                } else if(request.optString("op") == "openLink") {
+                    val raw=request.optJSONObject("data")?.optString("url").orEmpty()
+                    runOnUiThread {runCatching {
+                        val uri=URI(raw);require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && raw.length<=8192)
+                        startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW,Uri.parse(raw)))
+                    }.onFailure {Toast.makeText(this,"无法打开此链接",Toast.LENGTH_SHORT).show()}}
+                    java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
                 } else if(request.optString("op") == "voiceSettings") {
                     runOnUiThread {showSettings()};java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
                 } else if(request.optString("op") == "skillImport") {
@@ -153,13 +160,13 @@ class MainActivity : Activity() {
     private fun showSettings(section:String?=null) {
         if(section==null) {
             val content=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(24,16,24,24)}
-            val selection=host.view().getJSONObject("modelSelection")
+            val modelLabel=host.modelLabel()
             fun row(title:String,subtitle:String,action:()->Unit) {
                 content.addView(Button(this).apply {text=title;isAllCaps=false;textSize=16f;gravity=android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL;minimumHeight=64;setPadding(12,8,12,0);backgroundTintList=android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT);setOnClickListener {action()}},LinearLayout.LayoutParams(-1,-2))
                 content.addView(TextView(this).apply {text=subtitle;textSize=13f;setPadding(12,0,12,18)})
                 content.addView(View(this).apply {setBackgroundColor(0x22888888)},LinearLayout.LayoutParams(-1,1))
             }
-            row("模型服务 ›",selection.optString("label","添加模型")+" · "+host.view().optString("modelStatus")){showSettings("model")}
+            row("模型服务 ›",modelLabel+" · "+host.modelStatus()){showSettings("model")}
             row("联网搜索 ›","Brave 搜索与 API Key"){showSettings("search")}
             row("火山流式语音识别 ›","语音输入、识别资源与 API Key"){showVoiceSettingsPage()}
             row("设备与权限 ›","显示映射、无障碍与 Shizuku"){showSettings("device")}
@@ -175,6 +182,7 @@ class MainActivity : Activity() {
             if(secret) { importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS; setSaveEnabled(false) }
             content.addView(this)
         }
+        if(section=="model") {
         label("模型服务")
         val provider=Spinner(this).apply {adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,arrayOf("OpenCode Go","自定义 API Key"));setSelection(if((prefs.getString("provider",null)?.let {it=="opencode-go"} ?: prefs.getString("url","").orEmpty().startsWith("https://opencode.ai/zen/go")))0 else 1);content.addView(this)}
         val name = field("模型显示名", "name")
@@ -209,7 +217,7 @@ class MainActivity : Activity() {
             override fun onNothingSelected(parent:android.widget.AdapterView<*>?)=Unit
             override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long) {
                 val go=position==0;modelPicker.visibility=if(go)View.VISIBLE else View.GONE;refreshModels.visibility=modelPicker.visibility;catalogStatus.visibility=modelPicker.visibility
-                protocol.visibility=if(go)View.GONE else View.VISIBLE;model.visibility=protocol.visibility;imageSupport.visibility=protocol.visibility;contextBudget.isEnabled=!go
+                protocol.visibility=if(go)View.GONE else View.VISIBLE;model.visibility=protocol.visibility;name.visibility=protocol.visibility;url.visibility=protocol.visibility;contextBudget.isEnabled=!go
                 if(go){url.setText("https://opencode.ai/zen/go/v1");updateModels()}
             }
         }
@@ -218,24 +226,83 @@ class MainActivity : Activity() {
         label("模型 API Key：${vault.status("model")}；留空保留，勾选后删除")
         val modelKey = field("API Key（留空保留）", "", true)
         val removeModel = CheckBox(this).apply { text = "删除已保存模型 Key"; content.addView(this) }
-        val test = Button(this).apply { text = "测试当前已保存模型：图片输入与工具回传"; content.addView(this) }
-        test.setOnClickListener {
-            try {
-                val token = host.requestProbe(); val sid = host.selectedSession()
-                web.evaluateJavascript("window.runNativeProbe(${JSONObject.quote(token)}, ${JSONObject.quote(sid)})", null)
-                Toast.makeText(this,"连接检查已开始，结果将在设置中更新",Toast.LENGTH_SHORT).show()
-            } catch (_: Exception) { Toast.makeText(this, "请先保存有效配置，且停止活动运行", Toast.LENGTH_LONG).show() }
+        val advanced=listOf(contextBudget,maxOutput,imageSupport,headerName,headerTemplate)
+        advanced.forEach {it.visibility=View.GONE}
+        content.addView(Button(this).apply {text="高级选项 ›";setOnClickListener {val expand=advanced.first().visibility!=View.VISIBLE;advanced.forEach {it.visibility=if(expand)View.VISIBLE else View.GONE};text=if(expand)"收起高级选项 ‹" else "高级选项 ›"}})
+        fun currentModelDraft():ModelConnectionTest.Draft {
+            val draft=ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),
+                if(removeModel.isChecked)"" else modelKey.text.toString().ifBlank {vault.readNative("model").orEmpty()},headerName.text.toString(),headerTemplate.text.toString())
+            val uri=runCatching {URI(draft.baseUrl)}.getOrNull()
+            return if(uri?.scheme=="https" && uri.host=="opencode.ai" && uri.port in setOf(-1,443) && uri.path.trimEnd('/')=="/zen/go/v1")
+                draft.withProfile(catalog.models().objects().find {it.optString("id")==draft.model && it.optString("protocol")==draft.protocol}) else draft
         }
-        val probeStatus=TextView(this).apply {text=host.view().optString("modelStatus");content.addView(this)}
-        val statusPoll=object:Runnable {override fun run(){if(settingsView!=null && probeStatus.isAttachedToWindow){probeStatus.text=host.view().optString("modelStatus");probeStatus.postDelayed(this,500)}}}
-        probeStatus.postDelayed(statusPoll,500)
-        val modelEnd=content.childCount
+        val testStatus=TextView(this).apply {text="测试当前页面填写的配置；空白 Key 使用已保存 Key。草稿不会自动保存。";setPadding(0,12,0,12);content.addView(this)}
+        val test=Button(this).apply {text="测试当前填写的连接";content.addView(this)}
+        test.setOnClickListener {
+            val draft=currentModelDraft()
+            if(runCatching {draft.validate()}.isFailure){testStatus.text="请填写有效的地址、接口类型、模型 ID 和 API Key；草稿未保存";return@setOnClickListener}
+            test.isEnabled=false;testStatus.text="正在测试当前填写的连接…（草稿未保存）"
+            Thread {
+                val result=ModelConnectionTest.run(draft)
+                runOnUiThread {if(testStatus.isAttachedToWindow){test.isEnabled=true;testStatus.text="${result.message} · ${result.elapsedMs} ms\n草稿未保存，点击右上角保存后生效。"}}
+            }.start()
+        }
+        val fullTest=Button(this).apply {text="完整检查已保存配置（图片与工具）";content.addView(this)}
+        fullTest.setOnClickListener {
+            try {
+                require(!host.hasActiveRuns())
+                val token=host.requestProbe();val sid=host.selectedSession()
+                web.evaluateJavascript("window.runNativeProbe(${JSONObject.quote(token)}, ${JSONObject.quote(sid)})",null)
+                Toast.makeText(this,"正在检查已保存的配置；当前草稿不会参与",Toast.LENGTH_LONG).show()
+            } catch(_:Exception){Toast.makeText(this,"请先保存有效配置，并等待当前连接检查结束",Toast.LENGTH_LONG).show()}
+        }
+        val probeStatus=TextView(this).apply {text="已保存配置：${host.modelStatus()}";content.addView(this)}
+        val statusPoll=object:Runnable {override fun run(){if(probeStatus.isAttachedToWindow){val value="已保存配置：${host.modelStatus()}";if(probeStatus.text.toString()!=value)probeStatus.text=value;probeStatus.postDelayed(this,1000)}}}
+        probeStatus.postDelayed(statusPoll,1000)
+        settingsPage("模型服务",content,save={
+            try {
+                require(!host.hasActiveRuns())
+                ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),
+                    if(removeModel.isChecked)"removed" else modelKey.text.toString().ifBlank {vault.readNative("model").orEmpty()},headerName.text.toString(),headerTemplate.text.toString()).validate()
+                val budget=contextBudget.text.toString().ifBlank {"32768"}.toInt()
+                val outputBudget=maxOutput.text.toString().ifBlank {"2048"}.toInt()
+                require(budget in 4096..4000000 && outputBudget in 16..16384 && outputBudget<budget)
+                val nextRevision=prefs.getInt("revision",0)+1
+                check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
+                if(removeModel.isChecked)vault.remove("model") else if(modelKey.length()>0)vault.put("model",modelKey.text.toString())
+                check(prefs.edit().putBoolean("supportsImages",imageSupport.isChecked).putString("provider",if(provider.selectedItemPosition==0)"opencode-go" else "custom").putString("name",name.text.toString().take(80)).putInt("protocol",protocol.selectedItemPosition)
+                    .putString("url",url.text.toString().trim()).putString("model",model.text.toString().trim()).putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString())
+                    .putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName",headerName.text.toString()).putString("headerTemplate",headerTemplate.text.toString()).commit())
+                modelKey.text.clear();closeSettings();recreate();Toast.makeText(this,"设置已保存；新模型首次使用会检查图片与工具能力",Toast.LENGTH_LONG).show()
+            }catch(_:Exception){Toast.makeText(this,"保存失败：请先停止活动任务，并检查地址、预算和密钥配置",Toast.LENGTH_LONG).show()}
+        },back={showSettings()})
+        return
+        }
+        if(section=="search") {
         label("联网搜索 · Brave")
-        val backend = field("搜索后端：当前支持 Brave", "searchBackend").apply {visibility=View.GONE}; val searchUrl = field("搜索 API 地址", "searchUrl").apply {if(text.isBlank())setText("https://api.search.brave.com/res/v1/web/search")}
+        val searchUrl = field("搜索 API 地址", "searchUrl").apply {if(text.isBlank())setText("https://api.search.brave.com/res/v1/web/search")}
         label("搜索 Key：${vault.status("search")}")
         val searchKey = field("API Key（留空保留）", "", true)
         val removeSearch = CheckBox(this).apply { text = "删除已保存搜索 Key"; content.addView(this) }
-        val searchEnd=content.childCount
+        val searchTestStatus=TextView(this).apply {text="测试当前填写的地址与 Key；留空使用已保存 Key，不自动保存。";content.addView(this)}
+        val searchTest=Button(this).apply {text="测试当前搜索连接";content.addView(this)}
+        searchTest.setOnClickListener {
+            val testUrl=searchUrl.text.toString().trim();val testKey=if(removeSearch.isChecked)"" else searchKey.text.toString().ifBlank {vault.readNative("search").orEmpty()}
+            searchTest.isEnabled=false;searchTestStatus.text="正在测试当前搜索配置…"
+            Thread {val result=SearchConnectionTest.run(testUrl,testKey);runOnUiThread {if(searchTestStatus.isAttachedToWindow){searchTest.isEnabled=true;searchTestStatus.text="${result.message} · ${result.elapsedMs} ms"}}}.start()
+        }
+        settingsPage("联网搜索",content,save={
+            try {
+                require(!host.hasActiveRuns())
+                val value=searchUrl.text.toString().trim();val uri=URI(value)
+                require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && uri.rawQuery==null && uri.fragment==null && searchKey.length()<=8192)
+                if(removeSearch.isChecked)vault.remove("search") else if(searchKey.length()>0)vault.put("search",searchKey.text.toString())
+                check(prefs.edit().putString("searchBackend","Brave").putString("searchUrl",value).commit())
+                searchKey.text.clear();closeSettings();recreate()
+            }catch(_:Exception){Toast.makeText(this,"保存失败：请停止活动任务，并检查搜索地址和 Key",Toast.LENGTH_LONG).show()}
+        },back={showSettings()})
+        return
+        }
         label("设备与权限")
         val facts = dev.thor.tools.diagnostic.displayFacts(this)
         val upper = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, facts.map { "目标上屏 ${it.id}: ${it.width}×${it.height}" }); content.addView(this) }
@@ -246,40 +313,7 @@ class MainActivity : Activity() {
         content.addView(Button(this).apply { text = "打开系统无障碍设置（无 Shizuku 时手动开启）"; setOnClickListener { startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) } })
         content.addView(Button(this).apply { text = "请求/绑定 Shizuku（shell UID）"; setOnClickListener { runCatching { host.bindDebug() }.onFailure { Toast.makeText(this@MainActivity, "Shizuku 尚未就绪或没有 shell 授权", Toast.LENGTH_LONG).show() } } })
         label("设备状态：确认上下屏映射后使用屏幕工具；手柄控制暂不可用。\nADB 调试采用命令分级：白名单命令及亮度、风扇、刷新率等常用调整直接执行；涉及隐私或按键分配的灰名单需逐条确认；抹除、格式化、刷机和未审查命令禁止执行。内置操作手册可在 Skill 管理中查看。")
-        val children=(0 until content.childCount).map {content.getChildAt(it)};content.removeAllViews()
-        val range=when(section){"model"->0 until modelEnd;"search"->modelEnd until searchEnd;else->searchEnd until children.size}
-        for(i in range)content.addView(children[i])
-        val title=when(section){"model"->"模型服务";"search"->"联网搜索";else->"设备与权限"}
-        if(section=="device"){settingsPage(title,content,back={showSettings()});return}
-        settingsPage(title,content,save={
-
-                try {
-                    require(!host.hasActiveRuns()) {"请先停止任务再修改服务连接"}
-                    if(section=="search") {
-                        val value=searchUrl.text.toString();val uri=URI(value)
-                        require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && uri.rawQuery==null && uri.fragment==null && searchKey.length()<=8192)
-                        if(removeSearch.isChecked)vault.remove("search") else if(searchKey.length()>0)vault.put("search",searchKey.text.toString())
-                        check(prefs.edit().putString("searchBackend","Brave").putString("searchUrl",value).commit())
-                        searchKey.text.clear();closeSettings();recreate();return@settingsPage
-                    }
-                    for(value in listOf(url.text.toString())) if(value.isNotBlank()) {
-                        val uri = URI(value); require(uri.scheme in setOf("http", "https") && !uri.host.isNullOrBlank() && uri.userInfo == null && uri.rawQuery == null && uri.fragment == null) { "请输入无凭据、查询或片段的 HTTP / HTTPS URL" }
-                    }
-                    require(modelKey.length() <= 8192 && searchKey.length() <= 8192)
-                    require(headerName.text.isBlank() || headerName.text.toString().matches(Regex("[A-Za-z0-9-]+")))
-                    require(headerTemplate.text.isBlank() || headerTemplate.text.toString().split("{{credential}}").size == 2 && !headerTemplate.text.contains('\r') && !headerTemplate.text.contains('\n'))
-                    val budget = contextBudget.text.toString().ifBlank { "32768" }.toInt()
-                    val outputBudget = maxOutput.text.toString().ifBlank { "2048" }.toInt()
-                    require(budget in 4096..4000000 && outputBudget in 16..16384 && outputBudget < budget)
-                    val nextRevision = prefs.getInt("revision",0)+1
-                    check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
-                    if(removeModel.isChecked) vault.remove("model") else if(modelKey.length() > 0) vault.put("model", modelKey.text.toString())
-                    check(prefs.edit().putBoolean("supportsImages",imageSupport.isChecked).putString("provider",if(provider.selectedItemPosition==0)"opencode-go" else "custom").putString("name", name.text.toString().take(80)).putInt("protocol", protocol.selectedItemPosition)
-                        .putString("url", url.text.toString()).putString("model", model.text.toString().take(200))
-                        .putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString()).putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName", headerName.text.toString()).putString("headerTemplate", headerTemplate.text.toString()).putInt("revision", nextRevision).putString("probe", "untested").commit())
-                    modelKey.text.clear();searchKey.text.clear();closeSettings();recreate();Toast.makeText(this,"设置已保存；首次使用模型时自动检查连接",Toast.LENGTH_SHORT).show()
-                } catch(_: Exception) { Toast.makeText(this, "保存失败：请先停止活动任务，并检查地址、预算和密钥配置", Toast.LENGTH_LONG).show() }
-        },back={showSettings()})
+        settingsPage("设备与权限",content,back={showSettings()})
     }
     private fun showVoiceSettingsPage() {
         showVoiceSettings(this) {content,save->settingsPage("语音输入",content,save,back={showSettings()})}

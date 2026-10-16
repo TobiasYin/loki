@@ -1,0 +1,27 @@
+{
+  "archiveSha256": "0e6bbe883884aa1bf50a062da9f488313582cc04a6f10b5f0e4b9366291ebee3",
+  "retiredDeviceCopies": [
+    "11724273-dca9-4837-bbfe-53b3e8107213",
+    "b7d0f95a-1e6d-460a-8084-b19dde03b532",
+    "75c15363-2cb2-4333-934d-e62ce6565c82",
+    "d60b8555-1702-4e4b-8308-47da22c4dfea",
+    "e723aee2-daa3-44ec-967f-fa23b02a4e60",
+    "d6064957-e15b-4909-8bdc-43bded461fbe",
+    "b2918b30-1a69-4012-879e-59ed5c235f16",
+    "d609de66-45d4-47e7-bd53-4ef9357b2b8a",
+    "1281bb4a-8f29-4f53-b2e7-6d72c0819102",
+    "a73a7944-f32f-4c12-9e41-6d381b796d2a",
+    "9e6c6776-f3e9-462e-9c85-150c00e17083",
+    "4ad8b6f0-adc4-4f45-bacd-295aa96a82b8",
+    "8ee08a06-c79c-4bbd-bf63-8e32eb651250",
+    "ad90bb07-776b-4c89-a905-863d9343342e",
+    "08449566-af4d-42b9-8c9f-3fe656870275",
+    "5f5f1b9b-9012-4e8b-ad62-0b7cbbcc173e",
+    "c1f8f439-6216-4abe-827b-0a5520a53397",
+    "a78e2c51-0521-44e0-96fa-1a41157fffb7",
+    "1d595b07-6dee-4a32-9895-9c9735f05db1",
+    "e89a2c7b-56eb-4a2c-a99b-baaeae69856d"
+  ],
+  "physicalBaselineRetained": true,
+  "reason": "50 report retention limit; archived automatic test reports only"
+}

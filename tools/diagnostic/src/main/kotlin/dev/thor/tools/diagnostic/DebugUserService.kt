@@ -15,12 +15,80 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     private data class ShellJob(val token: String,val process: java.lang.Process,val timeout: Int,val max: Int)
     @Volatile private var shellJob: ShellJob? = null
     @Volatile private var lease: Lease? = null
+    private data class GamepadJob(val token: String,val requestHash: String,val action: NativeGamepad.Action)
+    @Volatile private var gamepadJob: GamepadJob?=null
+    private var gamepad: NativeGamepad?=null
     private var staged: File? = null
     private var stagedHash: String? = null
     private val watchdog = Executors.newSingleThreadScheduledExecutor().apply {
         scheduleWithFixedDelay({ synchronized(this@DebugUserService) { lease?.let { if (clock.now() >= it.deadline) retire(it) } } }, 100, 100, TimeUnit.MILLISECONDS)
     }
     override fun identity() = Process.myUid()
+    @Synchronized private fun nativeGamepad(): NativeGamepad = gamepad ?: NativeGamepad().also {gamepad=it}
+    private fun shellIdentity(action:()->String): String {
+        requireTool(Process.myUid()==2000,Code.PERMISSION_MISSING,"Only shell UID 2000 may inject gamepad events")
+        val identity=Binder.clearCallingIdentity()
+        return try {action()} finally {Binder.restoreCallingIdentity(identity)}
+    }
+    private fun gamepadResponse(action:()->Map<String,Any?>): String = try {
+        shellIdentity {(json(mapOf("data" to action())) as JSONObject).toString()}
+    } catch(t:Exception) {
+        val cause=if(t is java.lang.reflect.InvocationTargetException)t.targetException ?: t else t
+        val code=(cause as? ToolFailure)?.code ?: if(cause is SecurityException)Code.PERMISSION_MISSING else Code.UNSUPPORTED
+        JSONObject().put("error",code.name)
+            .put("message",(cause as? ToolFailure)?.message ?: "Native gamepad unavailable: ${cause.javaClass.simpleName}${if(cause is SecurityException)": ${cause.message.orEmpty().take(180)}" else ""}").toString()
+    }
+    // Acquire the service monitor only for lazy construction. Read-only metadata I/O must
+    // never delay cancel/retire or the independent gamepad release timer.
+    override fun gamepadStatus(): String = gamepadResponse {nativeGamepad().status()}
+    @Synchronized override fun prepareGamepad(token: String, request: String): String {
+        val l=try {check(token)}catch(t:ToolFailure){return JSONObject().put("error",t.code.name).put("message",t.message).toString()}
+        val guard=GamepadLeaseGuard(l.caller,l.deadline,clock,l.cancel) {lease===l}
+        val callerUid=Binder.getCallingUid()
+        return gamepadResponse {
+            guard.checkCaller(callerUid)
+            requireTool(gamepadJob==null,Code.BACKEND_UNAVAILABLE,"A gamepad action is already active")
+            requireTool(request.toByteArray().size<=4096,Code.LIMIT_EXCEEDED,"Gamepad request too large")
+            val args=JSONObject(request).args();args.only("toolId","displayId","args","expectedPackage")
+            val command=GamepadCommand.parse(args.string("toolId"),args["args"] as? Map<String,Any?> ?: fail(Code.INVALID_ARGUMENT,"Gamepad arguments required"))
+            val displayId=args.int("displayId",-1)
+            requireTool(displayId>=0,message="Gamepad displayId required")
+            val action=nativeGamepad().prepare(command,displayId,args["expectedPackage"] as? String,guard::checkAlive)
+            gamepadJob=GamepadJob(token,hash(request.toByteArray()),action)
+            mapOf("prepared" to true,"durationMs" to command.durationMs)
+        }
+    }
+    @Synchronized override fun startGamepad(token: String, request: String): String {
+        try {check(token)}catch(t:ToolFailure){return JSONObject().put("error",t.code.name).put("message",t.message).toString()}
+        val response=gamepadResponse {
+            val job=gamepadJob ?: fail(Code.STALE_AUTHORIZATION,"Gamepad action was not prepared")
+            requireTool(job.token==token && request.toByteArray().size<=4096 && job.requestHash==hash(request.toByteArray()),Code.STALE_AUTHORIZATION,"Prepared gamepad action differs")
+            job.action.start()
+            mapOf("started" to true,"submitted" to true)
+        }
+        return JSONObject(response).put("submitted",gamepadJob?.action?.mayHaveSubmitted==true).toString()
+    }
+    override fun pollGamepad(token: String): String {
+        try {check(token)}catch(t:ToolFailure){return JSONObject().put("error",t.code.name).put("message",t.message).toString()}
+        return gamepadResponse {
+            val job=gamepadJob ?: fail(Code.CANCELLED,"No submitted gamepad action")
+            requireTool(job.token==token,Code.STALE_AUTHORIZATION,"Gamepad token differs")
+            if(job.action.complete)job.action.result()+mapOf("complete" to true) else mapOf("complete" to false)
+        }
+    }
+    @Synchronized override fun releaseGamepad(runId: String): String {
+        val l=lease ?: return "{\"released\":false,\"reason\":\"no-active-run-inputs\"}"
+        requireTool(Binder.getCallingUid()==l.caller,Code.STALE_AUTHORIZATION,"Only the owning app can release its gamepad action")
+        if(runId.length !in 1..96 || !l.token.startsWith("$runId:"))return "{\"released\":false,\"reason\":\"no-matching-run-inputs\"}"
+        return gamepadResponse {
+            val job=gamepadJob?.takeIf {it.token==l.token}
+            if(job==null)mapOf("released" to false,"cleanupComplete" to true,"reason" to "no-active-run-inputs")
+            else {
+                job.action.finish(ToolFailure(Code.CANCELLED,"Run-owned gamepad action released"))
+                job.action.cleanupStatus()
+            }
+        }
+    }
     @Synchronized override fun openLease(token: String, deadlineElapsed: Long, root: String, owner: IBinder) {
         requireTool(Process.myUid() == 2000, Code.PERMISSION_MISSING, "Only shell UID 2000 allowed; Root is refused")
         requireTool(deadlineElapsed > clock.now() && deadlineElapsed - clock.now() <= 60_000 && token.length in 16..128, message = "Invalid short lease")
@@ -184,6 +252,11 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     }
     @Synchronized private fun retire(l: Lease) {
         l.cancel.cancel()
+        gamepadJob?.takeIf {it.token==l.token}?.let {
+            // Release is a fixed, bounded cleanup and must retain service shell identity.
+            runCatching {shellIdentity {it.action.finish(ToolFailure(Code.CANCELLED,"Gamepad lease retired"));""}}
+            gamepadJob=null
+        }
         staged?.delete();staged=null;stagedHash=null
         shellJob?.takeIf {it.token == l.token}?.let {if(it.process.isAlive)it.process.destroyForcibly();shellJob=null}
         runCatching { l.owner.unlinkToDeath(l.death, 0) }
@@ -192,6 +265,6 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     @Synchronized override fun cancel(token: String) {
         lease?.takeIf { token == it.token && Binder.getCallingUid() == it.caller }?.let(::retire)
     }
-    override fun destroy() { synchronized(this) { lease?.let(::retire) }; watchdog.shutdownNow(); kotlin.system.exitProcess(0) }
+    override fun destroy() { synchronized(this) { lease?.let(::retire);runCatching {gamepad?.close()} }; watchdog.shutdownNow(); kotlin.system.exitProcess(0) }
     companion object { const val ROOT = "/storage/emulated/0/Download/ThorToolPack" }
 }

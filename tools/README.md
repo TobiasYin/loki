@@ -55,8 +55,8 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 | `perception.device_info` | 普通 SDK 的 system/displays/resources，默认 system；不调用 Shell，无序列号或账号枚举 |
 | `perception.capture_screen` | Accessibility `takeScreenshot(displayId)`；可裁剪，JPEG，最长边 1280，压缩后最多 2 MiB；安全窗口/限频/显示失效分别报错，不回退 Shell |
 | `input.tap/long_press/swipe` | Accessibility `dispatchGesture`、指定 display，单指、1–32 点、最长 5s；`display_logical` 或绑定 `frameId` 的 `frame_pixels` |
-| `input.release_inputs` | 只查询/释放本 Run 所有资源的安全清理语义；没有持久手柄资源。已提交手势没有公开即时取消 API，未收到回调则返回 unknown 并阻止继续触摸 |
-| `input.press_button/set_axes` | **UNSUPPORTED**；没有验证过的原生手柄注入后端；没有键盘、触摸或 Shell 替代成功路径 |
+| `input.release_inputs` | 清理本 Run 的有界手柄资源，返回实际 releaseAcknowledged/cleanupComplete；归零失败不能报已释放。已提交 Accessibility 手势没有公开即时取消 API，未收到回调则返回 unknown 并阻止继续触摸 |
+| `input.press_button/set_axes` | 固定 Odin Controller evdev 按钮/六轴后端，Shizuku UID 2000、真实节点/布局与物理上屏焦点校验；持有≤5秒并自动释放。真实身份与接收验收见 [0.6手柄说明](../docs/release-0.6-gamepad.md)，没有键盘、触摸、MotionEvent替代成功路径 |
 | `debug.shell` | 真正 Shizuku UserService、实际 UID 2000；默认 15s、最多 60s，stdout/stderr 合计最多 64 KiB；每次审批确切命令；非零退出码为错误 |
 | `files.list/read` | 默认明确批准的宿主 `synthetic-config/`；显式 `backend=shizuku` 可通过 UserService 读取固定 `/storage/emulated/0/Download/ThorToolPack`，先由用户建立该目录；不推断 Android/data 或应用私有目录可达 |
 | `files.backup/write/restore` | 仅合成 JSON 配置目录；hash/CAS、具体差异审批、加密备份、同目录临时写/flush/原子替换、读回校验；恢复先备份当前版本 |
@@ -67,8 +67,8 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 
 1. 启动宿主，感知和搜索意愿默认 ON，屏幕操作和 ADB 调试默认 OFF。搜索显示未配置/本模块不提供。权限开关在进程内保存为测试状态，不代表产品 Session 持久化。
 2. 在系统设置显式开启此 APK 的无障碍服务。屏幕角色不硬编码为 0/1：通过校准按钮查看 display ID、名字、尺寸和旋转，分别确认 upper/lower。单屏设备不能完成双屏校准。每次进程重启、角色或显示几何变化重新确认。
-3. “Observe minimal upper context” 仅观察最小应用事实和能力摘要，不截图、不查版本、不遍历 UI 树；快照 TTL 10s。未知或多应用时不猜包名。
-4. 选择工具，编辑 JSON，执行并查看输入、结构化结果、错误和后端。开启屏幕操作后，明确给出逻辑坐标或先截图、再在快照 10s 内使用 frameId 与缩略图像素。过期帧/角色/目标/布局会拒绝。
+3. “Observe minimal upper context” 仅观察最小应用事实和能力摘要，不截图、不查版本、不遍历 UI 树；快照 TTL 60s。未知或多应用时不猜包名。
+4. 选择工具，编辑 JSON，执行并查看输入、结构化结果、错误和后端。开启屏幕操作后，明确给出逻辑坐标或先截图、再在快照 60s 内使用 frameId 与缩略图像素。过期帧/角色/目标/布局会拒绝。
 5. 用户自行安装并以 ADB 启动 Shizuku，点“Request/bind”。如果弹出授权，授权后再次点 Bind。检查实际 UserService UID；Root/其他 UID 被拒绝。通过 `debug.shell` 的默认 `id` 测试身份，id 为白名单直接执行；灰名单命令需要具体审批。
 6. 配置闭环：`files.read sample.json` → 复制 hash → `files.backup` → 复制 backupId → `files.write`（保留未知字段）并审阅完整前后文本/旧新 hash → `files.restore` 并审阅恢复差异。schema 只接受 JSON object；写入内容原样保留，不自动重序列化编码/换行。
 7. STOP、撤销能力、宿主离开前台、显示失效或 binder 死亡会停止 Run，拒绝后续动作，尝试结束受管 Shell 子进程。已发生副作用返回 submitted/unknown；不自动恢复配置或重放输入。

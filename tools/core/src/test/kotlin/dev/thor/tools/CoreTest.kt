@@ -158,7 +158,29 @@ class CoreTest {
     @Test fun snapshotsExpireAndCacheIsBounded() {
         val time=Time();val s=Snapshots(time) { Target("game","valid","v1") }; s.update(listOf(upper,lower));s.calibrate(7,9)
         val first=s.capture(); repeat(32) { s.capture() }; expect(Code.TARGET_CHANGED) { s.validate(first.id) }
-        val last=s.capture(); time.time += 10_000; expect(Code.TARGET_CHANGED) { s.validate(last.id) }
+        val last=s.capture(); time.time += Snapshots.OBSERVATION_TTL_MS; expect(Code.TARGET_CHANGED) { s.validate(last.id) }
+    }
+    @Test fun observationIsValidUntilJustBeforeSixtySecondsAndExpiresAtTheBoundary() {
+        assertEquals(60_000L,Snapshots.OBSERVATION_TTL_MS)
+        val time=Time();val s=Snapshots(time){Target("game","valid","stable")}
+        s.update(listOf(upper,lower));s.calibrate(7,9);val observed=s.capture()
+        time.time=observed.expires-1;assertEquals(observed,s.validate(observed.id))
+        time.time=observed.expires;expect(Code.TARGET_CHANGED){s.validate(observed.id)}
+        val fresh=s.captureForRead(observed.id)
+        assertNotEquals(observed.id,fresh.id);assertEquals(time.time+Snapshots.OBSERVATION_TTL_MS,fresh.expires)
+        expect(Code.TARGET_CHANGED){s.validate(observed.id)}
+    }
+    @Test fun staticTargetCanReceiveTapAfterSixteenSecondsButAnAppChangeImmediatelyRejectsIt() {
+        val time=Time();var target=Target("game","valid","stable")
+        val snapshots=Snapshots(time){target};snapshots.update(listOf(upper,lower));snapshots.calibrate(7,9)
+        val observed=snapshots.capture();val authority=ManualTestAuthority(time);authority.set(Capability.SCREEN_CONTROL,true)
+        val backend=FakeBackend {_,checkpoint->checkpoint.effect {}}
+        val lease=authority.begin(backend);val gate=Gateway(authority,backend,snapshots,time)
+        fun envelope(call:String)=Envelope(lease.session,lease.run,call,"input.tap",lease.epoch,lease.deadline,observed.id)
+        time.time+=16_000
+        assertNull(gate.execute(envelope("static-after-reasoning"),emptyMap()).error);assertEquals(1,backend.executions)
+        target=target.copy(packageName="other.game")
+        assertEquals(Code.TARGET_CHANGED,gate.execute(envelope("changed-app"),emptyMap()).error);assertEquals(1,backend.executions)
     }
     @Test fun staleTargetNeverReachesInputBackend() {
         val time=Time();val authority=ManualTestAuthority(time);authority.set(Capability.SCREEN_CONTROL,true)
@@ -170,13 +192,13 @@ class CoreTest {
     @Test fun freshReadGetsNewIdentityAndExpiryWithoutRevivingOldInputSnapshot() {
         val time=Time();var target=Target("game","valid","old");val s=Snapshots(time) {target}
         s.update(listOf(upper,lower));s.calibrate(7,9);val old=s.capture()
-        time.time+=11_000;target=Target("current.app","valid","new")
+        time.time+=Snapshots.OBSERVATION_TTL_MS+1;target=Target("current.app","valid","new")
         val fresh=s.captureForRead(old.id)
         assertNotEquals(old.id,fresh.id);assertEquals(target,fresh.target)
-        assertEquals(time.time+10_000,fresh.expires)
+        assertEquals(time.time+Snapshots.OBSERVATION_TTL_MS,fresh.expires)
         expect(Code.TARGET_CHANGED) {s.validate(old.id)}
         assertEquals(fresh,s.validate(fresh.id))
-        time.time+=10_000;expect(Code.TARGET_CHANGED) {s.validate(fresh.id)}
+        time.time+=Snapshots.OBSERVATION_TTL_MS;expect(Code.TARGET_CHANGED) {s.validate(fresh.id)}
     }
     @Test fun freshReadCannotCrossCalibrationRotationRemovalOrInventedSource() {
         val s=Snapshots(Time()) {Target("game","valid","v1")};s.update(listOf(upper,lower));s.calibrate(7,9)
@@ -185,7 +207,7 @@ class CoreTest {
         val swapped=s.capture();s.update(listOf(upper,lower.copy(rotation=1)));expect(Code.TARGET_CHANGED) {s.captureForRead(swapped.id)}
         s.calibrate(7,9);val last=s.capture();s.update(listOf(lower));expect(Code.TARGET_CHANGED) {s.captureForRead(last.id)}
     }
-    @Test fun onlyCaptureUsesCurrentReadAndStaleInputAndTreeStillStopBeforeBackend() {
+    @Test fun everyFreshUpperReadGetsCurrentObservationWhileStaleInputStillStopsBeforeBackend() {
         val time=Time();val a=ManualTestAuthority(time);a.set(Capability.SCREEN_CONTROL,true)
         var target=Target("game","valid","v1");val s=Snapshots(time) {target};s.update(listOf(upper,lower));s.calibrate(7,9)
         val old=s.capture();target=target.copy(revision="v2")
@@ -198,23 +220,24 @@ class CoreTest {
             }
             override fun release(runId:String)="test"
         }
+        time.time+=Snapshots.OBSERVATION_TTL_MS+1
         val lease=a.begin(backend);val gate=Gateway(a,backend,s,time)
         fun envelope(tool: String)=Envelope(lease.session,lease.run,tool,tool,lease.epoch,lease.deadline,old.id)
-        assertNull(gate.execute(envelope("perception.capture_screen"),emptyMap()).error)
-        assertEquals(1,executions)
+        for(tool in ToolPack.freshReads)assertNull("$tool must make a new read after model latency",gate.execute(envelope(tool),emptyMap()).error)
+        assertEquals(4,executions)
         assertEquals(Code.TARGET_CHANGED,gate.execute(envelope("perception.capture_screen").copy(snapshotId="invented"),emptyMap()).error)
-        for(tool in listOf("input.tap","input.long_press","input.swipe","perception.ui_tree")) {
+        for(tool in listOf("input.tap","input.long_press","input.swipe","input.press_button","input.set_axes")) {
             assertEquals(Code.TARGET_CHANGED,gate.execute(envelope(tool),emptyMap()).error)
         }
-        assertEquals(1,executions)
+        assertEquals(4,executions)
     }
     @Test fun freshObservationStillBecomesInvalidImmediatelyWhenTargetChangesAgain() {
         val sTime=Time();var target=Target("game","valid","v1");val s=Snapshots(sTime) {target};s.update(listOf(upper,lower));s.calibrate(7,9)
         val fresh=s.captureForRead(s.capture().id);target=target.copy(revision="changed-during-image-callback")
         expect(Code.TARGET_CHANGED) {s.validate(fresh.id)}
     }
-    @Test fun captureGatewayDiscardsMissingOrChangedObservationBeforeReturningPixels() {
-        for(mode in listOf("missing","changed","old-identity")) {
+    @Test fun freshReadGatewayDiscardsMissingOldOrChangedObservationsBeforeReturningAnyData() {
+        for(tool in ToolPack.freshReads)for(mode in listOf("missing","changed","old-identity")) {
             val time=Time();var target=Target("game","valid","v1");val s=Snapshots(time) {target}
             s.update(listOf(upper,lower));s.calibrate(7,9);val source=s.capture()
             val backend=object:DeviceBackend {
@@ -227,7 +250,7 @@ class CoreTest {
                 override fun release(runId:String)="test"
             }
             val authority=ManualTestAuthority(time);val lease=authority.begin(backend)
-            val result=Gateway(authority,backend,s,time).execute(Envelope(lease.session,lease.run,"capture","perception.capture_screen",lease.epoch,lease.deadline,source.id),emptyMap())
+            val result=Gateway(authority,backend,s,time).execute(Envelope(lease.session,lease.run,"capture",tool,lease.epoch,lease.deadline,source.id),emptyMap())
             assertEquals(Code.TARGET_CHANGED,result.error);assertTrue(result.data.isEmpty())
         }
     }

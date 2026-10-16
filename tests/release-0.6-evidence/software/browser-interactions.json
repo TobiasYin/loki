@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "layouts": [
+    {
+      "width": 620,
+      "height": 540,
+      "stationaryTarget": true,
+      "threshold": 216,
+      "slideBackSends": true,
+      "cancelOnRelease": true,
+      "transcriptHidden": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "stationaryTarget": true,
+      "threshold": 240,
+      "slideBackSends": true,
+      "cancelOnRelease": true,
+      "transcriptHidden": true
+    },
+    {
+      "width": 620,
+      "height": 180,
+      "stationaryTarget": true,
+      "threshold": 120,
+      "slideBackSends": true,
+      "cancelOnRelease": false,
+      "transcriptHidden": true
+    }
+  ]
+}

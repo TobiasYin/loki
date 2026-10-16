@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "coldLaunch": true,
+  "launcherComponent": "dev.thor.agent/.LauncherActivity",
+  "actualMainActivityDisplayIds": [
+    4
+  ],
+  "expectedLowerLogicalDisplay": 4,
+  "manualCalibrationUsed": false,
+  "launchOutput": "Starting: Intent { cmp=dev.thor.agent/.LauncherActivity }\nStatus: ok\nLaunchState: UNKNOWN (0)\nActivity: dev.thor.agent/.LauncherActivity\nWaitTime: 125\nComplete\n",
+  "installedPackages": {
+    "dev.thor.agent": {
+      "installedApkSha256": "2bdaa96e7382ad48e13529699db731c155d306d67eb98f18f2689a6502d9ba88"
+    },
+    "dev.thor.agent.test": {
+      "installedApkSha256": "0b4db4dacbf663ad311c2772707112f9d6a407f5e58de97c395da36c823380b9"
+    },
+    "dev.thor.inputlab": {
+      "installedApkSha256": "9ca8dd90d043536fd4c1bd27b6cc7e393c4235fd32bf59b744a86bea5d2337f0"
+    }
+  },
+  "device": {
+    "ro.product.model": "AYN Thor",
+    "ro.build.version.release": "13",
+    "ro.build.version.sdk": "33",
+    "ro.build.fingerprint": "qti/kalama/kalama:13/TKQ1.231222.001/eng.Thor.20260206.163241:user/release-keys"
+  },
+  "settledUiVisuallyVerified": true,
+  "settledUiShowsSavedModelAndCompletedVoiceConversation": true
+}

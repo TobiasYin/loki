@@ -52,10 +52,10 @@ class PhysicalTargetGuardTest {
                     b!=null && (b.left>0 || b.top>0 || b.right<1920 || b.bottom<1080)
                 }
                 val testRun="component-guard-${id()}"
-                val setup=receiver("prepare",Bundle().apply {putInt("version",1);putInt("observationSeconds",if(kind=="clipping")30 else 5);putString("evidenceMode","manual_platform_api");putString("testRunId",testRun);putString("agentRunId","no-agent:$testRun");putString("caseId","LAB-14");putString("senderTraceRef","component-gateway/ManualTestAuthority:$kind; no cloud or product-authority run")})
+                val setup=receiver("prepare",Bundle().apply {putInt("version",1);putInt("observationSeconds",if(kind=="clipping")90 else 5);putString("evidenceMode","manual_platform_api");putString("testRunId",testRun);putString("agentRunId","no-agent:$testRun");putString("caseId","LAB-14");putString("senderTraceRef","component-gateway/ManualTestAuthority:$kind; no cloud or product-authority run")})
                 val readArgs=Bundle().apply {putInt("version",1);putString("testRunId",testRun);putString("lease",setup.getString("lease"))}
                 val authority=ManualTestAuthority(clock).apply {set(Capability.SCREEN_CONTROL,true)}
-                val lease=authority.begin(backend);val gate=Gateway(authority,backend,snapshots,clock)
+                var lease=authority.begin(backend);val gate=Gateway(authority,backend,snapshots,clock)
                 fun call(tool:String,target:String,values:Map<String,Any?>)=gate.execute(Envelope(lease.session,lease.run,id(),tool,lease.epoch,lease.deadline,target),values)
                 try {
                     var state=setup.getJSONObject("snapshot")
@@ -81,7 +81,8 @@ class PhysicalTargetGuardTest {
                         val edge=call("input.tap",captured.id,mapOf("x" to x,"y" to y,"coordinateSpace" to "frame_pixels","frameId" to image.data.getValue("frameId"),"expectedPackage" to "dev.thor.inputlab"))
                         remember("clipped-frame-point",edge);assertEquals(Code.TARGET_CHANGED,edge.error);assertEquals("not_submitted",edge.outcome);assertTrue(edge.message.orEmpty().contains("observed/current touchable region"))
                         record.put("observedTouchableBounds",b.toString()).put("requestedDisplayPoint",JSONArray(listOf(point.x,point.y)))
-                        Thread.sleep(10100)
+                        Thread.sleep(Snapshots.OBSERVATION_TTL_MS+100)
+                        authority.stop();lease=authority.begin(backend)
                         val expired=call("input.tap",captured.id,mapOf("x" to 470,"y" to 600,"coordinateSpace" to "display_logical","expectedPackage" to "dev.thor.inputlab"))
                         remember("expired-snapshot",expired);assertEquals(Code.TARGET_CHANGED,expired.error);assertEquals("not_submitted",expired.outcome);assertTrue(expired.message.orEmpty().contains("expired"))
                     } else {
@@ -89,7 +90,7 @@ class PhysicalTargetGuardTest {
                         val switched=call("input.tap",captured.id,mapOf("x" to 470,"y" to 600,"coordinateSpace" to "display_logical","expectedPackage" to "dev.thor.inputlab"))
                         remember("changed-upper-app",switched);assertEquals(Code.TARGET_CHANGED,switched.error);assertEquals("not_submitted",switched.outcome)
                     }
-                    until(35) {state=receiver("report",readArgs).getJSONObject("snapshot");!state.isNull("report")}
+                    until(if(kind=="clipping")95 else 35) {state=receiver("report",readArgs).getJSONObject("snapshot");!state.isNull("report")}
                     val report=state.getJSONObject("report");File(context.filesDir,"physical-guard-$kind-report.json").writeText(report.toString(2))
                     assertEquals(if(kind=="clipping")"fail" else "inconclusive",report.getString("status"))
                     assertEquals(0,report.getJSONObject("sceneAfter").getInt("rawCount"));assertEquals(0,report.getJSONObject("sceneAfter").getInt("hits"))

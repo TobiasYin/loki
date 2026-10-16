@@ -1,0 +1,14 @@
+{
+  "apks": {
+    "app/build/outputs/apk/debug/app-debug.apk": "2bdaa96e7382ad48e13529699db731c155d306d67eb98f18f2689a6502d9ba88",
+    "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "0b4db4dacbf663ad311c2772707112f9d6a407f5e58de97c395da36c823380b9"
+  },
+  "cases": [
+    {
+      "name": "gamepad",
+      "passed": true,
+      "elapsedSeconds": 54.58,
+      "exitCode": 0
+    }
+  ]
+}

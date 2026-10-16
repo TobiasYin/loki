@@ -17,7 +17,7 @@
 ## 显示与感知差异
 
 - 使用 DisplayManager 的当前 name/ID/尺寸/旋转/density；公开 name 不是稳定物理唯一 ID。因此本版选择每次进程启动重新人工确认，不持久化 display 角色，也不承诺自动把宿主移动到 Thor 下屏。
-- 目标来自选定 display 的 Accessibility 可观察应用窗口；多包/null root 标 unknown/ambiguous。目标 revision 包含窗口边界/层/焦点和该屏内容事件计数，10s TTL；DisplayListener 使显示变化失效。仍不能把窗口观察与 Android 分发原子绑定，OEM 竞态需实机验证。
+- 目标来自选定 display 的 Accessibility 可观察应用窗口；多包/null root 标 unknown/ambiguous。目标 revision 包含窗口边界/层/焦点和该屏内容事件计数，60s TTL；DisplayListener 使显示变化失效。仍不能把窗口观察与 Android 分发原子绑定，OEM 竞态需实机验证。
 - 真实触摸只有 Accessibility 指定 display API，没有 `input` shell 逃生口；手势固定上限 5s。unknown 的待完成手势使该宿主后续触摸 unavailable，直到真实回调。若整个宿主/后端进程死亡，不能证明释放；重启需人工确认目标状态，不重放。
 - app_info 输入用可选 `package` 表示明确包或 current_upper；fields/install filtering 尚未实现，返回有界固定版本/安装字段。显式包查询也要求已校准上屏和当前 Accessibility 条件。本版未申请 QUERY_ALL_PACKAGES，包不可见与卸载在 SDK 返回中不能可靠细分。
 - 截图 JPEG only，region `[left,top,right,bottom]` 采用当前显示逻辑坐标；frameId 与同一 snapshot 绑定。显示与 screenshot 实际几何不一致时拒绝，不猜测变换。无 MediaProjection 自动回退。

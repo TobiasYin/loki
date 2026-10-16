@@ -37,7 +37,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             toolId.startsWith("debug.") -> "shizuku-userservice"
             else -> "synthetic-config/android-app-owned-root"
         }
-        if (toolId in setOf("input.press_button", "input.set_axes")) return Availability(Status.UNSUPPORTED, "No verified native gamepad device/source/axis backend; Thor POC-07 required", "none/native-gamepad")
+        if (toolId in setOf("input.press_button", "input.set_axes")) return shizuku.gamepadAvailability(toolId)
         if (toolId in setOf("debug.shell","debug.thor_brightness","apps.install","apps.package_info")) return shizuku.availability()
         if (toolId == "debug.command_policy") return Availability(Status.READY,"Native command policy; no device mutation","native-command-policy")
         if (toolId in gestureTools && inputUnknown) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
@@ -56,9 +56,18 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         return ToolResult(clock.now(), a.backend, a, common, truncated = truncated, outcome = outcome, snapshotId = e.snapshotId)
     }
     override fun execute(envelope: Envelope, args: Map<String, Any?>, checkpoint: Checkpoint): ToolResult {
-        val e = envelope; val cp = checkpoint
-        schemas.validate(e.toolId, args)
-        return when (e.toolId) {
+        schemas.validate(envelope.toolId, args)
+        // Read the current app/window/tree even after the model has spent more
+        // than an observation lifetime reasoning. The original source still fixes the
+        // authorized display/epoch; a fresh target must survive the whole read.
+        // Screenshot already owns this lifecycle, including its async callback.
+        val observation=if(envelope.toolId in ToolPack.freshReads && envelope.toolId!="perception.capture_screen") {
+            checkpoint.check();snapshots.captureForRead(envelope.snapshotId)
+        } else null
+        val e=if(observation==null)envelope else envelope.copy(snapshotId=observation.id)
+        val cp=if(observation==null)checkpoint else Checkpoint({checkpoint.check();snapshots.validate(observation.id)},checkpoint.cancellation)
+        cp.check()
+        val output=when (e.toolId) {
             "web.request", "files.download", "files.download_info" -> {
                 val data=try {downloads.execute(e.toolId,args,cp)}catch(t:Exception){cp.check();throw t}
                 result(e,data,truncated=data["truncated"]==true,actualBackend=null)
@@ -83,7 +92,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 val sections = args["sections"] as? List<*> ?: listOf("system")
                 requireTool(sections.size <= 3 && sections.all { it in listOf("system", "displays", "resources") }, message = "Unknown device_info sections")
                 val data = mutableMapOf<String, Any?>()
-                if ("system" in sections) data["system"] = mapOf("manufacturer" to Build.MANUFACTURER, "model" to Build.MODEL, "android" to Build.VERSION.RELEASE, "api" to Build.VERSION.SDK_INT, "thorVerified" to false)
+                if ("system" in sections) {data["gamepad"]=shizuku.gamepadInfo();data["system"] = mapOf("manufacturer" to Build.MANUFACTURER, "model" to Build.MODEL, "android" to Build.VERSION.RELEASE, "api" to Build.VERSION.SDK_INT, "thorVerified" to false)}
                 if ("displays" in sections) data["displays"] = displayFacts(context).map { mapOf("displayId" to it.id, "identity" to it.identity, "width" to it.width, "height" to it.height, "rotation" to it.rotation, "density" to it.density) }
                 if ("resources" in sections) {
                     val info = android.app.ActivityManager.MemoryInfo(); context.getSystemService(android.app.ActivityManager::class.java).getMemoryInfo(info)
@@ -99,11 +108,26 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 try {
                     @Suppress("DEPRECATION") val info = context.packageManager.getPackageInfo(pkg, 0)
                     result(e, mapOf("package" to pkg, "label" to info.applicationInfo?.loadLabel(context.packageManager)?.toString()?.take(256), "versionName" to info.versionName, "longVersionCode" to info.longVersionCode, "firstInstallTime" to info.firstInstallTime, "lastUpdateTime" to info.lastUpdateTime, "activity" to null))
-                } catch (_: android.content.pm.PackageManager.NameNotFoundException) { fail(Code.PERMISSION_MISSING, "Package unavailable: Android cannot distinguish hidden from uninstalled package here") }
+                } catch (_: android.content.pm.PackageManager.NameNotFoundException) {
+                    // An observed package is useful even when Android package visibility hides metadata.
+                    requireTool(pkg==snapshot.target.packageName,Code.PERMISSION_MISSING,"Package metadata unavailable")
+                    result(e,mapOf("package" to pkg,"observedOnUpper" to true,"metadataAvailable" to false,"activity" to null))
+                }
             }
             "perception.window_info" -> windowInfo(e, args)
             "perception.ui_tree" -> tree(e, args, cp)
             "perception.capture_screen" -> screenshot(e, args, cp)
+            "input.press_button", "input.set_axes" -> {
+                val snap=snapshots.validate(e.snapshotId);cp.check()
+                if(e.toolId in setOf("input.press_button","input.set_axes")) {
+                    val window=service().windowsOnAllDisplays[snap.display.id].orEmpty().singleOrNull {it.type==AccessibilityWindowInfo.TYPE_APPLICATION && it.isFocused}
+                    val root=window?.root
+                    val focusedPackage=try {root?.packageName?.toString()} finally {if(root!=null) {@Suppress("DEPRECATION") root.recycle()}}
+                    requireTool(focusedPackage==snap.target.packageName && focusedPackage!=null,Code.TARGET_CHANGED,"Physical controller requires the observed upper app to have window focus")
+                }
+                val held=cp.checkingTarget(snapshots,e.snapshotId)
+                result(e,shizuku.gamepad(e.runId,e.toolId,args,snap.display.id,held,expectedPackage=snap.target.packageName),outcome="submitted",actualBackend=if(e.toolId=="input.set_axes")"shizuku-evdev/odin-six-axes" else "shizuku-evdev/odin-buttons")
+            }
             "input.tap", "input.long_press", "input.swipe" -> gesture(e, args, cp)
             "input.release_inputs" -> { args.only(); result(e, mapOf("release" to release(e.runId)), outcome = "unknown") }
             "debug.shell" -> {
@@ -172,6 +196,11 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             }
             else -> fail(Code.UNSUPPORTED, "Unsupported tool/backend")
         }
+        if(observation!=null) {
+            cp.check() // Reject the whole response if the observed target moved while reading.
+            return output.copy(data=output.data+mapOf("requestSnapshotId" to envelope.snapshotId,"targetSnapshotId" to observation.id,"observedTargetPackage" to observation.target.packageName))
+        }
+        return output
     }
     private fun windowInfo(e: Envelope, args: Map<String, Any?>): ToolResult {
         args.only("maxWindows")
@@ -215,7 +244,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val edge = args.int("maxEdge", 1280); val quality = args.int("quality", 80)
         requireTool(edge in 64..1280 && quality in 30..95, Code.LIMIT_EXCEEDED, "Screenshot edge/quality budget exceeded")
         // A screenshot is a new observation, not permission to rebind an input.
-        // Its own identity/10s expiry begin now; every image callback still checks
+        // Its own identity/freshness lifetime begin now; every image callback checks
         // this fresh target and discards output if it changes during capture.
         val snap = snapshots.captureForRead(e.snapshotId)
         val cp=Checkpoint({requestCheckpoint.check();snapshots.validate(snap.id)},requestCheckpoint.cancellation)
@@ -347,8 +376,9 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         cp.check()
     }
     override fun release(runId: String): String {
+        val gamepad=shizuku.releaseRunInputs(runId)
         if (activeInputs.containsKey(runId)) { inputUnknown = true; return "unknown: Android has no public cancelGesture; already submitted bounded stroke may finish within 5s; further gestures blocked until callback" }
-        return "observed: no owned persistent buttons/axes; no gesture pending"
+        return "observed: $gamepad; no gesture pending"
     }
 }
 fun displayFacts(context: Context): List<DisplayFact> = context.getSystemService(DisplayManager::class.java).displays.map { d ->

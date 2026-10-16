@@ -9,4 +9,4 @@ JS 内部 Runtime v0.1 信封在适配边界转换成 Native wire v1；不直接
 
 设备复杂 schema 由同一 bundled contract 在 Runtime 和 Native `InputSchemas` 双重校验。产品经过 `tools.Gateway` + `DeviceAuthority`，不绕过 scalar-only 的旧 bridge ToolGateway；该旧网关保留供 bridge 诊断宿主测试。
 
-本项目不以隐藏 API 猜测 gamepad 注入。Shizuku 调用 split start/await，短 start 在 Native 原子授权内提交，等待/输出在锁外；服务仍检查 shell UID、caller、token、deadline 和 owner binder。终止直接子进程不证明所有后代已结束。真实 Thor 路由与厂商限制见中文集成报告。
+手柄按钮与六轴采用固定 evdev 后端，核对真实 Odin Controller 节点、固件映射、初始未按下/中立状态和上屏物理焦点；不把 InputManager 注入返回的身份当作接收端事实。Shizuku 手柄调用分离 prepare/start/poll，短 start 在 Native 原子授权内提交，元数据查询与持有等待在锁外；服务检查 shell UID、caller、token、deadline 和 owner binder。终止直接子进程不证明所有后代已结束。真实 Thor 路由、清理边界和验收见 [0.6手柄说明](../docs/release-0.6-gamepad.md)。

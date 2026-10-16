@@ -1,0 +1,10 @@
+{
+  "saved": false,
+  "modelDraft": "文本流式连接可用；图片和工具能力需另行完整检查 · 2348 ms\n草稿未保存，点击右上角保存后生效。",
+  "invalidModelDraft": "服务请求失败（HTTP 400），请检查服务状态与模型配置；type=server_error · message=Upstream request failed: Model is unavailable. · 1337 ms\n草稿未保存，点击右上角保存后生效。",
+  "searchDraft": "Brave 搜索连接可用，当前草稿未保存 · 1607 ms",
+  "profileUnchanged": true,
+  "credentialHashesUnchanged": true,
+  "sessionCountUnchanged": true,
+  "passed": true
+}

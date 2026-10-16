@@ -1,0 +1,37 @@
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalGamepadComponentTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.PhysicalGamepadComponentTest:
+INSTRUMENTATION_STATUS: test=realControllerButtonsAxesAndCancellationReachIndependentReceiver
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalGamepadComponentTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=realControllerButtonsAxesAndCancellationReachIndependentReceiver
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalGamepadComponentTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=focusParserRejectsAnotherDisplayOrApplicationOnlyEvidence
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalGamepadComponentTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=focusParserRejectsAnotherDisplayOrApplicationOnlyEvidence
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 54.064
+
+OK (2 tests)
+
+
+INSTRUMENTATION_CODE: -1

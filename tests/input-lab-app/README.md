@@ -1,8 +1,8 @@
 > 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
 
-# Thor Input Lab 0.3.0
+# Thor Input Lab 0.3.1
 
-独立 Kotlin / Android View 接收器，applicationId `dev.thor.inputlab`，默认独立进程与 UID。所有工程、锁文件、测试、说明和证据只在本目录中；不依赖 Thor Agent 或其他子项目。APK 无网络权限、Pi、Shizuku、模型配置、输入注入器或外部 setup/report IPC。
+独立 Kotlin / Android View 接收器，applicationId `dev.thor.inputlab`，默认独立进程与 UID。接收器源代码和模块测试位于本目录，通过根工程构建；不依赖 Thor Agent Runtime。APK 无网络权限、Pi、Shizuku、模型配置或输入注入器。只有 debug 变体带签名权限保护的 setup/report runner，release 不包含该 Provider；本轮窗口范围为 5–120 秒。最新实机证据见 [0.6 验收记录](../../docs/release-0.6-acceptance.md)。
 
 已实现可构建第一版与接收器本地验证。**尚未完成 Thor 实机 POC-11 资格认证、上下屏校准、物理手柄基线或 POC-06/07。** `receiverQualificationVersion=unqualified-physical-baseline-pending` 始终随报告保留；本地通过不能推断其他模拟器或游戏兼容。
 

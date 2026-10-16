@@ -1,0 +1,19 @@
+add device 1: /dev/input/event9
+  name:     "Odin Controller"
+  events:
+    KEY (0001): KEY_HOME              KEY_VOLUMEDOWN        KEY_VOLUMEUP          KEY_BACK             
+                BTN_GAMEPAD           BTN_EAST              BTN_C                 BTN_NORTH            
+                BTN_WEST              BTN_Z                 BTN_TL                BTN_TR               
+                BTN_TL2               BTN_TR2               BTN_SELECT            BTN_START            
+                BTN_MODE              BTN_THUMBL            BTN_THUMBR            BTN_DPAD_UP          
+                BTN_DPAD_DOWN         BTN_DPAD_LEFT         BTN_DPAD_RIGHT        KEY_APPSELECT        
+    ABS (0003): ABS_X                 : value 0, min -32767, max 32767, fuzz 0, flat 15, resolution 0
+                ABS_Y                 : value 0, min -32767, max 32767, fuzz 0, flat 15, resolution 0
+                ABS_Z                 : value 0, min -32767, max 32767, fuzz 0, flat 15, resolution 0
+                ABS_RZ                : value 0, min -32767, max 32767, fuzz 0, flat 15, resolution 0
+                ABS_GAS               : value 0, min 0, max 32767, fuzz 0, flat 0, resolution 0
+                ABS_BRAKE             : value 0, min 0, max 32767, fuzz 0, flat 0, resolution 0
+                ABS_HAT0X             : value 0, min -1, max 1, fuzz 0, flat 0, resolution 0
+                ABS_HAT0Y             : value 0, min -1, max 1, fuzz 0, flat 0, resolution 0
+  input props:
+    <none>

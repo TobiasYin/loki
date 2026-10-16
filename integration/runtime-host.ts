@@ -7,6 +7,8 @@ import { RuntimeError, type RuntimePorts, type ToolDescriptor, type ToolEnvelope
 import { createNativeFetch, decodeFrame } from '../native-bridge/js/fetch-adapter.js';
 // @ts-ignore Browser-independent text extraction is shared with Node tests.
 import { readableText } from './web-text.mjs';
+// @ts-ignore Pure coordinator shared with Node concurrency regression tests.
+import { StartupCoordinator } from './startup-coordinator.mjs';
 import { skillTools } from './skill-tools.js';
 import contract from '../tools/contracts/toolpack-v1.json';
 
@@ -22,7 +24,11 @@ let connectionId = '';
 const executions=new Map<string,ReturnType<typeof createExecution>>();
 const starting=new Set<string>();
 const sessions=new Map<string,RuntimeSession>();
-let profileChecks:Promise<void>=Promise.resolve();
+const startupCoordinator=new StartupCoordinator();
+const preparations=new Map<string,{cancelled:boolean,startedAt:number,runId?:string}>();
+function preparation(sessionId:string,state:{cancelled:boolean,startedAt:number,runId?:string},phase:string) {
+  if(preparations.get(sessionId)===state)(window as any).receivePreparationState?.({sessionId,phase,elapsedMs:Math.round(performance.now()-state.startedAt)});
+}
 const pending = new Map<string, { resolve: (v: any) => void; reject: (e: any) => void; timer: ReturnType<typeof setTimeout> }>();
 const queue: string[] = [];
 
@@ -49,6 +55,7 @@ function handle(message: any) {
 }
 function update(state: any) {
   currentState = state;
+  for(const [sessionId,preparing] of preparations)if(preparing.runId && (state.activeRuns??state.runs)?.some((r:any)=>r.id===preparing.runId))preparation(sessionId,preparing,'idle');
   for(const execution of executions.values()) {
     const lease=execution.lease;
     const s=state.sessions?.find((s:any)=>s.id===lease.sessionId);
@@ -135,16 +142,31 @@ return {runtime,lease:activeLease,receive:(raw:any)=>{fetchBridge.receive(raw);t
 async function start(sessionId:string,text:string,probeToken?:string) {
   if(starting.has(sessionId) || [...executions.values()].some(e=>e.lease.sessionId===sessionId))throw new RuntimeError('BACKEND_UNAVAILABLE');
   starting.add(sessionId);
-  try {
-    if(!probeToken) {
-      const check=profileChecks.catch(()=>{}).then(async()=>{
-        const status=await rpc('profile.check',{sessionId});
-        if(status.probeNeeded)await executeBegun(await rpc('begin',{sessionId,text:probeText,probeToken:status.token}));
-      });
-      profileChecks=check;await check;
+  const state:{cancelled:boolean,startedAt:number,runId?:string}={cancelled:false,startedAt:performance.now()};preparations.set(sessionId,state);preparation(sessionId,state,'checking');
+  const begun=async(data:any)=>{
+    state.runId=undefined;
+    const result=await rpc('begin',data);
+    state.runId=result.lease.runId;
+    if(state.cancelled) {
+      await rpc('ui',{op:'stop',sessionId,runId:result.lease.runId});
+      await rpc('end',result.lease);
+      throw new RuntimeError('CANCELLED');
     }
-    await executeBegun(await rpc('begin',{sessionId,text,...(probeToken?{probeToken}:{})}));
-  } finally {starting.delete(sessionId);}
+    if((currentState?.activeRuns??currentState?.runs)?.some((r:any)=>r.id===state.runId))preparation(sessionId,state,'idle');
+    await executeBegun(result);
+  };
+  try {
+    if(!probeToken)await startupCoordinator.verify(
+      (checkOnly:boolean)=>rpc('profile.check',{sessionId,checkOnly}),
+      (token:string)=>begun({sessionId,text:probeText,probeToken:token}),
+      ()=>state.cancelled,
+      ()=>preparation(sessionId,state,'probing'));
+    if(state.cancelled)throw new RuntimeError('CANCELLED');
+    preparation(sessionId,state,'starting');
+    await begun({sessionId,text,...(probeToken?{probeToken}:{})});
+  } finally {
+    if(preparations.get(sessionId)===state){preparation(sessionId,state,'idle');preparations.delete(sessionId);starting.delete(sessionId);}
+  }
 }
 async function executeBegun(begun:any) {
   if([...executions.values()].some(e=>e.lease.sessionId===begun.lease.sessionId))throw new RuntimeError('BACKEND_UNAVAILABLE');
@@ -159,8 +181,13 @@ window.runNativeProbe = (token, sessionId) => start(sessionId,probeText,token);
 window.ThorUI = { postMessage(raw) {
   if(!connectionId) { queue.push(raw); return; }
   const command = JSON.parse(raw);
-  if(['settings','pickImage','skillImport','voiceSettings','voice.start','voice.finish','voice.cancel','voice.permission'].includes(command.op)) { send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId: crypto.randomUUID(), op: command.op, data: command })); return; }
-  if(command.op === 'send') { void start(command.sessionId, command.text).catch(() => { (window as any).receiveSendFailure?.(command.text,command.sessionId); update({ ...currentState, error: '发送失败：请先配置模型并完成图片/工具探测；文字已保留。' }); }); return; }
+  if(command.op==='stopPreparing') {
+    const state=preparations.get(command.sessionId);if(state){state.cancelled=true;preparation(command.sessionId,state,'idle');starting.delete(command.sessionId);}
+    for(const e of executions.values())if(e.lease.sessionId===command.sessionId){e.runtime.stop();void rpc('ui',{op:'stop',sessionId:command.sessionId,runId:e.lease.runId}).then(update).catch(()=>{});}
+    return;
+  }
+  if(['openLink','settings','pickImage','skillImport','voiceSettings','voice.start','voice.finish','voice.cancel','voice.permission'].includes(command.op)) { send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId: crypto.randomUUID(), op: command.op, data: command })); return; }
+  if(command.op === 'send') { void start(command.sessionId, command.text).catch((error) => { (window as any).receiveSendFailure?.(command.text,command.sessionId); if(error?.code==='CANCELLED'||error?.message==='CANCELLED')return;update({ ...currentState, error: '发送失败：请先配置模型并完成图片/工具探测；文字已保留。' }); }); return; }
   if(command.op === 'stop')executions.get(command.runId)?.runtime.stop();
   void rpc('ui', command).then(state=>{if(command.op==='delete')sessions.delete(command.sessionId);update(state);}).catch(() => update({ ...currentState, error: '操作被拒绝：检查授权、活动运行或本地存储。' }));
 } };

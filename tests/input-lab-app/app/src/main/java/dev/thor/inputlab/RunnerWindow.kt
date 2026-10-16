@@ -19,7 +19,7 @@ class RunnerWindow private constructor(val observationSeconds: Int) {
         fun parse(value: Any? = null): RunnerWindow {
             require(value == null || value is Int) { "observationSeconds must be an integer" }
             val seconds = value as? Int ?: 5
-            require(seconds in 5..30) { "observationSeconds must be between 5 and 30" }
+            require(seconds in 5..120) { "observationSeconds must be between 5 and 120" }
             return RunnerWindow(seconds)
         }
     }

@@ -1,0 +1,45 @@
+
+> thor-agent-chat-tests@0.1.0 test
+> node --test web-tests/*.test.cjs
+
+✔ a verified session starts immediately while another profile is probing (4.695125ms)
+✔ waiting sessions recheck and do not repeat a successful profile probe (6.169083ms)
+✔ cancelled queued preparation never starts an extra probe (0.4585ms)
+✔ gray approval binds actual run and approval ID; black denial stays structured (76.274ms)
+✔ untrusted text never creates HTML, scripts, remote links or images (35.181583ms)
+✔ failed and unknown remain visible outside collapsed disclosure (27.49675ms)
+✔ background tasks keep running while composer stop targets only the selected session (23.440458ms)
+✔ capability choice and unavailable reason are distinct and bound to session (27.55275ms)
+✔ waiting confirmation remains outside disclosure and approves exact run (30.576542ms)
+✔ long histories render 200 messages and 50 sessions without persistence in web storage (96.287541ms)
+✔ storage recovery failure is explicit and disables sending without clearing history (8.405083ms)
+✔ voice mode hides composer and transcript, releases once, resets idle and ignores duplicate finals (16.729875ms)
+✔ voice swipe cancellation and session switch discard late final callbacks (13.484625ms)
+✔ failed recognition keeps transcript editable without sending partial speech (10.719958ms)
+✔ stream events become one tool card and an aggregated thinking panel without raw event JSON (21.160042ms)
+✔ Skill manager exposes metadata and explicit read, enable and import actions (11.604792ms)
+✔ compact composer keeps attachments and Skill selection in plus menu, hides probe success (9.860458ms)
+✔ model effort selection and per-session drafts stay isolated (33.608083ms)
+✔ configuration probe messages do not consume chat space (9.087ms)
+✔ instant failures remain actionable without a transient running banner (8.880625ms)
+✔ unrelated pointer cancellation does not release an active voice hold (14.995417ms)
+✔ voice release belongs to its starting input and real interruption still cancels (9.405208ms)
+✔ losing capture alone keeps recording and release outside the button finishes once (9.494125ms)
+✔ actual primary pointer cancellation outside the button and window blur stop capture (24.55375ms)
+✔ Markdown renders headings, lists, emphasis, fenced code and tables; links open through Native only (25.820333ms)
+✔ Markdown rejects script schemes and raw HTML handlers, forms and remote media (13.430791ms)
+✔ unchanged historical messages and disclosures keep DOM identity while the latest answer streams (14.126ms)
+✔ voice upward drift stays recording, large swipe only arms cancellation, and sliding back sends (10.532916ms)
+✔ session rows show only title; context menu opens actions and deletion requires confirmation (18.017041ms)
+✔ session long press opens options while a scrolling gesture does not (1174.487625ms)
+✔ preparation status stays inside composer and stop targets the selected pending task (21.312333ms)
+✔ Escape cancels a keyboard voice hold before moving focus away (11.4675ms)
+✔ page extraction removes executable head noise before enforcing the readable content budget (7.2185ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2330.2825

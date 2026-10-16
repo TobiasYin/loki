@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "authority": "ManualTestAuthority: native component only; no cloud model or product-authority Run",
+  "evidenceMode": "manual_platform_api",
+  "agentE2E": false,
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "clockIds": {
+    "senderInputAndStop": "android_uptime_ms",
+    "toolObservedAt": "android_elapsed_realtime_ms"
+  },
+  "cases": [
+    {
+      "name": "button",
+      "toolId": "input.press_button",
+      "arguments": {
+        "button": "A",
+        "phase": "hold",
+        "durationMs": 200
+      },
+      "cancelAfterSubmissionMs": null,
+      "passed": false,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native gamepad submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-inputmanager\/physical-controller-identity"
+      },
+      "manualRunId": "23f74489-9c90-4006-9c70-67203afe5b2d",
+      "callStartedUptimeMs": 337182502,
+      "callFinishedUptimeMs": 337182915,
+      "sender": {
+        "error": null,
+        "message": null,
+        "outcome": "submitted",
+        "backend": "shizuku-inputmanager\/physical-controller-key",
+        "availability": "READY",
+        "data": {
+          "submitted": true,
+          "released": true,
+          "button": "A",
+          "axes": {},
+          "durationMs": 200,
+          "deviceId": 30,
+          "deviceName": "Odin Controller",
+          "displayId": 0,
+          "source": 1025,
+          "backend": "shizuku-inputmanager\/physical-controller-key",
+          "displayRouting": "InputManager-explicit-displayId",
+          "receiverVerified": false,
+          "delivery": "InputManager key queue accepted; receiver must independently confirm",
+          "releaseGuarantee": "bounded-service-watchdog; service-process-SIGKILL-cannot-guarantee-release",
+          "complete": true,
+          "displayRole": "upper"
+        },
+        "observedAtElapsedRealtimeMs": 667562765
+      },
+      "attemptId": "a6e5540d-2e70-495a-a136-a39b741fad76",
+      "receiverStatus": "pass",
+      "rawBytes": 26907,
+      "eventPrefixBytes": 26907,
+      "eventPrefixSha256": "d494dd2d46694ccac1b9c1d3b9f38bcdcfac5d289998fba4f32a86984df5554e",
+      "receiverDeviceId": -1,
+      "rawInputCount": 2,
+      "failure": "AssertionError: expected:<-1> but was:<30>",
+      "failureCleanupReply": "observed: {\"released\":false,\"reason\":\"no-active-run-inputs\"}; no gesture pending"
+    },
+    {
+      "name": "axes",
+      "toolId": "input.set_axes",
+      "arguments": {
+        "axes": {
+          "X": 1,
+          "Y": -1,
+          "Z": 1,
+          "RZ": -1,
+          "BRAKE": 1,
+          "GAS": 1
+        },
+        "durationMs": 300
+      },
+      "cancelAfterSubmissionMs": null,
+      "passed": false,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native joystick submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-evdev\/odin-six-axes"
+      },
+      "manualRunId": "e60828d3-fe91-4961-bf64-7d32cf71e1e6",
+      "callStartedUptimeMs": 337189740,
+      "callFinishedUptimeMs": 337189900,
+      "sender": {
+        "error": "TARGET_CHANGED",
+        "message": "Upper windows\/app\/layout changed",
+        "outcome": "not_submitted",
+        "backend": "shizuku-evdev\/odin-six-axes",
+        "availability": "READY",
+        "data": {},
+        "observedAtElapsedRealtimeMs": 667569750
+      },
+      "attemptId": "257df93c-9eab-4c11-a414-5107ed4ab446",
+      "receiverStatus": "fail",
+      "rawBytes": 21554,
+      "eventPrefixBytes": 21554,
+      "eventPrefixSha256": "9817b4054720aa5a93ea593a1e96d110112e059193f1bbcaba8c395c1339576d",
+      "failure": "AssertionError: Independent receiver observed no raw input",
+      "failureCleanupReply": "observed: {\"released\":false,\"reason\":\"no-active-run-inputs\"}; no gesture pending"
+    },
+    {
+      "name": "button-cancel",
+      "toolId": "input.press_button",
+      "arguments": {
+        "button": "A",
+        "phase": "hold",
+        "durationMs": 3000
+      },
+      "cancelAfterSubmissionMs": 100,
+      "passed": false,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native gamepad submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-inputmanager\/physical-controller-identity"
+      },
+      "manualRunId": "e5b267b2-6af5-4d4f-bff8-85b3914c0781",
+      "callStartedUptimeMs": 337196979,
+      "submissionAcknowledgedUptimeMs": 337197031,
+      "cancelRequestedUptimeMs": 337197132,
+      "releaseReply": "observed: {\"released\":false,\"reason\":\"no-active-run-inputs\"}; no gesture pending",
+      "cleanupAcknowledgedUptimeMs": 337197133,
+      "callFinishedUptimeMs": 337197157,
+      "sender": {
+        "error": "CANCELLED",
+        "message": "Run was stopped; committed effects cannot be undone",
+        "outcome": "unknown",
+        "backend": "shizuku-inputmanager\/physical-controller-identity",
+        "availability": "READY",
+        "data": {},
+        "observedAtElapsedRealtimeMs": 667577007
+      },
+      "attemptId": "bf8525cb-8b82-4bcc-b3f6-cfedffc41c02",
+      "receiverStatus": "pass",
+      "rawBytes": 26907,
+      "eventPrefixBytes": 26907,
+      "eventPrefixSha256": "f54fbccbd6dc640bd725af2c17e5b40484ff42d2b279161297e53254d982a07c",
+      "receiverDeviceId": -1,
+      "rawInputCount": 2,
+      "failure": "ComparisonFailure: expected:<[Odin Controller]> but was:<[Virtual]>",
+      "failureCleanupReply": "observed: {\"released\":false,\"reason\":\"no-active-run-inputs\"}; no gesture pending"
+    },
+    {
+      "name": "axes-cancel",
+      "toolId": "input.set_axes",
+      "arguments": {
+        "axes": {
+          "X": 1,
+          "Y": -1,
+          "Z": 1,
+          "RZ": -1,
+          "BRAKE": 1,
+          "GAS": 1
+        },
+        "durationMs": 3000
+      },
+      "cancelAfterSubmissionMs": 100,
+      "passed": false,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native joystick submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-evdev\/odin-six-axes"
+      },
+      "manualRunId": "f29bc5da-c1ca-4f42-8877-f2b4b0c09200",
+      "callStartedUptimeMs": 337204275,
+      "sender": {
+        "error": "TARGET_CHANGED",
+        "message": "Upper windows\/app\/layout changed",
+        "outcome": "not_submitted",
+        "backend": "shizuku-evdev\/odin-six-axes",
+        "availability": "READY",
+        "data": {},
+        "observedAtElapsedRealtimeMs": 667584274
+      },
+      "failure": "AssertionError: No acknowledged native submission to cancel",
+      "failureCleanupReply": "observed: {\"released\":false,\"reason\":\"no-active-run-inputs\"}; no gesture pending",
+      "attemptId": "cf71cdba-86d7-432e-8ca0-f433b964ed5a",
+      "receiverStatus": "fail"
+    }
+  ],
+  "passed": false,
+  "controller": {
+    "deviceId": 30,
+    "deviceName": "Odin Controller",
+    "sources": 16778513,
+    "gamepad": true,
+    "joystick": true,
+    "axes": [
+      "X",
+      "Y",
+      "Z",
+      "RZ",
+      "GAS",
+      "BRAKE"
+    ],
+    "motionRanges": {
+      "X": {
+        "axisId": 0,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "Y": {
+        "axisId": 1,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "Z": {
+        "axisId": 11,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "RZ": {
+        "axisId": 14,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "BRAKE": {
+        "axisId": 23,
+        "min": 0,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      },
+      "GAS": {
+        "axisId": 22,
+        "min": 0,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      },
+      "HAT_X": {
+        "axisId": 15,
+        "min": -1,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      },
+      "HAT_Y": {
+        "axisId": 16,
+        "min": -1,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      }
+    },
+    "buttons": [
+      "A",
+      "B",
+      "X",
+      "Y",
+      "L1",
+      "R1",
+      "L2",
+      "R2",
+      "START",
+      "SELECT",
+      "MODE",
+      "L3",
+      "R3",
+      "DPAD_UP",
+      "DPAD_DOWN",
+      "DPAD_LEFT",
+      "DPAD_RIGHT"
+    ],
+    "reflectionAvailable": true,
+    "buttonBackend": "shizuku-inputmanager\/physical-controller-key",
+    "axisBackend": {
+      "backend": "shizuku-evdev\/odin-six-axes",
+      "kernelNode": "\/dev\/input\/event9",
+      "kernelAxisRanges": {
+        "X": {
+          "code": 0,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "Y": {
+          "code": 1,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "Z": {
+          "code": 2,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "RZ": {
+          "code": 5,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "GAS": {
+          "code": 9,
+          "value": 0,
+          "min": 0,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 0
+        },
+        "BRAKE": {
+          "code": 10,
+          "value": 0,
+          "min": 0,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 0
+        }
+      },
+      "displayRouting": "physical-controller-focus; not displayId injection"
+    },
+    "axisBackendError": null,
+    "receiverVerified": false,
+    "releaseGuarantee": "bounded-service-watchdog; service-process-SIGKILL-cannot-guarantee-release",
+    "availability": "ready"
+  }
+}

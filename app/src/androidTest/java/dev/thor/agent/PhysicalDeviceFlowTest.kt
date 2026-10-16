@@ -61,9 +61,11 @@ class PhysicalDeviceFlowTest {
         try {
             until {js(web,"window.productReady === true && document.querySelectorAll('.session-row').length>0 && !document.getElementById('new').disabled")=="true"}
             until {dev.thor.tools.diagnostic.ThorAccessibilityService.instance!=null && host.accessibilitySetupStatus().contains("已通过 Shizuku")}
-            instrumentation.runOnMainSync {host.calibrate(upper,lower)}
-            for(kind in listOf("logical","frame")) {
-                if(kind=="frame")launchReceiver()
+            // Product startup must resolve Thor panel roles itself. Never calibrate in this test.
+            val calibrated=ProductHost::class.java.getDeclaredField("snapshots").apply {isAccessible=true}.get(host) as dev.thor.tools.Snapshots
+            assertEquals("Normal startup must identify the upper panel",upper,calibrated.selected().id)
+            for(kind in if(args.getString("expanded")=="true")listOf("logical","frame","button","axes") else listOf("logical","frame")) {
+                if(kind!="logical")launchReceiver()
                 val count=js(web,"document.querySelectorAll('.session-row').length").toInt();js(web,"document.getElementById('new').click()")
                 until {js(web,"document.querySelectorAll('.session-row').length === ${count+1}")=="true"}
                 // Respect the provider's advertised effort levels on the new composer.
@@ -74,9 +76,15 @@ class PhysicalDeviceFlowTest {
                 val description=receiver("describe",Bundle().apply {putInt("version",1)}).getJSONObject("snapshot")
                 assertEquals(upper,description.getJSONObject("geometry").getInt("actualWindowDisplayId"))
                 val target=description.getJSONObject("target");val x=((target.getDouble("left")+target.getDouble("right"))/2).toInt();val y=((target.getDouble("top")+target.getDouble("bottom"))/2).toInt()
-                val text=if(kind=="logical") "请只调用一次 input_tap，x=$x,y=$y,coordinateSpace=display_logical,expectedPackage=dev.thor.inputlab，点击上屏测试目标。成功后简短回答，不要再调用任何工具。" else "请先调用 perception_capture_screen，region=[${x-50},${y-50},${x+50},${y+50}],maxEdge=100,format=jpeg。然后用该结果的 frameId 调用且只调用一次 input_tap，x=50,y=50,coordinateSpace=frame_pixels,expectedPackage=dev.thor.inputlab。成功后简短回答，不要调用其他工具或重复点击。"
+                val text=when(kind) {
+                    "logical" -> "请只调用一次 input_tap，x=$x,y=$y,coordinateSpace=display_logical,expectedPackage=dev.thor.inputlab，点击上屏测试目标。成功后简短回答，不要再调用任何工具。"
+                    "frame" -> if(args.getString("expanded")=="true")"先调用 perception_app_info 获取当前上屏应用，再调用 perception_capture_screen 获取完整上屏截图（maxEdge=1280,format=jpeg）。从图中找到左侧绿色 START 按钮，使用截图像素坐标和刚返回的 frameId 调用一次 input_tap，coordinateSpace=frame_pixels,expectedPackage=dev.thor.inputlab。不要调用 UI 树或其他工具，不要重复点击。完成后用简短 Markdown 回答应用名称和点击结果。" else "请先调用 perception_capture_screen，region=[${x-50},${y-50},${x+50},${y+50}],maxEdge=100,format=jpeg。然后用该结果的 frameId 调用且只调用一次 input_tap，x=50,y=50,coordinateSpace=frame_pixels,expectedPackage=dev.thor.inputlab。成功后简短回答，不要调用其他工具或重复点击。"
+                    "button" -> "请只调用一次 input_press_button，button=A,phase=hold,durationMs=200，在上屏按下并松开手柄 A。不要调用其他工具，不要重复，完成后简短回答。"
+                    else -> "请只调用一次 input_set_axes，axes={X:1,Y:-1,Z:1,RZ:-1,BRAKE:1,GAS:1}，durationMs=300。这是 AYN Thor 的左右摇杆与双扳机，操作后后端应自动归零。不要调用其他工具，不要重复，完成后简短回答。"
+                }
                 val begun=host.prepareForRunner(text).get(5,TimeUnit.SECONDS);val runId=begun.getJSONObject("lease").getString("runId");val testRun=id()
-                val setup=receiver("prepare",Bundle().apply {putInt("version",1);putInt("observationSeconds",30);putString("testRunId",testRun);putString("caseId","LAB-02");putString("agentRunId",runId);putString("senderTraceRef","live-product:$runId:$kind")})
+                val observationSeconds=if(kind=="frame" && args.getString("expanded")=="true")60 else if(kind in setOf("button","axes"))15 else 30
+                val setup=receiver("prepare",Bundle().apply {putInt("version",1);putInt("observationSeconds",observationSeconds);putString("testRunId",testRun);putString("caseId",when(kind){"button"->"LAB-06";"axes"->"LAB-07";else->"LAB-02"});putString("agentRunId",runId);putString("senderTraceRef","live-product:$runId:$kind")})
                 val receiverArgs=Bundle().apply {putInt("version",1);putString("testRunId",testRun);putString("lease",setup.getString("lease"))}
                 try {
                     var snapshot=setup.getJSONObject("snapshot")
@@ -101,7 +109,7 @@ class PhysicalDeviceFlowTest {
                     }
                     observeTarget()
                     js(web,"window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}));true")
-                    until(32) {observeTarget();snapshot=receiver("report",receiverArgs).getJSONObject("snapshot");!snapshot.isNull("report")}
+                    until(observationSeconds+2) {observeTarget();snapshot=receiver("report",receiverArgs).getJSONObject("snapshot");!snapshot.isNull("report")}
                     val report=snapshot.getJSONObject("report")
                     File(context.filesDir,"physical-cloud-$kind-report.json").writeText(report.toString(2))
                     val state=SqliteStore(context,"product.db").use {it.load()}
@@ -116,11 +124,11 @@ class PhysicalDeviceFlowTest {
                         continue
                     }
                     assertEquals("Physical receiver must observe exactly one complete target tap","pass",report.getString("status"));assertEquals(runId,report.getString("agentRunId"))
-                    assertEquals(if(kind=="logical")1 else 2,native.size)
+                    assertEquals(when(kind){"frame"->if(args.getString("expanded")=="true")3 else 2;else->1},native.size)
                     assertTrue(native.all {it.getJSONObject("data").isNull("error")})
-                    assertEquals("input.tap",native.last().getJSONObject("data").getString("toolId"))
+                    assertEquals(when(kind){"button"->"input.press_button";"axes"->"input.set_axes";else->"input.tap"},native.last().getJSONObject("data").getString("toolId"))
                     if(kind=="frame") {
-                        val capture=native.first().getJSONObject("data").getJSONArray("content").objects().first {it.getString("type")=="text"}
+                        val capture=native.single {it.getJSONObject("data").getString("toolId")=="perception.capture_screen"}.getJSONObject("data").getJSONArray("content").objects().first {it.getString("type")=="text"}
                         val details=JSONObject(capture.getString("text"))
                         assertNotEquals("A fresh image must not inherit the old request identity",details.getString("requestSnapshotId"),details.getString("targetSnapshotId"))
                         val run=state.getJSONArray("runs").objects().single {it.getString("id")==runId}
@@ -129,7 +137,7 @@ class PhysicalDeviceFlowTest {
                     }
                     while(js(web,"document.getElementById('send').dataset.running === 'false'")!="true")Thread.sleep(500)
                     val completed=SqliteStore(context,"product.db").use {it.load().getJSONArray("runs").objects().single {r -> r.getString("id")==runId}}
-                    record.put("runStatus",completed.getString("status"))
+                    record.put("runStatus",completed.getString("status")).put("timings",completed.optJSONObject("timings"))
                     assertEquals("completed",completed.getString("status"))
                 } finally {
                     runCatching {receiver("release",receiverArgs)}

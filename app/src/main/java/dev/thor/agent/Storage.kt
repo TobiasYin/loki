@@ -76,6 +76,19 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         } finally { db.endTransaction() }
     }
 
+    /** Changing a title/selection must not reread the durable event ledger. */
+    fun saveSessionUpdate(state:JSONObject) {
+        val db=writableDatabase;db.beginTransaction()
+        try {
+            for(row in state.getJSONArray("sessions").objects()) {
+                val values=ContentValues().apply {put("id",row.getString("id"));put("payload",row.toString())}
+                if(db.update("sessions",values,"id=?",arrayOf(row.getString("id")))==0)db.insertOrThrow("sessions",null,values)
+            }
+            db.insertWithOnConflict("metadata",null,ContentValues().apply {put("name","selected");put("value",state.optString("selected"))},SQLiteDatabase.CONFLICT_REPLACE)
+            db.setTransactionSuccessful()
+        } finally {db.endTransaction()}
+    }
+
     /** Current-run streaming transaction. Full snapshots still handle deletion and UI changes.
      * Updating parents in place preserves their existing children. Events only append;
      * a duplicate ID/sequence rolls back the run, message and selection together.

@@ -1,0 +1,25 @@
+{
+  "archiveSha256": "97f42ae2b379a0ef5bebfc460f9209f90bb7ff335c5d76579b39af5ff210f12e",
+  "archiveBytes": 37797376,
+  "retiredDeviceCopies": [
+    "0bca7a5c-56bc-4861-af24-2822f8e969d4",
+    "16a4d517-7155-4b78-a01e-d51fc12eadb5",
+    "1ce1ee54-d053-4096-9369-2e0d15d1e41b",
+    "1ea76147-9d37-47da-80fb-eb5389eda087",
+    "23186edd-eeca-4ee0-a54f-588ba5417fe4",
+    "24e88f09-1c78-4af5-9ae8-3341c0640e68",
+    "257df93c-9eab-4c11-a414-5107ed4ab446",
+    "298f28c5-dd27-4418-9c8a-cc007713f525",
+    "2e3bc718-48d5-403a-880f-4a743263d690",
+    "52382cc2-87e6-4827-afc7-763604563b8b",
+    "5386d8e9-15a9-46ae-9370-3ba2e82eacd0",
+    "77fbc52b-f139-4cfc-a371-5fd19d488b17",
+    "88331ab8-4818-44f6-81f9-047763194ee3",
+    "a6e5540d-2e70-495a-a136-a39b741fad76",
+    "bf8525cb-8b82-4bcc-b3f6-cfedffc41c02",
+    "cf71cdba-86d7-432e-8ca0-f433b964ed5a",
+    "fc7f2f1e-8bf7-4bc3-b555-6707dbb608db"
+  ],
+  "physicalBaselineRetained": true,
+  "reason": "Preserved and verified this turn automatic test reports before avoiding 50-report device retention limit"
+}

@@ -13,7 +13,9 @@
   const button = (text, action, className) => { const n=element('button',text,className); n.type='button'; n.addEventListener('click',action); return n; };
   const selected = () => state?.sessions.find(s=>s.id===state.selected);
   const active = () => (state?.activeRuns??state?.runs??[]).find(r=>r.sessionId===state?.selected && !terminal.has(r.status));
-  const drafts=new Map();
+  const preparing=new Map();
+  const drafts=new Map(),sectionSignatures=new Map();
+  function changedSection(name,value){const signature=JSON.stringify([state?.selected,value]);if(sectionSignatures.get(name)===signature)return false;sectionSignatures.set(name,signature);return true;}
   function drawer(open) { $('drawer').hidden=!open; $('shade').hidden=!open; $('menu').setAttribute('aria-expanded',String(open)); if(open)$('close-drawer').focus(); else $('menu').focus(); }
   function modal(title,text,initial,callback) {
     $('modal-title').textContent=title; $('modal-text').textContent=text;
@@ -21,24 +23,41 @@
     $('modal').showModal(); if(initial!==null)$('modal-input').focus();
   }
   $('modal').addEventListener('close',()=>{ const callback=modalCallback; modalCallback=null; if($('modal').returnValue==='ok')callback?.($('modal-input').value); });
+  let sessionsSignature='';
+  function sessionMenu(id) {
+    const s=state.sessions.find(s=>s.id===id);if(!s)return;
+    $('session-menu-title').textContent=s.title;const actions=$('session-menu-actions');actions.replaceChildren();
+    const closeThen=action=>()=>{$('session-menu').close();action();};
+    actions.append(button('重命名',closeThen(()=>modal('重命名会话','标题仅在本地保存。',s.title,title=>command({op:'rename',sessionId:s.id,title}))),'wide'));
+    actions.append(button(s.archivedAt!==null?'恢复':'归档',closeThen(()=>command({op:'archive',sessionId:s.id,archived:s.archivedAt===null})),'wide'));
+    actions.append(button('删除会话',closeThen(()=>modal('删除会话','将删除本会话的消息和附件。活动任务需先停止。',null,()=>command({op:'delete',sessionId:s.id}))),'wide danger'));
+    $('session-menu').showModal();
+  }
+  $('session-menu-close').addEventListener('click',()=>$('session-menu').close());
   function renderSessions() {
-    const list=$('sessions'); list.replaceChildren();
-    for(const s of [...state.sessions].filter(s=>showArchives ? s.archivedAt!==null : s.archivedAt===null).sort((a,b)=>b.updatedAt-a.updatedAt)) {
-      const row=element('div',undefined,'session-row'+(s.id===state.selected?' selected':''));
-      row.dataset.sessionId=s.id;
-      const choose=button('',()=>{ if(s.archivedAt!==null)command({op:'archive',sessionId:s.id,archived:false}); else{command({op:'select',sessionId:s.id});drawer(false);} },'session-select');
-      choose.append(element('strong',s.title));
+    const visible=[...state.sessions].filter(s=>showArchives?s.archivedAt!==null:s.archivedAt===null).sort((a,b)=>b.updatedAt-a.updatedAt);
+    const signature=JSON.stringify([state.selected,showArchives,visible.map(s=>[s.id,s.title,s.archivedAt]),(state.activeRuns??state.runs).filter(r=>!terminal.has(r.status)).map(r=>r.sessionId)]);
+    if(signature===sessionsSignature)return;sessionsSignature=signature;
+    const list=$('sessions');list.replaceChildren();
+    for(const s of visible) {
+      const row=element('div',undefined,'session-row'+(s.id===state.selected?' selected':''));row.dataset.sessionId=s.id;
+      let timer=null,origin=null,suppressClick=false;
+      const choose=button('',()=>{if(suppressClick){suppressClick=false;return;}if(s.archivedAt!==null)command({op:'archive',sessionId:s.id,archived:false});else{command({op:'select',sessionId:s.id});drawer(false);}},'session-select');
+      choose.append(element('strong',s.title));choose.setAttribute('aria-label',s.title);choose.setAttribute('aria-haspopup','dialog');
       const running=(state.activeRuns??state.runs).some(r=>r.sessionId===s.id && !terminal.has(r.status));
-      choose.append(element('small',(running?'● 运行中 · ':'')+new Date(s.updatedAt).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})));
-      const actions=element('div',undefined,'session-actions');
-      actions.append(button('重命名',()=>modal('重命名会话','标题仅在本地保存。',s.title,title=>command({op:'rename',sessionId:s.id,title}))));
-      actions.append(button(s.archivedAt!==null?'恢复':'归档',()=>command({op:'archive',sessionId:s.id,archived:s.archivedAt===null})));
-      actions.append(button('删除',()=>modal('删除会话','将删除该会话的消息、运行、工具事件和附件引用。活动运行需先停止。连接资料独立保留。',null,()=>command({op:'delete',sessionId:s.id}))));
-      row.append(choose,actions);list.append(row);
+      choose.classList.toggle('session-running',running);if(running)choose.setAttribute('aria-description','任务运行中');
+      const cancel=()=>{clearTimeout(timer);timer=null;};
+      choose.addEventListener('pointerdown',e=>{if(e.button>0 || e.isPrimary===false)return;suppressClick=false;origin=[e.clientX,e.clientY];timer=setTimeout(()=>{timer=null;suppressClick=true;sessionMenu(s.id);},550);});
+      choose.addEventListener('pointermove',e=>{if(origin && Math.hypot(e.clientX-origin[0],e.clientY-origin[1])>10)cancel();});
+      for(const type of ['pointerup','pointercancel','pointerleave'])choose.addEventListener(type,cancel);
+      choose.addEventListener('contextmenu',e=>{e.preventDefault();cancel();suppressClick=true;sessionMenu(s.id);});
+      choose.addEventListener('keydown',e=>{if(e.key==='ContextMenu' || (e.shiftKey&&e.key==='F10')){e.preventDefault();cancel();sessionMenu(s.id);}});
+      row.append(choose);list.append(row);
     }
     $('archives').textContent=showArchives?'返回最近会话':'查看归档';
   }
   function renderCapabilities() {
+    if(!changedSection('capabilities',[selected()?.capabilities,selected()?.pendingAttachments,state.availability]))return;
     const s=selected(); if(!s)return;
     $('attach').textContent=s.pendingAttachments?.length ? `附图 · ${s.pendingAttachments.length}` : '附图';
     $('capabilities').textContent=`◇ 能力 ${Object.values(s.capabilities).filter(Boolean).length} ⌄`;
@@ -50,7 +69,7 @@
         const apply=()=>command({op:'capability',sessionId:s.id,capability:cap,enabled});
         if(enabled && (cap==='debug'||cap==='screen_control')) {
           check.checked=false;
-          modal(`开启${label}`,cap==='debug'?'开启后，Agent 可运行经过分级审核的设备命令：白名单命令及亮度、风扇、刷新率等限定范围的常用调整直接执行；涉及隐私或按键分配等灰名单操作逐条确认；抹除、格式化、刷机和未审查命令禁止执行。完整操作手册可在 Skill 管理中查看。配置文件写入仍需单独批准。':'屏幕操作可能影响上屏应用和焦点，需系统授权与设备验证。只有已校准且授权的目标可执行触摸；手柄后端尚不可用。',null,apply);
+          modal(`开启${label}`,cap==='debug'?'开启后，Agent 可运行经过分级审核的设备命令：白名单命令及亮度、风扇、刷新率等限定范围的常用调整直接执行；涉及隐私或按键分配等灰名单操作逐条确认；抹除、格式化、刷机和未审查命令禁止执行。完整操作手册可在 Skill 管理中查看。配置文件写入仍需单独批准。':'屏幕操作可能影响上屏应用和焦点。执行前会校验目标屏幕、系统授权与设备支持情况。',null,apply);
         } else apply();
       });
       const text=element('span',label);text.append(element('small',`${s.capabilities[cap]?'意愿：已选择':'意愿：未选择'} · ${state.availability[cap]}`));row.append(check,text);panel.append(row);
@@ -77,8 +96,8 @@
     }
     return list;
   }
-  function runView(run) {
-    const events=state.events.filter(e=>e.runId===run.id).sort((a,b)=>a.sequence-b.sequence);
+  function runView(run,runEvents) {
+    const events=(runEvents??state.events.filter(e=>e.runId===run.id)).slice().sort((a,b)=>a.sequence-b.sequence);
     const container=element('div');
     // Actionable summaries live outside the collapsed disclosure, including unknown side effects.
     if(run.stopReason)container.append(element('div',run.stopReason,'attention'));
@@ -139,18 +158,43 @@
     }
     if(calls.size || last)container.append(disclosure);return container;
   }
+  // HTML from messages is treated as text. Markdown images remain text too:
+  // simply reading a message must never trigger an external image request.
+  const escapeHtml=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const markdownRenderer=window.marked?new window.marked.Renderer():null;
+  if(markdownRenderer){markdownRenderer.html=token=>escapeHtml(token.text);markdownRenderer.image=token=>escapeHtml(token.text||'图片');}
+  function markdown(text) {
+    const body=element('div',undefined,'markdown');
+    if(!window.marked || !window.DOMPurify){body.classList.add('text');body.textContent=text;return body;}
+    body.innerHTML=window.DOMPurify.sanitize(window.marked.parse(text,{renderer:markdownRenderer,gfm:true,breaks:true}),{
+      ALLOWED_TAGS:['p','br','strong','em','del','blockquote','ul','ol','li','h1','h2','h3','h4','h5','h6','pre','code','hr','table','thead','tbody','tr','th','td','a'],ALLOWED_ATTR:['href','title','start','align'],ALLOW_DATA_ATTR:false
+    });
+    for(const link of body.querySelectorAll('a')){
+      let url;try{url=new URL(link.getAttribute('href'));}catch{link.removeAttribute('href');continue;}
+      if(!['https:','http:'].includes(url.protocol)){link.removeAttribute('href');continue;}
+      link.rel='noopener noreferrer';link.addEventListener('click',event=>{event.preventDefault();command({op:'openLink',url:url.href});});
+    }
+    return body;
+  }
+  const messageNodes=new Map();let renderedSession=null;
   function renderChat() {
-    const chat=$('chat'), bottom=chat.scrollHeight-chat.clientHeight-chat.scrollTop<80, oldTop=chat.scrollTop;
-    chat.replaceChildren();
-    const messages=state.messages.filter(m=>m.sessionId===state.selected);
-    if(!messages.length)chat.append(element('div','今天想做什么？','empty'));
+    const chat=$('chat'),bottom=chat.scrollHeight-chat.clientHeight-chat.scrollTop<80,oldTop=chat.scrollTop;
+    if(renderedSession!==state.selected){chat.replaceChildren();messageNodes.clear();renderedSession=state.selected;}
+    const runs=new Map(state.runs.map(r=>[r.id,r])),events=new Map();
+    for(const event of state.events){if(!events.has(event.runId))events.set(event.runId,[]);events.get(event.runId).push(event);}
+    const messages=state.messages.filter(m=>m.sessionId===state.selected && !runs.get(m.runId)?.probe),keep=new Set(messages.map(m=>m.id));
+    for(const [id,entry] of messageNodes)if(!keep.has(id)){entry.card.remove();messageNodes.delete(id);}
+    chat.querySelector('.empty')?.remove();if(!messages.length)chat.append(element('div','今天想做什么？','empty'));
+    let previous=null;
     for(const message of messages) {
-      if(state.runs.find(r=>r.id===message.runId)?.probe)continue;
-      const card=element('article',undefined,`message ${message.role}`);card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'));
-      if(message.role==='assistant'&&message.runId){ const run=state.runs.find(r=>r.id===message.runId);if(run)card.append(runView(run)); }
-      card.append(element('div',message.text||'','text'));
-      for(const aid of message.attachments??[]) { const a=state.attachments?.find(a=>a.id===aid); card.append(element('small',a ? `本地附件 · ${a.size} 字节 · ${Date.now()>a.expiresAt?'已过期':'本地保存'} · SHA-256 ${a.hash.slice(0,12)}` : '附件引用不可用')); }
-      chat.append(card);
+      let entry=messageNodes.get(message.id);
+      if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments);entry={card,runSlot,textSlot,attachments};messageNodes.set(message.id,entry);}
+      const run=runs.get(message.runId),runSignature=message.role==='assistant'&&run?JSON.stringify([run,events.get(run.id)]):'';
+      if(entry.runSignature!==runSignature){entry.runSlot.replaceChildren();if(runSignature)entry.runSlot.append(runView(run,events.get(run.id)));entry.runSignature=runSignature;}
+      if(entry.text!==message.text){entry.textSlot.replaceChildren(message.role==='assistant'?markdown(message.text||''):element('div',message.text||'','text'));entry.text=message.text;}
+      const attachmentsSignature=JSON.stringify((message.attachments??[]).map(id=>state.attachments?.find(a=>a.id===id)??id));
+      if(entry.attachmentsSignature!==attachmentsSignature){entry.attachments.replaceChildren();for(const aid of message.attachments??[]){const a=state.attachments?.find(a=>a.id===aid);entry.attachments.append(element('small',a?`本地附件 · ${a.size} 字节 · ${Date.now()>a.expiresAt?'已过期':'本地保存'} · SHA-256 ${a.hash.slice(0,12)}`:'附件引用不可用'));}entry.attachmentsSignature=attachmentsSignature;}
+      const expected=previous?previous.nextSibling:chat.firstChild;if(expected!==entry.card)chat.insertBefore(entry.card,expected);previous=entry.card;
     }
     chat.scrollTop=bottom?chat.scrollHeight:oldTop;
   }
@@ -159,12 +203,22 @@
     const switched=state?.selected!==next.selected;if(switched && state)drafts.set(state.selected,$('input').value);state=next;if(switched)$('input').value=drafts.get(next.selected)??'';
     $('title').textContent=selected()?.title??'Thor Agent';
     $('notice').hidden=!next.error; $('notice').textContent=next.error??'';
-    const running=active();$('active').hidden=true;$('active').replaceChildren();
-    $('send').textContent=running?'停止':'发送';$('send').dataset.running=String(!!running);$('send').setAttribute('aria-label',running?'停止当前任务':'发送');
+    $('active').hidden=true;$('active').replaceChildren();refreshComposerState();
     renderSessions();renderCapabilities();renderChat();renderSkills();renderModelPicker();renderSkillSelection();refreshVoice();if(switched)$('chat').scrollTop=$('chat').scrollHeight;
+  };
+  function refreshComposerState(){
+    const running=active(),pending=preparing.get(state?.selected);const stopping=!!running||!!pending;
+    $('send').textContent=stopping?'停止':'发送';$('send').dataset.running=String(stopping);$('send').setAttribute('aria-label',stopping?'停止当前任务':'发送');
+    $('preparation-status').hidden=!pending || !!running;
+    $('preparation-status').textContent=pending?({checking:'正在准备任务…',probing:'首次连接：正在验证模型…',starting:'正在启动任务…'}[pending.phase]??'正在准备任务…'):'';
+  }
+  window.receivePreparationState=next=>{
+    if(!next?.sessionId)return;if(next.phase==='idle')preparing.delete(next.sessionId);else if(['checking','probing','starting'].includes(next.phase))preparing.set(next.sessionId,next);
+    refreshComposerState();refreshVoice();
   };
   const effortNames={off:'默认',minimal:'最少',low:'低',medium:'中',high:'高',xhigh:'很高',max:'最高'};
   function renderModelPicker() {
+    if(!changedSection('model',[state.modelSelection,state.modelChoices]))return;
     const profile=state.modelSelection??{};const picker=$('model-select');picker.replaceChildren();
     for(const model of state.modelChoices??[]) {const o=element('option',model.name??model.id);o.value=model.id;picker.append(o);}picker.value=profile.modelId??'';
     const effort=$('effort-select');effort.replaceChildren();for(const e of profile.efforts??['off']){const o=element('option',effortNames[e]??e);o.value=e;effort.append(o);}effort.value=profile.thinkingEffort??'off';
@@ -172,6 +226,7 @@
     $('model-context').textContent=profile.contextWindow?`上下文 ${Intl.NumberFormat('en',{notation:'compact'}).format(profile.contextWindow)} tokens`:'';
   }
   function renderSkillSelection() {
+    if(!changedSection('skill-selection',[state.skills,selected()?.selectedSkills]))return;
     const list=$('skill-selection');list.replaceChildren();const s=selected();if(!s)return;
     for(const skill of state.skills??[]) {
       const row=element('label',undefined,'cap-row');const input=element('input');input.type='checkbox';input.checked=skill.enabled && (skill.builtin || !s.selectedSkills || s.selectedSkills.includes(skill.name));input.disabled=skill.builtin || !skill.enabled;
@@ -188,6 +243,7 @@
   $('model-select').addEventListener('change',()=>command({op:'sessionOptions',sessionId:state.selected,modelId:$('model-select').value}));
   $('effort-select').addEventListener('change',()=>command({op:'sessionOptions',sessionId:state.selected,thinkingEffort:$('effort-select').value}));
   function renderSkills() {
+    if(!changedSection('skills',[state.skills,state.skillDetail,!!active()]))return;
     const list=$('skills-list');list.replaceChildren();
     for(const skill of state.skills??[]) {
       const row=element('div',undefined,'skill-row');row.append(element('strong',skill.name),element('p',skill.description),element('small',`${skill.builtin?'内置':'已导入 / 已创建'} · ${skill.enabled?'已启用':'已停用'} · ${skill.fileCount} 个文件`));
@@ -213,18 +269,26 @@
   function refreshVoice() {
     if(hold && (hold.sessionId!==state?.selected || active()))cancelVoice();
     $('input').hidden=voiceMode;$('voice-panel').hidden=!voiceMode;
-    $('voice-toggle').innerHTML=voiceMode?'⌨':'<svg width=20 height=24 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=1.8 aria-hidden=true><rect x=8 y=2 width=8 height=13 rx=4></rect><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"></path></svg>';$('voice-toggle').setAttribute('aria-pressed',String(voiceMode));$('voice-toggle').setAttribute('aria-label',voiceMode?'切换到文字输入':'切换到语音输入');
-    $('voice-hold').disabled=!!active() || voicePhase==='finalizing';
-    $('voice-hold').classList.toggle('holding',!!hold && ['connecting','recording'].includes(voicePhase));
-    $('voice-hold').textContent=['connecting','recording'].includes(voicePhase)?'松手发送 · 上滑取消':voicePhase==='finalizing'?'正在完成识别…':'按住说话';
-    $('voice-status').textContent=voiceError || ({connecting:'正在连接语音服务…',recording:'正在听 · 识别文字会实时更新',finalizing:'已松手，等待最终结果…',complete:'已发送',empty:'未识别到文字，请重试',cancelled:'已取消'}[voicePhase]??'按住说话，松手发送；上滑取消');
-    $('voice-transcript').textContent=voiceText;$('voice-cancel').hidden=!hold;$('voice-edit').hidden=!voiceText || !!hold;
-    $('send').hidden=voiceMode && !active();
+    $('voice-toggle').innerHTML=voiceMode?'⌨':'<svg width=20 height=24 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=1.8 aria-hidden=true><rect x=8 y=2 width=8 height=13 rx=4></rect><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"></path></svg>';
+    $('voice-toggle').setAttribute('aria-pressed',String(voiceMode));$('voice-toggle').setAttribute('aria-label',voiceMode?'切换到文字输入':'切换到语音输入');
+    const holding=!!hold&&!hold.released;
+    $('voice-hold').disabled=!!active() || preparing.has(state?.selected) || voicePhase==='finalizing';
+    $('voice-hold').classList.toggle('holding',holding);$('voice-hold').setAttribute('aria-pressed',String(holding));
+    $('voice-hold').textContent=holding?'松手发送 · 上滑取消':voicePhase==='finalizing'?'正在完成识别…':'按住说话';
+    $('voice-overlay').hidden=!holding;$('voice-overlay').classList.toggle('cancel-pending',!!hold?.cancelPending);
+    $('voice-instruction').textContent=hold?.cancelPending?'松手取消，滑回继续':'松手发送，上滑取消';
+    $('voice-status').textContent=voiceError||({finalizing:'正在完成识别…',empty:'未识别到文字，请重试',cancelled:'已取消'}[voicePhase]??'');
+    $('voice-status').hidden=!$('voice-status').textContent || holding;
+    // Keep interim and successful transcripts out of the composer. A failure
+    // offers an explicit draft recovery action without sending partial speech.
+    $('voice-transcript').textContent='';$('voice-transcript').hidden=true;
+    $('voice-cancel').hidden=!holding;$('voice-edit').hidden=!voiceText || !!hold || !voiceError;
+    $('send').hidden=voiceMode && !active() && !preparing.has(state?.selected);
   }
   function cancelVoice() {
     const wasHolding=!!hold;
     if(hold)command({op:'voice.cancel',id:hold.id,sessionId:hold.sessionId});
-    hold=null;if(wasHolding)voicePhase='cancelled';voiceError='';
+    hold=null;if(wasHolding)voicePhase='idle';voiceError='';
   }
   function changeVoiceMode() {
     cancelVoice();voiceMode=!voiceMode;
@@ -234,10 +298,10 @@
   $('voice-toggle').addEventListener('click',changeVoiceMode);
   $('voice-hold').addEventListener('contextmenu',e=>e.preventDefault());
   function beginVoice(event) {
-    if(!state || active() || hold || voicePhase==='finalizing')return;
+    if(!state || active() || preparing.has(state.selected) || hold || voicePhase==='finalizing')return;
     if(event.type==='pointerdown' && (event.isPrimary===false || event.button>0))return;
     event.preventDefault();voiceText='';voiceError='';voicePhase='connecting';
-    hold={id:window.crypto.randomUUID(),sessionId:state.selected,pointerId:event.pointerId,key:event.key,y:event.clientY,released:false};
+    hold={id:window.crypto.randomUUID(),sessionId:state.selected,pointerId:event.pointerId,key:event.key,y:event.clientY,released:false,cancelPending:false,cancelDistance:Math.max(120,Math.min(240,innerHeight*.4))};
     // Capture is an optimization; document-level release/cancel still owns the
     // gesture if WebView drops capture or this API is unavailable.
     if(event.pointerId!==undefined)try{$('voice-hold').setPointerCapture?.(event.pointerId);}catch{}
@@ -246,11 +310,11 @@
   function finishVoice(event) {
     if(!hold || hold.released)return;
     if(event.type==='pointerup' ? event.pointerId!==hold.pointerId : hold.pointerId!==undefined || event.key!==hold.key)return;
-    event.preventDefault();hold.released=true;voicePhase='finalizing';command({op:'voice.finish',id:hold.id,sessionId:hold.sessionId});refreshVoice();
+    event.preventDefault();if(hold.cancelPending){cancelVoice();refreshVoice();return;}hold.released=true;voicePhase='finalizing';command({op:'voice.finish',id:hold.id,sessionId:hold.sessionId});refreshVoice();
   }
   $('voice-hold').addEventListener('pointerdown',beginVoice);
   document.addEventListener('pointerup',finishVoice);
-  document.addEventListener('pointermove',event=>{if(hold && event.pointerId===hold.pointerId && hold.y-event.clientY>70){cancelVoice();refreshVoice();}});
+  document.addEventListener('pointermove',event=>{if(hold && !hold.released && event.pointerId===hold.pointerId){const pending=hold.y-event.clientY>=hold.cancelDistance;if(hold.cancelPending!==pending){hold.cancelPending=pending;refreshVoice();}}});
   document.addEventListener('pointercancel',event=>{if(hold && !hold.released && event.pointerId===hold.pointerId){cancelVoice();refreshVoice();}});
   $('voice-hold').addEventListener('keydown',event=>{if([' ','Enter'].includes(event.key) && !event.repeat)beginVoice(event);});
   $('voice-hold').addEventListener('keyup',event=>{if([' ','Enter'].includes(event.key))finishVoice(event);});
@@ -265,7 +329,7 @@
     voiceText=typeof next.text==='string'?next.text:voiceText;voicePhase=next.phase;voiceError=next.error??'';
     if(next.phase==='complete' && hold.released && !submitted.has(next.id) && typeof next.submit==='string' && next.submit.trim() && !active()) {
       submitted.add(next.id);if(submitted.size>100)submitted.delete(submitted.values().next().value);
-      command({op:'send',sessionId:hold.sessionId,text:next.submit.trim()});hold=null;
+      command({op:'send',sessionId:hold.sessionId,text:next.submit.trim()});hold=null;voicePhase='idle';voiceText='';voiceError='';
     } else if(['error','cancelled','empty'].includes(next.phase))hold=null;
     refreshVoice();
   };
@@ -274,6 +338,7 @@
   $('composer').addEventListener('submit',event=>{
     event.preventDefault();if(!state)return;
     if(active()){ $('send').textContent='停止'; command({op:'stop',runId:active().id});return; }
+    if(preparing.has(state.selected)){command({op:'stopPreparing',sessionId:state.selected});return;}
     const text=$('input').value.trim();if(!text)return;
     command({op:'send',sessionId:state.selected,text,scenario:$('scenario').value});drafts.delete(state.selected);$('input').value='';$('cap-panel').hidden=true;
   });
@@ -283,7 +348,7 @@
   $('archives').addEventListener('click',()=>{showArchives=!showArchives;renderSessions();});
   $('seed').addEventListener('click',()=>modal('加载长历史示例','向当前会话添加 200 条模拟消息，并新建 49 个会话。此操作会保存到本地，可逐个删除。',null,()=>command({op:'seed'})));
   $('capabilities').addEventListener('click',()=>{popover('cap-panel');$('capabilities').setAttribute('aria-expanded',String(!$('cap-panel').hidden));});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'){drawer(false);for(const p of ['more-panel','model-panel','skill-panel','cap-panel'])$(p).hidden=true;}});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){if(hold){cancelVoice();refreshVoice();}drawer(false);for(const p of ['more-panel','model-panel','skill-panel','cap-panel'])$(p).hidden=true;}});
   document.addEventListener('click',e=>{if(!e.target.closest('footer'))for(const p of ['more-panel','model-panel','skill-panel','cap-panel'])$(p).hidden=true;});
   command({op:'ready'});
 })();

@@ -48,6 +48,8 @@ class ProductHost private constructor(private val context: Context, private val 
         val networkCalls=mutableSetOf<String>()
     }
     private val scopes=mutableMapOf<String,RunScope>()
+    private val eventIndex=EventIndex()
+    private val runMetrics=java.util.concurrent.ConcurrentHashMap<String,java.util.concurrent.ConcurrentHashMap<String,Long>>()
     private fun scope(b:Binding)=scopes.getValue(b.runId)
     private fun bindingFor(j:JSONObject)=bindings[j.getString("runId")] ?: error("No run")
     fun hasActiveRuns()=bindings.isNotEmpty()
@@ -55,7 +57,8 @@ class ProductHost private constructor(private val context: Context, private val 
     private var storageFailed = false
     @Volatile private var closing = false
     private var connection: String? = null
-    private val deviceAuthority = DeviceAuthority(authority) { snapshots.update(displayFacts(context)) }
+    private val deviceAuthority = DeviceAuthority(authority) { updateDisplays() }
+    private val roles = DisplayRoles(context)
     private val snapshots = Snapshots(clock) { ThorAccessibilityService.instance?.target(it) ?: Target(null, "unknown", "no-accessibility") }
     private val displayManager=context.getSystemService(android.hardware.display.DisplayManager::class.java)
     private var displayState=displayFacts(context)
@@ -63,7 +66,7 @@ class ProductHost private constructor(private val context: Context, private val 
         override fun onDisplayAdded(id:Int)=changed()
         override fun onDisplayRemoved(id:Int)=changed()
         override fun onDisplayChanged(id:Int)=changed()
-        private fun changed() {val facts=displayFacts(context);if(facts != displayState) {displayState=facts;snapshots.update(facts);revokeResources()} }
+        private fun changed() {val facts=displayFacts(context);if(facts != displayState) {displayState=facts;updateDisplays();revokeResources()} }
     }
     private val debug = DebugConnection(context) { revokeResources() }
     private val local = LocalFiles(File(context.filesDir, "approved-synthetic-config").toPath())
@@ -86,6 +89,8 @@ class ProductHost private constructor(private val context: Context, private val 
     private val redactor = dev.thor.bridge.CredentialVault(buildMap { secret?.let { put(credentialRef,it) }; searchSecret?.let { put("search@$revision",it) } })
     val policy: NetworkPolicy
     private var model: JSONObject? = null
+    @Volatile private var modelStatusCache="模型未配置"
+    @Volatile private var modelLabelCache="添加模型"
     private val prepared = mutableMapOf<String, Prepared>()
     private data class Prepared(val e: Envelope, val args: Map<String, Any?>, val fingerprint: String,
         val approvalId: String?, val approved: CompletableFuture<Boolean>, val approval: Approval?, val summary: String)
@@ -111,6 +116,11 @@ class ProductHost private constructor(private val context: Context, private val 
     private val probeConsumerClosed=java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     private val probeCompleted = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     fun auditHttp(start: dev.thor.bridge.HttpStart,event: dev.thor.bridge.HttpEvent) {
+        runMetrics[start.envelope.binding.runId]?.let {metrics ->
+            val elapsed=clock.now()-(metrics["beginElapsedRealtime"] ?: clock.now())
+            if(event is dev.thor.bridge.HttpEvent.Head)metrics.putIfAbsent("responseHeadersMs",elapsed)
+            if(event is dev.thor.bridge.HttpEvent.Chunk && event.bytes.isNotEmpty())metrics.putIfAbsent("firstResponseBytesMs",elapsed)
+        }
         if(start.envelope.purpose != Purpose.configuration_test || start.envelope.binding.runId != probeRun)return
         when(event) {
             is dev.thor.bridge.HttpEvent.Head -> probeHeads[event.requestId]=event.status
@@ -134,6 +144,12 @@ class ProductHost private constructor(private val context: Context, private val 
         for (s in rows("sessions")) authority.restoreSession(s.getString("id"), enabled(s), s.optLong("capabilityEpoch", 1).coerceAtLeast(1))
         if (rows("sessions").isEmpty()) newSession()
         if (rows("sessions").none { it.getString("id") == state.optString("selected") && it.isNull("archivedAt") }) state.put("selected", rows("sessions").first().getString("id"))
+        val probeRunIds=rows("runs").filter {it.optBoolean("probe")}.map {it.getString("id")}.toSet()
+        val firstPrompts=linkedMapOf<String,String>()
+        for(message in rows("messages"))if(message.optString("role")=="user" && message.optString("runId") !in probeRunIds)
+            firstPrompts.putIfAbsent(message.getString("sessionId"),message.optString("text"))
+        for(s in rows("sessions"))if(s.optString("title") in setOf("","新会话"))firstPrompts[s.getString("id")]?.let {s.put("title",promptTitle(it))}
+        updateDisplays()
         persist()
         val profiles = mutableListOf<NetworkProfile>()
         try {
@@ -169,6 +185,7 @@ class ProductHost private constructor(private val context: Context, private val 
         policy = NetworkPolicy(profiles, redactor)
         ThorAccessibilityService.invalidated = { revokeResources() }
         displayManager.registerDisplayListener(displayListener,android.os.Handler(android.os.Looper.getMainLooper()))
+        refreshModelSummary()
     }
     private fun backupKey(): SecretKey {
         val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }; val alias = "thor-product-backups-v1"
@@ -212,9 +229,9 @@ class ProductHost private constructor(private val context: Context, private val 
         val remaining=authority.remainingLeaseMs(b)
         return if(remaining>9_007_199_254_740_991L-System.currentTimeMillis())9_007_199_254_740_991L else System.currentTimeMillis()+remaining
     }
-    private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null) { try {
+    private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null, sessionsOnly:Boolean=false) { try {
         for(s in rows("sessions")) {s.put("capabilityEpoch",authority.sessionEpoch(s.getString("id")));val granted=authority.sessionEnabled(s.getString("id"));for((name,cap) in capNames)s.getJSONObject("capabilities").put(name,cap in granted)}
-        if(currentRun==null)store.save(state) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
+        if(sessionsOnly)store.saveSessionUpdate(state) else if(currentRun==null)store.save(state) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
     private fun newSession(): String {
         val previous=rows("sessions").singleOrNull {it.getString("id")==state.optString("selected")}
         val caps=previous?.getJSONObject("capabilities")?.let {JSONObject(it.toString())} ?: obj("perception" to true,"search" to true,"screen_control" to false,"debug" to false)
@@ -244,7 +261,9 @@ class ProductHost private constructor(private val context: Context, private val 
                     "view" -> view()
                     "profile.check" -> {
                         val sid=data.getString("sessionId");val p=selectedProfile(session(sid))
-                        if(profilePassed(p))obj("probeNeeded" to false) else obj("probeNeeded" to true,"token" to requestProbe())
+                        obj("probeNeeded" to !profilePassed(p),"profileKey" to probeKey(p)).apply {
+                            if(!profilePassed(p) && !data.optBoolean("checkOnly"))put("token",requestProbe())
+                        }
                     }
                     "ui" -> ui(c, data)
                     "begin" -> begin(c, data)
@@ -255,7 +274,7 @@ class ProductHost private constructor(private val context: Context, private val 
                         val b=bound(c,data);val request=data.getString("requestId");val p=prepared[request]
                         if(p!=null) {require(p.e.runId==b.runId && p.e.toolCallId==data.getString("toolCallId"));p.approved.complete(false)}
                         deviceAuthority.cancelTool(b.runId,request)
-                        if(p?.approvalId!=null && run(b.runId).optJSONObject("approval")?.optString("id")==p.approvalId) {run(b.runId).getJSONObject("approval").put("status","cancelled");persist();publish()}
+                        if(p?.approvalId!=null && run(b.runId).optJSONObject("approval")?.optString("id")==p.approvalId) {run(b.runId).getJSONObject("approval").put("status","cancelled");persist(run(b.runId));publish()}
                         obj()
                     }
                     "persist" -> save(c, data)
@@ -281,6 +300,7 @@ class ProductHost private constructor(private val context: Context, private val 
         return future
     }
     private fun begin(c: String, d: JSONObject): JSONObject {
+        val began=clock.now()
         require(prefs.getInt("revision",-1)==revision);lastError=null; val sid = d.getString("sessionId"); val s = session(sid); require(s.isNull("archivedAt"))
         val profile = selectedProfile(s)
         val probe = d.optString("probeToken").isNotEmpty() && d.optString("probeToken") == probeToken
@@ -291,27 +311,32 @@ class ProductHost private constructor(private val context: Context, private val 
         val pendingImages=if(probe)JSONArray() else s.optJSONArray("pendingAttachments") ?: JSONArray()
         val text=if(probe && !supportsImages(profile))"Configuration probe: text-only model. Call probe_picture once, read its returned text, then answer PROBE_OK." else d.getString("text"); require(text.isNotBlank() && text.length <= 8000)
         val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } },durationMs=if(probe)180_000 else 0)
-        bindings[b.runId]=b;scopes[b.runId]=RunScope(profile);deviceAuthority.bind(b);if(probe)probeRun=b.runId
+        bindings[b.runId]=b;scopes[b.runId]=RunScope(profile);runMetrics[b.runId]=java.util.concurrent.ConcurrentHashMap<String,Long>().apply {put("beginElapsedRealtime",began)};deviceAuthority.bind(b);if(probe)probeRun=b.runId
         val r = obj("id" to b.runId, "sessionId" to sid, "status" to "queued", "expanded" to false, "startedAt" to System.currentTimeMillis(), "probe" to probe,
             "modelId" to profile.getString("modelId"),"thinkingEffort" to profile.getString("thinkingEffort"),"contextWindow" to profile.getInt("contextWindow"),"modelProfileRevision" to revision, "capabilityEpoch" to b.capabilityEpoch, "contexts" to JSONArray())
         state.getJSONArray("runs").put(r)
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "user", "text" to text, "attachments" to pendingImages, "status" to "complete"))
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "assistant", "text" to "", "attachments" to JSONArray(), "status" to "streaming"))
-        if(!probe)s.put("pendingAttachments",JSONArray()); persist(); publish()
+        if(!probe) {
+            s.put("pendingAttachments",JSONArray()).put("updatedAt",System.currentTimeMillis())
+            if(s.optString("title") in setOf("","新会话"))s.put("title",promptTitle(text))
+        }
         val input=JSONArray().put(obj("type" to "text","text" to text))
         if(probe && supportsImages(profile))input.put(obj("type" to "attachment","attachmentId" to addProbeImage(b))) else if(!probe)for(i in 0 until pendingImages.length())input.put(obj("type" to "attachment","attachmentId" to pendingImages.getString(i)))
-        r.put("turn",obj("turnId" to id(),"runId" to b.runId,"messages" to JSONArray().put(obj("kind" to "user","content" to input)),"source" to JSONArray(if(dev.thor.bridge.Capability.screen_perception in enabled(s))listOf("screen_perception") else emptyList<String>()),"observedAt" to System.currentTimeMillis(),"complete" to false));persist()
+        r.put("turn",obj("turnId" to id(),"runId" to b.runId,"messages" to JSONArray().put(obj("kind" to "user","content" to input)),"source" to JSONArray(if(dev.thor.bridge.Capability.screen_perception in enabled(s))listOf("screen_perception") else emptyList<String>()),"observedAt" to System.currentTimeMillis(),"complete" to false));persist(r);publish()
+        runMetrics[b.runId]?.put("nativePrepareMs",clock.now()-began)
         val ttl = authority.remainingLeaseMs(b)
+        val historyEvents=eventIndex.sessionEvents(state.getJSONArray("events"),sid).groupBy {it.getString("runId")}
         return obj("runTimeoutMs" to if(probe)180_000 else 0,"lease" to obj("sessionId" to sid, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to leaseWallDeadline(b)),
             "network" to obj("binding" to bindingJson(b), "purpose" to if(probe) "configuration_test" else "model", "profileRef" to profile.getString("profileId"), "credentialRef" to credentialRef, "deadlineMs" to if(probe)clock.now()+ttl else 9_007_199_254_740_991L, "timeoutMs" to if(probe)ttl else 0),
-            "history" to JSONArray(rows("runs").filter { it.getString("sessionId") == sid && it.getString("id") != b.runId && it.has("turn") && !it.optBoolean("probe") }.map { previous -> recoverTurnHistory(previous.getJSONObject("turn"),rows("events").filter {it.getString("runId")==previous.getString("id")}) }),
+            "history" to JSONArray(rows("runs").filter { it.getString("sessionId") == sid && it.getString("id") != b.runId && it.has("turn") && !it.optBoolean("probe") }.map { previous -> recoverTurnHistory(previous.getJSONObject("turn"),historyEvents[previous.getString("id")].orEmpty()) }),
             "input" to input)
     }
     private fun bindingJson(b: Binding) = obj("sessionId" to b.sessionId, "runId" to b.runId, "lease" to b.lease, "connectionId" to b.connectionId, "capabilityEpoch" to b.capabilityEpoch)
     private fun authoritySnapshot(b:Binding,refresh: Boolean): JSONObject {
-        val scope=scope(b);authority.validate(b);require(prefs.getInt("revision",-1)==revision)
+        val scope=scope(b);runMetrics[b.runId]?.let {it.putIfAbsent("firstAuthorityMs",clock.now()-it.getValue("beginElapsedRealtime"))};authority.validate(b);require(prefs.getInt("revision",-1)==revision)
         var snapshot=scope.snapshot;var pendingPerceptionSnapshot=scope.pendingPerceptionSnapshot
-        snapshots.update(displayFacts(context))
+        updateDisplays()
         if (refresh || snapshot == null) {
             // Preserve a valid frame/snapshot identity across model requests; changed/expired resources get a new identity.
             snapshot = pendingPerceptionSnapshot?.let { fresh -> runCatching { snapshots.validate(fresh.id) }.getOrNull() }
@@ -323,7 +348,8 @@ class ProductHost private constructor(private val context: Context, private val 
         for (t in ToolPack.descriptors.values) {
             var a = backend.availability(t.toolId)
             if(b.runId == probeRun) a = a.copy(status = Status.BACKEND_MISSING, reason = "配置探测不发布设备工具")
-            if (t.targetRequired && (snapshot == null || t.effect == Effect.INPUT && snapshot?.target?.validity != "valid")) a = a.copy(status = Status.TEMPORARILY_UNAVAILABLE, reason = "先校准上下屏")
+            if(t.targetRequired && snapshot==null)a=a.copy(status=Status.TEMPORARILY_UNAVAILABLE,reason="无法确定上下屏，请在设备设置确认映射")
+            else if(t.targetRequired && t.effect==Effect.INPUT && snapshot?.target?.validity!="valid")a=a.copy(status=Status.TEMPORARILY_UNAVAILABLE,reason="上屏应用无法唯一确定，请重新观察")
             available.put(t.toolId, obj("status" to a.status.name.lowercase(), "reason" to a.reason))
             if (a.status == Status.READY && dev.thor.bridge.Capability.valueOf(t.capability.name.lowercase()) in authority.enabled(b)) allowed.add(t.toolId)
         }
@@ -395,7 +421,7 @@ class ProductHost private constructor(private val context: Context, private val 
             })
             prepared[e.requestId]=p
             if(write)run(e.runId).put("approval",obj("id" to p.approvalId,"requestId" to e.requestId,"summary" to "Skill 变更：\n${p.summary}","status" to "pending")) else p.approved.complete(true)
-            persist();publish();return obj("awaiting" to write,"approvalId" to p.approvalId)
+            persist(run(e.runId));publish();return obj("awaiting" to write,"approvalId" to p.approvalId)
         }
         deviceAuthority.validate(e); schemas.validate(e.toolId, args)
         require(redactor.redact(j.getJSONObject("arguments").toString()) == j.getJSONObject("arguments").toString())
@@ -432,7 +458,7 @@ class ProductHost private constructor(private val context: Context, private val 
         prepared[e.requestId] = p
         if(!needsApproval) p.approved.complete(true)
         if(needsApproval) run(e.runId).put("approval", obj("id" to p.approvalId, "requestId" to e.requestId, "summary" to redactor.redact(summary), "status" to "pending"))
-        persist(); publish(); return obj("awaiting" to needsApproval, "approvalId" to p.approvalId)
+        persist(run(e.runId)); publish(); return obj("awaiting" to needsApproval, "approvalId" to p.approvalId)
     }
     private fun networkTool(c: String,j: JSONObject): JSONObject {
         val b = bound(c,j); val e = toolEnvelope(c,j); require(e.toolId in setOf("web.search","web.fetch") && dev.thor.bridge.Capability.web_search in authority.enabled(b))
@@ -484,7 +510,7 @@ class ProductHost private constructor(private val context: Context, private val 
                 serial.execute {
                     try {
                         bound(c, j)
-                        val freshObservation=if(e.toolId=="perception.capture_screen" && result.error==null)snapshots.validate(result.snapshotId) else null
+                        val freshObservation=if(e.toolId in ToolPack.freshReads && result.error==null)snapshots.validate(result.snapshotId) else null
                         val data = result.data.toMutableMap(); val content = JSONArray()
                         val path = data.remove("attachmentRef") as? String
                         if(path != null && result.error == null) {
@@ -532,7 +558,7 @@ class ProductHost private constructor(private val context: Context, private val 
             "event", "commit" -> {
                 val event = if(kind == "commit") d.getJSONObject("event") else value
                 require(event.getString("sessionId") == b.sessionId && event.getString("runId") == b.runId)
-                val sequence = rows("events").count { it.getString("runId") == b.runId } + 1
+                val sequence = eventIndex.runEventCount(state.getJSONArray("events"),b.runId) + 1
                 require(event.getInt("sequence") == sequence)
                 val copy = JSONObject(event.toString()).put("id", event.getString("eventId")).put("summary", eventSummary(event))
                 for(key in listOf("toolId","outcome","error")) if(event.getJSONObject("data").has(key))copy.put(key,event.getJSONObject("data").get(key))
@@ -547,6 +573,10 @@ class ProductHost private constructor(private val context: Context, private val 
             "context" -> { require(value.getInt("modelProfileRevision") == revision && value.getLong("capabilityEpoch") == b.capabilityEpoch); require(value.getJSONArray("effectiveTools").let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } == scope(b).publishedTools); r.getJSONArray("contexts").put(value) }
             "turn" -> { require(value.getString("runId") == b.runId); r.put("turn", value) }
             else -> error("Unsupported persistence method")
+        }
+        runMetrics[b.runId]?.let {metrics ->
+            if(appendedEvent?.optString("type")=="text_delta")metrics.putIfAbsent("firstVisibleTextMs",clock.now()-metrics.getValue("beginElapsedRealtime"))
+            r.put("timings",JSONObject(metrics.toMap()))
         }
         persist(r,appendedEvent); publish(); return obj()
     }
@@ -567,7 +597,8 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         authority.stopRun(b.runId);deviceAuthority.stop(b.runId);backend.release(b.runId);prepared.values.filter {it.e.runId==b.runId}.forEach {it.approved.complete(false)};prepared.entries.removeAll {it.value.e.runId==b.runId};bindings.remove(b.runId);scopes.remove(b.runId);if(probeRun==b.runId)probeRun=null
         rows("messages").filter { it.getString("runId") == b.runId }.forEach { it.put("status", "complete") }
-        persist(); publish(); return obj()
+        runMetrics.remove(b.runId)?.let {r.put("timings",JSONObject(it.toMap()))}
+        persist(r); publish(); return obj()
     }
     private fun ui(c: String, d: JSONObject): JSONObject {
         when(d.getString("op")) {
@@ -581,12 +612,12 @@ class ProductHost private constructor(private val context: Context, private val 
                 if(d.has("modelId")) {require(modelChoices().objects().any {it.getString("id")==d.getString("modelId")});s.put("modelId",d.getString("modelId"));s.remove("thinkingEffort")}
                 if(d.has("thinkingEffort")) {val p=selectedProfile(s,false);require((0 until p.getJSONArray("efforts").length()).any {p.getJSONArray("efforts").getString(it)==d.getString("thinkingEffort")});s.put("thinkingEffort",d.getString("thinkingEffort"))}
                 if(d.has("selectedSkills")) {val names=d.getJSONArray("selectedSkills");require(names.length()<=128);val known=skills.catalog().objects().map {it.getString("name")}.toSet();require((0 until names.length()).all {names.getString(it) in known});s.put("selectedSkills",JSONArray(names.toString()))}
-                persist()
+                persist(sessionsOnly=true)
             }
-            "new" -> { newSession(); persist() }
-            "select" -> { require(session(d.getString("sessionId")).isNull("archivedAt")); state.put("selected", d.getString("sessionId")); persist() }
-            "rename" -> { val title = d.getString("title"); require(title.isNotBlank() && title.length <= 80); session(d.getString("sessionId")).put("title", title); persist() }
-            "expanded" -> { run(d.getString("runId")).put("expanded", d.getBoolean("expanded")); persist() }
+            "new" -> { newSession(); persist(sessionsOnly=true) }
+            "select" -> { require(session(d.getString("sessionId")).isNull("archivedAt")); state.put("selected", d.getString("sessionId")); persist(sessionsOnly=true) }
+            "rename" -> { val title = d.getString("title"); require(title.isNotBlank() && title.length <= 80); session(d.getString("sessionId")).put("title", title); persist(sessionsOnly=true) }
+            "expanded" -> { run(d.getString("runId")).put("expanded", d.getBoolean("expanded")); persist(run(d.getString("runId"))) }
             "archive", "delete" -> {
                 val sid = d.getString("sessionId"); require(bindings.values.none {it.sessionId==sid})
                 if(d.getString("op") == "archive") session(sid).put("archivedAt", if(d.getBoolean("archived")) System.currentTimeMillis() else JSONObject.NULL)
@@ -607,7 +638,7 @@ class ProductHost private constructor(private val context: Context, private val 
                 require(!p.approved.isDone && clock.now() < p.e.deadline)
                 if(p.e.toolId !in skillToolIds)deviceAuthority.validate(p.e)
                 run(b.runId).getJSONObject("approval").put("status", if(d.getString("op") == "approve") "approved" else "rejected")
-                persist(); p.approved.complete(d.getString("op") == "approve")
+                persist(run(b.runId)); p.approved.complete(d.getString("op") == "approve")
             }
             else -> error("Unsupported UI command")
         }
@@ -620,7 +651,21 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     fun interrupt(reason:String) {if(closing)return;runCatching {serial.execute {stop(reason);bindings.values.forEach {b->run(b.runId).takeIf {it.optString("status") !in terminal}?.put("status","interrupted")};persist();bindings.clear();scopes.clear();connection=null;publish()}}}
     private fun revokeResources() {if(closing)return;runCatching {serial.execute {bindings.values.toList().forEach {authority.invalidateResources(it.sessionId);stop("系统授权或后端失效",it.runId)};persist();publish()}}}
-    fun calibrate(upper: Int, lower: Int) { snapshots.update(displayFacts(context)); snapshots.calibrate(upper, lower); revokeResources() }
+    private fun updateDisplays() {
+        val facts=displayFacts(context);snapshots.update(facts)
+        if(runCatching {snapshots.selected()}.isFailure)roles.resolve(facts)?.let {(upper,lower)->snapshots.calibrate(upper.id,lower.id)}
+    }
+    private fun refreshModelSummary() {
+        val selected=selectedProfile(session(state.getString("selected")),false)
+        modelLabelCache=selected.optString("label","添加模型")
+        modelStatusCache=if(model==null)"模型未配置" else if(profilePassed(selected))"连接已通过" else "未测试；可在模型设置测试连接"
+    }
+    fun modelStatus():String=modelStatusCache
+    fun modelLabel():String=modelLabelCache
+    fun calibrate(upper: Int, lower: Int) {
+        val facts=displayFacts(context);snapshots.update(facts);snapshots.calibrate(upper,lower)
+        roles.save(facts.single {it.id==upper},facts.single {it.id==lower});revokeResources()
+    }
     fun bindDebug() = debug.requestAndBind()
     fun accessibilitySetupStatus() = debug.accessibilitySetup
     fun requestProbe(): String { require(probeRun==null && model != null); val token = id(); probeToken = token; return token }
@@ -694,17 +739,18 @@ class ProductHost private constructor(private val context: Context, private val 
         return obj("action" to tool,"name" to name,"enabled" to args.optBoolean("enabled"),"expectedHash" to hash)
     }
     fun view(): JSONObject {
+        refreshModelSummary()
         val selectedBinding=bindings.values.find {it.sessionId==state.optString("selected")}
-        val v = chatSnapshot(state,selectedBinding?.runId)
+        val v = chatSnapshot(state,selectedBinding?.runId,eventIndex.sessionEvents(state.getJSONArray("events"),state.getString("selected")))
         if(storageFailed)v.put("fatal","本地存储失败；已停止网络和设备执行。历史保留；失败的变更未保存，重新打开将恢复上次已保存的开关。修复存储后重开，不会重放副作用。")
-        v.put("availability", obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else "需校准显示；按工具检查",
-            "search" to if(searchConfigured) "Brave 搜索已配置；HTTP/HTTPS 网页读取可用" else "搜索未配置；HTTP/HTTPS 网页读取可用", "screen_control" to "触摸需校准/无障碍；手柄 unsupported", "debug" to "Shell: ${debug.availability().reason}；白名单常用调整直接执行，灰名单逐项确认；文件仅合成目录"))
+        v.put("availability", obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else if(runCatching {snapshots.selected()}.isSuccess)"上屏已识别；按工具检查" else "请在设备设置确认上下屏",
+            "search" to if(searchConfigured) "Brave 搜索已配置；HTTP/HTTPS 网页读取可用" else "搜索未配置；HTTP/HTTPS 网页读取可用", "screen_control" to "触摸需上屏识别和无障碍；手柄需 Shizuku 与兼容控制器", "debug" to "Shell: ${debug.availability().reason}；白名单常用调整直接执行，灰名单逐项确认；文件仅合成目录"))
         v.put("skills",skills.catalog()).put("skillDetail",skillDetail ?: JSONObject.NULL)
         v.put("activeRunId",selectedBinding?.runId ?: JSONObject.NULL)
         v.put("activeRuns",JSONArray(bindings.values.map {b->obj("id" to b.runId,"sessionId" to b.sessionId,"status" to run(b.runId).optString("status").let {if(it in terminal)"stopping" else it},"stopReason" to run(b.runId).optString("stopReason"))}))
         v.put("modelChoices",modelChoices()).put("modelSelection",selectedProfile(session(state.getString("selected")),false))
         v.put("error", lastError ?: JSONObject.NULL)
-        v.put("modelStatus", if(model==null)"模型未配置" else if(profilePassed(selectedProfile(session(state.getString("selected")),false)))"连接已通过" else "首次使用时自动检查连接")
+        v.put("modelStatus", modelStatus())
         return v
     }
     private fun publish() = notify(view())

@@ -1,0 +1,666 @@
+{
+  "schemaVersion": 1,
+  "authority": "ManualTestAuthority: native component only; no cloud model or product-authority Run",
+  "evidenceMode": "manual_platform_api",
+  "agentE2E": false,
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "clockIds": {
+    "senderInputAndStop": "android_uptime_ms",
+    "toolObservedAt": "android_elapsed_realtime_ms"
+  },
+  "cases": [
+    {
+      "name": "button",
+      "toolId": "input.press_button",
+      "arguments": {
+        "button": "A",
+        "phase": "hold",
+        "durationMs": 200
+      },
+      "cancelAfterSubmissionMs": null,
+      "passed": true,
+      "focusDiagnostics": [
+        {
+          "observedUptimeMs": 338404881,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338405147,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338405402,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338407174,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "after-arm-before-submit"
+        }
+      ],
+      "focusVerifiedBeforeArm": true,
+      "labForegroundLaunchCount": 1,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native gamepad submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-evdev\/odin-buttons"
+      },
+      "manualRunId": "ae9568a6-48f9-447e-97f9-02121377aa27",
+      "stableSnapshotId": "39bb2bb8-e7a9-4f2b-962a-b451b8d71fd6",
+      "stableTargetRevision": "4757:1:0:true:false:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):4",
+      "callStartedUptimeMs": 338407176,
+      "callFinishedUptimeMs": 338407753,
+      "sender": {
+        "error": null,
+        "message": null,
+        "outcome": "submitted",
+        "backend": "shizuku-evdev\/odin-buttons",
+        "availability": "READY",
+        "data": {
+          "submitted": true,
+          "released": true,
+          "button": "A",
+          "axes": {},
+          "durationMs": 200,
+          "deviceId": 30,
+          "deviceName": "Odin Controller",
+          "displayId": 0,
+          "source": 1025,
+          "backend": "shizuku-evdev\/odin-buttons",
+          "displayRouting": "verified-focused-physical-controller; no displayId injection",
+          "receiverVerified": false,
+          "delivery": "Kernel evdev frame written; receiver must independently confirm",
+          "releaseGuarantee": "bounded-service-watchdog; service-process-SIGKILL-cannot-guarantee-release",
+          "complete": true,
+          "displayRole": "upper"
+        },
+        "observedAtElapsedRealtimeMs": 668787603
+      },
+      "attemptId": "53f28f14-071f-40cb-b890-bb80ea64ed05",
+      "receiverStatus": "pass",
+      "rawBytes": 36047,
+      "eventPrefixBytes": 36047,
+      "eventPrefixSha256": "14a9da6485d857ae77f57ac3a9690481d606fd0ba17902300537fad4fa5626c6",
+      "receiverDeviceId": 30,
+      "rawInputCount": 2,
+      "receiverSources": [
+        1281
+      ],
+      "receiverDeviceName": "Odin Controller",
+      "receiverIsVirtual": false,
+      "senderDeclaredDeviceId": 30,
+      "receiverHoldMs": 200
+    },
+    {
+      "name": "axes",
+      "toolId": "input.set_axes",
+      "arguments": {
+        "axes": {
+          "X": 1,
+          "Y": -1,
+          "Z": 1,
+          "RZ": -1,
+          "BRAKE": 1,
+          "GAS": 1
+        },
+        "durationMs": 300
+      },
+      "cancelAfterSubmissionMs": null,
+      "passed": true,
+      "focusDiagnostics": [
+        {
+          "observedUptimeMs": 338417170,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338417418,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338417670,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338417925,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338419686,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "after-arm-before-submit"
+        }
+      ],
+      "focusVerifiedBeforeArm": true,
+      "labForegroundLaunchCount": 1,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native joystick submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-evdev\/odin-six-axes"
+      },
+      "manualRunId": "629c8ef4-c446-4ff2-9010-d7b0cae4e3fa",
+      "stableSnapshotId": "da0c2151-c4b9-44a5-8008-bd3aeb88bd7f",
+      "stableTargetRevision": "4757:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):13",
+      "callStartedUptimeMs": 338419686,
+      "callFinishedUptimeMs": 338420368,
+      "sender": {
+        "error": null,
+        "message": null,
+        "outcome": "submitted",
+        "backend": "shizuku-evdev\/odin-six-axes",
+        "availability": "READY",
+        "data": {
+          "submitted": true,
+          "released": true,
+          "button": null,
+          "axes": {
+            "X": 1,
+            "Y": -1,
+            "Z": 1,
+            "RZ": -1,
+            "BRAKE": 1,
+            "GAS": 1
+          },
+          "durationMs": 300,
+          "deviceId": 30,
+          "deviceName": "Odin Controller",
+          "displayId": 0,
+          "source": 16777232,
+          "backend": "shizuku-evdev\/odin-six-axes",
+          "displayRouting": "verified-focused-physical-controller; no displayId injection",
+          "receiverVerified": false,
+          "delivery": "Kernel evdev frame written; receiver must independently confirm",
+          "releaseGuarantee": "bounded-service-watchdog; service-process-SIGKILL-cannot-guarantee-release",
+          "complete": true,
+          "displayRole": "upper"
+        },
+        "observedAtElapsedRealtimeMs": 668800218
+      },
+      "attemptId": "ed784f37-9223-4183-93f1-c4119389b36f",
+      "receiverStatus": "pass",
+      "rawBytes": 38339,
+      "eventPrefixBytes": 38339,
+      "eventPrefixSha256": "7b4688fdecd8dd9d6c57c1810297570171bca821b8e3d18f1c460081e07153b4",
+      "receiverDeviceId": 30,
+      "rawInputCount": 2,
+      "receiverSources": [
+        16777232
+      ],
+      "receiverDeviceName": "Odin Controller",
+      "receiverIsVirtual": false,
+      "senderDeclaredDeviceId": 30,
+      "axes": [
+        {
+          "axisId": 0,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 1,
+          "observedMin": -1,
+          "observedMax": 0,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 11,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 14,
+          "observedMin": -1,
+          "observedMax": 0,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 23,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.05
+        },
+        {
+          "axisId": 22,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.05
+        }
+      ],
+      "motionSampleCount": 2
+    },
+    {
+      "name": "button-cancel",
+      "toolId": "input.press_button",
+      "arguments": {
+        "button": "A",
+        "phase": "hold",
+        "durationMs": 3000
+      },
+      "cancelAfterSubmissionMs": 100,
+      "passed": true,
+      "focusDiagnostics": [
+        {
+          "observedUptimeMs": 338429702,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338429957,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338430211,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338431975,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "after-arm-before-submit"
+        }
+      ],
+      "focusVerifiedBeforeArm": true,
+      "labForegroundLaunchCount": 1,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native gamepad submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-evdev\/odin-buttons"
+      },
+      "manualRunId": "18a1fac8-f406-4921-88ce-d92e237ea457",
+      "stableSnapshotId": "45b138d4-625b-4eff-a81d-03f85bfdb260",
+      "stableTargetRevision": "4757:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):23",
+      "callStartedUptimeMs": 338431975,
+      "submissionAcknowledgedUptimeMs": 338432331,
+      "cancelRequestedUptimeMs": 338432432,
+      "releaseReply": "observed: {\"data\":{\"released\":true,\"releaseAttempted\":true,\"releaseAcknowledged\":true,\"resourceClosed\":true,\"cleanupComplete\":true,\"cleanupError\":null,\"actionComplete\":true,\"actionStarted\":true}}; no gesture pending",
+      "cleanupAcknowledgedUptimeMs": 338432434,
+      "callFinishedUptimeMs": 338432455,
+      "sender": {
+        "error": "CANCELLED",
+        "message": "Run was stopped; committed effects cannot be undone",
+        "outcome": "unknown",
+        "backend": "shizuku-evdev\/odin-buttons",
+        "availability": "READY",
+        "data": {},
+        "observedAtElapsedRealtimeMs": 668812305
+      },
+      "attemptId": "ec2e14da-8248-47ba-905f-11081df282e4",
+      "receiverStatus": "pass",
+      "rawBytes": 36047,
+      "eventPrefixBytes": 36047,
+      "eventPrefixSha256": "c6aaa3113f7b119314fbdfa4708ce3c76b4cef0bad0bdaa4ef8b1cf9a6470db3",
+      "receiverDeviceId": 30,
+      "rawInputCount": 2,
+      "receiverSources": [
+        1281
+      ],
+      "receiverDeviceName": "Odin Controller",
+      "receiverIsVirtual": false,
+      "receiverHoldMs": 102
+    },
+    {
+      "name": "axes-cancel",
+      "toolId": "input.set_axes",
+      "arguments": {
+        "axes": {
+          "X": 1,
+          "Y": -1,
+          "Z": 1,
+          "RZ": -1,
+          "BRAKE": 1,
+          "GAS": 1
+        },
+        "durationMs": 3000
+      },
+      "cancelAfterSubmissionMs": 100,
+      "passed": true,
+      "focusDiagnostics": [
+        {
+          "observedUptimeMs": 338442054,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338442297,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338442538,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338442779,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "before-arm",
+          "launchCount": 1
+        },
+        {
+          "observedUptimeMs": 338444558,
+          "focusedDisplayId": 0,
+          "focusedWindow": "displayId=0, name='93358c1 dev.thor.inputlab\/dev.thor.inputlab.LabActivity'",
+          "matchesUpperLab": true,
+          "phase": "after-arm-before-submit"
+        }
+      ],
+      "focusVerifiedBeforeArm": true,
+      "labForegroundLaunchCount": 1,
+      "availability": {
+        "status": "READY",
+        "reason": "Odin Controller #30: bounded native joystick submission available; receiver delivery requires independent verification",
+        "backend": "shizuku-evdev\/odin-six-axes"
+      },
+      "manualRunId": "cd0b6291-2d47-44ea-8084-9cd593abea42",
+      "stableSnapshotId": "0ec43fd1-5c59-45f4-a13c-0f0e215e7a9e",
+      "stableTargetRevision": "4757:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):31",
+      "callStartedUptimeMs": 338444558,
+      "submissionAcknowledgedUptimeMs": 338444919,
+      "cancelRequestedUptimeMs": 338445020,
+      "releaseReply": "observed: {\"data\":{\"released\":true,\"releaseAttempted\":true,\"releaseAcknowledged\":true,\"resourceClosed\":true,\"cleanupComplete\":true,\"cleanupError\":null,\"actionComplete\":true,\"actionStarted\":true}}; no gesture pending",
+      "cleanupAcknowledgedUptimeMs": 338445023,
+      "callFinishedUptimeMs": 338445028,
+      "sender": {
+        "error": "CANCELLED",
+        "message": "Run was stopped; committed effects cannot be undone",
+        "outcome": "unknown",
+        "backend": "shizuku-evdev\/odin-six-axes",
+        "availability": "READY",
+        "data": {},
+        "observedAtElapsedRealtimeMs": 668824878
+      },
+      "attemptId": "b2ccdaf5-9493-476b-9030-56cdd5957764",
+      "receiverStatus": "pass",
+      "rawBytes": 38339,
+      "eventPrefixBytes": 38339,
+      "eventPrefixSha256": "1c9eadf92e1bbe5601ad98d3d82fe63190536c3f5b146c1d01851387b05417e2",
+      "receiverDeviceId": 30,
+      "rawInputCount": 2,
+      "receiverSources": [
+        16777232
+      ],
+      "receiverDeviceName": "Odin Controller",
+      "receiverIsVirtual": false,
+      "axes": [
+        {
+          "axisId": 0,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 1,
+          "observedMin": -1,
+          "observedMax": 0,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 11,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 14,
+          "observedMin": -1,
+          "observedMax": 0,
+          "finalValue": 0,
+          "neutralTolerance": 0.1
+        },
+        {
+          "axisId": 23,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.05
+        },
+        {
+          "axisId": 22,
+          "observedMin": 0,
+          "observedMax": 1,
+          "finalValue": 0,
+          "neutralTolerance": 0.05
+        }
+      ],
+      "motionSampleCount": 2
+    }
+  ],
+  "passed": true,
+  "controller": {
+    "deviceId": 30,
+    "deviceName": "Odin Controller",
+    "sources": 16778513,
+    "gamepad": true,
+    "joystick": true,
+    "axes": [
+      "X",
+      "Y",
+      "Z",
+      "RZ",
+      "GAS",
+      "BRAKE"
+    ],
+    "motionRanges": {
+      "X": {
+        "axisId": 0,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "Y": {
+        "axisId": 1,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "Z": {
+        "axisId": 11,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "RZ": {
+        "axisId": 14,
+        "min": -1,
+        "max": 1,
+        "flat": 4.5777764E-4,
+        "fuzz": 0
+      },
+      "BRAKE": {
+        "axisId": 23,
+        "min": 0,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      },
+      "GAS": {
+        "axisId": 22,
+        "min": 0,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      },
+      "HAT_X": {
+        "axisId": 15,
+        "min": -1,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      },
+      "HAT_Y": {
+        "axisId": 16,
+        "min": -1,
+        "max": 1,
+        "flat": 0,
+        "fuzz": 0
+      }
+    },
+    "buttons": [
+      "A",
+      "B",
+      "X",
+      "Y",
+      "L1",
+      "R1",
+      "L2",
+      "R2",
+      "START",
+      "SELECT",
+      "MODE",
+      "L3",
+      "R3",
+      "DPAD_UP",
+      "DPAD_DOWN",
+      "DPAD_LEFT",
+      "DPAD_RIGHT"
+    ],
+    "buttonBackend": "shizuku-evdev\/odin-buttons",
+    "axisBackend": {
+      "backend": "shizuku-evdev\/odin-gamepad",
+      "kernelNode": "\/dev\/input\/event9",
+      "kernelButtonsPressed": {
+        "A": false,
+        "B": false,
+        "X": false,
+        "Y": false,
+        "L1": false,
+        "R1": false,
+        "L2": false,
+        "R2": false,
+        "SELECT": false,
+        "START": false,
+        "MODE": false,
+        "L3": false,
+        "R3": false,
+        "DPAD_UP": false,
+        "DPAD_DOWN": false,
+        "DPAD_LEFT": false,
+        "DPAD_RIGHT": false
+      },
+      "kernelAxisRanges": {
+        "X": {
+          "code": 0,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "Y": {
+          "code": 1,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "Z": {
+          "code": 2,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "RZ": {
+          "code": 5,
+          "value": 0,
+          "min": -32767,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 15
+        },
+        "GAS": {
+          "code": 9,
+          "value": 0,
+          "min": 0,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 0
+        },
+        "BRAKE": {
+          "code": 10,
+          "value": 0,
+          "min": 0,
+          "max": 32767,
+          "neutral": 0,
+          "flat": 0
+        }
+      },
+      "displayRouting": "physical-controller-focus; not displayId injection"
+    },
+    "axisBackendError": null,
+    "evdevBackendError": null,
+    "receiverVerified": false,
+    "releaseGuarantee": "bounded-service-watchdog; service-process-SIGKILL-cannot-guarantee-release",
+    "availability": "ready"
+  }
+}

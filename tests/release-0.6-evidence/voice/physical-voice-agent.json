@@ -1,0 +1,105 @@
+{
+  "audioSource": "device-speaker-to-physical-microphone",
+  "uploadedAudio": true,
+  "ttsProvider": "Volcengine TTS",
+  "reference": "请只回复语音测试成功，不要使用任何工具。",
+  "events": [
+    {
+      "phase": "connecting",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "0db55536-a469-4c2e-800a-65d113087ade",
+      "sessionId": "527234d5-bc6f-433b-97e5-74c16e26b32f",
+      "at": 1792138238498
+    },
+    {
+      "phase": "recording",
+      "text": "",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "0db55536-a469-4c2e-800a-65d113087ade",
+      "sessionId": "527234d5-bc6f-433b-97e5-74c16e26b32f",
+      "at": 1792138238989
+    },
+    {
+      "phase": "recording",
+      "text": "请只回复语音测试成功，不要使用任何工具。",
+      "confirmed": "请只回复语音测试成功，不要使用任何工具。",
+      "error": null,
+      "submit": null,
+      "id": "0db55536-a469-4c2e-800a-65d113087ade",
+      "sessionId": "527234d5-bc6f-433b-97e5-74c16e26b32f",
+      "at": 1792138244848
+    },
+    {
+      "phase": "finalizing",
+      "text": "请只回复语音测试成功，不要使用任何工具。",
+      "confirmed": "",
+      "error": null,
+      "submit": null,
+      "id": "0db55536-a469-4c2e-800a-65d113087ade",
+      "sessionId": "527234d5-bc6f-433b-97e5-74c16e26b32f",
+      "at": 1792138246099
+    },
+    {
+      "phase": "complete",
+      "text": "请只回复语音测试成功，不要使用任何工具。",
+      "confirmed": "",
+      "error": null,
+      "submit": "请只回复语音测试成功，不要使用任何工具。",
+      "id": "0db55536-a469-4c2e-800a-65d113087ade",
+      "sessionId": "527234d5-bc6f-433b-97e5-74c16e26b32f",
+      "at": 1792138246253
+    }
+  ],
+  "runId": "cf5596ac-2a2d-4144-81e8-981715591e78",
+  "messages": [
+    {
+      "id": "1497805a-6e0a-47aa-9301-dc70fd5b7fde",
+      "sessionId": "527234d5-bc6f-433b-97e5-74c16e26b32f",
+      "runId": "cf5596ac-2a2d-4144-81e8-981715591e78",
+      "role": "user",
+      "text": "请只回复语音测试成功，不要使用任何工具。",
+      "attachments": [],
+      "status": "complete"
+    },
+    {
+      "id": "31f88761-10c5-49bb-90c6-ca435c569a29",
+      "sessionId": "527234d5-bc6f-433b-97e5-74c16e26b32f",
+      "runId": "cf5596ac-2a2d-4144-81e8-981715591e78",
+      "role": "assistant",
+      "text": "语音测试成功",
+      "attachments": [],
+      "status": "complete"
+    }
+  ],
+  "status": "completed",
+  "inputOrigin": "platform touchscreen; not synthetic DOM events",
+  "touchEvents": [
+    {
+      "type": "pointerdown",
+      "trusted": true,
+      "at": 1792138238457
+    },
+    {
+      "type": "pointerup",
+      "trusted": true,
+      "at": 1792138245963
+    },
+    {
+      "type": "pointerdown",
+      "trusted": true,
+      "at": 1792138251120
+    },
+    {
+      "type": "pointerup",
+      "trusted": true,
+      "at": 1792138254124
+    }
+  ],
+  "cancelDidNotSend": true,
+  "passed": true
+}

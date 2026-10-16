@@ -4,7 +4,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /** Presentation projection only. Durable history and model context remain in Native. */
-internal fun chatSnapshot(state:JSONObject,activeRunId:String?):JSONObject {
+internal fun chatSnapshot(state:JSONObject,activeRunId:String?,indexedEvents:List<JSONObject>?=null):JSONObject {
     val selected=state.optString("selected")
     fun visible(row:JSONObject)=row.optString("sessionId")==selected || activeRunId!=null && row.optString("runId",row.optString("id"))==activeRunId
     fun fields(row:JSONObject,excluded:Set<String>)=JSONObject().apply {row.keys().forEach {key->if(key !in excluded)put(key,row.get(key))}}
@@ -14,7 +14,7 @@ internal fun chatSnapshot(state:JSONObject,activeRunId:String?):JSONObject {
     // UI needs complete thought blocks and the latest parsed call, not every streaming fragment.
     // Keep the durable append-only ledger untouched for model history, audit and recovery.
     val events=mutableListOf<JSONObject>();val blocks=mutableMapOf<String,Pair<JSONObject,StringBuilder>>();val updates=mutableMapOf<String,Int>()
-    for(original in state.getJSONArray("events").objects().filter(::visible)) {
+    for(original in (indexedEvents ?: state.getJSONArray("events").objects()).filter(::visible)) {
         val type=original.optString("type");val run=original.optString("runId")
         if(type in setOf("text_delta","thinking_delta")) {
             val data=original.getJSONObject("data");val key="$run:$type:${data.optString("blockId")}";val previous=blocks[key]

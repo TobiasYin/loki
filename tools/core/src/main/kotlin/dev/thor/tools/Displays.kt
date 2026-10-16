@@ -16,11 +16,20 @@ object FullScreenGeometry {
         return root
     }
 }
-data class Target(val packageName: String?, val validity: String, val revision: String,val touchableBounds:TouchableBounds?=null) {
-    fun sameLayout(other:Target)=packageName==other.packageName && validity==other.validity && revision==other.revision && (touchableBounds==null)==(other.touchableBounds==null)
+data class Target(val packageName: String?, val validity: String, val revision: String,val touchableBounds:TouchableBounds?=null,
+    // Null preserves legacy/synthetic semantics, including copy(revision=...).
+    // Real Accessibility targets provide structure separately from content events.
+    val layoutRevision:String?=null) {
+    fun sameStructure(other:Target)=packageName==other.packageName && validity==other.validity && (layoutRevision ?: revision)==(other.layoutRevision ?: other.revision)
+    fun sameLayout(other:Target)=sameStructure(other) && revision==other.revision && (touchableBounds==null)==(other.touchableBounds==null)
 }
 data class Snapshot(val id: String, val display: DisplayFact, val displayEpoch: Long, val target: Target, val expires: Long)
 class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Target) {
+    companion object {
+        /** Resource freshness only, never a model-run timeout. Target/layout,
+         * display epoch and authorization are still checked on every use. */
+        const val OBSERVATION_TTL_MS=60_000L
+    }
     private var displays = emptyList<DisplayFact>()
     private var upper: DisplayFact? = null
     private var lower: DisplayFact? = null
@@ -44,7 +53,7 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
     @Synchronized fun selected(): DisplayFact = upper ?: fail(Code.DISPLAY_GONE, "Calibrate upper/lower displays first")
     @Synchronized fun capture(): Snapshot {
         val display = selected()
-        val snap = Snapshot(UUID.randomUUID().toString(), display, epoch, currentTarget(display.id), clock.now() + 10_000)
+        val snap = Snapshot(UUID.randomUUID().toString(), display, epoch, currentTarget(display.id), clock.now() + OBSERVATION_TTL_MS)
         if (snapshots.size >= 32) snapshots.remove(snapshots.keys.first())
         snapshots[snap.id] = snap
         return snap
@@ -54,6 +63,15 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
         requireTool(clock.now() < snap.expires && snap.displayEpoch == epoch && snap.display == upper,
             Code.TARGET_CHANGED, "Display snapshot expired/changed")
         requireTool(snap.target.sameLayout(currentTarget(snap.display.id)), Code.TARGET_CHANGED, "Upper windows/app/layout changed")
+        return snap
+    }
+    /** Only an already-submitted bounded hold may ignore its own content
+     * feedback. New inputs and perception still use strict validate(). */
+    @Synchronized fun validateHeld(id:String?):Snapshot {
+        val snap=snapshots[id] ?: fail(Code.TARGET_CHANGED,"Snapshot missing/invalidated")
+        requireTool(clock.now()<snap.expires && snap.displayEpoch==epoch && snap.display==upper,
+            Code.TARGET_CHANGED,"Display snapshot expired/changed")
+        requireTool(snap.target.sameStructure(currentTarget(snap.display.id)),Code.TARGET_CHANGED,"Upper windows/app/layout changed during held input")
         return snap
     }
     @Synchronized fun validateInputPoints(id:String?,points:List<Point>) {

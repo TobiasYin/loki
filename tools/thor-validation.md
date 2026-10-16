@@ -7,7 +7,7 @@
 1. 下屏打开 ToolPack，上屏启动用户明确的测试应用。人工核对两个 display ID、名字、几何/旋转和角色，拒绝单屏/同 ID 校准；重启、旋转、显示重建后重新确认。
 2. 下屏输入法显示/隐藏、聊天焦点变化和上屏弹窗状态下，分别调用 L0、app_info、window_info；核对包名、版本与实际上屏窗口。验证查版本不生成截图，未知/ambiguous 不取下屏包名。
 3. UI tree 测原生控件、密码字段、自绘 SurfaceView、null root 与预算；安全窗口截图拒绝，普通截图记录实际尺寸/region/缩放变换/rotation/frameId。
-4. 指定 display 的 tap/long_press/swipe，在 Input Lab 的真实接收日志中核对坐标/时间/target display。分别测 display_logical 与裁剪缩放后的 frame_pixels；变更包、布局、旋转、等 10s 后重用旧 frame，必须拒绝。
+4. 指定 display 的 tap/long_press/swipe，在 Input Lab 的真实接收日志中核对坐标/时间/target display。分别测 display_logical 与裁剪缩放后的 frame_pixels；变更包、布局、旋转、等 60s 后重用旧 frame，必须拒绝。
 5. 手势提交前撤销操作应零分发；提交后 STOP 必须阻止后续动作，报告系统已提交且即时取消不可确认；未收完成/取消回调时继续操作 unavailable。检查接收端，无接收证据不报告 injected/observed game effect。
 
 ## Shizuku / shell / config

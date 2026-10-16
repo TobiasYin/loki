@@ -1,0 +1,510 @@
+{
+  "upperDisplay": 0,
+  "chatDisplay": 4,
+  "model": "deepseek-v4.1-flash",
+  "remoteService": "live OpenCode Go Responses",
+  "attempts": [
+    {
+      "kind": "logical",
+      "runId": "710475eb-62a6-4ece-a7d1-d607351cae11",
+      "receiverStatus": "pass",
+      "attemptId": "060c67ab-b73d-43e7-8cc2-40bc1d65bb0d",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 668165832,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4724:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):5",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4724,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668171771,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4724:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):6",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4724,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668171884,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4724:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):7",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4724,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668189992,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4724:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):7",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4724,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": [
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792137879564,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": null,
+          "outcome": "submitted",
+          "evidenceRef": "native-event:710475eb-62a6-4ece-a7d1-d607351cae11:fcb97969-9d98-41a8-bc33-cb9585ee6f03",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ]
+        }
+      ],
+      "runStatus": "completed",
+      "timings": {
+        "beginElapsedRealtime": 668164525,
+        "firstVisibleTextMs": 10195,
+        "responseHeadersMs": 3826,
+        "firstResponseBytesMs": 3831,
+        "firstAuthorityMs": 1313,
+        "nativePrepareMs": 21
+      }
+    },
+    {
+      "kind": "frame",
+      "runId": "110259aa-bda8-4694-b92d-8378bd040622",
+      "receiverStatus": "pass",
+      "attemptId": "b7ed10cd-548d-4366-bb9e-0049ebba848b",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 668200523,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):19",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668217502,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):20",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668217616,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):21",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668238703,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):21",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668244821,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):21",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1079)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1079)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668247879,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):21",
+          "touchableBounds": "TouchableBounds(left=1, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(1, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668253917,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):21",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668259969,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4730:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):22",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4730,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": [
+        {
+          "toolId": "perception.app_info",
+          "observedAt": 1792137914454,
+          "source": "android-sdk\/accessibility",
+          "truncated": false,
+          "error": null,
+          "outcome": "observed",
+          "evidenceRef": "native-event:110259aa-bda8-4694-b92d-8378bd040622:c15fc6d1-01b2-49c2-b9ae-509275b2cdd7",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"package\":\"dev.thor.inputlab\",\"label\":\"Thor Input Lab\",\"versionName\":\"0.3.1\",\"longVersionCode\":4,\"firstInstallTime\":1791893924554,\"lastUpdateTime\":1792137082719,\"activity\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"671db07b-58b6-4086-8186-c737ead648ad\",\"targetSnapshotId\":\"df30c288-6c46-4d87-a2d1-6c356d9dd588\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+            }
+          ]
+        },
+        {
+          "toolId": "perception.capture_screen",
+          "observedAt": 1792137914920,
+          "source": "android-sdk\/accessibility",
+          "truncated": false,
+          "error": null,
+          "outcome": "observed",
+          "evidenceRef": "native-event:110259aa-bda8-4694-b92d-8378bd040622:1769f66e-1951-4051-8dfa-93e5ae524bec",
+          "content": [
+            {
+              "type": "attachment",
+              "attachmentId": "7e6adaef-d60a-4507-a041-de2423b7a95b"
+            },
+            {
+              "type": "text",
+              "text": "{\"displayRole\":\"upper\",\"displayId\":0,\"frameId\":\"c915f2b0-de7a-4b9b-8d0e-f6e6ee2032fa\",\"requestSnapshotId\":\"671db07b-58b6-4086-8186-c737ead648ad\",\"targetSnapshotId\":\"d652848f-5414-4519-b6cc-051789405083\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"touchableWindowBounds\":{\"left\":1,\"top\":0,\"right\":1920,\"bottom\":1079},\"mime\":\"image\\\/jpeg\",\"bytes\":47549,\"width\":1280,\"height\":720,\"quality\":80,\"rotation\":1,\"transform\":{\"left\":0,\"top\":0,\"displayWidth\":1920,\"displayHeight\":1080,\"imageWidth\":1280,\"imageHeight\":720},\"message\":null}"
+            }
+          ]
+        },
+        {
+          "toolId": "input.tap",
+          "observedAt": 1792137925306,
+          "source": "accessibility-dispatchGesture",
+          "truncated": false,
+          "error": null,
+          "outcome": "submitted",
+          "evidenceRef": "native-event:110259aa-bda8-4694-b92d-8378bd040622:2285fbdf-a941-4a03-b28c-8ce4ad93233a",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ]
+        }
+      ],
+      "freshFrameSnapshotId": "d652848f-5414-4519-b6cc-051789405083",
+      "runStatus": "completed",
+      "timings": {
+        "beginElapsedRealtime": 668199214,
+        "firstVisibleTextMs": 21634,
+        "responseHeadersMs": 4067,
+        "firstResponseBytesMs": 4077,
+        "firstAuthorityMs": 1315,
+        "nativePrepareMs": 20
+      }
+    },
+    {
+      "kind": "button",
+      "runId": "d1470de7-1445-4ced-b821-d687ada5ca85",
+      "receiverStatus": "pass",
+      "attemptId": "ec85032c-c972-4636-ad15-f6ad875ef200",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 668265336,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4735:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):33",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4735,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668273590,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4735:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):34",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4735,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668273703,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4735:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):35",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4735,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668273815,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4735:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):36",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4735,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": [
+        {
+          "toolId": "input.press_button",
+          "observedAt": 1792137981559,
+          "source": "shizuku-evdev\/odin-buttons",
+          "truncated": false,
+          "error": null,
+          "outcome": "submitted",
+          "evidenceRef": "native-event:d1470de7-1445-4ced-b821-d687ada5ca85:024493f4-f9ab-4666-9a30-e400db6245b9",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"released\":true,\"button\":\"A\",\"axes\":{},\"durationMs\":200,\"deviceId\":30,\"deviceName\":\"Odin Controller\",\"displayId\":0,\"source\":1025,\"backend\":\"shizuku-evdev\\\/odin-buttons\",\"displayRouting\":\"verified-focused-physical-controller; no displayId injection\",\"receiverVerified\":false,\"delivery\":\"Kernel evdev frame written; receiver must independently confirm\",\"releaseGuarantee\":\"bounded-service-watchdog; service-process-SIGKILL-cannot-guarantee-release\",\"complete\":true,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ]
+        }
+      ],
+      "runStatus": "completed",
+      "timings": {
+        "beginElapsedRealtime": 668264020,
+        "firstVisibleTextMs": 12887,
+        "responseHeadersMs": 3946,
+        "firstResponseBytesMs": 3955,
+        "firstAuthorityMs": 1331,
+        "nativePrepareMs": 19
+      }
+    },
+    {
+      "kind": "axes",
+      "runId": "2bd83a0c-6abb-4d59-ac19-03410e5087a7",
+      "receiverStatus": "pass",
+      "attemptId": "b8c7df25-af97-4179-8918-079805e3dee5",
+      "targets": [
+        {
+          "elapsedRealtimeMs": 668285243,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4738:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):48",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4738,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668294294,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4738:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):49",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4738,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668294408,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4738:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):50",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4738,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668294629,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4738:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):51",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4738,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668294745,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4738:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):52",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4738,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        },
+        {
+          "elapsedRealtimeMs": 668299735,
+          "packageName": "dev.thor.inputlab",
+          "validity": "valid",
+          "revision": "4738:1:0:true:true:root-layout:TouchableBounds(left=0, top=0, right=1920, bottom=1080):root:TouchableBounds(left=0, top=0, right=1920, bottom=1080):53",
+          "touchableBounds": "TouchableBounds(left=0, top=0, right=1920, bottom=1080)",
+          "geometry": [
+            {
+              "windowId": 4738,
+              "type": 1,
+              "bounds": "Rect(0, 0 - 1920, 1080)",
+              "rootBounds": "Rect(0, 0 - 1920, 1080)"
+            }
+          ]
+        }
+      ],
+      "results": [
+        {
+          "toolId": "input.set_axes",
+          "observedAt": 1792138002419,
+          "source": "shizuku-evdev\/odin-six-axes",
+          "truncated": false,
+          "error": null,
+          "outcome": "submitted",
+          "evidenceRef": "native-event:2bd83a0c-6abb-4d59-ac19-03410e5087a7:0e697b52-7cea-4f63-9af8-c27b188ed17e",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"submitted\":true,\"released\":true,\"button\":null,\"axes\":{\"X\":1,\"Y\":-1,\"Z\":1,\"RZ\":-1,\"BRAKE\":1,\"GAS\":1},\"durationMs\":300,\"deviceId\":30,\"deviceName\":\"Odin Controller\",\"displayId\":0,\"source\":16777232,\"backend\":\"shizuku-evdev\\\/odin-six-axes\",\"displayRouting\":\"verified-focused-physical-controller; no displayId injection\",\"receiverVerified\":false,\"delivery\":\"Kernel evdev frame written; receiver must independently confirm\",\"releaseGuarantee\":\"bounded-service-watchdog; service-process-SIGKILL-cannot-guarantee-release\",\"complete\":true,\"displayRole\":\"upper\",\"message\":null}"
+            }
+          ]
+        }
+      ],
+      "runStatus": "completed",
+      "timings": {
+        "beginElapsedRealtime": 668283922,
+        "firstVisibleTextMs": 15489,
+        "responseHeadersMs": 4064,
+        "firstResponseBytesMs": 4079,
+        "firstAuthorityMs": 1326,
+        "nativePrepareMs": 20
+      }
+    }
+  ],
+  "passed": true
+}

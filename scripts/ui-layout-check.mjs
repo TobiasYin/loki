@@ -3,7 +3,7 @@ import {createServer} from 'node:http';
 import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 const base='app/src/main/assets/chat/';
-const server=createServer((req,res)=>{let name=req.url==='/'?'index.html':req.url.slice(1);if(name==='runtime-host.js'){res.setHeader('content-type','text/javascript');res.end('');return;}if(!['index.html','style.css','ui.js'].includes(name)){res.writeHead(404);res.end();return;}res.setHeader('content-type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(readFileSync(base+name));});
+const server=createServer((req,res)=>{let name=req.url==='/'?'index.html':req.url.slice(1);if(name==='runtime-host.js'){res.setHeader('content-type','text/javascript');res.end('');return;}if(!['index.html','style.css','ui.js','vendor/marked.umd.js','vendor/purify.min.js'].includes(name)){res.writeHead(404);res.end();return;}res.setHeader('content-type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(readFileSync(base+name));});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const url=`http://127.0.0.1:${server.address().port}/`;
 const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
 mkdirSync('build/ui-preview',{recursive:true});const checks=[];

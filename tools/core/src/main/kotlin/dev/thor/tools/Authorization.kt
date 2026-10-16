@@ -62,7 +62,7 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                 authority.validate(e)
                 val descriptor = ToolPack.descriptors.getValue(e.toolId)
                 if (descriptor.targetRequired && !(descriptor.effect == Effect.INPUT && cp?.submitted == true)) {
-                    if(e.toolId=="perception.capture_screen")snapshots.validateReadSource(e.snapshotId)
+                    if(e.toolId in ToolPack.freshReads)snapshots.validateReadSource(e.snapshotId)
                     else snapshots.validate(e.snapshotId)
                 }
                 val a = backend.availability(e.toolId, args)
@@ -75,11 +75,11 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                 authority.claim(e)
                 val result = backend.execute(e, args, cp)
                 cp.check() // Discard late perception output after stop/revoke/target invalidation.
-                if(e.toolId=="perception.capture_screen" && result.error==null) {
+                if(e.toolId in ToolPack.freshReads && result.error==null) {
                     val source=snapshots.validateReadSource(e.snapshotId)
                     val observed=snapshots.validate(result.snapshotId)
                     requireTool(observed.id!=source.id && observed.displayEpoch==source.displayEpoch && observed.display==source.display,
-                        Code.TARGET_CHANGED,"Screenshot must return a fresh observation on the authorized display")
+                        Code.TARGET_CHANGED,"Perception read must return a fresh observation on the authorized display")
                 }
                 return result
             } finally { if(device)resource.unlock() }
