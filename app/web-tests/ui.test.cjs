@@ -55,3 +55,34 @@ test('model effort selection and per-session drafts stay isolated',()=>{const{wi
 test('configuration probe messages do not consume chat space',()=>{const{window,doc}=setup();const s=state();s.runs=[{id:'probe',sessionId:'a',probe:true,status:'completed'}];s.messages=[{id:'probe-text',sessionId:'a',runId:'probe',role:'assistant',text:'PROBE_OK'}];window.receiveNative(s);assert.doesNotMatch(doc.querySelector('#chat').textContent,/PROBE_OK/);});
 
 test('instant failures remain actionable without a transient running banner',()=>{const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'failed',expanded:false}];s.messages=[{id:'m',runId:'r',sessionId:'a',role:'assistant',text:'',status:'complete'}];window.receiveNative(s);assert.match(doc.querySelector('.attention').textContent,/未能完成/);assert.equal(doc.querySelector('#active').hidden,true);assert.equal(doc.querySelector('#send').textContent,'发送');});
+
+// A second contact's cancellation must not end the finger that owns recording.
+test('unrelated pointer cancellation does not release an active voice hold',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const node=doc.querySelector('#voice-hold');
+ pointer(window,node,'pointerdown',{pointerId:1});
+ pointer(window,node,'pointercancel',{pointerId:2,isPrimary:false});
+ pointer(window,node,'lostpointercapture',{pointerId:2,isPrimary:false});
+ assert.equal(calls.filter(c=>c.op==='voice.cancel').length,0);
+ pointer(window,node,'pointerup',{pointerId:1});assert.equal(calls.filter(c=>c.op==='voice.finish').length,1);
+});
+test('voice release belongs to its starting input and real interruption still cancels',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const node=doc.querySelector('#voice-hold');
+ pointer(window,node,'pointerdown',{pointerId:1});node.dispatchEvent(new window.KeyboardEvent('keyup',{key:'Enter',bubbles:true}));
+ assert.equal(calls.filter(c=>c.op==='voice.finish').length,0);
+ pointer(window,node,'pointercancel',{pointerId:1});assert.equal(calls.filter(c=>c.op==='voice.cancel').length,1);
+ node.dispatchEvent(new window.KeyboardEvent('keydown',{key:' ',bubbles:true,cancelable:true}));
+ pointer(window,node,'pointerup',{pointerId:1});assert.equal(calls.filter(c=>c.op==='voice.finish').length,0);
+ node.dispatchEvent(new window.KeyboardEvent('keyup',{key:' ',bubbles:true,cancelable:true}));assert.equal(calls.filter(c=>c.op==='voice.finish').length,1);
+});
+test('losing capture alone keeps recording and release outside the button finishes once',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const node=doc.querySelector('#voice-hold');
+ node.setPointerCapture=()=>{throw new Error('capture unavailable');};
+ pointer(window,node,'pointerdown');pointer(window,node,'lostpointercapture');
+ assert.equal(calls.filter(c=>c.op==='voice.start').length,1);assert.equal(calls.filter(c=>c.op==='voice.cancel').length,0);
+ pointer(window,doc.body,'pointerup');pointer(window,doc.body,'pointerup');assert.equal(calls.filter(c=>c.op==='voice.finish').length,1);
+});
+test('actual primary pointer cancellation outside the button and window blur stop capture',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const node=doc.querySelector('#voice-hold');
+ pointer(window,node,'pointerdown');pointer(window,doc.body,'pointercancel');assert.equal(calls.filter(c=>c.op==='voice.cancel').length,1);
+ pointer(window,node,'pointerdown');window.dispatchEvent(new window.Event('blur'));assert.equal(calls.filter(c=>c.op==='voice.cancel').length,2);
+});

@@ -237,24 +237,28 @@
     if(!state || active() || hold || voicePhase==='finalizing')return;
     if(event.type==='pointerdown' && (event.isPrimary===false || event.button>0))return;
     event.preventDefault();voiceText='';voiceError='';voicePhase='connecting';
-    hold={id:window.crypto.randomUUID(),sessionId:state.selected,pointerId:event.pointerId,y:event.clientY,released:false};
-    if(event.pointerId!==undefined)$('voice-hold').setPointerCapture?.(event.pointerId);
+    hold={id:window.crypto.randomUUID(),sessionId:state.selected,pointerId:event.pointerId,key:event.key,y:event.clientY,released:false};
+    // Capture is an optimization; document-level release/cancel still owns the
+    // gesture if WebView drops capture or this API is unavailable.
+    if(event.pointerId!==undefined)try{$('voice-hold').setPointerCapture?.(event.pointerId);}catch{}
     command({op:'voice.start',id:hold.id,sessionId:hold.sessionId});refreshVoice();
   }
   function finishVoice(event) {
-    if(!hold || hold.released || (event.pointerId!==undefined && event.pointerId!==hold.pointerId))return;
+    if(!hold || hold.released)return;
+    if(event.type==='pointerup' ? event.pointerId!==hold.pointerId : hold.pointerId!==undefined || event.key!==hold.key)return;
     event.preventDefault();hold.released=true;voicePhase='finalizing';command({op:'voice.finish',id:hold.id,sessionId:hold.sessionId});refreshVoice();
   }
   $('voice-hold').addEventListener('pointerdown',beginVoice);
-  $('voice-hold').addEventListener('pointerup',finishVoice);
-  $('voice-hold').addEventListener('pointermove',event=>{if(hold && event.pointerId===hold.pointerId && hold.y-event.clientY>70){cancelVoice();refreshVoice();}});
-  for(const type of ['pointercancel','lostpointercapture'])$('voice-hold').addEventListener(type,()=>{if(hold && !hold.released){cancelVoice();refreshVoice();}});
+  document.addEventListener('pointerup',finishVoice);
+  document.addEventListener('pointermove',event=>{if(hold && event.pointerId===hold.pointerId && hold.y-event.clientY>70){cancelVoice();refreshVoice();}});
+  document.addEventListener('pointercancel',event=>{if(hold && !hold.released && event.pointerId===hold.pointerId){cancelVoice();refreshVoice();}});
   $('voice-hold').addEventListener('keydown',event=>{if([' ','Enter'].includes(event.key) && !event.repeat)beginVoice(event);});
   $('voice-hold').addEventListener('keyup',event=>{if([' ','Enter'].includes(event.key))finishVoice(event);});
   $('voice-cancel').addEventListener('click',()=>{cancelVoice();refreshVoice();});
   $('voice-edit').addEventListener('click',()=>{cancelVoice();voiceMode=false;$('input').value=voiceText;refreshVoice();$('input').focus();});
 
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelVoice();refreshVoice();}});
+  window.addEventListener('blur',()=>{cancelVoice();refreshVoice();});
   window.addEventListener('pagehide',()=>{cancelVoice();});
   window.receiveVoiceState=next=>{
     if(!hold || next.id!==hold.id || next.sessionId!==hold.sessionId || next.sessionId!==state?.selected)return;

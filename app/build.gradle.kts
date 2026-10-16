@@ -9,8 +9,8 @@ android {
         applicationId = "dev.thor.agent"
         minSdk = 30
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.5.0-integration"
+        versionCode = 6
+        versionName = "0.5.1-integration"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { buildConfig = true }

@@ -96,32 +96,45 @@ class PhysicalCloudVoiceTest {
         var player:android.media.MediaPlayer?=null
         try {
             until {js(web,"window.productReady===true")=="true"}
+            val sessions=js(web,"document.querySelectorAll('.session-row').length").toInt()
             js(web,"document.getElementById('new').click()")
-            Thread.sleep(300)
+            until {js(web,"document.querySelectorAll('.session-row').length===${sessions+1} && document.getElementById('send').dataset.running==='false'")=="true"}
             js(web,"window.__voiceEvents=[];const originalVoice=window.receiveVoiceState;window.receiveVoiceState=e=>{window.__voiceEvents.push({...e,at:Date.now()});originalVoice(e);};document.getElementById('voice-toggle').click()")
             audio.setStreamVolume(android.media.AudioManager.STREAM_MUSIC,(audio.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)*0.65).toInt().coerceAtLeast(1),0)
-            fun hold() {js(web,"document.getElementById('voice-hold').dispatchEvent(new PointerEvent('pointerdown',{pointerId:1,button:0,isPrimary:true,bubbles:true}));true")}
-            fun release() {js(web,"document.getElementById('voice-hold').dispatchEvent(new PointerEvent('pointerup',{pointerId:1,button:0,isPrimary:true,bubbles:true}));true")}
-            hold();Thread.sleep(900)
+            val display=args.getString("chatDisplay","4").toInt()
+            val automation=instrumentation.getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+            js(web,"window.__touchEvents=[];for(const type of ['pointerdown','pointerup','pointercancel'])document.getElementById('voice-hold').addEventListener(type,e=>window.__touchEvents.push({type,trusted:e.isTrusted,at:Date.now()}),true)")
+            fun hold(duration:Int):Thread {
+                val r=JSONObject(js(web,"(() => {const r=document.getElementById('voice-hold').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:innerWidth,h:innerHeight}})()"))
+                val origin=IntArray(2);var x=0;var y=0
+                instrumentation.runOnMainSync {web.getLocationOnScreen(origin);x=(origin[0]+web.width*r.getDouble("x")/r.getDouble("w")).toInt();y=(origin[1]+web.height*r.getDouble("y")/r.getDouble("h")).toInt()}
+                return Thread {android.os.ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("input touchscreen -d $display swipe $x $y ${x+5} ${y+5} $duration")).use {it.readBytes()}}.apply {start()}
+            }
+            val held=hold(7500);until {js(web,"document.getElementById('voice-hold').classList.contains('holding')")=="true"};Thread.sleep(900)
             val finished=CountDownLatch(1)
             player=android.media.MediaPlayer().apply {setAudioAttributes(android.media.AudioAttributes.Builder().setUsage(android.media.AudioAttributes.USAGE_MEDIA).setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build());setDataSource(File(context.cacheDir,"voice-reference.wav").path);setOnCompletionListener {finished.countDown()};prepare();start()}
             assertTrue(finished.await(20,TimeUnit.SECONDS));Thread.sleep(700)
             assertEquals("0",js(web,"document.querySelectorAll('.message.user').length"))
-            release()
+            assertEquals("Must stay held throughout reference speech","true",js(web,"document.getElementById('voice-hold').classList.contains('holding')"))
+            held.join(10000);assertFalse(held.isAlive)
             until(30) {js(web,"window.__voiceEvents.some(e=>e.phase==='complete'||e.phase==='error'||e.phase==='empty')")=="true"}
             val events=JSONArray(js(web,"JSON.stringify(window.__voiceEvents)").let {org.json.JSONTokener(it).nextValue() as String})
             report.put("events",events)
             assertTrue("Physical microphone did not recognize speech",events.objects().any {it.optString("phase")=="complete" && it.optString("submit").contains("语音测试成功")})
-            until(150) {js(web,"document.getElementById('active').hidden && document.querySelectorAll('.message.user').length===1 && document.querySelectorAll('.message.assistant').length===1")=="true"}
+            until {js(web,"document.querySelectorAll('.message.user').length===1")=="true"}
+            while(js(web,"document.getElementById('send').dataset.running === 'false' && document.querySelectorAll('.message.assistant').length===1")!="true")Thread.sleep(500)
             val state=SqliteStore(context,"product.db").use {it.load()};val run=state.getJSONArray("runs").objects().last()
             assertEquals("completed",run.getString("status"))
             val messages=state.getJSONArray("messages").objects().filter {it.optString("runId")==run.getString("id")}
             assertTrue("Expected model reply missing",messages.any {it.getString("role")=="assistant" && it.optString("text").contains("语音测试成功")})
             report.put("runId",run.getString("id")).put("messages",JSONArray(messages)).put("status",run.getString("status"))
-            hold();Thread.sleep(700);js(web,"document.getElementById('voice-cancel').click()")
+            val cancelled=hold(3000);until {js(web,"document.getElementById('voice-hold').classList.contains('holding')")=="true"};Thread.sleep(700);js(web,"document.getElementById('voice-cancel').click()")
+            cancelled.join(5000);assertFalse(cancelled.isAlive)
             Thread.sleep(500)
             assertEquals("1",js(web,"document.querySelectorAll('.message.user').length"))
-            report.put("cancelDidNotSend",true).put("passed",true)
+            val touchEvents=JSONArray(org.json.JSONTokener(js(web,"JSON.stringify(window.__touchEvents)")).nextValue() as String)
+            assertTrue(touchEvents.objects().all {it.getBoolean("trusted")})
+            report.put("inputOrigin","platform touchscreen; not synthetic DOM events").put("touchEvents",touchEvents).put("cancelDidNotSend",true).put("passed",true)
         } finally {
             player?.release();audio.setStreamVolume(android.media.AudioManager.STREAM_MUSIC,beforeVolume,0)
             File(context.filesDir,"physical-voice-agent.json").writeText(report.toString(2))

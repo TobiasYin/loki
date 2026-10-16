@@ -11,9 +11,11 @@ p.add_argument('--reference-wav',type=pathlib.Path,required=True)
 p.add_argument('--phase',choices=['transport','microphone'],required=True)
 p.add_argument('--configure-key-stdin',action='store_true')
 p.add_argument('--no-install',action='store_true')
+p.add_argument('--output',type=pathlib.Path,default=pathlib.Path('build/voice-live'))
 a=p.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1];os.chdir(root)
-out=root/'build/voice-live';out.mkdir(parents=True,exist_ok=True)
+out=root/a.output;out.mkdir(parents=True,exist_ok=True)
+assert not (out/(a.phase+'-instrumentation.txt')).exists(),'Use a fresh evidence directory; previous attempts are preserved'
 adb_bin=pathlib.Path(os.environ.get('ANDROID_HOME',pathlib.Path.home()/'Library/Android/sdk'))/'platform-tools/adb'
 adb=[str(adb_bin),'-P',str(a.adb_port),'-s',a.serial]
 def run(*args):return subprocess.check_output(adb+list(args),stdin=subprocess.DEVNULL)

@@ -4,10 +4,12 @@ import argparse,hashlib,json,os,pathlib,re,shlex,shutil,subprocess,time
 p=argparse.ArgumentParser()
 p.add_argument('--serial',required=True);p.add_argument('--adb-port',required=True,type=int)
 p.add_argument('--output',required=True,type=pathlib.Path)
-p.add_argument('--suite',choices=['context','ime','readback','receiver','install'],required=True)
+p.add_argument('--suite',choices=['context','ime','readback','receiver','install','voice-hold'],required=True)
 p.add_argument('--cleanup-session',help='Readback only: disable test control capabilities in this exact selected session')
+p.add_argument('--drop-pointer-capture',action='store_true',help='Voice hold only: test release outside the button after losing capture')
 a=p.parse_args();root=pathlib.Path(__file__).resolve().parents[1];os.chdir(root)
 assert not a.cleanup_session or (a.suite=='readback' and re.fullmatch(r'[0-9a-f-]{36}',a.cleanup_session))
+assert not a.drop_pointer_capture or a.suite=='voice-hold'
 assert not a.output.exists(),'Use a new evidence directory; do not overwrite failures'
 a.output.mkdir(parents=True)
 adb_bin=pathlib.Path(os.environ.get('ANDROID_HOME',pathlib.Path.home()/'Library/Android/sdk'))/'platform-tools/adb'
@@ -19,10 +21,10 @@ assert adb('shell','getprop','ro.kernel.qemu').strip()!=b'1'
 keys=['enabled_accessibility_services','accessibility_enabled']
 original={k:adb('shell','settings','get','secure',k).decode().strip() for k in keys}
 component='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
-classes={'context':'PhysicalResumeTest','ime':'PhysicalImeTest','readback':'PhysicalDeviceStateTest','receiver':'PhysicalDeviceFlowTest','install':'EmulatorLiveInstallTest'}
-outputs={'context':['physical-resume'],'ime':['physical-ime.json','physical-ime-settled.png'],'readback':['physical-device-final-state.json'],'receiver':['physical-cloud-input.json','physical-cloud-logical-report.json','physical-cloud-frame-report.json'],'install':['physical-live-install.json','physical-live-install.png']}
+classes={'context':'PhysicalResumeTest','ime':'PhysicalImeTest','readback':'PhysicalDeviceStateTest','receiver':'PhysicalDeviceFlowTest','install':'EmulatorLiveInstallTest','voice-hold':'PhysicalVoiceHoldTest'}
+outputs={'context':['physical-resume'],'ime':['physical-ime.json','physical-ime-settled.png'],'readback':['physical-device-final-state.json'],'receiver':['physical-cloud-input.json','physical-cloud-logical-report.json','physical-cloud-frame-report.json'],'install':['physical-live-install.json','physical-live-install.png'],'voice-hold':['physical-voice-hold.json']}
 metadata={'serial':a.serial,'port':a.adb_port,'physical':True,'suite':a.suite,'sourceCommit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'sourceDirty':bool(subprocess.check_output(['git','status','--porcelain'],text=True).strip()),'apks':{},'sourceFiles':{}}
-for f in ['app/src/androidTest/java/dev/thor/agent/PhysicalResumeTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalImeTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalDeviceFlowTest.kt','app/src/androidTest/java/dev/thor/agent/EmulatorLiveInstallTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalDeviceStateTest.kt']:
+for f in ['app/src/androidTest/java/dev/thor/agent/PhysicalResumeTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalImeTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalDeviceFlowTest.kt','app/src/androidTest/java/dev/thor/agent/EmulatorLiveInstallTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalDeviceStateTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalVoiceHoldTest.kt','app/src/androidTest/java/dev/thor/agent/PhysicalCloudVoiceTest.kt']:
  metadata['sourceFiles'][f]=hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()
 for apk in ['app/build/outputs/apk/debug/app-debug.apk','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk']:
  target=a.output/'apks'/pathlib.Path(apk).name;target.parent.mkdir(exist_ok=True);shutil.copyfile(apk,target);metadata['apks'][apk]=hashlib.sha256(target.read_bytes()).hexdigest()
@@ -43,7 +45,7 @@ try:
    exists=subprocess.run(prefix+['shell','run-as','dev.thor.agent','test','-f','files/'+name],stdout=subprocess.DEVNULL).returncode==0
    if exists:adb('shell','run-as','dev.thor.agent','mv','files/'+name,f'files/{name}.previous-{time.time_ns()}')
  adb('shell','input','keyevent','224')
- result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','physicalLiveInstall',str(a.suite=='install').lower(),'-e','reuseProfile','true','-e','chatDisplay','4','-e','labDisplay','0',*(['-e','cleanupSession',a.cleanup_session] if a.cleanup_session else []),'-e','class','dev.thor.agent.'+classes[a.suite],'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+ result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','physicalLiveInstall',str(a.suite=='install').lower(),'-e','reuseProfile','true','-e','chatDisplay','4','-e','labDisplay','0',*(['-e','cleanupSession',a.cleanup_session] if a.cleanup_session else []),*(['-e','dropPointerCapture','true'] if a.drop_pointer_capture else []),'-e','class','dev.thor.agent.'+classes[a.suite],'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
  (a.output/'suite.log').write_bytes(result);print(result.decode(),flush=True)
  metadata['passed']=bool(re.search(rb'OK \(\d+ tests?\)',result)) and b'FAILURES' not in result
  assert metadata['passed'],'Physical acceptance failed; original evidence retained'

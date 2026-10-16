@@ -31,3 +31,5 @@ footer{border:0;padding:6px 10px 10px;background:var(--bg)}#composer{border:1px 
 @media(max-height:250px){header{display:none}footer{padding:3px 6px}textarea{height:30px;min-height:30px;padding:0 5px}#composer{padding:5px 7px 3px;border-radius:19px}.controls button{min-height:32px}.controls #send{height:32px;width:32px;min-width:32px;min-height:32px}}
 /* Preserve a usable touch target even when the keyboard reduces the viewport. */
 .controls button,.controls .icon-button,.controls #voice-toggle{min-height:44px;min-width:44px}.controls #send{width:44px;height:44px;min-width:44px;min-height:44px}.controls #capabilities,.controls #model-picker{min-width:0}
+/* Keep the held target stationary when the cancel action becomes available. */
+#voice-panel{position:relative}#voice-hold{height:44px;min-height:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#voice-cancel{position:absolute;right:8px;bottom:4px;margin:0;min-height:36px}#voice-hold.holding{padding-left:72px;padding-right:72px}#voice-hold.holding~#voice-cancel{color:#fff}
