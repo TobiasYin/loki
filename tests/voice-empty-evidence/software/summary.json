@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T20:58:52.208460+00:00",
+  "status": "VOICE_EMPTY_SOFTWARE_VERIFIED_NOT_CLOUD_OR_DEVICE_ACCEPTANCE",
+  "scope": "Native streaming ASR silence/empty-result classification and UI empty-to-idle behavior",
+  "gradle": {
+    "log": "final-gradle.log",
+    "success": true,
+    "seconds": 7,
+    "tasks": 279,
+    "executed": 19,
+    "upToDate": 260,
+    "appJvmTaskExecuted": true
+  },
+  "appJvm": {
+    "totals": {
+      "tests": 112,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 23
+    },
+    "xmlHashes": "app-junit-xml-hashes.json"
+  },
+  "voiceJvm": {
+    "totals": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "suite": "VolcAsrProtocolTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "log": "final-VolcAsrProtocolTest.xml"
+      },
+      {
+        "suite": "VoiceTransportTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "log": "final-VoiceTransportTest.xml"
+      }
+    ],
+    "includedInApp112": true,
+    "protocolCases": 11,
+    "transportCases": 8,
+    "transport": "Actual local MockWebServer/OkHttp WebSockets with generated PCM, not official ASR"
+  },
+  "uiJs": {
+    "tests": 73,
+    "passed": 73,
+    "failed": 0,
+    "skipped": 0,
+    "log": "ui-js-tests.log",
+    "scope": "JSDOM/software component, not complete on-device voice flow"
+  },
+  "initialFailure": {
+    "preserved": true,
+    "gradleLog": "initial-fixture-failure-gradle.log",
+    "suites": [
+      {
+        "suite": "VolcAsrProtocolTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "log": "initial-VolcAsrProtocolTest.xml"
+      },
+      {
+        "suite": "VoiceTransportTest",
+        "tests": 8,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "log": "initial-VoiceTransportTest.xml"
+      }
+    ],
+    "cause": "Server-side MockWebServer RealWebSocket.cancel() has no client Call and threw NPE in test failure injection",
+    "fix": "Only targeted test changed to MockWebServer.shutdown real TCP closure, server onFailure latch and IOException assertion, idempotent shutdown cleanup",
+    "productionFailureClaim": false,
+    "testAssertionsRetained": true,
+    "noHistoryOverwritten": true
+  },
+  "semanticCoverage": [
+    "Only20000003 and1013 become terminal empty after validating complete protocol envelope, length, compression, UTF8 and declared JSON",
+    "45000002 remains real missing-recognizable-audio error; timeout, format, auth, busy and unknown codes remain errors with fixed safe code-based messages",
+    "Successful terminal text empty/null/missing clears partial; non-string text is rejected, never literal null/object transcript",
+    "Release plus terminal required; empty exactly once without submit/message, partial before silence discarded, cancellation never submits",
+    "First terminal immutable; late close/failure/duplicates ignored, real preterminal network errors remain visible",
+    "Synchronized accept/result phase publication with finish/complete/close prevents recording after terminal empty, verified through controlled concurrent emit/release test",
+    "UI empty phase resets to idle and clears stale transcript without sending a message"
+  ],
+  "pins": [
+    {
+      "path": "build/voice-empty/pinned/app-debug.apk",
+      "sha256": "006554347a6012671f238110458dafa00b70ccbfb14e70b78e2013f4dd73a953",
+      "bytes": 7864725
+    },
+    {
+      "path": "build/voice-empty/pinned/app-debug-androidTest.apk",
+      "sha256": "1c6bf788b8ae8dc22ff7667506bee9d2e50786cfaedbd4ede6263c01b8743d89",
+      "bytes": 3423710
+    },
+    {
+      "path": "build/voice-empty/pinned/input-lab-debug.apk",
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  ],
+  "pinsVerifiedActualBytes": true,
+  "artifactCheck": {
+    "file": "artifacts.json",
+    "allFourActualFilesVerified": true
+  },
+  "compiledUiAsset": {
+    "entry": "assets/chat/ui.js",
+    "sha256": "e624673bcb67c189e0699453ca6918ac803e2f943f02ba59380ae9f64a9d45d2",
+    "bytes": 53171,
+    "matchesSource": true
+  },
+  "sourceHashes": "source-hashes.json",
+  "logs": [
+    {
+      "path": "build/voice-empty-final-gradle.log",
+      "bytes": 18222,
+      "sha256": "37b8fb7ea1f3e3211a2502ef49fe233f17abb8bb24700533939d7ddd50a9212c",
+      "publishedPath": "final-gradle.log",
+      "scope": "Successful current Native voice build and full App JVM task"
+    },
+    {
+      "path": "build/voice-empty-artifacts.json",
+      "bytes": 1899,
+      "sha256": "429a2432dc6fc6d30a3599f69128dcc011bdb52277e4ccaff678471627b49198",
+      "publishedPath": "artifacts.json",
+      "scope": "Current static artifact checks"
+    },
+    {
+      "path": "build/voice-empty/pinned/pins.json",
+      "bytes": 519,
+      "sha256": "c58c33a47b6144a3c70ae905d8951a6f6a12ced08e2d54c0dc28df87e9384c1b",
+      "publishedPath": "pins.json",
+      "scope": "Fixed packages verified against actual bytes"
+    },
+    {
+      "path": "build/voice-empty-ui-js-tests.log",
+      "bytes": 7994,
+      "sha256": "72c5580e9b018216066f280c97023cfcc017c5060c1f9aade69c4492e6c19f73",
+      "publishedPath": "ui-js-tests.log",
+      "scope": "Current Chat JavaScript73 full check; browser component tests, not device end-to-end"
+    },
+    {
+      "path": "build/voice-empty-gradle.log",
+      "bytes": 17214,
+      "sha256": "567666ae7ee908186c300af7b62231e0a6bf6f379d91fbb9cbe683ac5fb4d6ad",
+      "publishedPath": "initial-fixture-failure-gradle.log",
+      "scope": "Preserved first build failure: test-only MockWebServer server-side RealWebSocket.cancel lacks Call, NPE; not a production failure"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+      "bytes": 1797,
+      "sha256": "bcef88278bcf92e79f812152b2a3fc93ab0cc4c9c481ce0c993f9fcc4bf764f3",
+      "publishedPath": "final-VolcAsrProtocolTest.xml",
+      "scope": "Current final targeted voice JUnit XML, part of App112"
+    },
+    {
+      "path": "build/voice-empty-initial-test-failure/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+      "bytes": 1797,
+      "sha256": "52a916e7bbaa59db31e57f6b26a3ff4ac5aed28debbc93a28c903371fbd2094d",
+      "publishedPath": "initial-VolcAsrProtocolTest.xml",
+      "scope": "Initial actual XML preserved, not overwritten by the later pass"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VoiceTransportTest.xml",
+      "bytes": 1510,
+      "sha256": "2c030f85ebc59ed4e7842da62edd7c207847f448d739105afea62cfd6a8c1a02",
+      "publishedPath": "final-VoiceTransportTest.xml",
+      "scope": "Current final targeted voice JUnit XML, part of App112"
+    },
+    {
+      "path": "build/voice-empty-initial-test-failure/TEST-dev.thor.agent.VoiceTransportTest.xml",
+      "bytes": 5415,
+      "sha256": "cbd0b24db1a13522892653421f44378c070cb7dc3a59c62c990df25268f5ae06",
+      "publishedPath": "initial-VoiceTransportTest.xml",
+      "scope": "Initial actual XML preserved, not overwritten by the later pass"
+    }
+  ],
+  "acceptance": {
+    "cloudTestClaim": false,
+    "microphoneCaptureClaim": false,
+    "onDeviceUiEndToEndClaim": false,
+    "emulatorAcceptanceIncluded": false,
+    "realThorGameCompletionClaim": false,
+    "collectorDeviceCommands": false
+  },
+  "limits": [
+    "The former invalid server cancel injection is preserved as one genuine initial test failure, not a production failure or hidden retry",
+    "Late transport test directly observes server I/O failure after closing TCP; it does not directly timestamp client onFailure callback",
+    "Official API errors and real silence behavior require independently pinned cloud checks; software frames do not prove server acceptance",
+    "JVM112 and JS73 are current software results; this package makes no statement about other-module JVM counts",
+    "Selected source hashes are not atomic complete build inputs; included physical test source is not execution evidence",
+    "Collector wrote only this software subdirectory and did not alter parent manifest or other evidence, source, build or device state"
+  ]
+}

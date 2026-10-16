@@ -1,0 +1,20 @@
+{
+  "scope": "real ASR generated silence; no microphone/UI/model task",
+  "installed": [
+    {
+      "name": "app-debug.apk",
+      "sha256": "006554347a6012671f238110458dafa00b70ccbfb14e70b78e2013f4dd73a953"
+    },
+    {
+      "name": "app-debug-androidTest.apk",
+      "sha256": "1c6bf788b8ae8dc22ff7667506bee9d2e50786cfaedbd4ede6263c01b8743d89"
+    }
+  ],
+  "nonterminalRunsBeforeInstall": 0,
+  "gameInputs": [],
+  "preferencesBytesUnchangedAfterInstall": true,
+  "suitePassed": true,
+  "secureSettingsRestored": true,
+  "preferenceBytesPreserved": true,
+  "databaseBytesPreserved": true
+}

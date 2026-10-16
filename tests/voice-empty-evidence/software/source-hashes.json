@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T20:58:52.208460+00:00",
+  "scope": "Selected Native voice, tests, UI consumer, settings integration and cloud-instrumentation source; not atomic full source archive, cloud source inclusion does not claim execution",
+  "files": [
+    {
+      "path": "app/src/main/java/dev/thor/agent/VolcAsrProtocol.kt",
+      "bytes": 6375,
+      "sha256": "6c7a19453d852a5719280f0de2819580b5a7fe31bc7de31cbbe3a0c9958f43af",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/VoiceInput.kt",
+      "bytes": 8677,
+      "sha256": "04421ad5be9cc8c93ac3dd5b899cbde1cfada9c4a8244eb94e9b482602a3b7b7",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/VolcAsrProtocolTest.kt",
+      "bytes": 8941,
+      "sha256": "def7f9cabdea52b75ca9dd8dc3304ce1c95001feaf690142552d1ecfc0c64044",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/VoiceTransportTest.kt",
+      "bytes": 16397,
+      "sha256": "1f01794f7ad3b8955f0efe95167cda6a8bd8b5b61b5ad6c0468095b19519f838",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/MainActivity.kt",
+      "bytes": 36048,
+      "sha256": "b33bae5ae3ca954fcd188b8236f7c7d46c7e7e1ba87b2a48507a181f2e9094c5",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 53171,
+      "sha256": "e624673bcb67c189e0699453ca6918ac803e2f943f02ba59380ae9f64a9d45d2",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 66459,
+      "sha256": "c7a24edbb22eba45bf57d9eb681ab5ae92b72a44b6dbaf30b25c8c59a65c20db",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/PhysicalVoiceSilenceTest.kt",
+      "bytes": 5791,
+      "sha256": "314ca1a74338c00eb77eea273ee8e073ded9a606b972f765ea0666e3854545cb",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "docs/voice-empty-result.md",
+      "bytes": 3755,
+      "sha256": "ec73b9dcf78856d4dc562484ffbf5a86305f01e939fadcc162e3b22d5be0d622",
+      "modifiedAfterBuildLog": true
+    },
+    {
+      "path": "app/build.gradle.kts",
+      "bytes": 1531,
+      "sha256": "9404b56ae6f2d566f55b1b49b3570c244671630c44bccdf9fee4eec372c7f1c3",
+      "modifiedAfterBuildLog": false
+    }
+  ]
+}

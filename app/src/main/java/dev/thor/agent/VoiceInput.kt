@@ -102,20 +102,25 @@ class VoiceInput(private val config:VoiceConfig,private val inputFactory:()->Pcm
                 } } catch(_:Exception) {fail("语音传输失败，请重试")}
             }
             override fun onMessage(webSocket:WebSocket,bytes:ByteString) {
-                if(cancelled || closed)return
+                if(cancelled || closed || finalSeen)return
                 try {
-                    val result=VolcAsrProtocol.parse(bytes.toByteArray())
-                    if(result.final){finalSeen=true;input?.stop()}
-                    val submit=draft.receive(result)
-                    if(submit!=null)complete(submit) else event(if(stopped)"finalizing" else "recording",confirmed=result.confirmed)
-                } catch(e:AsrServiceError) {fail("语音服务拒绝请求（${e.code}），请检查语音设置")}
+                    accept(VolcAsrProtocol.parse(bytes.toByteArray()))
+                } catch(e:AsrServiceError) {fail(e.userMessage())}
                 catch(_:Exception) {fail("语音响应格式无效，请重试")}
             }
-            override fun onFailure(webSocket:WebSocket,t:Throwable,response:Response?) {if(!cancelled && !closed)fail(if(response!=null)"语音连接失败（HTTP ${response.code}），请检查语音设置" else "语音连接失败，请检查网络")}
+            override fun onFailure(webSocket:WebSocket,t:Throwable,response:Response?) {if(!cancelled && !closed && !finalSeen)fail(if(response!=null)"语音连接失败（HTTP ${response.code}），请检查语音设置" else "语音连接失败，请检查网络")}
             override fun onClosing(webSocket:WebSocket,code:Int,reason:String) {if(!closed && !finalSeen)fail("语音连接提前结束，请重试") else webSocket.close(1000,"")}
             override fun onClosed(webSocket:WebSocket,code:Int,reason:String) {if(!closed && !finalSeen)fail("语音连接提前结束，请重试")}
         })
         if(closed)socket?.cancel()
+    }
+    /** Terminal acceptance and its phase publication are atomic with release,
+     * cancellation and completion; no recording event can follow terminal empty. */
+    @Synchronized private fun accept(result:VolcAsrProtocol.Result) {
+        if(closed || cancelled || finalSeen)return
+        if(result.final){finalSeen=true;input?.stop()}
+        val submit=draft.receive(result)
+        if(submit!=null)complete(submit) else event(if(stopped)"finalizing" else "recording",confirmed=result.confirmed)
     }
     @Synchronized fun finish() {
         if(stopped || cancelled || closed)return
@@ -126,8 +131,8 @@ class VoiceInput(private val config:VoiceConfig,private val inputFactory:()->Pcm
             timer.schedule({if(!closed)fail("等待最终识别超时，文字已保留，可重试或转为文字编辑")},12,TimeUnit.SECONDS)
         }
     }
-    @Synchronized private fun complete(text:String) {if(closed || cancelled)return;event(if(text.isBlank())"empty" else "complete",submit=text);shutdown()}
-    @Synchronized private fun fail(message:String) {if(closed || cancelled)return;draft.cancel();event("error",message);shutdown()}
+    @Synchronized private fun complete(text:String) {if(closed || cancelled)return;if(text.isBlank())event("empty") else event("complete",submit=text);shutdown()}
+    @Synchronized private fun fail(message:String) {if(closed || cancelled || finalSeen)return;draft.cancel();event("error",message);shutdown()}
     private fun shutdown() {closed=true;stopped=true;input?.stop();socket?.cancel();timer.shutdownNow();worker.shutdown();synchronized(sendLock){buffered.clear()};client.dispatcher.executorService.shutdown();client.connectionPool.evictAll()}
     @Synchronized override fun close() {if(closed)return;cancelled=true;draft.cancel();event("cancelled");shutdown()}
 }

@@ -1,0 +1,17 @@
+[
+  {
+    "path": "build/voice-empty/pinned/app-debug.apk",
+    "sha256": "006554347a6012671f238110458dafa00b70ccbfb14e70b78e2013f4dd73a953",
+    "bytes": 7864725
+  },
+  {
+    "path": "build/voice-empty/pinned/app-debug-androidTest.apk",
+    "sha256": "1c6bf788b8ae8dc22ff7667506bee9d2e50786cfaedbd4ede6263c01b8743d89",
+    "bytes": 3423710
+  },
+  {
+    "path": "build/voice-empty/pinned/input-lab-debug.apk",
+    "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+    "bytes": 2935291
+  }
+]

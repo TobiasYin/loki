@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "scope": "Full App112 task executed; voice19 are a subset, not additional unique cases",
+  "totals": {
+    "tests": 112,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suiteCount": 23
+  },
+  "task": ":app:testDebugUnitTest",
+  "taskStatus": "EXECUTED",
+  "files": [
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatBridgePolicyTest.xml",
+      "bytes": 901,
+      "sha256": "fad94c7c65172fbe8304b13496f5648c78f32218dee7905466ff81e829460770",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.ChatBridgePolicyTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatEventProjectionTest.xml",
+      "bytes": 936,
+      "sha256": "c79e2e9e1c5b67aa6a31af125e036342aac4f308202f979b3129def0b9d7ee99",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.ChatEventProjectionTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatSnapshotTest.xml",
+      "bytes": 741,
+      "sha256": "8b3d564460c7f609f1d5aa10cb9cd584c8b8e9e4669737b00030978a27856255",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.ChatSnapshotTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.CoordinatorTest.xml",
+      "bytes": 2399,
+      "sha256": "65afb94a4ee7e1d999bb5e3e880b3e910bb698f2fadf669f05a75afe0ba46de9",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.CoordinatorTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.DeepSeekCatalogTest.xml",
+      "bytes": 863,
+      "sha256": "08c9d1ecc28881b649b58034e0edad0a387db85f5f4a5e01d1773246f50ba7f0",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.DeepSeekCatalogTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.EventIndexIsolationTest.xml",
+      "bytes": 469,
+      "sha256": "eb259eed40c325a8ebf22971661b41b97077281b5e5e1eeb3053221c36db0adb",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.EventIndexIsolationTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ExecutionStateProjectionTest.xml",
+      "bytes": 1059,
+      "sha256": "a65e33ffff4b2391a794cb4e7375e57d5d980f50b494aa57d958a212f83161d5",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.ExecutionStateProjectionTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.HostRpcPayloadTest.xml",
+      "bytes": 1130,
+      "sha256": "006f51b4c2407711ce8b051062742ba8f5a8566719f7858eac7c0cf273539cfb",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.HostRpcPayloadTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.InputFocusFailureTest.xml",
+      "bytes": 758,
+      "sha256": "3937b5906c010a6d4408c11b2d5d0d1cb39b130e4336500d647aec80a71af731",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.InputFocusFailureTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.LatestValueTest.xml",
+      "bytes": 798,
+      "sha256": "40b16387bcc282aaca17ee6d5aece02f161ee33249a1747a7ac0e77f483e77a9",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.LatestValueTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelCatalogTest.xml",
+      "bytes": 1307,
+      "sha256": "0b4f03b7d5b5be4948767a77586c67ef8b2fe5eb3d2cf7b6cf737857e1f081e6",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.ModelCatalogTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelConnectionTestTest.xml",
+      "bytes": 1572,
+      "sha256": "252e53e8f41ccf6a5912e6f45c9aec2d70c6d31f91f8caa62ff431c68f1c1b0c",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.ModelConnectionTestTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.OfficialProfilePolicyTest.xml",
+      "bytes": 769,
+      "sha256": "51043712bb71128c8d2df4642eefc9e9b4fe37cb8f92ab8f9850c0204c34d89e",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.OfficialProfilePolicyTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.PreparedToolsTest.xml",
+      "bytes": 1039,
+      "sha256": "040f07f11c59159a5840ae25354ecc39cb535c3e527f7d94c81c6a28ac21d955",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.PreparedToolsTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RecoveryHistoryTest.xml",
+      "bytes": 468,
+      "sha256": "18fc221a157b48089de38215e5c0d86c8784c927e3816393ab6d55e13ff759e7",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.RecoveryHistoryTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RuntimeStartupDiagnosticsTest.xml",
+      "bytes": 645,
+      "sha256": "83df41f0207ce67e0174acbe1b594ecc8b03b2180288ffbcf922cbd427cdbbcb",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.RuntimeStartupDiagnosticsTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SearchConnectionTestTest.xml",
+      "bytes": 579,
+      "sha256": "409ad6cdf12df09cb4476b7a7374c2e92646644c67c2e7bfc3b6198cd2de5d2a",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.SearchConnectionTestTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillStoreTest.xml",
+      "bytes": 1201,
+      "sha256": "59418adee2ce218f4c61dcf69160a2c1e135e677372edb0db4ca6d112bc9b51e",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.SkillStoreTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillTextResourcesTest.xml",
+      "bytes": 458,
+      "sha256": "bed4b3d55a9753a64336c27776298f7173083cbd312f5be3c080e42bfbcfeff7",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.SkillTextResourcesTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StartupRegressionTest.xml",
+      "bytes": 606,
+      "sha256": "52854b233c04e7d959fc23b0b4cc9777f3492c71567b6d137eeeff73d3845e9f",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.StartupRegressionTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StreamDisplayProjectionTest.xml",
+      "bytes": 985,
+      "sha256": "75a88c7fee81fc346bf959a795299db1e4b8a05fcda596f7192e7c3b022f7c81",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.StreamDisplayProjectionTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VoiceTransportTest.xml",
+      "bytes": 1510,
+      "sha256": "2c030f85ebc59ed4e7842da62edd7c207847f448d739105afea62cfd6a8c1a02",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.VoiceTransportTest"
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+      "bytes": 1797,
+      "sha256": "bcef88278bcf92e79f812152b2a3fc93ab0cc4c9c481ce0c993f9fcc4bf764f3",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "dev.thor.agent.VolcAsrProtocolTest"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "path": "README.md",
+    "sha256": "d632357d79d339a11f88d93962a0086b899fbca5f139babdb91d839c857c64b0",
+    "bytes": 1449
+  },
+  {
+    "path": "installed-package-hashes.json",
+    "sha256": "cd892939ef16a67d3301d2439b6230e8f6b74210fb9e29a73d8226c87c18eff1",
+    "bytes": 254
+  },
+  {
+    "path": "instrumentation.log",
+    "sha256": "d01d293ebef69b890883e856e37e6d5446e7c7b3440e56146f61ba7b01133cf5",
+    "bytes": 775
+  },
+  {
+    "path": "physical-voice-silence.json",
+    "sha256": "1325d287a10390f399304e61987f5182aa6c6e7f56f6d5d00472986a3b1bef93",
+    "bytes": 1056
+  },
+  {
+    "path": "summary.json",
+    "sha256": "a8900177b3cf49ac56556fe7396d5db247fdbc2416b1bf963057c4ec5fd0940f",
+    "bytes": 593
+  }
+]

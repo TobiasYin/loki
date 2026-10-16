@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "scope": "Voice empty-result software evidence, no cloud/device acceptance; excludes manifest itself",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4115,
+      "sha256": "7e1fbe4d0f1b44ac1220d0b1980201af620e318299428397baac6d452b107a87"
+    },
+    {
+      "path": "app-junit-xml-hashes.json",
+      "bytes": 8416,
+      "sha256": "bacafb8b2119441b0db4bdc99cc84a9fe45f3d4c6caf5d293e9430e4dca01398"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "429a2432dc6fc6d30a3599f69128dcc011bdb52277e4ccaff678471627b49198"
+    },
+    {
+      "path": "final-VoiceTransportTest.xml",
+      "bytes": 1510,
+      "sha256": "2c030f85ebc59ed4e7842da62edd7c207847f448d739105afea62cfd6a8c1a02"
+    },
+    {
+      "path": "final-VolcAsrProtocolTest.xml",
+      "bytes": 1797,
+      "sha256": "bcef88278bcf92e79f812152b2a3fc93ab0cc4c9c481ce0c993f9fcc4bf764f3"
+    },
+    {
+      "path": "final-gradle.log",
+      "bytes": 18222,
+      "sha256": "37b8fb7ea1f3e3211a2502ef49fe233f17abb8bb24700533939d7ddd50a9212c"
+    },
+    {
+      "path": "initial-VoiceTransportTest.xml",
+      "bytes": 5415,
+      "sha256": "cbd0b24db1a13522892653421f44378c070cb7dc3a59c62c990df25268f5ae06"
+    },
+    {
+      "path": "initial-VolcAsrProtocolTest.xml",
+      "bytes": 1797,
+      "sha256": "52a916e7bbaa59db31e57f6b26a3ff4ac5aed28debbc93a28c903371fbd2094d"
+    },
+    {
+      "path": "initial-fixture-failure-gradle.log",
+      "bytes": 17214,
+      "sha256": "567666ae7ee908186c300af7b62231e0a6bf6f379d91fbb9cbe683ac5fb4d6ad"
+    },
+    {
+      "path": "pins.json",
+      "bytes": 519,
+      "sha256": "c58c33a47b6144a3c70ae905d8951a6f6a12ced08e2d54c0dc28df87e9384c1b"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 2442,
+      "sha256": "15620c0c9505f9efb9341f8b7dbacbfc3c997715809970214fadf0e8a486c199"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 8324,
+      "sha256": "8b2806573aad746eae9198b3d76b41ce92d77750f3bf8200b14d85efd1e2ca6d"
+    },
+    {
+      "path": "ui-js-tests.log",
+      "bytes": 7994,
+      "sha256": "72c5580e9b018216066f280c97023cfcc017c5060c1f9aade69c4492e6c19f73"
+    }
+  ]
+}

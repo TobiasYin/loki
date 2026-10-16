@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "passed": true,
+  "scope": "real cloud ASR with generated silent PCM; no microphone\/UI\/model execution",
+  "endpoint": "wss:\/\/openspeech.bytedance.com\/api\/v3\/sauc\/bigmodel_async",
+  "resource": "volc.seedasr.sauc.duration",
+  "cloudCalled": true,
+  "audioSource": "generated-zero-pcm16-16000-mono",
+  "hostGameInputs": [],
+  "packets": 15,
+  "generatedAudioMs": 3000,
+  "preferencesUnchanged": {
+    "profiles": true,
+    "voice": true,
+    "native-credentials": true,
+    "display-roles": true
+  },
+  "databaseBytesUnchanged": true,
+  "events": [
+    {
+      "phase": "connecting",
+      "textLength": 0,
+      "hasNonblankSubmit": false,
+      "error": null
+    },
+    {
+      "phase": "recording",
+      "textLength": 0,
+      "hasNonblankSubmit": false,
+      "error": null
+    },
+    {
+      "phase": "finalizing",
+      "textLength": 0,
+      "hasNonblankSubmit": false,
+      "error": null
+    },
+    {
+      "phase": "empty",
+      "textLength": 0,
+      "hasNonblankSubmit": false,
+      "error": null
+    }
+  ]
+}

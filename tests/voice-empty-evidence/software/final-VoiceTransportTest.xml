@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.VoiceTransportTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-16T20:56:17.901Z" hostname="JGJHX5JPGF" time="1.878">
+  <properties/>
+  <testcase name="microphonePacketsStreamThroughSocketAndReleaseUsesCorrectedFinalOnce" classname="dev.thor.agent.VoiceTransportTest" time="0.359"/>
+  <testcase name="cancellationAndSocketFailureNeverSubmitDrafts" classname="dev.thor.agent.VoiceTransportTest" time="0.092"/>
+  <testcase name="malformedSilenceIsAnErrorAndCancellationAfterTerminalStillNeverEmitsEmpty" classname="dev.thor.agent.VoiceTransportTest" time="0.068"/>
+  <testcase name="successfulEmptyAndJsonNullTerminalNeverSubmitPartialOrLiteralNull" classname="dev.thor.agent.VoiceTransportTest" time="0.16"/>
+  <testcase name="realServiceErrorsIncluding45000002StayErrorsWithFixedMessagesAndNoDraftSubmission" classname="dev.thor.agent.VoiceTransportTest" time="0.198"/>
+  <testcase name="silenceBeforeReleaseClearsPartialAndSurvivesRealLateSocketFailureWithoutSubmitting" classname="dev.thor.agent.VoiceTransportTest" time="0.747"/>
+  <testcase name="terminalPhasePublicationIsAtomicWithConcurrentRelease" classname="dev.thor.agent.VoiceTransportTest" time="0.033"/>
+  <testcase name="silenceAfterReleaseEmitsOneEmptyForBothFrameFormsWithoutSendingAnEmptyMessage" classname="dev.thor.agent.VoiceTransportTest" time="0.216"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

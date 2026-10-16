@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "status": "PINNED_MODERN_UI_ONE_PASS",
+  "collectedUtc": "2026-10-16T20:58:02.099113+00:00",
+  "scope": "Final voice-empty App0065/Test1c6b/Lab5727 isolated API36 ModernUI1 only. RealWebView syntheticchat with interceptedNativecommands; notvoice/microphone/cloud endtoend.",
+  "artifacts": {
+    "app-debug.apk": {
+      "sha256": "006554347a6012671f238110458dafa00b70ccbfb14e70b78e2013f4dd73a953",
+      "bytes": 7864725
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "1c6bf788b8ae8dc22ff7667506bee9d2e50786cfaedbd4ede6263c01b8743d89",
+      "bytes": 3423710
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "passed": 1,
+  "failed": 0,
+  "skipped": 0,
+  "retries": 0,
+  "durationSeconds": 23.356,
+  "explicitOptIn": "emulatorUiComponents=true",
+  "actualTrustedTouchAndKeyboard": true,
+  "voiceGestureOrEmptyPathExecuted": false,
+  "cloudCalls": 0,
+  "modelExecutions": 0,
+  "deviceControlCalls": 0,
+  "thorOperations": false,
+  "otherCasesRerun": false,
+  "notificationPermissionGrantedByCollector": false,
+  "sourceOrBuildByCollector": false,
+  "preservationPassed": true,
+  "initialRuns": 117,
+  "finalRuns": 117,
+  "sessionUpdatedAtChanges": 0,
+  "allOriginalSessionPayloadsByteIdentical": true,
+  "nativeAndJsChecks": "Coordinator JVM19voice/JS73 separate evidence; notrerunbythiscollector",
+  "finalReleaseAllCasesClaim": false
+}

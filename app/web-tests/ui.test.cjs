@@ -85,6 +85,41 @@ test('failed recognition keeps transcript editable without sending partial speec
  window.receiveVoiceState({id:started.id,sessionId:'a',phase:'error',text:'保留草稿',error:'网络断开'});assert.match(doc.querySelector('#voice-status').textContent,/网络断开/);
  doc.querySelector('#voice-edit').click();assert.equal(doc.querySelector('#input').value,'保留草稿');assert.equal(doc.querySelector('#input').hidden,false);assert.equal(calls.filter(c=>c.op==='send').length,0);
 });
+test('silent recognition finishes quietly and immediately permits a new hold without sending',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const hold=doc.querySelector('#voice-hold');
+ pointer(window,hold,'pointerdown');const start=calls.at(-1);pointer(window,hold,'pointerup');
+ window.receiveVoiceState({id:start.id,sessionId:'a',phase:'empty',text:'',submit:''});
+ assert.equal(calls.filter(c=>c.op==='send').length,0);assert.equal(hold.textContent,'按住说话');assert.equal(hold.disabled,false);assert.equal(hold.getAttribute('aria-pressed'),'false');
+ assert.equal(doc.querySelector('#voice-overlay').hidden,true);assert.equal(doc.querySelector('#voice-status').hidden,true);assert.equal(doc.querySelector('#voice-status').textContent,'');assert.equal(doc.querySelector('#voice-edit').hidden,true);
+ pointer(window,hold,'pointerdown');assert.equal(calls.at(-1).op,'voice.start');assert.notEqual(calls.at(-1).id,start.id);
+});
+test('empty result discards old partial and ignores late callbacks even during the next hold',()=>{
+ const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const hold=doc.querySelector('#voice-hold');
+ pointer(window,hold,'pointerdown');const old=calls.at(-1);window.receiveVoiceState({id:old.id,sessionId:'a',phase:'recording',text:'旧的误识别草稿'});pointer(window,hold,'pointerup');
+ window.receiveVoiceState({id:old.id,sessionId:'a',phase:'empty'});
+ assert.equal(doc.querySelector('#voice-edit').hidden,true);assert.equal(doc.querySelector('#voice-transcript').textContent,'');
+ for(const phase of ['recording','complete','error'])window.receiveVoiceState({id:old.id,sessionId:'a',phase,text:'迟到文字',submit:'迟到文字',error:'迟到错误'});
+ assert.equal(doc.querySelector('#voice-status').hidden,true);assert.equal(hold.textContent,'按住说话');
+ pointer(window,hold,'pointerdown');const fresh=calls.at(-1);
+ window.receiveVoiceState({id:old.id,sessionId:'a',phase:'empty'});window.receiveVoiceState({id:old.id,sessionId:'a',phase:'complete',submit:'旧结果'});
+ assert.equal(hold.getAttribute('aria-pressed'),'true');assert.equal(doc.querySelector('#voice-overlay').hidden,false);assert.equal(calls.filter(c=>c.op==='send').length,0);
+ pointer(window,hold,'pointerup');window.receiveVoiceState({id:fresh.id,sessionId:'a',phase:'complete',submit:'新的有效语音'});
+ assert.equal(calls.filter(c=>c.op==='send').length,1);assert.equal(calls.find(c=>c.op==='send').text,'新的有效语音');
+});
+test('silent recognition leaves an existing typed draft intact through native refresh and text mode return',()=>{
+ const{window,doc,calls}=setup();const s=state();window.receiveNative(s);const input=doc.querySelector('#input');input.value='尚未发送的文字草稿';input.dispatchEvent(new window.Event('input',{bubbles:true}));
+ doc.querySelector('#voice-toggle').click();const hold=doc.querySelector('#voice-hold');pointer(window,hold,'pointerdown');const start=calls.at(-1);window.receiveVoiceState({id:start.id,sessionId:'a',phase:'recording',text:'不应覆盖原草稿'});pointer(window,hold,'pointerup');
+ window.receiveVoiceState({id:start.id,sessionId:'a',phase:'empty',text:'',submit:''});window.receiveNative(s);doc.querySelector('#voice-toggle').click();
+ assert.equal(input.hidden,false);assert.equal(input.value,'尚未发送的文字草稿');assert.equal(doc.querySelector('#voice-status').hidden,true);assert.equal(doc.querySelector('#voice-edit').hidden,true);assert.equal(calls.filter(c=>c.op==='send').length,0);
+});
+test('genuine voice errors still show their message and offer explicit partial draft recovery',()=>{
+ for(const error of ['语音连接失败（HTTP 401）','语音连接失败，请检查网络','语音响应格式无效，请重试','语音服务拒绝请求']){
+  const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const hold=doc.querySelector('#voice-hold');pointer(window,hold,'pointerdown');const start=calls.at(-1);
+  window.receiveVoiceState({id:start.id,sessionId:'a',phase:'recording',text:'待恢复的语音草稿'});pointer(window,hold,'pointerup');window.receiveVoiceState({id:start.id,sessionId:'a',phase:'error',text:'待恢复的语音草稿',error});
+  assert.equal(doc.querySelector('#voice-status').hidden,false);assert.equal(doc.querySelector('#voice-status').textContent,error);assert.equal(doc.querySelector('#voice-edit').hidden,false);assert.equal(calls.filter(c=>c.op==='send').length,0);
+  doc.querySelector('#voice-edit').click();assert.equal(doc.querySelector('#input').value,'待恢复的语音草稿');assert.equal(doc.querySelector('#input').hidden,false);assert.equal(calls.filter(c=>c.op==='send').length,0);
+ }
+});
 test('stream events become one tool card and an aggregated thinking panel without raw event JSON',()=>{
  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'回答',status:'streaming'}];
  s.events=[{type:'thinking_delta',data:{text:'先看'},summary:'{"type":"thinking_delta"}'},{type:'thinking_delta',data:{text:'攻略'}},{type:'text_delta',data:{text:'回答'}},{type:'tool_call_update',toolCallId:'c',data:{toolName:'skills_read',arguments:{name:'game-guide'}}},{type:'tool_started',toolCallId:'c',data:{toolId:'skills.read',arguments:{name:'game-guide'}}},{type:'tool_result',toolCallId:'c',data:{toolId:'skills.read',outcome:'observed',content:[{type:'text',text:JSON.stringify({content:'安全文本 <script>bad()</script>',resources:['references/a.md']})}]}}].map((e,i)=>({...e,runId:'r',sequence:i+1,elapsedMs:10}));

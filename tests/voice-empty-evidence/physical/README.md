@@ -1,0 +1,7 @@
+# Thor real-service silence acceptance
+
+The fixed App00655434/Test1c6bf788 pair was installed with data preserved after checking all existing Runs were terminal. Actual installed package hashes match the fixed packages. Existing API credentials stayed in Android native encrypted storage; no import or credential output occurred.
+
+The opt-in test called the actual configured VolcEngine ASR endpoint through production VoiceInput using generated PCM16/16kHz/mono zeros. It captured15 packets, exactly3000ms. The real terminal sequence was connecting → recording → finalizing → empty. There was no error, nonblank submission or new model task. The one instrumentation case passed in3.679s and closed its audio source. No physical microphone, UI hold, Citra input or speech-acoustic accuracy is claimed. The sanitized report does not retain the raw provider frame/code; exact-code branches are covered separately by controlled protocol/WebSocket regressions.
+
+Four original preference files (model profiles, voice settings, encrypted native credentials and display roles) and product.db main-file bytes matched before/after. Original accessibility settings were restored; no conversation row was added. This is a main database file comparison, not a claim about separately hashing WAL/SHM files. Private backups remain only under ignored local build storage. After testing, the normal launcher was opened again; this did not start a model task.

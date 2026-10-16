@@ -491,7 +491,7 @@
     $('voice-hold').textContent=holding?'松手发送 · 上滑取消':voicePhase==='finalizing'?'正在完成识别…':'按住说话';
     $('voice-overlay').hidden=!holding;$('voice-overlay').classList.toggle('cancel-pending',!!hold?.cancelPending);
     $('voice-instruction').textContent=hold?.cancelPending?'松手取消，滑回继续':'松手发送，上滑取消';
-    $('voice-status').textContent=voiceError||({finalizing:'正在完成识别…',empty:'未识别到文字，请重试',cancelled:'已取消'}[voicePhase]??'');
+    $('voice-status').textContent=voiceError||({finalizing:'正在完成识别…',cancelled:'已取消'}[voicePhase]??'');
     $('voice-status').hidden=!$('voice-status').textContent || holding;
     // Keep interim and successful transcripts out of the composer. A failure
     // offers an explicit draft recovery action without sending partial speech.
@@ -544,7 +544,9 @@
     if(next.phase==='complete' && hold.released && !submitted.has(next.id) && typeof next.submit==='string' && next.submit.trim() && !active()) {
       submitted.add(next.id);if(submitted.size>100)submitted.delete(submitted.values().next().value);
       command({op:'send',sessionId:hold.sessionId,text:next.submit.trim()});hold=null;voicePhase='idle';voiceText='';voiceError='';
-    } else if(['error','cancelled','empty'].includes(next.phase))hold=null;
+    } else if(next.phase==='empty') {
+      hold=null;voicePhase='idle';voiceText='';voiceError='';
+    } else if(['error','cancelled'].includes(next.phase))hold=null;
     refreshVoice();
   };
   window.receiveSendFailure=(text,sessionId=state?.selected)=>{drafts.set(sessionId,text);if(sessionId===state?.selected){voiceMode=false;$('input').value=text;voiceError='发送未完成，文字已恢复到输入框';refreshVoice();}};

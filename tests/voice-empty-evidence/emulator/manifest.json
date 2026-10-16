@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "OnlyfixedApp0065/Test1c6b ModernUI1 emulatorpass; novoice-specific gesture/empty/cloud/mic acceptance in thiscase. Excludesitself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2546,
+      "sha256": "31116a51c7222ae8bfa304a3519f6df2e1c57fde8c818da431b1d80f1f180f55"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "d4aad35daca56db46326b42d6de68435b694ab9b1188d99d19c3c615152e4fdb"
+    },
+    {
+      "path": "modern-ui-explicit.log",
+      "bytes": 844,
+      "sha256": "8d08bb2014edaf64150c8174c8ccf126a5de495213ae73f8f08c3f59bb2f6967"
+    },
+    {
+      "path": "modern-ui.json",
+      "bytes": 7510,
+      "sha256": "648e6f94c897227dd8b6e7f491be7aa9219fc4d7f90d7b5ca5c8ebd5d5140bd4"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2176,
+      "sha256": "0427c0f08985068c8fb305fd70535700b635d858a66d464662bd0da7c941130e"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1481,
+      "sha256": "31a5bc69723dce13e56df956ab345b93af213253579ece2ad5c37231f52f28d0"
+    }
+  ]
+}

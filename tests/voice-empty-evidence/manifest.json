@@ -1,0 +1,142 @@
+[
+  {
+    "path": "README.md",
+    "sha256": "4280c3972f0524ed0931af4730d3138ffc20bc304069b63747bbdbe4927ec3c6",
+    "bytes": 2751
+  },
+  {
+    "path": "emulator/README.md",
+    "sha256": "31116a51c7222ae8bfa304a3519f6df2e1c57fde8c818da431b1d80f1f180f55",
+    "bytes": 2546
+  },
+  {
+    "path": "emulator/artifacts.json",
+    "sha256": "d4aad35daca56db46326b42d6de68435b694ab9b1188d99d19c3c615152e4fdb",
+    "bytes": 408
+  },
+  {
+    "path": "emulator/manifest.json",
+    "sha256": "228ea539f315a8db716fc0f9247a307142f84ee3721ab6edea486cc9e54966c2",
+    "bytes": 1083
+  },
+  {
+    "path": "emulator/modern-ui-explicit.log",
+    "sha256": "8d08bb2014edaf64150c8174c8ccf126a5de495213ae73f8f08c3f59bb2f6967",
+    "bytes": 844
+  },
+  {
+    "path": "emulator/modern-ui.json",
+    "sha256": "648e6f94c897227dd8b6e7f491be7aa9219fc4d7f90d7b5ca5c8ebd5d5140bd4",
+    "bytes": 7510
+  },
+  {
+    "path": "emulator/preservation.json",
+    "sha256": "0427c0f08985068c8fb305fd70535700b635d858a66d464662bd0da7c941130e",
+    "bytes": 2176
+  },
+  {
+    "path": "emulator/summary.json",
+    "sha256": "31a5bc69723dce13e56df956ab345b93af213253579ece2ad5c37231f52f28d0",
+    "bytes": 1481
+  },
+  {
+    "path": "physical/README.md",
+    "sha256": "d632357d79d339a11f88d93962a0086b899fbca5f139babdb91d839c857c64b0",
+    "bytes": 1449
+  },
+  {
+    "path": "physical/installed-package-hashes.json",
+    "sha256": "cd892939ef16a67d3301d2439b6230e8f6b74210fb9e29a73d8226c87c18eff1",
+    "bytes": 254
+  },
+  {
+    "path": "physical/instrumentation.log",
+    "sha256": "d01d293ebef69b890883e856e37e6d5446e7c7b3440e56146f61ba7b01133cf5",
+    "bytes": 775
+  },
+  {
+    "path": "physical/manifest.json",
+    "sha256": "f0cd91e0ddf14bf2615b5b8968609ab6fd3b08f97ef82712076c9dc684a2d84a",
+    "bytes": 721
+  },
+  {
+    "path": "physical/physical-voice-silence.json",
+    "sha256": "1325d287a10390f399304e61987f5182aa6c6e7f56f6d5d00472986a3b1bef93",
+    "bytes": 1056
+  },
+  {
+    "path": "physical/summary.json",
+    "sha256": "a8900177b3cf49ac56556fe7396d5db247fdbc2416b1bf963057c4ec5fd0940f",
+    "bytes": 593
+  },
+  {
+    "path": "software/README.md",
+    "sha256": "7e1fbe4d0f1b44ac1220d0b1980201af620e318299428397baac6d452b107a87",
+    "bytes": 4115
+  },
+  {
+    "path": "software/app-junit-xml-hashes.json",
+    "sha256": "bacafb8b2119441b0db4bdc99cc84a9fe45f3d4c6caf5d293e9430e4dca01398",
+    "bytes": 8416
+  },
+  {
+    "path": "software/artifacts.json",
+    "sha256": "429a2432dc6fc6d30a3599f69128dcc011bdb52277e4ccaff678471627b49198",
+    "bytes": 1899
+  },
+  {
+    "path": "software/final-VoiceTransportTest.xml",
+    "sha256": "2c030f85ebc59ed4e7842da62edd7c207847f448d739105afea62cfd6a8c1a02",
+    "bytes": 1510
+  },
+  {
+    "path": "software/final-VolcAsrProtocolTest.xml",
+    "sha256": "bcef88278bcf92e79f812152b2a3fc93ab0cc4c9c481ce0c993f9fcc4bf764f3",
+    "bytes": 1797
+  },
+  {
+    "path": "software/final-gradle.log",
+    "sha256": "37b8fb7ea1f3e3211a2502ef49fe233f17abb8bb24700533939d7ddd50a9212c",
+    "bytes": 18222
+  },
+  {
+    "path": "software/initial-VoiceTransportTest.xml",
+    "sha256": "cbd0b24db1a13522892653421f44378c070cb7dc3a59c62c990df25268f5ae06",
+    "bytes": 5415
+  },
+  {
+    "path": "software/initial-VolcAsrProtocolTest.xml",
+    "sha256": "52a916e7bbaa59db31e57f6b26a3ff4ac5aed28debbc93a28c903371fbd2094d",
+    "bytes": 1797
+  },
+  {
+    "path": "software/initial-fixture-failure-gradle.log",
+    "sha256": "567666ae7ee908186c300af7b62231e0a6bf6f379d91fbb9cbe683ac5fb4d6ad",
+    "bytes": 17214
+  },
+  {
+    "path": "software/manifest.json",
+    "sha256": "39a5edbd07b1071e6cd2f38a70a1a537239997f63a000ad4fbea12fbace2160c",
+    "bytes": 2173
+  },
+  {
+    "path": "software/pins.json",
+    "sha256": "c58c33a47b6144a3c70ae905d8951a6f6a12ced08e2d54c0dc28df87e9384c1b",
+    "bytes": 519
+  },
+  {
+    "path": "software/source-hashes.json",
+    "sha256": "15620c0c9505f9efb9341f8b7dbacbfc3c997715809970214fadf0e8a486c199",
+    "bytes": 2442
+  },
+  {
+    "path": "software/summary.json",
+    "sha256": "8b2806573aad746eae9198b3d76b41ce92d77750f3bf8200b14d85efd1e2ca6d",
+    "bytes": 8324
+  },
+  {
+    "path": "software/ui-js-tests.log",
+    "sha256": "72c5580e9b018216066f280c97023cfcc017c5060c1f9aade69c4492e6c19f73",
+    "bytes": 7994
+  }
+]
