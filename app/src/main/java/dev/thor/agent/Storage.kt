@@ -77,14 +77,34 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
     }
 
     /** Changing a title/selection must not reread the durable event ledger. */
-    fun saveSessionUpdate(state:JSONObject) {
+    fun saveSessionUpdate(state:JSONObject,changedSessionId:String?=null) {
         val db=writableDatabase;db.beginTransaction()
         try {
-            for(row in state.getJSONArray("sessions").objects()) {
+            for(row in state.getJSONArray("sessions").objects().filter {changedSessionId==null || it.getString("id")==changedSessionId}) {
                 val values=ContentValues().apply {put("id",row.getString("id"));put("payload",row.toString())}
                 if(db.update("sessions",values,"id=?",arrayOf(row.getString("id")))==0)db.insertOrThrow("sessions",null,values)
             }
             db.insertWithOnConflict("metadata",null,ContentValues().apply {put("name","selected");put("value",state.optString("selected"))},SQLiteDatabase.CONFLICT_REPLACE)
+            db.setTransactionSuccessful()
+        } finally {db.endTransaction()}
+    }
+
+    /** A captured image appends one row; never scans or rewrites old image bodies,
+     * messages or evidence. A duplicate identity must fail rather than replace. */
+    fun saveAttachment(row:JSONObject) {
+        val db=writableDatabase
+        val sid=row.getString("sessionId")
+        val rid=if(row.isNull("runId"))null else row.getString("runId")
+        val values=ContentValues().apply {
+            put("id",row.getString("id"));put("sessionId",sid);put("payload",row.toString())
+            if(rid==null)putNull("runId") else put("runId",rid)
+        }
+        db.beginTransaction()
+        try {
+            if(rid!=null)db.rawQuery("SELECT sessionId FROM runs WHERE id=?",arrayOf(rid)).use {c->
+                require(c.moveToFirst() && c.getString(0)==sid){"Attachment Run/Session mismatch"}
+            }
+            db.insertOrThrow("attachments",null,values)
             db.setTransactionSuccessful()
         } finally {db.endTransaction()}
     }
@@ -109,7 +129,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         }
         db.beginTransaction()
         try {
-            state.getJSONArray("sessions").objects().forEach {upsert("sessions",it)}
+            upsert("sessions",state.getJSONArray("sessions").objects().single {it.getString("id")==sid})
             upsert("runs",run)
             state.getJSONArray("messages").objects().filter {it.optString("runId")==rid}.forEach {upsert("messages",it)}
             if(event!=null)db.insertOrThrow("events",null,values("events",event))

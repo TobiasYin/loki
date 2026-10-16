@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "scope": "Public emulator evidence groups separately pinned by App/Test identity: receipt-fix Runtime pair2 background cases;256integration14-case pair; separate dual-screen case; historical groups. Passing results are not transferred between APKs. No APK/private DB/credentials/full history/raw cloud response included.",
+  "reportsNormalization": "Historical UI-provider report JSON whitespace compacted with fields retained. service-ui-final and final-pair JSON are selected summaries/boolean contracts; full reports stay ignored locally. Separate dual-screen artifacts retain their own evidence schema. Four historical ui-provider log excerpts have trailing blank lines normalized; original local logs are preserved unchanged.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 14884,
+      "sha256": "a7e17a0eba5ba36c8e88470d1f59b2f3703c4eeaddd7571cac9240a9e4e2637f"
+    },
+    {
+      "path": "background-runtime/background.log",
+      "bytes": 1555,
+      "sha256": "1adb093718b17452d7ae42dbe75cf021a5746f217fa5324da5249a140362d57b"
+    },
+    {
+      "path": "background-runtime/picker.log",
+      "bytes": 2184,
+      "sha256": "6418cd954c6a8cf72ed5bc97a1084b427e9b47bb10a2ff8e2dc46c837d967164"
+    },
+    {
+      "path": "background-runtime/summary.json",
+      "bytes": 989,
+      "sha256": "dbed15608207b597b51787bb70403401202424d0b2b6acbd295a393d04ab4651"
+    },
+    {
+      "path": "dual-screen/emulator-dual-screen-lower-events.jsonl",
+      "bytes": 3073,
+      "sha256": "0c40497fe61d5999aa7529ef7202f3eaf8c20216c98bf848e150fc862a925812"
+    },
+    {
+      "path": "dual-screen/emulator-dual-screen-lower.jpg",
+      "bytes": 12779,
+      "sha256": "754cf8319bf882e8475d3e9f9f2cb132203d43de49306a80ad24377e171fd151"
+    },
+    {
+      "path": "dual-screen/emulator-dual-screen-upper-events.jsonl",
+      "bytes": 12502,
+      "sha256": "03a4d47d97641530d75ad95e02a3cec603c4454ce062c7e07ff16b30a625736c"
+    },
+    {
+      "path": "dual-screen/emulator-dual-screen-upper.jpg",
+      "bytes": 14739,
+      "sha256": "d1248d5f0196cef49eb9ca9edee9f14931c4830d75122e749d6fbc336c394719"
+    },
+    {
+      "path": "dual-screen/instrumentation.log",
+      "bytes": 833,
+      "sha256": "ab1be90f862add8692d7c05eebebae8c5f1bdc9c2f30d01e5eda55395d802d20"
+    },
+    {
+      "path": "dual-screen/lower-receiver-report.json",
+      "bytes": 2196,
+      "sha256": "5c3b0b6205c4f13a0c8e8309e190ef07af1099c3538943ae83dcf27a1153297e"
+    },
+    {
+      "path": "dual-screen/native-tool-results.json",
+      "bytes": 33213,
+      "sha256": "3fdeab786c7f464436eb32cd40808ddd7e89d5055f8fbf4cdde38c7b6799e9eb"
+    },
+    {
+      "path": "dual-screen/restored-state.json",
+      "bytes": 612,
+      "sha256": "e0202b8ec5aeef99341378a069b93481b0be92ed24738a106ce0bcaf208cb657"
+    },
+    {
+      "path": "dual-screen/summary.json",
+      "bytes": 2451,
+      "sha256": "0b24d9bfdafb4b8368ddead66dec5d9ad3e40058fdb4d505ac9d127913687bc7"
+    },
+    {
+      "path": "dual-screen/upper-receiver-report.json",
+      "bytes": 23247,
+      "sha256": "62d330e8bd1f2710708f97fb38e17cb7dc28102867f37db4c8c76897d3f8362e"
+    },
+    {
+      "path": "final-pair/background.log",
+      "bytes": 1555,
+      "sha256": "dba23c13dfbca2685363fb01f2a78d674c1bb679a3e0547263bd85c92c6b92b0"
+    },
+    {
+      "path": "final-pair/images/model-picker.png",
+      "bytes": 59632,
+      "sha256": "a5cecbf791496505e389a7ab7995d1522bd22c54c0a83c91183b24ba0bb00403"
+    },
+    {
+      "path": "final-pair/picker.log",
+      "bytes": 2185,
+      "sha256": "d91ab9ea07be2df56ac99569861a376f609c89bc8e38909bfecd98d408d16b36"
+    },
+    {
+      "path": "final-pair/provider-contracts.json",
+      "bytes": 761,
+      "sha256": "a0d01ee451e4249f252a9b9333080be5f18545b5deac9d3b77ec9eedc772a4cc"
+    },
+    {
+      "path": "final-pair/provider-storage-launcher.log",
+      "bytes": 5009,
+      "sha256": "8e07ee13303262b83eecff9b2f3acc37d7d1965ae592dcea8abcd5c008a79cf9"
+    },
+    {
+      "path": "final-pair/summary.json",
+      "bytes": 4887,
+      "sha256": "36f5389676b5752f794ac9c9e855bae395438ac1fbca418e290cae498a99c9dc"
+    },
+    {
+      "path": "final-pair/ui-normal.log",
+      "bytes": 844,
+      "sha256": "736da4d49d9b87883515e77b857e716f0a913ba742438a98d866e85038aef6fe"
+    },
+    {
+      "path": "final-pair/ui-reduced.log",
+      "bytes": 843,
+      "sha256": "1617f38058838bf94625d3f8df8d3a7336746c5d541818b446f74a3dee64787d"
+    },
+    {
+      "path": "launcher/instrumentation.log",
+      "bytes": 2174,
+      "sha256": "2bec6f01d23ba204a97873445bf27fbc8e38db9ae89f1cbea1798c08c8244a6e"
+    },
+    {
+      "path": "launcher/summary.json",
+      "bytes": 997,
+      "sha256": "3c8e58e1f7a624d6597313e3dfdb6568617d51b5a5ef52b2bd0a994af622622f"
+    },
+    {
+      "path": "runtime-pair/background.log",
+      "bytes": 1555,
+      "sha256": "11cc2ba1e67b1582befb582ac001694100cf4e5f33c6006c6c175a2d230a8c95"
+    },
+    {
+      "path": "runtime-pair/summary.json",
+      "bytes": 2284,
+      "sha256": "2a647d13e5fac3a00765c8922ce6e3327895d2853605e3e45d646f0b365ca27f"
+    },
+    {
+      "path": "service-ui-final/images/model-picker.png",
+      "bytes": 59442,
+      "sha256": "d33c040a1c50a9bbf5b7138b51cbbe985ae956fad0f11a34c4cd78e6006bc2f2"
+    },
+    {
+      "path": "service-ui-final/images/topics.png",
+      "bytes": 40634,
+      "sha256": "f6334a2755ba56cbab9f274854ad83be510140a3cda8919954c5ae457eea8a8a"
+    },
+    {
+      "path": "service-ui-final/provider-contracts.json",
+      "bytes": 761,
+      "sha256": "a0d01ee451e4249f252a9b9333080be5f18545b5deac9d3b77ec9eedc772a4cc"
+    },
+    {
+      "path": "service-ui-final/provider-storage-launcher.log",
+      "bytes": 5009,
+      "sha256": "58b75ebd32fde64d792ba583936d87a8d0d57aeede1b9e2174dddda350bc088b"
+    },
+    {
+      "path": "service-ui-final/summary.json",
+      "bytes": 4278,
+      "sha256": "2fbb2b3a79343989b2fd58cea2f72887e5189ff88c1db6dee8487c62810a0d8e"
+    },
+    {
+      "path": "service-ui-final/ui-normal.log",
+      "bytes": 844,
+      "sha256": "0b385368f0ac54948748d0b804cb78d4c844873e5ad4bafd90a6bbf4498821d4"
+    },
+    {
+      "path": "service-ui-final/ui-reduced.log",
+      "bytes": 843,
+      "sha256": "edf6cf677141b497ca73d3901b7f14c8ba67283d698e3f05f1ba483f0eebe386"
+    },
+    {
+      "path": "ui-provider/images/capability-rollback.png",
+      "bytes": 72198,
+      "sha256": "4873663223ca285847b3fb87abd3050bb44c3f92f6e0b92f279556ecb5ddbdc8"
+    },
+    {
+      "path": "ui-provider/images/model-picker.png",
+      "bytes": 59859,
+      "sha256": "87c225a606819284d91e80137fe844fe79680f7f79992e018f83c6cc404334ea"
+    },
+    {
+      "path": "ui-provider/images/topics.png",
+      "bytes": 40924,
+      "sha256": "3a81dc8510d17ee6663b67fdf93b0365864f18ef21414799001b92e71394f509"
+    },
+    {
+      "path": "ui-provider/js-tests.log",
+      "bytes": 5599,
+      "sha256": "3a9b1171ee4472306ab584e7c1773ceefdbd1fc654f4f8742afbebb428d2abef"
+    },
+    {
+      "path": "ui-provider/provider-defaults.json",
+      "bytes": 88,
+      "sha256": "026d7f36a8e2dfa54f46f3bedb84bc7cd2c51f1c95012760ad90f54f75b392ef"
+    },
+    {
+      "path": "ui-provider/provider-settings.json",
+      "bytes": 545,
+      "sha256": "6eb6913bc8b48e42dcec9d1f7e03aa50ef47bbea45889bb7e4bae5668a31183e"
+    },
+    {
+      "path": "ui-provider/provider-settings.log",
+      "bytes": 76,
+      "sha256": "2b745f8404d2f446086c74f3721b8ce7bfdf3e4f693019d97bbcfc7cfce16725"
+    },
+    {
+      "path": "ui-provider/scoped-storage.log",
+      "bytes": 69,
+      "sha256": "e6a9825fafff73fa1a31e4cbfafd200345772ab259a55703be9a6a8de174150b"
+    },
+    {
+      "path": "ui-provider/summary.json",
+      "bytes": 2947,
+      "sha256": "670ad265b437380eda17606f52289cb268747d69cd1ae700c24423fc0444d214"
+    },
+    {
+      "path": "ui-provider/ui-normal.json",
+      "bytes": 17391,
+      "sha256": "efa5c5940b6604f1bc17a6c5835e48decbbdaef04be26ae17f5987b8d4d3a294"
+    },
+    {
+      "path": "ui-provider/ui-normal.log",
+      "bytes": 70,
+      "sha256": "4e463b96a65dedf4b8ac2ebd788d99bd7f1a0b07a9e57fa343a033b4f7973319"
+    },
+    {
+      "path": "ui-provider/ui-reduced.json",
+      "bytes": 10438,
+      "sha256": "289fd3b8684a76503f56df42f52c652774c8f3f369475b0cb0916b0ff46ba8f9"
+    },
+    {
+      "path": "ui-provider/ui-reduced.log",
+      "bytes": 69,
+      "sha256": "fa5e8b0902abad5d915d50b54af9135306273d7de0965379421f238e170ed164"
+    }
+  ]
+}

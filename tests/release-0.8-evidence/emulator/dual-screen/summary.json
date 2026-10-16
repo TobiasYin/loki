@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "passed": true,
+  "tests": 1,
+  "seconds": 70.597,
+  "scope": "emulator real Native component; synthetic offline receivers; no model execution",
+  "evidenceMode": "manual_platform_api",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "adbPort": 5042,
+  "serial": "127.0.0.1:5557",
+  "artifacts": {
+    "app-debug.apk": "256498c422e201fe728315f3dfbdcdefa649685fa16df46246cb9435f1ec7e24",
+    "app-debug-androidTest.apk": "d0866d32e310e099f7c71f942ffefaf824942416d2dd2946674d7f807651355c",
+    "input-lab-debug.apk": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e"
+  },
+  "nativeToolSteps": 19,
+  "expectedDenials": [
+    {
+      "toolId": "input.tap",
+      "error": "TARGET_CHANGED"
+    },
+    {
+      "toolId": "input.activate",
+      "error": "TARGET_CHANGED"
+    },
+    {
+      "toolId": "input.tap",
+      "error": "TARGET_CHANGED"
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "error": "PERMISSION_MISSING"
+    }
+  ],
+  "upperActivationWindowDiagnostic": [
+    {
+      "windowId": 119,
+      "focused": false,
+      "active": false,
+      "matchesTreeWindow": true
+    }
+  ],
+  "upperReceiverStatus": "pass",
+  "upperSemanticCount": 1,
+  "lowerDownCount": 1,
+  "lowerUpCount": 1,
+  "lowerClickCount": 1,
+  "lowerPage": "preferences",
+  "lowerNavigationCount": 1,
+  "lowerClickCallbackDeferred": true,
+  "lowerClickSenderAttribution": "time-window-only-not-sender-authentication",
+  "upperRawSha256": "03a4d47d97641530d75ad95e02a3cec603c4454ce062c7e07ff16b30a625736c",
+  "lowerRawSha256": "0c40497fe61d5999aa7529ef7202f3eaf8c20216c98bf848e150fc862a925812",
+  "guards": {
+    "backgroundObserved": true,
+    "crossScreenOldSnapshotRejected": true,
+    "crossScreenOldNodeRejected": true,
+    "crossScreenOldFrameRejected": true,
+    "otherRunSelectionUnchanged": true,
+    "obscuredLowerOwnWindowRefused": true,
+    "obscuredLowerCanEscapeToUpper": true
+  },
+  "preservation": {
+    "otherRunSelectionUnchanged": true,
+    "profilesRestored": true,
+    "credentialsRestored": true,
+    "rolesRestored": true,
+    "overlayDisplaySettingUnchanged": true,
+    "originalHistoryPreserved": true,
+    "accessibilityRestored": true,
+    "immersiveLessonSettingRestored": true,
+    "selectedSessionRestored": true,
+    "temporaryDisplayReleased": true
+  },
+  "cleanupErrors": [],
+  "localEvidence": "build/emulator/dual-screen-2026-10-17/run-07"
+}

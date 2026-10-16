@@ -1,0 +1,11 @@
+Extracted software summary; full source log identity is in software-checks.json.
+Source: build/physical/release-0.8-2026-10-16/app-final-js-tests.log
+latest successful App JS run, corrected to app working directory by main flow during collection; collection itself did not execute tests
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2477.792125

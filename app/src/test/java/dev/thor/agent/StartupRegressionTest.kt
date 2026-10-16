@@ -5,11 +5,13 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class StartupRegressionTest {
-    @Test fun tenCharacterTitlesKeepWholeEmojiAndNormalizeWhitespace() {
-        assertEquals("帮我查看上屏应用并截",promptTitle("  帮我查看上屏应用并截图然后点击  "))
-        assertEquals("123456789😀",promptTitle("123456789😀后面的文字"))
+    @Test fun titlesPreserveMeaningfulFirstLineInsteadOfFixedTenCharacters() {
+        assertEquals("帮我查看上屏应用并截图然后点击",promptTitle("  帮我查看上屏应用并截图然后点击  "))
+        assertEquals("123456789😀后面的文字",promptTitle("123456789😀后面的文字"))
         assertEquals("新会话",promptTitle(" \n "))
-        assertEquals("查看 上屏",promptTitle("查看\n上屏"))
+        assertEquals("查看",promptTitle("查看\n上屏"))
+        assertEquals("第一行 完整标题",promptTitle("\n\t 第一行  完整标题\n第二行代码或正文"))
+        val title=promptTitle("😀".repeat(600));assertEquals(512,title.codePointCount(0,title.length));assertTrue(title.endsWith("😀"))
     }
     @Test fun indexHandlesAppendDeleteAndStateRecoveryWithoutStaleRows() {
         val index=EventIndex();val events=JSONArray()

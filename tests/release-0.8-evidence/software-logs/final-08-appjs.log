@@ -1,0 +1,12 @@
+Source: build/physical/release-0.8-2026-10-16/final-08-appjs.log
+Source SHA256: c4f10cdefcb407e6e8267870be8b84b93f741fac5bd08191b15a2d4d17d012e8
+Selected evidence excerpt; not the complete source log.
+
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2660.422875

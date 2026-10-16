@@ -19,6 +19,11 @@ internal class EventIndex {
         }
     }
     @Synchronized fun sessionEvents(events:JSONArray,sid:String):List<JSONObject> {update(events);return bySession[sid].orEmpty().toList()}
+    @Synchronized fun sessionEventCount(events:JSONArray,sid:String):Int {update(events);return bySession[sid]?.size ?: 0}
+    @Synchronized fun sessionEventsSince(events:JSONArray,sid:String,offset:Int):List<JSONObject> {
+        update(events);val rows=bySession[sid].orEmpty();require(offset in 0..rows.size)
+        return rows.subList(offset,rows.size).toList()
+    }
     @Synchronized fun runEventCount(events:JSONArray,rid:String):Int {update(events);return byRun[rid]?.size ?: 0}
     @Synchronized fun runEvents(events:JSONArray,rid:String):List<JSONObject> {update(events);return byRun[rid].orEmpty().toList()}
 }

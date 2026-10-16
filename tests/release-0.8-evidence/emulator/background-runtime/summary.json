@@ -1,0 +1,28 @@
+{
+  "picker": {
+    "passed": true,
+    "exitCode": 0
+  },
+  "notificationBefore": {
+    "granted": false,
+    "line": "android.permission.POST_NOTIFICATIONS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+  },
+  "background": {
+    "passed": true,
+    "exitCode": 0
+  },
+  "notificationAfter": {
+    "granted": false,
+    "line": "android.permission.POST_NOTIFICATIONS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]"
+  },
+  "notificationRestored": true,
+  "scope": "isolated emulator 5042/127.0.0.1:5557; loopback model fixture only; no Thor or game input",
+  "appSha256": "9c03e723c21978c809480b5fc75e717ca248f845ee91b2888f872be64373fee8",
+  "testSha256": "c7a9a197dbaccec6ba1e46756ef4f04496d57e9c27aeeb54f5f8e8994e5fe66e",
+  "pickerTests": 3,
+  "backgroundTests": 2,
+  "backgroundSeconds": 18.567,
+  "pickerSeconds": 0.23,
+  "localEvidence": "build/emulator/dual-screen-2026-10-17/run-02",
+  "dualScreenPassed": false
+}

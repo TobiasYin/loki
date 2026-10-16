@@ -1,0 +1,10 @@
+Selected task/result lines only; full source log identity is in software-checks.json.
+Source: build/physical/release-0.8-2026-10-16/navigation-build.log
+> Task :bundleRuntime
+> Task :device-authority:test
+> Task :device-core:test
+> Task :app:testDebugUnitTest
+> Task :app:assembleDebugAndroidTest UP-TO-DATE
+> Task :app:assembleDebug
+BUILD SUCCESSFUL in 8s
+122 actionable tasks: 22 executed, 100 up-to-date

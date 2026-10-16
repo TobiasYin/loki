@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "status": "POINT_IN_TIME_256_INTEGRATION_FOURTEEN_PASSED",
+  "notLatestRuntimeFixAcceptance": true,
+  "pointInTimeNote": "This exact256integration APK pair passed14 emulator component/lifecycle tests. A subsequent runtime post-effect observation fix is outside this tested APK; no same-package acceptance is claimed for later builds.",
+  "appSha256": "256498c422e201fe728315f3dfbdcdefa649685fa16df46246cb9435f1ec7e24",
+  "testSha256": "d0866d32e310e099f7c71f942ffefaf824942416d2dd2946674d7f807651355c",
+  "localAndInstalledApkHashesVerified": true,
+  "apkAssetSha256": {
+    "assets/chat/ui.js": "b9d67e2da4c370f512131daaedd822666e57cabbc37a687d5e5baa7a230fdfd6",
+    "assets/chat/style.css": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52"
+  },
+  "distinctTests": 14,
+  "failures": 0,
+  "skipped": 0,
+  "suites": {
+    "ui-normal": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 21.048
+    },
+    "ui-reduced": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 8.413
+    },
+    "provider-storage-launcher": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 23.921
+    }
+  },
+  "supplementSuites": {
+    "picker": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 0.137
+    },
+    "background": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 25.652
+    }
+  },
+  "normalFrameSummary": {
+    "thought-open": {
+      "frames": 29,
+      "minimumCssHeight": 26,
+      "maximumCssHeight": 206,
+      "intermediateFrames": 11,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 83.4
+    },
+    "thought-close": {
+      "frames": 28,
+      "minimumCssHeight": 26,
+      "maximumCssHeight": 206,
+      "intermediateFrames": 7,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 50.0
+    },
+    "operations-open": {
+      "frames": 26,
+      "minimumCssHeight": 27,
+      "maximumCssHeight": 59,
+      "intermediateFrames": 7,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 49.9
+    },
+    "tool-open": {
+      "frames": 26,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateFrames": 10,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 50.1
+    },
+    "tool-close": {
+      "frames": 36,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateFrames": 9,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 66.6
+    },
+    "rapid-stream": {
+      "frames": 39,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateFrames": 30,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 66.6
+    }
+  },
+  "normalTrustedTouchAndKeyboardVerified": true,
+  "bridgeFailureUiRollbackVerified": true,
+  "reducedMotionSystemPreferenceVerified": true,
+  "profileAndCredentialsUnchanged": true,
+  "syntheticDocumentCleanupSucceeded": true,
+  "normalTimingMs": 250,
+  "normalEasing": "cubic-bezier(.4,0,.2,1)",
+  "normalStrictIntermediateFramesMinimum": 2,
+  "frameObservation": "Real trusted input;>=550ms and actual dataset/WAAPI settled, hard5s. No threshold reduction.",
+  "stable60FpsClaimed": false,
+  "backgroundContracts": {
+    "mode": "local-real-sse",
+    "cloudRequests": 0,
+    "deviceInputCalls": 0,
+    "passed": true,
+    "backgroundProbeHandoff": true,
+    "phase": "complete",
+    "sameWebView": true,
+    "sameHost": true,
+    "samePiSession": true,
+    "foregroundNotification": true,
+    "notificationStoppedRun": true,
+    "partialContextRetained": true,
+    "requestCount": 5
+  },
+  "notificationPermissionAndFlagsRestored": true,
+  "notificationOriginalAndRestoredGranted": false,
+  "animatorDurationScaleRestored": "null",
+  "serviceExitedAfterTests": true,
+  "scope": "Isolated AVD5042 only. Real WebView/platform inputs over synthetic UI; Native provider controlled loopback; temporary SQLite; real PackageManager with intercepted launch Intent; picker pending-result contracts without launching the system picker/reading a URI; background real Native bridge/Pi and loopback SSE. No official cloud, Thor/Citra/game, actual launcher foreground or complete picker import acceptance. Separate dual-screen test evidence is not counted in these14 cases.",
+  "sourceArtifacts": "build/emulator/ui-service-2026-10-17/final-03",
+  "pinDirectory": "build/emulator/dual-screen-2026-10-17/run-07",
+  "completedUtc": "2026-10-16T17:30:34.453845+00:00",
+  "earlierEvidenceRetained": "../service-ui-final and ../background-runtime preserve earlier9c03 App results, with their respective test APK hashes. Failed animation attempts remain ignored locally and are explained in README."
+}

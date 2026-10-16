@@ -1,0 +1,5 @@
+Source: build/physical/release-0.8-2026-10-16/final-08-artifacts.log
+Source SHA256: 525401e68182e1b72810e68fa09c0ee3e5b79f9d6398a63f7b7b4f920ee80d6b
+Selected evidence excerpt; not the complete source log.
+
+KeyError: 'ANDROID_HOME'

@@ -23,7 +23,7 @@ data class Target(val packageName: String?, val validity: String, val revision: 
     fun sameStructure(other:Target)=packageName==other.packageName && validity==other.validity && (layoutRevision ?: revision)==(other.layoutRevision ?: other.revision)
     fun sameLayout(other:Target)=sameStructure(other) && revision==other.revision && (touchableBounds==null)==(other.touchableBounds==null)
 }
-data class Snapshot(val id: String, val display: DisplayFact, val displayEpoch: Long, val target: Target, val expires: Long)
+data class Snapshot(val id: String, val display: DisplayFact, val displayEpoch: Long, val target: Target, val expires: Long,val role:String="upper")
 class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Target) {
     companion object {
         /** Resource freshness only, never a model-run timeout. Target/layout,
@@ -35,6 +35,16 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
     private var lower: DisplayFact? = null
     private var epoch = 1L
     private val snapshots = LinkedHashMap<String, Snapshot>()
+    private var lowerGuard:((DisplayFact,Target)->Unit)?=null
+    @Synchronized fun installLowerGuard(guard:(DisplayFact,Target)->Unit) {lowerGuard=guard}
+    private fun checkRoleTarget(display:DisplayFact,role:String,target:Target) {
+        if(role=="lower") {
+            requireTool(target.validity=="valid" && !target.packageName.isNullOrBlank() && target.packageName!="dev.thor.agent",
+                Code.PERMISSION_MISSING,"Lower target must be a unique non-assistant application")
+            requireTool(target.touchableBounds?.let {it.left<it.right && it.top<it.bottom}==true,Code.SECURE_CONTENT,"Lower target has no safe visible region")
+            lowerGuard?.invoke(display,target)
+        }
+    }
     @Synchronized fun update(facts: List<DisplayFact>) {
         if (displays != facts.sortedBy { it.id }) {
             epoch++; snapshots.clear()
@@ -50,29 +60,56 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
         upper = chosenUpper; lower = chosenLower
         epoch++; snapshots.clear()
     }
-    @Synchronized fun selected(): DisplayFact = upper ?: fail(Code.DISPLAY_GONE, "Calibrate upper/lower displays first")
-    @Synchronized fun capture(): Snapshot {
-        val display = selected()
-        val snap = Snapshot(UUID.randomUUID().toString(), display, epoch, currentTarget(display.id), clock.now() + OBSERVATION_TTL_MS)
+    @Synchronized fun selected(role:String="upper"): DisplayFact = when(role) {
+        "upper"->upper;"lower"->lower;else->fail(Code.INVALID_ARGUMENT,"Screen role must be upper or lower")
+    } ?: fail(Code.DISPLAY_GONE,"Calibrated $role display unavailable")
+    @Synchronized fun capture(role:String="upper"): Snapshot {
+        val display = selected(role);val target=currentTarget(display.id)
+        checkRoleTarget(display,role,target)
+        val snap = Snapshot(UUID.randomUUID().toString(), display, epoch, target, clock.now() + OBSERVATION_TTL_MS,role)
         if (snapshots.size >= 32) snapshots.remove(snapshots.keys.first())
         snapshots[snap.id] = snap
         return snap
     }
     @Synchronized fun validate(id: String?): Snapshot {
         val snap = snapshots[id] ?: fail(Code.TARGET_CHANGED, "Snapshot missing/invalidated")
-        requireTool(clock.now() < snap.expires && snap.displayEpoch == epoch && snap.display == upper,
+        requireTool(clock.now() < snap.expires && snap.displayEpoch == epoch && snap.display == selected(snap.role),
             Code.TARGET_CHANGED, "Display snapshot expired/changed")
-        requireTool(snap.target.sameLayout(currentTarget(snap.display.id)), Code.TARGET_CHANGED, "Upper windows/app/layout changed")
+        val current=currentTarget(snap.display.id);checkRoleTarget(snap.display,snap.role,current)
+        requireTool(snap.target.sameLayout(current), Code.TARGET_CHANGED, "Selected screen windows/app/layout changed")
         return snap
     }
-    /** Only an already-submitted bounded hold may ignore its own content
-     * feedback. New inputs and perception still use strict validate(). */
+    /** An already-submitted bounded hold may ignore its own content feedback.
+     * New coordinate inputs and existing node references keep strict validate(). */
     @Synchronized fun validateHeld(id:String?):Snapshot {
         val snap=snapshots[id] ?: fail(Code.TARGET_CHANGED,"Snapshot missing/invalidated")
-        requireTool(clock.now()<snap.expires && snap.displayEpoch==epoch && snap.display==upper,
+        requireTool(clock.now()<snap.expires && snap.displayEpoch==epoch && snap.display==selected(snap.role),
             Code.TARGET_CHANGED,"Display snapshot expired/changed")
-        requireTool(snap.target.sameStructure(currentTarget(snap.display.id)),Code.TARGET_CHANGED,"Upper windows/app/layout changed during held input")
+        val current=currentTarget(snap.display.id);checkRoleTarget(snap.display,snap.role,current)
+        requireTool(snap.target.sameStructure(current),Code.TARGET_CHANGED,"Selected screen windows/app/layout changed during held input")
         return snap
+    }
+    /** Reading pixels/text and fixed non-coordinate navigation may span app text
+     * updates. Window identity, focus, package, exact clipping and display remain
+     * bound to the original observation. This never authorizes coordinates/refs. */
+    @Synchronized fun validateObservation(id:String?):Snapshot {
+        val snap=snapshots[id] ?: fail(Code.TARGET_CHANGED,"Observation missing/invalidated")
+        requireTool(clock.now()<snap.expires && snap.displayEpoch==epoch && snap.display==selected(snap.role),
+            Code.TARGET_CHANGED,"Display observation expired/changed")
+        val current=currentTarget(snap.display.id)
+        checkRoleTarget(snap.display,snap.role,current)
+        requireTool(snap.target.sameStructure(current) && snap.target.touchableBounds==current.touchableBounds,
+            Code.TARGET_CHANGED,"Observed app/windows/geometry changed")
+        return snap
+    }
+    /** Sign a fresh identity at read completion. The caller must retain the
+     * original capture identity for any pixels/refs recorded before this point. */
+    @Synchronized fun captureReadCompletion(observationId:String?):Snapshot {
+        val before=validateObservation(observationId)
+        val after=capture(before.role)
+        requireTool(before.target.sameStructure(after.target) && before.target.touchableBounds==after.target.touchableBounds,
+            Code.TARGET_CHANGED,"Observed app/windows/geometry changed at read completion")
+        return after
     }
     @Synchronized fun validateInputPoints(id:String?,points:List<Point>) {
         val snap=validate(id)
@@ -89,12 +126,60 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
      * display/role authorized by its request. Never use this for input. */
     @Synchronized fun validateReadSource(id: String?): Snapshot {
         val source=snapshots[id] ?: fail(Code.TARGET_CHANGED,"Read source snapshot missing/invalidated")
-        requireTool(source.displayEpoch==epoch && source.display==upper,Code.TARGET_CHANGED,"Read display/role changed")
+        requireTool(source.displayEpoch==epoch && source.display==selected(source.role),Code.TARGET_CHANGED,"Read display/role changed")
         return source
     }
     @Synchronized fun captureForRead(sourceId: String?): Snapshot {
+        val source=validateReadSource(sourceId)
+        return capture(source.role)
+    }
+    @Synchronized fun selectScreen(sourceId:String?,role:String):Snapshot {
         validateReadSource(sourceId)
-        return capture()
+        requireTool(role in setOf("upper","lower"),message="Screen role must be upper or lower")
+        return capture(role)
+    }
+    /** Lower is discovered from calibration only; no caller-selected display or
+     * companion identity may ever become an input snapshot. */
+    @Synchronized fun captureCompanion(sourceId:String?,forbiddenPackages:Set<String>):CompanionObservation {
+        requireTool(validateReadSource(sourceId).role=="upper",message="Companion shortcut requires an upper source; select upper or read the selected lower screen normally")
+        val observed=captureForRead(sourceId)
+        requireTool(observed.target.validity=="valid" && !observed.target.packageName.isNullOrBlank() && observed.target.packageName !in forbiddenPackages,
+            Code.PERMISSION_MISSING,"Companion requires an authorized non-assistant upper application")
+        requireTool(observed.target.touchableBounds?.let {it.left<it.right && it.top<it.bottom}==true,
+            Code.SECURE_CONTENT,"Authorized upper application is not unambiguously visible")
+        val companion=lower ?: fail(Code.DISPLAY_GONE,"Calibrated lower display is unavailable")
+        requireTool(companion!=observed.display && companion in displays,Code.DISPLAY_GONE,"Distinct calibrated lower display required")
+        val target=currentTarget(companion.id)
+        requireTool(target.validity=="valid" && target.packageName==observed.target.packageName,Code.PERMISSION_MISSING,"Lower display is not a companion of the current upper application")
+        checkRoleTarget(companion,"lower",target)
+        return CompanionObservation(UUID.randomUUID().toString(),observed,companion,target,observed.expires).also {validateCompanion(it)}
+    }
+    @Synchronized fun validateCompanion(observation:CompanionObservation) {
+        validateObservation(observation.upper.id)
+        requireTool(clock.now()<observation.expires && observation.lowerDisplay==lower && observation.lowerDisplay in displays,
+            Code.TARGET_CHANGED,"Companion display/role/geometry or lifetime changed")
+        val current=currentTarget(observation.lowerDisplay.id)
+        checkRoleTarget(observation.lowerDisplay,"lower",current)
+        requireTool(current.validity=="valid" && current.packageName==observation.upper.target.packageName &&
+            observation.lowerTarget.sameStructure(current) && observation.lowerTarget.touchableBounds==current.touchableBounds,
+            Code.TARGET_CHANGED,"Companion app/window/visible geometry changed")
+    }
+    @Synchronized fun completeCompanion(observation:CompanionObservation):Snapshot {
+        validateCompanion(observation)
+        val upperCompletion=captureReadCompletion(observation.upper.id)
+        validateCompanion(observation)
+        return upperCompletion
+    }
+    @Synchronized fun validateCompanionResult(upperId:String?,data:Map<String,Any?>) {
+        val upperObservation=validateObservation(upperId)
+        val imageIdentity=data["companionObservationId"] as? String
+        requireTool(upperObservation.role=="upper" && lower!=null && data["readOnly"]==true && data["frameInputUsable"]==false && !data.containsKey("frameId") &&
+            data["coordinateSpace"]=="companion_read_only" && data["displayRole"]=="lower-companion-read-only" &&
+            data["displayId"]==lower?.id && data["displayId"]!=upperObservation.display.id &&
+            data["authorizedInputDisplayId"]==upperObservation.display.id && data["targetSnapshotId"]==upperObservation.id &&
+            !imageIdentity.isNullOrBlank() && imageIdentity !in snapshots &&
+            (data["companionImageTransform"] as? Map<*,*>)?.get("identity")==imageIdentity,
+            Code.TARGET_CHANGED,"Companion result must retain upper input authority and a separate read-only lower image identity")
     }
 }
 data class Point(val x: Double, val y: Double)

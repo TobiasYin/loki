@@ -18,15 +18,22 @@ data class Descriptor(val toolId: String, val capability: Capability, val effect
     val provenance: String = "builtin", val modelVisibility: Boolean = true)
 object ToolPack {
     const val VERSION = "0.1.0"
-    /** These tools observe the current upper display. Old observations remain
+    /** These tools observe the Run-selected calibrated screen. Old observations remain
      * invalid for input; no other READ tool implicitly receives this exception. */
-    val freshReads=setOf("perception.app_info","perception.window_info","perception.ui_tree","perception.capture_screen")
+    val freshReads=setOf("perception.app_info","perception.window_info","perception.ui_tree","perception.capture_screen","perception.capture_companion","perception.select_screen")
     val descriptors = listOf(
         Descriptor("perception.app_info", Capability.SCREEN_PERCEPTION, Effect.READ, true),
         Descriptor("perception.window_info", Capability.SCREEN_PERCEPTION, Effect.READ, true),
         Descriptor("perception.ui_tree", Capability.SCREEN_PERCEPTION, Effect.READ, true),
         Descriptor("perception.capture_screen", Capability.SCREEN_PERCEPTION, Effect.READ, true),
+        Descriptor("perception.capture_companion", Capability.SCREEN_PERCEPTION, Effect.READ, true),
+        Descriptor("perception.select_screen", Capability.SCREEN_PERCEPTION, Effect.READ, true),
         Descriptor("perception.device_info", Capability.SCREEN_PERCEPTION, Effect.READ),
+        Descriptor("perception.find_apps", Capability.SCREEN_PERCEPTION, Effect.READ,timeoutMs=15000),
+        Descriptor("apps.launch", Capability.SCREEN_CONTROL, Effect.INPUT, true,timeoutMs=15000),
+        Descriptor("agent.background", Capability.SCREEN_CONTROL, Effect.INPUT, false,timeoutMs=15000),
+        Descriptor("input.navigate", Capability.SCREEN_CONTROL, Effect.INPUT, true,timeoutMs=15000),
+        Descriptor("input.activate", Capability.SCREEN_CONTROL, Effect.INPUT, true,timeoutMs=15000),
         Descriptor("input.tap", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.long_press", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.swipe", Capability.SCREEN_CONTROL, Effect.INPUT, true),
@@ -65,7 +72,7 @@ class Cancellation {
     fun check() { if (cancelled) fail(Code.CANCELLED, "Run was stopped; committed effects cannot be undone") }
 }
 class Checkpoint(private val checkAction: () -> Unit, val cancellation: Cancellation, private val commitAction: ((() -> Unit) -> Unit)? = null) {
-    var submitted = false
+    @Volatile var submitted = false
         private set
     private var submissionObserver:(()->Unit)?=null
     fun check() { cancellation.check(); checkAction() }
@@ -80,6 +87,11 @@ class Checkpoint(private val checkAction: () -> Unit, val cancellation: Cancella
     ) {action->effect(action)}.also {child->
         // A remote may report a partial submission before throwing. Propagate
         // immediately, even if the delegated effect never returns successfully.
+        child.submissionObserver={submitted()}
+    }
+    /** Add a local async-lifetime check without losing Native's commit lock or
+     * partial-submission propagation when a queued UI action throws. */
+    fun checking(additional:()->Unit)=Checkpoint({check();additional()},cancellation) {action->effect(action)}.also {child->
         child.submissionObserver={submitted()}
     }
     /** Only wrap the brief actual commit, never a whole async/read/shell wait. */

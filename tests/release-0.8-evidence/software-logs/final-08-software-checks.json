@@ -1,0 +1,1318 @@
+{
+  "schemaVersion": 1,
+  "status": "FINAL_SOFTWARE_VALIDATION_ONLY",
+  "collectionStartedUtc": "2026-10-16T17:01:38.955476+00:00",
+  "collectionCompletedUtc": "2026-10-16T17:01:42.250456+00:00",
+  "method": "Read final existing XML/logs/artifacts only. This collection ran no tests, Gradle builds, artifact checker or device operations.",
+  "supersedes": "Previous INTERIM_SNAPSHOT_NOT_FINAL collection with 329 JVM cases. Historical public excerpt files remain, labeled superseded in software-logs/README.md.",
+  "limitations": [
+    "This is software validation evidence. It does not assert successful cloud requests, emulator acceptance, physical dual-screen control, Citra game completion, microphone/voice quality or hardware input reconstruction. Consult separate evidence for those scopes.",
+    "Gradle reused :core:test and :input-lab:testDebugUnitTest as UP-TO-DATE; their actual retained XML results are included with original hashes/mtimes. This was not a clean rerun of every JVM case.",
+    "AssembleDebugAndroidTest compiles instrumentation tests; it does not execute them. Background Runtime, dual-screen controls and PickerResultLifecycleTest execution must be established by separate device test evidence.",
+    "Unsigned release artifacts were built and checked; this does not prove release signing, distribution or installation.",
+    "Collection is per-file, not an atomic repository snapshot. Source hashes describe files at collection time; APK hashes identify exact built artifacts, not packages claimed to have run all device checks."
+  ],
+  "junitTotals": {
+    "suiteCount": 54,
+    "tests": 362,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "junitModules": [
+    {
+      "module": "app",
+      "xmlDirectory": "app/build/test-results/testDebugUnitTest",
+      "gradleTask": ":app:testDebugUnitTest",
+      "finalInvocationTaskStatus": "EXECUTED",
+      "suiteCount": 18,
+      "tests": 81,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatEventProjectionTest.xml",
+          "bytes": 783,
+          "sha256": "41fb8e9455d0293f0742993b1fb3e447570cb7228de69b735a96d0d0d3d9fcd2",
+          "mtimeUtc": "2026-10-16T16:59:01.630712+00:00",
+          "name": "dev.thor.agent.ChatEventProjectionTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatSnapshotTest.xml",
+          "bytes": 743,
+          "sha256": "e57dffc4c741b7a176bacd6ef28d6da3b12f18ce8c5474f20b799d37bee6a286",
+          "mtimeUtc": "2026-10-16T16:59:01.628942+00:00",
+          "name": "dev.thor.agent.ChatSnapshotTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.CoordinatorTest.xml",
+          "bytes": 2407,
+          "sha256": "b49f2397fd1eaf53de043e1d5f88937e48a88451357fb790c6df6ecc73328877",
+          "mtimeUtc": "2026-10-16T16:59:01.628817+00:00",
+          "name": "dev.thor.agent.CoordinatorTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.DeepSeekCatalogTest.xml",
+          "bytes": 864,
+          "sha256": "69692ee99f2bc383b480690cec47521cba8c8e07efee91630e733273772367c6",
+          "mtimeUtc": "2026-10-16T16:59:01.626650+00:00",
+          "name": "dev.thor.agent.DeepSeekCatalogTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.EventIndexIsolationTest.xml",
+          "bytes": 473,
+          "sha256": "2370ed27ad79df4f7c8bb92f83577f8e9f646bfbadef32d7ff6324730a51200a",
+          "mtimeUtc": "2026-10-16T16:59:01.632771+00:00",
+          "name": "dev.thor.agent.EventIndexIsolationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.HostRpcPayloadTest.xml",
+          "bytes": 1130,
+          "sha256": "f37a631026fe5083168d26ba7367b4db997f1c414a6394dcf0ae41b0ad6f432a",
+          "mtimeUtc": "2026-10-16T16:59:01.626841+00:00",
+          "name": "dev.thor.agent.HostRpcPayloadTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.LatestValueTest.xml",
+          "bytes": 800,
+          "sha256": "6a819280e7c9daf25741388c425663c588f256e31bc1e5f3dc4f9ef55bac1153",
+          "mtimeUtc": "2026-10-16T16:59:01.629725+00:00",
+          "name": "dev.thor.agent.LatestValueTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelCatalogTest.xml",
+          "bytes": 1307,
+          "sha256": "5c0f02b3defa912ff9bcf2eb6b954b7d44559a5c564bb0ed6812f0645e5b6f69",
+          "mtimeUtc": "2026-10-16T16:59:01.631694+00:00",
+          "name": "dev.thor.agent.ModelCatalogTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelConnectionTestTest.xml",
+          "bytes": 1573,
+          "sha256": "ba02f760679dd8236b3f80bb82e8f7fc8be04d9efec431bee278526ee4d128dc",
+          "mtimeUtc": "2026-10-16T16:59:01.625828+00:00",
+          "name": "dev.thor.agent.ModelConnectionTestTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.OfficialProfilePolicyTest.xml",
+          "bytes": 771,
+          "sha256": "70e7bff1e810b7690aa09075417091e8ac1e02fb4cf033bb605b3b13ab6f7d11",
+          "mtimeUtc": "2026-10-16T16:59:01.625940+00:00",
+          "name": "dev.thor.agent.OfficialProfilePolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.PreparedToolsTest.xml",
+          "bytes": 1041,
+          "sha256": "9c5e3401da2d5c17b72e7db4013f115cc3d1136f87604046e3de265f9977404d",
+          "mtimeUtc": "2026-10-16T16:59:01.631694+00:00",
+          "name": "dev.thor.agent.PreparedToolsTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RecoveryHistoryTest.xml",
+          "bytes": 468,
+          "sha256": "539a9136d26b627cfe31d0d287163ec19f4668acc80d5ab4e9a37a8b6bd069fa",
+          "mtimeUtc": "2026-10-16T16:59:01.632338+00:00",
+          "name": "dev.thor.agent.RecoveryHistoryTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SearchConnectionTestTest.xml",
+          "bytes": 579,
+          "sha256": "c85548e3f1dc9fbaf8aa67b6d0ec2faf21cdd73ad08dec321533ff1b7fccba9f",
+          "mtimeUtc": "2026-10-16T16:59:01.627977+00:00",
+          "name": "dev.thor.agent.SearchConnectionTestTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillStoreTest.xml",
+          "bytes": 1197,
+          "sha256": "27026f45e7a937b3657a006aa2da5e11d9d5e6ccaddf860d802ca764cd1f4c62",
+          "mtimeUtc": "2026-10-16T16:59:01.628034+00:00",
+          "name": "dev.thor.agent.SkillStoreTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillTextResourcesTest.xml",
+          "bytes": 462,
+          "sha256": "46f7bbd2ac6adefa28af9b5706a1c694b70954f8a3ea2e44e081ca8b69a2b3b4",
+          "mtimeUtc": "2026-10-16T16:59:01.632143+00:00",
+          "name": "dev.thor.agent.SkillTextResourcesTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StartupRegressionTest.xml",
+          "bytes": 606,
+          "sha256": "ab8a2f1b6888e7ef6b230db583a3b8e550cdbd20bff9018a8615ac761a3715b8",
+          "mtimeUtc": "2026-10-16T16:59:01.630732+00:00",
+          "name": "dev.thor.agent.StartupRegressionTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VoiceTransportTest.xml",
+          "bytes": 594,
+          "sha256": "48a22392d9ae532a1850e50ad8ddb808a222b558fbb05b8b81248bd75e0ab3f2",
+          "mtimeUtc": "2026-10-16T16:59:01.629537+00:00",
+          "name": "dev.thor.agent.VoiceTransportTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+          "bytes": 940,
+          "sha256": "3d1bd6b39123a4dd530c8a23caff63ec0e17963a49e1e089ca65198157ce05bd",
+          "mtimeUtc": "2026-10-16T16:59:01.632743+00:00",
+          "name": "dev.thor.agent.VolcAsrProtocolTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "device-core",
+      "xmlDirectory": "tools/core/build/test-results/test",
+      "gradleTask": ":device-core:test",
+      "finalInvocationTaskStatus": "EXECUTED",
+      "suiteCount": 24,
+      "tests": 155,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AccessibilitySetupTest.xml",
+          "bytes": 736,
+          "sha256": "904ec316e1a2770de1aaf6b62dbe97d3f0d9b8e7e6d13077e93df52ddf564fb0",
+          "mtimeUtc": "2026-10-16T16:58:49.434155+00:00",
+          "name": "dev.thor.tools.AccessibilitySetupTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AgentBackgroundTest.xml",
+          "bytes": 1046,
+          "sha256": "98b163cf89027af0da9a1673e2f88b2d18d87b2d1514e518945bd10e28062344",
+          "mtimeUtc": "2026-10-16T16:58:49.438232+00:00",
+          "name": "dev.thor.tools.AgentBackgroundTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.BoundedInputStateTest.xml",
+          "bytes": 1326,
+          "sha256": "9e2c4e3ddbbb71f3ec6475fd53d7af35619406e142bdb35e0121a2b873c0eca0",
+          "mtimeUtc": "2026-10-16T16:58:49.434217+00:00",
+          "name": "dev.thor.tools.BoundedInputStateTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CompanionObservationTest.xml",
+          "bytes": 1058,
+          "sha256": "e4cd241bf911011740acaf1b2865443ad811a0a9e8cce7be215ad4c3b9cd413a",
+          "mtimeUtc": "2026-10-16T16:58:49.435563+00:00",
+          "name": "dev.thor.tools.CompanionObservationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CoreTest.xml",
+          "bytes": 5123,
+          "sha256": "620bbaa94efe282c70984bd526091d7727f271a95f3aba7783e12e15376599fb",
+          "mtimeUtc": "2026-10-16T16:58:49.437719+00:00",
+          "name": "dev.thor.tools.CoreTest",
+          "tests": 39,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayRolePolicyTest.xml",
+          "bytes": 744,
+          "sha256": "d23ddc899234211a060360116437fce0c3211eb573637fcbcdf5a08f09bcae03",
+          "mtimeUtc": "2026-10-16T16:58:49.436517+00:00",
+          "name": "dev.thor.tools.DisplayRolePolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayVisibilityTest.xml",
+          "bytes": 1049,
+          "sha256": "9a121e620b8b2754431218c99e5a9f6218e7510f0be15c2ae250ddd905b688e0",
+          "mtimeUtc": "2026-10-16T16:58:49.438295+00:00",
+          "name": "dev.thor.tools.DisplayVisibilityTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevAxesTest.xml",
+          "bytes": 1122,
+          "sha256": "cb5ae4c5364144e0ee87f21c358e71e05e86a7db8ed0550f72e1ac653d52dad1",
+          "mtimeUtc": "2026-10-16T16:58:49.437369+00:00",
+          "name": "dev.thor.tools.EvdevAxesTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevButtonsTest.xml",
+          "bytes": 896,
+          "sha256": "d36f7db0cf27fcc850e8d25305b1e09c4a569a77a09bfdb83cb74e55cfc3ee57",
+          "mtimeUtc": "2026-10-16T16:58:49.434577+00:00",
+          "name": "dev.thor.tools.EvdevButtonsTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCleanupTest.xml",
+          "bytes": 871,
+          "sha256": "7dd594d82b196829a8eeb7c1824929eeec4b30f1d3864defdc935a7081390aa1",
+          "mtimeUtc": "2026-10-16T16:58:49.433456+00:00",
+          "name": "dev.thor.tools.GamepadCleanupTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCommandTest.xml",
+          "bytes": 703,
+          "sha256": "4ff75b3e9c4282068ac5d8b1e1548c0c6533d012c66a48827926bcbccb52804a",
+          "mtimeUtc": "2026-10-16T16:58:49.434009+00:00",
+          "name": "dev.thor.tools.GamepadCommandTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadHoldTargetTest.xml",
+          "bytes": 916,
+          "sha256": "71a581946a971a1ae734be67887e5e66366ca7c10545ee8bc21e858e58464832",
+          "mtimeUtc": "2026-10-16T16:58:49.435541+00:00",
+          "name": "dev.thor.tools.GamepadHoldTargetTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadLeaseGuardTest.xml",
+          "bytes": 725,
+          "sha256": "9545c54fcafb54742acd69c8c151aa5e5dd341ef24cdc891282fd7534b080dc1",
+          "mtimeUtc": "2026-10-16T16:58:49.438370+00:00",
+          "name": "dev.thor.tools.GamepadLeaseGuardTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.InputTargetPolicyTest.xml",
+          "bytes": 626,
+          "sha256": "b178bbb5e5795770abda1238262debd25b3e163253c8550e03f372e0ee628998",
+          "mtimeUtc": "2026-10-16T16:58:49.434761+00:00",
+          "name": "dev.thor.tools.InputTargetPolicyTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.LauncherAppsTest.xml",
+          "bytes": 897,
+          "sha256": "a008ceae204532b1aadbd85d5986ad745b796701a6bbd80da18bd73eb7509dc6",
+          "mtimeUtc": "2026-10-16T16:58:49.433461+00:00",
+          "name": "dev.thor.tools.LauncherAppsTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationCommandTest.xml",
+          "bytes": 1001,
+          "sha256": "91491b75cd6d661050d476e5cf930a4b07b7d7cc18aafaf9e174ae60e3c61ea3",
+          "mtimeUtc": "2026-10-16T16:58:49.437720+00:00",
+          "name": "dev.thor.tools.NavigationCommandTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationFocusTest.xml",
+          "bytes": 855,
+          "sha256": "6d3d7f395c880461fb8822d06b1b9bc0e9244412b24076ad72fd448f19b8f4dc",
+          "mtimeUtc": "2026-10-16T16:58:49.436516+00:00",
+          "name": "dev.thor.tools.NavigationFocusTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ReadObservationTest.xml",
+          "bytes": 1373,
+          "sha256": "953c967349b83f8ebb0ca490cd1b4fafcc8b27ddb43d10910f5f9c4028ce4d29",
+          "mtimeUtc": "2026-10-16T16:58:49.433516+00:00",
+          "name": "dev.thor.tools.ReadObservationTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ScreenSelectionTest.xml",
+          "bytes": 1306,
+          "sha256": "5fd18601819eb64e16463257f2b2a831ee75941901646d608abe91cf49bb0407",
+          "mtimeUtc": "2026-10-16T16:58:49.434230+00:00",
+          "name": "dev.thor.tools.ScreenSelectionTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.SemanticTreeTest.xml",
+          "bytes": 1472,
+          "sha256": "0701622af2ce80b7a091e74f048c5250f436903898dfcd06f16382d781bef0e1",
+          "mtimeUtc": "2026-10-16T16:58:49.437720+00:00",
+          "name": "dev.thor.tools.SemanticTreeTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ShellCommandPolicyTest.xml",
+          "bytes": 1346,
+          "sha256": "c3372983da74c8e853e5d00f0054862294dad1234acc9ce0528e78be48f71c95",
+          "mtimeUtc": "2026-10-16T16:58:49.438545+00:00",
+          "name": "dev.thor.tools.ShellCommandPolicyTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ThorBrightnessCommandTest.xml",
+          "bytes": 879,
+          "sha256": "bf25f3d21c6e2c3a4ea99a858ad8bba49b780ee77ace50a88821e4dd881565c1",
+          "mtimeUtc": "2026-10-16T16:58:49.433459+00:00",
+          "name": "dev.thor.tools.ThorBrightnessCommandTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActivationTest.xml",
+          "bytes": 997,
+          "sha256": "3cbc53783e9a4c07f7c0558af4409c33b44d5b2afa8d4d9c11e817e898c13e4b",
+          "mtimeUtc": "2026-10-16T16:58:49.436608+00:00",
+          "name": "dev.thor.tools.UiActivationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UpperTargetResolverTest.xml",
+          "bytes": 1909,
+          "sha256": "03b93739a078e96e67a3c5be9a1b7fbe83c082675b108a788fd2553db99eff88",
+          "mtimeUtc": "2026-10-16T16:58:49.437973+00:00",
+          "name": "dev.thor.tools.UpperTargetResolverTest",
+          "tests": 10,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "core",
+      "xmlDirectory": "native-bridge/core/build/test-results/test",
+      "gradleTask": ":core:test",
+      "finalInvocationTaskStatus": "UP-TO-DATE",
+      "suiteCount": 3,
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.AuthorityBudgetTest.xml",
+          "bytes": 615,
+          "sha256": "8265c50315812d5b969373e713a04b6816655723e76ebb12bb77973e3f49a7b1",
+          "mtimeUtc": "2026-10-15T18:34:02.646285+00:00",
+          "name": "dev.thor.bridge.AuthorityBudgetTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.GatewayTest.xml",
+          "bytes": 2410,
+          "sha256": "95390f6ab8834e4cf3f216756fcfa4114c8d912e7f009066fc7b1c049ceee6ff",
+          "mtimeUtc": "2026-10-15T18:34:02.646331+00:00",
+          "name": "dev.thor.bridge.GatewayTest",
+          "tests": 17,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.TransportTest.xml",
+          "bytes": 2777,
+          "sha256": "729fd5be422dd134a758ac8ab0f859f8d535f01d2f703de2bca036d7cd6ec326",
+          "mtimeUtc": "2026-10-15T18:34:02.646351+00:00",
+          "name": "dev.thor.bridge.TransportTest",
+          "tests": 20,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "device-authority",
+      "xmlDirectory": "integration/device-authority/build/test-results/test",
+      "gradleTask": ":device-authority:test",
+      "finalInvocationTaskStatus": "EXECUTED",
+      "suiteCount": 1,
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "integration/device-authority/build/test-results/test/TEST-dev.thor.integration.DeviceAuthorityTest.xml",
+          "bytes": 2168,
+          "sha256": "67e70479154139d5eeeb28758b4ae745a0a58764d4512196da4ae92cb37c1811",
+          "mtimeUtc": "2026-10-16T16:58:51.075356+00:00",
+          "name": "dev.thor.integration.DeviceAuthorityTest",
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "input-lab",
+      "xmlDirectory": "tests/input-lab-app/app/build/test-results/testDebugUnitTest",
+      "gradleTask": ":input-lab:testDebugUnitTest",
+      "finalInvocationTaskStatus": "UP-TO-DATE",
+      "suiteCount": 8,
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AttemptTest.xml",
+          "bytes": 4207,
+          "sha256": "854eca70dc37578eeab42c81830e32a2a7188f641b9485d93db96578d72e1a12",
+          "mtimeUtc": "2026-10-16T08:44:43.563736+00:00",
+          "name": "dev.thor.inputlab.AttemptTest",
+          "tests": 37,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AxisProfileTest.xml",
+          "bytes": 1011,
+          "sha256": "f4fc6c394f0a5cfa476261bc466699acd5bdadca6ad9efbed5163d53a0256b47",
+          "mtimeUtc": "2026-10-16T08:44:43.570098+00:00",
+          "name": "dev.thor.inputlab.AxisProfileTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.DeviceContinuityTest.xml",
+          "bytes": 1321,
+          "sha256": "5450e9f0b90b14757af52b538b0c2673b7e0540af89d517783c0b4c7efe6b499",
+          "mtimeUtc": "2026-10-16T08:44:43.562612+00:00",
+          "name": "dev.thor.inputlab.DeviceContinuityTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.JournalTest.xml",
+          "bytes": 1090,
+          "sha256": "042b37395917d3f3da023f79543b9ecca250038b67c4caca2c01b2a6178e41e2",
+          "mtimeUtc": "2026-10-16T08:44:43.507777+00:00",
+          "name": "dev.thor.inputlab.JournalTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerEvidenceModeTest.xml",
+          "bytes": 893,
+          "sha256": "ad0d07af89f270306ba147d6f9bdf10ab8b13b7ee44abfa364bea8af60b09c76",
+          "mtimeUtc": "2026-10-16T08:44:43.571931+00:00",
+          "name": "dev.thor.inputlab.RunnerEvidenceModeTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerWindowTest.xml",
+          "bytes": 909,
+          "sha256": "f982b8c1ff4bb57b9699a8a4517cf5ea2c3139cdef82f10a149557fb01c2b796",
+          "mtimeUtc": "2026-10-16T08:44:43.508783+00:00",
+          "name": "dev.thor.inputlab.RunnerWindowTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioModelTest.xml",
+          "bytes": 1032,
+          "sha256": "b5295e7a717c849c30f3db0fdcfb9a9235fa0a9109ec2bd6663ab3e5766a76cd",
+          "mtimeUtc": "2026-10-16T08:44:43.561234+00:00",
+          "name": "dev.thor.inputlab.ScenarioModelTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioSessionTest.xml",
+          "bytes": 1044,
+          "sha256": "d6dae29125d23f9df33e019e6884fac1c5e4c7ba3e62981b5d84aab1bd29e1e7",
+          "mtimeUtc": "2026-10-16T08:44:43.562450+00:00",
+          "name": "dev.thor.inputlab.ScenarioSessionTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "nodeRuns": [
+    {
+      "name": "runtime",
+      "path": "build/physical/release-0.8-2026-10-16/final-08-runtime.log",
+      "bytes": 6953,
+      "sha256": "dd87bf3c7361c5b543cb37b9601b46cda958ee84a70c4bdc725e4c7122361296",
+      "mtimeUtc": "2026-10-16T16:58:21.068250+00:00",
+      "summary": {
+        "tests": 67,
+        "suites": 0,
+        "pass": 67,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 1265.019458
+      },
+      "note": "Final validation invocation; this evidence collector did not rerun tests.",
+      "excerpt": {
+        "path": "tests/release-0.8-evidence/software-logs/final-08-runtime.log",
+        "bytes": 322,
+        "sha256": "aa674e4b6e692b1f5e4fee73cceb188a61d255e3e82ebe942e68389b9e0b32e4",
+        "mtimeUtc": "2026-10-16T17:01:39.020431+00:00"
+      }
+    },
+    {
+      "name": "appJs",
+      "path": "build/physical/release-0.8-2026-10-16/final-08-appjs.log",
+      "bytes": 5598,
+      "sha256": "c4f10cdefcb407e6e8267870be8b84b93f741fac5bd08191b15a2d4d17d012e8",
+      "mtimeUtc": "2026-10-16T16:58:24.254352+00:00",
+      "summary": {
+        "tests": 52,
+        "suites": 0,
+        "pass": 52,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 2660.422875
+      },
+      "note": "Final validation invocation; this evidence collector did not rerun tests.",
+      "excerpt": {
+        "path": "tests/release-0.8-evidence/software-logs/final-08-appjs.log",
+        "bytes": 320,
+        "sha256": "39fb7d8a5913a059401b692fe7127c63a33fa5f74126518d20b12c059ee670e1",
+        "mtimeUtc": "2026-10-16T17:01:39.022572+00:00"
+      }
+    },
+    {
+      "name": "nativeBridgeJs",
+      "path": "build/physical/release-0.8-2026-10-16/final-08-bridge.log",
+      "bytes": 1254,
+      "sha256": "bd9f037101304d3f90c2886c50e8519c87ad18efed3b1d5d85a6736492349222",
+      "mtimeUtc": "2026-10-16T16:58:21.440593+00:00",
+      "summary": {
+        "tests": 13,
+        "suites": 0,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 131.869334
+      },
+      "note": "Final validation invocation; this evidence collector did not rerun tests.",
+      "excerpt": {
+        "path": "tests/release-0.8-evidence/software-logs/final-08-bridge.log",
+        "bytes": 320,
+        "sha256": "d64e1e67a4bfdc72e66523e543793c071f7608b9399d1cd8e796f1855ac01f68",
+        "mtimeUtc": "2026-10-16T17:01:39.025450+00:00"
+      }
+    }
+  ],
+  "gradleLogs": [
+    {
+      "path": "build/physical/release-0.8-2026-10-16/final-08-gradle-02.log",
+      "bytes": 49950,
+      "sha256": "09e68eb458183084ae10a32476c75e46beed14d12b2ffdefdb000b30536d3493",
+      "mtimeUtc": "2026-10-16T16:59:28.728486+00:00",
+      "successful": true,
+      "buildSummary": "BUILD SUCCESSFUL in 42s",
+      "actionableTasks": {
+        "total": 506,
+        "executed": 89,
+        "upToDate": 417
+      },
+      "taskLines": [
+        "> Task :core:test UP-TO-DATE",
+        "> Task :device-core:test",
+        "> Task :device-authority:test",
+        "> Task :input-lab:testDebugUnitTest UP-TO-DATE",
+        "> Task :android:lintAnalyzeDebugUnitTest",
+        "> Task :android:lintAnalyzeDebugAndroidTest",
+        "> Task :device-android:lintAnalyzeDebugAndroidTest",
+        "> Task :device-android:lintAnalyzeDebugUnitTest",
+        "> Task :android:lintAnalyzeDebug",
+        "> Task :app:testDebugUnitTest",
+        "> Task :android:lintReportDebug",
+        "> Task :android:lintDebug",
+        "> Task :input-lab:lintAnalyzeDebug",
+        "> Task :device-android:lintAnalyzeDebug",
+        "> Task :app:lintAnalyzeDebugUnitTest",
+        "> Task :app:assembleDebug",
+        "> Task :input-lab:lintAnalyzeDebugAndroidTest",
+        "> Task :app:lintAnalyzeDebugAndroidTest",
+        "> Task :device-android:lintReportDebug",
+        "> Task :device-android:lintDebug",
+        "> Task :app:lintAnalyzeDebug",
+        "> Task :app:lintReportDebug",
+        "> Task :app:lintDebug",
+        "> Task :diagnostic:lintAnalyzeDebugAndroidTest",
+        "> Task :input-lab:lintAnalyzeDebugUnitTest",
+        "> Task :input-lab:lintReportDebug",
+        "> Task :input-lab:lintDebug",
+        "> Task :diagnostic:lintAnalyzeDebugUnitTest",
+        "> Task :bridge-host:lintAnalyzeDebug",
+        "> Task :bridge-host:lintAnalyzeDebugUnitTest",
+        "> Task :bridge-host:lintAnalyzeDebugAndroidTest",
+        "> Task :bridge-host:lintReportDebug",
+        "> Task :bridge-host:lintDebug",
+        "> Task :diagnostic:lintAnalyzeDebug",
+        "> Task :diagnostic:lintReportDebug",
+        "> Task :diagnostic:lintDebug",
+        "> Task :input-lab:assembleDebug UP-TO-DATE",
+        "> Task :android:lintVitalAnalyzeRelease",
+        "> Task :input-lab:lintVitalAnalyzeRelease",
+        "> Task :device-android:lintVitalAnalyzeRelease",
+        "> Task :input-lab:lintVitalReportRelease",
+        "> Task :input-lab:lintVitalRelease",
+        "> Task :input-lab:assembleRelease",
+        "> Task :input-lab:assembleDebugAndroidTest UP-TO-DATE",
+        "> Task :app:lintVitalAnalyzeRelease",
+        "> Task :app:lintVitalReportRelease",
+        "> Task :app:lintVitalRelease",
+        "> Task :app:assembleRelease",
+        "> Task :bridge-host:assembleDebug UP-TO-DATE",
+        "> Task :diagnostic:assembleDebug",
+        "> Task :app:assembleDebugAndroidTest",
+        "BUILD SUCCESSFUL in 42s",
+        "506 actionable tasks: 89 executed, 417 up-to-date"
+      ],
+      "excerpt": {
+        "path": "tests/release-0.8-evidence/software-logs/final-08-gradle.log",
+        "bytes": 2162,
+        "sha256": "5e0460bc0ee11ad8688559f9f942d7906a425025f2b8ef572d598577b4c9b61d",
+        "mtimeUtc": "2026-10-16T17:01:38.958818+00:00"
+      }
+    }
+  ],
+  "typeScriptCheck": {
+    "path": "build/physical/release-0.8-2026-10-16/final-08-tsc.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mtimeUtc": "2026-10-16T16:58:24.263505+00:00",
+    "successful": true,
+    "resultSource": "Coordinator confirmed exit-success; empty log records no diagnostics.",
+    "excerpt": {
+      "path": "tests/release-0.8-evidence/software-logs/final-08-tsc.log",
+      "bytes": 348,
+      "sha256": "7921eb5a2d68a42e01e26b889912ef9fad69f3f4682cba26b41a3d29c59f6d7a",
+      "mtimeUtc": "2026-10-16T17:01:42.249526+00:00"
+    }
+  },
+  "artifactCheck": {
+    "path": "build/physical/release-0.8-2026-10-16/final-08-artifacts-02.log",
+    "bytes": 1899,
+    "sha256": "baef302872cbb1134b95950c7a2f47d61191116e6b104e234f002479920c81f0",
+    "mtimeUtc": "2026-10-16T16:59:50.467201+00:00",
+    "successful": true,
+    "checkedArtifacts": [
+      "agent-debug",
+      "agent-release-unsigned",
+      "input-lab-debug",
+      "input-lab-release-unsigned"
+    ],
+    "publicResult": {
+      "path": "tests/release-0.8-evidence/software-logs/final-08-artifacts.json",
+      "bytes": 1899,
+      "sha256": "baef302872cbb1134b95950c7a2f47d61191116e6b104e234f002479920c81f0",
+      "mtimeUtc": "2026-10-16T17:01:40.947761+00:00"
+    }
+  },
+  "environmentSetupAttempts": [
+    {
+      "path": "build/physical/release-0.8-2026-10-16/final-08-gradle.log",
+      "bytes": 1469,
+      "sha256": "91490b2a5194573a47533cb1fc634ecb5b30dde39507d961ee1c9575516553ec",
+      "mtimeUtc": "2026-10-16T16:58:27.625869+00:00",
+      "classification": "ENVIRONMENT_SETUP_FAILURE",
+      "note": "Initial invocation failed before tests/build because ANDROID_HOME/SDK location was not configured. Superseded by final-08-gradle-02.log after environment setup.",
+      "excerpt": {
+        "path": "tests/release-0.8-evidence/software-logs/initial-final-08-gradle.log",
+        "bytes": 247,
+        "sha256": "b0b076abe23e8628f2448d56b985527080b18bf19d492bdcc2a2683e8a939061",
+        "mtimeUtc": "2026-10-16T17:01:42.246372+00:00"
+      }
+    },
+    {
+      "path": "build/physical/release-0.8-2026-10-16/final-08-artifacts.log",
+      "bytes": 298,
+      "sha256": "525401e68182e1b72810e68fa09c0ee3e5b79f9d6398a63f7b7b4f920ee80d6b",
+      "mtimeUtc": "2026-10-16T16:59:08.092281+00:00",
+      "classification": "ENVIRONMENT_SETUP_FAILURE",
+      "note": "Initial artifact script invocation lacked ANDROID_HOME. Superseded by final-08-artifacts-02.log after environment setup.",
+      "excerpt": {
+        "path": "tests/release-0.8-evidence/software-logs/initial-final-08-artifacts.log",
+        "bytes": 231,
+        "sha256": "b560e6339eb4701ddf3da2c4426f4d63acfc91bfbae97c1adcead03971f52fc2",
+        "mtimeUtc": "2026-10-16T17:01:42.248126+00:00"
+      }
+    }
+  ],
+  "sourceHashMethod": "For each scope: sort repository-relative file paths; concatenate path + NUL + content SHA256 hex + newline; SHA256 UTF-8 concatenation. Excludes build and node_modules.",
+  "currentSourceTrees": [
+    {
+      "scope": "runtime",
+      "roots": [
+        "runtime/src",
+        "runtime/test"
+      ],
+      "extensions": [
+        ".ts"
+      ],
+      "fileCount": 14,
+      "pathsAndContentSha256": "d605634c67c8d1d3c51f28d453a2ce2614c3c76e2cf0a8a09509e58a1130f9ef",
+      "latestSourceMtimeUtc": "2026-10-16T16:30:57.799267+00:00"
+    },
+    {
+      "scope": "nativeBridgeJs",
+      "roots": [
+        "native-bridge/js"
+      ],
+      "extensions": [
+        ".json",
+        ".mjs"
+      ],
+      "fileCount": 3,
+      "pathsAndContentSha256": "fdfc270976e7df70c15e3c016571a021a9f10dc26b482419da20380a68776443",
+      "latestSourceMtimeUtc": "2026-10-15T18:37:17.419371+00:00"
+    },
+    {
+      "scope": "appWeb",
+      "roots": [
+        "app/src/main/assets/chat",
+        "app/web-tests"
+      ],
+      "extensions": [
+        ".cjs",
+        ".css",
+        ".html",
+        ".js"
+      ],
+      "fileCount": 10,
+      "pathsAndContentSha256": "0c3ee1d83823bcaaf0c00e33c6a38590b16339e4cb86cc1fa963b45d8bda281d",
+      "latestSourceMtimeUtc": "2026-10-16T16:50:55.164295+00:00"
+    },
+    {
+      "scope": "core",
+      "roots": [
+        "tools/core/src/main",
+        "tools/core/src/test"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 50,
+      "pathsAndContentSha256": "fd1f83ee8bd57b1ef2c6e47e5c67f2db5670b29c63a2f9c132b0d472e085741f",
+      "latestSourceMtimeUtc": "2026-10-16T16:45:31.934054+00:00"
+    },
+    {
+      "scope": "bridgeCore",
+      "roots": [
+        "native-bridge/core/src"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 10,
+      "pathsAndContentSha256": "be52a66210b5935c2ad033b00c76c32e9f01463c2139f0ceba1c6ea9756cf8d5",
+      "latestSourceMtimeUtc": "2026-10-15T18:33:53.456397+00:00"
+    },
+    {
+      "scope": "deviceAuthority",
+      "roots": [
+        "integration/device-authority/src"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 2,
+      "pathsAndContentSha256": "2e0f7af610d6989ee4ffb46238b597a4dae79b33176e195480a6b95a822f670f",
+      "latestSourceMtimeUtc": "2026-10-16T16:52:03.316833+00:00"
+    },
+    {
+      "scope": "integration",
+      "roots": [
+        "integration"
+      ],
+      "extensions": [
+        ".mjs",
+        ".ts"
+      ],
+      "fileCount": 6,
+      "pathsAndContentSha256": "8f8f9b0a309e6d708ebf69f11325f1344802160f480dbae57f3e1e3b767ebd24",
+      "latestSourceMtimeUtc": "2026-10-16T16:36:41.684340+00:00"
+    },
+    {
+      "scope": "appNative",
+      "roots": [
+        "app/src/main/java",
+        "app/src/test/java"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 44,
+      "pathsAndContentSha256": "2e4efb259c811c3a6b87f276d8b1b4c579fea73f67b5f9199d3fa1ce2479258e",
+      "latestSourceMtimeUtc": "2026-10-16T16:57:25.170154+00:00"
+    },
+    {
+      "scope": "diagnostic",
+      "roots": [
+        "tools/diagnostic/src/main"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 14,
+      "pathsAndContentSha256": "d064486d56617e6ea9a6b5dc9bc414c9a2c1ff8eb08b843b530801506a0022c0",
+      "latestSourceMtimeUtc": "2026-10-16T16:45:31.935191+00:00"
+    },
+    {
+      "scope": "inputLab",
+      "roots": [
+        "tests/input-lab-app/app/src/main",
+        "tests/input-lab-app/app/src/test"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 17,
+      "pathsAndContentSha256": "e62e9af98e4d2cda38ab8acaf7e3b32b1b4906e00170677a03da01d8d186eb81",
+      "latestSourceMtimeUtc": "2026-10-16T08:44:32.360474+00:00"
+    },
+    {
+      "scope": "appAndroidTests",
+      "roots": [
+        "app/src/androidTest/java"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 41,
+      "pathsAndContentSha256": "694811da02f116cb3cd411dc5b3adf6a316cfee302b082457a06b7af8b48d7e7",
+      "latestSourceMtimeUtc": "2026-10-16T16:58:11.140327+00:00"
+    }
+  ],
+  "currentSelectedFiles": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/PickerResultLifecycleTest.kt",
+      "bytes": 4069,
+      "sha256": "5534541aac00fb92d93efc0f38241fa2b4590f570c78744a1785c948e76f2557",
+      "mtimeUtc": "2026-10-16T16:57:25.171053+00:00"
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "bytes": 1655,
+      "sha256": "1a8f4ec19455b33775f499a114f8237f55cc00b16d01e023361b2e8f5da5663b",
+      "mtimeUtc": "2026-10-16T16:02:21.341841+00:00"
+    },
+    {
+      "path": "app/src/main/assets/chat/style.css",
+      "bytes": 20052,
+      "sha256": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52",
+      "mtimeUtc": "2026-10-16T13:22:57.509367+00:00"
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 48853,
+      "sha256": "b9d67e2da4c370f512131daaedd822666e57cabbc37a687d5e5baa7a230fdfd6",
+      "mtimeUtc": "2026-10-16T16:50:55.164295+00:00"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/AgentRuntimeEngine.kt",
+      "bytes": 6838,
+      "sha256": "9899e29c9420a06ff2b9a5652ddf37eba325c5613012ee2885acd39f946f2d8e",
+      "mtimeUtc": "2026-10-16T16:24:56.900191+00:00"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/AgentRuntimeService.kt",
+      "bytes": 6943,
+      "sha256": "4b15b36844cf97607f0aa4da5d43cc4e0034bcada00e2a1c21ba619873a6fb1a",
+      "mtimeUtc": "2026-10-16T16:21:09.889987+00:00"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/MainActivity.kt",
+      "bytes": 35763,
+      "sha256": "1ecfbcb4299583091bb60149c8b8c001f0dc521950033bd9108267feded07b59",
+      "mtimeUtc": "2026-10-16T16:57:25.170154+00:00"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "bytes": 83214,
+      "sha256": "e81f24417740657f4e8bbb58caa2903195bb5bcaf956f8b8110aabe42b877aef",
+      "mtimeUtc": "2026-10-16T16:52:03.316218+00:00"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/Storage.kt",
+      "bytes": 12204,
+      "sha256": "7a38ff3298704f879241ca373636faf84151165f974abc15be1dfade1a709630",
+      "mtimeUtc": "2026-10-16T16:05:03.557219+00:00"
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 49549,
+      "sha256": "c5652cac3263d6acc916097b0aedc8f11e9248b28a1b5a6f5e43c33041f69018",
+      "mtimeUtc": "2026-10-16T16:15:19.715257+00:00"
+    },
+    {
+      "path": "integration/device-authority/src/main/kotlin/dev/thor/integration/DeviceAuthority.kt",
+      "bytes": 5021,
+      "sha256": "7aaaefab8c415039790d0125ed09c2097d9bccb67fd78bee88d9613a330a4f38",
+      "mtimeUtc": "2026-10-16T16:16:35.210102+00:00"
+    },
+    {
+      "path": "integration/device-authority/src/test/kotlin/dev/thor/integration/DeviceAuthorityTest.kt",
+      "bytes": 12231,
+      "sha256": "a4a9f38860acd50d645abe5c30df9985dfa239431a2f9f079214fff00609ca42",
+      "mtimeUtc": "2026-10-16T16:52:03.316833+00:00"
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "bytes": 17416,
+      "sha256": "af9f620d7c74697e5e991fcdcc399038d0859cb5fb9bcdf17dc6457475941f71",
+      "mtimeUtc": "2026-10-16T16:36:41.684340+00:00"
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "bytes": 13661,
+      "sha256": "14758329b91a7e56e6972b93fd16fc0be922594f42c9b4c0a7541f800ed79fca",
+      "mtimeUtc": "2026-10-16T16:28:03.506922+00:00"
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 31107,
+      "sha256": "3d3c93a3aecefd22d0858c317be6b85823b620ecebaa2525aab397259e1a21f2",
+      "mtimeUtc": "2026-10-16T15:49:17.520455+00:00"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Authorization.kt",
+      "bytes": 7326,
+      "sha256": "69b28b8b55de78865e34d0887f7927705a8fbf8ec9b34ec1a3937eeed5ee966a",
+      "mtimeUtc": "2026-10-16T16:03:46.411917+00:00"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Displays.kt",
+      "bytes": 14011,
+      "sha256": "e67b7d87b709cc0c53cf241f5f983b31229e4d8263fb79f1654a5e60d54ec298",
+      "mtimeUtc": "2026-10-16T16:03:46.413098+00:00"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/NavigationCommand.kt",
+      "bytes": 938,
+      "sha256": "1d7c2f63d03f691e5827d5d5c3f21c1e1a9d753bb6cc54d2c6164191f8b7ddbd",
+      "mtimeUtc": "2026-10-16T14:47:04.337025+00:00"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/NavigationFocus.kt",
+      "bytes": 2471,
+      "sha256": "be37bc3dde532944de7306297e8fdd176d88690913317000dac1489fd4f35d83",
+      "mtimeUtc": "2026-10-16T16:12:17.438144+00:00"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/UiActivation.kt",
+      "bytes": 2090,
+      "sha256": "6e141377a67b74b9c702a1da4ad8f40a4f682372ad5afd49bd394785c780d0a5",
+      "mtimeUtc": "2026-10-16T15:24:11.549602+00:00"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt",
+      "bytes": 65958,
+      "sha256": "552d4468e17d1215d65918581739a22f9facf10b7e69d3367b372373f36dfb4d",
+      "mtimeUtc": "2026-10-16T16:45:31.935191+00:00"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/NativeNavigation.kt",
+      "bytes": 4318,
+      "sha256": "89051edcccd90a44cde255172f8de6a5ed7dc62997ad6619c6f5c6e8632b8e0e",
+      "mtimeUtc": "2026-10-16T15:11:52.607555+00:00"
+    }
+  ],
+  "currentBuiltApkFiles": [
+    {
+      "path": "app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 7662245,
+      "sha256": "9c03e723c21978c809480b5fc75e717ca248f845ee91b2888f872be64373fee8",
+      "mtimeUtc": "2026-10-16T16:59:12.983434+00:00"
+    },
+    {
+      "path": "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "bytes": 3210366,
+      "sha256": "c7a9a197dbaccec6ba1e46756ef4f04496d57e9c27aeeb54f5f8e8994e5fe66e",
+      "mtimeUtc": "2026-10-16T16:59:28.626598+00:00"
+    },
+    {
+      "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+      "bytes": 5378151,
+      "sha256": "44cf1be6f72eff6ddc74540c0e030b0ad6485156aa98521fd2eedc56f70f506b",
+      "mtimeUtc": "2026-10-16T16:59:27.481924+00:00"
+    },
+    {
+      "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+      "bytes": 2920483,
+      "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+      "mtimeUtc": "2026-10-16T08:44:51.463771+00:00"
+    },
+    {
+      "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+      "bytes": 2287292,
+      "sha256": "4c7f089c2002a4932f08cfc3525f80861c727bc9871fbe8fbdfa1799c59eca0d",
+      "mtimeUtc": "2026-10-16T16:59:25.051604+00:00"
+    }
+  ],
+  "pendingSourceTestsWithoutXml": [],
+  "lintReports": [
+    {
+      "path": "app/build/reports/lint-results-debug.xml",
+      "bytes": 38771,
+      "sha256": "d60d241cd8c70ad5bfa53ead72ef31a7bb5381b800eeb4cbab000697c936a3b9",
+      "mtimeUtc": "2026-10-16T16:59:17.070011+00:00",
+      "issueCount": 26,
+      "issueSeverityCounts": {
+        "Warning": 26
+      },
+      "issueIdCounts": {
+        "AndroidGradlePluginVersion": 1,
+        "DataExtractionRules": 1,
+        "GradleDependency": 3,
+        "MissingApplicationIcon": 1,
+        "OldTargetApi": 1,
+        "SetTextI18n": 19
+      }
+    },
+    {
+      "path": "integration/device-android/build/reports/lint-results-debug.xml",
+      "bytes": 13547,
+      "sha256": "04e477971b7c8f00378911f88b913cd8921d82d0b80a5dffde1b73374572e454",
+      "mtimeUtc": "2026-10-16T16:59:14.957607+00:00",
+      "issueCount": 10,
+      "issueSeverityCounts": {
+        "Warning": 10
+      },
+      "issueIdCounts": {
+        "DiscouragedApi": 1,
+        "DiscouragedPrivateApi": 2,
+        "PrivateApi": 3,
+        "SetTextI18n": 3,
+        "UsableSpace": 1
+      }
+    },
+    {
+      "path": "native-bridge/android/build/reports/lint-results-debug.xml",
+      "bytes": 3098,
+      "sha256": "42f8f9f035c6366af8b862da933d2af4f284a54013fe38ea0fd7952da6d97614",
+      "mtimeUtc": "2026-10-16T16:59:01.780472+00:00",
+      "issueCount": 3,
+      "issueSeverityCounts": {
+        "Warning": 3
+      },
+      "issueIdCounts": {
+        "AndroidGradlePluginVersion": 1,
+        "GradleDependency": 1,
+        "SetJavaScriptEnabled": 1
+      }
+    },
+    {
+      "path": "native-bridge/host/build/reports/lint-results-debug.xml",
+      "bytes": 7579,
+      "sha256": "ee0cba01a20376831a723a31eb4299a1e39958a5b5aeea0eb483bc3bcf4ce1bc",
+      "mtimeUtc": "2026-10-16T16:59:19.612973+00:00",
+      "issueCount": 4,
+      "issueSeverityCounts": {
+        "Warning": 4
+      },
+      "issueIdCounts": {
+        "DataExtractionRules": 1,
+        "OldTargetApi": 1,
+        "SetTextI18n": 2
+      }
+    },
+    {
+      "path": "tests/input-lab-app/app/build/reports/lint-results-debug.xml",
+      "bytes": 75618,
+      "sha256": "912ef9a82e84de4b2dbb1d355faeb47af09f94a41a0b3a22ac590c2edc878ee5",
+      "mtimeUtc": "2026-10-16T16:59:18.193049+00:00",
+      "issueCount": 46,
+      "issueSeverityCounts": {
+        "Warning": 46
+      },
+      "issueIdCounts": {
+        "AndroidGradlePluginVersion": 1,
+        "ClickableViewAccessibility": 1,
+        "DiscouragedApi": 2,
+        "DrawAllocation": 1,
+        "OldTargetApi": 1,
+        "SetTextI18n": 40
+      }
+    },
+    {
+      "path": "tools/diagnostic/build/reports/lint-results-debug.xml",
+      "bytes": 15506,
+      "sha256": "b3500ce66f96fdfed4c53a83cc2261da426a17550dc7a7d5f6fe45ef46514c16",
+      "mtimeUtc": "2026-10-16T16:59:20.580206+00:00",
+      "issueCount": 11,
+      "issueSeverityCounts": {
+        "Warning": 11
+      },
+      "issueIdCounts": {
+        "DiscouragedApi": 1,
+        "DiscouragedPrivateApi": 2,
+        "OldTargetApi": 1,
+        "PrivateApi": 3,
+        "SetTextI18n": 3,
+        "UsableSpace": 1
+      }
+    }
+  ],
+  "lintTotals": {
+    "issueCount": 100,
+    "issueSeverityCounts": {
+      "Warning": 100
+    }
+  },
+  "lintNote": "Final Gradle invocation completed lint tasks successfully. Debug XML reports contain 100 warnings and zero reported errors; warnings were not treated as zero or silently discarded. Compiler/Gradle deprecations may additionally appear in original build logs."
+}

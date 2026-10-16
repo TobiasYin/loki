@@ -63,6 +63,9 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                 val descriptor = ToolPack.descriptors.getValue(e.toolId)
                 if (descriptor.targetRequired && !(descriptor.effect == Effect.INPUT && cp?.submitted == true)) {
                     if(e.toolId in ToolPack.freshReads)snapshots.validateReadSource(e.snapshotId)
+                    // Fixed BACK has no coordinates; activate re-resolves and checks
+                    // its exact semantic node in Native before ACTION_CLICK.
+                    else if(e.toolId in setOf("input.navigate","input.activate"))snapshots.validateObservation(e.snapshotId)
                     else snapshots.validate(e.snapshotId)
                 }
                 val a = backend.availability(e.toolId, args)
@@ -77,9 +80,13 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                 cp.check() // Discard late perception output after stop/revoke/target invalidation.
                 if(e.toolId in ToolPack.freshReads && result.error==null) {
                     val source=snapshots.validateReadSource(e.snapshotId)
-                    val observed=snapshots.validate(result.snapshotId)
-                    requireTool(observed.id!=source.id && observed.displayEpoch==source.displayEpoch && observed.display==source.display,
-                        Code.TARGET_CHANGED,"Perception read must return a fresh observation on the authorized display")
+                    val observed=snapshots.validateObservation(result.snapshotId)
+                    if(e.toolId=="perception.select_screen") {
+                        requireTool(observed.role==ScreenSelection.parse(args),Code.TARGET_CHANGED,"Selected screen does not match the requested calibrated role")
+                        ScreenSelection.verifyResult(source,observed,result.data)
+                    } else requireTool(observed.id!=source.id && observed.displayEpoch==source.displayEpoch && observed.display==source.display && observed.role==source.role,
+                        Code.TARGET_CHANGED,"Perception read must retain the selected calibrated role/display")
+                    if(e.toolId=="perception.capture_companion")snapshots.validateCompanionResult(observed.id,result.data)
                 }
                 return result
             } finally { if(device)resource.unlock() }

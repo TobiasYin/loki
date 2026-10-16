@@ -14,6 +14,22 @@ class CoreTest {
         try { block(); fail("Expected $code") } catch (f: ToolFailure) { assertEquals(code, f.code) }
     }
     private val upper = DisplayFact(7, "test-upper", 800, 600, 0, 240)
+    // These fake reads exercise Gateway freshness, not Native screenshot/window
+    // qualification. Specialized tools must still satisfy their real result
+    // contracts; their lower-window/role security has independent test suites.
+    private fun freshReadArgs(tool:String):Map<String,Any?> =
+        if(tool=="perception.select_screen")mapOf("screen" to "upper") else emptyMap()
+    private fun freshReadMetadata(tool:String,observed:Snapshot):Map<String,Any?> = when(tool) {
+        "perception.select_screen" -> mapOf("selectedScreen" to observed.role,"displayRole" to observed.role,"displayId" to observed.display.id,
+            "targetSnapshotId" to observed.id,"readOnlySelection" to true,"calibrationChanged" to false)
+        "perception.capture_companion" -> {
+            val imageIdentity=java.util.UUID.randomUUID().toString()
+            mapOf("readOnly" to true,"frameInputUsable" to false,"coordinateSpace" to "companion_read_only","displayRole" to "lower-companion-read-only",
+                "displayId" to lower.id,"authorizedInputDisplayId" to observed.display.id,"targetSnapshotId" to observed.id,
+                "companionObservationId" to imageIdentity,"companionImageTransform" to mapOf("identity" to imageIdentity))
+        }
+        else -> emptyMap()
+    }
     private val lower = DisplayFact(9, "test-lower", 640, 480, 0, 240)
     private class FakeBackend(val action: (Envelope, Checkpoint) -> Unit = { _, _ -> }) : DeviceBackend {
         var executions = 0
@@ -216,20 +232,20 @@ class CoreTest {
             override fun availability(toolId: String)=Availability(Status.READY,"test","test")
             override fun execute(envelope: Envelope,args:Map<String,Any?>,checkpoint:Checkpoint):ToolResult {
                 executions++;val observed=s.captureForRead(envelope.snapshotId)
-                return ToolResult(time.now(),"test",availability(envelope.toolId),snapshotId=observed.id)
+                return ToolResult(time.now(),"test",availability(envelope.toolId),freshReadMetadata(envelope.toolId,observed),snapshotId=observed.id)
             }
             override fun release(runId:String)="test"
         }
         time.time+=Snapshots.OBSERVATION_TTL_MS+1
         val lease=a.begin(backend);val gate=Gateway(a,backend,s,time)
         fun envelope(tool: String)=Envelope(lease.session,lease.run,tool,tool,lease.epoch,lease.deadline,old.id)
-        for(tool in ToolPack.freshReads)assertNull("$tool must make a new read after model latency",gate.execute(envelope(tool),emptyMap()).error)
-        assertEquals(4,executions)
+        for(tool in ToolPack.freshReads)assertNull("$tool must make a new read after model latency",gate.execute(envelope(tool),freshReadArgs(tool)).error)
+        assertEquals(ToolPack.freshReads.size,executions)
         assertEquals(Code.TARGET_CHANGED,gate.execute(envelope("perception.capture_screen").copy(snapshotId="invented"),emptyMap()).error)
         for(tool in listOf("input.tap","input.long_press","input.swipe","input.press_button","input.set_axes")) {
             assertEquals(Code.TARGET_CHANGED,gate.execute(envelope(tool),emptyMap()).error)
         }
-        assertEquals(4,executions)
+        assertEquals(ToolPack.freshReads.size,executions)
     }
     @Test fun freshObservationStillBecomesInvalidImmediatelyWhenTargetChangesAgain() {
         val sTime=Time();var target=Target("game","valid","v1");val s=Snapshots(sTime) {target};s.update(listOf(upper,lower));s.calibrate(7,9)
@@ -245,12 +261,12 @@ class CoreTest {
                 override fun execute(envelope:Envelope,args:Map<String,Any?>,checkpoint:Checkpoint):ToolResult {
                     val fresh=s.captureForRead(envelope.snapshotId)
                     if(mode=="changed")target=target.copy(revision="after-image")
-                    return ToolResult(time.now(),"test",availability(envelope.toolId),mapOf("pixels" to "must-not-escape"),snapshotId=when(mode) {"missing" -> null;"old-identity" -> source.id;else -> fresh.id})
+                    return ToolResult(time.now(),"test",availability(envelope.toolId),freshReadMetadata(tool,fresh)+mapOf("pixels" to "must-not-escape"),snapshotId=when(mode) {"missing" -> null;"old-identity" -> source.id;else -> fresh.id})
                 }
                 override fun release(runId:String)="test"
             }
             val authority=ManualTestAuthority(time);val lease=authority.begin(backend)
-            val result=Gateway(authority,backend,s,time).execute(Envelope(lease.session,lease.run,"capture",tool,lease.epoch,lease.deadline,source.id),emptyMap())
+            val result=Gateway(authority,backend,s,time).execute(Envelope(lease.session,lease.run,"capture",tool,lease.epoch,lease.deadline,source.id),freshReadArgs(tool))
             assertEquals(Code.TARGET_CHANGED,result.error);assertTrue(result.data.isEmpty())
         }
     }

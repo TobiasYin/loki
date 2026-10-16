@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "e6bd0914-a64f-4691-8b10-97060e049123",
+  "testRunId": "dual-screen-df7ee9a5-9b28-4a77-a628-4a49cdfa1fc9",
+  "agentRunId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+  "senderTraceRef": "native-component:ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+  "evidenceMode": "manual_platform_api",
+  "scene": "settings",
+  "seed": 7331,
+  "page": "preferences",
+  "taskPrompt": "请在上屏演练应用打开设备偏好，把模式设为标准，将夜间阅读关闭，用拖动滑块将音量设为50%，保存后查看保存结果并告诉我三项最终值。",
+  "state": {
+    "settingsSaved": false,
+    "settingsValues": null,
+    "settingsDraft": {
+      "mode": "静谧",
+      "enabled": true,
+      "volume": 90
+    },
+    "settingsDragCount": 0,
+    "settingsSaveCount": 0,
+    "settingNavigationCount": 1,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": null,
+    "articleOpenCount": 0,
+    "newsListScrollCount": 0,
+    "detailScrollCount": 0,
+    "listScrollY": 0,
+    "detailScrollY": 0,
+    "maxListScrollY": 0,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "expected": {
+    "settingsValues": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 50
+    },
+    "newsTargetTitle": "海港观测简报 137",
+    "newsTargetId": "story-20",
+    "newsCode": "N-77157",
+    "articleTitle": "滨海记录 211",
+    "articleTopCode": "TOP-81730",
+    "articleBottomCode": "END-82282",
+    "gameTargets": [
+      "stage-0-tile-2",
+      "stage-1-tile-5"
+    ],
+    "gameResult": "GW-31337"
+  },
+  "completed": false,
+  "interruptedReason": null,
+  "geometry": {
+    "displayId": 7,
+    "width": 960,
+    "height": 640,
+    "rotation": 0,
+    "densityDpi": 160
+  },
+  "agentAnswerVerified": false,
+  "receiverQualificationVersion": "scenario-ui-observation-v1",
+  "systemInjectionProven": false,
+  "evidence": {
+    "eventPrefixBytes": 3073,
+    "eventPrefixSha256": "0c40497fe61d5999aa7529ef7202f3eaf8c20216c98bf848e150fc862a925812",
+    "eventCount": 7,
+    "incomplete": false,
+    "droppedSamples": 0,
+    "sealed": true,
+    "relativePath": "scenario-reports/e6bd0914-a64f-4691-8b10-97060e049123/events.jsonl"
+  }
+}

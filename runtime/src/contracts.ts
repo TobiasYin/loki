@@ -11,6 +11,8 @@ export interface ModelProfile {
   credentialRef: string; contextWindow: number; maxOutput: number;
   input?: ('text'|'image')[];
   provider?: string;
+  /** Native-normalized official catalog facts, not a fabricated successful probe. */
+  providerMetadataKnown?: boolean; probeRequired?: boolean; supportsTools?: boolean; configurationProbe?: boolean;
   thinkingEffort?: 'off'|'minimal'|'low'|'medium'|'high'|'xhigh'|'max';
   reasoning?: boolean; thinkingLevelMap?: Record<string,string|null>; compat?: Record<string,unknown>;
   customHeaders?: Record<string, string>;
@@ -18,7 +20,7 @@ export interface ModelProfile {
 }
 export interface SessionConfig { sessionId: string; title: string; model: ModelProfile; enabled: Capabilities; capabilityEpoch: number }
 export interface RunLease { sessionId: string; runId: string; leaseId: string; capabilityEpoch: number; expiresAt: number }
-export interface L0 { snapshotId: string; device?: string; upperApp?: { packageName: string; label: string }; displaySnapshotId?: string }
+export interface L0 { snapshotId: string; device?: string; upperApp?: { packageName: string; label: string }; targetScreen?: 'upper'|'lower'; displaySnapshotId?: string }
 export interface AuthoritySnapshot { session: SessionConfig; lease: RunLease; availability: Record<string, Availability>; l0: L0; skills?: { name: string; description: string; hash: string }[] }
 export interface AuthorityPort {
   /** Caller-owned mirror of Native's authority. No method here grants authority. */
@@ -90,4 +92,4 @@ export interface PersistencePort {
 export interface RuntimePorts { authority: AuthorityPort; tools: ToolPort; network: FetchPort; persistence: PersistencePort; attachments: AttachmentPort }
 export interface RuntimeLimits { maxRequests: number; runTimeoutMs: number; maxRequestBytes: number; maxResponseBytes: number; maxHistoryTurns: number; imageTokenEstimate: number }
 /** runTimeoutMs=0: no model/task wall-clock deadline; individual tools keep their own timeout. */
-export const DEFAULT_LIMITS: RuntimeLimits = { maxRequests: 40, runTimeoutMs: 0, maxRequestBytes: 16 * 1024 * 1024, maxResponseBytes: 32 * 1024 * 1024, maxHistoryTurns: 50, imageTokenEstimate: 4096 };
+export const DEFAULT_LIMITS: RuntimeLimits = { maxRequests: 256, runTimeoutMs: 0, maxRequestBytes: 16 * 1024 * 1024, maxResponseBytes: 32 * 1024 * 1024, maxHistoryTurns: 50, imageTokenEstimate: 4096 };

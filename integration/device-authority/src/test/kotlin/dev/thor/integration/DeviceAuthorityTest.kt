@@ -88,4 +88,108 @@ class DeviceAuthorityTest {
         val b = begin(); try { port.publish(b.copy(runId="fake"), setOf("debug.shell")); fail("forgery") } catch(_: RuntimeException) { }
         rejected { port.validate(e(b).copy(toolId="unknown")) }
     }
+    @Test fun eightySequentialGatewayReadsReleaseCancellationResourcesButKeepReplayProtection() {
+        val b=begin();var reads=0
+        val backend=object:DeviceBackend {
+            override fun availability(toolId:String)=Availability(Status.READY,"test","read-fixture")
+            override fun release(runId:String)="none"
+            override fun execute(envelope:Envelope,args:Map<String,Any?>,checkpoint:Checkpoint):ToolResult {
+                checkpoint.check();reads++
+                return ToolResult(now,"read-fixture",availability(envelope.toolId),mapOf("read" to reads))
+            }
+        }
+        val gateway=Gateway(port,backend,Snapshots(Clock {now}) {Target(null,"unknown","0")},Clock {now})
+        repeat(80) {index->
+            val request=e(b,"read-$index");val cancellation=port.validate(request)
+            val result=gateway.execute(request,emptyMap());assertNull("read $index: ${result.error}",result.error)
+            assertEquals(index+1,result.data["read"]);port.finishTool(b.runId,request.requestId)
+            assertTrue(cancellation.cancelled)
+            val replay=gateway.execute(request,emptyMap());assertEquals(Code.STALE_AUTHORIZATION,replay.error)
+        }
+        assertEquals(80,reads)
+        rejected {port.claim(e(b,"new-request").copy(toolCallId="read-0"))}
+        native.validate(b)
+    }
+    @Test fun finishedCheckpointCannotSubmitLateEffectsAndFinishingOneCallKeepsOtherCallsLive() {
+        val b=begin();val first=e(b,"first");val second=e(b,"second")
+        val firstCancellation=port.validate(first);val secondCancellation=port.validate(second)
+        port.claim(first);var effects=0
+        val checkpoint=Checkpoint({port.validate(first)},firstCancellation) {action->port.commit(first,action)}
+        port.finishTool(b.runId,first.requestId)
+        rejected {checkpoint.effect {effects++}}
+        assertEquals(0,effects);assertFalse(secondCancellation.cancelled)
+        port.commit(second){effects++};assertEquals(1,effects)
+        native.stopRun(b.runId);assertTrue(secondCancellation.cancelled)
+    }
+    @Test fun targetSelectionIsRecheckedAtCommitAndOtherRunsRemainIndependent() {
+        val first=begin();val second=native.beginRun("b",first.connectionId,emptyMap()).also {port.bind(it);port.publish(it,setOf("perception.device_info"))}
+        val selected=java.util.concurrent.ConcurrentHashMap<String,String>().apply {put(first.runId,"upper");put(second.runId,"upper")}
+        port.targetScopeValidator={request->requireTool(request.snapshotId==selected[request.runId],Code.TARGET_CHANGED,"Screen selection changed")}
+        val a=e(first,"prepared-a").copy(snapshotId="upper")
+        val b=e(second,"prepared-b").copy(snapshotId="upper")
+        val cancellation=port.validate(a);port.claim(a)
+        val checkpoint=Checkpoint({port.validate(a)},cancellation) {effect->port.commit(a,effect)}
+        selected[first.runId]="lower"
+        var effects=0
+        assertEquals(Code.TARGET_CHANGED,assertThrows(ToolFailure::class.java){checkpoint.effect {effects++}}.code)
+        assertEquals(0,effects)
+        port.commit(b){effects++};assertEquals(1,effects)
+        port.commit(e(first,"fresh-lower").copy(snapshotId="lower")){effects++};assertEquals(2,effects)
+    }
+
+    @Test fun targetSelectionWriteWaitsForValidatedCommitThenRejectsTheOldRole() {
+        val binding=begin()
+        val selected=java.util.concurrent.atomic.AtomicReference("upper")
+        val validated=java.util.concurrent.CountDownLatch(1)
+        val release=java.util.concurrent.CountDownLatch(1)
+        val pause=java.util.concurrent.atomic.AtomicBoolean(true)
+        val failures=java.util.concurrent.ConcurrentLinkedQueue<Throwable>()
+        val order=java.util.concurrent.ConcurrentLinkedQueue<String>()
+        port.targetScopeValidator={request->
+            requireTool(request.snapshotId==selected.get(),Code.TARGET_CHANGED,"Screen selection changed")
+            if(pause.getAndSet(false)) {
+                validated.countDown()
+                check(release.await(5,java.util.concurrent.TimeUnit.SECONDS)) {"Commit was not released"}
+            }
+        }
+        val old=e(binding,"old-upper").copy(snapshotId="upper")
+        val commit=Thread({try {
+            port.commit(old) {assertEquals("upper",selected.get());order.add("effect")}
+        }catch(t:Throwable){failures.add(t)}},"validated-device-commit")
+        val selection=Thread({try {
+            // Mirrors ProductHost's selection publication under the authority
+            // lock, not just a volatile write to the current Run's role.
+            native.atomic {selected.set("lower");order.add("selection")}
+        }catch(t:Throwable){failures.add(t)}},"publish-screen-selection")
+        try {
+            commit.start()
+            assertTrue(validated.await(5,java.util.concurrent.TimeUnit.SECONDS))
+            selection.start()
+            // Prove actual monitor contention while validation is paused. This
+            // does not infer exclusion from an arbitrary sleep or fast timeout.
+            val threads=java.lang.management.ManagementFactory.getThreadMXBean()
+            val deadline=System.nanoTime()+java.util.concurrent.TimeUnit.SECONDS.toNanos(5)
+            var blocked=false
+            while(System.nanoTime()<deadline && !blocked && selection.isAlive) {
+                val info=threads.getThreadInfo(selection.id)
+                blocked=info?.threadState==Thread.State.BLOCKED && info.lockOwnerId==commit.id
+                if(!blocked)Thread.yield()
+            }
+            assertTrue("Selection must contend on the live commit's authority monitor",blocked)
+            assertEquals("upper",selected.get());assertTrue(order.isEmpty())
+        } finally {
+            release.countDown();commit.join(5000)
+            if(selection.state!=Thread.State.NEW)selection.join(5000)
+        }
+        assertFalse(commit.isAlive);assertFalse(selection.isAlive)
+        assertTrue("Worker failures: $failures",failures.isEmpty())
+        assertEquals(listOf("effect","selection"),order.toList())
+        assertEquals("lower",selected.get())
+        assertEquals(Code.TARGET_CHANGED,assertThrows(ToolFailure::class.java){
+            port.commit(old){fail("Old-role effect must not execute after selection")}
+        }.code)
+        port.commit(e(binding,"fresh-lower").copy(snapshotId="lower")){order.add("lower-effect")}
+        assertEquals(listOf("effect","selection","lower-effect"),order.toList())
+    }
+
 }

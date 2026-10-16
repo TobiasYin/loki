@@ -1,0 +1,25 @@
+{
+  "scope": "isolated emulator component: real PackageManager, intercepted SDK launch Intent; no model or actual foreground proof",
+  "device": {
+    "serial": "127.0.0.1:5557",
+    "adbPort": 5042,
+    "model": "sdk_gphone64_arm64",
+    "hardware": "ranchu",
+    "avd": "android_gui_agent_api36"
+  },
+  "apkSha256": {
+    "app-debug.apk": "dcd90f3e4d3a7dc1f906d6a4e6c0b36f7bcabc0662dc27dedf6d8366dea17cc8",
+    "app-debug-androidTest.apk": "7182cabf553b598582e0a69274811b09146e0eb6264fc68e18dead99d4676bc0"
+  },
+  "passed": true,
+  "tests": 3,
+  "elapsedSeconds": 1.923,
+  "productDbUnchanged": true,
+  "installMode": "-r; no uninstall/clear/wipe",
+  "physicalDeviceTouched": false,
+  "server5037Restarted": false,
+  "configurationChangedByTest": false,
+  "actualActivityLaunched": false,
+  "sourceEditedDuringExecution": false,
+  "sourceArtifacts": "build/emulator/app-launcher-2026-10-16; APKs, emulator output, absolute local paths and private database hashes are intentionally not copied"
+}

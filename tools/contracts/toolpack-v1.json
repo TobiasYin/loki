@@ -34,14 +34,113 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
-        "Accessibility for current-upper target; PackageManager visibility for version lookup"
+        "Accessibility for current-selected screen target; PackageManager visibility for version lookup"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Read upper application package label/version/install details without capture."
+      "description": "Read selected screen application package label/version/install details without capture."
+    },
+    {
+      "toolId": "perception.find_apps",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 15000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [],
+      "platformPrerequisites": [
+        "Android PackageManager MAIN + CATEGORY_LAUNCHER visibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Find only enabled exported public MAIN/LAUNCHER apps matching a nonempty query against app label, package or launcher activity class. Returns at most 20 matching items, never a complete package inventory. Use for requested app discovery instead of broad pm list packages. A Citra query can match a Lime3DS launcher activity whose class contains org.citra. No shell or elevated privilege."
+    },
+    {
+      "toolId": "apps.launch",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packageName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255,
+            "pattern": "[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+"
+          }
+        },
+        "required": [
+          "packageName"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 15000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "selected-screen/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Android PackageManager MAIN + CATEGORY_LAUNCHER visibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Launch one discovered package using only its enabled exported MAIN/CATEGORY_LAUNCHER activity onto the currently resolved selected screen display. No arbitrary component, URI, extras, shell, data/task clearing or launching the assistant itself. Requires screen_control and fresh target authorization; no ADB permission or gray-shell approval is needed. A submitted launch is not foreground proof: immediately observe app/window/UI or capture a fresh screen before the next input."
+    },
+    {
+      "toolId": "agent.background",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "timeoutMs": 15000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "assistant-chat-task"
+      ],
+      "platformPrerequisites": [
+        "Attached assistant runtime background callback; fixed main-thread Activity.moveTaskToBack(true) when chat is visible"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Move only the Thor Agent chat task into the background so the authorized Run can continue controlling calibrated screens. Takes no package, task, display, command or navigation arguments. Does not start a target app, change screen roles, or alter focus settings. Already hidden chat returns alreadyBackground=true without submitting input. After actual movement, re-observe and explicitly select the desired screen role before further input."
     },
     {
       "toolId": "perception.window_info",
@@ -67,14 +166,14 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Enumerate bounded Accessibility windows only on the calibrated upper display."
+      "description": "Enumerate bounded Accessibility windows only on the calibrated selected screen display."
     },
     {
       "toolId": "perception.ui_tree",
@@ -148,14 +247,14 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Read a compact semantic Accessibility tree of the current upper app, including exposed offscreen nodes. Passwords hidden. Returns snapshot-bound nodeRef, parent/scroll relationships, actions and collection/range metadata. Never auto-scrolls or reveals unexposed virtualized/hidden content. Use maxDepth up to 20, query, visibility and offset to page current exposed evidence; each read is a new observation and invalidates old refs. Scroll using a returned scrollable nodeRef, then observe again. For a long exposed TextView, query returns a snippet near the hit; textStart/textLength indicate clipping. textOffset reads later text without scrolling. Offscreen text evidence does not imply actual viewport movement."
+      "description": "Read a compact semantic Accessibility tree of the current selected screen app, including exposed offscreen nodes. Passwords hidden. Returns snapshot-bound nodeRef, parent/scroll relationships, actions and collection/range metadata. Never auto-scrolls or reveals unexposed virtualized/hidden content. Use maxDepth up to 20, query, visibility and offset to page current exposed evidence; each read is a new observation and invalidates old refs. Scroll using a returned scrollable nodeRef, then observe again. For a long exposed TextView, query returns a snippet near the hit; textStart/textLength indicate clipping. textOffset reads later text without scrolling. Offscreen text evidence does not imply actual viewport movement."
     },
     {
       "toolId": "perception.capture_screen",
@@ -204,14 +303,98 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Capture calibrated upper display via Accessibility into a bounded private JPEG attachment."
+      "description": "Capture calibrated selected screen display via Accessibility into a bounded private JPEG attachment."
+    },
+    {
+      "toolId": "perception.capture_companion",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "maxEdge": {
+            "type": "integer",
+            "minimum": 64,
+            "maximum": 1280
+          },
+          "quality": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 95
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "jpeg"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot",
+        "calibrated-lower/same-app-read-only"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read-only screenshot of the calibrated lower companion display ONLY when its unique visible application window belongs to the current authorized upper app. Useful for a dual-screen emulator presenting game controls, dialogs or status on its second screen. Never accepts displayId or input; refuses own assistant, other apps, ambiguous windows, overlays and secure windows. Captures only that app’s visible rectangle. Image has a separate companionObservationId/companionImageTransform, readOnly=true, frameInputUsable=false and NO frameId. Returned targetSnapshotId remains a fresh UPPER observation; never reuse companion pixels or coordinates for upper input. Uses native Accessibility screenshot only; no shell/root fallback.",
+      "platformPrerequisites": [
+        "Accessibility screenshot capability",
+        "Calibrated upper/lower roles",
+        "Unique visible lower application window belonging to the same current upper app",
+        "No occluding system/IME/private app overlay or secure screenshot restriction"
+      ]
+    },
+    {
+      "toolId": "perception.select_screen",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_perception"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "screen": {
+            "type": "string",
+            "enum": [
+              "upper",
+              "lower"
+            ]
+          }
+        },
+        "required": [
+          "screen"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "calibrated-screen-roles",
+        "this-run/target-snapshot"
+      ],
+      "platformPrerequisites": [
+        "Existing calibrated upper/lower roles",
+        "Lower: unique safe visible non-assistant application, no password/overlay or secure screenshot restriction"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Select the calibrated upper or lower screen as THIS RUN’s next observation/input target. New runs default to upper. Does not change global calibration, another Run or permissions. Different apps on the two screens are allowed; lower refuses the assistant itself, ambiguous/occluded apps, visible password fields and secure windows. Returned snapshotId/targetSnapshotId and displayRole bind this selected role; after success re-observe that screen in the next tool round before input. Old upper/lower frames and nodeRefs cannot cross roles. Accepts only screen upper|lower, never a numeric displayId. SCREEN_CONTROL is still independently required for any actual input."
     },
     {
       "toolId": "perception.device_info",
@@ -250,6 +433,80 @@
       "modelVisibility": true,
       "provenance": "builtin",
       "description": "Read requested system/display/resource SDK data; never use Shell."
+    },
+    {
+      "toolId": "input.activate",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "nodeRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "nodeRef"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 15000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "selected-screen/snapshot",
+        "latest-ui-tree/node-ref"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Activate a current ui_tree clickable node using its advertised ACTION_CLICK, without guessing coordinates. Only nodeRef is accepted. Native resolves the same unique tree path and node identity again and requires its own signature, bounds, app/window, display/epoch and visible region unchanged. Unrelated content updates such as a sibling RAM counter may change; target changes, stale refs, other runs/sessions, new screen observations or prior input invalidate the ref. Never activates offscreen/password/disabled/nonclickable nodes; choose a visible clickable ancestor if needed. No arbitrary accessibility actions, coordinates, text or value injection. Submission is not proof of app effect; re-observe afterward.",
+      "platformPrerequisites": [
+        "Current run/session latest ui_tree ref",
+        "Same selected screen display, app, window, layout and visible region",
+        "Unchanged visible enabled clickable non-password target with ACTION_CLICK"
+      ]
+    },
+    {
+      "toolId": "input.navigate",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "back"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 15000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "selected-screen/snapshot"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Send one fixed Android BACK down/up pair to the currently authorized selected screen display and that display’s focused target app/window (global focus may belong to the lower display). Use for Android back navigation or an app menu implemented by onBackPressed; an edge swipe or gamepad BUTTON_MODE is not equivalent. No arbitrary keycode, HOME, shell, display override, hold, repeat, URI or extras. This is virtual-keyboard Android navigation, never physical gamepad identity. Returns submitted but foregroundVerified=false; re-observe after navigation. Requires normal screen_control, not a separate adb_debug capability; bound shell backend still needs its actual Shizuku grant.",
+      "platformPrerequisites": [
+        "Bound Shizuku shell UID 2000",
+        "Current selected screen snapshot with matching per-display focused application and window",
+        "InputManager explicit display routing reflection available"
+      ]
     },
     {
       "toolId": "input.tap",
@@ -311,14 +568,14 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Submit a bounded single-finger tap to the calibrated upper display."
+      "description": "Submit a bounded single-finger tap to the calibrated selected screen display."
     },
     {
       "toolId": "input.long_press",
@@ -380,14 +637,14 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Submit a bounded single-finger long press to the calibrated upper display."
+      "description": "Submit a bounded single-finger long press to the calibrated selected screen display."
     },
     {
       "toolId": "input.swipe",
@@ -448,14 +705,14 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Submit a bounded single-finger swipe to the calibrated upper display."
+      "description": "Submit a bounded single-finger swipe to the calibrated selected screen display."
     },
     {
       "toolId": "input.scroll",
@@ -509,7 +766,7 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
@@ -571,7 +828,7 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Accessibility"
@@ -634,17 +891,17 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Shizuku shell UID 2000 grant",
         "Unique writable Odin Controller evdev node, reported button label/state, and verified firmware key layout",
-        "Authorized upper app is the physical controller focused target; requested button initially released"
+        "Authorized selected screen app is the physical controller focused target; requested button initially released"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
       "availabilityPolicy": "ready only when the fixed physical evdev backend is writable and its controller profile is validated; InputManager event identity is not a fallback",
-      "description": "Press and automatically release a real Odin controller button using a fixed EV_KEY+SYN evdev frame. Use phase=hold only, durationMs default 100 and maximum 5000. Firmware key layout and actual getevent button label/state must be verified; an initially pressed button is rejected. Physical controller input follows verified upper-app focus, not displayId injection. Never keyboard/touch/InputManager fallback. Stop releases only this action through its original fd; SIGKILL cannot guarantee release. Independently verify receiver source/deviceId and down/up before claiming effect."
+      "description": "Press and automatically release a real Odin controller button using a fixed EV_KEY+SYN evdev frame. Use phase=hold only, durationMs default 100 and maximum 5000. Firmware key layout and actual getevent button label/state must be verified; an initially pressed button is rejected. Physical controller input follows verified selected screen-app focus, not displayId injection. Never keyboard/touch/InputManager fallback. Stop releases only this action through its original fd; SIGKILL cannot guarantee release. Independently verify receiver source/deviceId and down/up before claiming effect."
     },
     {
       "toolId": "input.set_axes",
@@ -708,17 +965,17 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
-        "upper-display/snapshot"
+        "selected-screen/snapshot"
       ],
       "platformPrerequisites": [
         "Shizuku shell UID 2000 grant",
         "Unique writable Odin Controller evdev node and verified six-axis min/max/key layout",
-        "Authorized upper app is the physical controller focused target; requested axes initially neutral"
+        "Authorized selected screen app is the physical controller focused target; requested axes initially neutral"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
       "availabilityPolicy": "ready only when the fixed physical evdev backend is writable and its controller profile is validated; InputManager MotionEvent is not an axis fallback",
-      "description": "Hold bounded physical Odin controller axes and automatically return requested axes to neutral. Only X/Y (left stick), Z/RZ (right stick), GAS/BRAKE (triggers) are supported after discovering real firmware ranges. Sticks accept -1..1, triggers 0..1; durationMs 1..5000. Uses a fixed EV_ABS+SYN evdev writer, not MotionEvent injection. Physical controller input follows verified upper-app focus; displayId alone cannot route evdev events. Non-neutral requested axes, changed controller, unavailable routing evidence or wrong focus are rejected without changing focus locks. Stop writes neutral to this action original fd. SIGKILL cannot guarantee release; independently verify real controller source/deviceId and neutral at the receiver."
+      "description": "Hold bounded physical Odin controller axes and automatically return requested axes to neutral. Only X/Y (left stick), Z/RZ (right stick), GAS/BRAKE (triggers) are supported after discovering real firmware ranges. Sticks accept -1..1, triggers 0..1; durationMs 1..5000. Uses a fixed EV_ABS+SYN evdev writer, not MotionEvent injection. Physical controller input follows verified selected screen-app focus; displayId alone cannot route evdev events. Non-neutral requested axes, changed controller, unavailable routing evidence or wrong focus are rejected without changing focus locks. Stop writes neutral to this action original fd. SIGKILL cannot guarantee release; independently verify real controller source/deviceId and neutral at the receiver."
     },
     {
       "toolId": "input.release_inputs",

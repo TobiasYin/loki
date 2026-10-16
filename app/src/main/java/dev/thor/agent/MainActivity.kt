@@ -18,99 +18,150 @@ import java.net.URI
 class MainActivity : Activity() {
     private lateinit var web: WebView
     private lateinit var host: ProductHost
-    private lateinit var uiStates:LatestValue<JSONObject>
+    // Aliases retained for settings and acceptance tests; Service owns these.
     private var bridge: dev.thor.bridge.android.TrustedWebViewBridge? = null
+    private var runtimeService:AgentRuntimeService?=null
+    private var attachedEngine:AgentRuntimeEngine?=null
+    private lateinit var container:FrameLayout
+    private var serviceBound=false
+    private var chatStarted=false
+    private val runtimeUi=object:AgentRuntimeEngine.Ui {
+        override fun runtimeUiCommand(op:String,data:JSONObject)=handleRuntimeUi(op,data)
+        override fun runtimeUnavailable(message:String)=showRuntimeError(message)
+        override fun isChatVisible()=chatStarted && !isFinishing && !isDestroyed && window.decorView.windowVisibility==View.VISIBLE
+        override fun moveToBackground()=if(isFinishing || isDestroyed)false else moveTaskToBack(true)
+    }
+    private val serviceConnection=object:android.content.ServiceConnection {
+        override fun onServiceConnected(name:android.content.ComponentName,binder:android.os.IBinder) {
+            if(isDestroyed || isFinishing)return
+            val service=(binder as AgentRuntimeService.LocalBinder).service
+            runtimeService=service
+            val screen=java.lang.ref.WeakReference(this@MainActivity)
+            service.whenEngineReady {screen.get()?.let {if(it.runtimeService===service && !it.isDestroyed && !it.isFinishing)it.attachEngine()}}
+        }
+        override fun onServiceDisconnected(name:android.content.ComponentName) {
+            attachedEngine=null;runtimeService=null
+            if(!isDestroyed && !isFinishing)showRuntimeError("执行服务已退出；历史保留，运行不会自动重放。")
+        }
+    }
     private var pickerSession: String? = null
     private var pickerKind="image"
+    private var pendingPickerResult:PendingPickerResult?=null
     private var settingsView:View?=null
     private var settingsBack:()->Unit={closeSettings()}
     private var microphonePermissionPending=false
     private var voice:VoiceInput?=null
     private var voiceId:String?=null
-    private val origin = BridgePolicy.ORIGIN
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pickerSession=savedInstanceState?.getString("pickerSession")
         pickerKind=savedInstanceState?.getString("pickerKind") ?: "image"
-        web = WebView(this); web.id = android.R.id.custom
-        val container = FrameLayout(this).apply { addView(web, FrameLayout.LayoutParams(-1, -1)) }
+        pendingPickerResult=PendingPickerResult.restore(savedInstanceState)
+        container=FrameLayout(this)
+        container.addView(TextView(this).apply {text="正在打开聊天…";gravity=android.view.Gravity.CENTER},FrameLayout.LayoutParams(-1,-1))
         setContentView(container)
-        container.setOnApplyWindowInsetsListener { view, insets ->
-            val bars = insets.getInsets(android.view.WindowInsets.Type.systemBars() or android.view.WindowInsets.Type.ime())
-            view.setPadding(bars.left, bars.top, bars.right, bars.bottom); insets
+        container.setOnApplyWindowInsetsListener {view,insets->
+            val bars=insets.getInsets(android.view.WindowInsets.Type.systemBars() or android.view.WindowInsets.Type.ime())
+            view.setPadding(bars.left,bars.top,bars.right,bars.bottom);insets
         }
-        web.settings.textZoom = (resources.configuration.fontScale * 100).toInt().coerceIn(75, 200)
-        WebView.setWebContentsDebuggingEnabled(false)
-        uiStates=LatestValue({task->web.postDelayed({task()},50)},{state,delivered->
-            if(!isFinishing && !isDestroyed)web.evaluateJavascript("window.receiveProductState?.(JSON.parse(${JSONObject.quote(state.toString())}))") {delivered()} else delivered()
-        })
-        try { host = ProductHost.create(this) { state -> runOnUiThread {uiStates.offer(state)} }
-        } catch(error:Exception) {if(BuildConfig.DEBUG)android.util.Log.e("ThorInit",error.javaClass.simpleName+"\n"+error.stackTrace.joinToString("\n"));setContentView(LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;addView(TextView(this@MainActivity).apply {text="本地存储或安全配置初始化失败；历史保留，未执行网络或设备操作。"});addView(Button(this@MainActivity).apply {text="重试打开";setOnClickListener {recreate()}})});return}
-        val transport = dev.thor.bridge.HttpTransport(host.authority, host.policy)
-        val toolGateway = dev.thor.bridge.ToolGateway(host.authority, emptyList(), { emptyMap() })
-        bridge = dev.thor.bridge.android.TrustedWebViewBridge(web, host.authority, transport, toolGateway,
-            { c -> host.bootstrap(c) }, "$origin/assets/chat/index.html", { c, request ->
-                if(request.optString("op").startsWith("voice.")) {
-                    runOnUiThread { handleVoice(request.optString("op"),request.optJSONObject("data") ?: JSONObject()) }
-                    java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
-                } else if(request.optString("op") == "openLink") {
-                    val raw=request.optJSONObject("data")?.optString("url").orEmpty()
-                    runOnUiThread {runCatching {
-                        val uri=URI(raw);require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && raw.length<=8192)
-                        startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW,Uri.parse(raw)))
-                    }.onFailure {Toast.makeText(this,"无法打开此链接",Toast.LENGTH_SHORT).show()}}
-                    java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
-                } else if(request.optString("op") == "voiceSettings") {
-                    runOnUiThread {showSettings()};java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
-                } else if(request.optString("op") == "skillImport") {
-                    runOnUiThread {runCatching {pickerSession=host.requestImagePicker();pickerKind="skill";startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("*/*").putExtra(android.content.Intent.EXTRA_MIME_TYPES,arrayOf("text/markdown","text/plain","application/zip","application/octet-stream")),72)}.onFailure {pickerSession=null;Toast.makeText(this,"请先停止活动运行再导入 Skill",Toast.LENGTH_LONG).show()}}
-                    java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
-                } else if(request.optString("op") == "pickImage") {
-                    runOnUiThread {
-                        runCatching { pickerSession=host.requestImagePicker();pickerKind="image";startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("image/*"),71) }
-                            .onFailure { Toast.makeText(this,"请先停止活动运行再附图",Toast.LENGTH_LONG).show() }
-                    }; java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
-                } else if(request.optString("op") == "settings") {
-                    runOnUiThread { showSettings() }; java.util.concurrent.CompletableFuture.completedFuture(JSONObject())
-                } else host.rpc(c, request)
-            }, { host.interrupt("页面/renderer 连接失效；不重放") }, host::auditHttp, {
-            uiStates.close()
-            val panel=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;addView(TextView(this@MainActivity).apply {text="聊天渲染进程已退出；当前运行已中断，不会重放。"});addView(Button(this@MainActivity).apply {text="重新打开聊天";setOnClickListener {recreate()}})}
-            setContentView(panel)
-        })
-        if(bridge!!.supported) bridge!!.load() else setContentView(TextView(this).apply { text = "请更新 Android System WebView：安全消息桥不可用。" })
+        serviceBound=bindService(android.content.Intent(this,AgentRuntimeService::class.java),serviceConnection,BIND_AUTO_CREATE)
+        if(!serviceBound)showRuntimeError("执行服务暂不可用；历史已保留，请重新打开聊天。")
     }
-    override fun onPause() {
-        super.onPause()
-        voice?.close();voice=null;voiceId=null
-        // Android may create the next Activity before destroying this one. Release the single writer before that handoff.
-        if(pickerSession == null && !microphonePermissionPending) {bridge?.close();if(::host.isInitialized)host.close()}
+    private fun attachEngine() {
+        val service=runtimeService ?: return
+        val engine=service.engine ?: run {showRuntimeError(service.initializationError ?: "执行环境暂不可用。");return}
+        attachedEngine?.detach(runtimeUi);attachedEngine=engine
+        web=engine.web;host=engine.host;bridge=engine.bridge
+        settingsView=null;container.removeAllViews();engine.attach(this,container,runtimeUi)
+        consumePendingPickerResult()
     }
-    override fun onStop() {
-        super.onStop()
-        bridge?.close(); if(::host.isInitialized)host.interrupt("应用离开前台；不重放任何动作")
+    private fun reloadRuntime() {
+        val service=runtimeService ?: return
+        val screen=java.lang.ref.WeakReference(this)
+        if(!service.reloadConfiguration {screen.get()?.let {if(it.runtimeService===service && !it.isDestroyed && !it.isFinishing)it.attachEngine()}}) {
+            Toast.makeText(this,"请等待活动任务结束后再重新加载设置",Toast.LENGTH_LONG).show();return
+        }
+        attachedEngine=null;settingsView=null;container.removeAllViews()
+        container.addView(TextView(this).apply {text="正在加载已保存的设置…";gravity=android.view.Gravity.CENTER},FrameLayout.LayoutParams(-1,-1))
     }
-    override fun onRestart() { super.onRestart(); if(pickerSession == null && !microphonePermissionPending)recreate() }
+    private fun showRuntimeError(message:String) {
+        if(isDestroyed || isFinishing)return
+        container.removeAllViews()
+        container.addView(LinearLayout(this).apply {orientation=LinearLayout.VERTICAL
+            addView(TextView(this@MainActivity).apply {text=message})
+            addView(Button(this@MainActivity).apply {text="重新打开聊天";setOnClickListener {reloadRuntime()}})
+        },FrameLayout.LayoutParams(-1,-1))
+    }
+    private fun handleRuntimeUi(op:String,data:JSONObject) {
+        if(isDestroyed || isFinishing)return
+        if(op.startsWith("voice.")){handleVoice(op,data);return}
+        when(op) {
+            "openLink"->runCatching {
+                val raw=data.optString("url");val uri=URI(raw)
+                require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && raw.length<=8192)
+                startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW,Uri.parse(raw)))
+            }.onFailure {Toast.makeText(this,"无法打开此链接",Toast.LENGTH_SHORT).show()}
+            "voiceSettings","settings"->showSettings()
+            "skillImport"->runCatching {
+                pickerSession=host.requestImagePicker();pickerKind="skill"
+                startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("*/*").putExtra(android.content.Intent.EXTRA_MIME_TYPES,arrayOf("text/markdown","text/plain","application/zip","application/octet-stream")),72)
+            }.onFailure {pickerSession=null;Toast.makeText(this,"请先停止活动运行再导入 Skill",Toast.LENGTH_LONG).show()}
+            "pickImage"->runCatching {
+                pickerSession=host.requestImagePicker();pickerKind="image"
+                startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT).addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("image/*"),71)
+            }.onFailure {pickerSession=null;Toast.makeText(this,"请先停止活动运行再附图",Toast.LENGTH_LONG).show()}
+        }
+    }
+    private fun offerNotificationPermission() {
+        if(android.os.Build.VERSION.SDK_INT<33 || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)==android.content.pm.PackageManager.PERMISSION_GRANTED)return
+        requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),74)
+    }
+    override fun onStart() {super.onStart();chatStarted=true}
+    override fun onStop() {chatStarted=false;super.onStop()}
+    override fun onPause() {super.onPause();voice?.close();voice=null;voiceId=null}
     override fun onDestroy() {
-        if(::uiStates.isInitialized)uiStates.close()
-        bridge?.close(); if(::host.isInitialized)host.close()
-        if(::web.isInitialized) { (web.parent as? android.view.ViewGroup)?.removeView(web); web.destroy() }
+        voice?.close();voice=null;voiceId=null
+        attachedEngine?.detach(runtimeUi);attachedEngine=null
+        if(serviceBound){unbindService(serviceConnection);serviceBound=false}
+        runtimeService=null
         super.onDestroy()
     }
-    override fun onSaveInstanceState(out: Bundle) {super.onSaveInstanceState(out);out.putString("pickerSession",pickerSession);out.putString("pickerKind",pickerKind)}
+    override fun onSaveInstanceState(out: Bundle) {
+        super.onSaveInstanceState(out);out.putString("pickerSession",pickerSession);out.putString("pickerKind",pickerKind)
+        pendingPickerResult?.save(out)
+    }
     @Deprecated("System document picker result")
     override fun onActivityResult(requestCode: Int,resultCode: Int,data: android.content.Intent?) {
         super.onActivityResult(requestCode,resultCode,data)
-        if(requestCode==72) {
-            val uri=data?.data
-            if(resultCode==RESULT_OK && uri!=null)host.importSkill(uri).whenComplete {_,error->runOnUiThread {pickerSession=null;Toast.makeText(this,if(error==null)"Skill 已导入，可在管理页面查看" else "导入失败：检查 Skill 格式、大小和重名",Toast.LENGTH_LONG).show();recreate()}}
-            else {pickerSession=null;recreate()}
+        if(requestCode !in setOf(71,72))return
+        val uri=data?.data
+        if(resultCode!=RESULT_OK || uri==null || requestCode==71 && pickerSession==null) {
+            pendingPickerResult=null;pickerSession=null;return
         }
-        if(requestCode == 71) {
-            val sid=pickerSession;val uri=data?.data
-            if(resultCode == RESULT_OK && uri != null && sid != null)host.addUserImage(sid,uri).whenComplete {_,error ->runOnUiThread {pickerSession=null;Toast.makeText(this,if(error==null)"图片已保存在本会话，随下一条消息发送" else "图片导入失败：检查格式/大小或存储",Toast.LENGTH_LONG).show();recreate()} }
-            else {pickerSession=null;recreate()}
-        }
+        // Android can deliver this result before the recreated Activity receives
+        // its asynchronous Service connection. Retain its original session.
+        pendingPickerResult=PendingPickerResult(requestCode,uri.toString(),pickerSession)
+        consumePendingPickerResult()
+    }
+    private fun consumePendingPickerResult() {
+        if(isDestroyed || isFinishing)return
+        val engine=attachedEngine ?: return
+        if(engine.failed || runtimeService?.engine!==engine)return
+        val pending=pendingPickerResult ?: return
+        // Consume before dispatch. A second attach/recreation cannot import the
+        // same result again, and an old callback cannot clear a newer picker.
+        pendingPickerResult=null;pickerSession=null
+        val uri=Uri.parse(pending.uri)
+        val future=if(pending.requestCode==72)engine.host.importSkill(uri)
+            else engine.host.addUserImage(requireNotNull(pending.sessionId),uri)
+        future.whenComplete {_,error->runOnUiThread {
+            if(!isDestroyed && !isFinishing && attachedEngine===engine) {
+                val message=if(pending.requestCode==72) {
+                    if(error==null)"Skill 已导入，可在管理页面查看" else "导入失败：检查 Skill 格式、大小和重名"
+                } else if(error==null)"图片已保存在本会话，随下一条消息发送" else "图片导入失败：检查格式/大小或存储"
+                Toast.makeText(this,message,Toast.LENGTH_LONG).show()
+            }
+        }}
     }
     private fun sendVoice(state:JSONObject,id:String?,sid:String?) {
         if(isDestroyed || isFinishing)return
@@ -170,6 +221,11 @@ class MainActivity : Activity() {
             row("联网搜索 ›","Brave 搜索与 API Key"){showSettings("search")}
             row("火山流式语音识别 ›","语音输入、识别资源与 API Key"){showVoiceSettingsPage()}
             row("设备与权限 ›","显示映射、无障碍与 Shizuku"){showSettings("device")}
+            val notificationsAllowed=android.os.Build.VERSION.SDK_INT<33 || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)==android.content.pm.PackageManager.PERMISSION_GRANTED
+            row("后台任务通知 ›",if(notificationsAllowed)"通知中可查看运行并停止任务" else "未允许通知；后台任务仍可运行，点此开启通知") {
+                if(!notificationsAllowed)offerNotificationPermission()
+                else startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,packageName))
+            }
             settingsPage("设置",content);return
         }
         val prefs = getSharedPreferences("profiles", MODE_PRIVATE); val vault = CredentialVault(this)
@@ -184,63 +240,97 @@ class MainActivity : Activity() {
         }
         if(section=="model") {
         label("模型服务")
-        val provider=Spinner(this).apply {adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,arrayOf("OpenCode Go","自定义 API Key"));setSelection(if((prefs.getString("provider",null)?.let {it=="opencode-go"} ?: prefs.getString("url","").orEmpty().startsWith("https://opencode.ai/zen/go")))0 else 1);content.addView(this)}
+        val savedProvider=prefs.getString("provider",null) ?: if(prefs.getString("url","").orEmpty().startsWith("https://opencode.ai/zen/go"))"opencode-go" else "custom"
+        val providerIds=listOf("opencode-go","custom","deepseek") // Keep existing Go/custom positions compatible.
+        val provider=Spinner(this).apply {
+            tag="model-provider";contentDescription="模型服务商"
+            adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,arrayOf("OpenCode Go","自定义 API Key","DeepSeek 官方"))
+            setSelection(if(prefs.getString("url","").isNullOrBlank())2 else providerIds.indexOf(savedProvider).let {if(it<0)1 else it});content.addView(this)
+        }
+        fun providerId()=providerIds[provider.selectedItemPosition]
         val name = field("模型显示名", "name")
         val protocol = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, arrayOf("OpenAI Responses", "Anthropic Messages","OpenAI Chat Completions")); setSelection(prefs.getInt("protocol", 0)); content.addView(this) }
         val url = field("模型基础 URL（HTTP / HTTPS）", "url"); val model = field("模型 ID", "model")
         val contextBudget = field("自定义模型上下文上限（tokens）", "contextBudgetText")
         val maxOutput = field("最大输出预算（默认 2048；按服务实际限制填写）", "maxOutputText")
         val imageSupport=CheckBox(this).apply {text="支持图片输入";isChecked=prefs.getBoolean("supportsImages",true);content.addView(this)}
-        val catalog=ModelCatalog(this)
-        val modelPicker=Spinner(this);content.addView(modelPicker)
-        val catalogStatus=TextView(this).apply {text=catalog.source();content.addView(this)}
+        val catalog=ModelCatalog(this);val deepseek=DeepSeekCatalog(this)
+        val modelPicker=Spinner(this).apply {tag="model-picker";contentDescription="选择模型"};content.addView(modelPicker)
+        val catalogStatus=TextView(this).apply {tag="model-catalog-status";content.addView(this)}
+        val refreshModels=Button(this).apply {content.addView(this)}
+        val headerName = field("自定义凭据头（可选）", "headerName")
+        val headerTemplate = field("凭据格式，例如 Bearer {{credential}}（可选）", "headerTemplate")
+        val keyStatus=TextView(this).apply {setPadding(0,20,0,8);content.addView(this)}
+        val modelKey = field("API Key（留空保留）", "", true)
+        val removeModel = CheckBox(this).apply { text = "删除已保存模型 Key"; content.addView(this) }
+        var advancedExpanded=false
+        val advanced=listOf(contextBudget,maxOutput,imageSupport,headerName,headerTemplate)
+        fun renderAdvanced() {
+            advanced.forEach {it.visibility=if(advancedExpanded && (providerId()=="custom" || it==contextBudget || it==maxOutput || it==imageSupport))View.VISIBLE else View.GONE}
+            contextBudget.isEnabled=providerId()=="custom";imageSupport.isEnabled=providerId()=="custom"
+        }
+        renderAdvanced()
+        content.addView(Button(this).apply {text="高级选项 ›";setOnClickListener {advancedExpanded=!advancedExpanded;renderAdvanced();text=if(advancedExpanded)"收起高级选项 ‹" else "高级选项 ›"}})
+        fun draftKey():String=if(removeModel.isChecked)"" else modelKey.text.toString().ifBlank {
+            if(DeepSeekCatalog.canReuseCredential(savedProvider,providerId()))vault.readNative("model").orEmpty() else ""
+        }
+        fun selectedMetadata():JSONObject?=when(providerId()) {"deepseek"->deepseek.models();"opencode-go"->catalog.models();else->null}
+            ?.objects()?.find {it.optString("id")==model.text.toString() && it.optString("protocol")==ModelCatalog.protocols[protocol.selectedItemPosition]}
         fun updateModels() {
-            val choices=catalog.models().objects()
+            val selectedProvider=providerId();if(selectedProvider=="custom")return
+            val choices=(if(selectedProvider=="deepseek")deepseek.models() else catalog.models()).objects()
+            modelPicker.onItemSelectedListener=null
             modelPicker.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,choices.map {it.getString("name")})
-            modelPicker.setSelection(choices.indexOfFirst {it.getString("id")==model.text.toString()}.coerceAtLeast(0))
+            val chosen=choices.indexOfFirst {it.getString("id")==model.text.toString()}.coerceAtLeast(0)
+            fun applyChoice(position:Int) {
+                val choice=choices[position];model.setText(choice.getString("id"));name.setText(choice.getString("name"))
+                contextBudget.setText(choice.getInt("contextWindow").toString());protocol.setSelection(ModelCatalog.protocols.indexOf(choice.getString("protocol")))
+                imageSupport.isChecked=choice.optJSONArray("input")?.let {a->(0 until a.length()).any {a.getString(it)=="image"}}==true
+                val source=if(selectedProvider=="deepseek")deepseek.source() else catalog.source()
+                val labels=mapOf("off" to "关闭","low" to "低","high" to "高","max" to "最大")
+                val effort=if(selectedProvider=="deepseek")choice.getJSONArray("efforts").let {a->(0 until a.length()).joinToString(" / "){labels[a.getString(it)] ?: a.getString(it)}}+"（默认${labels[choice.optString("defaultEffort","high")] ?: "高"}）" else choice.getJSONArray("efforts").join(" / ")
+                catalogStatus.text="$source\n上下文 ${choice.getInt("contextWindow")} tokens · 思考强度 $effort\n"+if(imageSupport.isChecked)"支持文字和图片" else "仅支持文字"
+            }
+            modelPicker.setSelection(chosen);applyChoice(chosen)
             modelPicker.onItemSelectedListener=object:android.widget.AdapterView.OnItemSelectedListener {
                 override fun onNothingSelected(parent:android.widget.AdapterView<*>?)=Unit
-                override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long) {
-                    if(provider.selectedItemPosition!=0)return
-                    val choice=choices[position];model.setText(choice.getString("id"));name.setText(choice.getString("name"))
-                    contextBudget.setText(choice.getInt("contextWindow").toString());protocol.setSelection(ModelCatalog.protocols.indexOf(choice.getString("protocol")))
-                    catalogStatus.text="${catalog.source()}\n上下文 ${choice.getInt("contextWindow")} tokens · 思考强度 ${choice.getJSONArray("efforts").join(" / ")}"
-                }
+                override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long) {if(providerId()==selectedProvider)applyChoice(position)}
             }
         }
-        updateModels()
-        val refreshModels=Button(this).apply {text="刷新 OpenCode Go 模型列表";content.addView(this);setOnClickListener {
-            isEnabled=false;catalogStatus.text="正在读取模型资料…"
-            Thread {val success=runCatching {catalog.refresh()}.isSuccess;runOnUiThread {isEnabled=true;if(success)updateModels() else catalogStatus.text="暂时无法刷新，继续使用已缓存模型资料"}}.start()
-        }}
+        refreshModels.setOnClickListener {
+            val selectedProvider=providerId();val key=draftKey()
+            if(selectedProvider=="deepseek" && key.isBlank()){catalogStatus.text="请填写 DeepSeek 官方 API Key 后刷新；可先选择内置官方模型";return@setOnClickListener}
+            refreshModels.isEnabled=false;catalogStatus.text="正在读取模型资料…"
+            Thread {
+                val success=runCatching {if(selectedProvider=="deepseek")deepseek.refresh(key) else catalog.refresh()}.isSuccess
+                runOnUiThread {if(refreshModels.isAttachedToWindow){refreshModels.isEnabled=true;if(providerId()==selectedProvider){if(success)updateModels() else catalogStatus.text="暂时无法刷新，请检查该服务的 Key、网络或额度；保留已缓存模型资料"}}}
+            }.start()
+        }
+        var lastProvider=savedProvider
         provider.onItemSelectedListener=object:android.widget.AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent:android.widget.AdapterView<*>?)=Unit
             override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long) {
-                val go=position==0;modelPicker.visibility=if(go)View.VISIBLE else View.GONE;refreshModels.visibility=modelPicker.visibility;catalogStatus.visibility=modelPicker.visibility
-                protocol.visibility=if(go)View.GONE else View.VISIBLE;model.visibility=protocol.visibility;name.visibility=protocol.visibility;url.visibility=protocol.visibility;contextBudget.isEnabled=!go
-                if(go){url.setText("https://opencode.ai/zen/go/v1");updateModels()}
+                val id=providerId();val fixed=id!="custom"
+                if(!DeepSeekCatalog.canReuseCredential(lastProvider,id))modelKey.text.clear()
+                lastProvider=id
+                modelPicker.visibility=if(fixed)View.VISIBLE else View.GONE;refreshModels.visibility=modelPicker.visibility;catalogStatus.visibility=modelPicker.visibility
+                for(v in listOf(protocol,model,name,url))v.visibility=if(fixed)View.GONE else View.VISIBLE
+                keyStatus.text=if(DeepSeekCatalog.canReuseCredential(savedProvider,id))"模型 API Key：${vault.status("model")}；留空保留，勾选后删除" else "切换服务请填写该服务的 API Key；不会复用其他服务的 Key"
+                refreshModels.text=if(id=="deepseek")"刷新 DeepSeek 官方模型列表" else "刷新 OpenCode Go 模型列表"
+                if(fixed){url.setText(if(id=="deepseek")DeepSeekCatalog.BASE_URL else "https://opencode.ai/zen/go/v1");updateModels()}
+                renderAdvanced()
             }
         }
-        val headerName = field("自定义凭据头（可选）", "headerName")
-        val headerTemplate = field("凭据格式，例如 Bearer {{credential}}（可选）", "headerTemplate")
-        label("模型 API Key：${vault.status("model")}；留空保留，勾选后删除")
-        val modelKey = field("API Key（留空保留）", "", true)
-        val removeModel = CheckBox(this).apply { text = "删除已保存模型 Key"; content.addView(this) }
-        val advanced=listOf(contextBudget,maxOutput,imageSupport,headerName,headerTemplate)
-        advanced.forEach {it.visibility=View.GONE}
-        content.addView(Button(this).apply {text="高级选项 ›";setOnClickListener {val expand=advanced.first().visibility!=View.VISIBLE;advanced.forEach {it.visibility=if(expand)View.VISIBLE else View.GONE};text=if(expand)"收起高级选项 ‹" else "高级选项 ›"}})
         fun currentModelDraft():ModelConnectionTest.Draft {
-            val draft=ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),
-                if(removeModel.isChecked)"" else modelKey.text.toString().ifBlank {vault.readNative("model").orEmpty()},headerName.text.toString(),headerTemplate.text.toString())
-            val uri=runCatching {URI(draft.baseUrl)}.getOrNull()
-            return if(uri?.scheme=="https" && uri.host=="opencode.ai" && uri.port in setOf(-1,443) && uri.path.trimEnd('/')=="/zen/go/v1")
-                draft.withProfile(catalog.models().objects().find {it.optString("id")==draft.model && it.optString("protocol")==draft.protocol}) else draft
+            val custom=providerId()=="custom"
+            return ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),
+                draftKey(),if(custom)headerName.text.toString() else "",if(custom)headerTemplate.text.toString() else "").withProfile(selectedMetadata())
         }
-        val testStatus=TextView(this).apply {text="测试当前页面填写的配置；空白 Key 使用已保存 Key。草稿不会自动保存。";setPadding(0,12,0,12);content.addView(this)}
-        val test=Button(this).apply {text="测试当前填写的连接";content.addView(this)}
+        val testStatus=TextView(this).apply {tag="model-test-status";text="测试当前页面填写的配置；同一服务的空白 Key 使用已保存 Key。草稿不会自动保存。";setPadding(0,12,0,12);content.addView(this)}
+        val test=Button(this).apply {text="测试当前填写的连接";tag="model-test";content.addView(this)}
         test.setOnClickListener {
             val draft=currentModelDraft()
-            if(runCatching {draft.validate()}.isFailure){testStatus.text="请填写有效的地址、接口类型、模型 ID 和 API Key；草稿未保存";return@setOnClickListener}
+            if(runCatching {draft.validate()}.isFailure){testStatus.text="请填写该服务有效的 API Key 和模型配置；草稿未保存";return@setOnClickListener}
             test.isEnabled=false;testStatus.text="正在测试当前填写的连接…（草稿未保存）"
             Thread {
                 val result=ModelConnectionTest.run(draft)
@@ -262,18 +352,17 @@ class MainActivity : Activity() {
         settingsPage("模型服务",content,save={
             try {
                 require(!host.hasActiveRuns())
-                ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),
-                    if(removeModel.isChecked)"removed" else modelKey.text.toString().ifBlank {vault.readNative("model").orEmpty()},headerName.text.toString(),headerTemplate.text.toString()).validate()
+                currentModelDraft().let {if(removeModel.isChecked)it.copy(credential="removed") else it}.validate()
                 val budget=contextBudget.text.toString().ifBlank {"32768"}.toInt()
                 val outputBudget=maxOutput.text.toString().ifBlank {"2048"}.toInt()
                 require(budget in 4096..4000000 && outputBudget in 16..16384 && outputBudget<budget)
                 val nextRevision=prefs.getInt("revision",0)+1
                 check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
                 if(removeModel.isChecked)vault.remove("model") else if(modelKey.length()>0)vault.put("model",modelKey.text.toString())
-                check(prefs.edit().putBoolean("supportsImages",imageSupport.isChecked).putString("provider",if(provider.selectedItemPosition==0)"opencode-go" else "custom").putString("name",name.text.toString().take(80)).putInt("protocol",protocol.selectedItemPosition)
+                check(prefs.edit().putBoolean("supportsImages",imageSupport.isChecked).putString("provider",providerId()).putString("name",name.text.toString().take(80)).putInt("protocol",protocol.selectedItemPosition)
                     .putString("url",url.text.toString().trim()).putString("model",model.text.toString().trim()).putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString())
-                    .putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName",headerName.text.toString()).putString("headerTemplate",headerTemplate.text.toString()).commit())
-                modelKey.text.clear();closeSettings();recreate();Toast.makeText(this,"设置已保存；新模型首次使用会检查图片与工具能力",Toast.LENGTH_LONG).show()
+                    .putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName",if(providerId()=="custom")headerName.text.toString() else "").putString("headerTemplate",if(providerId()=="custom")headerTemplate.text.toString() else "").commit())
+                modelKey.text.clear();closeSettings();reloadRuntime();Toast.makeText(this,if(providerId()!="custom")"设置已保存；官方模型可直接使用，也可在设置中测试连接" else "设置已保存；自定义模型首次使用会检查连接与工具能力",Toast.LENGTH_LONG).show()
             }catch(_:Exception){Toast.makeText(this,"保存失败：请先停止活动任务，并检查地址、预算和密钥配置",Toast.LENGTH_LONG).show()}
         },back={showSettings()})
         return
@@ -298,7 +387,7 @@ class MainActivity : Activity() {
                 require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && uri.rawQuery==null && uri.fragment==null && searchKey.length()<=8192)
                 if(removeSearch.isChecked)vault.remove("search") else if(searchKey.length()>0)vault.put("search",searchKey.text.toString())
                 check(prefs.edit().putString("searchBackend","Brave").putString("searchUrl",value).commit())
-                searchKey.text.clear();closeSettings();recreate()
+                searchKey.text.clear();closeSettings();reloadRuntime()
             }catch(_:Exception){Toast.makeText(this,"保存失败：请停止活动任务，并检查搜索地址和 Key",Toast.LENGTH_LONG).show()}
         },back={showSettings()})
         return
@@ -317,5 +406,24 @@ class MainActivity : Activity() {
     }
     private fun showVoiceSettingsPage() {
         showVoiceSettings(this) {content,save->settingsPage("语音输入",content,save,back={showSettings()})}
+    }
+}
+
+/** A document result waiting for the existing Service connection. No Runtime,
+ * Activity, ContentResolver or writer is retained in saved instance state. */
+internal data class PendingPickerResult(val requestCode:Int,val uri:String,val sessionId:String?) {
+    fun save(out:Bundle) {
+        out.putInt("pickerResult.requestCode",requestCode)
+        out.putString("pickerResult.uri",uri)
+        out.putString("pickerResult.sessionId",sessionId)
+    }
+    companion object {
+        fun restore(state:Bundle?):PendingPickerResult? {
+            val code=state?.getInt("pickerResult.requestCode") ?: return null
+            val uri=state.getString("pickerResult.uri")?.takeIf {it.isNotBlank()} ?: return null
+            val sid=state.getString("pickerResult.sessionId")
+            if(code !in setOf(71,72) || code==71 && sid==null)return null
+            return PendingPickerResult(code,uri,sid)
+        }
     }
 }

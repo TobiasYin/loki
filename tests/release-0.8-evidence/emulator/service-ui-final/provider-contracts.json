@@ -1,0 +1,24 @@
+{
+  "settings": {
+    "officialCloudCalled": false,
+    "goAdmissionWithoutProbeOrCloud": true,
+    "crossProviderBlankKeyRejected": true,
+    "officialModelsSelectable": true,
+    "metadataAccurate": true,
+    "settingsSaveReloadedIdleServiceHost": true,
+    "settingsSaveKeptActivity": true,
+    "officialProfileMetadataAndNoProbeGate": true,
+    "officialAdmissionWithoutProbeOrCloud": true,
+    "officialSaveAndReopen": true,
+    "keyExcludedFromWebViewAndProfilePrefs": true,
+    "controlledSseDraftPassed": true,
+    "controlledAuthenticationFailureDisplayed": true,
+    "passed": true,
+    "fixtureCredentialsRemoved": true
+  },
+  "defaults": {
+    "passed": true,
+    "emptyConfigurationDefaultsToOfficial": true,
+    "officialCloudCalled": false
+  }
+}

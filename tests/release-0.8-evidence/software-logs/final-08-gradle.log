@@ -1,0 +1,57 @@
+Source: build/physical/release-0.8-2026-10-16/final-08-gradle-02.log
+Source SHA256: 09e68eb458183084ae10a32476c75e46beed14d12b2ffdefdb000b30536d3493
+Selected evidence excerpt; not the complete source log.
+
+> Task :core:test UP-TO-DATE
+> Task :device-core:test
+> Task :device-authority:test
+> Task :input-lab:testDebugUnitTest UP-TO-DATE
+> Task :android:lintAnalyzeDebugUnitTest
+> Task :android:lintAnalyzeDebugAndroidTest
+> Task :device-android:lintAnalyzeDebugAndroidTest
+> Task :device-android:lintAnalyzeDebugUnitTest
+> Task :android:lintAnalyzeDebug
+> Task :app:testDebugUnitTest
+> Task :android:lintReportDebug
+> Task :android:lintDebug
+> Task :input-lab:lintAnalyzeDebug
+> Task :device-android:lintAnalyzeDebug
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :app:assembleDebug
+> Task :input-lab:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :device-android:lintReportDebug
+> Task :device-android:lintDebug
+> Task :app:lintAnalyzeDebug
+> Task :app:lintReportDebug
+> Task :app:lintDebug
+> Task :diagnostic:lintAnalyzeDebugAndroidTest
+> Task :input-lab:lintAnalyzeDebugUnitTest
+> Task :input-lab:lintReportDebug
+> Task :input-lab:lintDebug
+> Task :diagnostic:lintAnalyzeDebugUnitTest
+> Task :bridge-host:lintAnalyzeDebug
+> Task :bridge-host:lintAnalyzeDebugUnitTest
+> Task :bridge-host:lintAnalyzeDebugAndroidTest
+> Task :bridge-host:lintReportDebug
+> Task :bridge-host:lintDebug
+> Task :diagnostic:lintAnalyzeDebug
+> Task :diagnostic:lintReportDebug
+> Task :diagnostic:lintDebug
+> Task :input-lab:assembleDebug UP-TO-DATE
+> Task :android:lintVitalAnalyzeRelease
+> Task :input-lab:lintVitalAnalyzeRelease
+> Task :device-android:lintVitalAnalyzeRelease
+> Task :input-lab:lintVitalReportRelease
+> Task :input-lab:lintVitalRelease
+> Task :input-lab:assembleRelease
+> Task :input-lab:assembleDebugAndroidTest UP-TO-DATE
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:assembleRelease
+> Task :bridge-host:assembleDebug UP-TO-DATE
+> Task :diagnostic:assembleDebug
+> Task :app:assembleDebugAndroidTest
+BUILD SUCCESSFUL in 42s
+506 actionable tasks: 89 executed, 417 up-to-date

@@ -22,7 +22,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(11)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(13)
     private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
@@ -80,6 +80,10 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         GamepadCommand.parse(toolId,args)
         return call(runId,mapOf("operation" to "gamepad","toolId" to toolId,"args" to args,"displayId" to displayId,"expectedPackage" to expectedPackage),cp)
     }
+    fun navigate(runId:String,args:Map<String,Any?>,displayId:Int,expectedPackage:String?,cp:Checkpoint):Map<String,Any?> {
+        val command=NavigationCommand.parse(args)
+        return call(runId,mapOf("operation" to "navigation","action" to command.action,"displayId" to displayId,"expectedPackage" to expectedPackage),cp)
+    }
     fun releaseRunInputs(runId: String): String = runCatching {
         val remote=service ?: return@runCatching "No bound gamepad backend"
         remote.releaseGamepad(runId)
@@ -135,6 +139,20 @@ class DebugConnection(private val context: Context, private val invalidated: () 
                     requireTool(start.optBoolean("started"),Code.IO_ERROR,"Command submission was not acknowledged")
                 }
                 remote.awaitShell(token)
+            } else if(request["operation"]=="navigation") {
+                val preparation=JSONObject(remote.execute(token,(json(request+mapOf("operation" to "navigation.prepare")) as JSONObject).toString()))
+                if(preparation.has("error"))fail(Code.valueOf(preparation.getString("error")),preparation.optString("message"))
+                requireTool(preparation.getJSONObject("data").optBoolean("prepared"),Code.IO_ERROR,"Navigation preparation was not acknowledged")
+                var response=""
+                cp.check()
+                cp.effect {
+                    // A lost Binder reply cannot prove that DOWN was not already enqueued.
+                    cp.submitted()
+                    response=remote.execute(token,"{\"operation\":\"navigation.start\"}")
+                    val started=JSONObject(response)
+                    if(started.has("error"))fail(Code.valueOf(started.getString("error")),started.optString("message"))
+                }
+                response
             } else if(request["operation"]=="gamepad") {
                 val payload=request.filterKeys {it in setOf("toolId","displayId","args","expectedPackage")}
                 val serialized=(json(payload) as JSONObject).toString()

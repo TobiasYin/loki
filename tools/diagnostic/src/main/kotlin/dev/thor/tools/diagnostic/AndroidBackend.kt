@@ -10,6 +10,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import dev.thor.tools.*
 import dev.thor.tools.Point
+import dev.thor.tools.Target
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -25,9 +26,15 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     var approval: Approval? = null
     var shellApproval: String? = null
     var installApproval: String? = null
+    @Volatile var backgroundAgentAction:((Checkpoint)->Map<String,Any?>)?=null
     val downloads=NativeDownloads(context)
-    private val gestureTools = setOf("input.tap", "input.long_press", "input.swipe", "input.drag", "input.scroll")
-    private data class NodeBinding(val snapshotId:String,val windowId:Int,val packageName:String?,val node:AccessibilityNodeInfo,val signature:String,val expires:Long,val runId:String,val sessionId:String)
+    private val launcher=AppLauncher(context)
+    private data class LowerSafety(val key:String,val at:Long,val state:CompanionWindowState)
+    @Volatile private var lowerSafetyCache:LowerSafety?=null
+    @Volatile private var lastScreenshotAttempt=Long.MIN_VALUE
+    init {snapshots.installLowerGuard {display,target->lowerSafety(display,target)}}
+    private val gestureTools = setOf("input.tap", "input.long_press", "input.swipe", "input.drag", "input.scroll", "input.activate")
+    private data class NodeBinding(val snapshotId:String,val windowId:Int,val packageName:String?,val node:AccessibilityNodeInfo,val signature:String,val expires:Long,val runId:String,val sessionId:String,val path:String,val uniqueIdentity:Boolean)
     private val nodeRefs=LinkedHashMap<String,NodeBinding>()
     private val nodeLock=Any()
     private var nodeExpiry:Runnable?=null
@@ -35,16 +42,25 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     private fun nodeSignature(node:AccessibilityNodeInfo):String {
         val r=Rect();node.getBoundsInScreen(r)
         return hash(listOf(node.windowId,node.packageName,node.className,node.viewIdResourceName,node.isPassword,
-            if(node.isPassword)null else node.text,if(node.isPassword)null else node.contentDescription,node.isEnabled,node.isVisibleToUser,node.isScrollable,
+            if(node.isPassword)null else node.text,if(node.isPassword)null else node.contentDescription,node.isEnabled,node.isVisibleToUser,node.isScrollable,node.isClickable,node.childCount,
             node.collectionInfo?.rowCount,node.collectionInfo?.columnCount,node.collectionItemInfo?.rowIndex,node.collectionItemInfo?.columnIndex,node.isChecked,node.isSelected,
             if(node.isPassword)null else node.stateDescription,node.rangeInfo?.current,r.toShortString(),node.actionList.map {it.id}).joinToString("|").toByteArray())
     }
     override fun availability(toolId: String): Availability {
+        if(toolId=="agent.background")return if(backgroundAgentAction!=null)
+            Availability(Status.READY,"Fixed assistant chat-task background action; no arbitrary app/task routing","android-sdk/assistant-background")
+            else Availability(Status.BACKEND_MISSING,"Assistant background host callback is not installed","android-sdk/assistant-background")
+        if(toolId in setOf("perception.find_apps","apps.launch"))return Availability(Status.READY,"Fixed public MAIN/LAUNCHER PackageManager API; actual foreground requires observation","android-sdk/launcher")
+        if(toolId=="input.navigate") {
+            val base=shizuku.availability()
+            return base.copy(backend="shizuku-inputmanager/android-navigation",reason=if(base.status==Status.READY)"Fixed Android BACK; reflection and focused selected-screen target are verified before submission, handling remains unverified" else base.reason)
+        }
         val backend = when {
             toolId in setOf("web.request","files.download","files.download_info") -> "native-http/private-downloads"
             toolId.startsWith("apps.") -> "shizuku-userservice/shell-uid-2000"
             toolId.startsWith("perception.") -> "android-sdk/accessibility"
             toolId=="input.scroll" -> "accessibility-node-scroll"
+            toolId=="input.activate" -> "accessibility-node-activate"
             toolId.startsWith("input.") -> "accessibility-dispatchGesture"
             toolId.startsWith("debug.") -> "shizuku-userservice"
             else -> "synthetic-config/android-app-owned-root"
@@ -63,24 +79,61 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     private fun service() = ThorAccessibilityService.instance ?: fail(Code.PERMISSION_MISSING, "Accessibility disconnected")
     private fun result(e: Envelope, data: Map<String, Any?>, truncated: Boolean = false, outcome: String = "observed", actualBackend: String? = null): ToolResult {
         val a = if (actualBackend == null) availability(e.toolId) else shizuku.availability().copy(backend = actualBackend)
-        val target = if (ToolPack.descriptors[e.toolId]?.targetRequired == true) runCatching { snapshots.selected() }.getOrNull() else null
-        val common = if (target == null) data else data + mapOf("displayRole" to "upper", "displayId" to target.id)
+        val target = if (ToolPack.descriptors[e.toolId]?.targetRequired == true) runCatching { snapshots.validateReadSource(e.snapshotId) }.getOrNull() else null
+        val common = if (target == null) data else data + mapOf("displayRole" to target.role, "displayId" to target.display.id)
         return ToolResult(clock.now(), a.backend, a, common, truncated = truncated, outcome = outcome, snapshotId = e.snapshotId)
     }
     override fun execute(envelope: Envelope, args: Map<String, Any?>, checkpoint: Checkpoint): ToolResult {
+        lowerSafetyCache=null // A new tool never inherits a prior password scan.
         schemas.validate(envelope.toolId, args)
+        if(ToolPack.descriptors[envelope.toolId]?.let {it.effect==Effect.INPUT && it.targetRequired}==true)
+            InputTargetPolicy.check(envelope.toolId,snapshots.validateReadSource(envelope.snapshotId).target,setOf(context.packageName,"dev.thor.agent"))
         if(envelope.toolId in ToolPack.freshReads)invalidateNodeRefs()
         // Read the current app/window/tree even after the model has spent more
         // than an observation lifetime reasoning. The original source still fixes the
         // authorized display/epoch; a fresh target must survive the whole read.
         // Screenshot already owns this lifecycle, including its async callback.
-        val observation=if(envelope.toolId in ToolPack.freshReads && envelope.toolId!="perception.capture_screen") {
+        val observation=if(envelope.toolId in ToolPack.freshReads && envelope.toolId !in setOf("perception.capture_screen","perception.capture_companion","perception.select_screen")) {
             checkpoint.check();snapshots.captureForRead(envelope.snapshotId)
         } else null
         val e=if(observation==null)envelope else envelope.copy(snapshotId=observation.id)
-        val cp=if(observation==null)checkpoint else Checkpoint({checkpoint.check();snapshots.validate(observation.id)},checkpoint.cancellation)
+        val cp=if(observation==null)checkpoint else Checkpoint({
+            checkpoint.check()
+            snapshots.validateObservation(observation.id)
+        },checkpoint.cancellation)
         cp.check()
+        if(ToolPack.descriptors[e.toolId]?.targetRequired==true && e.toolId !in setOf("perception.select_screen","perception.capture_screen","perception.capture_companion")) {
+            val selected=snapshots.validateReadSource(e.snapshotId)
+            if(selected.role=="lower")lowerSecurityProbe(selected,e,cp)
+        }
         val output=when (e.toolId) {
+            "agent.background" -> backgroundAgent(e,args,cp)
+            "perception.select_screen" -> {
+                val role=ScreenSelection.parse(args)
+                cp.check();invalidateNodeRefs()
+                val chosen=snapshots.selectScreen(e.snapshotId,role)
+                if(role=="lower")lowerSecurityProbe(chosen,e,cp)
+                val completed=snapshots.captureReadCompletion(chosen.id)
+                result(e.copy(snapshotId=completed.id),mapOf("selectedScreen" to completed.role,"targetSnapshotId" to completed.id,
+                    "requestSnapshotId" to e.snapshotId,"readOnlySelection" to true,"calibrationChanged" to false,
+                    "nextStep" to "Only this Run selected the calibrated screen. Re-observe its current UI/screenshot before input; prior role frames/refs remain invalid for this target."))
+            }
+            "input.activate" -> activate(e,args,cp)
+            "input.navigate" -> {
+                NavigationCommand.parse(args)
+                val snap=snapshots.validateObservation(e.snapshotId)
+                cp.check();invalidateNodeRefs()
+                val data=shizuku.navigate(e.runId,args,snap.display.id,snap.target.packageName,cp)
+                cp.check();snapshots.validateReadSource(snap.id)
+                result(e,data,outcome="submitted")
+            }
+            "perception.find_apps" -> result(e,launcher.find(args,cp))
+            "apps.launch" -> {
+                val snap=snapshots.validate(e.snapshotId)
+                val data=launcher.launch(args,snap.display.id,cp,snap.role) {snapshots.validate(e.snapshotId);invalidateNodeRefs()}
+                cp.check();snapshots.validateReadSource(snap.id) // Launch changes the app, but must not change the authorized display/role/epoch.
+                result(e,data,outcome="submitted")
+            }
             "web.request", "files.download", "files.download_info" -> {
                 val data=try {downloads.execute(e.toolId,args,cp)}catch(t:Exception){cp.check();throw t}
                 result(e,data,truncated=data["truncated"]==true,actualBackend=null)
@@ -115,7 +168,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             }
             "perception.app_info" -> {
                 args.only("package")
-                val snapshot = snapshots.validate(e.snapshotId)
+                val snapshot = snapshots.validateObservation(e.snapshotId)
                 val pkg = args["package"] as? String ?: snapshot.target.packageName ?: fail(Code.TARGET_CHANGED, "Upper application is ambiguous/unknown; specify a known visible package")
                 requireTool(pkg.length in 1..255 && pkg.matches(Regex("[A-Za-z0-9_.]+")), message = "Invalid package")
                 try {
@@ -130,13 +183,14 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             "perception.window_info" -> windowInfo(e, args)
             "perception.ui_tree" -> tree(e, args, cp)
             "perception.capture_screen" -> screenshot(e, args, cp)
+            "perception.capture_companion" -> screenshot(e,args,cp,companion=true)
             "input.press_button", "input.set_axes" -> {
                 val snap=snapshots.validate(e.snapshotId);cp.check();invalidateNodeRefs()
                 if(e.toolId in setOf("input.press_button","input.set_axes")) {
                     val window=service().windowsOnAllDisplays[snap.display.id].orEmpty().singleOrNull {it.type==AccessibilityWindowInfo.TYPE_APPLICATION && it.isFocused}
                     val root=window?.root
                     val focusedPackage=try {root?.packageName?.toString()} finally {if(root!=null) {@Suppress("DEPRECATION") root.recycle()}}
-                    requireTool(focusedPackage==snap.target.packageName && focusedPackage!=null,Code.TARGET_CHANGED,"Physical controller requires the observed upper app to have window focus")
+                    requireTool(focusedPackage==snap.target.packageName && focusedPackage!=null,Code.TARGET_CHANGED,"Physical controller requires the observed selected-screen app to have window focus")
                 }
                 val held=cp.checkingTarget(snapshots,e.snapshotId)
                 result(e,shizuku.gamepad(e.runId,e.toolId,args,snap.display.id,held,expectedPackage=snap.target.packageName),outcome="submitted",actualBackend=if(e.toolId=="input.set_axes")"shizuku-evdev/odin-six-axes" else "shizuku-evdev/odin-buttons")
@@ -211,17 +265,42 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             else -> fail(Code.UNSUPPORTED, "Unsupported tool/backend")
         }
         if(observation!=null) {
-            cp.check() // Reject the whole response if the observed target moved while reading.
-            return output.copy(data=output.data+mapOf("requestSnapshotId" to envelope.snapshotId,"targetSnapshotId" to observation.id,"observedTargetPackage" to observation.target.packageName))
+            cp.check() // Content-only updates do not invalidate pure reads; node refs stay strict.
+            val completed=if(envelope.toolId=="perception.ui_tree")observation else snapshots.captureReadCompletion(observation.id)
+            return output.copy(snapshotId=completed.id,data=output.data+mapOf("requestSnapshotId" to envelope.snapshotId,"captureSnapshotId" to observation.id,"targetSnapshotId" to completed.id,"observedTargetPackage" to observation.target.packageName))
         }
         return output
+    }
+    private fun backgroundAgent(e:Envelope,args:Map<String,Any?>,cp:Checkpoint):ToolResult {
+        AgentBackground.parse(args)
+        val action=backgroundAgentAction ?: fail(Code.BACKEND_UNAVAILABLE,"Assistant background callback disappeared")
+        val abandoned=java.util.concurrent.atomic.AtomicBoolean(false)
+        val end=minOf(e.deadline,clock.now()+10000)
+        val guarded=cp.checking {requireTool(!abandoned.get() && clock.now()<end,Code.TIMEOUT,"Queued background request expired")}
+        val done=CountDownLatch(1);var data:Map<String,Any?>?=null;var failure:ToolFailure?=null
+        val work=Runnable {
+            try {guarded.check();data=action(guarded)}
+            catch(t:ToolFailure){failure=t}
+            catch(t:Exception){failure=ToolFailure(if(t is SecurityException)Code.PERMISSION_MISSING else Code.IO_ERROR,"Assistant background failed: ${t.javaClass.simpleName}")}
+            finally {if(cp.submitted){invalidateNodeRefs();frames.clear()};done.countDown()}
+        }
+        requireTool(main.post(work),Code.BACKEND_UNAVAILABLE,"Assistant UI executor is unavailable")
+        try {
+            while(!done.await(50,TimeUnit.MILLISECONDS))guarded.check()
+            cp.check();failure?.let {throw it}
+        } catch(t:Exception) {abandoned.set(true);main.removeCallbacks(work);throw t}
+        val receipt=data ?: fail(Code.IO_ERROR,"Assistant background result is missing")
+        AgentBackground.verifyReceipt(receipt,cp.submitted)
+        return result(e,receipt+mapOf("submitted" to cp.submitted,"scope" to "assistant-chat-task-only",
+            "nextStep" to "Re-observe the desired calibrated screen, then select upper/lower for this Run as needed. No target app has been started or configured."),
+            outcome=if(cp.submitted)"submitted" else "observed")
     }
     private fun windowInfo(e: Envelope, args: Map<String, Any?>): ToolResult {
         args.only("maxWindows")
         val limit = args.int("maxWindows", 16); requireTool(limit in 1..16, Code.LIMIT_EXCEEDED, "Window limit is 1..16")
-        val snap = snapshots.validate(e.snapshotId)
+        val snap = snapshots.validateObservation(e.snapshotId)
         val windows = service().windowsOnAllDisplays[snap.display.id].orEmpty()
-        return result(e, mapOf("displayRole" to "upper", "displayId" to snap.display.id, "activity" to null, "completeSystemTaskList" to false,
+        return result(e, mapOf("displayRole" to snap.role, "displayId" to snap.display.id, "activity" to null, "completeSystemTaskList" to false,
             "windows" to windows.take(limit).map { w -> val r = Rect(); w.getBoundsInScreen(r); mapOf("windowId" to w.id, "type" to w.type, "layer" to w.layer, "focused" to w.isFocused, "active" to w.isActive, "bounds" to listOf(r.left, r.top, r.right, r.bottom)) }), windows.size > limit)
     }
     private fun tree(e: Envelope, args: Map<String, Any?>, cp: Checkpoint): ToolResult {
@@ -229,7 +308,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val depthLimit=args.int("maxDepth",5);val nodeLimit=args.int("maxNodes",80);val charLimit=args.int("maxChars",12000)
         val visitLimit=args.int("maxVisited",1024)
         requireTool(depthLimit in 0..20 && nodeLimit in 1..128 && charLimit in 1..12000 && visitLimit in 1..2048,Code.LIMIT_EXCEEDED,"UI tree budget exceeded")
-        val snap=snapshots.validate(e.snapshotId)
+        val snap=snapshots.validateObservation(e.snapshotId)
         val windows=service().windowsOnAllDisplays[snap.display.id].orEmpty().filter {it.type==AccessibilityWindowInfo.TYPE_APPLICATION}
         val window=if(args.containsKey("windowId"))windows.singleOrNull {it.id==args.int("windowId",-1)} else windows.singleOrNull()
         if(window==null)return result(e,mapOf("nodes" to emptyList<Any>(),"emptyReason" to "no_unique_application_window","coverage" to "Accessibility-exposed nodes only"))
@@ -279,7 +358,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         }
         var rootHandedOff=false
         try {
-            requireTool(root.packageName?.toString()==snap.target.packageName,Code.TARGET_CHANGED,"Tree window does not belong to observed upper app")
+            requireTool(root.packageName?.toString()==snap.target.packageName,Code.TARGET_CHANGED,"Tree window does not belong to the selected-screen app")
             rootHandedOff=true;visit(root,0,"root",null)
             val treeId=java.util.UUID.randomUUID().toString()
             fun ref(path:String)="$treeId:$path"
@@ -287,7 +366,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             reasons.addAll(page.reasons);cp.check()
             synchronized(nodeLock) {
                 invalidateNodeRefs()
-                for(path in page.paths)handles.remove(path)?.let {node->nodeRefs[ref(path)]=NodeBinding(snap.id,window.id,snap.target.packageName,node,nodeSignature(node),snap.expires,e.runId,e.sessionId)}
+                val identities=handles.values.groupingBy {it}.eachCount()
+                for(path in page.paths)handles.remove(path)?.let {node->nodeRefs[ref(path)]=NodeBinding(snap.id,window.id,snap.target.packageName,node,nodeSignature(node),snap.expires,e.runId,e.sessionId,path,identities[node]==1)}
                 nodeExpiry=Runnable {synchronized(nodeLock){if(nodeRefs.values.firstOrNull()?.snapshotId==snap.id)invalidateNodeRefs()}}
                 main.postDelayed(nodeExpiry!!,(snap.expires-clock.now()).coerceAtLeast(1))
             }
@@ -298,6 +378,67 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                     "limits" to "Only nodes provided by the app/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed/private content. Surface/virtualized lists may omit content; scroll and observe again."),
                 "truncationReasons" to reasons.toList(),"emptyReason" to if(page.nodes.isEmpty())"no_matching_exposed_semantics_or_budget" else null),reasons.isNotEmpty())
         } finally {if(!rootHandedOff){@Suppress("DEPRECATION") root.recycle()};handles.values.forEach {@Suppress("DEPRECATION") it.recycle()}}
+    }
+    private fun activate(e:Envelope,args:Map<String,Any?>,cp:Checkpoint):ToolResult {
+        val reference=UiActivationGuard.parse(args)
+        requireTool(!inputState.hasPending(),Code.BACKEND_UNAVAILABLE,"Previous gesture has not finished")
+        val snapshot=snapshots.validateObservation(e.snapshotId)
+        requireTool(snapshot.target.validity=="valid" && !snapshot.target.packageName.isNullOrBlank(),Code.TARGET_CHANGED,"Activation requires an unambiguous selected-screen app")
+        val done=CountDownLatch(1);var accepted=false;var error:ToolFailure?=null
+        main.post {
+            val resolved=mutableListOf<AccessibilityNodeInfo>()
+            try {
+                cp.check()
+                synchronized(nodeLock) {
+                    val binding=nodeRefs[reference] ?: fail(Code.TARGET_CHANGED,"Activation ref is stale/missing; read ui_tree again")
+                    requireTool(binding.uniqueIdentity,Code.TARGET_CHANGED,"Node was exposed at multiple tree paths; choose an unambiguous clickable node")
+                    val guard=UiActivationGuard(binding.runId,binding.sessionId,binding.snapshotId,binding.windowId,binding.packageName,binding.path,binding.signature,binding.expires)
+                    cp.effect {
+                        snapshots.validateObservation(e.snapshotId)
+                        val windows=service().windowsOnAllDisplays[snapshot.display.id].orEmpty()
+                        val windowId=UiActionWindow.select(snapshot.display,snapshot.target,binding.windowId,binding.packageName,
+                            companionWindows(snapshot.display.id,windows))
+                        val window=windows.singleOrNull {it.id==windowId && it.type==AccessibilityWindowInfo.TYPE_APPLICATION}
+                            ?: fail(Code.TARGET_CHANGED,"Activation window disappeared from the selected screen")
+                        var node=window.root ?: fail(Code.TARGET_CHANGED,"Activation tree root disappeared")
+                        resolved.add(node)
+                        requireTool(node.packageName?.toString()==binding.packageName,Code.TARGET_CHANGED,"Activation root package changed")
+                        val path=binding.path.split('/')
+                        requireTool(path.firstOrNull()=="root" && path.size<=33,Code.TARGET_CHANGED,"Invalid stored activation path")
+                        for(part in path.drop(1)) {
+                            val index=part.toIntOrNull() ?: fail(Code.TARGET_CHANGED,"Invalid activation path index")
+                            requireTool(index in 0 until node.childCount,Code.TARGET_CHANGED,"Activation path was removed")
+                            val child=node.getChild(index) ?: fail(Code.TARGET_CHANGED,"Activation path node disappeared")
+                            val cyclic=resolved.any {it==child};resolved.add(child)
+                            requireTool(!cyclic,Code.TARGET_CHANGED,"Activation tree path is cyclic/ambiguous")
+                            node=child
+                        }
+                        requireTool(node.refresh(),Code.TARGET_CHANGED,"Activation node disappeared")
+                        guard.check(e.runId,e.sessionId,e.snapshotId,node.windowId,node.packageName?.toString(),binding.path,
+                            node==binding.node,nodeSignature(node),clock.now())
+                        val bounds=Rect();node.getBoundsInScreen(bounds)
+                        UiActivationGuard.requireClickable(node.isVisibleToUser,node.isEnabled,node.isClickable,node.isPassword,
+                            node.actionList.any {it.id==AccessibilityNodeInfo.ACTION_CLICK},TouchableBounds(bounds.left,bounds.top,bounds.right,bounds.bottom),snapshot.display,snapshot.target.touchableBounds)
+                        snapshots.validateObservation(e.snapshotId) // Recheck structure/clip after resolving the node.
+                        cp.check()
+                        cp.submitted() // ACTION_CLICK can have reached the app even if the Binder reply fails.
+                        accepted=node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    }
+                    invalidateNodeRefs()
+                }
+            } catch(t:ToolFailure){error=t}
+              catch(t:Exception){error=ToolFailure(if(t is SecurityException)Code.PERMISSION_MISSING else Code.IO_ERROR,"Accessibility activation failed: ${t.javaClass.simpleName}")}
+            finally {
+                resolved.forEach {@Suppress("DEPRECATION") it.recycle()}
+                if(cp.submitted)invalidateNodeRefs()
+                done.countDown()
+            }
+        }
+        await(done,e,cp);error?.let {throw it}
+        snapshots.validateReadSource(snapshot.id)
+        return result(e,mapOf("submitted" to true,"action" to "click","actionAccepted" to accepted,"foregroundVerified" to false,
+            "nodeRefsInvalidated" to true,"nextStep" to "Re-observe ui_tree or screenshot to verify the result before any next input"),outcome="submitted")
+            .copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected ACTION_CLICK; re-observe before another action")
     }
     private val actionNames=mapOf(
         AccessibilityNodeInfo.ACTION_CLICK to "click",AccessibilityNodeInfo.ACTION_LONG_CLICK to "long_click",AccessibilityNodeInfo.ACTION_FOCUS to "focus",
@@ -310,8 +451,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         args.only("nodeRef","direction","row","column","expectedPackage")
         requireTool(!inputState.hasPending(),Code.BACKEND_UNAVAILABLE,"Previous gesture has not finished")
         val snapshot=snapshots.validate(e.snapshotId)
-        requireTool(snapshot.target.validity=="valid" && !snapshot.target.packageName.isNullOrBlank(),Code.TARGET_CHANGED,"Scroll requires an unambiguous observed upper app")
-        requireTool(args["expectedPackage"]==null || args["expectedPackage"]==snapshot.target.packageName,Code.TARGET_CHANGED,"Expected app does not match upper")
+        requireTool(snapshot.target.validity=="valid" && !snapshot.target.packageName.isNullOrBlank(),Code.TARGET_CHANGED,"Scroll requires an unambiguous selected-screen app")
+        requireTool(args["expectedPackage"]==null || args["expectedPackage"]==snapshot.target.packageName,Code.TARGET_CHANGED,"Expected app does not match selected screen")
         val done=CountDownLatch(1);var accepted=false;var error:ToolFailure?=null;var actionName=""
         main.post {
             try {
@@ -353,23 +494,104 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         snapshots.validateHeld(e.snapshotId) // Own scroll/content callbacks may update revision; target structure must remain.
         return result(e,mapOf("submitted" to true,"action" to actionName,"actionAccepted" to accepted,"movementObserved" to false,"nodeRefsInvalidated" to true,"nextStep" to "Read ui_tree or screenshot again to verify position and obtain fresh refs"),outcome="submitted").copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected scroll or reached boundary; re-observe before choosing another action")
     }
-    private fun screenshot(e: Envelope, args: Map<String, Any?>, requestCheckpoint: Checkpoint): ToolResult {
-        args.only("maxEdge", "quality", "region", "format")
+    private fun lowerKey(display:DisplayFact,target:Target)="$display:${target.layoutRevision}:${target.revision}:${target.touchableBounds}"
+    private fun lowerSafety(display:DisplayFact,target:Target):CompanionWindowState {
+        val key=lowerKey(display,target)
+        lowerSafetyCache?.takeIf {it.key==key && clock.now()-it.at<100}?.let {return it.state}
+        val state=CompanionWindows.verify(display,target.packageName,companionWindows(display.id),setOf(context.packageName,"dev.thor.agent"))
+        val window=service().windowsOnAllDisplays[display.id].orEmpty().singleOrNull {it.id==state.windowId}
+            ?: fail(Code.TARGET_CHANGED,"Lower application window disappeared")
+        val root=window.root ?: fail(Code.SECURE_CONTENT,"Lower application exposes no safe window identity")
+        var visited=0
+        val scanDeadline=clock.now()+2500
+        fun scan(node:AccessibilityNodeInfo,depth:Int) {
+            try {
+                requireTool(++visited<=2048 && depth<=32 && clock.now()<scanDeadline,Code.SECURE_CONTENT,"Lower safety scan exceeded exposed-node/time budget")
+                requireTool(!(node.isPassword && node.isVisibleToUser),Code.SECURE_CONTENT,"Lower screen contains a visible password field")
+                for(index in 0 until node.childCount)node.getChild(index)?.let {scan(it,depth+1)}
+            } finally {@Suppress("DEPRECATION") node.recycle()}
+        }
+        scan(root,0)
+        lowerSafetyCache=LowerSafety(key,clock.now(),state)
+        return state
+    }
+    /** FLAG_SECURE has no reliable public Accessibility metadata getter. Probe
+     * through the actual screenshot API without copying/encoding any pixels.
+     * No proof is reused across tools: FLAG_SECURE can change without a public
+     * Accessibility content event. */
+    private fun lowerSecurityProbe(snapshot:Snapshot,e:Envelope,parent:Checkpoint) {
+        requireTool(snapshot.role=="lower",message="Lower security probe requires a lower-role snapshot")
+        val cp=Checkpoint({parent.check();snapshots.validateObservation(snapshot.id)},parent.cancellation)
+        cp.check()
+        val done=CountDownLatch(1);var failure:Int?=null;var success=false
+        awaitScreenshotInterval(e,cp)
+        service().takeScreenshot(snapshot.display.id,context.mainExecutor,object:AccessibilityService.TakeScreenshotCallback {
+            override fun onSuccess(result:AccessibilityService.ScreenshotResult) {try {success=true}finally {result.hardwareBuffer.close();done.countDown()}}
+            override fun onFailure(errorCode:Int) {failure=errorCode;done.countDown()}
+        })
+        await(done,e,cp)
+        failure?.let {fail(when(it) {
+            AccessibilityService.ERROR_TAKE_SCREENSHOT_SECURE_WINDOW->Code.SECURE_CONTENT
+            AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY->Code.DISPLAY_GONE
+            AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT->Code.RATE_LIMITED
+            else->Code.IO_ERROR
+        },"Lower screenshot safety check rejected ($it); no fallback")}
+        requireTool(success,Code.SECURE_CONTENT,"Lower secure-window status is unverified")
+        cp.check()
+    }
+    private fun awaitScreenshotInterval(e:Envelope,cp:Checkpoint) {
+        while(lastScreenshotAttempt!=Long.MIN_VALUE && clock.now()-lastScreenshotAttempt<350) {
+            cp.check();requireTool(clock.now()<e.deadline,Code.TIMEOUT,"Screenshot safety wait expired")
+            Thread.sleep(25)
+        }
+        cp.check();lastScreenshotAttempt=clock.now()
+    }
+    private fun companionWindows(display:Int,windows:List<AccessibilityWindowInfo> = service().windowsOnAllDisplays[display].orEmpty()):List<TargetWindowEvidence> = windows.map {window->
+        val rect=Rect();window.getBoundsInScreen(rect)
+        val region=Region();window.getRegionInScreen(region)
+        val pieces=mutableListOf<TouchableBounds>();val iterator=RegionIterator(region);val piece=Rect()
+        while(iterator.next(piece))pieces.add(TouchableBounds(piece.left,piece.top,piece.right,piece.bottom))
+        var pkg:String?=null;var rootBounds:TouchableBounds?=null
+        if(window.type==AccessibilityWindowInfo.TYPE_APPLICATION)window.root?.let {root->
+            try {if(root.refresh()){pkg=root.packageName?.toString();val bounds=Rect();root.getBoundsInScreen(bounds);rootBounds=TouchableBounds(bounds.left,bounds.top,bounds.right,bounds.bottom)}}
+            finally {@Suppress("DEPRECATION") root.recycle()}
+        }
+        TargetWindowEvidence(window.id,window.type,window.layer,window.isFocused,window.isActive,
+            TouchableBounds(rect.left,rect.top,rect.right,rect.bottom),pieces,region.isRect,pkg,rootBounds)
+    }
+    private fun screenshot(e: Envelope, args: Map<String, Any?>, requestCheckpoint: Checkpoint,companion:Boolean=false): ToolResult {
+        if(companion)args.only("maxEdge","quality","format") else args.only("maxEdge", "quality", "region", "format")
         requireTool(args.string("format", "jpeg") == "jpeg", Code.UNSUPPORTED, "Only JPEG implemented")
         val edge = args.int("maxEdge", 1280); val quality = args.int("quality", 80)
         requireTool(edge in 64..1280 && quality in 30..95, Code.LIMIT_EXCEEDED, "Screenshot edge/quality budget exceeded")
         // A screenshot is a new observation, not permission to rebind an input.
         // Its own identity/freshness lifetime begin now; every image callback checks
-        // this fresh target and discards output if it changes during capture.
-        val snap = snapshots.captureForRead(e.snapshotId)
-        val cp=Checkpoint({requestCheckpoint.check();snapshots.validate(snap.id)},requestCheckpoint.cancellation)
+        // this fresh window/geometry and discards output if structure changes.
+        // Content counters may update; old pixels keep their capture identity.
+        val forbidden=setOf(context.packageName,"dev.thor.agent")
+        val companionObservation=if(companion)snapshots.captureCompanion(e.snapshotId,forbidden) else null
+        val snap = companionObservation?.upper ?: snapshots.captureForRead(e.snapshotId)
+        val captureDisplay=companionObservation?.lowerDisplay ?: snap.display
+        val selectedLowerState=if(!companion && snap.role=="lower")lowerSafety(captureDisplay,snap.target) else null
+        val companionState=companionObservation?.let {CompanionWindows.verify(captureDisplay,snap.target.packageName,companionWindows(captureDisplay.id),forbidden)}
+        val cp=Checkpoint({
+            requestCheckpoint.check();snapshots.validateObservation(snap.id)
+            if(companionObservation!=null) {
+                snapshots.validateCompanion(companionObservation)
+                requireTool(CompanionWindows.verify(captureDisplay,snap.target.packageName,companionWindows(captureDisplay.id),forbidden)==companionState,
+                    Code.TARGET_CHANGED,"Companion visible windows changed during capture")
+            }
+        },requestCheckpoint.cancellation)
         val region = args["region"] as? List<*>
-        val rect = if (region == null) Rect(0, 0, snap.display.width, snap.display.height) else {
+        val safeLowerClip=companionState?.clip ?: selectedLowerState?.clip
+        val rect = if(safeLowerClip!=null && region==null)safeLowerClip.let {Rect(it.left,it.top,it.right,it.bottom)} else if (region == null) Rect(0, 0, captureDisplay.width, captureDisplay.height) else {
             requireTool(region.size == 4 && region.all { it is Number }, message = "Region is [left,top,right,bottom]")
             Rect((region[0] as Number).toInt(), (region[1] as Number).toInt(), (region[2] as Number).toInt(), (region[3] as Number).toInt())
         }
-        requireTool(rect.left >= 0 && rect.top >= 0 && rect.right <= snap.display.width && rect.bottom <= snap.display.height && rect.width() > 0 && rect.height() > 0, message = "Crop outside display")
-        requireTool(snap.display.width.toLong() * snap.display.height <= 16_000_000, Code.LIMIT_EXCEEDED, "Screenshot source exceeds 16MP allocation budget")
+        requireTool(rect.left >= 0 && rect.top >= 0 && rect.right <= captureDisplay.width && rect.bottom <= captureDisplay.height && rect.width() > 0 && rect.height() > 0, message = "Crop outside display")
+        if(safeLowerClip!=null)requireTool(rect.left>=safeLowerClip.left && rect.top>=safeLowerClip.top && rect.right<=safeLowerClip.right && rect.bottom<=safeLowerClip.bottom,
+            Code.SECURE_CONTENT,"Lower capture must remain inside the verified application-only region")
+        requireTool(captureDisplay.width.toLong() * captureDisplay.height <= 16_000_000, Code.LIMIT_EXCEEDED, "Screenshot source exceeds 16MP allocation budget")
         val done = CountDownLatch(1)
         val bitmap = java.util.concurrent.atomic.AtomicReference<Bitmap?>()
         val abandoned = java.util.concurrent.atomic.AtomicBoolean(false)
@@ -377,10 +599,12 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         var conversionError: ToolFailure? = null
         cp.cancellation.register { abandoned.set(true); bitmap.getAndSet(null)?.recycle() }
         cp.check()
-        service().takeScreenshot(snap.display.id, context.mainExecutor, object : AccessibilityService.TakeScreenshotCallback {
+        awaitScreenshotInterval(e,cp)
+        service().takeScreenshot(captureDisplay.id, context.mainExecutor, object : AccessibilityService.TakeScreenshotCallback {
             override fun onSuccess(screenshot: AccessibilityService.ScreenshotResult) {
                 try {
                     if (!cp.cancellation.cancelled && !abandoned.get()) {
+                        cp.check()
                         val hw = Bitmap.wrapHardwareBuffer(screenshot.hardwareBuffer, screenshot.colorSpace)
                         try {
                             val copy = hw?.copy(Bitmap.Config.ARGB_8888, false)
@@ -388,6 +612,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                             if (abandoned.get()) bitmap.getAndSet(null)?.recycle()
                         } finally { hw?.recycle() }
                     }
+                } catch(t:ToolFailure) {conversionError=t
                 } catch (_: OutOfMemoryError) {
                     conversionError = ToolFailure(Code.LIMIT_EXCEEDED, "Screenshot conversion exceeded memory budget")
                 } catch (t: Exception) {
@@ -407,9 +632,10 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             else -> Code.IO_ERROR
         }, "Accessibility screenshot error $it; no Shell fallback") }
         val original = bitmap.getAndSet(null) ?: fail(Code.IO_ERROR, "Missing screenshot bitmap")
+        var storedImage:File?=null
         try {
             cp.check()
-            requireTool(original.width == snap.display.width && original.height == snap.display.height, Code.TARGET_CHANGED, "Screenshot/display geometry mismatch; recalibrate")
+            requireTool(original.width == captureDisplay.width && original.height == captureDisplay.height, Code.TARGET_CHANGED, "Screenshot/display geometry mismatch; recalibrate")
             val crop = Bitmap.createBitmap(original, rect.left, rect.top, rect.width(), rect.height())
             var scaled: Bitmap? = null
             try {
@@ -423,18 +649,40 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 val attachments = File(context.cacheDir, "tool-frames").apply { mkdirs() }
                 attachments.listFiles()?.sortedBy { it.lastModified() }?.dropLast(7)?.forEach { it.delete() }
                 val frame = java.util.UUID.randomUUID().toString()
-                val output = File(attachments, "$frame.jpg"); output.writeBytes(encoded)
+                val output = File(attachments, "$frame.jpg"); output.writeBytes(encoded);storedImage=output
                 frames.entries.removeIf { !File(attachments, "${it.key}.jpg").exists() }
                 val transform = FrameTransform(rect.left, rect.top, rect.width(), rect.height(), scaled!!.width, scaled!!.height)
                 cp.check()
-                frames[frame] = snap.id to transform
-                return result(e.copy(snapshotId=snap.id), mapOf("displayRole" to "upper", "displayId" to snap.display.id, "frameId" to frame, "attachmentRef" to output.absolutePath,
-                    "requestSnapshotId" to e.snapshotId,"targetSnapshotId" to snap.id,"observedTargetPackage" to snap.target.packageName,
+                val completed=if(companionObservation!=null)snapshots.completeCompanion(companionObservation) else snapshots.captureReadCompletion(snap.id)
+                if(companionObservation!=null) {
+                    cp.check()
+                    val metadata=mapOf("displayRole" to "lower-companion-read-only","displayId" to captureDisplay.id,
+                        "authorizedInputDisplayId" to snap.display.id,"companionObservationId" to companionObservation.id,
+                        "attachmentRef" to output.absolutePath,"readOnly" to true,"frameInputUsable" to false,"coordinateSpace" to "companion_read_only",
+                        "requestSnapshotId" to e.snapshotId,"captureUpperSnapshotId" to snap.id,"targetSnapshotId" to completed.id,
+                        "observedTargetPackage" to snap.target.packageName,"sameAppCompanion" to true,
+                        "mime" to "image/jpeg","bytes" to encoded.size,"width" to scaled!!.width,"height" to scaled!!.height,
+                        "quality" to maxOf(30,q+15),"rotation" to captureDisplay.rotation,
+                        "companionImageTransform" to mapOf("identity" to companionObservation.id,"left" to rect.left,"top" to rect.top,
+                            "displayWidth" to rect.width(),"displayHeight" to rect.height(),"imageWidth" to scaled!!.width,"imageHeight" to scaled!!.height),
+                        "nextStep" to "Read-only same-app companion pixels. No frameId or lower input authority exists; never reuse these image coordinates for upper input. Re-observe the upper screen before input.")
+                    // Keep the tool envelope on an UPPER snapshot. The companion
+                    // image identity is deliberately absent from the input frames map.
+                    return result(e.copy(snapshotId=completed.id),emptyMap()).copy(data=metadata)
+                }
+                val unchanged=snap.target.sameLayout(completed.target)
+                // Never re-label old pixels with a newer content revision. A frame
+                // whose content changed remains visible but cannot authorize input
+                // against the separately signed current observation.
+                frames[frame] = (if(unchanged)completed.id else snap.id) to transform
+                return result(e.copy(snapshotId=completed.id), mapOf("displayRole" to snap.role, "displayId" to snap.display.id, "frameId" to frame, "attachmentRef" to output.absolutePath,
+                    "requestSnapshotId" to e.snapshotId,"captureSnapshotId" to snap.id,"targetSnapshotId" to completed.id,"frameInputUsable" to unchanged,"contentChangedDuringCapture" to !unchanged,"observedTargetPackage" to snap.target.packageName,
                     "touchableWindowBounds" to snap.target.touchableBounds?.let {mapOf("left" to it.left,"top" to it.top,"right" to it.right,"bottom" to it.bottom)},
                     "mime" to "image/jpeg", "bytes" to encoded.size, "width" to scaled!!.width, "height" to scaled!!.height, "quality" to maxOf(30, q + 15), "rotation" to snap.display.rotation,
                     "transform" to mapOf("left" to rect.left, "top" to rect.top, "displayWidth" to rect.width(), "displayHeight" to rect.height(), "imageWidth" to scaled!!.width, "imageHeight" to scaled!!.height)))
             } finally { if (scaled !== crop) scaled?.recycle(); if (crop !== original) crop.recycle() }
-        } catch (_: OutOfMemoryError) { fail(Code.LIMIT_EXCEEDED, "Screenshot processing exceeded memory budget") }
+        } catch (_: OutOfMemoryError) { if(companion)storedImage?.delete();fail(Code.LIMIT_EXCEEDED, "Screenshot processing exceeded memory budget") }
+        catch(t:Exception) {if(companion)storedImage?.delete();throw t}
         finally { original.recycle() }
     }
     private fun gesture(e: Envelope, args: Map<String, Any?>, cp: Checkpoint): ToolResult {
@@ -442,7 +690,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         requireTool(!inputState.hasPending(), Code.BACKEND_UNAVAILABLE, "Previous gesture has not finished")
         val snap = snapshots.validate(e.snapshotId)
         val expected = args["expectedPackage"] as? String
-        requireTool(expected == null || expected == snap.target.packageName, Code.TARGET_CHANGED, "Expected app does not match upper")
+        requireTool(expected == null || expected == snap.target.packageName, Code.TARGET_CHANGED, "Expected app does not match selected screen")
         val coordinateSpace = args.string("coordinateSpace")
         requireTool(coordinateSpace in setOf("display_logical", "frame_pixels"), message = "Explicit coordinateSpace required")
         val raw = if (e.toolId in setOf("input.swipe","input.drag")) {

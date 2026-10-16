@@ -7,6 +7,16 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class ModelConnectionTestTest {
+    @Test fun officialDeepSeekDraftUsesNativeResponsesContractAndKnownLowEffort() {
+        val profile=DeepSeekCatalog.bundled().getJSONObject(0)
+        val draft=ModelConnectionTest.Draft(DeepSeekCatalog.BASE_URL,"openai-responses","deepseek-flash","fixture-key-not-a-cloud-key").withProfile(profile)
+        val req=ModelConnectionTest.request(draft);val buffer=okio.Buffer();req.body!!.writeTo(buffer);val body=JSONObject(buffer.readUtf8())
+        assertEquals("https://api.deepseek.com/responses",req.url.toString());assertEquals("Bearer fixture-key-not-a-cloud-key",req.header("Authorization"))
+        assertEquals("deepseek-flash",body.getString("model"));assertEquals("low",body.getJSONObject("reasoning").getString("effort"))
+        assertFalse(body.has("include"));assertFalse(body.getJSONObject("reasoning").has("summary"));assertFalse(body.getBoolean("store"))
+        assertTrue(body.getBoolean("stream"));assertNull(req.header("x-opencode-session"))
+        assertFalse(ModelConnectionTest.isDeepSeekEndpoint("https://api.deepseek.com.evil.test"));assertFalse(ModelConnectionTest.isDeepSeekEndpoint("http://api.deepseek.com"))
+    }
     @Test fun currentDraftIsUsedAndRecognizesEachStreamingProtocol() {
         for((protocol,path,chunk) in listOf(
             Triple("openai-responses","/v1/responses","{\"type\":\"response.output_text.delta\",\"delta\":\"OK\"}"),

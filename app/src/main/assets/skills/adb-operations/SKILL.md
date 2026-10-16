@@ -18,6 +18,7 @@ debug_shell 的 command 是单条设备命令，兼容开头 adb shell。直接�
 
 - curl 网络请求、GitHub 发布查询、下载 APK、ADB 安装与回验：[references/download-install.md](references/download-install.md)。安装需要本次 UI 确认，普通请求和下载无需批准。
 - 上/下屏分别调亮度：[references/thor-brightness.md](references/thor-brightness.md)。常规调整使用 debug_thor_brightness，value 和回读亮度均为 0–100 整数百分比。不要把存储设置项冒充实际副屏控制；底层命令原生单位只用于明确需要的诊断。
+- 查找指定应用并在上屏打开：[references/thor-apps.md](references/thor-apps.md)。用 perception_find_apps 按名称／包名／launcher 类名匹配，再用 apps_launch 启动；不要为找一个应用读取完整安装清单。启动后必须重新观察前台与画面。
 - 风扇模式与转速回验：[references/thor-fan.md](references/thor-fan.md)。不写硬件节点，不关闭散热。
 - 刷新率：[references/thor-refresh.md](references/thor-refresh.md)，包含 60/120 Hz 的写入先后与实际回验。
 - 旋转、焦点、手柄及其他常用配置：[references/thor-device.md](references/thor-device.md)。未审查项目只读或走系统界面，不猜枚举含义。

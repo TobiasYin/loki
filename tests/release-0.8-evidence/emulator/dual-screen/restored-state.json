@@ -1,0 +1,17 @@
+{
+  "animatorDurationScale": "null",
+  "notificationPermission": "android.permission.POST_NOTIFICATIONS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+  "serviceEmpty": true,
+  "reportPreservationChecks": {
+    "otherRunSelectionUnchanged": true,
+    "profilesRestored": true,
+    "credentialsRestored": true,
+    "rolesRestored": true,
+    "overlayDisplaySettingUnchanged": true,
+    "originalHistoryPreserved": true,
+    "accessibilityRestored": true,
+    "immersiveLessonSettingRestored": true,
+    "selectedSessionRestored": true,
+    "temporaryDisplayReleased": true
+  }
+}

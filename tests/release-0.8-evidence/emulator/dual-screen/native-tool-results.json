@@ -1,0 +1,1070 @@
+[
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "agent.background",
+    "arguments": {},
+    "elapsedMs": 14,
+    "error": null,
+    "outcome": "submitted",
+    "data": {
+      "alreadyBackground": false,
+      "movedToBackground": true,
+      "submitted": true,
+      "scope": "assistant-chat-task-only",
+      "nextStep": "Re-observe the desired calibrated screen, then select upper/lower for this Run as needed. No target app has been started or configured.",
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "agent.background",
+    "arguments": {},
+    "elapsedMs": 8,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "alreadyBackground": true,
+      "movedToBackground": false,
+      "submitted": false,
+      "scope": "assistant-chat-task-only",
+      "nextStep": "Re-observe the desired calibrated screen, then select upper/lower for this Run as needed. No target app has been started or configured.",
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.capture_screen",
+    "arguments": {
+      "maxEdge": 960,
+      "quality": 80,
+      "format": "jpeg"
+    },
+    "elapsedMs": 79,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "displayRole": "upper",
+      "displayId": 0,
+      "frameId": "a349f12d-f193-4502-b8e1-4d336e03806a",
+      "requestSnapshotId": "5560495e-a56d-452b-907e-b85224b5c024",
+      "captureSnapshotId": "276c0a7f-7452-4dee-917c-18f51959d385",
+      "targetSnapshotId": "34664147-0d02-4134-89c6-3c9d9ec192e6",
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": false,
+      "observedTargetPackage": "dev.thor.inputlab",
+      "touchableWindowBounds": {
+        "left": 0,
+        "top": 0,
+        "right": 1080,
+        "bottom": 2400
+      },
+      "mime": "image/jpeg",
+      "bytes": 14739,
+      "width": 432,
+      "height": 960,
+      "quality": 80,
+      "rotation": 0,
+      "transform": {
+        "left": 0,
+        "top": 0,
+        "displayWidth": 1080,
+        "displayHeight": 2400,
+        "imageWidth": 432,
+        "imageHeight": 960
+      },
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.ui_tree",
+    "arguments": {
+      "visibility": "visible",
+      "maxNodes": 128,
+      "maxDepth": 10
+    },
+    "elapsedMs": 30,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "nodes": [
+        {
+          "ref": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root",
+          "nodeRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root",
+          "parentRef": null,
+          "scrollAncestorRef": null,
+          "role": "android.widget.FrameLayout",
+          "id": null,
+          "text": null,
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": null,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            0,
+            0,
+            1080,
+            2400
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/0",
+          "nodeRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/0",
+          "parentRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.TextView",
+          "id": null,
+          "text": "THOR INPUT LAB 0.4.0 · display 0 · NO FOCUS\nLAB-05 / ARMED · rev 0 · layout 2 · raw 0 · 544d5854\nIntegrity no known gap · qualification pending",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 143,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            8,
+            4,
+            1072,
+            80
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/1",
+          "nodeRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/1",
+          "parentRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root",
+          "scrollAncestorRef": null,
+          "role": "android.view.View",
+          "id": null,
+          "text": null,
+          "description": "Input Lab self-drawn arena, START at left, END at right. No fine-grained semantic nodes.",
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": null,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": 88,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            8,
+            224,
+            1072,
+            2252
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/2",
+          "nodeRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/2",
+          "parentRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.Button",
+          "id": null,
+          "text": "NATIVE SEMANTIC TARGET (LAB-05)",
+          "description": "Native semantic target",
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 31,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": 22,
+          "password": false,
+          "clickable": true,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "focus",
+            "select",
+            "click"
+          ],
+          "bounds": [
+            8,
+            2252,
+            1072,
+            2300
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/3",
+          "nodeRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/3",
+          "parentRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.TextView",
+          "id": null,
+          "text": "Activate the native semantic button. Semantic evidence is separate from raw touch; self-drawn shapes have no fine UI tree.",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 122,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            8,
+            2300,
+            1072,
+            2396
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        }
+      ],
+      "windowId": 119,
+      "treeId": "36aa67c0-6788-4511-8fd7-1c3a0cd15604",
+      "nodeRefsReusable": false,
+      "nodeRefScope": "this latest tree snapshot until input/new observation/expiry; scroll once then re-observe",
+      "pagination": {
+        "offset": 0,
+        "nextOffset": null,
+        "matchedExposedNodes": 5,
+        "reobservedEachPage": true,
+        "blocked": false,
+        "resumeHint": null
+      },
+      "coverage": {
+        "source": "Accessibility current exposed application nodes",
+        "visibleExposedNodes": 5,
+        "offscreenExposedNodes": 0,
+        "visitedNodes": 5,
+        "virtualizedContentMayBeUnexposed": true,
+        "hiddenOrUnloadedContentGuaranteed": false,
+        "autoScrolled": false,
+        "offscreenFilterDefinition": "visibleToUser=false; may include occluded or offscreen exposed nodes",
+        "limits": "Only nodes provided by the app/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed/private content. Surface/virtualized lists may omit content; scroll and observe again."
+      },
+      "truncationReasons": [],
+      "emptyReason": null,
+      "displayRole": "upper",
+      "displayId": 0,
+      "requestSnapshotId": "34664147-0d02-4134-89c6-3c9d9ec192e6",
+      "captureSnapshotId": "b54b985c-837f-4bd4-a8bd-95a02963ed6c",
+      "targetSnapshotId": "b54b985c-837f-4bd4-a8bd-95a02963ed6c",
+      "observedTargetPackage": "dev.thor.inputlab",
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.select_screen",
+    "arguments": {
+      "screen": "lower"
+    },
+    "elapsedMs": 243,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "selectedScreen": "lower",
+      "targetSnapshotId": "9f0caeaa-4d4c-4dd8-9def-9e7518cc1f11",
+      "requestSnapshotId": "b54b985c-837f-4bd4-a8bd-95a02963ed6c",
+      "readOnlySelection": true,
+      "calibrationChanged": false,
+      "nextStep": "Only this Run selected the calibrated screen. Re-observe its current UI/screenshot before input; prior role frames/refs remain invalid for this target.",
+      "displayRole": "lower",
+      "displayId": 7,
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "input.tap",
+    "arguments": {
+      "x": 1,
+      "y": 1,
+      "coordinateSpace": "display_logical"
+    },
+    "elapsedMs": 0,
+    "error": "TARGET_CHANGED",
+    "outcome": "observed",
+    "data": {}
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "input.activate",
+    "arguments": {
+      "nodeRef": "36aa67c0-6788-4511-8fd7-1c3a0cd15604:root/2"
+    },
+    "elapsedMs": 296,
+    "error": "TARGET_CHANGED",
+    "outcome": "observed",
+    "data": {
+      "message": "Activation ref is stale/missing; read ui_tree again"
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "input.tap",
+    "arguments": {
+      "x": 1,
+      "y": 1,
+      "coordinateSpace": "frame_pixels",
+      "frameId": "a349f12d-f193-4502-b8e1-4d336e03806a"
+    },
+    "elapsedMs": 328,
+    "error": "TARGET_CHANGED",
+    "outcome": "observed",
+    "data": {
+      "message": "Frame must belong to this current snapshot"
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.capture_screen",
+    "arguments": {
+      "maxEdge": 960,
+      "quality": 80,
+      "format": "jpeg"
+    },
+    "elapsedMs": 343,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "displayRole": "lower",
+      "displayId": 7,
+      "frameId": "09181fe3-b859-43b3-8557-c5909042404c",
+      "requestSnapshotId": "9f0caeaa-4d4c-4dd8-9def-9e7518cc1f11",
+      "captureSnapshotId": "d5c58bf0-b010-47d3-9c9b-2df03ab6631f",
+      "targetSnapshotId": "2aed1591-76ea-4be6-a9c0-8b2f2b4c1e92",
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": false,
+      "observedTargetPackage": "dev.thor.inputlab",
+      "touchableWindowBounds": {
+        "left": 0,
+        "top": 0,
+        "right": 960,
+        "bottom": 640
+      },
+      "mime": "image/jpeg",
+      "bytes": 12779,
+      "width": 960,
+      "height": 640,
+      "quality": 80,
+      "rotation": 0,
+      "transform": {
+        "left": 0,
+        "top": 0,
+        "displayWidth": 960,
+        "displayHeight": 640,
+        "imageWidth": 960,
+        "imageHeight": 640
+      },
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.ui_tree",
+    "arguments": {
+      "visibility": "visible",
+      "maxNodes": 128,
+      "maxDepth": 10
+    },
+    "elapsedMs": 373,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "nodes": [
+        {
+          "ref": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root",
+          "nodeRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root",
+          "parentRef": null,
+          "scrollAncestorRef": null,
+          "role": "android.widget.FrameLayout",
+          "id": null,
+          "text": null,
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": null,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            0,
+            0,
+            960,
+            640
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/0",
+          "nodeRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/0",
+          "parentRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.TextView",
+          "id": null,
+          "text": "离线交互演练 · settings",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 17,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            21,
+            8,
+            944,
+            43
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/1",
+          "nodeRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/1",
+          "parentRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.TextView",
+          "id": null,
+          "text": "设置首页",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 4,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            21,
+            43,
+            944,
+            94
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/2",
+          "nodeRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/2",
+          "parentRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.Button",
+          "id": "dev.thor.inputlab:id/scenario_preferences",
+          "text": "设备偏好",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 4,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": true,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "focus",
+            "select",
+            "click"
+          ],
+          "bounds": [
+            21,
+            94,
+            944,
+            142
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/3",
+          "nodeRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root/3",
+          "parentRef": "a9954217-a5c4-41ce-a3c3-79bb6c464749:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.Button",
+          "id": "dev.thor.inputlab:id/scenario_distractor",
+          "text": "显示说明",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 4,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": true,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "focus",
+            "select",
+            "click"
+          ],
+          "bounds": [
+            21,
+            142,
+            944,
+            190
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        }
+      ],
+      "windowId": 118,
+      "treeId": "a9954217-a5c4-41ce-a3c3-79bb6c464749",
+      "nodeRefsReusable": false,
+      "nodeRefScope": "this latest tree snapshot until input/new observation/expiry; scroll once then re-observe",
+      "pagination": {
+        "offset": 0,
+        "nextOffset": null,
+        "matchedExposedNodes": 5,
+        "reobservedEachPage": true,
+        "blocked": false,
+        "resumeHint": null
+      },
+      "coverage": {
+        "source": "Accessibility current exposed application nodes",
+        "visibleExposedNodes": 5,
+        "offscreenExposedNodes": 0,
+        "visitedNodes": 5,
+        "virtualizedContentMayBeUnexposed": true,
+        "hiddenOrUnloadedContentGuaranteed": false,
+        "autoScrolled": false,
+        "offscreenFilterDefinition": "visibleToUser=false; may include occluded or offscreen exposed nodes",
+        "limits": "Only nodes provided by the app/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed/private content. Surface/virtualized lists may omit content; scroll and observe again."
+      },
+      "truncationReasons": [],
+      "emptyReason": null,
+      "displayRole": "lower",
+      "displayId": 7,
+      "requestSnapshotId": "2aed1591-76ea-4be6-a9c0-8b2f2b4c1e92",
+      "captureSnapshotId": "b07bc2d9-71cd-4ada-be0d-28e05704a492",
+      "targetSnapshotId": "b07bc2d9-71cd-4ada-be0d-28e05704a492",
+      "observedTargetPackage": "dev.thor.inputlab",
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "input.tap",
+    "arguments": {
+      "x": 482.5,
+      "y": 118,
+      "coordinateSpace": "display_logical",
+      "expectedPackage": "dev.thor.inputlab"
+    },
+    "elapsedMs": 403,
+    "error": null,
+    "outcome": "submitted",
+    "data": {
+      "submitted": true,
+      "systemCallback": "completed",
+      "gameEffectObserved": false,
+      "displayId": 7,
+      "durationMs": 80,
+      "gestureKind": "input.tap",
+      "nodeRefsInvalidated": true,
+      "displayRole": "lower",
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.select_screen",
+    "arguments": {
+      "screen": "upper"
+    },
+    "elapsedMs": 17,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "selectedScreen": "upper",
+      "targetSnapshotId": "c7fcf5f4-3303-467f-b506-0c1ec7831916",
+      "requestSnapshotId": "b07bc2d9-71cd-4ada-be0d-28e05704a492",
+      "readOnlySelection": true,
+      "calibrationChanged": false,
+      "nextStep": "Only this Run selected the calibrated screen. Re-observe its current UI/screenshot before input; prior role frames/refs remain invalid for this target.",
+      "displayRole": "upper",
+      "displayId": 0,
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.ui_tree",
+    "arguments": {
+      "visibility": "visible",
+      "maxNodes": 128,
+      "maxDepth": 10
+    },
+    "elapsedMs": 26,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "nodes": [
+        {
+          "ref": "c22b65d1-4860-4698-949a-3d2333e38594:root",
+          "nodeRef": "c22b65d1-4860-4698-949a-3d2333e38594:root",
+          "parentRef": null,
+          "scrollAncestorRef": null,
+          "role": "android.widget.FrameLayout",
+          "id": null,
+          "text": null,
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": null,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            0,
+            0,
+            1080,
+            2400
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "c22b65d1-4860-4698-949a-3d2333e38594:root/0",
+          "nodeRef": "c22b65d1-4860-4698-949a-3d2333e38594:root/0",
+          "parentRef": "c22b65d1-4860-4698-949a-3d2333e38594:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.TextView",
+          "id": null,
+          "text": "THOR INPUT LAB 0.4.0 · display 0 · NO FOCUS\nLAB-05 / ARMED · rev 0 · layout 2 · raw 0 · 544d5854\nIntegrity no known gap · qualification pending",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 143,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            8,
+            4,
+            1072,
+            80
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "c22b65d1-4860-4698-949a-3d2333e38594:root/1",
+          "nodeRef": "c22b65d1-4860-4698-949a-3d2333e38594:root/1",
+          "parentRef": "c22b65d1-4860-4698-949a-3d2333e38594:root",
+          "scrollAncestorRef": null,
+          "role": "android.view.View",
+          "id": null,
+          "text": null,
+          "description": "Input Lab self-drawn arena, START at left, END at right. No fine-grained semantic nodes.",
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": null,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": 88,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            8,
+            224,
+            1072,
+            2252
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "c22b65d1-4860-4698-949a-3d2333e38594:root/2",
+          "nodeRef": "c22b65d1-4860-4698-949a-3d2333e38594:root/2",
+          "parentRef": "c22b65d1-4860-4698-949a-3d2333e38594:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.Button",
+          "id": null,
+          "text": "NATIVE SEMANTIC TARGET (LAB-05)",
+          "description": "Native semantic target",
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 31,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": 22,
+          "password": false,
+          "clickable": true,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "focus",
+            "select",
+            "click"
+          ],
+          "bounds": [
+            8,
+            2252,
+            1072,
+            2300
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        },
+        {
+          "ref": "c22b65d1-4860-4698-949a-3d2333e38594:root/3",
+          "nodeRef": "c22b65d1-4860-4698-949a-3d2333e38594:root/3",
+          "parentRef": "c22b65d1-4860-4698-949a-3d2333e38594:root",
+          "scrollAncestorRef": null,
+          "role": "android.widget.TextView",
+          "id": null,
+          "text": "Activate the native semantic button. Semantic evidence is separate from raw touch; self-drawn shapes have no fine UI tree.",
+          "description": null,
+          "value": null,
+          "matchesQuery": true,
+          "textStart": 0,
+          "textLength": 122,
+          "textTruncated": false,
+          "descriptionStart": 0,
+          "descriptionLength": null,
+          "password": false,
+          "clickable": false,
+          "checkable": false,
+          "checked": false,
+          "selected": false,
+          "enabled": true,
+          "visibleToUser": true,
+          "scrollable": false,
+          "editable": false,
+          "actions": [
+            "select"
+          ],
+          "bounds": [
+            8,
+            2300,
+            1072,
+            2396
+          ],
+          "collection": null,
+          "collectionItem": null,
+          "range": null
+        }
+      ],
+      "windowId": 119,
+      "treeId": "c22b65d1-4860-4698-949a-3d2333e38594",
+      "nodeRefsReusable": false,
+      "nodeRefScope": "this latest tree snapshot until input/new observation/expiry; scroll once then re-observe",
+      "pagination": {
+        "offset": 0,
+        "nextOffset": null,
+        "matchedExposedNodes": 5,
+        "reobservedEachPage": true,
+        "blocked": false,
+        "resumeHint": null
+      },
+      "coverage": {
+        "source": "Accessibility current exposed application nodes",
+        "visibleExposedNodes": 5,
+        "offscreenExposedNodes": 0,
+        "visitedNodes": 5,
+        "virtualizedContentMayBeUnexposed": true,
+        "hiddenOrUnloadedContentGuaranteed": false,
+        "autoScrolled": false,
+        "offscreenFilterDefinition": "visibleToUser=false; may include occluded or offscreen exposed nodes",
+        "limits": "Only nodes provided by the app/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed/private content. Surface/virtualized lists may omit content; scroll and observe again."
+      },
+      "truncationReasons": [],
+      "emptyReason": null,
+      "displayRole": "upper",
+      "displayId": 0,
+      "requestSnapshotId": "c7fcf5f4-3303-467f-b506-0c1ec7831916",
+      "captureSnapshotId": "e992d0a4-ee11-4e97-bd70-8f02124034f4",
+      "targetSnapshotId": "e992d0a4-ee11-4e97-bd70-8f02124034f4",
+      "observedTargetPackage": "dev.thor.inputlab",
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "input.activate",
+    "arguments": {
+      "nodeRef": "c22b65d1-4860-4698-949a-3d2333e38594:root/2"
+    },
+    "elapsedMs": 25,
+    "error": null,
+    "outcome": "submitted",
+    "data": {
+      "submitted": true,
+      "action": "click",
+      "actionAccepted": true,
+      "foregroundVerified": false,
+      "nodeRefsInvalidated": true,
+      "nextStep": "Re-observe ui_tree or screenshot to verify the result before any next input",
+      "displayRole": "upper",
+      "displayId": 0,
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.select_screen",
+    "arguments": {
+      "screen": "lower"
+    },
+    "elapsedMs": 32,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "selectedScreen": "lower",
+      "targetSnapshotId": "eeb07bc4-b9b8-466e-af84-5e6bb62b8d28",
+      "requestSnapshotId": "55900fed-6091-4522-89b3-6e11568fc88d",
+      "readOnlySelection": true,
+      "calibrationChanged": false,
+      "nextStep": "Only this Run selected the calibrated screen. Re-observe its current UI/screenshot before input; prior role frames/refs remain invalid for this target.",
+      "displayRole": "lower",
+      "displayId": 7,
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.capture_screen",
+    "arguments": {
+      "maxEdge": 960,
+      "quality": 80,
+      "format": "jpeg"
+    },
+    "elapsedMs": 26,
+    "error": "PERMISSION_MISSING",
+    "outcome": "observed",
+    "data": {
+      "message": "Lower target must be a unique non-assistant application"
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.select_screen",
+    "arguments": {
+      "screen": "upper"
+    },
+    "elapsedMs": 12,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "selectedScreen": "upper",
+      "targetSnapshotId": "5419c077-c7db-4c69-b480-2b82f87e0121",
+      "requestSnapshotId": "eeb07bc4-b9b8-466e-af84-5e6bb62b8d28",
+      "readOnlySelection": true,
+      "calibrationChanged": false,
+      "nextStep": "Only this Run selected the calibrated screen. Re-observe its current UI/screenshot before input; prior role frames/refs remain invalid for this target.",
+      "displayRole": "upper",
+      "displayId": 0,
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "perception.app_info",
+    "arguments": {},
+    "elapsedMs": 15,
+    "error": null,
+    "outcome": "observed",
+    "data": {
+      "package": "dev.thor.inputlab",
+      "label": "Thor Input Lab",
+      "versionName": "0.4.0",
+      "longVersionCode": 5,
+      "firstInstallTime": 1792169766178,
+      "lastUpdateTime": 1792169766178,
+      "activity": null,
+      "displayRole": "upper",
+      "displayId": 0,
+      "requestSnapshotId": "5419c077-c7db-4c69-b480-2b82f87e0121",
+      "captureSnapshotId": "c6e796fe-6614-497e-b5fb-d06882c7563b",
+      "targetSnapshotId": "6b17fa18-2c99-4517-bebf-84873718131b",
+      "observedTargetPackage": "dev.thor.inputlab",
+      "message": null
+    }
+  },
+  {
+    "runId": "ac73447f-a40c-4a89-88f4-1d556a7b3bd5",
+    "toolId": "agent.background",
+    "arguments": {},
+    "elapsedMs": 23,
+    "error": null,
+    "outcome": "submitted",
+    "data": {
+      "alreadyBackground": false,
+      "movedToBackground": true,
+      "submitted": true,
+      "scope": "assistant-chat-task-only",
+      "nextStep": "Re-observe the desired calibrated screen, then select upper/lower for this Run as needed. No target app has been started or configured.",
+      "message": null
+    }
+  }
+]

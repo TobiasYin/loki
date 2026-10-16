@@ -1,0 +1,96 @@
+{
+  "scope": "isolated emulator UI components and Native provider settings; synthetic UI fixture, controlled loopback only; not official cloud or physical-device acceptance",
+  "apkSha256": {
+    "app-debug.apk": "bd6fdb7dc29b25048dcfa4f1f296bda58f95e6f70947afc1877f0c54f1289e1e",
+    "app-debug-androidTest.apk": "8c628a4289900eaaca463b23b6a75eb21a6c4bd322fbc56062d68eb1683f4cf4"
+  },
+  "installedApkHashesVerified": true,
+  "sourceSha256": {
+    "ui.js": "eaf35c38b712bc3a99261b9b76bb36ae460e4ed8f9730e0b33211db08ef4fba2",
+    "style.css": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52",
+    "ui.test.cjs": "d809580dabe16c4df785f488e49cde2cce79f1f5a092a70a1d81fe8012fdf759",
+    "EmulatorModernChatUiTest.kt": "f4e8c487f9f59939e174a61f5b8a029851c944620c3fbb3365a15f22253c5f2b"
+  },
+  "software": {
+    "appJvmTests": 76,
+    "appJvmFailures": 0,
+    "jsTests": 52,
+    "jsFailures": 0,
+    "lintDebug": "passed"
+  },
+  "webViewVersion": "133.0.6943.137",
+  "frameSamples": {
+    "thought-open": {
+      "frames": 31,
+      "minimumCssHeight": 26,
+      "maximumCssHeight": 206,
+      "intermediateHeightFrames": 7,
+      "maximumFrameGapMs": 33.4
+    },
+    "thought-close": {
+      "frames": 18,
+      "minimumCssHeight": 26,
+      "maximumCssHeight": 206,
+      "intermediateHeightFrames": 3,
+      "maximumFrameGapMs": 99.9
+    },
+    "operations-open": {
+      "frames": 30,
+      "minimumCssHeight": 27,
+      "maximumCssHeight": 59,
+      "intermediateHeightFrames": 7,
+      "maximumFrameGapMs": 49.9
+    },
+    "tool-open": {
+      "frames": 20,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateHeightFrames": 8,
+      "maximumFrameGapMs": 133.2
+    },
+    "tool-close": {
+      "frames": 30,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateHeightFrames": 8,
+      "maximumFrameGapMs": 33.4
+    },
+    "rapid-stream": {
+      "frames": 22,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1712.28125,
+      "intermediateHeightFrames": 12,
+      "maximumFrameGapMs": 150.0
+    }
+  },
+  "instrumentation": {
+    "providerSettings": {
+      "tests": 2,
+      "passed": true,
+      "seconds": 14.211
+    },
+    "uiNormal": {
+      "tests": 1,
+      "passed": true,
+      "seconds": 14.155
+    },
+    "uiReduced": {
+      "tests": 1,
+      "passed": true,
+      "seconds": 6.392
+    },
+    "scopedSqlite": {
+      "tests": 1,
+      "passed": true,
+      "seconds": 0.217
+    }
+  },
+  "actualTrustedTouchAndKeyboardVerified": true,
+  "bridgeFailureUiRollbackVerified": true,
+  "reducedMotionSystemPreferenceVerified": true,
+  "systemPreferenceAppliedBeforeWebViewProcess": true,
+  "profileAndCredentialsUnchanged": true,
+  "restoredAnimatorDurationScale": "null",
+  "stable60FpsClaimed": false,
+  "sourceArtifacts": "build/emulator/ui-modern-2026-10-16/final; only compact reports/logs and selected synthetic UI screenshots copied here"
+}

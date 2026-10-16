@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "status": "NINE_DISTINCT_COMPONENT_TESTS_PASSED_SAME_APP_TWO_TEST_APKS",
+  "scope": "Isolated emulator only. UI synthetic data and intercepted Native task commands; provider controlled loopback; launcher Intent intercepted. No official cloud, physical-device/game, actual launcher foreground or60FPS acceptance.",
+  "appApkSha256": "9c03e723c21978c809480b5fc75e717ca248f845ee91b2888f872be64373fee8",
+  "appInstalledHashVerifiedInBothBatches": true,
+  "apkAssetSha256": {
+    "assets/chat/ui.js": "b9d67e2da4c370f512131daaedd822666e57cabbc37a687d5e5baa7a230fdfd6",
+    "assets/chat/style.css": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52"
+  },
+  "testBatches": [
+    {
+      "testApkSha256": "906a0eec326b0be3638ca72cbcb251b66c3f42e337d1797b4de58a1996504a8c",
+      "passedDistinctTests": 7,
+      "providerSettings": 2,
+      "scopedStorage": 2,
+      "launcher": 3,
+      "seconds": 17.424,
+      "sourceArtifacts": "build/emulator/ui-service-2026-10-17/final-01"
+    },
+    {
+      "testApkSha256": "3cac861a0e06a2601a916a8c4567ec322967a0bb63ebe7ce144cfae61edb43d8",
+      "passedDistinctTests": 2,
+      "uiNormal": 1,
+      "uiReducedFreshProcess": 1,
+      "uiNormalSeconds": 22.089,
+      "uiReducedSeconds": 9.509,
+      "sourceArtifacts": "build/emulator/ui-service-2026-10-17/final-02"
+    }
+  ],
+  "normalFrameSummary": {
+    "thought-open": {
+      "frames": 21,
+      "inputAtMs": 128,
+      "minimumCssHeight": 26,
+      "maximumCssHeight": 206,
+      "intermediateFrames": 8,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 283.4
+    },
+    "thought-close": {
+      "frames": 15,
+      "inputAtMs": 115.20000000111759,
+      "minimumCssHeight": 26,
+      "maximumCssHeight": 206,
+      "intermediateFrames": 3,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 116.7
+    },
+    "operations-open": {
+      "frames": 32,
+      "inputAtMs": 67.39999999850988,
+      "minimumCssHeight": 27,
+      "maximumCssHeight": 59,
+      "intermediateFrames": 8,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 50.0
+    },
+    "tool-open": {
+      "frames": 21,
+      "inputAtMs": 67.59999999962747,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateFrames": 10,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 83.3
+    },
+    "tool-close": {
+      "frames": 20,
+      "inputAtMs": 144.69999999925494,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateFrames": 9,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 116.7
+    },
+    "rapid-stream": {
+      "frames": 29,
+      "inputAtMs": 80.79999999888241,
+      "minimumCssHeight": 32,
+      "maximumCssHeight": 1722.09375,
+      "intermediateFrames": 20,
+      "timedOut": false,
+      "finalFrameAnimating": false,
+      "maximumFrameGapMs": 100.0
+    }
+  },
+  "normalTrustedTouchAndKeyboardVerified": true,
+  "bridgeFailureUiRollbackVerified": true,
+  "reducedMotionSystemPreferenceVerified": true,
+  "reducedFramesContainAnimation": false,
+  "allNormalTracesSettled": true,
+  "normalTimingMs": 250,
+  "normalEasing": "cubic-bezier(.4,0,.2,1)",
+  "traceCollection": "Real input then>=550ms and actual WAAPI/dataset settled; hard5s; strict>=2 intermediate-height frames unchanged.",
+  "stable60FpsClaimed": false,
+  "profileAndCredentialsUnchanged": true,
+  "syntheticDocumentCleanupViaIdleServiceReload": true,
+  "notificationPermissionUnchanged": true,
+  "animatorDurationScaleRestored": "null",
+  "serviceExitedAfterTests": true,
+  "failedAttemptsPreservedLocally": [
+    "build/emulator/ui-service-2026-10-17/run-01",
+    "build/emulator/ui-service-2026-10-17/run-02",
+    "build/emulator/ui-service-2026-10-17/final-01"
+  ],
+  "failureHistoryNote": "Earlier strict checks failed. Product190ms front-loaded transition changed to250ms balanced curve. A later250ms failure captured an actual animation still running at last sample, so its range was incomplete. Test-only completion synchronization was fixed without weakening the>=2 intermediate-frame standard. Older failures are not relabeled passed."
+}

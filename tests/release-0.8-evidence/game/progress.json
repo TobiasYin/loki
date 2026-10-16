@@ -1,0 +1,1246 @@
+{
+  "status": "IN_PROGRESS_GAME11_AFTER_RUNTIME_RECEIPT_FIX_NOT_GAME_GOAL_PASS",
+  "sessionId": "7719b29a-9c06-46a3-b2ab-96975d1f8cb7",
+  "harnessGameSteps": [],
+  "goalVerified": {
+    "openCitra": true,
+    "launchTargetGame": true,
+    "openEmulatorMenu": true,
+    "createNewSave": false,
+    "obtainSword": false,
+    "completeFirstQuest": false
+  },
+  "verification": "Opening/launch/menu confirmed by host read-only screenshots plus recorded model tools. No host game input was sent during formal flow. These phase flags are not whole-goal completion.",
+  "attempts": [
+    {
+      "attempt": "game-01",
+      "note": "Setup failed while device asleep; no model game actions.",
+      "runs": [],
+      "observerSuitePassed": false,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "74b41e7b75c6991fb52e14d46a6a319dd4c55247f677f0c3453703292fe90a6b",
+          "bytes": 6785607
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "0a21d12001da9396b34d135b7044610887bdbf73aa6e6049d89d33b85a75a50b",
+          "bytes": 3040094
+        }
+      },
+      "elapsedSeconds": 9.48,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-02",
+      "note": null,
+      "runs": [
+        {
+          "runId": "40b81dc8-dbdc-40aa-9d0c-9e47fc333425",
+          "status": "failed",
+          "error": "PROTOCOL_ERROR",
+          "eventCount": 169,
+          "elapsedMs": 96338,
+          "toolCounts": {
+            "perception.ui_tree": 1,
+            "perception.app_info": 1,
+            "perception.capture_screen": 1,
+            "skills.read": 1,
+            "debug.command_policy": 1,
+            "debug.shell": 1
+          },
+          "toolErrors": {
+            "TIMEOUT": 1
+          },
+          "timings": {
+            "beginElapsedRealtime": 688169028,
+            "firstVisibleTextMs": 4270,
+            "responseHeadersMs": 3620,
+            "firstResponseBytesMs": 3624,
+            "firstAuthorityMs": 32,
+            "nativePrepareMs": 19
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 131441,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 97062,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 220365,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73170,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        }
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "bd6fdb7dc29b25048dcfa4f1f296bda58f95e6f70947afc1877f0c54f1289e1e",
+          "bytes": 6785903
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "72b364cdfbfc28f82ccd4f4c1ee96e38b9866f7d32fe936eee05b14aeb365f08",
+          "bytes": 3041234
+        }
+      },
+      "elapsedSeconds": 101.82,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-03",
+      "note": "Instrumentation argument quoting failed; observation file was stale and must not be used.",
+      "runs": [],
+      "observerSuitePassed": false,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "dcd90f3e4d3a7dc1f906d6a4e6c0b36f7bcabc0662dc27dedf6d8366dea17cc8",
+          "bytes": 6786001
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "7182cabf553b598582e0a69274811b09146e0eb6264fc68e18dead99d4676bc0",
+          "bytes": 3053378
+        }
+      },
+      "elapsedSeconds": 1.05,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-04",
+      "note": null,
+      "runs": [
+        {
+          "runId": "3862784d-b497-45e4-8b2b-e31e01f3a7d4",
+          "status": "cancelled",
+          "error": "CANCELLED",
+          "eventCount": 590,
+          "elapsedMs": 388554,
+          "toolCounts": {
+            "perception.capture_screen": 6,
+            "apps.launch": 1,
+            "input.swipe": 4,
+            "input.tap": 1,
+            "input.press_button": 1
+          },
+          "toolErrors": {
+            "TARGET_CHANGED": 1
+          },
+          "timings": {
+            "beginElapsedRealtime": 692003084,
+            "firstVisibleTextMs": 12212,
+            "responseHeadersMs": 11626,
+            "firstResponseBytesMs": 11647,
+            "firstAuthorityMs": 87,
+            "nativePrepareMs": 53
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 80065,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 63961,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 524142,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67541,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 443976,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 74354,
+              "terminal": "eof"
+            },
+            {
+              "status": null,
+              "responseBytes": 0,
+              "terminal": "CANCELLED"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67541,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 296535,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67543,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 146225,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 172425,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67543,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 410440,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 75120,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 79951,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 75364,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        },
+        {
+          "runId": "6ae7cc7d-2d72-47f2-b23a-9f5b0fbf47d4",
+          "status": "cancelled",
+          "error": "CANCELLED",
+          "eventCount": 590,
+          "elapsedMs": 388554,
+          "toolCounts": {
+            "perception.capture_screen": 6,
+            "apps.launch": 1,
+            "input.swipe": 4,
+            "input.tap": 1,
+            "input.press_button": 1
+          },
+          "toolErrors": {
+            "TARGET_CHANGED": 1
+          },
+          "timings": {
+            "beginElapsedRealtime": 692003084,
+            "firstVisibleTextMs": 12212,
+            "responseHeadersMs": 11626,
+            "firstResponseBytesMs": 11647,
+            "firstAuthorityMs": 87,
+            "nativePrepareMs": 53
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 80065,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 63961,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 524142,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67541,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 443976,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 74354,
+              "terminal": "eof"
+            },
+            {
+              "status": null,
+              "responseBytes": 0,
+              "terminal": "CANCELLED"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67541,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 296535,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67543,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 146225,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 172425,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67543,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 410440,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 75120,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 79951,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 75364,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        },
+        {
+          "runId": "f052dbc5-1191-4074-8a92-09aea57b837b",
+          "status": "cancelled",
+          "error": "CANCELLED",
+          "eventCount": 590,
+          "elapsedMs": 388554,
+          "toolCounts": {
+            "perception.capture_screen": 6,
+            "apps.launch": 1,
+            "input.swipe": 4,
+            "input.tap": 1,
+            "input.press_button": 1
+          },
+          "toolErrors": {
+            "TARGET_CHANGED": 1
+          },
+          "timings": {
+            "beginElapsedRealtime": 692003084,
+            "firstVisibleTextMs": 12212,
+            "responseHeadersMs": 11626,
+            "firstResponseBytesMs": 11647,
+            "firstAuthorityMs": 87,
+            "nativePrepareMs": 53
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 80065,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 63961,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 524142,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67541,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 443976,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 74354,
+              "terminal": "eof"
+            },
+            {
+              "status": null,
+              "responseBytes": 0,
+              "terminal": "CANCELLED"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67541,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 296535,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67543,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 146225,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 172425,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 67543,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 410440,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 75120,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 79951,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 75364,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        }
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "dcd90f3e4d3a7dc1f906d6a4e6c0b36f7bcabc0662dc27dedf6d8366dea17cc8",
+          "bytes": 6786001
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "7182cabf553b598582e0a69274811b09146e0eb6264fc68e18dead99d4676bc0",
+          "bytes": 3053378
+        }
+      },
+      "elapsedSeconds": 3074.76,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-05",
+      "note": null,
+      "runs": [
+        {
+          "runId": "72c71235-20da-432a-a2b1-a6f101e6b496",
+          "status": "failed",
+          "error": "IO_ERROR",
+          "eventCount": 543,
+          "elapsedMs": 156550,
+          "toolCounts": {
+            "perception.capture_screen": 3,
+            "input.navigate": 3,
+            "perception.window_info": 1,
+            "perception.ui_tree": 1
+          },
+          "toolErrors": {
+            "TARGET_CHANGED": 3
+          },
+          "timings": {
+            "beginElapsedRealtime": 693003042,
+            "firstVisibleTextMs": 20058,
+            "responseHeadersMs": 4272,
+            "firstResponseBytesMs": 4281,
+            "firstAuthorityMs": 92,
+            "nativePrepareMs": 66
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 74620,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 187025,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 176549,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 195083,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 301673,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 79810,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 481665,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 529533,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        }
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "7709dbd5dee7ab1bb8ae417346dc6e44a199256ec33684ca2343772e9032eeef",
+          "bytes": 7048808
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "7182cabf553b598582e0a69274811b09146e0eb6264fc68e18dead99d4676bc0",
+          "bytes": 3053378
+        }
+      },
+      "elapsedSeconds": 163.03,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-06",
+      "note": null,
+      "runs": [
+        {
+          "runId": "af183b86-075a-4d47-8937-eec26c98f12f",
+          "status": "failed",
+          "error": "IO_ERROR",
+          "eventCount": 698,
+          "elapsedMs": 327522,
+          "toolCounts": {
+            "perception.capture_screen": 16,
+            "input.navigate": 3,
+            "perception.window_info": 6,
+            "perception.ui_tree": 5,
+            "input.tap": 3,
+            "input.press_button": 1,
+            "input.long_press": 1,
+            "apps.launch": 1,
+            "debug.shell": 1
+          },
+          "toolErrors": {
+            "TARGET_CHANGED": 26
+          },
+          "timings": {
+            "beginElapsedRealtime": 694058000,
+            "firstVisibleTextMs": 15367,
+            "responseHeadersMs": 4065,
+            "firstResponseBytesMs": 4074,
+            "firstAuthorityMs": 92,
+            "nativePrepareMs": 68
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 75454,
+              "terminal": "eof"
+            },
+            {
+              "status": null,
+              "responseBytes": 0,
+              "terminal": "IO_ERROR"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 84337,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 127787,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 205960,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 126377,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73141,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 193389,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 78878,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 93885,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 103772,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 126106,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 93940,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70202,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 92879,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 77924,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70202,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 84204,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70202,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70202,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 253156,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70202,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 87932,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 165254,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 80487,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 70211,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 317837,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73133,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 194784,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        }
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "e0b56ee497be357048ebcc763f4d2bd1cd354b5021332a608152f1852f052d3d",
+          "bytes": 7048853
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "7182cabf553b598582e0a69274811b09146e0eb6264fc68e18dead99d4676bc0",
+          "bytes": 3053378
+        }
+      },
+      "elapsedSeconds": 334.16,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-07",
+      "note": "Stale observer stop marker cancelled setup/new Run with zero events; no game actions.",
+      "runs": [],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "a74e6caf73758a9d644ed69f01712211d6faad38af6290352feabaecd38128a8",
+          "bytes": 7049439
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "7182cabf553b598582e0a69274811b09146e0eb6264fc68e18dead99d4676bc0",
+          "bytes": 3053378
+        }
+      },
+      "elapsedSeconds": 9.12,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-08",
+      "note": null,
+      "runs": [
+        {
+          "runId": "01d67a1b-683d-498a-9184-23978e39d147",
+          "status": "failed",
+          "error": "LIMIT_EXCEEDED",
+          "eventCount": 619,
+          "elapsedMs": 553225,
+          "toolCounts": {
+            "perception.capture_screen": 17,
+            "perception.ui_tree": 4,
+            "input.activate": 1,
+            "input.tap": 2,
+            "input.swipe": 9,
+            "input.scroll": 4,
+            "input.navigate": 1,
+            "input.press_button": 2
+          },
+          "toolErrors": {
+            "TARGET_CHANGED": 3
+          },
+          "timings": {
+            "beginElapsedRealtime": 695000646,
+            "firstVisibleTextMs": 19573,
+            "responseHeadersMs": 4974,
+            "firstResponseBytesMs": 4979,
+            "firstAuthorityMs": 96,
+            "nativePrepareMs": 73
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 87026,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73060,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 280781,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 100057,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 77680,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 102697,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 93365,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 87453,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 87905,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73060,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 102498,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 117695,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 75980,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73058,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 90150,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 117021,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 96450,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 46877,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 85826,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 104876,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 95583,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 77680,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73060,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 78325,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 143132,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 96030,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 85627,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 76524,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 46877,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 359724,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 235039,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 86796,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": null,
+          "encryptedCredentialsUnchanged": null,
+          "originalRunIdsPreserved": null
+        },
+        {
+          "runId": "247ef83b-3a1c-43fe-b108-974ba3baaf93",
+          "status": "failed",
+          "error": "IO_ERROR",
+          "eventCount": 127,
+          "elapsedMs": 81470,
+          "toolCounts": {
+            "perception.capture_screen": 2,
+            "input.press_button": 1
+          },
+          "toolErrors": {},
+          "timings": {
+            "beginElapsedRealtime": 695554110,
+            "responseHeadersMs": 13233,
+            "firstResponseBytesMs": 13266,
+            "firstAuthorityMs": 235,
+            "nativePrepareMs": 91
+          },
+          "modelTransport": [
+            {
+              "status": 200,
+              "responseBytes": 533153,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 83414,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 73060,
+              "terminal": "eof"
+            },
+            {
+              "status": 200,
+              "responseBytes": 80128,
+              "terminal": "eof"
+            }
+          ],
+          "profileConfigurationUnchanged": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        }
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "a74e6caf73758a9d644ed69f01712211d6faad38af6290352feabaecd38128a8",
+          "bytes": 7049439
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "7182cabf553b598582e0a69274811b09146e0eb6264fc68e18dead99d4676bc0",
+          "bytes": 3053378
+        }
+      },
+      "elapsedSeconds": 641.8,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      }
+    },
+    {
+      "attempt": "game-10",
+      "note": "User reconnected Thor. Normal same-session model flow ran, then explicitly stopped for a proven Runtime post-execution validation defect, not a model wall-clock timeout.",
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "harnessGameSteps": [],
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "256498c422e201fe728315f3dfbdcdefa649685fa16df46246cb9435f1ec7e24",
+          "bytes": 7662245
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "cdfb0efcaaaf89c2a89da4ac7e9c5b7f4d9f1fa9febcc0c53410bff42d5b2fdb",
+          "bytes": 3223490
+        }
+      },
+      "elapsedSeconds": 276.94,
+      "runs": [
+        {
+          "runId": "b7805796-53bd-49d7-ab6e-3b70be97c827",
+          "status": "cancelled",
+          "error": "CANCELLED",
+          "eventCount": 496,
+          "toolCounts": {
+            "perception.capture_screen": 10,
+            "perception.device_info": 1,
+            "apps.launch": 2,
+            "perception.select_screen": 2,
+            "input.tap": 3,
+            "input.press_button": 3,
+            "input.navigate": 2,
+            "perception.ui_tree": 2,
+            "input.activate": 2
+          },
+          "toolErrors": {
+            "BACKEND_UNAVAILABLE": 4,
+            "PERMISSION_MISSING": 2,
+            "TARGET_CHANGED": 1
+          },
+          "nativeSubmittedReceiptsMisclassifiedAsBackendUnavailable": {
+            "apps.launch": 1,
+            "input.tap": 2,
+            "input.activate": 1
+          },
+          "profileConfigurationRestored": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        }
+      ],
+      "independentScreenReview": "Upper emulator menu and lower story prologue observed read-only after maintenance stop. Prologue narration mentioning a sword is not inventory/quest completion evidence; no new save name or sword acquisition independently verified.",
+      "externalGameDataPreservation": {
+        "existingGameDataFiles": 34,
+        "modifiedExistingFiles": 0,
+        "newFiles": 0,
+        "missingFiles": 0,
+        "scope": "Read-only byte-hash comparison of external Citra sdmc/nand data; not a gameplay or new-save verdict."
+      }
+    }
+  ],
+  "continuation": {
+    "sessionId": "7719b29a-9c06-46a3-b2ab-96975d1f8cb7",
+    "runId": "41cdb2eb-4f4a-4fab-9cca-b39b1cae275a",
+    "reason": "Runtime receipt defect fixed and tested. Thor Agent resumed same durable conversation, independently backgrounded chat, selected/read lower screen and submitted semantic input. No new-save/sword/quest verdict yet.",
+    "appSha256": "5b5535d2cff41a1c67cecd9dab692961f491272955c409d66f25dd1b2743b9a8",
+    "testSha256": "d0866d32e310e099f7c71f942ffefaf824942416d2dd2946674d7f807651355c",
+    "testOutputBudget": 16384,
+    "hostGameInputAllowed": false,
+    "game09": "Disconnected preflight failed before installation/model actions; excluded from gameplay attempts.",
+    "runStatus": "running"
+  },
+  "withheldScreenshots": [
+    {
+      "file": "model-launched-game-upper.png",
+      "sha256": "f7576289e6f4d3a32b7d84f2a02f8ac22be2679dc93ee3ba3e012c9ccdd51f23",
+      "scope": "Host read-only screenshot after ThorAgent launch and ROM selection, not injected into model."
+    },
+    {
+      "file": "model-opened-menu-upper.png",
+      "sha256": "c7c72a0a33c990be883edbe991de98f27a799181d2c26f7af7eab3ba8214e5b6",
+      "scope": "Host read-only screenshot after ThorAgent BACK opened emulator menu."
+    },
+    {
+      "file": "host-diagnosed-lower-save-menu.png",
+      "sha256": "82e794b6855f301c6ce3e2cd2dbf1cb127ab3a3af6c71a9c961b43fbe10d33c5",
+      "scope": "Host read-only diagnosis found save confirmation on lower display; model had no lower perception tool at that time. Host did not confirm or select the save."
+    }
+  ],
+  "screenshots": [],
+  "publicationRedaction": "Screenshot originals are withheld from public main for privacy and third-party media review. Original file names and hashes below record the private captures, not public files or a test rerun."
+}

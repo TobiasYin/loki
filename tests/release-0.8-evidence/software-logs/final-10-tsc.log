@@ -1,0 +1,6 @@
+Source: build/physical/release-0.8-2026-10-16/runtime-native-receipts-tsc.log
+Source SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Selected evidence excerpt; not the complete source log.
+
+Integration TypeScript check: process exit 0 directly observed by receipt-fix agent.
+No diagnostics (source log zero bytes); exit status is not inferred from emptiness.

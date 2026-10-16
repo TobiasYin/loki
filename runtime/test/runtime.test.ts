@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Model } from '@earendil-works/pi-ai';
 import { ThorRuntime, RuntimeSession, defaultCapabilities, RuntimeError, ToolRegistry, compileContext, assertPaired, type HistoryTurn, type ToolOutcome } from '../src/index.js';
-import { fixture, registry, descriptor, PNG } from './fixtures.js';
+import { fixture, registry, descriptor, PNG, protocolSse } from './fixtures.js';
 import { ProtocolAudit } from '../src/protocol-audit.js';
 
 for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) {
@@ -327,4 +327,87 @@ test('invalid Skill resource nesting stays blocked and returns a safe actionable
  const good={content:'guide',expectedHash:'',resources:{'references/a.md':'A','references/b.md':'B'}};
  assert.equal(r.validate('skills_save',good).toolId,'skills.save');
  assert.throws(()=>r.validate('skills_save',{content:'guide',expectedHash:'',resources:{'references/a.md':'A'},'references/b.md':'PRIVATE_CONTENT_MUST_NOT_ECHO'}),(error:unknown)=>error instanceof RuntimeError && error.code==='PROTOCOL_ERROR' && error.message.includes('resources object') && !error.message.includes('PRIVATE_CONTENT_MUST_NOT_ECHO'));
+});
+
+test('an approval tool timeout leaves awaiting_user and permits the next model turn',async()=>{
+  const f=fixture('openai-responses',[{call:{name:'echo'}},{text:'The tool timed out; proceeding without repeating it.'}]);
+  const reg=new ToolRegistry();reg.register({packId:'approval-fixture',packVersion:'1',tools:[{...descriptor(),timeoutMs:20}]});
+  f.ports.tools.execute=async(envelope,signal,awaiting)=>{f.executions.push(envelope);await awaiting?.(true);return new Promise((_resolve,reject)=>{signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true});});};
+  const result=await new ThorRuntime(f.ports,reg).run(f.lease,[{type:'text',text:'attempt then report'}]);
+  assert.equal(result.state,'completed');assert.equal(f.requests.length,2);assert.equal(f.executions.length,1);
+  assert.ok(f.events.some(e=>e.type==='tool_result' && e.data.error==='TIMEOUT'));
+  const states=f.events.filter(e=>e.type==='state').map(e=>e.data.state);const index=states.indexOf('awaiting_user');assert.deepEqual(states.slice(index,index+3),['awaiting_user','executing_tools','generating']);
+});
+test('stopping while awaiting approval never resumes a model request',async()=>{
+  const f=fixture('openai-responses',[{call:{name:'echo'}},{text:'must not generate'}]);let runtime:ThorRuntime;
+  f.ports.tools.execute=async(_envelope,signal,awaiting)=>{await awaiting?.(true);runtime.stop();return new Promise((_resolve,reject)=>{if(signal.aborted)reject(new DOMException('Aborted','AbortError'));else signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true});});};
+  runtime=new ThorRuntime(f.ports,registry());assert.equal((await runtime.run(f.lease,[{type:'text',text:'stop here'}])).state,'cancelled');assert.equal(f.requests.length,1);
+});
+
+test('a timer-only merged-fragment persistence failure aborts an otherwise waiting model stream',{timeout:2000},async()=>{
+  const f=fixture();const original=f.ports.persistence.appendEvent;let deltas=0,aborts=0;
+  f.ports.persistence.appendEvent=async e=>{if(e.type==='text_delta' && ++deltas===2)throw new Error('synthetic disk failure');await original(e);};
+  f.ports.network.fetch=async(input,init)=>{
+    const request=new Request(input,init);
+    const body=new ReadableStream<Uint8Array>({start(controller){
+      controller.enqueue(new TextEncoder().encode(protocolSse('openai-responses',{text:'firstlater',disconnect:true})));
+      request.signal.addEventListener('abort',()=>{aborts++;controller.error(new DOMException('Aborted','AbortError'));},{once:true});
+    }});
+    return new Response(body,{headers:{'content-type':'text/event-stream'}});
+  };
+  await assert.rejects(new ThorRuntime(f.ports,registry(),{runTimeoutMs:0}).run(f.lease,[{type:'text',text:'wait for response'}]),e=>e instanceof RuntimeError && e.code==='PERSISTENCE_ERROR');
+  assert.equal(deltas,2);assert.equal(aborts,1);assert.equal(f.executions.length,0);assert.ok(!f.runs.some(r=>r.state==='completed'));
+  const count=f.events.length;await new Promise(r=>setTimeout(r,80));assert.equal(f.events.length,count,'no delayed persistence after disposed failure');
+});
+
+for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) {
+  test(`${protocol}: actual length SSE is classified and the same Pi session retains partial text and tool context`,async()=>{
+    const session=new RuntimeSession('session-test');
+    const first=fixture(protocol,[{call:{name:'tap',id:'one-native-action'}},{text:'已完成一次操作，后续正文未写完',stopReason:'length'}]);
+    first.snapshot.session.enabled.screen_control=true;
+    const tools=new ToolRegistry();tools.register({packId:'output-limit-actions',packVersion:'1',tools:[{...descriptor('tap',['screen_control']),effectClass:'input'}]});
+    let nativeEffects=0;
+    first.setTool(async()=>{nativeEffects++;return {content:[{type:'text',text:'operation-confirmed-once'}],observedAt:Date.now(),source:'fixture',truncated:false,outcome:'submitted'};});
+    const result=await new ThorRuntime(first.ports,tools,{},session).run(first.lease,[{type:'text',text:'保留原目标直到完成'}]);
+    assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');
+    assert.equal(session.agent!.state.messages.filter(m=>m.role==='assistant').at(-1)!.stopReason,'length');
+    assert.equal(nativeEffects,1);assert.equal(first.executions.length,1);assert.equal(first.requests.length,2);
+    assert.deepEqual(first.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_OUTPUT_LIMIT').map(e=>e.data),[{code:'MODEL_OUTPUT_LIMIT',stopReason:'length'}]);
+    assert.equal(first.events.filter(e=>e.type==='text_delta').map(e=>e.data.text).join(''),'已完成一次操作，后续正文未写完');
+    const recorded=first.turns.at(-1)!;assert.equal(recorded.complete,false);
+    assert.ok(JSON.stringify(recorded.messages).includes('已完成一次操作，后续正文未写完'));
+    assert.ok(JSON.stringify(recorded.messages).includes('operation-confirmed-once'));
+    assert.equal(recorded.effects?.filter(effect=>effect.outcome==='submitted').length,1);
+    const agent=session.agent;
+    const followup=fixture(protocol,[{text:'继续原进度完成，未重复已确认操作'}]);followup.snapshot.session.enabled.screen_control=true;
+    const continued=await new ThorRuntime(followup.ports,tools,{},session).run(followup.lease,[{type:'text',text:'继续刚才被截断的任务'}],[recorded]);
+    assert.equal(continued.state,'completed');assert.equal(session.agent,agent);assert.equal(followup.executions.length,0);assert.equal(nativeEffects,1);
+    const request=JSON.stringify(followup.requests[0]!.body);
+    for(const retained of ['保留原目标直到完成','operation-confirmed-once','已完成一次操作，后续正文未写完','继续刚才被截断的任务'])assert.ok(request.includes(retained));
+    assert.equal(followup.contexts[0]!.modelProfileRevision,first.contexts[0]!.modelProfileRevision);
+  });
+}
+
+test('provider error termination records only a fixed safe reason without persisting upstream details',async()=>{
+  const f=fixture('openai-responses',[{status:500}]);const original=f.ports.network.fetch;
+  const privateUpstream='synthetic-upstream-secret-and-private-error-body';
+  f.ports.network.fetch=async(...args)=>{
+    const response=await original(...args);
+    return new Response(JSON.stringify({error:{message:privateUpstream}}),{status:response.status,headers:response.headers});
+  };
+  const session=new RuntimeSession('session-test');
+  const result=await new ThorRuntime(f.ports,registry(),{},session).run(f.lease,[{type:'text',text:'触发上游失败'}]);
+  assert.equal(result.state,'failed');assert.equal(result.error,'IO_ERROR');
+  assert.deepEqual(f.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_STREAM_FAILED').map(e=>e.data),[{code:'MODEL_STREAM_FAILED',stopReason:'error'}]);
+  assert.ok(!JSON.stringify({events:f.events,runs:f.runs,turns:f.turns,contexts:f.contexts}).includes(privateUpstream));
+  const next=fixture('openai-responses',[{text:'恢复'}]);
+  assert.equal((await new ThorRuntime(next.ports,registry(),{},session).run(next.lease,[{type:'text',text:'继续'}],[f.turns.at(-1)!])).state,'completed');
+  assert.ok(!JSON.stringify(next.requests).includes(privateUpstream));
+});
+
+test('explicit user stop retains cancellation semantics and never masquerades as a model termination',async()=>{
+  const f=fixture('openai-responses',[{wait:true}]);const runtime=new ThorRuntime(f.ports,registry());
+  f.setOnRequest(()=>runtime.stop());const result=await runtime.run(f.lease,[{type:'text',text:'停止此任务'}]);
+  assert.equal(result.state,'cancelled');assert.equal(result.error,'CANCELLED');
+  assert.ok(!f.events.some(e=>e.type==='diagnostic' && ['MODEL_OUTPUT_LIMIT','MODEL_STREAM_FAILED'].includes(String(e.data.code))));
 });

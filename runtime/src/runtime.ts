@@ -9,6 +9,8 @@ import { ToolRegistry } from './registry.js';
 import { ProtocolAudit } from './protocol-audit.js';
 import { RuntimeSession, closeInterruptedRound } from './session.js';
 import { withoutProviderDeadline } from './provider-timeouts.js';
+import { StreamEvents } from './stream-events.js';
+import { checkProfile } from './profile-validation.js';
 
 const terminal = new Set<RunState>(['completed', 'failed', 'cancelled', 'interrupted']);
 const transitions: Record<RunState, RunState[]> = {
@@ -21,7 +23,7 @@ interface Active {
   run: AgentRun; lease: RunLease; profile: ModelProfile; agent?: Agent; controller: AbortController;
   sequence: number; startMono: number; requests: number; requestSnapshot?: AuthoritySnapshot;
   effective: ToolDescriptor[]; seenCalls: Set<string>; source: Set<Capability>; stopReason?: ErrorCode;
-  persistenceFailed: boolean; requestMessages: Message[]; resultRefs: Map<string, Content[]>;
+  stream?: StreamEvents; persistenceFailed: boolean; requestMessages: Message[]; resultRefs: Map<string, Content[]>;
   failure?: ErrorCode;
   effects: EffectRecord[];
   turnId: string; streamMessage: number; messageOffset: number; input: Content[];
@@ -30,15 +32,8 @@ function fail(code: ErrorCode): never { throw new RuntimeError(code); }
 export function assertRuntimeFeatures(): void {
   if (typeof AbortController === 'undefined' || typeof ReadableStream === 'undefined' || typeof TextEncoder === 'undefined' || typeof TextDecoder === 'undefined' || typeof Headers === 'undefined' || typeof Request === 'undefined' || typeof Response === 'undefined' || typeof structuredClone === 'undefined' || !globalThis.crypto?.subtle || !globalThis.crypto?.randomUUID || typeof globalThis.performance?.now !== 'function') throw new RuntimeError('UNSUPPORTED', 'Required browser streaming/crypto APIs unavailable');
 }
-function checkProfile(p: ModelProfile): void {
-  const u = new URL(p.baseUrl);
-  if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || u.search || u.hash) fail('UNSUPPORTED');
-  if (!['openai-responses', 'anthropic-messages','openai-completions'].includes(p.protocol) || !p.modelId || !p.credentialRef || p.contextWindow <= p.maxOutput || p.maxOutput < 16 || !Number.isSafeInteger(p.contextWindow) || !Number.isSafeInteger(p.maxOutput)) fail('UNSUPPORTED');
-  if (p.lastProbe.revision !== p.revision || !p.lastProbe.textStream || !p.lastProbe.toolCalling || (p.input??['text','image']).includes('image') && (!p.lastProbe.imageInput || !p.lastProbe.imageToolRoundTrip)) fail('UNSUPPORTED');
-  for (const [h, v] of Object.entries(p.customHeaders ?? {})) if (!/^[a-z0-9-]+$/i.test(h) || /^(host|authorization|x-api-key|cookie|proxy-authorization|content-length|connection)$/i.test(h) || /[\r\n]/.test(v)) fail('UNSUPPORTED');
-}
 function toModel(p: ModelProfile): Model<any> {
-  return { id: p.modelId, name: p.label, api: p.protocol, provider:p.provider==='opencode-go'?'opencode-go':p.protocol==='anthropic-messages'?'anthropic':'openai', baseUrl: p.baseUrl.replace(/\/+$/, ''),
+  return { id: p.modelId, name: p.label, api: p.protocol, provider:p.provider==='opencode-go'?'opencode-go':p.provider==='deepseek'?'deepseek':p.protocol==='anthropic-messages'?'anthropic':'openai', baseUrl: p.baseUrl.replace(/\/+$/, ''),
     reasoning: p.reasoning??(p.thinkingEffort!==undefined && p.thinkingEffort!=='off'), thinkingLevelMap:p.thinkingLevelMap as Model<any>['thinkingLevelMap'], input:p.input??['text','image'], contextWindow: p.contextWindow, maxTokens: p.maxOutput,
     // Pi requires a price object. Zero is an internal sentinel, never a displayed price claim.
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, compat: { ...p.compat, supportsMidConvoSystemMessages: false } };
@@ -85,6 +80,10 @@ export class ThorRuntime {
     await this.ports.persistence.saveRun(recovered); return recovered;
   }
   private async event(a: Active, type: RunEvent['type'], data: Record<string, unknown>, toolCallId?: string, run?: AgentRun): Promise<void> {
+    await a.stream?.flush();
+    await this.writeEvent(a,type,data,toolCallId,run);
+  }
+  private async writeEvent(a: Active, type: RunEvent['type'], data: Record<string, unknown>, toolCallId?: string, run?: AgentRun): Promise<void> {
     const e: RunEvent = { sessionId: a.run.sessionId, runId: a.run.runId, eventId: crypto.randomUUID(), sequence: ++a.sequence, wallTime: Date.now(), elapsedMs: Math.round(performance.now() - a.startMono), type, data, ...(toolCallId ? { toolCallId } : {}) };
     await this.persist(a, () => run ? this.ports.persistence.commitRun(structuredClone(run), structuredClone(e)) : this.ports.persistence.appendEvent(structuredClone(e)));
     if (run) a.run = run;
@@ -113,6 +112,16 @@ export class ThorRuntime {
     if (s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
     return s;
   }
+  private async toolResultCheck(a: Active, t: ToolDescriptor): Promise<AuthoritySnapshot> {
+    const s = await this.authority(a);
+    if (!t.requiredCapabilities.every(c => s.session.enabled[c])) fail('CAPABILITY_DISABLED');
+    // An action can legitimately navigate, replace its old window or make its
+    // own backend unavailable. Those are execution preconditions, not grounds
+    // to discard Native's receipt. Pure screen reads still cannot deliver data
+    // after their request source is replaced by an unrelated observation.
+    if (t.effectClass === 'read' && t.requiredCapabilities.includes('screen_perception') && s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
+    return s;
+  }
   private tools(a: Active, descriptors: ToolDescriptor[]): AgentTool[] {
     return descriptors.map(t => ({ name: t.modelName, label: t.toolId, description: t.description, parameters: t.inputSchema, replay: 'never', executionMode: 'sequential',
       prepareArguments: args => { this.registry.validate(t.modelName, args); return args as any; },
@@ -131,22 +140,31 @@ export class ThorRuntime {
         const controller = new AbortController();
         const cancel = () => controller.abort(); a.controller.signal.addEventListener('abort', cancel, { once: true }); signal?.addEventListener('abort', cancel, { once: true });
         let timedOut = false;
+        let receipt: { outcome: NonNullable<ToolOutcome['outcome']>; evidenceRef?: string } | undefined;
         const timer = setTimeout(() => { timedOut = true; controller.abort(); }, Math.max(0, deadline - Date.now()));
         try {
           await this.event(a, 'tool_started', { toolId: t.toolId, arguments: args }, callId);
           await this.toolCheck(a, t);
           const outcome = await abortable(this.ports.tools.execute(envelope, controller.signal, async waiting => { await this.state(a, waiting ? 'awaiting_user' : 'executing_tools'); }), controller.signal);
-          if (effect) Object.assign(effect, { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef });
-          await this.toolCheck(a, t); // Reject late data following revocation, cancellation or target change.
-          const bounded = await this.boundOutcome(outcome, t, s);
+          receipt = { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef };
+          if (effect) Object.assign(effect, receipt);
+          const current = await abortable(this.toolResultCheck(a, t), controller.signal);
+          const bounded = await abortable(this.boundOutcome(outcome, t, current), controller.signal);
+          // Attachment resolution is asynchronous too: revocation or stop while
+          // unpacking must not admit its text/images into the transcript.
+          await abortable(this.toolResultCheck(a, t), controller.signal);
           a.resultRefs.set(callId, bounded.domain);
           await this.event(a, 'tool_result', { toolId: t.toolId, observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, error: outcome.error, outcome: outcome.outcome, evidenceRef: outcome.evidenceRef, content: bounded.domain }, callId);
           return { content: bounded.content, details: { observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, outcome: outcome.outcome ?? 'observed' }, isError: !!outcome.error };
         } catch (error) {
-          const code = timedOut ? 'TIMEOUT' : error instanceof RuntimeError ? error.code : 'IO_ERROR';
+          const code = timedOut ? 'TIMEOUT' : a.controller.signal.aborted ? a.stopReason ?? 'CANCELLED' : error instanceof RuntimeError ? error.code : 'IO_ERROR';
           if (code === 'PERSISTENCE_ERROR') { a.stopReason = code; a.controller.abort(); }
-          await this.event(a, 'tool_result', { toolId: t.toolId, error: code, outcome: 'unknown' }, callId);
-          return { content: [{ type: 'text' as const, text: code }], details: { error: code, outcome: 'unknown' }, isError: true, terminate: a.controller.signal.aborted };
+          // Revocation withholds content, but cannot undo a submitted action.
+          // Only a receipt already received before this rejection is retained;
+          // uncooperative executors never write events after terminal state.
+          const result = { error: code, outcome: receipt?.outcome ?? 'unknown', evidenceRef: receipt?.evidenceRef, contentDiscarded: receipt !== undefined };
+          await this.event(a, 'tool_result', { toolId: t.toolId, ...result }, callId);
+          return { content: [{ type: 'text' as const, text: code }], details: result, isError: true, terminate: a.controller.signal.aborted };
         } finally { clearTimeout(timer); a.controller.signal.removeEventListener('abort', cancel); signal?.removeEventListener('abort', cancel); }
       } }));
   }
@@ -215,6 +233,7 @@ export class ThorRuntime {
     };
   }
   private async saveTurn(a:Active,complete:boolean):Promise<void> {
+    await a.stream?.flush();
     const messages:DomainMessage[]=[];
     for(const m of a.agent?.state.messages.filter(m=>m.role!=='system').slice(a.messageOffset)??[]) {
       if(m.role==='user')messages.push({kind:'user',content:a.input});
@@ -231,18 +250,22 @@ export class ThorRuntime {
   }
   private async onPi(a: Active, e: AgentEvent): Promise<void> {
     if (terminal.has(a.run.state)) return;
+    if (e.type !== 'message_update') await a.stream?.flush();
     if (e.type === 'message_start' && e.message.role === 'assistant') a.streamMessage++;
     if (e.type === 'message_update' && !a.controller.signal.aborted) {
       const delta = e.assistantMessageEvent;
       if (delta.type === 'text_delta' || delta.type === 'thinking_delta') {
-        await this.event(a, delta.type, { text: delta.delta, blockId: `${a.streamMessage}:${delta.contentIndex}` });
+        await a.stream!.push({type:delta.type,data:{ text: delta.delta, blockId: `${a.streamMessage}:${delta.contentIndex}` }});
       } else if (delta.type === 'toolcall_start' || delta.type === 'toolcall_delta' || delta.type === 'toolcall_end') {
         const call = delta.partial.content[delta.contentIndex];
-        if (call?.type === 'toolCall') await this.event(a, 'tool_call_update', { toolName: call.name, arguments: call.arguments, complete: delta.type === 'toolcall_end' }, call.id);
+        if (call?.type === 'toolCall') await a.stream!.push({type:'tool_call_update',data:{ toolName: call.name, arguments: call.arguments, complete: delta.type === 'toolcall_end' },toolCallId:call.id});
       }
     }
     if(e.type==='message_end' && !a.persistenceFailed)await this.saveTurn(a,false);
     if (e.type === 'tool_execution_start' && !a.controller.signal.aborted) await this.state(a, 'executing_tools');
+    // A tool-local timeout/rejection can finish while its Native approval RPC is
+    // still unwinding. Leave awaiting_user before Pi starts its next model turn.
+    if(e.type==='tool_execution_end' && a.run.state==='awaiting_user' && !a.controller.signal.aborted)await this.state(a,'executing_tools');
     if (e.type === 'tool_execution_end' && e.isError) await this.event(a, 'diagnostic', { code: 'TOOL_FAILED', toolName: e.toolName }, e.toolCallId);
   }
   async run(lease: RunLease, input: Content[], history: HistoryTurn[] = []): Promise<AgentRun> {
@@ -264,6 +287,7 @@ export class ThorRuntime {
       a = { run: { sessionId: lease.sessionId, runId: lease.runId, state: 'queued', modelProfileRevision: profile.revision, capabilityEpoch: lease.capabilityEpoch, startedAt: Date.now() },
         lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], streamMessage: 0, messageOffset:0, input, turnId: crypto.randomUUID() };
       this.active = a; const active = a; const model = toModel(profile);
+      active.stream=new StreamEvents(f=>this.writeEvent(active,f.type,f.data,f.toolCallId));
       if(initial.session.enabled.screen_perception && (initial.l0.device || initial.l0.upperApp))a.source.add('screen_perception');
       await this.event(a, 'state', { state: 'queued' }, undefined, a.run); await this.state(a, 'preparing');
       await this.persist(a, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages: [{ kind: 'user', content: input }], source: [...active.source], observedAt: Date.now(), complete: false }));
@@ -280,7 +304,7 @@ export class ThorRuntime {
           try {
           const s = await this.authority(active, true);
           if (++active.requests > this.limits.maxRequests) fail('LIMIT_EXCEEDED');
-          active.requestSnapshot = s; active.effective = this.registry.effective(s);
+          active.requestSnapshot = s; active.effective = profile.supportsTools === false ? [] : this.registry.effective(s);
           if (s.session.enabled.screen_perception && (s.l0.device || s.l0.upperApp)) active.source.add('screen_perception');
           audit = new ProtocolAudit();
           const tools = this.tools(active, active.effective);
@@ -325,8 +349,12 @@ export class ThorRuntime {
         await this.state(a, a.stopReason === 'TIMEOUT' || a.stopReason === 'PERSISTENCE_ERROR' ? 'failed' : 'cancelled');
       } else if (!assistant || assistant.role !== 'assistant' || assistant.stopReason === 'error' || assistant.stopReason === 'aborted' || assistant.stopReason === 'length') {
         await saveIncomplete();
-        // Do not persist upstream error bodies/headers that may echo credentials.
-        a.run.error = a.failure ?? 'IO_ERROR'; await this.state(a, 'failed');
+        // Persist only fixed local reason labels, never SDK errorMessage, provider
+        // bodies or headers. A clean HTTP EOF can still be an output-token limit.
+        const stopReason = !assistant || assistant.role !== 'assistant' ? 'missing' : assistant.stopReason === 'length' ? 'length' : assistant.stopReason === 'aborted' ? 'aborted' : 'error';
+        a.run.error = stopReason === 'length' ? 'LIMIT_EXCEEDED' : a.failure ?? 'IO_ERROR';
+        await this.event(a,'diagnostic',{code:stopReason==='length'?'MODEL_OUTPUT_LIMIT':'MODEL_STREAM_FAILED',stopReason});
+        await this.state(a, 'failed');
       } else {
         await this.saveTurn(active,true);
         await this.state(a, 'completed');
@@ -344,6 +372,6 @@ export class ThorRuntime {
         await this.state(a, 'stopping'); await this.state(a, 'cancelled');
       } else await this.state(a, 'failed');
       return structuredClone(a.run);
-    } finally { if (timer) clearTimeout(timer); this.active = undefined; this.pending = undefined; this.reserved = false; }
+    } finally { a?.stream?.dispose();if (timer) clearTimeout(timer); this.active = undefined; this.pending = undefined; this.reserved = false; }
   }
 }

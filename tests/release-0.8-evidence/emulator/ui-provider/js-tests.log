@@ -1,0 +1,64 @@
+
+> thor-agent-chat-tests@0.1.0 test
+> node --test web-tests/*.test.cjs
+
+✔ small host requests retain the normal inline protocol (4.512625ms)
+✔ a complete tool round larger than 64 KiB uses a bounded exact UTF-8 body (14.979125ms)
+✔ body fields cannot replace the trusted request header and malformed envelopes fail locally (3.009458ms)
+✔ oversized UTF-8 state and metadata are rejected before posting (64.293625ms)
+✔ preset failures never tell users to run a custom image/tool probe (4.36325ms)
+✔ a verified session starts immediately while another profile is probing (4.44425ms)
+✔ waiting sessions recheck and do not repeat a successful profile probe (5.871334ms)
+✔ cancelled queued preparation never starts an extra probe (0.501875ms)
+✔ gray approval binds actual run and approval ID; black denial stays structured (68.300125ms)
+✔ untrusted text never creates HTML, scripts, remote links or images (25.724292ms)
+✔ failed and unknown remain visible outside collapsed disclosure (12.672334ms)
+✔ background tasks keep running while composer stop targets only the selected session (11.281417ms)
+✔ capability choice and unavailable reason are distinct and bound to session (12.588958ms)
+✔ waiting confirmation remains outside disclosure and approves exact run (10.66525ms)
+✔ long histories render 200 messages and 50 sessions without persistence in web storage (66.211667ms)
+✔ storage recovery failure is explicit and disables sending without clearing history (6.823167ms)
+✔ voice mode hides composer and transcript, releases once, resets idle and ignores duplicate finals (14.237792ms)
+✔ voice swipe cancellation and session switch discard late final callbacks (11.966833ms)
+✔ failed recognition keeps transcript editable without sending partial speech (9.432917ms)
+✔ stream events become one tool card and an aggregated thinking panel without raw event JSON (15.515ms)
+✔ brightness percentages are scoped to current percent objects; legacy and unrelated values keep their units (11.708792ms)
+✔ semantic tree, scrolling and dragging use readable operation labels (10.759292ms)
+✔ Skill manager exposes metadata and explicit read, enable and import actions (9.062292ms)
+✔ compact composer keeps attachments and Skill selection in plus menu, hides probe success (7.594541ms)
+✔ model effort selection and per-session drafts stay isolated (45.928417ms)
+✔ configuration probe messages do not consume chat space (8.275959ms)
+✔ instant failures remain actionable without a transient running banner (9.288209ms)
+✔ unrelated pointer cancellation does not release an active voice hold (7.553333ms)
+✔ voice release belongs to its starting input and real interruption still cancels (9.259166ms)
+✔ losing capture alone keeps recording and release outside the button finishes once (7.857125ms)
+✔ actual primary pointer cancellation outside the button and window blur stop capture (10.933791ms)
+✔ Markdown renders headings, lists, emphasis, fenced code and tables; links open through Native only (17.089709ms)
+✔ Markdown rejects script schemes and raw HTML handlers, forms and remote media (8.989208ms)
+✔ unchanged historical messages and disclosures keep DOM identity while the latest answer streams (11.630958ms)
+✔ voice upward drift stays recording, large swipe only arms cancellation, and sliding back sends (8.254ms)
+✔ session rows show only title; context menu opens actions and deletion requires confirmation (10.327625ms)
+✔ session long press opens options while a scrolling gesture does not (1170.705417ms)
+✔ preparation status stays inside composer and stop targets the selected pending task (10.731292ms)
+✔ Escape cancels a keyboard voice hold before moving focus away (11.022375ms)
+✔ large collapsed operation histories construct bounded DOM across stream updates; opening each level reveals only its requested fields (77.596958ms)
+✔ expanded tool content stays current across deltas and session switches, while collapsed siblings stay lazy (60.452333ms)
+✔ collapsed operation history keeps nested unknown outcomes, failed tools and approval actions immediately visible (43.316375ms)
+✔ common input operations and streaming tool aliases have readable labels; child toggle never changes its parent disclosure (12.604709ms)
+✔ unfinished legacy brightness histories never guess units while a current running input uses integer percent (13.303375ms)
+✔ normal pending input never flashes unknown-action warnings; explicit uncertain results and abnormal unfinished operations remain visible (12.60075ms)
+✔ capability toggles acknowledge exact mutation IDs, resist stale snapshots, isolate sessions and roll back actual failures (13.206ms)
+✔ model and effort use keyboard-accessible in-page listboxes without native selects or system popup (11.812667ms)
+✔ disclosure animation supports rapid reversal, retains content through close, resumes after streaming and releases lazy DOM only when settled (79.3785ms)
+✔ reduced-motion disclosure changes settle directly without animation or retaining collapsed content (43.613083ms)
+✔ topic text remains full length in DOM so available width, rather than a fixed character limit, controls ellipsis (8.197667ms)
+✔ bridge capability failures roll back only the matching pending mutation and remain isolated from other capabilities (10.171708ms)
+✔ page extraction removes executable head noise before enforcing the readable content budget (5.391042ms)
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2391.492542

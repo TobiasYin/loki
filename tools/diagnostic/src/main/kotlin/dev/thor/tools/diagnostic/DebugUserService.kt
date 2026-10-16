@@ -17,6 +17,8 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     @Volatile private var lease: Lease? = null
     private data class GamepadJob(val token: String,val requestHash: String,val action: NativeGamepad.Action)
     @Volatile private var gamepadJob: GamepadJob?=null
+    private data class NavigationJob(val token:String,val action:NativeNavigation)
+    private var navigationJob:NavigationJob?=null
     private var gamepad: NativeGamepad?=null
     private var staged: File? = null
     private var stagedHash: String? = null
@@ -112,11 +114,36 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
         return l
     }
     override fun execute(token: String, request: String): String {
+        var submitted=false
         return try {
             val l = check(token)
             requireTool(request.toByteArray().size <= 16 * 1024, Code.LIMIT_EXCEEDED, "Binder request too large")
             val obj = JSONObject(request); val args = obj.args()
             val data: Map<String, Any?> = when (args.string("operation")) {
+                "navigation.prepare" -> synchronized(this) {
+                    check(token)
+                    args.only("operation","action","displayId","expectedPackage")
+                    val command=NavigationCommand.parse(mapOf("action" to args["action"]))
+                    val guard=GamepadLeaseGuard(l.caller,l.deadline,clock,l.cancel) {lease===l}
+                    guard.checkCaller(Binder.getCallingUid())
+                    requireTool(navigationJob==null,Code.BACKEND_UNAVAILABLE,"Navigation is already prepared")
+                    val identity=Binder.clearCallingIdentity()
+                    try {
+                        navigationJob=NavigationJob(token,NativeNavigation.prepare(command,args.int("displayId",-1),args["expectedPackage"] as? String,guard::checkAlive))
+                        mapOf("prepared" to true)
+                    } finally {Binder.restoreCallingIdentity(identity)}
+                }
+                "navigation.start" -> synchronized(this) {
+                    check(token);args.only("operation")
+                    val job=navigationJob ?: fail(Code.STALE_AUTHORIZATION,"Navigation was not prepared")
+                    requireTool(job.token==token,Code.STALE_AUTHORIZATION,"Navigation token differs")
+                    navigationJob=null
+                    val guard=GamepadLeaseGuard(l.caller,l.deadline,clock,l.cancel) {lease===l}
+                    guard.checkCaller(Binder.getCallingUid())
+                    val identity=Binder.clearCallingIdentity()
+                    try {job.action.submit(guard::checkAlive) {submitted=true}}
+                    finally {Binder.restoreCallingIdentity(identity)}
+                }
                 "accessibility.ensure" -> {
                     args.only("operation","reconnect")
                     val reconnect=args["reconnect"] as? Boolean ?: false
@@ -179,8 +206,8 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
             }
             check(token)
             (json(mapOf("data" to data)) as JSONObject).toString()
-        } catch (t: ToolFailure) { JSONObject().put("error", t.code.name).put("message", t.message).toString() }
-          catch (t: Exception) { JSONObject().put("error", Code.IO_ERROR.name).put("message", "UserService failure: ${t.javaClass.simpleName}").toString() }
+        } catch (t: ToolFailure) { JSONObject().put("error", t.code.name).put("message", t.message).put("submitted",submitted).toString() }
+          catch (t: Exception) { JSONObject().put("error", Code.IO_ERROR.name).put("message", "UserService failure: ${t.javaClass.simpleName}").put("submitted",submitted).toString() }
     }
     @Synchronized override fun startShell(token: String, command: String, timeoutMs: Int, maxBytes: Int, approvalHash: String): String {
         return try {
@@ -252,6 +279,7 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     }
     @Synchronized private fun retire(l: Lease) {
         l.cancel.cancel()
+        if(navigationJob?.token==l.token)navigationJob=null
         gamepadJob?.takeIf {it.token==l.token}?.let {
             // Release is a fixed, bounded cleanup and must retain service shell identity.
             runCatching {shellIdentity {it.action.finish(ToolFailure(Code.CANCELLED,"Gamepad lease retired"));""}}

@@ -1,0 +1,11 @@
+Extracted software summary; full source log identity is in software-checks.json.
+Source: build/physical/release-0.8-2026-10-16/runtime-final-tests.log
+existing_latest_success; not rerun during this snapshot
+ℹ tests 62
+ℹ suites 0
+ℹ pass 62
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 878.497958

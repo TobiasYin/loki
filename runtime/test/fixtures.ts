@@ -13,21 +13,21 @@ export const descriptor = (modelName = 'echo', caps: ToolDescriptor['requiredCap
   outputPolicy: { maxTextBytes: 1024, maxImageBytes: 4096, maxImages: 1, imageTokenEstimate: 4096 },
 });
 export function registry(): ToolRegistry { const r = new ToolRegistry(); r.register({ packId: 'test', packVersion: '1', tools: [descriptor(), descriptor('picture'), { ...descriptor('search', ['web_search']), platformPrerequisites: ['search-backend'] }, descriptor('tap', ['screen_control']), descriptor('shell', ['adb_debug'])] }); return r; }
-export type Reply = { text?: string; call?: { id?: string; name: string; args?: string }; status?: number; disconnect?: boolean; wait?: boolean; chunkSize?: number; delayMs?: number };
+export type Reply = { stopReason?: 'length'; text?: string; call?: { id?: string; name: string; args?: string }; status?: number; disconnect?: boolean; wait?: boolean; chunkSize?: number; delayMs?: number };
 function sse(event: Record<string, unknown>): string { return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`; }
 export function protocolSse(protocol: ModelProfile['protocol'], reply: Reply, index = 0): string {
   const call = reply.call; const text = reply.text ?? '完成中文'; const id = call?.id ?? `call_${index}`;
   if(protocol==='openai-completions') {
     const chunk=(delta:unknown,finish:string|null=null)=>`data: ${JSON.stringify({id:`chat_${index}`,object:'chat.completion.chunk',created:0,model:'fixture-model',choices:[{index:0,delta,finish_reason:finish}]})}\n\n`;
-    if(call)return chunk({role:'assistant',tool_calls:[{index:0,id,type:'function',function:{name:call.name,arguments:''}}]})+chunk({tool_calls:[{index:0,function:{arguments:call.args??'{"text":"hello"}'}}]})+(reply.disconnect?'':chunk({},'tool_calls')+'data: [DONE]\n\n');
-    return chunk({role:'assistant',content:text.slice(0,2)})+chunk({content:text.slice(2)})+(reply.disconnect?'':chunk({},'stop')+'data: [DONE]\n\n');
+    if(call)return chunk({role:'assistant',tool_calls:[{index:0,id,type:'function',function:{name:call.name,arguments:''}}]})+chunk({tool_calls:[{index:0,function:{arguments:call.args??'{"text":"hello"}'}}]})+(reply.disconnect?'':chunk({},reply.stopReason==='length'?'length':'tool_calls')+'data: [DONE]\n\n');
+    return chunk({role:'assistant',content:text.slice(0,2)})+chunk({content:text.slice(2)})+(reply.disconnect?'':chunk({},reply.stopReason==='length'?'length':'stop')+'data: [DONE]\n\n');
   }
   if (protocol === 'anthropic-messages') {
     const events: Record<string, unknown>[] = [ { type: 'message_start', message: { id: `msg_${index}`, type: 'message', role: 'assistant', model: 'fixture-model', content: [], stop_reason: null, usage: { input_tokens: 10, output_tokens: 0 } } } ];
     if (call) events.push({ type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id, name: call.name, input: {} } }, { type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: call.args ?? '{"text":"hello"}' } });
     else events.push({ type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } }, { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: text.slice(0, 2) } }, { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: text.slice(2) } });
     if (reply.disconnect) return events.map(sse).join('');
-    events.push({ type: 'content_block_stop', index: 0 }, { type: 'message_delta', delta: { stop_reason: call ? 'tool_use' : 'end_turn' }, usage: { output_tokens: 4 } }, { type: 'message_stop' });
+    events.push({ type: 'content_block_stop', index: 0 }, { type: 'message_delta', delta: { stop_reason: reply.stopReason==='length' ? 'max_tokens' : call ? 'tool_use' : 'end_turn' }, usage: { output_tokens: 4 } }, { type: 'message_stop' });
     return ': heartbeat\n\n' + events.map(sse).join('');
   }
   const item = call ? { type: 'function_call', id: `fc_${id}`, call_id: id, name: call.name, arguments: '', status: 'in_progress' } : { type: 'message', id: `msg_${index}`, role: 'assistant', content: [], status: 'in_progress' };
@@ -36,7 +36,7 @@ export function protocolSse(protocol: ModelProfile['protocol'], reply: Reply, in
   else events.push({ type: 'response.content_part.added', output_index: 0, content_index: 0, item_id: item.id, part: { type: 'output_text', text: '', annotations: [] } }, { type: 'response.output_text.delta', output_index: 0, content_index: 0, item_id: item.id, delta: text.slice(0, 2) }, { type: 'response.output_text.delta', output_index: 0, content_index: 0, item_id: item.id, delta: text.slice(2) });
   if (reply.disconnect) return events.map(sse).join('');
   const doneItem = call ? { ...item, arguments: call.args ?? '{"text":"hello"}', status: 'completed' } : { ...item, content: [{ type: 'output_text', text, annotations: [] }], status: 'completed' };
-  events.push({ type: 'response.output_item.done', output_index: 0, item: doneItem }, { type: 'response.completed', response: { id: `resp_${index}`, status: 'completed', output: [doneItem], usage: { input_tokens: 10, output_tokens: 4, total_tokens: 14 } } });
+  events.push({ type: 'response.output_item.done', output_index: 0, item: doneItem }, { type: reply.stopReason==='length'?'response.incomplete':'response.completed', response: { id: `resp_${index}`, status: reply.stopReason==='length'?'incomplete':'completed', ...(reply.stopReason==='length'?{incomplete_details:{reason:'max_output_tokens'}}:{}), output: [doneItem], usage: { input_tokens: 10, output_tokens: 4, total_tokens: 14 } } });
   return ': heartbeat\n\n' + events.map(sse).join('');
 }
 export function fixture(protocol: ModelProfile['protocol'] = 'openai-responses', replies: Reply[] = [{ text: '完成中文' }]) {

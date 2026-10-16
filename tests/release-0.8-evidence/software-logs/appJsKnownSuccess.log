@@ -1,0 +1,11 @@
+Extracted software summary; full source log identity is in software-checks.json.
+Source: build/ui-preview/ui-modern-app-labels-js-tests.log
+latest known successful App JS run; later failed invocation is recorded separately
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2520.817542

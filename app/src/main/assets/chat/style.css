@@ -41,3 +41,22 @@ footer{border:0;padding:6px 10px 10px;background:var(--bg)}#composer{border:1px 
 #voice-panel{padding:0 3px;position:relative}#voice-hold{background:transparent;border:0;border-radius:0;height:60px;min-height:60px;padding:8px;font-size:20px;font-weight:600;line-height:1.4;touch-action:none}#voice-hold.holding{background:transparent;color:var(--ink);padding:8px}#voice-panel:has(#voice-hold.holding){opacity:0}#voice-status{font-size:12px;padding:3px 0;color:var(--danger)}#voice-edit{min-height:36px;padding:2px 8px}#voice-cancel{position:absolute;right:0;bottom:0}#voice-overlay{position:fixed;z-index:8;left:0;right:0;bottom:0;height:min(68dvh,420px);pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;color:#fff;background:linear-gradient(180deg,var(--bg) 0%,#bcd6ff 28%,#5b9af9 65%,#4f91f4 100%);padding:50px 20px 24px}#voice-instruction{font-size:18px;text-shadow:0 1px 6px #3978d333}.voice-cancel-zone{font-size:12px;opacity:.75}.voice-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:32px;width:min(80vw,430px)}.voice-wave i{display:block;width:3px;height:7px;background:#fff;border-radius:4px;opacity:.8}.voice-wave i:nth-child(3n){height:14px}.voice-wave i:nth-child(5n){height:20px}.voice-wave i:first-child,.voice-wave i:last-child{opacity:.25}#voice-overlay.cancel-pending{background:linear-gradient(180deg,var(--bg) 0%,#edbbc6 30%,#dc6079 70%,#cc4d68 100%)}#voice-overlay.cancel-pending .voice-cancel-zone{opacity:0}#voice-overlay.cancel-pending #voice-instruction{font-weight:600}
 @media(prefers-reduced-motion:no-preference){.voice-wave i{animation:voice-pulse 850ms ease-in-out infinite alternate}.voice-wave i:nth-child(2n){animation-delay:-300ms}.voice-wave i:nth-child(3n){animation-delay:-600ms}@keyframes voice-pulse{to{transform:scaleY(.45);opacity:.5}}}
 @media(max-height:250px){#voice-hold{height:44px;min-height:44px;font-size:17px}#voice-overlay{height:100dvh;padding:20px;gap:12px}}
+
+/* Quiet controls and lightweight in-page choices, with a persistent keyboard focus. */
+button{-webkit-tap-highlight-color:transparent;transition:color .12s ease,opacity .12s ease}
+button:not(.primary):hover,button:not(.primary):active{background:transparent}
+button:active{opacity:.72}button:disabled:active{opacity:.55}
+.session-select{width:100%;overflow:hidden}.session-select strong{width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.run>summary,.tool-card>summary,.thinking>summary{list-style:none;display:flex;align-items:center;gap:8px;user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
+.run>summary::-webkit-details-marker,.tool-card>summary::-webkit-details-marker,.thinking>summary::-webkit-details-marker{display:none}
+.run>summary::before,.tool-card>summary::before,.thinking>summary::before{content:'';flex:none;width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(-45deg);transition:transform .18s cubic-bezier(.2,.7,.2,1)}
+[data-expanded=true]>summary::before{transform:rotate(45deg)}[data-disclosure-animating=true]{will-change:height}
+#model-panel{min-width:min(340px,calc(100vw - 24px));padding:10px;max-width:calc(100vw - 20px)}
+.picker-label{font-size:11px;font-weight:500;color:var(--muted);padding:5px 8px}
+.picker-listbox{max-height:24vh;overflow:auto;outline-offset:0;border-radius:10px;padding:2px 0}
+.picker-listbox:focus-visible{outline:2px solid var(--accent)}
+.picker-option{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;min-height:38px;padding:7px 9px;text-align:left;font-size:13px;border-radius:8px;line-height:1.35}
+.picker-option::after{content:'';width:15px;flex:none}.picker-option[aria-selected=true]{color:var(--accent);font-weight:600}.picker-option[aria-selected=true]::after{content:'✓'}
+.picker-option:focus-visible{outline-offset:-2px}.picker-listbox:focus-visible .picker-active{outline:1px solid var(--line);outline-offset:-2px}#effort-select{display:flex;flex-wrap:wrap;gap:3px}#effort-select .picker-option{width:auto;flex:1;min-width:45px;justify-content:center;padding:7px}#effort-select .picker-option::after{display:none}
+#model-context{padding:8px 8px 3px;font-size:11px}.cap-pending{color:var(--muted)}.cap-error{color:var(--danger)}
+@media(prefers-reduced-motion:reduce){button,.run>summary::before,.tool-card>summary::before,.thinking>summary::before{transition:none}[data-disclosure-animating=true]{will-change:auto}}

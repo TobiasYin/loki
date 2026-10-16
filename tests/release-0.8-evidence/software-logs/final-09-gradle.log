@@ -1,0 +1,57 @@
+Source: build/physical/release-0.8-2026-10-16/final-09-gradle.log
+Source SHA256: f1f6ca5da957acafca38d2634d508e3223c26b7bcf84f63ec043b7e6deb2e534
+Selected evidence excerpt; not the complete source log.
+
+> Task :core:test UP-TO-DATE
+> Task :device-authority:test
+> Task :device-core:test
+> Task :input-lab:testDebugUnitTest UP-TO-DATE
+> Task :android:lintAnalyzeDebug UP-TO-DATE
+> Task :android:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :android:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :android:lintReportDebug UP-TO-DATE
+> Task :android:lintDebug
+> Task :app:testDebugUnitTest
+> Task :app:assembleDebug
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :device-android:lintAnalyzeDebugAndroidTest
+> Task :device-android:lintAnalyzeDebugUnitTest
+> Task :input-lab:lintAnalyzeDebug UP-TO-DATE
+> Task :input-lab:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :input-lab:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :input-lab:lintReportDebug UP-TO-DATE
+> Task :input-lab:lintDebug
+> Task :device-android:lintAnalyzeDebug
+> Task :input-lab:assembleDebug UP-TO-DATE
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :device-android:lintReportDebug
+> Task :device-android:lintDebug
+> Task :diagnostic:lintAnalyzeDebugAndroidTest
+> Task :app:assembleDebugAndroidTest
+> Task :input-lab:assembleDebugAndroidTest UP-TO-DATE
+> Task :diagnostic:lintAnalyzeDebugUnitTest
+> Task :bridge-host:lintAnalyzeDebug UP-TO-DATE
+> Task :bridge-host:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :bridge-host:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :bridge-host:lintReportDebug UP-TO-DATE
+> Task :bridge-host:lintDebug
+> Task :android:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :diagnostic:lintAnalyzeDebug
+> Task :diagnostic:lintReportDebug UP-TO-DATE
+> Task :diagnostic:lintDebug
+> Task :input-lab:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :input-lab:lintVitalReportRelease UP-TO-DATE
+> Task :input-lab:lintVitalRelease
+> Task :input-lab:assembleRelease UP-TO-DATE
+> Task :bridge-host:assembleDebug UP-TO-DATE
+> Task :diagnostic:assembleDebug
+> Task :device-android:lintVitalAnalyzeRelease
+> Task :app:lintAnalyzeDebug
+> Task :app:lintReportDebug
+> Task :app:lintDebug
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease UP-TO-DATE
+> Task :app:lintVitalRelease
+> Task :app:assembleRelease
+BUILD SUCCESSFUL in 25s
+506 actionable tasks: 80 executed, 426 up-to-date

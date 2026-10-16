@@ -94,7 +94,14 @@ object ModelConnectionTest {
             else->body.put("messages",messages).put("max_tokens",2048)
         }
         if(draft.reasoningEffort!=null)when(draft.protocol) {
-            "openai-responses"->body.put("reasoning",JSONObject().put("effort",draft.reasoningEffort).put("summary","auto")).put("include",JSONArray(listOf("reasoning.encrypted_content")))
+            "openai-responses"->{
+                val reasoning=JSONObject().put("effort",draft.reasoningEffort)
+                if(!isDeepSeekEndpoint(draft.baseUrl)) {
+                    reasoning.put("summary","auto")
+                    body.put("include",JSONArray(listOf("reasoning.encrypted_content")))
+                }
+                body.put("reasoning",reasoning)
+            }
             "openai-completions"->body.put("reasoning_effort",draft.reasoningEffort)
             // Anthropic adaptive vs budget thinking differ by model; leave its default unchanged.
         }
@@ -106,6 +113,7 @@ object ModelConnectionTest {
         if(isGoEndpoint(draft.baseUrl))request.header("x-opencode-session",java.util.UUID.randomUUID().toString())
         return request.build()
     }
+    internal fun isDeepSeekEndpoint(base:String):Boolean=runCatching {val uri=URI(base);uri.scheme=="https" && uri.host=="api.deepseek.com" && uri.port in setOf(-1,443) && uri.path.trimEnd('/') in setOf("","/v1") && uri.userInfo==null && uri.query==null && uri.fragment==null}.getOrDefault(false)
     /** Only explicit diagnostic fields survive; never return raw response bodies or headers. */
     internal fun safeError(draft:Draft,root:JSONObject):String {
         val source=root.optJSONObject("error") ?: root.optJSONObject("response")?.optJSONObject("error") ?: root

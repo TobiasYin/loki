@@ -1,0 +1,12 @@
+Source: build/physical/release-0.8-2026-10-16/final-08-bridge.log
+Source SHA256: bd9f037101304d3f90c2886c50e8519c87ad18efed3b1d5d85a6736492349222
+Selected evidence excerpt; not the complete source log.
+
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 131.869334

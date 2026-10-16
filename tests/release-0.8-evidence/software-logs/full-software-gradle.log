@@ -1,0 +1,17 @@
+Selected task/result lines only; full source log identity is in software-checks.json.
+Source: build/physical/release-0.8-2026-10-16/full-software-gradle.log
+> Task :core:test UP-TO-DATE
+> Task :device-core:test UP-TO-DATE
+> Task :device-authority:test UP-TO-DATE
+> Task :bundleRuntime
+> Task :app:testDebugUnitTest UP-TO-DATE
+> Task :input-lab:testDebugUnitTest UP-TO-DATE
+> Task :android:lintDebug
+> Task :input-lab:lintDebug
+> Task :device-android:lintDebug
+> Task :bridge-host:lintDebug
+> Task :diagnostic:lintDebug
+> Task :app:lintDebug
+> Task :app:assembleRelease
+BUILD SUCCESSFUL in 15s
+333 actionable tasks: 59 executed, 274 up-to-date

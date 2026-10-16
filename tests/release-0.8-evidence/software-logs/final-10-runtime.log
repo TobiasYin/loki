@@ -1,0 +1,12 @@
+Source: build/physical/release-0.8-2026-10-16/runtime-native-receipts-tests-02.log
+Source SHA256: 6dbe3af6cae6ddc044570729bf29774bf4ebf8b7161b989d4efd404527a20964
+Selected evidence excerpt; not the complete source log.
+
+ℹ tests 82
+ℹ suites 0
+ℹ pass 82
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 966.959167

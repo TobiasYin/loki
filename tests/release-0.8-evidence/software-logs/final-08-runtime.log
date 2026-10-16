@@ -1,0 +1,12 @@
+Source: build/physical/release-0.8-2026-10-16/final-08-runtime.log
+Source SHA256: dd87bf3c7361c5b543cb37b9601b46cda958ee84a70c4bdc725e4c7122361296
+Selected evidence excerpt; not the complete source log.
+
+ℹ tests 67
+ℹ suites 0
+ℹ pass 67
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1265.019458

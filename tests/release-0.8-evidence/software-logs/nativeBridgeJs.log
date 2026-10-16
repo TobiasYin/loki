@@ -1,0 +1,11 @@
+Extracted software summary; full source log identity is in software-checks.json.
+Source: build/physical/release-0.8-2026-10-16/bridge-final-js-tests.log
+latest successful native-bridge JS run, executed by main flow during collection; no device or network acceptance
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 112.912959

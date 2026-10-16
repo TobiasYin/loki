@@ -1,0 +1,11 @@
+Source: build/emulator/dual-screen-2026-10-17/test-build-07.log
+Source SHA256: a063ac057224c632ed2bfee70507cbd22fe19fb16b9859cd064065e72c9c62db
+Selected evidence excerpt; not the complete source log.
+
+> Task :android:compileDebugKotlin
+> Task :device-android:compileDebugKotlin
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugAndroidTestKotlin
+> Task :app:assembleDebugAndroidTest
+BUILD SUCCESSFUL in 10s
+95 actionable tasks: 11 executed, 84 up-to-date
