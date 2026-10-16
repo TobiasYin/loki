@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.inputlab.ScenarioSessionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-16T08:44:42.652Z" hostname="JGJHX5JPGF" time="0.739">
+  <properties/>
+  <testcase name="exactByteBudgetDoesNotAppendPartialOrOversizedRows" classname="dev.thor.inputlab.ScenarioSessionTest" time="0.024"/>
+  <testcase name="interruptedAttemptCannotClaimCompletionAndSavedSettingsPersistSeparately" classname="dev.thor.inputlab.ScenarioSessionTest" time="0.024"/>
+  <testcase name="quotaPreservesPriorEvidenceAndPreventsFalseCompletion" classname="dev.thor.inputlab.ScenarioSessionTest" time="0.014"/>
+  <testcase name="sealedEvidenceHashAndPrefixNeverChangeAfterLateInput" classname="dev.thor.inputlab.ScenarioSessionTest" time="0.186"/>
+  <testcase name="manualSelectionCannotImpersonateRealAgentRunAndUsesIndependentJournal" classname="dev.thor.inputlab.ScenarioSessionTest" time="0.488"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

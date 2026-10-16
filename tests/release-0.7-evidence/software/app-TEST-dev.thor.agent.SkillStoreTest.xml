@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.SkillStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:37:24.557Z" hostname="JGJHX5JPGF" time="0.067">
+  <properties/>
+  <testcase name="zipRejectsTraversalMultipleSkillsAndOversizeWithoutWriting" classname="dev.thor.agent.SkillStoreTest" time="0.005"/>
+  <testcase name="yamlRejectsDuplicateKeysTagsAndBadNames" classname="dev.thor.agent.SkillStoreTest" time="0.014"/>
+  <testcase name="packageHashIncludesUnambiguousFileBoundaries" classname="dev.thor.agent.SkillStoreTest" time="0.007"/>
+  <testcase name="updatesAreAtomicCompareVersionsAndKeepResources" classname="dev.thor.agent.SkillStoreTest" time="0.018"/>
+  <testcase name="builtinUpgradeUpdatesReferencesAndPreservesDisabledChoice" classname="dev.thor.agent.SkillStoreTest" time="0.01"/>
+  <testcase name="builtinCannotBeOverwrittenOrDeletedButCanBeDisabled" classname="dev.thor.agent.SkillStoreTest" time="0.005"/>
+  <testcase name="metadataDoesNotLoadBodiesAndReopenPreservesResources" classname="dev.thor.agent.SkillStoreTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

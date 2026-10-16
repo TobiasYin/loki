@@ -1,0 +1,56 @@
+
+> thor-agent-chat-tests@0.1.0 test
+> node --test web-tests/*.test.cjs
+
+✔ small host requests retain the normal inline protocol (5.245125ms)
+✔ a complete tool round larger than 64 KiB uses a bounded exact UTF-8 body (19.079459ms)
+✔ body fields cannot replace the trusted request header and malformed envelopes fail locally (2.9385ms)
+✔ oversized UTF-8 state and metadata are rejected before posting (71.077292ms)
+✔ a verified session starts immediately while another profile is probing (4.269291ms)
+✔ waiting sessions recheck and do not repeat a successful profile probe (6.32375ms)
+✔ cancelled queued preparation never starts an extra probe (0.624541ms)
+✔ gray approval binds actual run and approval ID; black denial stays structured (71.565917ms)
+✔ untrusted text never creates HTML, scripts, remote links or images (23.996375ms)
+✔ failed and unknown remain visible outside collapsed disclosure (11.756333ms)
+✔ background tasks keep running while composer stop targets only the selected session (12.282833ms)
+✔ capability choice and unavailable reason are distinct and bound to session (9.596583ms)
+✔ waiting confirmation remains outside disclosure and approves exact run (9.493583ms)
+✔ long histories render 200 messages and 50 sessions without persistence in web storage (66.903375ms)
+✔ storage recovery failure is explicit and disables sending without clearing history (7.14925ms)
+✔ voice mode hides composer and transcript, releases once, resets idle and ignores duplicate finals (14.890666ms)
+✔ voice swipe cancellation and session switch discard late final callbacks (11.48875ms)
+✔ failed recognition keeps transcript editable without sending partial speech (9.557083ms)
+✔ stream events become one tool card and an aggregated thinking panel without raw event JSON (18.649833ms)
+✔ brightness percentages are scoped to current percent objects; legacy and unrelated values keep their units (13.963167ms)
+✔ semantic tree, scrolling and dragging use readable operation labels (9.177917ms)
+✔ Skill manager exposes metadata and explicit read, enable and import actions (9.197375ms)
+✔ compact composer keeps attachments and Skill selection in plus menu, hides probe success (9.752541ms)
+✔ model effort selection and per-session drafts stay isolated (37.354125ms)
+✔ configuration probe messages do not consume chat space (9.151208ms)
+✔ instant failures remain actionable without a transient running banner (7.831916ms)
+✔ unrelated pointer cancellation does not release an active voice hold (7.815ms)
+✔ voice release belongs to its starting input and real interruption still cancels (9.798708ms)
+✔ losing capture alone keeps recording and release outside the button finishes once (7.355084ms)
+✔ actual primary pointer cancellation outside the button and window blur stop capture (8.121584ms)
+✔ Markdown renders headings, lists, emphasis, fenced code and tables; links open through Native only (21.3895ms)
+✔ Markdown rejects script schemes and raw HTML handlers, forms and remote media (10.012375ms)
+✔ unchanged historical messages and disclosures keep DOM identity while the latest answer streams (13.432542ms)
+✔ voice upward drift stays recording, large swipe only arms cancellation, and sliding back sends (10.202584ms)
+✔ session rows show only title; context menu opens actions and deletion requires confirmation (9.494208ms)
+✔ session long press opens options while a scrolling gesture does not (1172.754417ms)
+✔ preparation status stays inside composer and stop targets the selected pending task (26.405334ms)
+✔ Escape cancels a keyboard voice hold before moving focus away (17.565833ms)
+✔ large collapsed operation histories construct bounded DOM across stream updates; opening each level reveals only its requested fields (87.8495ms)
+✔ expanded tool content stays current across deltas and session switches, while collapsed siblings stay lazy (61.390166ms)
+✔ collapsed operation history keeps nested unknown outcomes, failed tools and approval actions immediately visible (43.153041ms)
+✔ common input operations and streaming tool aliases have readable labels; child toggle never changes its parent disclosure (9.674625ms)
+✔ unfinished legacy brightness histories never guess units while a current running input uses integer percent (17.66425ms)
+✔ page extraction removes executable head noise before enforcing the readable content budget (6.096916ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 44
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2274.223042

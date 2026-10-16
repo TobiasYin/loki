@@ -42,9 +42,15 @@ Native 可以实现通用流式压缩解码、TLS、连接取消和 HTTP redirec
 
 ## 流量与内存预算（待 PoC 调整）
 
-单 chunk 初值 32 KiB；每请求未消费缓冲上限 256 KiB；单模型请求 body 上限 16 MiB；累计响应上限 32 MiB；连接超时 15 秒。普通 HTTP 的读空闲 60 秒、单次请求总时限 180 秒；模型请求和普通整轮任务不设置生成/等待时限（`timeoutMs=0`），仍支持用户停止、撤销和字节预算。配置探查与单个工具保留独立时限。与 provider 最大输出配置联动；超限返回明确错误，不静默丢块。截图解码的原始缓冲另行计量，不能只按 JPEG 大小估算内存。
+多步任务默认最多 40 轮模型请求，给按需 Skill 读取、观察、滚动与最终核对留出空间；设备工具的 Native 32 次调用预算独立保留，预算不是生成时间上限，失败后原会话上下文仍可继续。单 chunk 初值 32 KiB；每请求未消费缓冲上限 256 KiB；单模型请求 body 上限 16 MiB；累计响应上限 32 MiB；连接超时 15 秒。普通 HTTP 的读空闲 60 秒、单次请求总时限 180 秒；模型请求和普通整轮任务不设置生成/等待时限（`timeoutMs=0`），仍支持用户停止、撤销和字节预算。配置探查与单个工具保留独立时限。与 provider 最大输出配置联动；超限返回明确错误，不静默丢块。截图解码的原始缓冲另行计量，不能只按 JPEG 大小估算内存。
 
 优先特性探测后的 ArrayBuffer 消息；不支持时用有上限的 base64 分块，并计入编码开销。AndroidX 提供消息桥/消息数据类型，但具体 Thor WebView 支持由 feature probe 与真实传输测量确认。[WebViewCompat](https://developer.android.com/reference/androidx/webkit/WebViewCompat)、[WebMessageCompat](https://developer.android.com/reference/androidx/webkit/WebMessageCompat)。
+
+## 本地上下文 RPC 分帧
+
+本地 `host.rpc` 的路由头仍限制为 64 KiB。较长的完整 turn、工具记录和会话数据通过 `dataInBody=true` 放进最多 16 MiB 的 UTF-8 JSON 数据体；小请求沿用 inline `data`，不允许两种表示同时出现。body 只还原为 `header.data`，不能覆盖 connectionId、requestId、op 或授权字段，Native 继续校验来源、主 frame、当前连接和 ProductHost 授权。
+
+非法编码、冲突表示和超限请求返回关联原 requestId 的本地错误，JS 立即结束对应等待；不能把本地保存失败误报为模型网络中断。模型 HTTP 诊断仅保留状态码、收到的字节数与结束原因，不记录地址、请求头、响应正文或凭据。大上下文的真实 WebView→Native→SQLite 保存和原会话恢复另有组件回归，不能冒充模型调用通过。
 
 ## 凭据与网络边界
 

@@ -1,0 +1,24 @@
+{
+  "apks": {
+    "app/build/outputs/apk/debug/app-debug.apk": {
+      "sha256": "43ba17870befd6a5b3bf98b223456006e40396c7f84deff82dfc460da9393d04",
+      "bytes": 7003563
+    },
+    "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk": {
+      "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+      "bytes": 2920483
+    },
+    "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+      "sha256": "f252c38397a7156fb63887ca5e25d6688fcd418c5b12949925686c8de6c5307b",
+      "bytes": 2952410
+    }
+  },
+  "scene": null,
+  "passed": true,
+  "elapsedSeconds": 685.32,
+  "exitCode": 0,
+  "secureRestored": {
+    "enabled_accessibility_services": true,
+    "accessibility_enabled": true
+  }
+}

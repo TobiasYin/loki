@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.ModelConnectionTestTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:37:24.397Z" hostname="JGJHX5JPGF" time="0.149">
+  <properties/>
+  <testcase name="badRequestDiagnosticOnlyReturnsRedactedWhitelistedFields" classname="dev.thor.agent.ModelConnectionTestTest" time="0.125"/>
+  <testcase name="rejectsRedirectsAndDoesNotLeakProviderErrorOrCredentials" classname="dev.thor.agent.ModelConnectionTestTest" time="0.007"/>
+  <testcase name="responsesRequestMatchesPiStoreReasoningAndExactGoAffinity" classname="dev.thor.agent.ModelConnectionTestTest" time="0.001"/>
+  <testcase name="lowEffortIsSentOnlyForTheMatchingSupportedModelProfile" classname="dev.thor.agent.ModelConnectionTestTest" time="0.007"/>
+  <testcase name="currentDraftIsUsedAndRecognizesEachStreamingProtocol" classname="dev.thor.agent.ModelConnectionTestTest" time="0.008"/>
+  <testcase name="invalidDraftCannotSendCredentials" classname="dev.thor.agent.ModelConnectionTestTest" time="0.001"/>
+  <testcase name="nullableErrorIsNotFailureAndFailedResponseIsNotTextSuccess" classname="dev.thor.agent.ModelConnectionTestTest" time="0.0"/>
+  <testcase name="thinkingOrToolDeltasDoNotPretendTextStreamingPassed" classname="dev.thor.agent.ModelConnectionTestTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.CoordinatorTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:37:23.980Z" hostname="JGJHX5JPGF" time="0.379">
+  <properties/>
+  <testcase name="failedPersistenceRollsBackDomainMutation" classname="dev.thor.agent.CoordinatorTest" time="0.004"/>
+  <testcase name="successPersistsSeparateOrderedToolPairsAndCollapses" classname="dev.thor.agent.CoordinatorTest" time="0.004"/>
+  <testcase name="deviceExecutesOnceAndAttachmentFailureDoesNotCommitSuccess" classname="dev.thor.agent.CoordinatorTest" time="0.003"/>
+  <testcase name="queuedToolAfterEpochChangeFailsEvenIfAnotherCapabilityWasEnabled" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <testcase name="processRecoveryInterruptsAndDoesNotReplayIntent" classname="dev.thor.agent.CoordinatorTest" time="0.003"/>
+  <testcase name="oversizedInputAndOutputRejectWithoutFalseCompletion" classname="dev.thor.agent.CoordinatorTest" time="0.002"/>
+  <testcase name="bridgePolicyRejectsForeignOriginsSubframesNavigationAndOversizedPayload" classname="dev.thor.agent.CoordinatorTest" time="0.0"/>
+  <testcase name="defaultsAreSessionScopedAndSurviveRecreation" classname="dev.thor.agent.CoordinatorTest" time="0.0"/>
+  <testcase name="manualDisclosureDoesNotChangeHistoryAndNewRunOnlyCollapsesItself" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <testcase name="waitRequiresExactApprovalAndDisabledCapabilityFails" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <testcase name="switchingViewDoesNotStopOrRebindRunAndSecondRunRejected" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <testcase name="archiveDeleteAndRestorePreserveOtherSessions" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <testcase name="failureAndUnknownAreTerminalAndKeepAuditableSummary" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <testcase name="historyAndLongAnswerAreBoundedWithoutLosingMessages" classname="dev.thor.agent.CoordinatorTest" time="0.353"/>
+  <testcase name="timeoutUsesMonotonicTimeAndForegroundExitInterrupts" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <testcase name="revokeAndReenableCannotReviveLeaseOrAcceptLateToken" classname="dev.thor.agent.CoordinatorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "mainVersion": "0.7.0-integration",
+  "versionCode": 8,
+  "launcher": "dev.thor.agent/.LauncherActivity",
+  "mainActivityDisplay": 4,
+  "expectedLowerDisplay": 4,
+  "evidence": "topResumedActivity within Display #4 section, corroborated by task display area; global ResumedActivity summary ignored",
+  "manualCalibrationInvoked": false,
+  "originalTasksAllTerminalBeforeColdStop": true,
+  "installedApks": {
+    "dev.thor.agent": {
+      "sha256": "fed08226e9e113f52cb2ccf81e74643c76d8e195cbf0248b5b24da5489006af2",
+      "matchesBuiltArtifact": true,
+      "bytes": 7003563
+    },
+    "dev.thor.inputlab": {
+      "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+      "matchesBuiltArtifact": true,
+      "bytes": 2920483
+    },
+    "dev.thor.agent.test": {
+      "sha256": "7c8e969a862775628bc1e18035990a78aae1dc4a7620c9f605327c7e094a92de",
+      "matchesBuiltArtifact": true,
+      "bytes": 2952598
+    }
+  },
+  "passed": true
+}

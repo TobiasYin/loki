@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "8867bf1d-817f-441b-b1e7-de76196312c1",
+  "testRunId": "scenario-3038ecb4-642a-4496-899b-3efd9c0f13d6",
+  "agentRunId": "1c1037b6-04fc-4a80-bc2d-63b7012ffe00",
+  "senderTraceRef": "live-product:1c1037b6-04fc-4a80-bc2d-63b7012ffe00:game",
+  "evidenceMode": "agent_e2e",
+  "scene": "game",
+  "seed": 1728805315385772082,
+  "page": "victory",
+  "taskPrompt": "请观察上屏演练游戏的每关提示，连续完成两关。每关点选同时符合颜色、形状和编号的目标，避开干扰项。完成后告诉我画面上的通关口令。",
+  "state": {
+    "settingsSaved": false,
+    "settingsValues": null,
+    "settingsDraft": {
+      "mode": "静谧",
+      "enabled": true,
+      "volume": 90
+    },
+    "settingsDragCount": 0,
+    "settingsSaveCount": 0,
+    "settingNavigationCount": 0,
+    "gameStep": 2,
+    "gameWrong": 0,
+    "openedArticleId": null,
+    "articleOpenCount": 0,
+    "newsListScrollCount": 0,
+    "detailScrollCount": 0,
+    "listScrollY": 0,
+    "detailScrollY": 0,
+    "maxListScrollY": 0,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "expected": {
+    "settingsValues": {
+      "mode": "性能",
+      "enabled": false,
+      "volume": 40
+    },
+    "newsTargetTitle": "云岭观测简报 730",
+    "newsTargetId": "story-25",
+    "newsCode": "N-18633",
+    "articleTitle": "远山手记 950",
+    "articleTopCode": "TOP-76468",
+    "articleBottomCode": "END-50689",
+    "gameTargets": [
+      "stage-0-tile-4",
+      "stage-1-tile-2"
+    ],
+    "gameResult": "GW-55090"
+  },
+  "completed": true,
+  "interruptedReason": null,
+  "geometry": {
+    "displayId": 0,
+    "width": 1920,
+    "height": 1080,
+    "rotation": 1,
+    "densityDpi": 369
+  },
+  "agentAnswerVerified": false,
+  "receiverQualificationVersion": "scenario-ui-observation-v1",
+  "systemInjectionProven": false,
+  "evidence": {
+    "eventPrefixBytes": 4171,
+    "eventPrefixSha256": "593308c22ecf56b0e34936d5d086a8ce3e7382a6a4af64da43b0442c0c2c02f0",
+    "eventCount": 9,
+    "incomplete": false,
+    "droppedSamples": 0,
+    "sealed": true,
+    "relativePath": "scenario-reports\/8867bf1d-817f-441b-b1e7-de76196312c1\/events.jsonl"
+  }
+}

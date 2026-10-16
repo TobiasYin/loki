@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.GamepadCleanupTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:05.108Z" hostname="JGJHX5JPGF" time="0.004">
+  <properties/>
+  <testcase name="preparedButNeverSubmittedClosesWithoutManufacturingUpOrNeutral" classname="dev.thor.tools.GamepadCleanupTest" time="0.003"/>
+  <testcase name="normalCleanupAcknowledgesOnlyAfterReleaseThenClose" classname="dev.thor.tools.GamepadCleanupTest" time="0.0"/>
+  <testcase name="rejectedNeutralWriteCannotBeReportedAsReleasedAndStillClosesOriginalFd" classname="dev.thor.tools.GamepadCleanupTest" time="0.001"/>
+  <testcase name="closeFailureIsDistinctFromAcknowledgedInputRelease" classname="dev.thor.tools.GamepadCleanupTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

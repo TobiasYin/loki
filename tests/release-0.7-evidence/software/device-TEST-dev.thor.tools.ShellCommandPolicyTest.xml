@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.ShellCommandPolicyTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:05.159Z" hostname="JGJHX5JPGF" time="0.023">
+  <properties/>
+  <testcase name="directArgvDoesNotInterpretShellText" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.015"/>
+  <testcase name="thorHardwareReadsAndSafeFanModesAreBounded" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.003"/>
+  <testcase name="destructiveCommandsCannotBeApproved" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.001"/>
+  <testcase name="reviewedMutationsAndSensitiveReadsRequireExactApproval" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.001"/>
+  <testcase name="argumentInjectionAndOutOfRangeValuesNeverGainApproval" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.001"/>
+  <testcase name="publicReadsRunWithoutApprovalAndHaveCanonicalExecutable" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.001"/>
+  <testcase name="parserAcceptsOnlyEquivalentSafeQuotedForms" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.0"/>
+  <testcase name="shellAndWrapperBypassesFailClosed" classname="dev.thor.tools.ShellCommandPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

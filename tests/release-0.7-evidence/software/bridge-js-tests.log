@@ -1,0 +1,25 @@
+
+> thor-native-fetch@0.1.0 test
+> node --test *.test.mjs
+
+✔ unbounded model has no elapsed timer while ordinary web requests still time out (10.190208ms)
+✔ base64 and ArrayBuffer keep split UTF-8 raw until JS decode (2.701208ms)
+✔ 4xx/5xx are ordinary Responses with complete body and duplicate headers (1.183167ms)
+✔ string/bytes/ArrayBuffer and Request inputs serialize and merge headers (4.744125ms)
+✔ unsupported uploads/options and oversized bodies fail before posting (2.661166ms)
+✔ abort before start and during body cancels Native call, rejects readers, ignores late bytes (0.369667ms)
+✔ clone preserves independent bodyUsed and bounded consumers (0.490792ms)
+✔ clone permits sequential consumers below the buffer budget (5.103041ms)
+✔ abandoned clone fails at the 256 KiB branch limit (14.878208ms)
+✔ invalid chunk sequence/credit and error after head fail body (0.453459ms)
+✔ HEAD and no-body statuses have null body and no consumer credits (0.185666ms)
+✔ binary frame bounds and arbitrary bytes round-trip (0.074125ms)
+✔ stalled Request serialization times out or cancels on bridge close (21.739917ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 104.894417

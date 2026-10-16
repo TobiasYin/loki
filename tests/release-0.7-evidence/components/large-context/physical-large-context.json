@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "scope": "real WebView\/Native bridge\/SQLite component only; synthetic DomainTurn; no cloud or input execution",
+  "cloudStarted": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "acks": [
+    {
+      "message": {
+        "type": "host.result",
+        "requestId": "large-context-4db04ff3-09d6-4f70-a053-f71633617ddc",
+        "value": {},
+        "code": null
+      },
+      "elapsedMs": 113.30000001192093,
+      "transport": "base64",
+      "payloadBytes": 480253,
+      "payloadSha256": "4612156dfb4be8c323f958a478513b93dd314893e8205ff2cebac704658efd29"
+    }
+  ],
+  "cleanupErrors": [],
+  "passed": true,
+  "sessionId": "232f76bd-e0f4-43c6-ac49-031e3abf06ca",
+  "firstRunId": "c96fc645-35bf-49dc-8377-672d91e07f7a",
+  "turnId": "68703ab0-0a7f-48d9-8c56-62982707a497",
+  "turnBytes": 480033,
+  "turnSha256": "f5d9e63e0447f3dc21ab36d0fbd5f9b45e5dbaa94a11fd13458a3ec6535cc921",
+  "bodyBytes": 480253,
+  "conflictingInlineAndBody": {
+    "message": {
+      "bridgeVersion": 1,
+      "type": "host.result",
+      "requestId": "large-context-8c678038-759a-48d7-94d1-210fe71635ec",
+      "code": "INVALID_REQUEST",
+      "value": null
+    },
+    "elapsedMs": 80.5,
+    "transport": "base64",
+    "payloadBytes": 480253,
+    "payloadSha256": "4612156dfb4be8c323f958a478513b93dd314893e8205ff2cebac704658efd29"
+  },
+  "badBodyDidNotWrite": true,
+  "binarySupported": false,
+  "secondBeginAckElapsedMs": 45.39999997615814,
+  "restoredHistoryBytes": 480035,
+  "restoredHistorySha256": "a874a831ea3c68fd6fa32a582ae04dc6df0f0d846419c3dff0efc0bfe11124e8",
+  "secondRunId": "d6d115b4-2f87-460f-a5e9-b0c8d1d2d1e3",
+  "historyRestored": true,
+  "restoredTurnSha256": "f5d9e63e0447f3dc21ab36d0fbd5f9b45e5dbaa94a11fd13458a3ec6535cc921",
+  "componentPassed": true,
+  "selectionRestored": true,
+  "historyPreserved": true,
+  "profileConfigurationUnchanged": true,
+  "encryptedCredentialsUnchanged": true
+}

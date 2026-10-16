@@ -1,0 +1,343 @@
+{
+  "scene": "settings",
+  "seed": 7325455703783129672,
+  "passed": true,
+  "sessionId": "7ba5daab-76f0-427e-b49c-68578930d63e",
+  "prompt": "请在上屏演练应用打开设备偏好，把模式设为标准，将夜间阅读关闭，用拖动滑块将音量设为60%，保存后查看保存结果并告诉我三项最终值。 请通过上屏实际界面操作。优先读取可见 UI 树辨认设置项；滑块必须真实拖动，不能单击刻度替代。每次页面变化后重新观察，保存后回读核对，最后按自然字段格式简短报告：模式：实际模式；夜间阅读：开启或关闭；音量：实际百分比%。",
+  "runId": "24791a77-7a3a-4c64-a60c-e0c79edb8286",
+  "testRunId": "scenario-68822d09-beab-4416-bd28-fdb24868cc04",
+  "runningElapsedMs": 104683,
+  "latestReceiverPage": "saved",
+  "latestReceiverState": {
+    "settingsSaved": true,
+    "settingsValues": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 60
+    },
+    "settingsDraft": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 60
+    },
+    "settingsDragCount": 1,
+    "settingsSaveCount": 1,
+    "settingNavigationCount": 1,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": null,
+    "articleOpenCount": 0,
+    "newsListScrollCount": 0,
+    "detailScrollCount": 0,
+    "listScrollY": 0,
+    "detailScrollY": 0,
+    "maxListScrollY": 0,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "runStatus": "completed",
+  "runtime": {
+    "sessionId": "7ba5daab-76f0-427e-b49c-68578930d63e",
+    "runId": "24791a77-7a3a-4c64-a60c-e0c79edb8286",
+    "state": "completed",
+    "modelProfileRevision": 1002,
+    "capabilityEpoch": 3,
+    "startedAt": 1792143550993
+  },
+  "modelTransport": [
+    {
+      "status": 200,
+      "responseBytes": 50257,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 49570,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 41010,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 56173,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 41008,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 57399,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 130735,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 42710,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 82391,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 52839,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 56343,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 47827,
+      "terminal": "eof"
+    }
+  ],
+  "modelId": "deepseek-v4.1-flash",
+  "timings": {
+    "beginElapsedRealtime": 673841303,
+    "firstVisibleTextMs": 5385,
+    "responseHeadersMs": 4213,
+    "firstResponseBytesMs": 4223,
+    "firstAuthorityMs": 1599,
+    "nativePrepareMs": 26
+  },
+  "assistantAnswer": "I'll start by observing the current upper screen.I see the drill app. Let me open \"设备偏好\".On the 设备偏好 page. Now selecting 标准 mode.Now turning off 夜间阅读.模式=标准 ✓、夜间阅读=关闭 ✓。现在拖动音量滑块到 60%。音量=60% ✓。现在保存。已在“设备偏好”完成设置并保存，保存结果页确认：\n\n- 模式：标准\n- 夜间阅读：关闭\n- 音量：60%",
+  "toolResults": [
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143556262,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:9e008511-e8a9-40a0-9e01-7489a78135ed",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\",\"nodeRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/0\",\"nodeRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/0\",\"parentRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"离线交互演练 · settings\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,73,1884,149],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/1\",\"nodeRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/1\",\"parentRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"设置首页\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,149,1884,261],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/2\",\"nodeRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/2\",\"parentRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_preferences\",\"text\":\"设备偏好\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,261,1884,372],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/3\",\"nodeRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\\\/3\",\"parentRef\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_distractor\",\"text\":\"显示说明\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,372,1884,483],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"616db4f5-c6c1-4e0a-ac2e-1b52a16411ea\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":5,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":5,\"offscreenExposedNodes\":0,\"visitedNodes\":5,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"68eb7414-e56a-472b-b704-ad92430c4179\",\"targetSnapshotId\":\"ed07dd46-ff5e-47da-a576-43ef21abcdfd\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.window_info",
+      "observedAt": 1792143556660,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:a6c41265-d703-4a2f-82e5-1fdbdf02145a",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"displayRole\":\"upper\",\"displayId\":0,\"activity\":null,\"completeSystemTaskList\":false,\"windows\":[{\"windowId\":11,\"type\":3,\"layer\":1,\"focused\":false,\"active\":false,\"bounds\":[0,0,1920,55]},{\"windowId\":4870,\"type\":1,\"layer\":0,\"focused\":true,\"active\":true,\"bounds\":[0,0,1920,1079]}],\"requestSnapshotId\":\"68eb7414-e56a-472b-b704-ad92430c4179\",\"targetSnapshotId\":\"c4f2d16c-a148-474b-9597-bd969b8543d5\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.tap",
+      "observedAt": 1792143563677,
+      "source": "accessibility-dispatchGesture",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:6dfc6f81-e721-4687-9eac-c5543a051490",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"gestureKind\":\"input.tap\",\"nodeRefsInvalidated\":true,\"displayRole\":\"upper\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143568559,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:8ef0f6a2-f2b1-4697-860d-e9eeaed6d97b",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/0\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/0\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"离线交互演练 · settings\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,73,1884,149],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/1\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/1\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"设备偏好\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,149,1884,255],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/2\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/2\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"选择模式\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,255,1884,339],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/3\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/3\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.RadioButton\",\"id\":null,\"text\":\"标准\",\"description\":null,\"value\":\"未选择\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,339,663,449],\"collection\":null,\"collectionItem\":{\"rowIndex\":0,\"rowSpan\":1,\"columnIndex\":0,\"columnSpan\":1,\"selected\":false},\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/4\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/4\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.RadioButton\",\"id\":null,\"text\":\"静谧\",\"description\":null,\"value\":\"已选择\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":true,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[663,339,1273,449],\"collection\":null,\"collectionItem\":{\"rowIndex\":0,\"rowSpan\":1,\"columnIndex\":1,\"columnSpan\":1,\"selected\":true},\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/5\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/5\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.RadioButton\",\"id\":null,\"text\":\"性能\",\"description\":null,\"value\":\"未选择\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[1273,339,1884,449],\"collection\":null,\"collectionItem\":{\"rowIndex\":0,\"rowSpan\":1,\"columnIndex\":2,\"columnSpan\":1,\"selected\":false},\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/6\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/6\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Switch\",\"id\":\"dev.thor.inputlab:id\\\/scenario_switch\",\"text\":\"夜间阅读\",\"description\":null,\"value\":\"开启\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":true,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,449,1884,568],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/7\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/7\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"音量：10%（每格 10%）\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":14,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,568,1884,662],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/8\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/8\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.SeekBar\",\"id\":\"dev.thor.inputlab:id\\\/scenario_slider\",\"text\":null,\"description\":\"音量滑块，步进10百分比\",\"value\":\"10%\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":12,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"set_progress\"],\"bounds\":[53,662,1884,823],\"collection\":null,\"collectionItem\":null,\"range\":{\"type\":0,\"min\":0,\"max\":10,\"current\":1}},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/9\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/9\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_save\",\"text\":\"保存\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,823,1884,934],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/10\",\"nodeRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\\\/10\",\"parentRef\":\"f31234d2-6a2f-4650-9068-18dd48034304:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_back\",\"text\":\"返回首页\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,934,1884,1045],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"f31234d2-6a2f-4650-9068-18dd48034304\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":12,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":12,\"offscreenExposedNodes\":0,\"visitedNodes\":12,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"9e847a29-caf7-4794-b24d-7816047b0f87\",\"targetSnapshotId\":\"9194e4be-d9a0-4dc4-8c3d-42c5558b2fbc\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.tap",
+      "observedAt": 1792143581845,
+      "source": "accessibility-dispatchGesture",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:54010c85-55c4-4f47-ad00-c93ac8c4570a",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"gestureKind\":\"input.tap\",\"nodeRefsInvalidated\":true,\"displayRole\":\"upper\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143588852,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:0530886d-6a52-4d25-bea4-e45dde302078",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"5ed7712d-95f5-4687-87b4-9914cc7b739d:root\",\"nodeRef\":\"5ed7712d-95f5-4687-87b4-9914cc7b739d:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5ed7712d-95f5-4687-87b4-9914cc7b739d:root\\\/6\",\"nodeRef\":\"5ed7712d-95f5-4687-87b4-9914cc7b739d:root\\\/6\",\"parentRef\":\"5ed7712d-95f5-4687-87b4-9914cc7b739d:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Switch\",\"id\":\"dev.thor.inputlab:id\\\/scenario_switch\",\"text\":\"夜间阅读\",\"description\":null,\"value\":\"开启\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":true,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,449,1884,568],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"5ed7712d-95f5-4687-87b4-9914cc7b739d\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":1,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":12,\"offscreenExposedNodes\":0,\"visitedNodes\":12,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"78e390fb-babf-46ba-821a-97a75d5d2403\",\"targetSnapshotId\":\"3c3e706b-ccd5-4902-b97d-e71ad1f16547\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.tap",
+      "observedAt": 1792143596924,
+      "source": "accessibility-dispatchGesture",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:a475eb32-027c-4a4a-ace4-f6dd13bace17",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"gestureKind\":\"input.tap\",\"nodeRefsInvalidated\":true,\"displayRole\":\"upper\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143602789,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:a16d5878-149c-421a-9e1f-ddc5de159f43",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/0\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/0\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"离线交互演练 · settings\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,73,1884,149],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/1\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/1\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"设备偏好\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,149,1884,255],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/2\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/2\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"选择模式\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,255,1884,339],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/3\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/3\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.RadioButton\",\"id\":null,\"text\":\"标准\",\"description\":null,\"value\":\"已选择\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":true,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,339,663,449],\"collection\":null,\"collectionItem\":{\"rowIndex\":0,\"rowSpan\":1,\"columnIndex\":0,\"columnSpan\":1,\"selected\":true},\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/4\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/4\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.RadioButton\",\"id\":null,\"text\":\"静谧\",\"description\":null,\"value\":\"未选择\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[663,339,1273,449],\"collection\":null,\"collectionItem\":{\"rowIndex\":0,\"rowSpan\":1,\"columnIndex\":1,\"columnSpan\":1,\"selected\":false},\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/5\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/5\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.RadioButton\",\"id\":null,\"text\":\"性能\",\"description\":null,\"value\":\"未选择\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[1273,339,1884,449],\"collection\":null,\"collectionItem\":{\"rowIndex\":0,\"rowSpan\":1,\"columnIndex\":2,\"columnSpan\":1,\"selected\":false},\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/6\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/6\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Switch\",\"id\":\"dev.thor.inputlab:id\\\/scenario_switch\",\"text\":\"夜间阅读\",\"description\":null,\"value\":\"关闭\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":true,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,449,1884,568],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/7\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/7\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"音量：10%（每格 10%）\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":14,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,568,1884,662],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/8\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/8\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.SeekBar\",\"id\":\"dev.thor.inputlab:id\\\/scenario_slider\",\"text\":null,\"description\":\"音量滑块，步进10百分比\",\"value\":\"10%\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":12,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"set_progress\"],\"bounds\":[53,662,1884,823],\"collection\":null,\"collectionItem\":null,\"range\":{\"type\":0,\"min\":0,\"max\":10,\"current\":1}},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/9\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/9\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_save\",\"text\":\"保存\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":2,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,823,1884,934],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/10\",\"nodeRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\\\/10\",\"parentRef\":\"0cd17e20-8032-47d6-ae53-d18e3b708459:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_back\",\"text\":\"返回首页\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,934,1884,1045],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"0cd17e20-8032-47d6-ae53-d18e3b708459\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":12,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":12,\"offscreenExposedNodes\":0,\"visitedNodes\":12,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"a398a91b-1488-4c77-a585-49319cf1a044\",\"targetSnapshotId\":\"831c4eb5-f5ab-4fe9-8558-b4406f80d1ff\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.drag",
+      "observedAt": 1792143631117,
+      "source": "accessibility-dispatchGesture",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:12272989-7def-45b9-8235-ec26b985e886",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":800,\"gestureKind\":\"bounded-drag-down-move-up\",\"nodeRefsInvalidated\":true,\"displayRole\":\"upper\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143636855,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:b6baba4f-bd78-4dc1-a4fa-0d6d3ee45775",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\",\"nodeRef\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\\\/7\",\"nodeRef\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\\\/7\",\"parentRef\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"音量：60%（每格 10%）\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":14,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,568,1884,662],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\\\/8\",\"nodeRef\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\\\/8\",\"parentRef\":\"aed683fb-26f8-48a8-b1df-bb44305058b2:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.SeekBar\",\"id\":\"dev.thor.inputlab:id\\\/scenario_slider\",\"text\":null,\"description\":\"音量滑块，步进10百分比\",\"value\":\"60%\",\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":12,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"set_progress\"],\"bounds\":[53,662,1884,823],\"collection\":null,\"collectionItem\":null,\"range\":{\"type\":0,\"min\":0,\"max\":10,\"current\":6}}],\"windowId\":4870,\"treeId\":\"aed683fb-26f8-48a8-b1df-bb44305058b2\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":2,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":12,\"offscreenExposedNodes\":0,\"visitedNodes\":12,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"ca15b0a1-db47-41d9-b2d0-f2671a681096\",\"targetSnapshotId\":\"5f3bf6c8-f5b5-4c4c-8ed9-af804060c46d\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.tap",
+      "observedAt": 1792143645078,
+      "source": "accessibility-dispatchGesture",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:5dc34515-3953-4307-a63f-5ee266623fc0",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"gestureKind\":\"input.tap\",\"nodeRefsInvalidated\":true,\"displayRole\":\"upper\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143650452,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:24791a77-7a3a-4c64-a60c-e0c79edb8286:b14e8e79-42fa-4860-8cfe-988cadbb675a",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\",\"nodeRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/0\",\"nodeRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/0\",\"parentRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"离线交互演练 · settings\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,73,1884,149],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/1\",\"nodeRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/1\",\"parentRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"保存结果\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,149,1884,261],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/2\",\"nodeRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/2\",\"parentRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"已保存到本地演练记录\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,261,1884,350],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/3\",\"nodeRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/3\",\"parentRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"模式：标准\\n夜间阅读：关闭\\n音量：60%\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":20,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[53,350,1884,592],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/4\",\"nodeRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\\\/4\",\"parentRef\":\"87d00a60-47a2-4991-a98e-6c036b0195c2:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_back\",\"text\":\"返回首页\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":4,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[53,592,1884,703],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"87d00a60-47a2-4991-a98e-6c036b0195c2\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":6,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":6,\"offscreenExposedNodes\":0,\"visitedNodes\":6,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"4366eda2-6f89-4ea9-b84d-3bdad106f76e\",\"targetSnapshotId\":\"4f0887d2-353f-459a-a840-b66e34d95af4\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    }
+  ],
+  "toolErrors": [],
+  "attemptId": "5a8c2835-5e82-405c-b241-cc903a0838d0",
+  "eventPrefixBytes": 62575,
+  "eventPrefixSha256": "151bb08432da42c968e71ced10197deb998c3fa27e2265f96318f55f827f4167",
+  "rawBytes": 62575,
+  "persistedSettingsReadbackVerified": true,
+  "persistedSettingsSha256": "297f92c31f76425eeaf730037a2185b98dbf8f97678cff85f655f9c2cf5c8662",
+  "receiverState": {
+    "settingsSaved": true,
+    "settingsValues": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 60
+    },
+    "settingsDraft": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 60
+    },
+    "settingsDragCount": 1,
+    "settingsSaveCount": 1,
+    "settingNavigationCount": 1,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": null,
+    "articleOpenCount": 0,
+    "newsListScrollCount": 0,
+    "detailScrollCount": 0,
+    "listScrollY": 0,
+    "detailScrollY": 0,
+    "maxListScrollY": 0,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "receiverCompleted": true,
+  "toolCounts": {
+    "perception.ui_tree": 6,
+    "perception.window_info": 1,
+    "input.tap": 4,
+    "input.drag": 1
+  },
+  "testHarnessAnswerAndFlowVerified": true
+}

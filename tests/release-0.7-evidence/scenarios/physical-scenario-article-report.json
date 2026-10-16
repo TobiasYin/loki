@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "9864410e-3a40-4f02-8ff5-4ce91a687ad6",
+  "testRunId": "scenario-8f3bfec9-12a9-4133-92ce-aec3ae47fe9a",
+  "agentRunId": "918c4f47-da83-4dd6-b33a-477351ee342b",
+  "senderTraceRef": "live-product:918c4f47-da83-4dd6-b33a-477351ee342b:article",
+  "evidenceMode": "agent_e2e",
+  "scene": "article",
+  "seed": 7546304033504120474,
+  "page": "detail",
+  "taskPrompt": "请在上屏打开专栏《星海航线 713》，阅读开头核对码，并实际滚动到文章末尾，告诉我开头和文末两处核对码。",
+  "state": {
+    "settingsSaved": false,
+    "settingsValues": null,
+    "settingsDraft": {
+      "mode": "标准",
+      "enabled": true,
+      "volume": 90
+    },
+    "settingsDragCount": 0,
+    "settingsSaveCount": 0,
+    "settingNavigationCount": 0,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": "long-article",
+    "articleOpenCount": 1,
+    "newsListScrollCount": 0,
+    "detailScrollCount": 137,
+    "listScrollY": 0,
+    "detailScrollY": 7380,
+    "maxListScrollY": 0,
+    "maxDetailScrollY": 7380,
+    "footerVisible": true
+  },
+  "expected": {
+    "settingsValues": {
+      "mode": "静谧",
+      "enabled": false,
+      "volume": 50
+    },
+    "newsTargetTitle": "海港观测简报 286",
+    "newsTargetId": "story-22",
+    "newsCode": "N-41893",
+    "articleTitle": "星海航线 713",
+    "articleTopCode": "TOP-18352",
+    "articleBottomCode": "END-56355",
+    "gameTargets": [
+      "stage-0-tile-5",
+      "stage-1-tile-2"
+    ],
+    "gameResult": "GW-45878"
+  },
+  "completed": true,
+  "interruptedReason": null,
+  "geometry": {
+    "displayId": 0,
+    "width": 1920,
+    "height": 1080,
+    "rotation": 1,
+    "densityDpi": 369
+  },
+  "agentAnswerVerified": false,
+  "receiverQualificationVersion": "scenario-ui-observation-v1",
+  "systemInjectionProven": false,
+  "evidence": {
+    "eventPrefixBytes": 130420,
+    "eventPrefixSha256": "52e2f84b33e8c0c305802f859b1b27d546cf7d7c6da66c2352d8db8a46571954",
+    "eventCount": 282,
+    "incomplete": false,
+    "droppedSamples": 0,
+    "sealed": true,
+    "relativePath": "scenario-reports\/9864410e-3a40-4f02-8ff5-4ce91a687ad6\/events.jsonl"
+  }
+}

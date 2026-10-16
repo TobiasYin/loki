@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "databaseIntegrity": "ok",
+  "tables": {
+    "sessions": {
+      "before": 141,
+      "after": 168,
+      "missingOriginalRows": [],
+      "modifiedOriginalRows": []
+    },
+    "runs": {
+      "before": 132,
+      "after": 157,
+      "missingOriginalRows": [],
+      "modifiedOriginalRows": []
+    },
+    "messages": {
+      "before": 264,
+      "after": 314,
+      "missingOriginalRows": [],
+      "modifiedOriginalRows": []
+    },
+    "events": {
+      "before": 29328,
+      "after": 48215,
+      "missingOriginalRows": [],
+      "modifiedOriginalRows": []
+    },
+    "attachments": {
+      "before": 30,
+      "after": 45,
+      "missingOriginalRows": [],
+      "modifiedOriginalRows": []
+    }
+  },
+  "preferences": {
+    "profiles": {
+      "byteIdentical": true
+    },
+    "native-credentials": {
+      "byteIdentical": true
+    },
+    "voice": {
+      "byteIdentical": true
+    }
+  },
+  "skills": {
+    "originalImportedCount": 1,
+    "allOriginalImportedMetadataAndFilesIdentical": true,
+    "builtinManualUpdatesExpected": true
+  },
+  "passed": true,
+  "selectionChangedDuringAdditiveTests": false,
+  "privateBackupsCommitted": false
+}

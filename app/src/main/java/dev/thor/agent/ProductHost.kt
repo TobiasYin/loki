@@ -115,7 +115,27 @@ class ProductHost private constructor(private val context: Context, private val 
     private val probeBodies=java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     private val probeConsumerClosed=java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     private val probeCompleted = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+    private class ModelHttpReceipt {
+        var status:Int?=null;var bytes=0L;var terminal:String?=null
+        @Synchronized fun update(event:dev.thor.bridge.HttpEvent) {
+            when(event) {
+                is dev.thor.bridge.HttpEvent.Head->status=event.status
+                is dev.thor.bridge.HttpEvent.Chunk->bytes+=event.bytes.size
+                is dev.thor.bridge.HttpEvent.End->terminal="eof"
+                is dev.thor.bridge.HttpEvent.Error->terminal=event.code.name
+                else->Unit
+            }
+        }
+        @Synchronized fun snapshot()=obj("status" to status,"responseBytes" to bytes,"terminal" to terminal)
+    }
+    // Numeric status/byte counts and local error categories only: never response bodies,
+    // headers, URLs or credentials. A consumer CANCELLED after SSE completion can be normal.
+    private val modelHttpReceipts=java.util.concurrent.ConcurrentHashMap<String,java.util.concurrent.ConcurrentHashMap<String,ModelHttpReceipt>>()
     fun auditHttp(start: dev.thor.bridge.HttpStart,event: dev.thor.bridge.HttpEvent) {
+        if(start.envelope.purpose==Purpose.model && runMetrics.containsKey(start.envelope.binding.runId)) {
+            val receipts=modelHttpReceipts.getOrPut(start.envelope.binding.runId){java.util.concurrent.ConcurrentHashMap()}
+            if(receipts.size<64 || receipts.containsKey(event.requestId))receipts.getOrPut(event.requestId){ModelHttpReceipt()}.update(event)
+        }
         runMetrics[start.envelope.binding.runId]?.let {metrics ->
             val elapsed=clock.now()-(metrics["beginElapsedRealtime"] ?: clock.now())
             if(event is dev.thor.bridge.HttpEvent.Head)metrics.putIfAbsent("responseHeadersMs",elapsed)
@@ -598,6 +618,7 @@ class ProductHost private constructor(private val context: Context, private val 
         authority.stopRun(b.runId);deviceAuthority.stop(b.runId);backend.release(b.runId);prepared.values.filter {it.e.runId==b.runId}.forEach {it.approved.complete(false)};prepared.entries.removeAll {it.value.e.runId==b.runId};bindings.remove(b.runId);scopes.remove(b.runId);if(probeRun==b.runId)probeRun=null
         rows("messages").filter { it.getString("runId") == b.runId }.forEach { it.put("status", "complete") }
         runMetrics.remove(b.runId)?.let {r.put("timings",JSONObject(it.toMap()))}
+        modelHttpReceipts.remove(b.runId)?.let {receipts->r.put("modelTransport",JSONArray(receipts.values.map {it.snapshot()}))}
         persist(r); publish(); return obj()
     }
     private fun ui(c: String, d: JSONObject): JSONObject {

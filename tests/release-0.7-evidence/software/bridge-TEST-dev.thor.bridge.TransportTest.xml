@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.bridge.TransportTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-10-15T18:33:59.549Z" hostname="JGJHX5JPGF" time="3.084">
+  <properties/>
+  <testcase name="credentialsAreBoundRedactedAndNeverFollowRedirects" classname="dev.thor.bridge.TransportTest" time="0.191"/>
+  <testcase name="abruptDisconnectIsTransportError" classname="dev.thor.bridge.TransportTest" time="0.008"/>
+  <testcase name="stalledConsumerTimesOut" classname="dev.thor.bridge.TransportTest" time="0.211"/>
+  <testcase name="redirectsRevalidatePathAndDoNotReplayPost" classname="dev.thor.bridge.TransportTest" time="0.026"/>
+  <testcase name="webFetchFollowsReachableHttpRedirectAcrossOriginsWithoutCredentials" classname="dev.thor.bridge.TransportTest" time="0.015"/>
+  <testcase name="errorStatusStillDeliversHeadersAndBody" classname="dev.thor.bridge.TransportTest" time="0.042"/>
+  <testcase name="networkAllowsSystemDnsAndReachableLocalOrProxyDestinations" classname="dev.thor.bridge.TransportTest" time="0.001"/>
+  <testcase name="requestLimitAndDuplicateIdAreRejected" classname="dev.thor.bridge.TransportTest" time="0.005"/>
+  <testcase name="selfSignedTlsIsRejectedWithoutLeakingExceptionDetails" classname="dev.thor.bridge.TransportTest" time="0.201"/>
+  <testcase name="nativeSessionRoutingOverridesCallerHeaderAndIsProfileScoped" classname="dev.thor.bridge.TransportTest" time="0.001"/>
+  <testcase name="searchRevocationDoesNotCancelModelAndOldEpochCannotRestart" classname="dev.thor.bridge.TransportTest" time="0.013"/>
+  <testcase name="disconnectCancelsAndForgedBindingCannotAbortAnotherRun" classname="dev.thor.bridge.TransportTest" time="0.014"/>
+  <testcase name="responseLimitFailsExplicitly" classname="dev.thor.bridge.TransportTest" time="0.012"/>
+  <testcase name="modelGenerationHasNoTransportIdleOrTotalCapButCanBeStopped" classname="dev.thor.bridge.TransportTest" time="0.174"/>
+  <testcase name="endpointMethodCredentialAndHeaderScopeAreEnforced" classname="dev.thor.bridge.TransportTest" time="0.001"/>
+  <testcase name="headResponseFinishesWithoutCredit" classname="dev.thor.bridge.TransportTest" time="0.005"/>
+  <testcase name="utf8RemainsBytesWithMonotonicChunks" classname="dev.thor.bridge.TransportTest" time="0.015"/>
+  <testcase name="gzipIsGenericAndHeadersMatchDecodedBody" classname="dev.thor.bridge.TransportTest" time="0.006"/>
+  <testcase name="eightIndependentStreamsAreBoundedAndStoppingOnePreservesTheOthers" classname="dev.thor.bridge.TransportTest" time="2.051"/>
+  <testcase name="creditControlsDeliveryAndAbortHasOneTerminal" classname="dev.thor.bridge.TransportTest" time="0.092"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

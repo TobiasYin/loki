@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.inputlab.ScenarioModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-16T08:44:42.640Z" hostname="JGJHX5JPGF" time="0.009">
+  <properties/>
+  <testcase name="unsupportedSceneAndInvalidActionsRejectWithoutForgingCompletion" classname="dev.thor.inputlab.ScenarioModelTest" time="0.005"/>
+  <testcase name="wrongGameTargetCannotQualifyEvenAfterLaterCorrectPicks" classname="dev.thor.inputlab.ScenarioModelTest" time="0.0"/>
+  <testcase name="newsAndArticleRequireRealScrollAndCorrectDetailNotOffscreenEnumeration" classname="dev.thor.inputlab.ScenarioModelTest" time="0.001"/>
+  <testcase name="settingsNeedsNavigationCorrectValuesRealDragQualificationAndSave" classname="dev.thor.inputlab.ScenarioModelTest" time="0.0"/>
+  <testcase name="seedIsDeterministicAndVariesTargetsOrderAndValues" classname="dev.thor.inputlab.ScenarioModelTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

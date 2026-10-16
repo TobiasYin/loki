@@ -1,0 +1,62 @@
+
+> @thor-agent/runtime@0.1.0 test
+> npm run build && node --test dist/test/*.test.js
+
+
+> @thor-agent/runtime@0.1.0 build
+> tsc -p tsconfig.json && node scripts/build.mjs
+
+✔ openai-responses: unbounded model waits for delayed headers and still stops explicitly (83.349625ms)
+✔ openai-responses: failed research survives a follow-up with the same Pi Agent (23.626791ms)
+✔ openai-completions: unbounded model waits for delayed headers and still stops explicitly (64.458542ms)
+✔ openai-completions: failed research survives a follow-up with the same Pi Agent (20.696166ms)
+✔ anthropic-messages: unbounded model waits for delayed headers and still stops explicitly (64.46175ms)
+✔ anthropic-messages: failed research survives a follow-up with the same Pi Agent (10.445083ms)
+✔ openai-responses: streamed text + user image + image tool round trip through injected fetch (7.517334ms)
+✔ openai-responses: one-byte SSE chunks preserve UTF-8 and deliver multiple deltas (16.530291ms)
+✔ openai-responses: malformed complete tool JSON never executes (11.451208ms)
+✔ openai-responses: disconnect with partial tool arguments never executes (2.149833ms)
+✔ openai-responses: HTTP 429/500 fails without retry or leaking provider errors (3.927209ms)
+✔ openai-responses: stop cancels an open stream and terminal state persists once (1.174292ms)
+✔ anthropic-messages: streamed text + user image + image tool round trip through injected fetch (4.560292ms)
+✔ anthropic-messages: one-byte SSE chunks preserve UTF-8 and deliver multiple deltas (10.892417ms)
+✔ anthropic-messages: malformed complete tool JSON never executes (2.167041ms)
+✔ anthropic-messages: disconnect with partial tool arguments never executes (1.408417ms)
+✔ anthropic-messages: HTTP 429/500 fails without retry or leaking provider errors (3.382375ms)
+✔ anthropic-messages: stop cancels an open stream and terminal state persists once (0.922ms)
+✔ default capabilities and unavailable backend produce exact effective set (0.280458ms)
+✔ Anthropic completed zero-argument tool block is valid without JSON deltas (0.084125ms)
+✔ off/on epoch change after model response rejects old call; a fresh lease can execute (7.443959ms)
+✔ epoch rechecked after durable intent before executor; Native remains final gate (6.015125ms)
+✔ revoked late image result is never delivered to model (2.038417ms)
+✔ unknown/uninjected tools, invalid schema and duplicate call IDs do not execute (37.011875ms)
+✔ tool failures are error tool results, text truncates at valid UTF-8 boundary (11.382542ms)
+✔ bounded deterministic compression drops whole pairs; revoked derived history is filtered (6.675542ms)
+✔ required current content cannot fit: stops without a request (0.402ms)
+✔ consumed leases do not run twice and a second Session cannot run concurrently (3.366917ms)
+✔ expired images are reloaded before every request and L0 is replaced (4.522875ms)
+✔ tool deadline stops waiting for an uncooperative executor; late data cannot re-enter (15.197167ms)
+✔ compression retains explicit constraints and side-effect ledger; oversized required memory stops (5.738958ms)
+✔ authority bootstrap can be cancelled and configuration changes affect only new Runs (4.331459ms)
+✔ timeout, request/response budgets and bounded tool loop fail (39.241041ms)
+✔ session/run mismatch, expired lease, incomplete probes reject before network (0.600083ms)
+✔ failed intent persistence prevents execution; recovery never replays (3.635917ms)
+✔ only the audited internal configuration fixture can omit public capabilities (0.159875ms)
+✔ Skill metadata is discoverable, bodies and referenced files enter context only after explicit read (11.887667ms)
+✔ provider thinking deltas are decoded separately from answer text and never stored as raw events (3.7165ms)
+✔ large Skill catalogs stay bounded and advertise explicit paginated discovery (2.910583ms)
+✔ large unavailable tool inventories keep L0 bounded without changing effective authorization (5.119375ms)
+✔ Chat Completions validates complete tool JSON and preserves image round trip (5.294583ms)
+✔ selected reasoning effort reaches Responses payload and uses model context profile (10.427958ms)
+✔ Completions strict audit rejects truncated and conflicting argument streams (0.126542ms)
+✔ one-million-token model budget is used without an extra fixed percentage cutoff (8.717875ms)
+✔ text-only model probe flags and image placeholders are respected (6.618875ms)
+✔ invalid Skill resource nesting stays blocked and returns a safe actionable schema hint (0.486292ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 747.137875

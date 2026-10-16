@@ -72,9 +72,14 @@ class TrustedWebViewBridge(
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) WebViewCompat.addWebMessageListener(webView, "ThorNative", setOf(ORIGIN)) { view, message, origin, mainFrame, reply ->
             if (closed || !BridgePeerPolicy.accepts(origin.toString(), mainFrame, view === webView, view.url, page)) return@addWebMessageListener
             var requestId = ""
+            var hostRequest=false
             try {
-                val (json, body) = decode(message)
-                requestId = json.optString("requestId")
+                val (json, body) = decode(message) {header->
+                    // Extract correlation before body/header validation, so malformed large
+                    // host requests fail their own promise instead of waiting for RPC timeout.
+                    requestId=(header.opt("requestId") as? String).orEmpty()
+                    hostRequest=header.optString("type")=="host.rpc"
+                }
                 when (json.getString("type")) {
                     "bridge.hello" -> {
                         requireBridgePublic(connection == null, Code.UNTRUSTED_BRIDGE)
@@ -93,7 +98,8 @@ class TrustedWebViewBridge(
                             val c = connection ?: throw BridgeFailure(Code.UNTRUSTED_BRIDGE)
                             requireBridgePublic(json.getString("connectionId") == c, Code.UNTRUSTED_BRIDGE)
                             val handler = hostRpc ?: throw BridgeFailure(Code.UNSUPPORTED)
-                            handler(c, json).whenComplete { value, error -> ui.post {
+                            val payload=HostRpcPayload.materialize(json,body)
+                            handler(c, payload).whenComplete { value, error -> ui.post {
                                 if (!closed && connection == c && webView.url == page) postString(reply, JSONObject()
                                     .put("type", "host.result").put("requestId", requestId)
                                     .put("value", value ?: JSONObject.NULL).put("code", if (error == null) JSONObject.NULL else "IO_ERROR").toString())
@@ -132,23 +138,28 @@ class TrustedWebViewBridge(
             } catch (e: Exception) {
                 // Never return exception messages: parser/HTTP errors can include payloads and secrets.
                 val code = (e as? BridgeFailure)?.code ?: Code.INVALID_REQUEST
-                postString(reply, JSONObject().put("bridgeVersion", 1).put("type", "response.error").put("requestId", requestId.take(100)).put("code", code.name).toString())
+                val failure=JSONObject().put("bridgeVersion",1).put("type",if(hostRequest)"host.result" else "response.error").put("requestId",requestId.take(100)).put("code",code.name)
+                if(hostRequest)failure.put("value",JSONObject.NULL)
+                postString(reply,failure.toString())
             }
         }
     }
     private fun binding(j: JSONObject) = Binding(j.getString("sessionId"), j.getString("runId"), j.getString("lease"), j.getString("connectionId"), j.getLong("capabilityEpoch"))
-    private fun decode(message: WebMessageCompat): Pair<JSONObject, ByteArray> {
+    private fun decode(message: WebMessageCompat,onHeader:(JSONObject)->Unit): Pair<JSONObject, ByteArray> {
         if (message.type == WebMessageCompat.TYPE_ARRAY_BUFFER) {
             requireBridgePublic(arrayBufferSupported, Code.UNSUPPORTED)
             val data = message.arrayBuffer
             requireBridgePublic(data.size in 4..(16 * 1024 * 1024 + 65540), Code.LIMIT_EXCEEDED)
             val n = ByteBuffer.wrap(data, 0, 4).int
             requireBridgePublic(n in 1..65536 && n + 4 <= data.size, Code.INVALID_REQUEST)
-            return JSONObject(data.copyOfRange(4, 4 + n).toString(Charsets.UTF_8)) to data.copyOfRange(4 + n, data.size)
+            val header=JSONObject(data.copyOfRange(4,4+n).toString(Charsets.UTF_8))
+            onHeader(header)
+            return header to data.copyOfRange(4+n,data.size)
         }
         val data = message.data ?: throw BridgeFailure(Code.INVALID_REQUEST)
         requireBridgePublic(data.length <= 16 * 1024 * 1024 * 4 / 3 + 65536, Code.LIMIT_EXCEEDED)
         val j = JSONObject(data)
+        onHeader(j)
         val body = if (j.opt("bytes") is String) Base64.decode(j.getString("bytes"), Base64.NO_WRAP) else ByteArray(0)
         requireBridgePublic(body.size <= 16 * 1024 * 1024, Code.LIMIT_EXCEEDED)
         if (j.opt("bytes") is String) j.remove("bytes")

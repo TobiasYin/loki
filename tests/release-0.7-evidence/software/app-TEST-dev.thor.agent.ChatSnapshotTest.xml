@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.ChatSnapshotTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:37:23.899Z" hostname="JGJHX5JPGF" time="0.079">
+  <properties/>
+  <testcase name="snapshotIsIsolatedAndDoesNotDeleteOrRewriteDurableHistory" classname="dev.thor.agent.ChatSnapshotTest" time="0.023"/>
+  <testcase name="thousandsOfStreamFragmentsProjectAsCompleteBlocksWithoutMutatingTheLedger" classname="dev.thor.agent.ChatSnapshotTest" time="0.055"/>
+  <testcase name="selectedChatAndActiveRunRemainVisibleWithoutUnrelatedBodies" classname="dev.thor.agent.ChatSnapshotTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

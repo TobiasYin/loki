@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.DisplayRolePolicyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:05.075Z" hostname="JGJHX5JPGF" time="0.0">
+  <properties/>
+  <testcase name="savedMappingNeverSilentlyFallsBackWhenAnExternalPanelDisappears" classname="dev.thor.tools.DisplayRolePolicyTest" time="0.0"/>
+  <testcase name="restoredHintsUseNewDescriptorsAndNeverStaleGeometryOrIds" classname="dev.thor.tools.DisplayRolePolicyTest" time="0.0"/>
+  <testcase name="thorDefaultWorksWithUnrelatedVirtualDisplayAndSparseIds" classname="dev.thor.tools.DisplayRolePolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

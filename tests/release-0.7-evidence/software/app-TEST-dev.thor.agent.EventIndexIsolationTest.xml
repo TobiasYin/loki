@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.EventIndexIsolationTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:37:24.360Z" hostname="JGJHX5JPGF" time="0.0">
+  <properties/>
+  <testcase name="publishedIndexListsRemainStableWhenWriterAppendsOrRecoversState" classname="dev.thor.agent.EventIndexIsolationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

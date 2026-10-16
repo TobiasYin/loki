@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.DisplayVisibilityTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:05.076Z" hostname="JGJHX5JPGF" time="0.004">
+  <properties/>
+  <testcase name="clippingNormalizationNeverExtendsTheConfiguredInputExpiry" classname="dev.thor.tools.DisplayVisibilityTest" time="0.001"/>
+  <testcase name="canonicalLayoutRequiresCompleteSoleFullscreenRectangularEvidence" classname="dev.thor.tools.DisplayVisibilityTest" time="0.001"/>
+  <testcase name="clippingDoesNotRebindLayoutButCurrentClippedEdgesCannotReceiveInput" classname="dev.thor.tools.DisplayVisibilityTest" time="0.001"/>
+  <testcase name="newlyVisibleEdgesCannotBeUsedFromAnImageThatNeverObservedThem" classname="dev.thor.tools.DisplayVisibilityTest" time="0.001"/>
+  <testcase name="unknownVisibilityAndRealRootOrAppChangesStillInvalidateTheTarget" classname="dev.thor.tools.DisplayVisibilityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,10 +1,18 @@
 > 2026-10-13 整合状态：已进入根工程正式软件集成；以下独立任务证据保留为历史参考。当前产品接线、复现入口与本次验证见 [中文集成报告](../../docs/integration-report.md)，不能将旧模块通过直接当作集成通过。
 
-# Thor Input Lab 0.3.1
+# Thor Input Lab 0.4.0
 
-独立 Kotlin / Android View 接收器，applicationId `dev.thor.inputlab`，默认独立进程与 UID。接收器源代码和模块测试位于本目录，通过根工程构建；不依赖 Thor Agent Runtime。APK 无网络权限、Pi、Shizuku、模型配置或输入注入器。只有 debug 变体带签名权限保护的 setup/report runner，release 不包含该 Provider；本轮窗口范围为 5–120 秒。最新实机证据见 [0.6 验收记录](../../docs/release-0.6-acceptance.md)。
+独立 Kotlin / Android View 接收器，applicationId `dev.thor.inputlab`，默认独立进程与 UID。接收器源代码和模块测试位于本目录，通过根工程构建；不依赖 Thor Agent Runtime。APK 无网络权限、Pi、Shizuku、模型配置或输入注入器。只有 debug 变体带签名权限保护的准备/报告 runner，release 不包含任何 runner Provider。原始 Lab 的观察窗口保持 5–120 秒；新增多步场景单独记录至 runner 主动封存，不限制模型任务总时长。最新实机证据见 [0.6 验收记录](../../docs/release-0.6-acceptance.md)。
 
 已实现可构建第一版与接收器本地验证。**尚未完成 Thor 实机 POC-11 资格认证、上下屏校准、物理手柄基线或 POC-06/07。** `receiverQualificationVersion=unqualified-physical-baseline-pending` 始终随报告保留；本地通过不能推断其他模拟器或游戏兼容。
+
+## 本地合成多步场景（0.4.0）
+
+从原始 Lab 非录制区域的“多步演练”进入独立 `ScenarioActivity` 手动首页，选择设置/游戏/新闻/长文即可开始随机一组任务；“查看任务”展示公开任务说明，“新的一组”重新生成，“选择场景”封存旧记录。debug/release 都可手动使用，手动证据固定 `manual_synthetic`、agentRunId 为空，不冒称 Agent 端到端测试。新增场景：设置子页修改并保存、两关画面目标辨识、28 条新闻列表滚动并进入详情、长文实际滚到文末读取双码。全部数据本地合成，seed 改变目标值、顺序和布局；不访问网络、不修改设备系统设置。新闻/长文使用原生 ScrollView，游戏使用带干扰项的 Canvas；接收端依据真实页面状态、触摸/进度变化和 viewport 滚动记录判定，不能仅凭模型口述或离屏树文本判定完成。
+
+独立调试入口为 `content://dev.thor.inputlab.scenario`，只允许同签名 Agent/测试包调用。`describe` 只返回自然任务，随后正常创建真实 Agent run，再用 `prepare` 绑定其 runId；runner 的 `report`/`release` 只能读取/封存，不提供代点、赋值、输入注入或通过判定接口。详细 API、报告字段、证据边界和复现约束见 [scenarios.md](scenarios.md)。原始 `LabActivity` 仅在原操作行增加入口，不改变保留区域高度；录制时随该区域隐藏且入口另有非录制守卫，LAB case、接收资格判定及历史报告不受影响。
+
+本轮本地验证：原 Lab 64 项与新场景首轮 9 项 JVM 回归全部通过，debug/release APK 构建与 debug lint 通过；新增手动入口及其第 10 项回归由主流程统一复核。真实模型多步操作由产品测试单独验证；这些软件检查不等于 Thor 实机验收。
 
 ## 独立构建
 
@@ -22,13 +30,13 @@ export ANDROID_HOME=path/to/android-sdk
 
 也可在本目录的忽略文件 `local.properties` 设置 `sdk.dir=path/to/android-sdk`。输出：
 
-- 安装包：`app/build/outputs/apk/debug/app-debug.apk`。
+- 安装包：`app/build/outputs/apk/debug/input-lab-debug.apk`。
 - JVM 测试：`app/build/reports/tests/testDebugUnitTest/index.html`。
 - Lint：`app/build/reports/lint-results-debug.html`。
-- 解析器测试包：`app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk`。
+- 解析器测试包：`app/build/outputs/apk/androidTest/debug/input-lab-debug-androidTest.apk`。
 
 ```sh
-adb -s DEVICE install -r app/build/outputs/apk/debug/app-debug.apk
+adb -s DEVICE install -r app/build/outputs/apk/debug/input-lab-debug.apk
 adb -s DEVICE shell am start -n dev.thor.inputlab/.LabActivity
 # 在操作者已经确认可启动到该显示的情况下，作为实验记录启动参数；不承诺 Thor 支持。
 adb -s DEVICE shell am start --display CONFIRMED_DISPLAY -n dev.thor.inputlab/.LabActivity
@@ -85,7 +93,7 @@ v2 将 `InputDeviceListener.changed` 与断连区分：所有冻结公开设备�
 python3 scripts/emulator-smoke.py --serial emulator-5554 --adb path/to/adb
 # 如使用隔离 ADB server，可另传 --port 5041。
 
-adb -s DEVICE install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb -s DEVICE install -r app/build/outputs/apk/androidTest/debug/input-lab-debug-androidTest.apk
 adb -s DEVICE shell am instrument -w dev.thor.inputlab.test/dev.thor.inputlab.SnapshotInstrumentation
 ```
 

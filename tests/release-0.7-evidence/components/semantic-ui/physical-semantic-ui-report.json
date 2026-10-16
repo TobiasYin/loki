@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "d5b203d2-f02d-417f-8321-837205df2726",
+  "testRunId": "component-semantic-559035d5-b00d-4488-969b-57851a2c7f1e",
+  "agentRunId": "no-agent:component-semantic-559035d5-b00d-4488-969b-57851a2c7f1e",
+  "senderTraceRef": "component-gateway\/ManualTestAuthority:semantic-ui; no cloud\/model\/product-authority run",
+  "evidenceMode": "manual_platform_api",
+  "scene": "news",
+  "seed": 3111807130019710130,
+  "page": "list",
+  "taskPrompt": "请在上屏新闻列表找到《山城观测简报 923》，滚动到该条目并打开详情，告诉我详情里的核对码。",
+  "state": {
+    "settingsSaved": false,
+    "settingsValues": null,
+    "settingsDraft": {
+      "mode": "性能",
+      "enabled": false,
+      "volume": 90
+    },
+    "settingsDragCount": 0,
+    "settingsSaveCount": 0,
+    "settingNavigationCount": 0,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": null,
+    "articleOpenCount": 0,
+    "newsListScrollCount": 70,
+    "detailScrollCount": 0,
+    "listScrollY": 3645,
+    "detailScrollY": 0,
+    "maxListScrollY": 3645,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "expected": {
+    "settingsValues": {
+      "mode": "静谧",
+      "enabled": true,
+      "volume": 40
+    },
+    "newsTargetTitle": "山城观测简报 923",
+    "newsTargetId": "story-23",
+    "newsCode": "N-18050",
+    "articleTitle": "远山手记 958",
+    "articleTopCode": "TOP-82703",
+    "articleBottomCode": "END-11436",
+    "gameTargets": [
+      "stage-0-tile-2",
+      "stage-1-tile-1"
+    ],
+    "gameResult": "GW-93985"
+  },
+  "completed": false,
+  "interruptedReason": null,
+  "geometry": {
+    "displayId": 0,
+    "width": 1920,
+    "height": 1080,
+    "rotation": 1,
+    "densityDpi": 369
+  },
+  "agentAnswerVerified": false,
+  "receiverQualificationVersion": "scenario-ui-observation-v1",
+  "systemInjectionProven": false,
+  "evidence": {
+    "eventPrefixBytes": 72653,
+    "eventPrefixSha256": "15f33a562b743da284e4b5d369d8bd24e82084c83bb1f3f0b692a559cc28a35f",
+    "eventCount": 144,
+    "incomplete": false,
+    "droppedSamples": 0,
+    "sealed": true,
+    "relativePath": "scenario-reports\/d5b203d2-f02d-417f-8321-837205df2726\/events.jsonl"
+  }
+}

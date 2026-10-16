@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.bridge.GatewayTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-10-15T18:33:59.267Z" hostname="JGJHX5JPGF" time="0.263">
+  <properties/>
+  <testcase name="runningSequenceStopsAfterRevocationAndReportsSubmittedEffects" classname="dev.thor.bridge.GatewayTest" time="0.116"/>
+  <testcase name="queuedCallIsRecheckedBeforeAnyEffect" classname="dev.thor.bridge.GatewayTest" time="0.004"/>
+  <testcase name="toolOmittedFromPublishedSnapshotCannotAppearJustBecauseBackendRecovers" classname="dev.thor.bridge.GatewayTest" time="0.006"/>
+  <testcase name="boundedQueueRefusesExcessWork" classname="dev.thor.bridge.GatewayTest" time="0.008"/>
+  <testcase name="knownCredentialValuesCannotEnterToolParametersAndResultsAreRedacted" classname="dev.thor.bridge.GatewayTest" time="0.017"/>
+  <testcase name="disableReenableNeverResurrectsOldCallsAndDuplicateDoesNotReplay" classname="dev.thor.bridge.GatewayTest" time="0.002"/>
+  <testcase name="concurrentNetworkLeasesAndRevocationStaySessionScoped" classname="dev.thor.bridge.GatewayTest" time="0.011"/>
+  <testcase name="parameterAndResourceValidation" classname="dev.thor.bridge.GatewayTest" time="0.001"/>
+  <testcase name="deadlinesAndStoppedLeaseBlockWork" classname="dev.thor.bridge.GatewayTest" time="0.001"/>
+  <testcase name="targetChangeAndBackendLossBetweenAdmissionAndCommitBlockEffects" classname="dev.thor.bridge.GatewayTest" time="0.003"/>
+  <testcase name="outputHasUtf8BudgetAndAsyncTimeout" classname="dev.thor.bridge.GatewayTest" time="0.088"/>
+  <testcase name="executorFailureAfterCommitReportsUnknownAndRedactsOutput" classname="dev.thor.bridge.GatewayTest" time="0.001"/>
+  <testcase name="forgedSessionLeaseUnknownToolAndSchemaFailClosed" classname="dev.thor.bridge.GatewayTest" time="0.001"/>
+  <testcase name="defaultsAndSessionIsolation" classname="dev.thor.bridge.GatewayTest" time="0.0"/>
+  <testcase name="pendingUiDeliveryHasIndependentPerRequestAndGlobalBudgets" classname="dev.thor.bridge.GatewayTest" time="0.002"/>
+  <testcase name="trustedOriginMainFrameAndConnectionAreMandatory" classname="dev.thor.bridge.GatewayTest" time="0.001"/>
+  <testcase name="expiredLeaseAndRendererDisconnectCannotResumeOldRun" classname="dev.thor.bridge.GatewayTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -94,13 +94,13 @@
           "maxDepth": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 5,
+            "maximum": 20,
             "default": 5
           },
           "maxNodes": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 80,
+            "maximum": 128,
             "default": 80
           },
           "maxChars": {
@@ -108,6 +108,37 @@
             "minimum": 1,
             "maximum": 12000,
             "default": 12000
+          },
+          "maxVisited": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2048,
+            "default": 1024
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2048,
+            "default": 0
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "all",
+              "visible",
+              "offscreen"
+            ],
+            "default": "all"
+          },
+          "textOffset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000,
+            "default": 0
           }
         },
         "required": [],
@@ -124,7 +155,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Read a bounded upper window UI tree; hide passwords; null/surface content can be empty."
+      "description": "Read a compact semantic Accessibility tree of the current upper app, including exposed offscreen nodes. Passwords hidden. Returns snapshot-bound nodeRef, parent/scroll relationships, actions and collection/range metadata. Never auto-scrolls or reveals unexposed virtualized/hidden content. Use maxDepth up to 20, query, visibility and offset to page current exposed evidence; each read is a new observation and invalidates old refs. Scroll using a returned scrollable nodeRef, then observe again. For a long exposed TextView, query returns a snippet near the hit; textStart/textLength indicate clipping. textOffset reads later text without scrolling. Offscreen text evidence does not imply actual viewport movement."
     },
     {
       "toolId": "perception.capture_screen",
@@ -427,6 +458,129 @@
       "description": "Submit a bounded single-finger swipe to the calibrated upper display."
     },
     {
+      "toolId": "input.scroll",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "nodeRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "forward",
+              "backward",
+              "up",
+              "down",
+              "left",
+              "right",
+              "to_position"
+            ]
+          },
+          "row": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "column": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "expectedPackage": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "nodeRef",
+          "direction"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Perform one supported Accessibility scroll action on a nodeRef returned by the current ui_tree snapshot. Use scrollable container nodeRef (or scrollAncestorRef), never an old ref. forward/backward/up/down/left/right use advertised actions; to_position requires known collection row/column bounds and supported action. Does not read or reveal unloaded content. All tree refs invalid after submission: observe ui_tree/screenshot again and verify actual movement."
+    },
+    {
+      "toolId": "input.drag",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 2,
+            "maxItems": 32
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "coordinateSpace": {
+            "type": "string",
+            "enum": [
+              "display_logical",
+              "frame_pixels"
+            ]
+          },
+          "frameId": {
+            "type": "string"
+          },
+          "expectedPackage": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "points",
+          "coordinateSpace"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "upper-display/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Drag a native slider/scrollbar/object with one bounded down-move-up gesture along points (durationMs default 500, max 5000). Explicit display_logical or fresh frame_pixels as for swipe. Re-observe afterwards. Does not guarantee drag-and-drop controls needing an initial long press; no continued or indefinite stroke."
+    },
+    {
       "toolId": "input.press_button",
       "schemaVersion": 1,
       "requiredCapabilities": [
@@ -687,7 +841,7 @@
           "value": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 255
+            "maximum": 100
           }
         },
         "required": [
@@ -705,7 +859,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Read or set AYN Thor upper/lower screen brightness independently through its firmware controller. Read adb-operations Skill and references/thor-brightness.md first. Both read and bounded set are white: no UI approval needed. Native resolves the real display ID; value is 0..255, not the lower-screen stored percentage. Read both screens before/after and restore when testing."
+      "description": "Read or set AYN Thor upper/lower screen brightness independently through its firmware controller. Read adb-operations Skill and references/thor-brightness.md first. Both read and bounded set are white: no UI approval needed. Native resolves the real display ID; value and all returned brightness values are integer percentages 0..100 (unit=percent); Native privately converts to firmware units. Reject fractional or out-of-range values. Use this tool for ordinary brightness adjustments; generic shell commands retain their documented native units. Read both screens before/after and restore when testing."
     },
     {
       "toolId": "files.list",

@@ -1,0 +1,746 @@
+{
+  "schemaVersion": 1,
+  "release": "0.7",
+  "evidenceDate": "2026-10-16",
+  "pathBase": "repository_root",
+  "purpose": "Sanitized history of unsuccessful or incomplete physical acceptance attempts. Later fixes do not retroactively turn these attempts into passes.",
+  "rawEvidenceRoot": "build/physical/release-0.7-2026-10-16",
+  "rawEvidenceIgnored": true,
+  "privacy": {
+    "includesRawUserDatabase": false,
+    "includesReceiverArchives": false,
+    "includesCredentialsOrApiKeys": false,
+    "includesBegunLeasesOrAuthorityTokens": false,
+    "includesFullPromptsOrModelMessages": false,
+    "policy": "Only result metadata, aggregate counters, relative local evidence references and APK checksums are included. Referenced raw evidence stays in the ignored build directory and is not copied into this manifest."
+  },
+  "interpretation": {
+    "driverExitCodeZeroIsNotPass": true,
+    "abortedSuitesDoNotProveRemainingCases": true,
+    "physicalScrollCountsAreReceiverCallbacksNotToolCallCounts": true,
+    "diagnosisProvenance": "Attributions combine the cited local result metadata with code inspection and maintainer diagnosis during this development session; unresolved cases are stated explicitly. APK digests are taken from the original per-run summary and checked against the archived APK when present."
+  },
+  "attempts": [
+    {
+      "id": "scenarios-01",
+      "evidenceDirectory": "build/physical/release-0.7-2026-10-16/scenarios-01",
+      "result": {
+        "passed": false,
+        "driverExitCode": 0,
+        "elapsedSeconds": 18.32
+      },
+      "status": "failed_harness",
+      "attribution": "confirmed",
+      "category": "harness_database_lock",
+      "cause": "The instrumentation harness read the product SQLite database through a competing connection during startup; every scenario failed with SQLITE_BUSY before usable model/tool evidence was collected.",
+      "remediation": "Use the product-owned database access path and wait for setup to finish before observing sessions. This run is not evidence of model or input capability failure.",
+      "evidenceFiles": [
+        "build/physical/release-0.7-2026-10-16/scenarios-01/summary.json",
+        "build/physical/release-0.7-2026-10-16/scenarios-01/suite.log",
+        "build/physical/release-0.7-2026-10-16/scenarios-01/physical-scenario-flow.json"
+      ],
+      "apks": [
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-01/app-debug.apk",
+          "sha256": "47c4bc138a2c942f448aa89c9679308fe4bfa12064909a9dd68e17e895538a4a",
+          "bytes": 6354585,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-01/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-01/input-lab-debug.apk",
+          "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+          "bytes": 2920483,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-01/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-01/app-debug-androidTest.apk",
+          "sha256": "d17964d093ff96481a4ea661d18137bb739a6d61585e5fac92e3719683e4543f",
+          "bytes": 2864642,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-01/summary.json",
+          "archivedDigestVerified": true
+        }
+      ],
+      "scenarioResults": [
+        {
+          "scene": "settings",
+          "passed": false,
+          "failure": "SQLiteDatabaseLockedException: database is locked (code 5 SQLITE_BUSY): , while compiling: SELECT payload FROM sessions ORDER BY rowid",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {}
+        },
+        {
+          "scene": "game",
+          "passed": false,
+          "failure": "SQLiteDatabaseLockedException: database is locked (code 5 SQLITE_BUSY): , while compiling: SELECT payload FROM sessions ORDER BY rowid",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {}
+        },
+        {
+          "scene": "news",
+          "passed": false,
+          "failure": "SQLiteDatabaseLockedException: database is locked (code 5 SQLITE_BUSY): , while compiling: SELECT payload FROM sessions ORDER BY rowid",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {}
+        },
+        {
+          "scene": "article",
+          "passed": false,
+          "failure": "SQLiteDatabaseLockedException: database is locked (code 5 SQLITE_BUSY): , while compiling: SELECT payload FROM sessions ORDER BY rowid",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {}
+        }
+      ],
+      "recordedScenarioCount": 4,
+      "passedScenarioCount": 0,
+      "preservation": {
+        "historyPreserved": true,
+        "profileConfigurationUnchanged": true,
+        "encryptedCredentialsUnchanged": true
+      }
+    },
+    {
+      "id": "scenarios-02",
+      "evidenceDirectory": "build/physical/release-0.7-2026-10-16/scenarios-02",
+      "result": {
+        "passed": false,
+        "driverExitCode": -15,
+        "elapsedSeconds": 196.16
+      },
+      "status": "aborted_after_confirmed_failure",
+      "attribution": "confirmed",
+      "category": "target_observation_invalidation",
+      "cause": "SystemUI status-bar content events advanced the upper display revision and invalidated the application observation. Repeated input.tap attempts were rejected as TARGET_CHANGED before input; the settings receiver stayed on home.",
+      "remediation": "Ignore corroborated pure SystemUI content updates while retaining app-content freshness checks and real window/overlay/geometry structure guards. The driver stopped this suite after the failure was identified; uncompleted scenarios remain unproven.",
+      "evidenceFiles": [
+        "build/physical/release-0.7-2026-10-16/scenarios-02/summary.json",
+        "build/physical/release-0.7-2026-10-16/scenarios-02/suite.log",
+        "build/physical/release-0.7-2026-10-16/scenarios-02/physical-scenario-flow.json"
+      ],
+      "apks": [
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-02/app-debug.apk",
+          "sha256": "7f9b4cf9c926d5ab9053f4e257370d27c035cfd073b8e30daa7c995fab156e99",
+          "bytes": 6368302,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-02/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-02/input-lab-debug.apk",
+          "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+          "bytes": 2920483,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-02/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-02/app-debug-androidTest.apk",
+          "sha256": "48e9447163c58f4d4ded8cd8f9e366bcd525eabe9a1c1f18d18a43c91f6501a1",
+          "bytes": 2868766,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-02/summary.json",
+          "archivedDigestVerified": true
+        }
+      ],
+      "scenarioResults": [
+        {
+          "scene": "settings",
+          "passed": false,
+          "runningElapsedMs": 147867,
+          "latestReceiverPage": "home",
+          "failure": "IllegalArgumentException: Failed requirement.",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        },
+        {
+          "scene": "game",
+          "passed": false,
+          "runningElapsedMs": 25955,
+          "latestReceiverPage": "game",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        }
+      ],
+      "recordedScenarioCount": 2,
+      "passedScenarioCount": 0,
+      "preservation": {}
+    },
+    {
+      "id": "scenarios-03",
+      "evidenceDirectory": "build/physical/release-0.7-2026-10-16/scenarios-03",
+      "result": {
+        "passed": false,
+        "driverExitCode": -15,
+        "elapsedSeconds": 227.79
+      },
+      "status": "aborted_after_confirmed_failure",
+      "attribution": "confirmed",
+      "category": "pending_input_misclassified_unknown",
+      "cause": "The backend marked its own normally pending bounded gesture as inputUnknown. Gateway availability checks then rejected the in-flight gesture as BACKEND_UNAVAILABLE/unknown although receiver actions occurred.",
+      "remediation": "Keep pending request ownership separate from genuinely uncertain completion; set unknown only for uncertain submission/completion and preserve callback identity and input serialization. Settings receiver save and one drag occurred, but the required successful drag tool outcome was absent, so this was not an end-to-end pass.",
+      "evidenceFiles": [
+        "build/physical/release-0.7-2026-10-16/scenarios-03/summary.json",
+        "build/physical/release-0.7-2026-10-16/scenarios-03/suite.log",
+        "build/physical/release-0.7-2026-10-16/scenarios-03/physical-scenario-flow.json"
+      ],
+      "apks": [
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-03/app-debug.apk",
+          "sha256": "489fa1bfb3a2597cb244d264612caabe8ec461ffa080e30a5abfc179ec789986",
+          "bytes": 6619437,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-03/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-03/input-lab-debug.apk",
+          "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+          "bytes": 2920483,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-03/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-03/app-debug-androidTest.apk",
+          "sha256": "a56c4c21740e4de98581d7eca0a70149f3812d6fbe016d94a6a2fe54ab91e397",
+          "bytes": 2916370,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-03/summary.json",
+          "archivedDigestVerified": true
+        }
+      ],
+      "scenarioResults": [
+        {
+          "scene": "settings",
+          "passed": false,
+          "runStatus": "completed",
+          "runningElapsedMs": 173504,
+          "latestReceiverPage": "saved",
+          "failure": "AssertionError: Slider must use the real drag tool",
+          "recordedToolResults": 14,
+          "toolErrors": [
+            {
+              "toolId": "input.tap",
+              "error": "BACKEND_UNAVAILABLE",
+              "outcome": "unknown",
+              "count": 4
+            },
+            {
+              "toolId": "input.drag",
+              "error": "TARGET_CHANGED",
+              "outcome": "observed",
+              "count": 1
+            },
+            {
+              "toolId": "input.drag",
+              "error": "BACKEND_UNAVAILABLE",
+              "outcome": "unknown",
+              "count": 1
+            }
+          ],
+          "receiverCounters": {
+            "settingsSaved": true,
+            "settingsDragCount": 1,
+            "settingsSaveCount": 1,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        },
+        {
+          "scene": "game",
+          "passed": false,
+          "runningElapsedMs": 20951,
+          "latestReceiverPage": "game",
+          "failure": "IllegalArgumentException: Failed requirement.",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 1,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        },
+        {
+          "scene": "news",
+          "passed": false,
+          "runningElapsedMs": 514,
+          "latestReceiverPage": "list",
+          "recordedToolResults": 0,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        }
+      ],
+      "recordedScenarioCount": 3,
+      "passedScenarioCount": 0,
+      "preservation": {}
+    },
+    {
+      "id": "scenarios-04",
+      "evidenceDirectory": "build/physical/release-0.7-2026-10-16/scenarios-04",
+      "result": {
+        "passed": false,
+        "driverExitCode": 0,
+        "elapsedSeconds": 721.67
+      },
+      "status": "partial_pass_suite_failed",
+      "attribution": "unresolved_for_failed_cases",
+      "category": "runtime_failure_without_sufficient_transport_diagnostics",
+      "cause": "The game scenario passed with two completed steps and zero wrong selections. Settings, news and article runs ended failed; news reached detail and article performed actual scrolling but neither completed the requested result. These failures were not diagnosed by this run alone.",
+      "remediation": "Add minimal numeric model transport receipts and reproduce. Do not attribute these failures to network access: IO_ERROR alone does not establish a network cause, and the later framing diagnosis must not be treated as independent proof for every earlier failure.",
+      "evidenceFiles": [
+        "build/physical/release-0.7-2026-10-16/scenarios-04/summary.json",
+        "build/physical/release-0.7-2026-10-16/scenarios-04/suite.log",
+        "build/physical/release-0.7-2026-10-16/scenarios-04/physical-scenario-flow.json"
+      ],
+      "apks": [
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-04/app-debug.apk",
+          "sha256": "16a38d770dc23b6868353bdae8098ecdd1c4340328440b0eb5c96137b811d202",
+          "bytes": 6619477,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-04/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-04/input-lab-debug.apk",
+          "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+          "bytes": 2920483,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-04/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-04/app-debug-androidTest.apk",
+          "sha256": "a56c4c21740e4de98581d7eca0a70149f3812d6fbe016d94a6a2fe54ab91e397",
+          "bytes": 2916370,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-04/summary.json",
+          "archivedDigestVerified": true
+        }
+      ],
+      "scenarioResults": [
+        {
+          "scene": "settings",
+          "passed": false,
+          "runStatus": "failed",
+          "runningElapsedMs": 57563,
+          "latestReceiverPage": "preferences",
+          "failure": "ComparisonFailure: expected:<[complet]ed> but was:<[fail]ed>",
+          "recordedToolResults": 6,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        },
+        {
+          "scene": "game",
+          "passed": true,
+          "runStatus": "completed",
+          "runningElapsedMs": 46739,
+          "latestReceiverPage": "victory",
+          "recordedToolResults": 5,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 2,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        },
+        {
+          "scene": "news",
+          "passed": false,
+          "runStatus": "failed",
+          "runningElapsedMs": 292527,
+          "latestReceiverPage": "detail",
+          "failure": "ComparisonFailure: expected:<[complet]ed> but was:<[fail]ed>",
+          "recordedToolResults": 13,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 1,
+            "newsListScrollCount": 70,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          }
+        },
+        {
+          "scene": "article",
+          "passed": false,
+          "runStatus": "failed",
+          "runningElapsedMs": 282739,
+          "latestReceiverPage": "detail",
+          "failure": "ComparisonFailure: expected:<[complet]ed> but was:<[fail]ed>",
+          "recordedToolResults": 9,
+          "toolErrors": [
+            {
+              "toolId": "input.swipe",
+              "error": "TARGET_CHANGED",
+              "outcome": "observed",
+              "count": 1
+            }
+          ],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 1,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 108,
+            "footerVisible": false
+          }
+        }
+      ],
+      "recordedScenarioCount": 4,
+      "passedScenarioCount": 1,
+      "preservation": {
+        "historyPreserved": true,
+        "profileConfigurationUnchanged": true,
+        "encryptedCredentialsUnchanged": true
+      }
+    },
+    {
+      "id": "scenarios-05",
+      "evidenceDirectory": "build/physical/release-0.7-2026-10-16/scenarios-05",
+      "result": {
+        "passed": false,
+        "driverExitCode": 0,
+        "elapsedSeconds": 768.05
+      },
+      "status": "partial_pass_suite_failed",
+      "attribution": "confirmed_for_news_persistence_failure",
+      "category": "large_context_rejected_as_header",
+      "cause": "Settings and game passed. News and article ended failed while runtime state remained executing_tools. News model transport recorded 15 responses, all HTTP 200 ending at eof. Accumulated saveTurn data exceeded the 65536-byte host header limit; the legacy decoder rejected the JSON before extracting requestId, causing an uncorrelated error and a 185-second pending RPC timeout.",
+      "remediation": "Keep the 64 KiB header limit and carry bounded UTF-8 host.rpc.data in a separate body (at most 16 MiB); correlate host errors before payload validation. The news persistence fault was diagnosed by code inspection and reproduction. Article showed the same late runtime symptoms, but its exact failing request was not independently captured; do not label either case a proven network failure.",
+      "evidenceFiles": [
+        "build/physical/release-0.7-2026-10-16/scenarios-05/summary.json",
+        "build/physical/release-0.7-2026-10-16/scenarios-05/suite.log",
+        "build/physical/release-0.7-2026-10-16/scenarios-05/physical-scenario-flow.json"
+      ],
+      "apks": [
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-05/app-debug.apk",
+          "sha256": "d4284debc9f2d6bb7efb885f4fc89296d0e914189d2b791acf458022c9324cd2",
+          "bytes": 7003563,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-05/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-05/input-lab-debug.apk",
+          "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+          "bytes": 2920483,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-05/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/scenarios-05/app-debug-androidTest.apk",
+          "sha256": "9a110d471354d90c8d57b84d126b7d1087995d917a99964829e06a3bab5c40fb",
+          "bytes": 2918298,
+          "digestSource": "build/physical/release-0.7-2026-10-16/scenarios-05/summary.json",
+          "archivedDigestVerified": true
+        }
+      ],
+      "scenarioResults": [
+        {
+          "scene": "settings",
+          "passed": true,
+          "runStatus": "completed",
+          "runningElapsedMs": 88659,
+          "latestReceiverPage": "saved",
+          "recordedToolResults": 11,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": true,
+            "settingsDragCount": 1,
+            "settingsSaveCount": 1,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          },
+          "lastRuntimeState": "completed",
+          "modelTransport": {
+            "responses": 12,
+            "httpStatuses": {
+              "200": 12
+            },
+            "terminals": {
+              "eof": 12
+            },
+            "totalResponseBytes": 653758
+          }
+        },
+        {
+          "scene": "game",
+          "passed": true,
+          "runStatus": "completed",
+          "runningElapsedMs": 46911,
+          "latestReceiverPage": "victory",
+          "recordedToolResults": 5,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 2,
+            "gameWrong": 0,
+            "articleOpenCount": 0,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          },
+          "lastRuntimeState": "completed",
+          "modelTransport": {
+            "responses": 6,
+            "httpStatuses": {
+              "200": 6
+            },
+            "terminals": {
+              "eof": 6
+            },
+            "totalResponseBytes": 331146
+          }
+        },
+        {
+          "scene": "news",
+          "passed": false,
+          "runStatus": "failed",
+          "runningElapsedMs": 312873,
+          "latestReceiverPage": "detail",
+          "failure": "ComparisonFailure: expected:<[complet]ed> but was:<[fail]ed>",
+          "recordedToolResults": 15,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 1,
+            "newsListScrollCount": 84,
+            "detailScrollCount": 0,
+            "footerVisible": false
+          },
+          "lastRuntimeState": "executing_tools",
+          "modelTransport": {
+            "responses": 15,
+            "httpStatuses": {
+              "200": 15
+            },
+            "terminals": {
+              "eof": 15
+            },
+            "totalResponseBytes": 844827
+          }
+        },
+        {
+          "scene": "article",
+          "passed": false,
+          "runStatus": "failed",
+          "runningElapsedMs": 271648,
+          "latestReceiverPage": "detail",
+          "failure": "ComparisonFailure: expected:<[complet]ed> but was:<[fail]ed>",
+          "recordedToolResults": 10,
+          "toolErrors": [],
+          "receiverCounters": {
+            "settingsSaved": false,
+            "settingsDragCount": 0,
+            "settingsSaveCount": 0,
+            "gameStep": 0,
+            "gameWrong": 0,
+            "articleOpenCount": 1,
+            "newsListScrollCount": 0,
+            "detailScrollCount": 43,
+            "footerVisible": false
+          },
+          "lastRuntimeState": "executing_tools",
+          "modelTransport": {
+            "responses": 10,
+            "httpStatuses": {
+              "200": 10
+            },
+            "terminals": {
+              "eof": 10
+            },
+            "totalResponseBytes": 579901
+          }
+        }
+      ],
+      "recordedScenarioCount": 4,
+      "passedScenarioCount": 2,
+      "preservation": {
+        "historyPreserved": true,
+        "profileConfigurationUnchanged": true,
+        "encryptedCredentialsUnchanged": true
+      }
+    },
+    {
+      "id": "large-01",
+      "evidenceDirectory": "build/physical/release-0.7-2026-10-16/large-01",
+      "result": {
+        "passed": false,
+        "driverExitCode": 0,
+        "elapsedSeconds": 9.35
+      },
+      "status": "failed_harness_assertion",
+      "attribution": "confirmed",
+      "category": "conflict_fixture_also_exceeded_header_limit",
+      "cause": "The intended conflicting inline-data/body rejection test also put the large body into the inline header. Native correctly returned LIMIT_EXCEEDED before the test reached the expected INVALID_REQUEST ambiguity check.",
+      "remediation": "Keep only a small forbidden inline object in that negative test. The test was corrected without increasing the 65536-byte header limit or 16 MiB body limit. The suite stopped at this assertion; turn/body sizes are fixture sizes, not proof of a successful full persistence/resume round trip. No cloud execution or system input injection was attempted.",
+      "evidenceFiles": [
+        "build/physical/release-0.7-2026-10-16/large-01/summary.json",
+        "build/physical/release-0.7-2026-10-16/large-01/suite.log",
+        "build/physical/release-0.7-2026-10-16/large-01/physical-large-context.json"
+      ],
+      "apks": [
+        {
+          "path": "build/physical/release-0.7-2026-10-16/large-01/app-debug.apk",
+          "sha256": "43ba17870befd6a5b3bf98b223456006e40396c7f84deff82dfc460da9393d04",
+          "bytes": 7003563,
+          "digestSource": "build/physical/release-0.7-2026-10-16/large-01/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/large-01/input-lab-debug.apk",
+          "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+          "bytes": 2920483,
+          "digestSource": "build/physical/release-0.7-2026-10-16/large-01/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/large-01/app-debug-androidTest.apk",
+          "sha256": "5b397064c6157675b0c574e9a01fd203770912729dfc4878ff9bbcdc6c496b81",
+          "bytes": 2952346,
+          "digestSource": "build/physical/release-0.7-2026-10-16/large-01/summary.json",
+          "archivedDigestVerified": true
+        }
+      ],
+      "failure": "ComparisonFailure: expected:<[INVALID_REQUEST]> but was:<[LIMIT_EXCEEDED]>",
+      "preservation": {
+        "selectionRestored": true,
+        "historyPreserved": true,
+        "profileConfigurationUnchanged": true,
+        "encryptedCredentialsUnchanged": true
+      },
+      "fixture": {
+        "cloudStarted": false,
+        "modelExecutionProven": false,
+        "systemInjectionProven": false,
+        "turnBytes": 451233,
+        "bodyBytes": 451453,
+        "negativeCaseResponseCode": "LIMIT_EXCEEDED"
+      }
+    },
+    {
+      "id": "brightness-01",
+      "evidenceDirectory": "build/physical/release-0.7-2026-10-16/brightness-01",
+      "result": {
+        "passed": false,
+        "driverExitCode": 0,
+        "elapsedSeconds": 107.37
+      },
+      "status": "failed_harness_setup_race",
+      "attribution": "confirmed_setup_race",
+      "category": "session_selection_setup_race",
+      "cause": "The harness began model execution before asynchronous session selection/options/capability setup had settled. The captured run used unintended perception/input capabilities and later failed with LIMIT_EXCEEDED, so it cannot validate the intended isolated percent-brightness workflow.",
+      "remediation": "Wait for selected session and saved configuration/capabilities, explicitly begin that session, and assert the returned lease session before starting the model. Restore both panels and existing brightness mode; restoration reported no errors in this failed run.",
+      "evidenceFiles": [
+        "build/physical/release-0.7-2026-10-16/brightness-01/summary.json",
+        "build/physical/release-0.7-2026-10-16/brightness-01/suite.log",
+        "build/physical/release-0.7-2026-10-16/brightness-01/physical-brightness-percent.json"
+      ],
+      "apks": [
+        {
+          "path": "build/physical/release-0.7-2026-10-16/brightness-01/app-debug.apk",
+          "sha256": "7f9b4cf9c926d5ab9053f4e257370d27c035cfd073b8e30daa7c995fab156e99",
+          "bytes": 6368302,
+          "digestSource": "build/physical/release-0.7-2026-10-16/brightness-01/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/brightness-01/input-lab-debug.apk",
+          "sha256": "9697588ca085ef7e616e6f736eb38ecdfd8375e4138633fa8e8033c71cdb392e",
+          "bytes": 2920483,
+          "digestSource": "build/physical/release-0.7-2026-10-16/brightness-01/summary.json",
+          "archivedDigestVerified": true
+        },
+        {
+          "path": "build/physical/release-0.7-2026-10-16/brightness-01/app-debug-androidTest.apk",
+          "sha256": "5ab586686518e0abc4bba285b06c45a837fe193cb507291a8eebe4bf6450f83e",
+          "bytes": 2871562,
+          "digestSource": "build/physical/release-0.7-2026-10-16/brightness-01/summary.json",
+          "archivedDigestVerified": true
+        }
+      ],
+      "failure": "ComparisonFailure: expected:<[complet]ed> but was:<[fail]ed>",
+      "preservation": {
+        "historyPreserved": true,
+        "profileConfigurationUnchanged": true,
+        "encryptedCredentialsUnchanged": true,
+        "restorationErrors": []
+      },
+      "lastRuntimeState": "failed",
+      "lastRuntimeError": "LIMIT_EXCEEDED"
+    }
+  ]
+}

@@ -51,9 +51,11 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 |---|---|
 | `perception.app_info` | 上屏当前应用或明确可见包的 PackageManager 信息；版本查询不截图；无法区分隐藏和卸载时明确报“不可见或不存在” |
 | `perception.window_info` | Accessibility 按选定 display 枚举可观察窗口，有界 16 个；Activity 返回 null，不用事件 className 推断 |
-| `perception.ui_tree` | 指定上屏窗口；默认深度 5、80 节点、12000 字符；隐藏密码文本/描述；空树与错误分开 |
+| `perception.ui_tree` | 上屏语义组件树，默认深度 5、80 节点、12000 字符；支持 query、节点分页和长文本偏移，保留暴露的非可见节点；密码字段从查询语料剔除，覆盖与裁剪限制见 [语义组件树与滚动](semantic-ui.md) |
 | `perception.device_info` | 普通 SDK 的 system/displays/resources，默认 system；不调用 Shell，无序列号或账号枚举 |
 | `perception.capture_screen` | Accessibility `takeScreenshot(displayId)`；可裁剪，JPEG，最长边 1280，压缩后最多 2 MiB；安全窗口/限频/显示失效分别报错，不回退 Shell |
+| `input.scroll` | 使用当前树快照中的受控 nodeRef，执行节点公开的方向滚动或有已知行列边界的定位动作；提交后引用失效，必须再次观察验证实际位置 |
+| `input.drag` | 一次有界 down→move→up，拖动原生滑块/滚动条；同 swipe 的坐标与 5s 上限，不保证需长按启动的拖放 |
 | `input.tap/long_press/swipe` | Accessibility `dispatchGesture`、指定 display，单指、1–32 点、最长 5s；`display_logical` 或绑定 `frameId` 的 `frame_pixels` |
 | `input.release_inputs` | 清理本 Run 的有界手柄资源，返回实际 releaseAcknowledged/cleanupComplete；归零失败不能报已释放。已提交 Accessibility 手势没有公开即时取消 API，未收到回调则返回 unknown 并阻止继续触摸 |
 | `input.press_button/set_axes` | 固定 Odin Controller evdev 按钮/六轴后端，Shizuku UID 2000、真实节点/布局与物理上屏焦点校验；持有≤5秒并自动释放。真实身份与接收验收见 [0.6手柄说明](../docs/release-0.6-gamepad.md)，没有键盘、触摸、MotionEvent替代成功路径 |
@@ -79,7 +81,7 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 {"path":"test.json","backend":"shizuku","maxBytes":65536,"offset":0}
 ```
 
-设备命令由共享 ShellCommandPolicy 在 Native 与 UID2000 两端校验，生产执行为固定 argv；白名单常用调整无需审批，灰名单绑定具体命令审批，黑名单和未知形式不能执行。debug.command_policy 不执行命令；debug.thor_brightness 封装 Thor 固定亮度协议。所有命令和文件工具仍要求 `adb_debug`，文件写入保留独立备份/审批。详见 docs/adb-policy-acceptance.md。
+设备命令由共享 ShellCommandPolicy 在 Native 与 UID2000 两端校验，生产执行为固定 argv；白名单常用调整无需审批，灰名单绑定具体命令审批，黑名单和未知形式不能执行。debug.command_policy 不执行命令；debug.thor_brightness 封装 Thor 固定亮度协议，上/下屏分别选择，输入 value 与 before/requested/brightness 回读均为 0–100 整数百分比（unit=percent）；拒绝小数和越界，固件转换在内部完成，verified 按原始硬件误差严格核验。通用 shell 命令仍采用系统原生格式与单位。所有命令和文件工具仍要求 `adb_debug`，文件写入保留独立备份/审批。详见 docs/adb-policy-acceptance.md。
 
 ## 资源和安全限制
 

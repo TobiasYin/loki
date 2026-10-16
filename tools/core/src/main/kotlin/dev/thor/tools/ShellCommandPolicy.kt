@@ -102,6 +102,6 @@ object ShellCommandPolicy {
         "white" to listOf("id","getprop ro.product.model","settings get system screen_brightness","wm size","dumpsys battery","cmd display get-displays","cmd display set-brightness 0.5","settings put system fan_mode 5","settings put system peak_refresh_rate 60.0","settings put system screen_off_timeout 60000"),
         "gray" to listOf("apps.install：已下载 APK 的本次 UI 确认（不可通过 debug.shell 安装）","settings put system screen_focus_lock 1","settings put system flip_button_layout 1","dumpsys display","pm list packages -3"),
         "black" to listOf("抹除/格式化/刷机/分区/提权/重启","应用数据清除或卸载","权限和连接配置写入","脚本、管道、重定向、复合命令、未知命令或参数"),
-        "thorBrightness" to "debug.thor_brightness: read and set upper/lower value 0..255 are white. Stored dual_screen_brightness_level is percent only, not an effective backlight command.",
+        "thorBrightness" to "debug.thor_brightness: read and set upper/lower integer value 0..100 percent are white; prefer this tool for brightness. Generic shell settings/commands retain native units; stored dual_screen_brightness_level is not an effective backlight command.",
         "execution" to "Native 与 shell UID 进程共同检查；直接执行已审核 argv，不调用 sh -c；灰名单逐条 UI 确认，黑名单不可放行")
 }

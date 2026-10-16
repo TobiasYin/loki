@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.inputlab.JournalTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-16T08:44:42.509Z" hostname="JGJHX5JPGF" time="0.114">
+  <properties/>
+  <testcase name="byteLimitIsExplicit" classname="dev.thor.inputlab.JournalTest" time="0.019"/>
+  <testcase name="queueOverflowIsDeterministicAndExplicit" classname="dev.thor.inputlab.JournalTest" time="0.023"/>
+  <testcase name="diskFailureIsStickyAndBlocksPassEvidence" classname="dev.thor.inputlab.JournalTest" time="0.011"/>
+  <testcase name="atomicReportContainsOnlyCommittedContents" classname="dev.thor.inputlab.JournalTest" time="0.015"/>
+  <testcase name="budgetDoesNotOverwriteEvidence" classname="dev.thor.inputlab.JournalTest" time="0.004"/>
+  <testcase name="appendOrderingAndHash" classname="dev.thor.inputlab.JournalTest" time="0.017"/>
+  <testcase name="prefixSnapshotRemainsVerifiableAfterLateAppend" classname="dev.thor.inputlab.JournalTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

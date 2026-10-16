@@ -3,57 +3,58 @@ package dev.thor.tools.diagnostic
 import android.accessibilityservice.AccessibilityService
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
+import android.graphics.Rect
+import android.graphics.Region
+import android.graphics.RegionIterator
 import dev.thor.tools.Target
 import dev.thor.tools.TouchableBounds
-import dev.thor.tools.FullScreenGeometry
-import android.graphics.Rect
-import java.util.concurrent.ConcurrentHashMap
+import dev.thor.tools.TargetWindowEvidence
+import dev.thor.tools.TargetWindowRevisions
+import dev.thor.tools.TargetEventKind
+import dev.thor.tools.UpperTargetResolver
 
 class ThorAccessibilityService : AccessibilityService() {
-    private val revisions = ConcurrentHashMap<Int, Long>()
-    override fun onServiceConnected() { instance = this }
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event == null) return
-        val all = windowsOnAllDisplays
-        for (i in 0 until all.size()) {
-            val display = all.keyAt(i)
-            if (all.valueAt(i).any { it.id == event.windowId }) revisions.merge(display, 1L, Long::plus)
-        }
-    }
-    fun target(display: Int): Target {
-        val windows = windowsOnAllDisplays[display].orEmpty()
-        val apps = windows.filter { it.type == AccessibilityWindowInfo.TYPE_APPLICATION }
-        var soleRoot:TouchableBounds?=null
-        val rootBoundsByWindow=mutableMapOf<Int,TouchableBounds>()
-        val packages = apps.mapNotNull { window -> window.root?.let { node ->
+    private val revisions=TargetWindowRevisions()
+    override fun onServiceConnected() { instance=this }
+    private fun evidence(window:AccessibilityWindowInfo,readSystemRoot:Boolean=false,readAppRoot:Boolean=true):TargetWindowEvidence {
+        val rect=Rect();window.getBoundsInScreen(rect)
+        val region=Region();window.getRegionInScreen(region)
+        val pieces=mutableListOf<TouchableBounds>();val iterator=RegionIterator(region);val piece=Rect()
+        while(iterator.next(piece))pieces.add(TouchableBounds(piece.left,piece.top,piece.right,piece.bottom))
+        var rootBounds:TouchableBounds?=null;var pkg:String?=null
+        if(window.type==AccessibilityWindowInfo.TYPE_APPLICATION && readAppRoot || readSystemRoot)window.root?.let {node->
             try {
-                if(!node.refresh())return@let null
-                val rootBounds=Rect();node.getBoundsInScreen(rootBounds)
-                val root=TouchableBounds(rootBounds.left,rootBounds.top,rootBounds.right,rootBounds.bottom)
-                rootBoundsByWindow[window.id]=root
-                if(apps.size==1)soleRoot=root
-                node.packageName?.toString()
-            } finally { @Suppress("DEPRECATION") node.recycle() }
-        } }.distinct()
-        val soleRegion=if(windows.size==1 && apps.size==1)android.graphics.Region().also {apps.single().getRegionInScreen(it)} else null
-        val visible=soleRegion?.bounds?.let {TouchableBounds(it.left,it.top,it.right,it.bottom)}
-        val canonical=displayFacts(this).singleOrNull {it.id==display}?.let {FullScreenGeometry.canonicalRoot(it,windows.size,apps.size,soleRoot,visible,soleRegion?.isRect==true)}
-        // Structural changes terminate a held controller action. Text/content
-        // callbacks caused by that action must not be mistaken for a new layout.
-        val layoutRevision = windows.joinToString(";") { window ->
-            val bounds = Rect(); window.getBoundsInScreen(bounds)
-            val geometry=canonical?.let {"root-layout:$it"} ?: "window:$bounds"
-            "${window.id}:${window.type}:${window.layer}:${window.isFocused}:${window.isActive}:$geometry:root:${rootBoundsByWindow[window.id]}"
+                if(node.refresh()) {
+                    val root=Rect();node.getBoundsInScreen(root);rootBounds=TouchableBounds(root.left,root.top,root.right,root.bottom)
+                    pkg=node.packageName?.toString()
+                }
+            }finally { @Suppress("DEPRECATION") node.recycle() }
         }
-        val revision="$layoutRevision:${revisions[display] ?: 0}"
-        val validity = when { packages.size > 1 -> "ambiguous"; packages.isEmpty() -> "unknown"; else -> "valid" }
-        return Target(packages.singleOrNull(), validity, revision,if(canonical!=null)visible else null,layoutRevision)
+        return TargetWindowEvidence(window.id,window.type,window.layer,window.isFocused,window.isActive,
+            TouchableBounds(rect.left,rect.top,rect.right,rect.bottom),pieces,region.isRect,pkg,rootBounds)
+    }
+    override fun onAccessibilityEvent(event:AccessibilityEvent?) {
+        if(event==null)return
+        val kind=TargetEventKind.fromAndroidType(event.eventType)
+        val all=windowsOnAllDisplays
+        val current=linkedMapOf<Int,List<TargetWindowEvidence>>()
+        for(index in 0 until all.size()) {
+            val display=all.keyAt(index)
+            // Only an exact system window is eligible for the content-only exclusion.
+            // Never trust the event's package string without corroborating its root.
+            current[display]=all.valueAt(index).map {window->evidence(window,kind==TargetEventKind.CONTENT && window.id==event.windowId && window.type==AccessibilityWindowInfo.TYPE_SYSTEM,readAppRoot=false)}
+        }
+        revisions.event(kind,event.windowId,event.packageName?.toString(),current)
+    }
+    fun target(display:Int):Target {
+        val fact=displayFacts(this).singleOrNull {it.id==display} ?: return Target(null,"unknown","display-missing")
+        return UpperTargetResolver.resolve(fact,windowsOnAllDisplays[display].orEmpty().map {evidence(it)},revisions)
     }
     override fun onInterrupt() { invalidated?.invoke() }
-    override fun onUnbind(intent: android.content.Intent?): Boolean { instance = null; invalidated?.invoke(); return super.onUnbind(intent) }
-    override fun onDestroy() { instance = null; invalidated?.invoke(); super.onDestroy() }
+    override fun onUnbind(intent:android.content.Intent?):Boolean { instance=null;invalidated?.invoke();return super.onUnbind(intent) }
+    override fun onDestroy() { instance=null;invalidated?.invoke();super.onDestroy() }
     companion object {
-        @Volatile var instance: ThorAccessibilityService? = null
-        @Volatile var invalidated: (() -> Unit)? = null
+        @Volatile var instance:ThorAccessibilityService?=null
+        @Volatile var invalidated:(()->Unit)?=null
     }
 }

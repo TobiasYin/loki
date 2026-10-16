@@ -37,7 +37,8 @@ for name,path in artifacts.items():
    assert "name='dev.thor.inputlab'" in badging
    assert 'android.permission.INTERNET' not in permissions
    assert not any('/chat/' in f for f in files)
-   assert ('RunnerProvider' in manifest) == ('debug' in name)
+   assert ('dev.thor.inputlab.RunnerProvider' in manifest) == ('debug' in name)
+   assert ('dev.thor.inputlab.ScenarioRunnerProvider' in manifest) == ('debug' in name)
    assert ('dev.thor.inputlab.permission.CONTROL' in manifest) == ('debug' in name)
   report[name]={'path':str(path.relative_to(root)),'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'bytes':path.stat().st_size,'permissions':permissions.strip()}
  (root/'build/integration'/f'{name}-manifest.txt').write_text(manifest)

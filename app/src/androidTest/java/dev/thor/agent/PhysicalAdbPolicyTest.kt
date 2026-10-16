@@ -145,12 +145,12 @@ class PhysicalAdbPolicyTest {
                 js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false}))")
             }
             for((label,screen,value,approve) in listOf(
-                listOf("upper-independent","upper",96,true),listOf("lower-independent","lower",80,true),
+                listOf("upper-independent","upper",42,true),listOf("lower-independent","lower",37,true),
                 listOf("upper-restore","upper",originalPanels.getValue("upper"),true),
                 listOf("lower-restore","lower",originalPanels.getValue("lower"),true))) {
                 val target=screen as String;val level=value as Int;val accepted=approve as Boolean
                 newSession();val before=listOf(panel("upper"),panel("lower"))
-                send("Thor 双屏独立亮度验收：先读取 adb-operations 和 references/thor-brightness.md。按手册先分别读取两屏原值，再执行唯一的一次写入 debug_thor_brightness(action=set,screen=$target,value=$level)，最后分别读取两屏回验。读取操作不限制次数，写入仅这一次，无需批准；拒绝后停止。不要执行 Shell 或其他写操作。本轮目标值就是测试指定值；下一轮负责恢复。")
+                send("Thor 双屏独立亮度验收：先读取 adb-operations 和 references/thor-brightness.md。按手册先分别读取两屏原值，再执行唯一的一次写入 debug_thor_brightness(action=set,screen=$target,value=$level)，最后分别读取两屏回验。读取操作不限制次数，写入仅这一次，无需批准；拒绝后停止。不要执行 Shell 或其他写操作。本轮目标值为整数百分比 $level%；下一轮负责恢复。")
                 val events=finished(label as String);assertFalse(events.any {it.getString("type")=="awaiting_user"});val after=listOf(panel("upper"),panel("lower"));val index=if(target=="upper")0 else 1
                 assertEquals("Other screen must stay unchanged",before[1-index],after[1-index])
                 if(accepted)assertTrue("Requested brightness within firmware quantization",kotlin.math.abs(level-after[index])<=1) else assertEquals(before,after)

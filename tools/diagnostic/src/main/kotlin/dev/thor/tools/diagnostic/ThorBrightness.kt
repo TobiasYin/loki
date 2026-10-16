@@ -33,9 +33,15 @@ class ThorBrightness(private val context: Context) {
             } finally {input.recycle();output.recycle()}
         }
         val before=transact(null)
-        if(command.mutates){beforeMutation();transact(command.value)}
+        val requestedRaw=command.value?.let {ThorBrightnessPercent.toFirmware(it)}
+        if(command.mutates){beforeMutation();transact(requestedRaw)}
         val after=transact(null)
-        return mapOf("screen" to command.screen,"displayId" to display!!.displayId,"displayName" to display.name,"before" to before,"brightness" to after,
-            "requested" to command.value,"verified" to (!command.mutates || kotlin.math.abs(command.value!!-after)<=1),"quantizationTolerance" to 1,"policyTier" to "white","policyVersion" to ShellCommandPolicy.VERSION)
+        return mapOf("screen" to command.screen,"displayId" to display!!.displayId,"displayName" to display.name,
+            "unit" to "percent","before" to ThorBrightnessPercent.fromFirmware(before),"brightness" to ThorBrightnessPercent.fromFirmware(after),
+            "requested" to command.value,"verified" to (!command.mutates || ThorBrightnessPercent.verified(command.value!!,after)),
+            "quantizationTolerance" to 1,"policyTier" to "white","policyVersion" to ShellCommandPolicy.VERSION,
+            // Only the service client uses this to retain strict raw verification while polling.
+            // It is removed before publishing the result to the Agent or UI.
+            "firmwareDiagnostics" to mapOf("brightness" to after,"unit" to "firmware_0_255"))
     }
 }

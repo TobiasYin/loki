@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.UpperTargetResolverTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:05.186Z" hostname="JGJHX5JPGF" time="0.013">
+  <properties/>
+  <testcase name="overlaysPackagesRootGeometryFocusLayerAndRegionChangesRemainStrict" classname="dev.thor.tools.UpperTargetResolverTest" time="0.009"/>
+  <testcase name="structuralSystemEventsAndSpoofedOrUnknownSystemOwnersAreNeverFiltered" classname="dev.thor.tools.UpperTargetResolverTest" time="0.001"/>
+  <testcase name="applicationViewFeedbackExpiresNewObservationsWithoutInventingWindowStructureChanges" classname="dev.thor.tools.UpperTargetResolverTest" time="0.001"/>
+  <testcase name="edgeToEdgeRootNeverAuthorizesStatusNavigationBarsOrAnOverlayHole" classname="dev.thor.tools.UpperTargetResolverTest" time="0.0"/>
+  <testcase name="regionIsIntersectedWithRootWindowAndDisplayAndUnsafeShapesCannotTouchAnywhere" classname="dev.thor.tools.UpperTargetResolverTest" time="0.0"/>
+  <testcase name="lowerScreenChangesDoNotInvalidateUpperAndRemovedWindowEventsRetainDisplayOwnership" classname="dev.thor.tools.UpperTargetResolverTest" time="0.0"/>
+  <testcase name="onlyTrueWindowEventsAreStructuralAndSystemInteractionsCannotUseContentExclusion" classname="dev.thor.tools.UpperTargetResolverTest" time="0.001"/>
+  <testcase name="ownAppContentStillInvalidatesNewInputButHeldStructureIsIndependent" classname="dev.thor.tools.UpperTargetResolverTest" time="0.0"/>
+  <testcase name="soleFullscreenCanonicalClippingKeepsExistingIntersectionGuardAndExpiry" classname="dev.thor.tools.UpperTargetResolverTest" time="0.001"/>
+  <testcase name="ordinaryApplicationKeepsClipWhileClockAndBatteryContentUpdatesDoNotInvalidateInput" classname="dev.thor.tools.UpperTargetResolverTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

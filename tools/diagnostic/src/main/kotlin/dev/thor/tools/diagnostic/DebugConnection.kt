@@ -22,7 +22,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(10)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(11)
     private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
@@ -183,10 +183,14 @@ class DebugConnection(private val context: Context, private val invalidated: () 
                         val actual=read.getJSONObject("data")
                         requireTool(actual.getInt("displayId")==data.getInt("displayId"),Code.TARGET_CHANGED,"Thor display identity changed during brightness verification")
                         data.put("brightness",actual.getInt("brightness"))
-                        data.put("verified",kotlin.math.abs(command.value!!-actual.getInt("brightness"))<=1)
+                        data.put("verified",ThorBrightnessPercent.verified(command.value!!,actual.getJSONObject("firmwareDiagnostics").getInt("brightness")))
                         if(data.getBoolean("verified"))break
                         Thread.sleep(50)
                     } while(SystemClock.elapsedRealtime()<end)
+                    raw=response.toString()
+                }
+                if(!response.has("error")) {
+                    response.getJSONObject("data").remove("firmwareDiagnostics")
                     raw=response.toString()
                 }
                 raw

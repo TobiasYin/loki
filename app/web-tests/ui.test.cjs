@@ -1,12 +1,14 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const {JSDOM}=require('jsdom');
 function setup(){const dom=new JSDOM(fs.readFileSync('src/main/assets/chat/index.html','utf8'),{runScripts:'outside-only',url:'https://appassets.androidplatform.net/assets/chat/index.html'});const calls=[];dom.window.ThorUI={postMessage:s=>calls.push(JSON.parse(s))};for(const name of ['vendor/marked.umd.js','vendor/purify.min.js','ui.js'])dom.window.eval(fs.readFileSync('src/main/assets/chat/'+name,'utf8'));dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(value=''){this.returnValue=value;this.open=false;this.dispatchEvent(new dom.window.Event('close'));};return{window:dom.window,doc:dom.window.document,calls};}
 function state(){return{selected:'a',sessions:[{id:'a',title:'会话 A',archivedAt:null,updatedAt:1,capabilities:{perception:true,search:true,screen_control:false,debug:false}}],messages:[],runs:[],events:[],availability:{perception:'模拟就绪',search:'真实服务未配置',screen_control:'待验证',debug:'高权限'}};}
+function disclose(window,node,open=true){assert.ok(node,'Disclosure must exist');if(node.open!==open)node.querySelector(':scope > summary').click();node.dispatchEvent(new window.Event('toggle'));return node;}
+function openOperations(window,doc){return disclose(window,doc.querySelector('details.run'));}
 test('gray approval binds actual run and approval ID; black denial stays structured',()=>{
  const{window,doc,calls}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'streaming'}];
  s.runs=[{id:'r',sessionId:'a',status:'awaiting_user',approval:{id:'approval-1',summary:'灰名单 · 屏幕焦点锁 1'}}];window.receiveNative(s);
  doc.querySelector('.wait button').click();assert.deepEqual(calls.at(-1),{op:'approve',runId:'r',approvalId:'approval-1'});
  s.runs[0].status='completed';s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'c',data:{toolId:'debug.shell',error:'COMMAND_BLOCKED',outcome:'observed',content:[{type:'text',text:JSON.stringify({policyTier:'black',executed:false,reason:'禁止格式化'})}]}}];window.receiveNative(s);
- assert.equal(doc.querySelector('.wait'),null);assert.match(doc.querySelector('.tool-card').textContent,/已禁止/);assert.match(doc.querySelector('.structured').textContent,/禁止格式化/);assert.doesNotMatch(doc.querySelector('.tool-card').textContent,/"executed"/);
+ assert.equal(doc.querySelector('.wait'),null);assert.match(doc.querySelector('.attention').textContent,/已禁止/);assert.equal(doc.querySelector('.tool-card'),null);openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-card').textContent,/已禁止/);assert.match(doc.querySelector('.structured').textContent,/禁止格式化/);assert.doesNotMatch(doc.querySelector('.tool-card').textContent,/"executed"/);
 });
 test('untrusted text never creates HTML, scripts, remote links or images',()=>{const{window,doc}=setup();const s=state();s.messages.push({id:'m',sessionId:'a',role:'assistant',text:'<img src="https://evil.invalid" onerror="alert(1)"><script>bad()</script>',status:'completed'});window.receiveNative(s);assert.equal(doc.querySelector('#chat img'),null);assert.equal(doc.querySelector('#chat script'),null);assert.match(doc.querySelector('#chat').textContent,/<img/);});
 test('failed and unknown remain visible outside collapsed disclosure',()=>{const{window,doc}=setup();const s=state();s.messages.push({id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'failed'});s.runs.push({id:'r',sessionId:'a',status:'failed',expanded:false,stopReason:'工具失败'});s.events.push({runId:'r',sequence:1,outcome:'unknown',summary:'提交结果未知',elapsedMs:100,type:'tool_result'});window.receiveNative(s);assert.ok(!doc.querySelector('details.run') || !doc.querySelector('details.run').open);const warnings=[...doc.querySelectorAll('.attention')];assert.equal(warnings.length,2);assert.ok(warnings.every(n=>n.parentElement.tagName!=='DETAILS'));});
@@ -40,7 +42,19 @@ test('failed recognition keeps transcript editable without sending partial speec
 test('stream events become one tool card and an aggregated thinking panel without raw event JSON',()=>{
  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'回答',status:'streaming'}];
  s.events=[{type:'thinking_delta',data:{text:'先看'},summary:'{"type":"thinking_delta"}'},{type:'thinking_delta',data:{text:'攻略'}},{type:'text_delta',data:{text:'回答'}},{type:'tool_call_update',toolCallId:'c',data:{toolName:'skills_read',arguments:{name:'game-guide'}}},{type:'tool_started',toolCallId:'c',data:{toolId:'skills.read',arguments:{name:'game-guide'}}},{type:'tool_result',toolCallId:'c',data:{toolId:'skills.read',outcome:'observed',content:[{type:'text',text:JSON.stringify({content:'安全文本 <script>bad()</script>',resources:['references/a.md']})}]}}].map((e,i)=>({...e,runId:'r',sequence:i+1,elapsedMs:10}));
- window.receiveNative(s);assert.equal(doc.querySelectorAll('.tool-card').length,1);assert.match(doc.querySelector('.thinking').textContent,/先看攻略/);assert.match(doc.querySelector('.tool-card').textContent,/读取 Skill · 已完成/);assert.ok(doc.querySelector('.structured dt'));assert.equal(doc.querySelector('#chat pre'),null);assert.equal(doc.querySelector('#chat script'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/thinking_delta|text_delta|"toolId"/);
+ window.receiveNative(s);assert.equal(doc.querySelectorAll('.tool-card').length,1);assert.equal(doc.querySelector('.structured'),null);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.thinking').textContent,/先看攻略/);assert.match(doc.querySelector('.tool-card').textContent,/读取 Skill · 已完成/);assert.ok(doc.querySelector('.structured dt'));assert.equal(doc.querySelector('#chat pre'),null);assert.equal(doc.querySelector('#chat script'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/thinking_delta|text_delta|"toolId"/);
+});
+test('brightness percentages are scoped to current percent objects; legacy and unrelated values keep their units',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'完成'}];
+ const definitions=[['percent','debug.thor_brightness',{action:'set',screen:'upper',value:42},{unit:'percent',before:49,brightness:42,requested:42,quantizationTolerance:1,nested:{value:17,before:23}}],['legacy','debug.thor_brightness',{action:'set',screen:'upper',value:124},{before:125,brightness:124,requested:124}],['other','files.write',{value:42},{before:49,brightness:124,requested:42}]];
+ s.events=definitions.flatMap(([toolCallId,toolId,args,data],i)=>[{runId:'r',sequence:i*2+1,type:'tool_started',toolCallId,data:{toolId,arguments:args}},{runId:'r',sequence:i*2+2,type:'tool_result',toolCallId,data:{toolId,outcome:'submitted',content:[{type:'text',text:JSON.stringify(data)}]}}]);window.receiveNative(s);
+ const [percent,legacy,other]=doc.querySelectorAll('.tool-card');for(const card of [percent,legacy,other])disclose(window,card);const fields=node=>[...node.querySelectorAll('dt')].map(dt=>[dt.textContent,dt.nextElementSibling.textContent]);
+ assert.ok(fields(percent).some(([k,v])=>k==='value'&&v==='42%'));for(const [key,value] of [['修改前','49%'],['亮度','42%'],['请求值','42%'],['量化容差','1%']])assert.ok(fields(percent).some(([k,v])=>k===key&&v===value));
+ assert.ok(fields(percent).some(([k,v])=>k==='修改前'&&v==='23'));assert.doesNotMatch(legacy.textContent,/%/);assert.doesNotMatch(other.textContent,/%/);assert.ok(fields(legacy).some(([k,v])=>k==='亮度'&&v==='124'));
+ const pending=structuredClone(s);pending.runs[0].status='executing_tools';pending.events=[{runId:'r',sequence:1,type:'tool_started',toolCallId:'new',data:{toolId:'debug.thor_brightness',arguments:{action:'set',screen:'lower',value:37}}}];window.receiveNative(pending);disclose(window,doc.querySelector('.tool-card'));assert.ok(fields(doc.querySelector('.tool-card')).some(([k,v])=>k==='value'&&v==='37%'));
+});
+test('semantic tree, scrolling and dragging use readable operation labels',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'完成'}];s.events=['perception.ui_tree','input.scroll','input.drag'].map((toolId,i)=>({runId:'r',sequence:i+1,type:'tool_started',toolCallId:String(i),data:{toolId,arguments:{}}}));window.receiveNative(s);assert.deepEqual([...doc.querySelectorAll('.tool-card summary')].map(n=>n.textContent),['读取组件树 · 执行中','滚动页面 · 执行中','拖动控件 · 执行中']);
 });
 test('Skill manager exposes metadata and explicit read, enable and import actions',()=>{
  const{window,doc,calls}=setup();const s=state();s.skills=[{name:'game-guide',description:'需要攻略时使用',hash:'version',enabled:true,builtin:false,fileCount:2}];window.receiveNative(s);
@@ -120,4 +134,72 @@ test('preparation status stays inside composer and stop targets the selected pen
 });
 test('Escape cancels a keyboard voice hold before moving focus away',()=>{
  const{window,doc,calls}=setup();window.receiveNative(state());doc.querySelector('#voice-toggle').click();const node=doc.querySelector('#voice-hold');node.dispatchEvent(new window.KeyboardEvent('keydown',{key:' ',bubbles:true,cancelable:true}));doc.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));node.dispatchEvent(new window.KeyboardEvent('keyup',{key:' ',bubbles:true}));assert.equal(calls.filter(c=>c.op==='voice.cancel').length,1);assert.equal(calls.filter(c=>c.op==='voice.finish').length,0);assert.equal(doc.querySelector('#voice-overlay').hidden,true);
+});
+
+function treeHistory(callCount=20){
+ const s=state();s.runs=[{id:'large',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'large-message',runId:'large',sessionId:'a',role:'assistant',text:'继续读取'}];
+ s.events=Array.from({length:callCount},(_,i)=>{
+  const nodes=Array.from({length:36},(_,j)=>({text:`tool-${i}-node-${j}`,visibleToUser:j<8,scrollAncestorRef:`current-container-${i}`,bounds:[0,j*100,500,j*100+80],...Object.fromEntries(Array.from({length:26},(_,k)=>[`field${k}`,`value-${i}-${j}-${k}`]))}));
+  return [{runId:'large',sequence:i*2+1,type:'tool_started',toolCallId:`call-${i}`,data:{toolId:'perception.ui_tree',arguments:{query:`target-${i}`}}},{runId:'large',sequence:i*2+2,type:'tool_result',toolCallId:`call-${i}`,data:{toolId:'perception.ui_tree',outcome:'observed',content:[{type:'text',text:JSON.stringify({nodes,coverage:{offscreenExposedNodes:28}})}]}}];
+ }).flat();return s;
+}
+test('large collapsed operation histories construct bounded DOM across stream updates; opening each level reveals only its requested fields',()=>{
+ const{window,doc}=setup();const s=treeHistory();let created=0;const create=doc.createElement.bind(doc);doc.createElement=(...args)=>{created++;return create(...args);};
+ window.receiveNative(s);assert.ok(created<200,`Collapsed history created ${created} elements`);assert.ok(doc.querySelector('#chat').querySelectorAll('*').length<35);
+ assert.match(doc.querySelector('details.run > summary').textContent,/20 项操作/);assert.equal(doc.querySelector('.tool-card,.tool-body,.structured'),null);assert.ok(doc.querySelector('.activity-label.shimmer'));
+ const baseline=created;
+ for(let i=0;i<8;i++){s.messages[0].text+='。';s.events.push({runId:'large',sequence:41+i,type:'text_delta',data:{text:'。'}});window.receiveNative(s);}
+ assert.ok(created-baseline<200,`Collapsed streaming rebuilt ${created-baseline} elements`);assert.equal(doc.querySelector('.tool-card,.structured'),null);
+ openOperations(window,doc);const cards=[...doc.querySelectorAll('.tool-card')];assert.equal(cards.length,20);assert.ok(cards.every(card=>card.children.length===1));assert.equal(doc.querySelector('.structured'),null);
+ disclose(window,cards[7]);assert.match(cards[7].textContent,/tool-7-node-35/);assert.match(cards[7].textContent,/current-container-7/);assert.match(cards[7].textContent,/value-7-35-25/);
+ assert.equal(doc.querySelectorAll('.tool-body').length,1);assert.ok(cards.filter(card=>card!==cards[7]).every(card=>card.children.length===1));
+ disclose(window,cards[7],false);assert.equal(doc.querySelector('.tool-body,.structured'),null);disclose(window,doc.querySelector('details.run'),false);assert.equal(doc.querySelector('.tool-card'),null);
+});
+test('expanded tool content stays current across deltas and session switches, while collapsed siblings stay lazy',()=>{
+ const{window,doc,calls}=setup();const s=treeHistory(2);s.events.unshift({runId:'large',sequence:0,type:'thinking_delta',data:{text:'先检查'}});window.receiveNative(s);
+ disclose(window,doc.querySelector('.thinking'));openOperations(window,doc);disclose(window,doc.querySelectorAll('.tool-card')[0]);
+ assert.ok(calls.some(c=>c.op==='expanded' && c.runId==='large' && c.expanded));
+ // Native has not acknowledged expanded yet. A simultaneous stream update must
+ // retain the user's immediate disclosure choice instead of closing it.
+ const next=structuredClone(s);next.messages[0].text='读取到新结果';next.events.push({runId:'large',sequence:5,type:'tool_result',toolCallId:'call-0',data:{toolId:'perception.ui_tree',outcome:'observed',content:[{type:'text',text:JSON.stringify({nodes:[{text:'更新后的实际字段',visibleToUser:true}]})}]}});window.receiveNative(next);
+ assert.ok(doc.querySelector('details.run').open);assert.ok(doc.querySelector('.thinking').open);let cards=doc.querySelectorAll('.tool-card');assert.ok(cards[0].open);assert.match(cards[0].textContent,/更新后的实际字段/);assert.equal(cards[1].open,false);assert.equal(cards[1].querySelector('.tool-body'),null);
+ const away=structuredClone(next);away.sessions.push({...away.sessions[0],id:'b',title:'会话 B'});away.selected='b';window.receiveNative(away);assert.equal(doc.querySelector('details.run'),null);window.receiveNative(next);
+ assert.ok(doc.querySelector('details.run').open);assert.ok(doc.querySelector('.tool-card').open);assert.match(doc.querySelector('.tool-body').textContent,/更新后的实际字段/);
+ disclose(window,doc.querySelector('details.run'),false);assert.equal(doc.querySelector('.tool-card'),null);window.receiveNative({...next,messages:[{...next.messages[0],text:'再流入'}]});assert.equal(doc.querySelector('.tool-card'),null);
+ openOperations(window,doc);assert.ok(doc.querySelector('.tool-card').open);assert.match(doc.querySelector('.tool-body').textContent,/更新后的实际字段/);
+ const acknowledged=structuredClone(next);acknowledged.runs[0].expanded=true;window.receiveNative(acknowledged);assert.ok(doc.querySelector('details.run').open);
+ const finished=structuredClone(acknowledged);finished.runs[0].status='completed';finished.runs[0].expanded=false;window.receiveNative(finished);assert.equal(doc.querySelector('details.run').open,false);assert.equal(doc.querySelector('.tool-card'),null);
+});
+test('collapsed operation history keeps nested unknown outcomes, failed tools and approval actions immediately visible',()=>{
+ const{window,doc,calls}=setup();const s=treeHistory(2);s.runs[0].status='awaiting_user';s.runs[0].approval={id:'actual-approval',summary:'确认安装这个应用'};
+ s.events[1].data.outcome='unknown';s.events[3].data.error='BACKEND_UNAVAILABLE';window.receiveNative(s);
+ assert.equal(doc.querySelector('.tool-card,.structured'),null);const warnings=[...doc.querySelectorAll('.attention')];assert.ok(warnings.some(n=>n.textContent.includes('副作用未知')));assert.ok(warnings.some(n=>n.textContent.includes('执行失败')));assert.ok(warnings.every(n=>!n.closest('details')));
+ assert.match(doc.querySelector('.wait').textContent,/确认安装这个应用/);doc.querySelector('.wait button').click();assert.deepEqual(calls.at(-1),{op:'approve',runId:'large',approvalId:'actual-approval'});
+ openOperations(window,doc);disclose(window,doc.querySelectorAll('.tool-card')[1]);assert.match(doc.querySelectorAll('.tool-card')[1].textContent,/BACKEND_UNAVAILABLE/);
+});
+
+test('common input operations and streaming tool aliases have readable labels; child toggle never changes its parent disclosure',()=>{
+ const{window,doc,calls}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
+ const names=[['input.tap','点击上屏'],['input.long_press','长按上屏'],['input.swipe','滑动上屏'],['input.press_button','按手柄键'],['input.set_axes','移动摇杆与扳机'],['input.release_inputs','释放输入']];
+ s.events=names.map(([toolId],i)=>({runId:'r',sequence:i+1,type:'tool_started',toolCallId:'c'+i,data:{toolId,arguments:{target:'可读参数'}}}));
+ s.events.push({runId:'r',sequence:7,type:'tool_call_update',toolCallId:'pending',data:{toolName:'input_tap',arguments:{x:30,y:40}}});window.receiveNative(s);
+ const cards=doc.querySelectorAll('.tool-card');assert.deepEqual([...cards].slice(0,6).map(c=>c.querySelector('summary').textContent),names.map(([,label])=>label+' · 执行中'));assert.equal(doc.querySelector('.activity-label.shimmer').textContent,'点击上屏');
+ // Accessibility/keyboard/programmatic state changes use toggle too, without
+ // depending on a mouse click. A bubbling child toggle must not notify Native
+ // that the outer operation history was closed.
+ cards[0].open=true;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.ok(cards[0].querySelector('.structured'));
+ cards[0].open=false;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.equal(cards[0].querySelector('.tool-body'),null);assert.ok(doc.querySelector('details.run').open);assert.equal(calls.filter(c=>c.op==='expanded').length,0);
+ window.receiveNative({...s,messages:[{...s.messages[0],text:'流式更新'}]});assert.equal(doc.querySelector('.tool-card').open,false);assert.equal(doc.querySelector('.tool-body'),null);
+});
+
+test('unfinished legacy brightness histories never guess units while a current running input uses integer percent',()=>{
+ const{window,doc}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.runs=[{id:'r',sessionId:'a',status:'interrupted',expanded:true}];
+ s.events=[42,124].map((value,i)=>({runId:'r',sequence:i+1,type:'tool_started',toolCallId:'old-'+i,data:{toolId:'debug.thor_brightness',arguments:{action:'set',screen:'upper',value}}}));
+ for(const status of ['interrupted','failed','cancelled','completed']){
+  s.runs[0].status=status;window.receiveNative(s);openOperations(window,doc);for(const card of doc.querySelectorAll('.tool-card'))disclose(window,card);
+  const cards=doc.querySelectorAll('.tool-card');assert.doesNotMatch(cards[0].textContent,/%/);assert.doesNotMatch(cards[1].textContent,/%/);
+  const values=[...cards].map(card=>[...card.querySelectorAll('dt')].find(dt=>dt.textContent==='value').nextElementSibling.textContent);assert.deepEqual(values,['42','124']);
+ }
+ const running=structuredClone(s);running.runs[0].status='executing_tools';running.events=[{runId:'r',sequence:1,type:'tool_started',toolCallId:'current',data:{toolId:'debug.thor_brightness',arguments:{action:'set',screen:'lower',value:42}}}];window.receiveNative(running);openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));
+ const value=[...doc.querySelectorAll('.tool-card dt')].find(dt=>dt.textContent==='value');assert.equal(value.nextElementSibling.textContent,'42%');
 });

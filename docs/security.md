@@ -23,7 +23,7 @@ Native 与实际 shell UID 2000 执行端共同执行固定的白/灰/黑名单�
 
 命令只解析为单个 argv，规范化到审核的 /system/bin 可执行文件；生产路径不调用 sh -c，不支持变量、命令替换、转义、组合、管道、重定向、解释器或第三方二进制。灰名单批准绑定 Native run/request、原始参数指纹、deadline 与 capability epoch；拒绝、停止或重新授权不会复活旧请求。UID 端仍重新分类，即使伪造 approvalHash 也不能运行黑名单命令。debug.command_policy 只读分类，不执行。
 
-Thor 双屏亮度使用固定的 debug.thor_brightness 工具：参数只接受 read/set、upper/lower、0–255；由 Native 识别当前显示编号并通过已审查固件接口执行。read/set 均为白名单，但实际 set 仍在授权 commit 内提交。未知固件/缺失屏幕拒绝，不开放任意 Binder transaction。服务在验证 app caller、owner、短 lease 后只为此固定操作使用 shell 自身身份，取消/超时仍生效。
+Thor 双屏亮度使用固定的 debug.thor_brightness 工具：参数只接受 read/set、upper/lower、0–100 整数百分比；由 Native 识别当前显示编号并通过已审查固件接口执行。read/set 均为白名单，但实际 set 仍在授权 commit 内提交。未知固件/缺失屏幕拒绝，不开放任意 Binder transaction。服务在验证 app caller、owner、短 lease 后只为此固定操作使用 shell 自身身份，取消/超时仍生效。
 
 不把限制后的命令接口宣称为通用 Shell 沙箱，也不将它用于绕过其他工具授权。命令能力和所有文件工具仍依赖当前会话 adb_debug；系统设置不能由 JS 自行授权。停止不能撤回已提交的系统变更，恢复需要新的合法操作。结构化文件工具的备份保护仍只覆盖其受管配置目录。
 

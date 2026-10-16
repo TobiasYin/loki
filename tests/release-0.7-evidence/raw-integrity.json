@@ -1,0 +1,65 @@
+[
+  {
+    "report": "scenarios/physical-scenario-article-report.json",
+    "prefixBytes": 130420,
+    "sha256": "52e2f84b33e8c0c305802f859b1b27d546cf7d7c6da66c2352d8db8a46571954",
+    "records": 282,
+    "passed": true
+  },
+  {
+    "report": "scenarios/physical-scenario-news-report.json",
+    "prefixBytes": 67276,
+    "sha256": "bd4e966f59927e725848077a5e996e7f142cefa10243b75de31c4b7279e12195",
+    "records": 147,
+    "passed": true
+  },
+  {
+    "report": "scenarios/physical-scenario-game-report.json",
+    "prefixBytes": 4171,
+    "sha256": "593308c22ecf56b0e34936d5d086a8ce3e7382a6a4af64da43b0442c0c2c02f0",
+    "records": 9,
+    "passed": true
+  },
+  {
+    "report": "scenarios/physical-scenario-settings-report.json",
+    "prefixBytes": 62575,
+    "sha256": "151bb08432da42c968e71ced10197deb998c3fa27e2265f96318f55f827f4167",
+    "records": 124,
+    "passed": true
+  },
+  {
+    "report": "components/gamepad/physical-gamepad-axes-report.json",
+    "prefixBytes": 38317,
+    "sha256": "ec6e261cd45a5cfed652dd13888df10bad4df89d75a6129b954671f7bfb58175",
+    "records": 12,
+    "passed": true
+  },
+  {
+    "report": "components/gamepad/physical-gamepad-button-report.json",
+    "prefixBytes": 36021,
+    "sha256": "28e801092e133743e441e2c506598f7d0274be8d0e47bb7745fa65c090cb50a9",
+    "records": 12,
+    "passed": true
+  },
+  {
+    "report": "components/gamepad/physical-gamepad-button-cancel-report.json",
+    "prefixBytes": 36034,
+    "sha256": "429c2287630f41b40f185a87e35659ed7c3b81b89f996f645cb05094164c2b49",
+    "records": 12,
+    "passed": true
+  },
+  {
+    "report": "components/gamepad/physical-gamepad-axes-cancel-report.json",
+    "prefixBytes": 38326,
+    "sha256": "4363a35b697513e72e30eb3899b62364f266c77fd2f43acbb48c1bd819627dad",
+    "records": 12,
+    "passed": true
+  },
+  {
+    "report": "components/semantic-ui/physical-semantic-ui-report.json",
+    "prefixBytes": 72653,
+    "sha256": "15f33a562b743da284e4b5d369d8bd24e82084c83bb1f3f0b692a559cc28a35f",
+    "records": 144,
+    "passed": true
+  }
+]

@@ -116,6 +116,9 @@ class LabActivity : Activity(), DisplayManager.DisplayListener, InputManager.Inp
         actions.addView(button("Environment") { showEnvironment() },LinearLayout.LayoutParams(0,rowHeight,1f))
         actions.addView(button("Export ZIP") { chooseExport() },LinearLayout.LayoutParams(0,rowHeight,1f))
         actions.addView(button("Fault probe") { chooseFault() },LinearLayout.LayoutParams(0,rowHeight,1f))
+        actions.addView(button("多步演练") {
+            if(active?.active()!=true && !finishing && controls.visibility==View.VISIBLE) startActivity(Intent(this,ScenarioActivity::class.java))
+        }.apply { contentDescription="多步交互演练" },LinearLayout.LayoutParams(0,rowHeight,1f))
         controls.addView(actions); root.addView(controls)
         arena = Arena()
         root.addView(arena,LinearLayout.LayoutParams(-1,0,1f))

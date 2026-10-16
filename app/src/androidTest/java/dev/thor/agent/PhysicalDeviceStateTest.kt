@@ -42,7 +42,7 @@ class PhysicalDeviceStateTest {
             val dns=JSONObject();for(k in listOf("private_dns_mode","private_dns_specifier"))dns.put(k,shell("settings get global $k"))
             return obj("upper" to panel("upper"),"lower" to panel("lower"),"settings" to settings,"privateDns" to dns,"displays" to JSONArray(context.getSystemService(DisplayManager::class.java).displays.filter {it.displayId==0 || it.name=="Screen-2"}.map {obj("id" to it.displayId,"refreshRate" to it.mode.refreshRate)}))
         }
-        val evidence=obj("scope" to "Native cleanup/readback only; not Agent execution proof")
+        val evidence=obj("scope" to "Native cleanup/readback only; not Agent execution proof","brightnessUnit" to "percent","legacyBrightnessUnit" to "raw_0_255")
         try {
             evidence.put("before",snapshot())
             args.getString("cleanupSession")?.let {sid->
@@ -66,14 +66,14 @@ class PhysicalDeviceStateTest {
                 assertTrue(cleared());evidence.put("testControlsDisabled",true).put("cleanupSession",sid)
             }
             if(args.getString("restoreBaseline")=="true") {
-                for(screen in listOf("upper","lower"))panel(screen,args.getString(if(screen=="upper")"baselineUpper" else "baselineLower")!!.toInt())
+                for(screen in listOf("upper","lower"))panel(screen,args.getString(if(screen=="upper")"baselineUpperPercent" else "baselineLowerPercent")!!.toInt())
                 Thread.sleep(500)
                 val legacy=args.getString("legacyBrightness")!!.toInt();assertTrue(legacy in 0..255);shell("settings put system screen_brightness $legacy")
                 Thread.sleep(500)
                 evidence.put("restoredRecordedBrightnessBaseline",true)
             }
             val after=snapshot();evidence.put("after",after)
-            if(args.getString("restoreBaseline")=="true")for(screen in listOf("upper","lower"))assertTrue(kotlin.math.abs(after.getJSONObject(screen).getInt("brightness")-args.getString(if(screen=="upper")"baselineUpper" else "baselineLower")!!.toInt())<=1)
+            if(args.getString("restoreBaseline")=="true")for(screen in listOf("upper","lower"))assertTrue(kotlin.math.abs(after.getJSONObject(screen).getInt("brightness")-args.getString(if(screen=="upper")"baselineUpperPercent" else "baselineLowerPercent")!!.toInt())<=1)
             evidence.put("passed",true)
         } finally {File(context.filesDir,"physical-device-final-state.json").writeText(evidence.toString(2));ins.runOnMainSync {activity.finish()};ins.waitForIdleSync()}
     }

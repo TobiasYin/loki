@@ -30,6 +30,8 @@ object ToolPack {
         Descriptor("input.tap", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.long_press", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.swipe", Capability.SCREEN_CONTROL, Effect.INPUT, true),
+        Descriptor("input.scroll", Capability.SCREEN_CONTROL, Effect.INPUT, true),
+        Descriptor("input.drag", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.press_button", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.set_axes", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.release_inputs", Capability.SCREEN_CONTROL, Effect.INPUT),

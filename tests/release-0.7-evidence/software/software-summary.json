@@ -1,0 +1,54 @@
+{
+  "jvm": {
+    "native-bridge/core": {
+      "suites": 3,
+      "tests": 39,
+      "failures": 0,
+      "errors": 0
+    },
+    "tools/core": {
+      "suites": 15,
+      "tests": 111,
+      "failures": 0,
+      "errors": 0
+    },
+    "integration/device-authority": {
+      "suites": 1,
+      "tests": 9,
+      "failures": 0,
+      "errors": 0
+    },
+    "app": {
+      "suites": 14,
+      "tests": 62,
+      "failures": 0,
+      "errors": 0
+    },
+    "tests/input-lab-app/app": {
+      "suites": 8,
+      "tests": 74,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "jvmTotal": 295,
+  "js": {
+    "runtime": {
+      "tests": 46,
+      "failures": 0
+    },
+    "app": {
+      "tests": 44,
+      "failures": 0
+    },
+    "bridge": {
+      "tests": 13,
+      "failures": 0
+    }
+  },
+  "jsTotal": 103,
+  "integrationTypecheck": "passed",
+  "specifiedLint": "passed",
+  "debugReleaseBuilds": "passed",
+  "artifactInspection": "passed"
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.integration.DeviceAuthorityTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:07.776Z" hostname="JGJHX5JPGF" time="0.084">
+  <properties/>
+  <testcase name="unpublishedToolAndReplayNeverCommit" classname="dev.thor.integration.DeviceAuthorityTest" time="0.017"/>
+  <testcase name="publicationCannotSwitchBindingOrAddUnknownTool" classname="dev.thor.integration.DeviceAuthorityTest" time="0.0"/>
+  <testcase name="nativeDisconnectCancelsAndCannotRevive" classname="dev.thor.integration.DeviceAuthorityTest" time="0.001"/>
+  <testcase name="lateDeviceReadIsDiscardedByRealGateway" classname="dev.thor.integration.DeviceAuthorityTest" time="0.002"/>
+  <testcase name="queuedCommitRevocationRaceOneHundredTimesHasZeroEffects" classname="dev.thor.integration.DeviceAuthorityTest" time="0.061"/>
+  <testcase name="crossSessionForgedRunSchemaAndDeadlineFail" classname="dev.thor.integration.DeviceAuthorityTest" time="0.001"/>
+  <testcase name="concurrentRunsKeepPublicationCancellationAndReplayLedgersSeparate" classname="dev.thor.integration.DeviceAuthorityTest" time="0.001"/>
+  <testcase name="realGatewayUsesNativeCapabilitySourceAndRejectsOffOn" classname="dev.thor.integration.DeviceAuthorityTest" time="0.0"/>
+  <testcase name="oneToolTimeoutDoesNotRevokeItsRunOrOtherTools" classname="dev.thor.integration.DeviceAuthorityTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

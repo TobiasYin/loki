@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.EvdevButtonsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:05.095Z" hostname="JGJHX5JPGF" time="0.012">
+  <properties/>
+  <testcase name="missingLabelsAmbiguousLabelsAndChangedFirmwareMappingAreUnsupported" classname="dev.thor.tools.EvdevButtonsTest" time="0.008"/>
+  <testcase name="buttonFramesOnlyContainAnAllowedEvKeyThenSynAndReleaseUsesZero" classname="dev.thor.tools.EvdevButtonsTest" time="0.001"/>
+  <testcase name="actualThorLabelsAndKeyLayoutCoverTheAllowedButtonsWithoutGuessingAliases" classname="dev.thor.tools.EvdevButtonsTest" time="0.002"/>
+  <testcase name="currentlyPressedStarBlocksOnlyTheRequestedButtonBeforeSubmission" classname="dev.thor.tools.EvdevButtonsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

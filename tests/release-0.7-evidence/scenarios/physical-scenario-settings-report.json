@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "5a8c2835-5e82-405c-b241-cc903a0838d0",
+  "testRunId": "scenario-68822d09-beab-4416-bd28-fdb24868cc04",
+  "agentRunId": "24791a77-7a3a-4c64-a60c-e0c79edb8286",
+  "senderTraceRef": "live-product:24791a77-7a3a-4c64-a60c-e0c79edb8286:settings",
+  "evidenceMode": "agent_e2e",
+  "scene": "settings",
+  "seed": 7325455703783129672,
+  "page": "saved",
+  "taskPrompt": "请在上屏演练应用打开设备偏好，把模式设为标准，将夜间阅读关闭，用拖动滑块将音量设为60%，保存后查看保存结果并告诉我三项最终值。",
+  "state": {
+    "settingsSaved": true,
+    "settingsValues": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 60
+    },
+    "settingsDraft": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 60
+    },
+    "settingsDragCount": 1,
+    "settingsSaveCount": 1,
+    "settingNavigationCount": 1,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": null,
+    "articleOpenCount": 0,
+    "newsListScrollCount": 0,
+    "detailScrollCount": 0,
+    "listScrollY": 0,
+    "detailScrollY": 0,
+    "maxListScrollY": 0,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "expected": {
+    "settingsValues": {
+      "mode": "标准",
+      "enabled": false,
+      "volume": 60
+    },
+    "newsTargetTitle": "海港观测简报 464",
+    "newsTargetId": "story-21",
+    "newsCode": "N-90204",
+    "articleTitle": "远山手记 295",
+    "articleTopCode": "TOP-84308",
+    "articleBottomCode": "END-28491",
+    "gameTargets": [
+      "stage-0-tile-4",
+      "stage-1-tile-2"
+    ],
+    "gameResult": "GW-33939"
+  },
+  "completed": true,
+  "interruptedReason": null,
+  "geometry": {
+    "displayId": 0,
+    "width": 1920,
+    "height": 1080,
+    "rotation": 1,
+    "densityDpi": 369
+  },
+  "agentAnswerVerified": false,
+  "receiverQualificationVersion": "scenario-ui-observation-v1",
+  "systemInjectionProven": false,
+  "evidence": {
+    "eventPrefixBytes": 62575,
+    "eventPrefixSha256": "151bb08432da42c968e71ced10197deb998c3fa27e2265f96318f55f827f4167",
+    "eventCount": 124,
+    "incomplete": false,
+    "droppedSamples": 0,
+    "sealed": true,
+    "relativePath": "scenario-reports\/5a8c2835-5e82-405c-b241-cc903a0838d0\/events.jsonl"
+  }
+}

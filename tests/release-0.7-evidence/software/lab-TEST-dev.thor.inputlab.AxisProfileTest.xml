@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.inputlab.AxisProfileTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-16T08:44:42.499Z" hostname="JGJHX5JPGF" time="0.002">
+  <properties/>
+  <testcase name="thorProfileFreezesAdvertisedBrakeGasBeforeInput" classname="dev.thor.inputlab.AxisProfileTest" time="0.001"/>
+  <testcase name="unadvertisedStandardTriggerValuesCannotSubstituteForRequiredBrakeGas" classname="dev.thor.inputlab.AxisProfileTest" time="0.0"/>
+  <testcase name="selectedControllerCannotBorrowEvidenceFromAnotherDevice" classname="dev.thor.inputlab.AxisProfileTest" time="0.0"/>
+  <testcase name="incompleteNeutralAndHeldExtraAdvertisedAxisCannotPass" classname="dev.thor.inputlab.AxisProfileTest" time="0.001"/>
+  <testcase name="keyboardVirtualUnknownAmbiguousAndMissingRangesCannotSelectThorProfile" classname="dev.thor.inputlab.AxisProfileTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

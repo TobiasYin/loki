@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.CoreTest" tests="39" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:19:04.572Z" hostname="JGJHX5JPGF" time="0.501">
+  <properties/>
+  <testcase name="finalCommitCheckDetectsConcurrentWriterAndSymlinkSwap" classname="dev.thor.tools.CoreTest" time="0.062"/>
+  <testcase name="displayRolesRequireTwoDistinctKnownDisplays" classname="dev.thor.tools.CoreTest" time="0.002"/>
+  <testcase name="configurationSizeAndFormatLimitsPreventWrites" classname="dev.thor.tools.CoreTest" time="0.007"/>
+  <testcase name="staticTargetCanReceiveTapAfterSixteenSecondsButAnAppChangeImmediatelyRejectsIt" classname="dev.thor.tools.CoreTest" time="0.005"/>
+  <testcase name="freshReadGatewayDiscardsMissingOldOrChangedObservationsBeforeReturningAnyData" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="screenshotCropScalingHasIndependentExpectedCoordinates" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="snapshotsExpireAndCacheIsBounded" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="gestureRejectsDurationOversizedPathNanAndOffscreen" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="restoreConflictPreservesCurrentFileAndBackupQuotaRefusesWithoutDeleting" classname="dev.thor.tools.CoreTest" time="0.05"/>
+  <testcase name="encryptedBackupSurvivesReopenAndTamperFails" classname="dev.thor.tools.CoreTest" time="0.008"/>
+  <testcase name="postCommitCorruptionIsFailureWithRecoveryAndSubmittedMarker" classname="dev.thor.tools.CoreTest" time="0.013"/>
+  <testcase name="byteBudgetDistinguishesExactEofAndTruncationAndChecksCancellation" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="inputEffectMayChangeItsOwnLayoutAfterSubmission" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="detachedShellChildCannotHoldOutputDrainForever" classname="dev.thor.tools.CoreTest" time="0.017"/>
+  <testcase name="gatewayDiscardsLateReadAfterRevocation" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="defaultsAndEffectiveSetAreLeastPrivilege" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="shellTimeoutAndCancellationStopDirectChildWithoutClaimingDescendants" classname="dev.thor.tools.CoreTest" time="0.224"/>
+  <testcase name="writesRequireExactApprovalMatchingBackupAndCurrentHash" classname="dev.thor.tools.CoreTest" time="0.026"/>
+  <testcase name="requestSpecificBackendPermissionIsCheckedAndReportedBeforeDispatch" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="submittedCancellationIsUnknownAndInvokesOwnedCleanup" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="freshReadGetsNewIdentityAndExpiryWithoutRevivingOldInputSnapshot" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="capabilityDisabledHasExplicitError" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="observationIsValidUntilJustBeforeSixtySecondsAndExpiresAtTheBoundary" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="finalAtomicEffectGuardRejectsRevokedQueuedCommit" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="shellOutputIsCombinedBoundedAndNonzeroExitPreserved" classname="dev.thor.tools.CoreTest" time="0.021"/>
+  <testcase name="freshObservationStillBecomesInvalidImmediatelyWhenTargetChangesAgain" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="crossSessionUnknownToolSchemaAndDeadlineAreRejected" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="replayAndRunToolBudgetAreRejected" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="pathTraversalSymlinksAndNonexistentTargetsAreDenied" classname="dev.thor.tools.CoreTest" time="0.004"/>
+  <testcase name="queuedAuthorizationNeverRevivesAfterOffOn" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="boundedNetworkWorkDoesNotOwnTheDeviceCommitLock" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="rotationGeometryRemovalAndAppChangeInvalidateSnapshots" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="singleDeviceRunAndResourceLockPreventParallelEffects" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="everyFreshUpperReadGetsCurrentObservationWhileStaleInputStillStopsBeforeBackend" classname="dev.thor.tools.CoreTest" time="0.001"/>
+  <testcase name="freshReadCannotCrossCalibrationRotationRemovalOrInventedSource" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="cancelledCommitDoesNotWriteOrAutoRestore" classname="dev.thor.tools.CoreTest" time="0.017"/>
+  <testcase name="cancellationRegistrationAfterStopStillRuns" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <testcase name="backupWriteVerifyRestorePreservesUnknownFieldsAndBeforeRestoreBackup" classname="dev.thor.tools.CoreTest" time="0.024"/>
+  <testcase name="staleTargetNeverReachesInputBackend" classname="dev.thor.tools.CoreTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

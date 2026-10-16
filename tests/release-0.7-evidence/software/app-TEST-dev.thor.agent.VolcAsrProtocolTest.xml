@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.VolcAsrProtocolTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-16T09:37:24.762Z" hostname="JGJHX5JPGF" time="0.001">
+  <properties/>
+  <testcase name="finalBeforeReleaseAndCancellationNeverSendEarly" classname="dev.thor.agent.VolcAsrProtocolTest" time="0.0"/>
+  <testcase name="malformedAndOversizedPacketsAreRejected" classname="dev.thor.agent.VolcAsrProtocolTest" time="0.0"/>
+  <testcase name="parsesGzipAndPlainReplacementsAndTerminalSequence" classname="dev.thor.agent.VolcAsrProtocolTest" time="0.001"/>
+  <testcase name="releaseWaitsForFinalAndSubmitsOnlyOnce" classname="dev.thor.agent.VolcAsrProtocolTest" time="0.0"/>
+  <testcase name="authModesStayInNativeHeadersAtFixedEndpoint" classname="dev.thor.agent.VolcAsrProtocolTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

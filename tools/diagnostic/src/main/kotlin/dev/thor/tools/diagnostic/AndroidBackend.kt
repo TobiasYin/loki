@@ -20,19 +20,31 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     val files: LocalFiles, val transactions: ConfigTransactions) : DeviceBackend {
     private val schemas = InputSchemas(context)
     private val main = Handler(Looper.getMainLooper())
-    private val activeInputs = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
+    private val inputState=BoundedInputState()
     private val frames = java.util.concurrent.ConcurrentHashMap<String, Pair<String, FrameTransform>>()
     var approval: Approval? = null
     var shellApproval: String? = null
     var installApproval: String? = null
     val downloads=NativeDownloads(context)
-    @Volatile private var inputUnknown = false
-    private val gestureTools = setOf("input.tap", "input.long_press", "input.swipe")
+    private val gestureTools = setOf("input.tap", "input.long_press", "input.swipe", "input.drag", "input.scroll")
+    private data class NodeBinding(val snapshotId:String,val windowId:Int,val packageName:String?,val node:AccessibilityNodeInfo,val signature:String,val expires:Long,val runId:String,val sessionId:String)
+    private val nodeRefs=LinkedHashMap<String,NodeBinding>()
+    private val nodeLock=Any()
+    private var nodeExpiry:Runnable?=null
+    private fun invalidateNodeRefs()=synchronized(nodeLock){nodeExpiry?.let {main.removeCallbacks(it)};nodeExpiry=null;nodeRefs.values.forEach { @Suppress("DEPRECATION") it.node.recycle() };nodeRefs.clear()}
+    private fun nodeSignature(node:AccessibilityNodeInfo):String {
+        val r=Rect();node.getBoundsInScreen(r)
+        return hash(listOf(node.windowId,node.packageName,node.className,node.viewIdResourceName,node.isPassword,
+            if(node.isPassword)null else node.text,if(node.isPassword)null else node.contentDescription,node.isEnabled,node.isVisibleToUser,node.isScrollable,
+            node.collectionInfo?.rowCount,node.collectionInfo?.columnCount,node.collectionItemInfo?.rowIndex,node.collectionItemInfo?.columnIndex,node.isChecked,node.isSelected,
+            if(node.isPassword)null else node.stateDescription,node.rangeInfo?.current,r.toShortString(),node.actionList.map {it.id}).joinToString("|").toByteArray())
+    }
     override fun availability(toolId: String): Availability {
         val backend = when {
             toolId in setOf("web.request","files.download","files.download_info") -> "native-http/private-downloads"
             toolId.startsWith("apps.") -> "shizuku-userservice/shell-uid-2000"
             toolId.startsWith("perception.") -> "android-sdk/accessibility"
+            toolId=="input.scroll" -> "accessibility-node-scroll"
             toolId.startsWith("input.") -> "accessibility-dispatchGesture"
             toolId.startsWith("debug.") -> "shizuku-userservice"
             else -> "synthetic-config/android-app-owned-root"
@@ -40,7 +52,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         if (toolId in setOf("input.press_button", "input.set_axes")) return shizuku.gamepadAvailability(toolId)
         if (toolId in setOf("debug.shell","debug.thor_brightness","apps.install","apps.package_info")) return shizuku.availability()
         if (toolId == "debug.command_policy") return Availability(Status.READY,"Native command policy; no device mutation","native-command-policy")
-        if (toolId in gestureTools && inputUnknown) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
+        if (toolId in gestureTools && inputState.hasUnknown()) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
         if (toolId == "web.request" || toolId == "perception.device_info" || toolId.startsWith("files.") || toolId == "input.release_inputs") return Availability(Status.READY, "Manual diagnostics only", backend)
         if (ThorAccessibilityService.instance == null) return Availability(Status.PERMISSION_MISSING, "Enable this diagnostic Accessibility service in Android settings", backend)
         return Availability(Status.READY, "Android API exists; delivery on Thor is unverified", backend)
@@ -57,6 +69,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     }
     override fun execute(envelope: Envelope, args: Map<String, Any?>, checkpoint: Checkpoint): ToolResult {
         schemas.validate(envelope.toolId, args)
+        if(envelope.toolId in ToolPack.freshReads)invalidateNodeRefs()
         // Read the current app/window/tree even after the model has spent more
         // than an observation lifetime reasoning. The original source still fixes the
         // authorized display/epoch; a fresh target must survive the whole read.
@@ -118,7 +131,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             "perception.ui_tree" -> tree(e, args, cp)
             "perception.capture_screen" -> screenshot(e, args, cp)
             "input.press_button", "input.set_axes" -> {
-                val snap=snapshots.validate(e.snapshotId);cp.check()
+                val snap=snapshots.validate(e.snapshotId);cp.check();invalidateNodeRefs()
                 if(e.toolId in setOf("input.press_button","input.set_axes")) {
                     val window=service().windowsOnAllDisplays[snap.display.id].orEmpty().singleOrNull {it.type==AccessibilityWindowInfo.TYPE_APPLICATION && it.isFocused}
                     val root=window?.root
@@ -128,7 +141,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 val held=cp.checkingTarget(snapshots,e.snapshotId)
                 result(e,shizuku.gamepad(e.runId,e.toolId,args,snap.display.id,held,expectedPackage=snap.target.packageName),outcome="submitted",actualBackend=if(e.toolId=="input.set_axes")"shizuku-evdev/odin-six-axes" else "shizuku-evdev/odin-buttons")
             }
-            "input.tap", "input.long_press", "input.swipe" -> gesture(e, args, cp)
+            "input.scroll" -> scroll(e,args,cp)
+            "input.tap", "input.long_press", "input.swipe", "input.drag" -> gesture(e, args, cp)
             "input.release_inputs" -> { args.only(); result(e, mapOf("release" to release(e.runId)), outcome = "unknown") }
             "debug.shell" -> {
                 args.only("command", "timeoutMs", "maxBytes")
@@ -211,32 +225,133 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             "windows" to windows.take(limit).map { w -> val r = Rect(); w.getBoundsInScreen(r); mapOf("windowId" to w.id, "type" to w.type, "layer" to w.layer, "focused" to w.isFocused, "active" to w.isActive, "bounds" to listOf(r.left, r.top, r.right, r.bottom)) }), windows.size > limit)
     }
     private fun tree(e: Envelope, args: Map<String, Any?>, cp: Checkpoint): ToolResult {
-        args.only("windowId", "maxDepth", "maxNodes", "maxChars")
-        val depthLimit = args.int("maxDepth", 5); val nodeLimit = args.int("maxNodes", 80); val charLimit = args.int("maxChars", 12000)
-        requireTool(depthLimit in 0..5 && nodeLimit in 1..80 && charLimit in 1..12000, Code.LIMIT_EXCEEDED, "UI tree budget exceeded")
-        val snap = snapshots.validate(e.snapshotId)
-        val windows = service().windowsOnAllDisplays[snap.display.id].orEmpty()
-        val window = if (args.containsKey("windowId")) windows.singleOrNull { it.id == args.int("windowId", -1) } else windows.filter { it.type == AccessibilityWindowInfo.TYPE_APPLICATION }.singleOrNull()
-        if (window == null) return result(e, mapOf("nodes" to emptyList<Any>(), "emptyReason" to "no_unique_application_window"))
-        val root = window.root ?: return result(e, mapOf("nodes" to emptyList<Any>(), "emptyReason" to "null_root_or_surface_content"))
-        val nodes = mutableListOf<Map<String, Any?>>()
-        var chars = 0; var truncated = false
-        fun visit(node: AccessibilityNodeInfo, depth: Int, ref: String) {
+        args.only("windowId","maxDepth","maxNodes","maxChars","maxVisited","offset","query","visibility","textOffset")
+        val depthLimit=args.int("maxDepth",5);val nodeLimit=args.int("maxNodes",80);val charLimit=args.int("maxChars",12000)
+        val visitLimit=args.int("maxVisited",1024)
+        requireTool(depthLimit in 0..20 && nodeLimit in 1..128 && charLimit in 1..12000 && visitLimit in 1..2048,Code.LIMIT_EXCEEDED,"UI tree budget exceeded")
+        val snap=snapshots.validate(e.snapshotId)
+        val windows=service().windowsOnAllDisplays[snap.display.id].orEmpty().filter {it.type==AccessibilityWindowInfo.TYPE_APPLICATION}
+        val window=if(args.containsKey("windowId"))windows.singleOrNull {it.id==args.int("windowId",-1)} else windows.singleOrNull()
+        if(window==null)return result(e,mapOf("nodes" to emptyList<Any>(),"emptyReason" to "no_unique_application_window","coverage" to "Accessibility-exposed nodes only"))
+        val root=window.root ?: return result(e,mapOf("nodes" to emptyList<Any>(),"emptyReason" to "null_root_or_surface_content","coverage" to "No exposed Accessibility tree; use screenshot for visual evidence"))
+        val raw=mutableListOf<UiElement>();val handles=LinkedHashMap<String,AccessibilityNodeInfo>();val reasons=linkedSetOf<String>()
+        var scannedChars=0
+        fun extract(node:AccessibilityNodeInfo,path:String,parent:String?):UiElement {
+            fun textSlice(value:CharSequence?,body:Boolean=false):Triple<String?,Int,Int?> {
+                if(value==null)return Triple(null,0,null)
+                if(scannedChars>=524288){reasons.add("scanTextBudget");return Triple(null,0,value.length)}
+                val query=args.string("query","")
+                val searchLength=minOf(value.length,1000000)
+                val hit=if(body && query.isNotEmpty())value.subSequence(0,searchLength).toString().indexOf(query,ignoreCase=true) else -1
+                if(body && query.isNotEmpty() && searchLength<value.length)reasons.add("sourceTextSearchLimit")
+                val start=if(!body)0 else if(hit>=0)(hit-100).coerceAtLeast(0) else args.int("textOffset",0).coerceAtMost(value.length)
+                val take=minOf(value.length-start,262144,(524288-scannedChars).coerceAtLeast(0));scannedChars+=take
+                if(take<value.length-start || start>0)reasons.add("scanTextBudget")
+                return Triple(value.subSequence(start,start+take).toString(),start,value.length)
+            }
+            fun text(value:CharSequence?)=textSlice(value).first
+            val bounds=Rect();node.getBoundsInScreen(bounds)
+            val secret=node.isPassword
+            val range=node.rangeInfo?.let {mapOf("type" to it.type,"min" to it.min,"max" to it.max,"current" to it.current)}
+            val collection=node.collectionInfo?.let {mapOf("rows" to it.rowCount,"columns" to it.columnCount,"hierarchical" to it.isHierarchical,"selectionMode" to it.selectionMode)}
+            val item=node.collectionItemInfo?.let {mapOf("rowIndex" to it.rowIndex,"rowSpan" to it.rowSpan,"columnIndex" to it.columnIndex,"columnSpan" to it.columnSpan,"selected" to it.isSelected)}
+            val actions=node.actionList.mapNotNull {actionNames[it.id]}.distinct()
+            val body=if(secret)Triple(null,0,null) else textSlice(node.text,true)
+            val description=if(secret)Triple(null,0,null) else textSlice(node.contentDescription,true)
+            val value=if(secret)Triple(null,0,null) else textSlice(node.stateDescription ?: if(node.isEditable)node.text else null,true)
+            return UiElement(path,parent,text(node.className),if(secret)null else text(node.viewIdResourceName),body.first,description.first,
+                value.first,secret,node.isClickable,node.isCheckable,node.isChecked,node.isSelected,node.isEnabled,node.isVisibleToUser,node.isScrollable,node.isEditable,
+                listOf(bounds.left,bounds.top,bounds.right,bounds.bottom),actions,collection,item,range,body.second,body.third,description.second,description.third,value.second)
+        }
+        fun visit(node:AccessibilityNodeInfo,depth:Int,path:String,parent:String?) {
             try {
                 cp.check()
-                if (nodes.size >= nodeLimit || chars >= charLimit) { truncated = true; return }
-                fun text(v: CharSequence?): String? { val s = v?.toString() ?: return null; val bound = s.take(charLimit - chars); chars += bound.length; if (bound.length < s.length) truncated = true; return bound }
-                val r = Rect(); node.getBoundsInScreen(r)
-                nodes.add(mapOf("ref" to ref, "role" to text(node.className), "text" to if (node.isPassword) text("[password hidden]") else text(node.text), "description" to if (node.isPassword) null else text(node.contentDescription), "clickable" to node.isClickable, "enabled" to node.isEnabled, "bounds" to listOf(r.left, r.top, r.right, r.bottom)))
-                if (depth >= depthLimit) { if (node.childCount > 0) truncated = true; return }
-                for (i in 0 until node.childCount) {
-                    if (nodes.size >= nodeLimit || chars >= charLimit) { truncated = true; break }
-                    node.getChild(i)?.let { visit(it, depth + 1, "$ref/$i") }
+                if(raw.size>=visitLimit){reasons.add("maxVisited");return}
+                val entry=extract(node,path,parent);raw.add(entry)
+                @Suppress("DEPRECATION") val copy=AccessibilityNodeInfo.obtain(node);handles[path]=copy
+                val semanticDepth=depth+if(entry.semantic())1 else 0
+                if(semanticDepth>depthLimit || path.count {it=='/'}>=32){if(node.childCount>0)reasons.add("maxDepth");return}
+                for(index in 0 until node.childCount) {
+                    if(raw.size>=visitLimit){reasons.add("maxVisited");break}
+                    node.getChild(index)?.let {visit(it,semanticDepth,"$path/$index",path)}
                 }
-            } finally { @Suppress("DEPRECATION") node.recycle() }
+            }finally { @Suppress("DEPRECATION") node.recycle() }
         }
-        visit(root, 0, "${e.snapshotId}/${window.id}")
-        return result(e, mapOf("nodes" to nodes, "windowId" to window.id, "nodeRefsReusable" to false, "emptyReason" to if (nodes.size == 1 && nodes[0]["text"] == null) "may_be_self_drawn_surface" else null), truncated)
+        var rootHandedOff=false
+        try {
+            requireTool(root.packageName?.toString()==snap.target.packageName,Code.TARGET_CHANGED,"Tree window does not belong to observed upper app")
+            rootHandedOff=true;visit(root,0,"root",null)
+            val treeId=java.util.UUID.randomUUID().toString()
+            fun ref(path:String)="$treeId:$path"
+            val page=SemanticTree.project(raw,::ref,nodeLimit,charLimit,args.int("offset",0),args.string("query",""),args.string("visibility","all"),args.int("textOffset",0))
+            reasons.addAll(page.reasons);cp.check()
+            synchronized(nodeLock) {
+                invalidateNodeRefs()
+                for(path in page.paths)handles.remove(path)?.let {node->nodeRefs[ref(path)]=NodeBinding(snap.id,window.id,snap.target.packageName,node,nodeSignature(node),snap.expires,e.runId,e.sessionId)}
+                nodeExpiry=Runnable {synchronized(nodeLock){if(nodeRefs.values.firstOrNull()?.snapshotId==snap.id)invalidateNodeRefs()}}
+                main.postDelayed(nodeExpiry!!,(snap.expires-clock.now()).coerceAtLeast(1))
+            }
+            return result(e,mapOf("nodes" to page.nodes,"windowId" to window.id,"treeId" to treeId,"nodeRefsReusable" to false,"nodeRefScope" to "this latest tree snapshot until input/new observation/expiry; scroll once then re-observe",
+                "pagination" to mapOf("offset" to args.int("offset",0),"nextOffset" to page.nextOffset,"matchedExposedNodes" to page.matched,"reobservedEachPage" to true,"blocked" to page.blocked,"resumeHint" to if(page.blocked)"Increase maxNodes/maxChars to fit ancestor context; do not repeat the same offset" else null),
+                "coverage" to mapOf("source" to "Accessibility current exposed application nodes","visibleExposedNodes" to page.visible,"offscreenExposedNodes" to page.offscreen,"visitedNodes" to raw.size,
+                    "virtualizedContentMayBeUnexposed" to true,"hiddenOrUnloadedContentGuaranteed" to false,"autoScrolled" to false,"offscreenFilterDefinition" to "visibleToUser=false; may include occluded or offscreen exposed nodes",
+                    "limits" to "Only nodes provided by the app/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed/private content. Surface/virtualized lists may omit content; scroll and observe again."),
+                "truncationReasons" to reasons.toList(),"emptyReason" to if(page.nodes.isEmpty())"no_matching_exposed_semantics_or_budget" else null),reasons.isNotEmpty())
+        } finally {if(!rootHandedOff){@Suppress("DEPRECATION") root.recycle()};handles.values.forEach {@Suppress("DEPRECATION") it.recycle()}}
+    }
+    private val actionNames=mapOf(
+        AccessibilityNodeInfo.ACTION_CLICK to "click",AccessibilityNodeInfo.ACTION_LONG_CLICK to "long_click",AccessibilityNodeInfo.ACTION_FOCUS to "focus",
+        AccessibilityNodeInfo.ACTION_SELECT to "select",AccessibilityNodeInfo.ACTION_SET_TEXT to "set_text",AccessibilityNodeInfo.ACTION_EXPAND to "expand",AccessibilityNodeInfo.ACTION_COLLAPSE to "collapse",
+        AccessibilityNodeInfo.ACTION_SCROLL_FORWARD to "scroll_forward",AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD to "scroll_backward",
+        AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP.id to "scroll_up",AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN.id to "scroll_down",
+        AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_LEFT.id to "scroll_left",AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_RIGHT.id to "scroll_right",
+        AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_TO_POSITION.id to "scroll_to_position",AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS.id to "set_progress")
+    private fun scroll(e:Envelope,args:Map<String,Any?>,cp:Checkpoint):ToolResult {
+        args.only("nodeRef","direction","row","column","expectedPackage")
+        requireTool(!inputState.hasPending(),Code.BACKEND_UNAVAILABLE,"Previous gesture has not finished")
+        val snapshot=snapshots.validate(e.snapshotId)
+        requireTool(snapshot.target.validity=="valid" && !snapshot.target.packageName.isNullOrBlank(),Code.TARGET_CHANGED,"Scroll requires an unambiguous observed upper app")
+        requireTool(args["expectedPackage"]==null || args["expectedPackage"]==snapshot.target.packageName,Code.TARGET_CHANGED,"Expected app does not match upper")
+        val done=CountDownLatch(1);var accepted=false;var error:ToolFailure?=null;var actionName=""
+        main.post {
+            try {
+                cp.check()
+                synchronized(nodeLock) {
+                    val binding=nodeRefs[args.string("nodeRef")] ?: fail(Code.TARGET_CHANGED,"Node ref is stale/missing; read ui_tree again")
+                    requireTool(binding.runId==e.runId && binding.sessionId==e.sessionId && binding.snapshotId==e.snapshotId && binding.packageName==snapshot.target.packageName,Code.TARGET_CHANGED,"Node ref belongs to another observation/app")
+                    val node=binding.node
+                    requireTool(node.refresh(),Code.TARGET_CHANGED,"Referenced node disappeared; observe again")
+                    val refGuard=UiNodeRefGuard(binding.snapshotId,binding.windowId,binding.packageName,binding.signature,binding.expires)
+                    refGuard.check(e.snapshotId,node.windowId,node.packageName?.toString(),nodeSignature(node),clock.now())
+                    requireTool(node.isEnabled && node.isVisibleToUser,Code.INVALID_ARGUMENT,"Scroll requires a visible enabled container")
+                    val direction=args.string("direction");val supported=node.actionList.map {it.id}.toSet()
+                    val names=when(direction){"forward"->listOf("scroll_forward");"backward"->listOf("scroll_backward");"up"->listOf("scroll_up","scroll_backward");"down"->listOf("scroll_down","scroll_forward");"left"->listOf("scroll_left");"right"->listOf("scroll_right");"to_position"->listOf("scroll_to_position");else->emptyList()}
+                    val action=names.firstNotNullOfOrNull {name->actionNames.entries.firstOrNull {it.value==name && it.key in supported}} ?: fail(Code.UNSUPPORTED,"Node does not advertise this scroll action")
+                    actionName=action.value
+                    val bundle=Bundle()
+                    if(direction=="to_position") {
+                        val info=node.collectionInfo ?: fail(Code.INVALID_ARGUMENT,"Collection dimensions unknown; directional scroll instead")
+                        val row=args.int("row",-1);val column=args.int("column",-1)
+                        requireTool(row in 0 until info.rowCount && column in 0 until info.columnCount,Code.INVALID_ARGUMENT,"Scroll position outside advertised collection")
+                        bundle.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_ROW_INT,row);bundle.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_COLUMN_INT,column)
+                    }else requireTool(!args.containsKey("row") && !args.containsKey("column"),message="row/column only for to_position")
+                    cp.effect {
+                        snapshots.validate(e.snapshotId)
+                        requireTool(node.refresh(),Code.TARGET_CHANGED,"Node disappeared immediately before scroll")
+                        refGuard.check(e.snapshotId,node.windowId,node.packageName?.toString(),nodeSignature(node),clock.now())
+                        cp.submitted() // The IPC may have reached the app even if its reply throws.
+                        accepted=node.performAction(action.key,bundle)
+                    }
+                    invalidateNodeRefs()
+                }
+            } catch(t:ToolFailure){error=t}
+              catch(t:Exception){error=ToolFailure(if(t is SecurityException)Code.PERMISSION_MISSING else Code.IO_ERROR,"Accessibility scroll failed: ${t.javaClass.simpleName}")}
+            finally {if(cp.submitted)invalidateNodeRefs();done.countDown()}
+        }
+        await(done,e,cp)
+        error?.let {throw it}
+        snapshots.validateHeld(e.snapshotId) // Own scroll/content callbacks may update revision; target structure must remain.
+        return result(e,mapOf("submitted" to true,"action" to actionName,"actionAccepted" to accepted,"movementObserved" to false,"nodeRefsInvalidated" to true,"nextStep" to "Read ui_tree or screenshot again to verify position and obtain fresh refs"),outcome="submitted").copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected scroll or reached boundary; re-observe before choosing another action")
     }
     private fun screenshot(e: Envelope, args: Map<String, Any?>, requestCheckpoint: Checkpoint): ToolResult {
         args.only("maxEdge", "quality", "region", "format")
@@ -324,13 +439,13 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     }
     private fun gesture(e: Envelope, args: Map<String, Any?>, cp: Checkpoint): ToolResult {
         args.only("x", "y", "points", "durationMs", "coordinateSpace", "frameId", "expectedPackage")
-        requireTool(activeInputs.isEmpty(), Code.BACKEND_UNAVAILABLE, "Previous gesture has not finished")
+        requireTool(!inputState.hasPending(), Code.BACKEND_UNAVAILABLE, "Previous gesture has not finished")
         val snap = snapshots.validate(e.snapshotId)
         val expected = args["expectedPackage"] as? String
         requireTool(expected == null || expected == snap.target.packageName, Code.TARGET_CHANGED, "Expected app does not match upper")
         val coordinateSpace = args.string("coordinateSpace")
         requireTool(coordinateSpace in setOf("display_logical", "frame_pixels"), message = "Explicit coordinateSpace required")
-        val raw = if (e.toolId == "input.swipe") {
+        val raw = if (e.toolId in setOf("input.swipe","input.drag")) {
             val list = args["points"] as? List<*> ?: fail(Code.INVALID_ARGUMENT, "Swipe points required")
             requireTool(list.size in 2..32, Code.LIMIT_EXCEEDED, "Swipe needs 2..32 points")
             list.map { point -> val a = point as? List<*> ?: fail(Code.INVALID_ARGUMENT, "Point must be [x,y]"); requireTool(a.size == 2 && a.all { it is Number }, message = "Point must be [x,y]"); Point((a[0] as Number).toDouble(), (a[1] as Number).toDouble()) }
@@ -351,33 +466,41 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 cp.check() // Final target/auth check immediately before the actual system dispatch.
                 cp.effect {
                     snapshots.validateInputPoints(e.snapshotId,points)
+                    invalidateNodeRefs()
+                    // Register before Binder submission so an early callback cannot be lost.
+                    // A normally pending stroke is owned by the Gateway resource lock,
+                    // not an unknown input: its own checkpoint must remain available.
+                    inputState.register(e.runId,e.requestId)
+                    cp.submitted() // A throwing Binder call may still have submitted this bounded stroke.
                     accepted = service().dispatchGesture(gesture, object : AccessibilityService.GestureResultCallback() {
-                    override fun onCompleted(g: GestureDescription?) { completed = true; activeInputs.remove(e.runId); inputUnknown = activeInputs.isNotEmpty(); done.countDown() }
-                    override fun onCancelled(g: GestureDescription?) { activeInputs.remove(e.runId); inputUnknown = activeInputs.isNotEmpty(); done.countDown() }
+                    override fun onCompleted(g: GestureDescription?) { completed = true; inputState.complete(e.runId,e.requestId); done.countDown() }
+                    override fun onCancelled(g: GestureDescription?) { inputState.complete(e.runId,e.requestId); done.countDown() }
                 }, main)
+                    if(!accepted){inputState.complete(e.runId,e.requestId)}
                     requireTool(accepted, Code.BACKEND_UNAVAILABLE, "System rejected gesture")
-                    activeInputs[e.runId] = true
                 }
                 if (!accepted) done.countDown()
-            } catch (t: ToolFailure) { dispatchError = t; done.countDown() }
+            } catch (t: ToolFailure) { inputState.abandon(e.runId,e.requestId);dispatchError = t; done.countDown() }
               catch (t: Exception) {
+                inputState.abandon(e.runId,e.requestId)
                 dispatchError = ToolFailure(if (t is SecurityException) Code.PERMISSION_MISSING else Code.IO_ERROR, "Gesture dispatch failed: ${t.javaClass.simpleName}")
                 done.countDown()
             }
         }
-        await(done, e, cp)
+        try {await(done,e,cp)}catch(t:Exception){inputState.abandon(e.runId,e.requestId);throw t}
         dispatchError?.let { throw it }
         requireTool(accepted, Code.BACKEND_UNAVAILABLE, "System rejected gesture")
         return result(e, mapOf("submitted" to true, "systemCallback" to if (completed) "completed" else "cancelled", "gameEffectObserved" to false,
-            "displayId" to snap.display.id, "durationMs" to duration), outcome = if (completed) "submitted" else "unknown")
+            "displayId" to snap.display.id, "durationMs" to duration,"gestureKind" to if(e.toolId=="input.drag")"bounded-drag-down-move-up" else e.toolId,"nodeRefsInvalidated" to true), outcome = if (completed) "submitted" else "unknown")
     }
     private fun await(done: CountDownLatch, e: Envelope, cp: Checkpoint) {
         while (!done.await(50, TimeUnit.MILLISECONDS)) { cp.check(); requireTool(clock.now() < e.deadline, Code.TIMEOUT, "Android callback deadline expired") }
         cp.check()
     }
     override fun release(runId: String): String {
+        synchronized(nodeLock){if(nodeRefs.values.any {it.runId==runId})invalidateNodeRefs()}
         val gamepad=shizuku.releaseRunInputs(runId)
-        if (activeInputs.containsKey(runId)) { inputUnknown = true; return "unknown: Android has no public cancelGesture; already submitted bounded stroke may finish within 5s; further gestures blocked until callback" }
+        if (inputState.abandonRun(runId)) { return "unknown: Android has no public cancelGesture; already submitted bounded stroke may finish within 5s; further gestures blocked until callback" }
         return "observed: $gamepad; no gesture pending"
     }
 }

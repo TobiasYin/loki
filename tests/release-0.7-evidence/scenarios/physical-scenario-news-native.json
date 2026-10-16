@@ -1,0 +1,357 @@
+{
+  "scene": "news",
+  "seed": 4951855132237057793,
+  "passed": true,
+  "sessionId": "c562374e-df7b-4444-bffd-544487932854",
+  "prompt": "请在上屏新闻列表找到《云岭观测简报 145》，滚动到该条目并打开详情，告诉我详情里的核对码。 请通过 UI 树查找目标，在列表中实际滚动到它可见后再打开，不能点击离屏位置或打开相似条目。每次滚动后重新观察，打开后读取任务要求的字段并简短回答。",
+  "runId": "a2b17288-76ee-47e5-ae21-e2fbd131a200",
+  "testRunId": "scenario-678f0073-2c85-491e-80c8-08713707eabf",
+  "runningElapsedMs": 146662,
+  "latestReceiverPage": "detail",
+  "latestReceiverState": {
+    "settingsSaved": false,
+    "settingsValues": null,
+    "settingsDraft": {
+      "mode": "性能",
+      "enabled": false,
+      "volume": 10
+    },
+    "settingsDragCount": 0,
+    "settingsSaveCount": 0,
+    "settingNavigationCount": 0,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": "story-22",
+    "articleOpenCount": 1,
+    "newsListScrollCount": 70,
+    "detailScrollCount": 0,
+    "listScrollY": 3645,
+    "detailScrollY": 0,
+    "maxListScrollY": 3645,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "runStatus": "completed",
+  "runtime": {
+    "sessionId": "c562374e-df7b-4444-bffd-544487932854",
+    "runId": "a2b17288-76ee-47e5-ae21-e2fbd131a200",
+    "state": "completed",
+    "modelProfileRevision": 1002,
+    "capabilityEpoch": 2,
+    "startedAt": 1792143727418
+  },
+  "modelTransport": [
+    {
+      "status": 200,
+      "responseBytes": 138595,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 43357,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 99400,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 45698,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 59053,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 43357,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 59475,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 43357,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 63188,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 43357,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 67593,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 49217,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 92504,
+      "terminal": "eof"
+    },
+    {
+      "status": 200,
+      "responseBytes": 41006,
+      "terminal": "eof"
+    }
+  ],
+  "modelId": "deepseek-v4.1-flash",
+  "timings": {
+    "beginElapsedRealtime": 674017678,
+    "firstVisibleTextMs": 5149,
+    "responseHeadersMs": 4162,
+    "firstResponseBytesMs": 4178,
+    "firstAuthorityMs": 1661,
+    "nativePrepareMs": 22
+  },
+  "assistantAnswer": "I'll start by observing the current screen.The target is item 22, currently offscreen. Let me scroll the list and re-observe.Progress made; target moved up but still offscreen. Continuing to scroll.The target is now visible (bounds y 538–713). Tapping it to open the detail.已打开《云岭观测简报 145》详情。核对码：\n\n- 开头核对码：**N-79728**\n- 文末核对码：FIN-N-79728（位于文末，需滚动到底部）\n\n两处都读到了，主要内容用的是开头核对码 N-79728。",
+  "toolResults": [
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143732342,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:b3f29c24-020c-4fd2-a2e1-78ad0e608520",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/0\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/0\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"离线交互演练 · news\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":13,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,73,1884,149],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/1\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/1\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"本地新闻 · 28 条\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":11,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,149,1884,259],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/2\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/2\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"列表为原生 ScrollView 完整子树；向下滚动查找目标。\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":31,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,259,1884,333],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.ScrollView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_news_scroll\",\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":true,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_down\"],\"bounds\":[36,333,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/0\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/0\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_0\",\"text\":\"本地动态 1 · 交通记录 869\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,333,1884,508],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/1\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/1\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_1\",\"text\":\"本地动态 2 · 天气记录 868\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,508,1884,683],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/2\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/2\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_2\",\"text\":\"本地动态 3 · 科技记录 871\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,683,1884,858],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/3\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/3\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_3\",\"text\":\"本地动态 4 · 文化记录 870\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,858,1884,1033],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/4\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/4\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_4\",\"text\":\"本地动态 5 · 交通记录 873\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1033,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/5\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/5\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_5\",\"text\":\"本地动态 6 · 天气记录 872\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1208,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/6\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/6\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_6\",\"text\":\"本地动态 7 · 科技记录 875\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1383,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/7\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/7\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_7\",\"text\":\"本地动态 8 · 文化记录 874\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1558,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/8\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/8\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_8\",\"text\":\"本地动态 9 · 交通记录 877\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":17,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1733,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/9\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/9\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_9\",\"text\":\"本地动态 10 · 天气记录 876\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1908,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/10\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/10\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_10\",\"text\":\"本地动态 11 · 科技记录 879\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,2083,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/11\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/11\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_11\",\"text\":\"本地动态 12 · 文化记录 878\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,2258,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/12\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/12\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_12\",\"text\":\"本地动态 13 · 交通记录 881\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,2433,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/13\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/13\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_13\",\"text\":\"本地动态 14 · 天气记录 880\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,2608,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/14\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/14\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_14\",\"text\":\"本地动态 15 · 科技记录 883\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,2783,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/15\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/15\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_15\",\"text\":\"本地动态 16 · 文化记录 882\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,2958,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/16\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/16\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_16\",\"text\":\"本地动态 17 · 交通记录 885\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,3133,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/17\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/17\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_17\",\"text\":\"本地动态 18 · 天气记录 884\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,3308,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/18\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/18\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_18\",\"text\":\"本地动态 19 · 科技记录 887\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,3483,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/19\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/19\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_19\",\"text\":\"本地动态 20 · 文化记录 886\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,3658,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/20\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/20\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_20\",\"text\":\"本地动态 21 · 交通记录 889\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,3833,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/21\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/21\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_21\",\"text\":\"本地动态 22 · 天气记录 888\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,4008,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/22\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/22\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_22\",\"text\":\"云岭观测简报 145\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,4183,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/23\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/23\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_23\",\"text\":\"本地动态 24 · 文化记录 890\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,4358,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/24\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/24\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_24\",\"text\":\"本地动态 25 · 交通记录 893\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,4533,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/25\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/25\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_25\",\"text\":\"本地动态 26 · 天气记录 892\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,4708,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/26\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/26\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_26\",\"text\":\"本地动态 27 · 科技记录 895\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,4883,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/27\",\"nodeRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\\\/27\",\"parentRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"scrollAncestorRef\":\"dd670472-b919-474c-bca2-14c41488288d:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_27\",\"text\":\"本地动态 28 · 文化记录 894\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":18,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,5058,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"dd670472-b919-474c-bca2-14c41488288d\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":33,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":10,\"offscreenExposedNodes\":23,\"visitedNodes\":33,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"d38d1653-7387-4d1f-b1ef-ab866a236ab2\",\"targetSnapshotId\":\"c8e23494-0437-4d33-8e7d-d694194c5a7c\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.scroll",
+      "observedAt": 1792143750428,
+      "source": "accessibility-node-scroll",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:a475eade-1fc9-4d20-8ded-cd2160439a01",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"action\":\"scroll_forward\",\"actionAccepted\":true,\"movementObserved\":false,\"nodeRefsInvalidated\":true,\"nextStep\":\"Read ui_tree or screenshot again to verify position and obtain fresh refs\",\"displayRole\":\"upper\",\"displayId\":0,\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143756210,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:4f11c310-0029-4842-8bcb-8c19c780c962",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\",\"nodeRef\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\\\/3\",\"nodeRef\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\\\/3\",\"parentRef\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.ScrollView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_news_scroll\",\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":true,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"scroll_up\",\"scroll_down\"],\"bounds\":[36,333,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\\\/3\\\/22\",\"nodeRef\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\\\/3\\\/22\",\"parentRef\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\\\/3\",\"scrollAncestorRef\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_22\",\"text\":\"云岭观测简报 145\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,3454,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"8fb4d1aa-706f-472f-a7a6-dd63bbf2da61\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":1,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":10,\"offscreenExposedNodes\":23,\"visitedNodes\":33,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"3b1d0578-491f-47a2-946d-8e9b1c41f6cb\",\"targetSnapshotId\":\"20d3c6e1-e85c-4ea3-ad93-182e311413b6\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.scroll",
+      "observedAt": 1792143784618,
+      "source": "accessibility-node-scroll",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:b014d1d9-7faf-4d21-9b6b-398278064a07",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"action\":\"scroll_forward\",\"actionAccepted\":true,\"movementObserved\":false,\"nodeRefsInvalidated\":true,\"nextStep\":\"Read ui_tree or screenshot again to verify position and obtain fresh refs\",\"displayRole\":\"upper\",\"displayId\":0,\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143790957,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:7d9fff6f-e3ff-4e99-948e-ce7fa65add0f",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\",\"nodeRef\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\\\/3\",\"nodeRef\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\\\/3\",\"parentRef\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.ScrollView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_news_scroll\",\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":true,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"scroll_up\",\"scroll_down\"],\"bounds\":[36,333,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\\\/3\\\/22\",\"nodeRef\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\\\/3\\\/22\",\"parentRef\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\\\/3\",\"scrollAncestorRef\":\"c125fce6-504a-47c4-a9f4-1852b3879cea:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_22\",\"text\":\"云岭观测简报 145\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,2725,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"c125fce6-504a-47c4-a9f4-1852b3879cea\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":1,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":10,\"offscreenExposedNodes\":23,\"visitedNodes\":33,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"cbebbdc3-ea6f-40bc-934b-9820933ff8e8\",\"targetSnapshotId\":\"b31314da-f482-46ba-901e-e50790b51b4e\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.scroll",
+      "observedAt": 1792143800120,
+      "source": "accessibility-node-scroll",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:b988252a-2915-4089-b8fb-df21068c0133",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"action\":\"scroll_forward\",\"actionAccepted\":true,\"movementObserved\":false,\"nodeRefsInvalidated\":true,\"nextStep\":\"Read ui_tree or screenshot again to verify position and obtain fresh refs\",\"displayRole\":\"upper\",\"displayId\":0,\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143806090,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:f2a60400-a7f7-4bd8-a46e-1bd16df2593c",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\",\"nodeRef\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\\\/3\",\"nodeRef\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\\\/3\",\"parentRef\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.ScrollView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_news_scroll\",\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":true,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"scroll_up\",\"scroll_down\"],\"bounds\":[36,333,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\\\/3\\\/22\",\"nodeRef\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\\\/3\\\/22\",\"parentRef\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\\\/3\",\"scrollAncestorRef\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_22\",\"text\":\"云岭观测简报 145\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1996,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"ba8b05c6-805c-409e-ae22-8fc7669daeda\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":1,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":10,\"offscreenExposedNodes\":23,\"visitedNodes\":33,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"b6978700-6de9-43b2-8638-c0fcd30431f9\",\"targetSnapshotId\":\"bf2ca5df-e91e-46b5-8cf2-3759c0e96756\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.scroll",
+      "observedAt": 1792143815517,
+      "source": "accessibility-node-scroll",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:1aa94c40-6750-49d6-ad4f-c33dbba40f91",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"action\":\"scroll_forward\",\"actionAccepted\":true,\"movementObserved\":false,\"nodeRefsInvalidated\":true,\"nextStep\":\"Read ui_tree or screenshot again to verify position and obtain fresh refs\",\"displayRole\":\"upper\",\"displayId\":0,\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143822097,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:a0b061de-e5bb-470f-b36f-b297113e70be",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"07205308-24ac-4160-84cf-1221883535c1:root\",\"nodeRef\":\"07205308-24ac-4160-84cf-1221883535c1:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"07205308-24ac-4160-84cf-1221883535c1:root\\\/3\",\"nodeRef\":\"07205308-24ac-4160-84cf-1221883535c1:root\\\/3\",\"parentRef\":\"07205308-24ac-4160-84cf-1221883535c1:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.ScrollView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_news_scroll\",\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":true,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"scroll_up\",\"scroll_down\"],\"bounds\":[36,333,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"07205308-24ac-4160-84cf-1221883535c1:root\\\/3\\\/22\",\"nodeRef\":\"07205308-24ac-4160-84cf-1221883535c1:root\\\/3\\\/22\",\"parentRef\":\"07205308-24ac-4160-84cf-1221883535c1:root\\\/3\",\"scrollAncestorRef\":\"07205308-24ac-4160-84cf-1221883535c1:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_22\",\"text\":\"云岭观测简报 145\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,1267,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"07205308-24ac-4160-84cf-1221883535c1\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":1,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":10,\"offscreenExposedNodes\":23,\"visitedNodes\":33,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"37445d70-beff-4a1a-8942-f256bdebce03\",\"targetSnapshotId\":\"d0fc35d2-dc1f-4086-97b5-fea787ff812c\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.scroll",
+      "observedAt": 1792143834334,
+      "source": "accessibility-node-scroll",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:69483ca8-2d88-44d4-8d0c-0721c8fab522",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"action\":\"scroll_forward\",\"actionAccepted\":true,\"movementObserved\":false,\"nodeRefsInvalidated\":true,\"nextStep\":\"Read ui_tree or screenshot again to verify position and obtain fresh refs\",\"displayRole\":\"upper\",\"displayId\":0,\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143840947,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:2039fe1b-af3e-4a34-8def-3f648755185f",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\",\"nodeRef\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\\\/3\",\"nodeRef\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\\\/3\",\"parentRef\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.ScrollView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_news_scroll\",\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":false,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":true,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_backward\",\"scroll_up\",\"scroll_down\"],\"bounds\":[36,333,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\\\/3\\\/22\",\"nodeRef\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\\\/3\\\/22\",\"parentRef\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\\\/3\",\"scrollAncestorRef\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737:root\\\/3\",\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_story_22\",\"text\":\"云岭观测简报 145\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,538,1884,713],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"7f96fa10-1ce9-4178-9a9b-a328d5571737\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":1,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":10,\"offscreenExposedNodes\":23,\"visitedNodes\":33,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"f6499f6e-1436-4db2-b12c-86344d9cc758\",\"targetSnapshotId\":\"4f8072ca-fd30-4945-bf02-3340f3fc54f6\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "input.tap",
+      "observedAt": 1792143851985,
+      "source": "accessibility-dispatchGesture",
+      "truncated": false,
+      "error": null,
+      "outcome": "submitted",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:11c978c4-1f22-4a70-8d87-c3b672f5460f",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"submitted\":true,\"systemCallback\":\"completed\",\"gameEffectObserved\":false,\"displayId\":0,\"durationMs\":80,\"gestureKind\":\"input.tap\",\"nodeRefsInvalidated\":true,\"displayRole\":\"upper\",\"message\":null}"
+        }
+      ]
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "observedAt": 1792143857274,
+      "source": "android-sdk\/accessibility",
+      "truncated": false,
+      "error": null,
+      "outcome": "observed",
+      "evidenceRef": "native-event:a2b17288-76ee-47e5-ae21-e2fbd131a200:976d7566-742b-401a-ba88-7cdbd5d93ab2",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"nodes\":[{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\",\"parentRef\":null,\"scrollAncestorRef\":null,\"role\":\"android.widget.FrameLayout\",\"id\":null,\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[0,0,1920,1080],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/0\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/0\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"离线交互演练 · news\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":13,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,73,1884,149],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/1\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/1\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.Button\",\"id\":\"dev.thor.inputlab:id\\\/scenario_back\",\"text\":\"‹ 返回列表\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":6,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":true,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"focus\",\"select\",\"click\"],\"bounds\":[36,149,1884,260],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\",\"scrollAncestorRef\":null,\"role\":\"android.widget.ScrollView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_detail_scroll\",\"text\":null,\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":null,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":true,\"editable\":false,\"actions\":[\"focus\",\"select\",\"scroll_forward\",\"scroll_down\"],\"bounds\":[36,260,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/0\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/0\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"云岭观测简报 145\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":10,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,260,1884,372],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/1\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/1\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"开头核对码：N-79728\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":13,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,372,1884,471],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/2\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/2\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"第 1 段：这是本地合成的观测记录。路线、天气与时间仅用于测试页面阅读和滚动，不代表真实新闻。请按用户任务读取画面，不要把未显示的内容当作已阅读。\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":73,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,471,1884,683],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/3\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/3\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"第 2 段：这是本地合成的观测记录。路线、天气与时间仅用于测试页面阅读和滚动，不代表真实新闻。请按用户任务读取画面，不要把未显示的内容当作已阅读。\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":73,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,683,1884,895],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/4\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/4\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"第 3 段：这是本地合成的观测记录。路线、天气与时间仅用于测试页面阅读和滚动，不代表真实新闻。请按用户任务读取画面，不要把未显示的内容当作已阅读。\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":73,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":true,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,895,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/5\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/5\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"第 4 段：这是本地合成的观测记录。路线、天气与时间仅用于测试页面阅读和滚动，不代表真实新闻。请按用户任务读取画面，不要把未显示的内容当作已阅读。\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":73,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,1107,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/6\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/6\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":null,\"text\":\"第 5 段：这是本地合成的观测记录。路线、天气与时间仅用于测试页面阅读和滚动，不代表真实新闻。请按用户任务读取画面，不要把未显示的内容当作已阅读。\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":73,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,1319,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null},{\"ref\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/7\",\"nodeRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\\\/7\",\"parentRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"scrollAncestorRef\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a:root\\\/2\",\"role\":\"android.widget.TextView\",\"id\":\"dev.thor.inputlab:id\\\/scenario_footer\",\"text\":\"文末核对码：FIN-N-79728\\n文章结束\",\"description\":null,\"value\":null,\"matchesQuery\":true,\"textStart\":0,\"textLength\":22,\"textTruncated\":false,\"descriptionStart\":0,\"descriptionLength\":null,\"password\":false,\"clickable\":false,\"checkable\":false,\"checked\":false,\"selected\":false,\"enabled\":true,\"visibleToUser\":false,\"scrollable\":false,\"editable\":false,\"actions\":[\"select\"],\"bounds\":[36,1531,1884,1062],\"collection\":null,\"collectionItem\":null,\"range\":null}],\"windowId\":4870,\"treeId\":\"5e6c3b2c-98cc-424f-b8e8-dc34f835f30a\",\"nodeRefsReusable\":false,\"nodeRefScope\":\"this latest tree snapshot until input\\\/new observation\\\/expiry; scroll once then re-observe\",\"pagination\":{\"offset\":0,\"nextOffset\":null,\"matchedExposedNodes\":12,\"reobservedEachPage\":true,\"blocked\":false,\"resumeHint\":null},\"coverage\":{\"source\":\"Accessibility current exposed application nodes\",\"visibleExposedNodes\":9,\"offscreenExposedNodes\":3,\"visitedNodes\":12,\"virtualizedContentMayBeUnexposed\":true,\"hiddenOrUnloadedContentGuaranteed\":false,\"autoScrolled\":false,\"offscreenFilterDefinition\":\"visibleToUser=false; may include occluded or offscreen exposed nodes\",\"limits\":\"Only nodes provided by the app\\\/AccessibilityNodeProvider. visibleToUser=false is exposed offscreen evidence, not proof of scrolling or access to unexposed\\\/private content. Surface\\\/virtualized lists may omit content; scroll and observe again.\"},\"truncationReasons\":[],\"emptyReason\":null,\"displayRole\":\"upper\",\"displayId\":0,\"requestSnapshotId\":\"5cf5ef9c-c83a-4782-bd89-bf91339019d7\",\"targetSnapshotId\":\"fc599216-bc4b-4ef9-8591-6961b20ea89e\",\"observedTargetPackage\":\"dev.thor.inputlab\",\"message\":null}"
+        }
+      ]
+    }
+  ],
+  "toolErrors": [],
+  "attemptId": "357588d7-10cc-4dda-9c35-aeee8c0bf48e",
+  "eventPrefixBytes": 67276,
+  "eventPrefixSha256": "bd4e966f59927e725848077a5e996e7f142cefa10243b75de31c4b7279e12195",
+  "rawBytes": 67276,
+  "receiverState": {
+    "settingsSaved": false,
+    "settingsValues": null,
+    "settingsDraft": {
+      "mode": "性能",
+      "enabled": false,
+      "volume": 10
+    },
+    "settingsDragCount": 0,
+    "settingsSaveCount": 0,
+    "settingNavigationCount": 0,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": "story-22",
+    "articleOpenCount": 1,
+    "newsListScrollCount": 70,
+    "detailScrollCount": 0,
+    "listScrollY": 3645,
+    "detailScrollY": 0,
+    "maxListScrollY": 3645,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "receiverCompleted": true,
+  "toolCounts": {
+    "perception.ui_tree": 7,
+    "input.scroll": 5,
+    "input.tap": 1
+  },
+  "testHarnessAnswerAndFlowVerified": true
+}

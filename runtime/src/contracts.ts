@@ -90,4 +90,4 @@ export interface PersistencePort {
 export interface RuntimePorts { authority: AuthorityPort; tools: ToolPort; network: FetchPort; persistence: PersistencePort; attachments: AttachmentPort }
 export interface RuntimeLimits { maxRequests: number; runTimeoutMs: number; maxRequestBytes: number; maxResponseBytes: number; maxHistoryTurns: number; imageTokenEstimate: number }
 /** runTimeoutMs=0: no model/task wall-clock deadline; individual tools keep their own timeout. */
-export const DEFAULT_LIMITS: RuntimeLimits = { maxRequests: 12, runTimeoutMs: 0, maxRequestBytes: 16 * 1024 * 1024, maxResponseBytes: 32 * 1024 * 1024, maxHistoryTurns: 50, imageTokenEstimate: 4096 };
+export const DEFAULT_LIMITS: RuntimeLimits = { maxRequests: 40, runTimeoutMs: 0, maxRequestBytes: 16 * 1024 * 1024, maxResponseBytes: 32 * 1024 * 1024, maxHistoryTurns: 50, imageTokenEstimate: 4096 };

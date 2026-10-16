@@ -77,49 +77,43 @@
 
     panel.append(button('打开设置',()=>{cancelVoice();refreshVoice();command({op:'settings'});},'wide'));
   }
-  const disclosures=new Map();
-  function rememberDisclosure(node,key,initial) {
+  const disclosures=new Map(),runDisclosures=new Map();
+  function rememberDisclosure(node,key,initial,renderOpen) {
     node.open=disclosures.has(key)?disclosures.get(key):initial;
+    // Remember the intent synchronously: Native may publish another stream delta
+    // before the browser's coalesced toggle event has been delivered.
     node.querySelector('summary').addEventListener('click',()=>disclosures.set(key,!node.open));
-    return node;
+    node.addEventListener('toggle',event=>{
+      if(event.target!==node || !node.isConnected)return;
+      disclosures.set(key,node.open);renderOpen?.(node.open);
+    });
+    renderOpen?.(node.open);return node;
   }
-  const fieldNames={downloadId:'下载文件编号',filename:'文件名',sha256:'SHA-256 校验值',size:'字节数',finalUrl:'下载地址',mime:'文件类型',apk:'应用信息',packageName:'应用包名',versionName:'版本',versionCode:'版本编号',signerSha256:'签名指纹',requestedPermissions:'声明权限',downloadedAt:'下载时间',downloads:'下载记录',installed:'已安装',apkPath:'安装路径',headers:'响应头',method:'请求方法',screen:'目标屏幕',displayId:'显示编号',displayName:'显示名称',brightness:'亮度（0–255）',before:'修改前',requested:'请求值',verified:'回读一致',policyVersion:'策略版本',policyTier:'安全等级',reason:'原因',requiresApproval:'需要确认',allowed:'允许提交',executed:'已执行',white:'白名单示例',gray:'灰名单示例',black:'禁止执行',execution:'执行规则',stdout:'输出',stderr:'错误输出',exitCode:'退出码',uid:'执行身份',command:'具体命令',query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
-  function structured(value,depth=0) {
+  const fieldNames={downloadId:'下载文件编号',filename:'文件名',sha256:'SHA-256 校验值',size:'字节数',finalUrl:'下载地址',mime:'文件类型',apk:'应用信息',packageName:'应用包名',versionName:'版本',versionCode:'版本编号',signerSha256:'签名指纹',requestedPermissions:'声明权限',downloadedAt:'下载时间',downloads:'下载记录',installed:'已安装',apkPath:'安装路径',headers:'响应头',method:'请求方法',screen:'目标屏幕',displayId:'显示编号',displayName:'显示名称',brightness:'亮度',before:'修改前',requested:'请求值',quantizationTolerance:'量化容差',unit:'单位',verified:'回读一致',policyVersion:'策略版本',policyTier:'安全等级',reason:'原因',requiresApproval:'需要确认',allowed:'允许提交',executed:'已执行',white:'白名单示例',gray:'灰名单示例',black:'禁止执行',execution:'执行规则',stdout:'输出',stderr:'错误输出',exitCode:'退出码',uid:'执行身份',command:'具体命令',query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
+  function structured(value,depth=0,brightnessInput=false) {
     if(value===null || value===undefined)return element('span','无','muted');
-    if(typeof value==='string' && depth<7 && /^[\s]*[\[{]/.test(value)) {try {return structured(JSON.parse(value),depth+1);}catch{}}
+    if(typeof value==='string' && depth<7 && /^[\s]*[\[{]/.test(value)) {try {return structured(JSON.parse(value),depth+1,brightnessInput);}catch{}}
     if(typeof value!=='object')return element('div',typeof value==='boolean'?(value?'是':'否'):String(value),'text');
     if(depth>=7)return element('div','内容层级过深，请展开更具体的结果','muted');
     const list=element('dl',undefined,'structured');
+    // Units belong to this object only. Legacy results without unit=percent keep
+    // plain values, and another tool's generic value/before fields stay untouched.
+    const percentFields=new Set(value.unit==='percent'?['before','brightness','requested','quantizationTolerance']:brightnessInput?['value']:[]);
     for(const [key,entry] of Object.entries(value).slice(0,80)) {
       list.append(element('dt',Array.isArray(value)?`第 ${Number(key)+1} 项`:(fieldNames[key]??key)));
-      const row=element('dd');row.append(structured(entry,depth+1));list.append(row);
+      const row=element('dd');
+      if(percentFields.has(key) && Number.isInteger(entry) && entry>=0 && entry<=100)row.append(element('div',`${entry}%`,'text'));
+      else row.append(structured(entry,depth+1));
+      list.append(row);
     }
     return list;
   }
   function runView(run,runEvents) {
     const events=(runEvents??state.events.filter(e=>e.runId===run.id)).slice().sort((a,b)=>a.sequence-b.sequence);
     const container=element('div');
-    // Actionable summaries live outside the collapsed disclosure, including unknown side effects.
-    if(run.stopReason)container.append(element('div',run.stopReason,'attention'));
-    else if(run.status==='failed')container.append(element('div','这次任务未能完成，请重试或检查设置。','attention'));
-    const unknown=events.filter(e=>e.outcome==='unknown' && (e.type==='tool_result' || !events.some(r=>r.type==='tool_result' && r.toolCallId===e.toolCallId)));
-    for(const e of unknown)container.append(element('div',`副作用未知 · ${e.toolId??e.data?.toolId??'工具操作'}，请检查目标状态`,'attention'));
-    if(run.status==='awaiting_user') {
-      const waiting=events.findLast(e=>e.type==='awaiting_user');
-      const card=element('div',run.approval?.summary??waiting?.summary??'等待用户','wait');
-      card.append(document.createElement('br'),button('批准此操作',()=>command({op:'approve',runId:run.id,approvalId:run.approval?.id}),'primary'),button('拒绝',()=>command({op:'reject',runId:run.id,approvalId:run.approval?.id})));container.append(card);
-    }
-    const thinking=events.filter(e=>e.type==='thinking_delta').map(e=>e.data?.text??'').join('');
-    if(thinking) {
-      const thought=element('details',undefined,'thinking');thought.open=false;
-      thought.append(element('summary',terminal.has(run.status)?'思考过程':'思考中','activity-label'+(!terminal.has(run.status)?' shimmer':'')),element('div',thinking,'text'));rememberDisclosure(thought,`${run.id}:thinking`,false);container.append(thought);
-    }
-    const disclosure=element('details',undefined,'run');disclosure.open=run.expanded;
-    const count=events.filter(e=>e.type==='tool_started').length;
-    disclosure.append(element('summary',`查看 ${count} 项操作`));
-    const calls=new Map();
-    const toolLabels={'web.request':'网络请求 · curl','files.download':'下载文件','files.download_info':'查看下载','apps.install':'安装应用','apps.package_info':'核验应用安装','skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
+    const toolLabels={'web.request':'网络请求 · curl','files.download':'下载文件','files.download_info':'查看下载','apps.install':'安装应用','apps.package_info':'核验应用安装','skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看上屏','perception.read_ui':'读取界面','perception.ui_tree':'读取组件树','input.scroll':'滚动页面','input.drag':'拖动控件','input.tap':'点击上屏','input.long_press':'长按上屏','input.swipe':'滑动上屏','input.press_button':'按手柄键','input.set_axes':'移动摇杆与扳机','input.release_inputs':'释放输入','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
     const outcomeLabels={observed:'已完成',submitted:'已提交',unknown:'结果未知'};
+    const calls=new Map(),resultIds=new Set();
     for(const event of events) {
       if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type))continue;
       const id=event.toolCallId??`event:${event.sequence}`;
@@ -127,34 +121,89 @@
       Object.assign(current,{toolId:data.toolId??event.toolId??current.toolId,toolName:data.toolName??current.toolName});
       if(event.type==='tool_call_update')current.arguments=data.arguments;
       if(event.type==='tool_started'){current.started=true;current.arguments=data.arguments??current.arguments;}
-      if(event.type==='tool_result'){current.result=data;current.outcome=data.outcome??event.outcome;current.error=data.error??event.error;}
+      if(event.type==='tool_result'){current.result=data;current.outcome=data.outcome??event.outcome;current.error=data.error??event.error;if(event.toolCallId)resultIds.add(event.toolCallId);}
       calls.set(id,current);
     }
-    for(const call of calls.values()) {
-      const card=element('details',undefined,'tool-card');
-      const title=toolLabels[call.toolId]??call.toolId??call.toolName??'工具';
-      const status=call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
-      card.append(element('summary',`${title} · ${status}`));
-      if(call.arguments && Object.keys(call.arguments).length) {card.append(element('small','输入'));card.append(structured(call.arguments));}
-      if(call.result) {
-        if(call.error)card.append(element('div',`失败原因：${call.error}`,'attention'));
-        for(const content of call.result.content??[]) {
-          if(content.type==='attachment')card.append(element('div','已返回本地图片附件','muted'));
-          else if(content.type==='text') {
-            let value=content.text;try {value=JSON.parse(value);}catch{if(/^[\s]*[\[{]/.test(value))value='结构化结果不完整，请请求更小的结果或重试。';}
-            card.append(structured(value));
-          }
-        }
-        if(call.result.truncated)card.append(element('small','结果已按长度限制截断'));
-        if(call.result.source)card.append(element('small',`来源：${call.result.source}`));
-      }
-      rememberDisclosure(card,`${run.id}:tool:${call.id}`,false);disclosure.append(card);
+    const title=call=>toolLabels[call.toolId]??toolLabels[call.toolName?.replace('_','.')]??call.toolId??call.toolName??'工具';
+    // Actionable summaries never depend on opening an operation history.
+    if(run.stopReason)container.append(element('div',run.stopReason,'attention'));
+    else if(run.status==='failed')container.append(element('div','这次任务未能完成，请重试或检查设置。','attention'));
+    const unknown=events.filter(e=>(e.data?.outcome??e.outcome)==='unknown' && (e.type==='tool_result' || !resultIds.has(e.toolCallId)));
+    for(const e of unknown)container.append(element('div',`副作用未知 · ${toolLabels[e.toolId??e.data?.toolId]??e.toolId??e.data?.toolId??'工具操作'}，请检查目标状态`,'attention'));
+    for(const call of calls.values())if(call.error)container.append(element('div',`${title(call)} · ${call.error==='COMMAND_BLOCKED'?'已禁止':'执行失败'}，可展开操作详情查看原因`,'attention'));
+    if(run.status==='awaiting_user') {
+      const waiting=events.findLast(e=>e.type==='awaiting_user');
+      const card=element('div',run.approval?.summary??waiting?.summary??'等待用户','wait');
+      card.append(document.createElement('br'),button('批准此操作',()=>command({op:'approve',runId:run.id,approvalId:run.approval?.id}),'primary'),button('拒绝',()=>command({op:'reject',runId:run.id,approvalId:run.approval?.id})));container.append(card);
     }
-    const last=events.findLast(e=>e.type==='diagnostic');if(last)disclosure.append(element('div',`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
-    disclosure.addEventListener('toggle',()=> { if(disclosure.isConnected && disclosure.open!==run.expanded)command({op:'expanded',runId:run.id,expanded:disclosure.open}); });
+    const thinking=events.filter(e=>e.type==='thinking_delta').map(e=>e.data?.text??'').join('');
+    if(thinking) {
+      const thought=element('details',undefined,'thinking');
+      thought.append(element('summary',terminal.has(run.status)?'思考过程':'思考中','activity-label'+(!terminal.has(run.status)?' shimmer':'')),element('div',thinking,'text'));rememberDisclosure(thought,`${run.id}:thinking`,false);container.append(thought);
+    }
+    const disclosure=element('details',undefined,'run');
+    disclosure.append(element('summary',`查看 ${calls.size} 项操作`));
+    const last=events.findLast(e=>e.type==='diagnostic');
+    let contents=null;
+    function renderCallBody(card,call) {
+      let body=null;
+      rememberDisclosure(card,`${run.id}:tool:${call.id}`,false,open=>{
+        if(!open){body?.remove();body=null;return;}
+        if(body)return;
+        body=element('div',undefined,'tool-body');
+        // Parsing and recursive structured DOM construction happen only inside
+        // the one tool the user actually opened, never for collapsed history.
+        const brightnessCall=call.toolId==='debug.thor_brightness' || call.toolName==='debug_thor_brightness';
+        const percentInput=brightnessCall && ((!call.result && !terminal.has(run.status)) || (call.result?.content??[]).some(c=>{if(c.type!=='text')return false;try{return JSON.parse(c.text)?.unit==='percent';}catch{return false;}}));
+        if(call.arguments && Object.keys(call.arguments).length){body.append(element('small','输入'));body.append(structured(call.arguments,0,percentInput));}
+        if(call.result) {
+          if(call.error)body.append(element('div',`失败原因：${call.error}`,'attention'));
+          for(const content of call.result.content??[]) {
+            if(content.type==='attachment')body.append(element('div','已返回本地图片附件','muted'));
+            else if(content.type==='text') {
+              let value=content.text;try{value=JSON.parse(value);}catch{if(/^[\s]*[\[{]/.test(value))value='结构化结果不完整，请请求更小的结果或重试。';}
+              body.append(structured(value));
+            }
+          }
+          if(call.result.truncated)body.append(element('small','结果已按长度限制截断'));
+          if(call.result.source)body.append(element('small',`来源：${call.result.source}`));
+        }
+        card.append(body);
+      });
+    }
+    function renderOperations(open) {
+      if(!open){contents?.remove();contents=null;return;}
+      if(contents)return;
+      contents=element('div',undefined,'tool-list');
+      for(const call of calls.values()) {
+        const card=element('details',undefined,'tool-card');
+        const status=call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
+        card.append(element('summary',`${title(call)} · ${status}`));
+        renderCallBody(card,call);contents.append(card);
+      }
+      if(last)contents.append(element('div',`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
+      disclosure.append(contents);
+    }
+    // Native persists the outer choice. Keep an immediate local choice while
+    // awaiting its acknowledgement; a changed Native value or terminal transition
+    // still applies its explicit history-collapse policy.
+    const nativeExpanded=!!run.expanded;
+    let remembered=runDisclosures.get(run.id);
+    if(!remembered || remembered.nativeExpanded!==nativeExpanded || (!terminal.has(remembered.status)&&terminal.has(run.status))) {
+      remembered={open:nativeExpanded,nativeExpanded,status:run.status};runDisclosures.set(run.id,remembered);
+    }else remembered.status=run.status;
+    disclosure.open=remembered.open;
+    disclosure.querySelector('summary').addEventListener('click',()=>{remembered.open=!disclosure.open;});
+    disclosure.addEventListener('toggle',event=>{
+      if(event.target!==disclosure || !disclosure.isConnected)return;
+      remembered.open=disclosure.open;renderOperations(disclosure.open);
+      const current=state?.runs.find(r=>r.id===run.id)??run;
+      if(disclosure.open!==!!current.expanded)command({op:'expanded',runId:run.id,expanded:disclosure.open});
+    });
+    renderOperations(disclosure.open);
     if(!terminal.has(run.status) && run.status!=='awaiting_user') {
       const latest=[...calls.values()].at(-1);
-      container.append(element('div',latest?(toolLabels[latest.toolId]??latest.toolName??'处理任务'):'正在处理','activity-label shimmer'));
+      container.append(element('div',latest?title(latest):'正在处理','activity-label shimmer'));
     }
     if(calls.size || last)container.append(disclosure);return container;
   }

@@ -9,6 +9,8 @@ import { createNativeFetch, decodeFrame } from '../native-bridge/js/fetch-adapte
 import { readableText } from './web-text.mjs';
 // @ts-ignore Pure coordinator shared with Node concurrency regression tests.
 import { StartupCoordinator } from './startup-coordinator.mjs';
+// @ts-ignore Bounded host payload framing is shared with Node regression tests.
+import { encodeHostRpc } from './rpc-frame.mjs';
 import { skillTools } from './skill-tools.js';
 import contract from '../tools/contracts/toolpack-v1.json';
 
@@ -39,17 +41,18 @@ const rpc = (op: string, data: any = {}, timeout = 185000): Promise<any> => new 
   const requestId = crypto.randomUUID();
   const timer = setTimeout(() => { pending.delete(requestId); reject(new RuntimeError('TIMEOUT')); executions.get(data.runId)?.runtime.stop(); }, timeout);
   pending.set(requestId, { resolve, reject, timer });
-  send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId, op, data }));
+  try {send(encodeHostRpc({ type:'host.rpc',bridgeVersion:1,connectionId,requestId,op },data));}
+  catch(error:any){clearTimeout(timer);pending.delete(requestId);reject(new RuntimeError(error?.code==='LIMIT_EXCEEDED'?'LIMIT_EXCEEDED':'PROTOCOL_ERROR'));}
 });
 function handle(message: any) {
   if (message.type === 'bridge.ready') {
     connectionId = message.connectionId; window.productReady = true;
     void rpc('view').then(update);
     for (const raw of queue.splice(0)) window.ThorUI.postMessage(raw);
-  } else if (message.type === 'host.result') {
+  } else if (message.type === 'host.result' || message.type==='response.error' && pending.has(message.requestId)) {
     const p = pending.get(message.requestId); if (!p) return;
     clearTimeout(p.timer); pending.delete(message.requestId);
-    if (message.code || message.value?.error && !message.value?.content) p.reject(new RuntimeError(message.value?.error ?? 'IO_ERROR'));
+    if (message.code || message.value?.error && !message.value?.content) {const code=message.value?.error??message.code??'IO_ERROR';p.reject(new RuntimeError(code==='INVALID_REQUEST'?'PROTOCOL_ERROR':code));}
     else p.resolve(message.value);
   }
 }
@@ -67,7 +70,7 @@ function update(state: any) {
 }
 (window as any).receiveProductState = update;
 window.ThorNative.onmessage = event => {
-  try { const message = decodeFrame(event.data); if (message.type === 'host.result' || message.type === 'bridge.ready') handle(message); else for(const execution of executions.values())execution.receive(event.data); }
+  try { const message = decodeFrame(event.data); if (message.type === 'host.result' || message.type === 'bridge.ready' || message.type==='response.error' && pending.has(message.requestId)) handle(message); else for(const execution of executions.values())execution.receive(event.data); }
   catch { for(const execution of executions.values())execution.runtime.stop(); }
 };
 const tools = (contract.tools as any[]).map(t => ({ ...t,

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "357588d7-10cc-4dda-9c35-aeee8c0bf48e",
+  "testRunId": "scenario-678f0073-2c85-491e-80c8-08713707eabf",
+  "agentRunId": "a2b17288-76ee-47e5-ae21-e2fbd131a200",
+  "senderTraceRef": "live-product:a2b17288-76ee-47e5-ae21-e2fbd131a200:news",
+  "evidenceMode": "agent_e2e",
+  "scene": "news",
+  "seed": 4951855132237057793,
+  "page": "detail",
+  "taskPrompt": "请在上屏新闻列表找到《云岭观测简报 145》，滚动到该条目并打开详情，告诉我详情里的核对码。",
+  "state": {
+    "settingsSaved": false,
+    "settingsValues": null,
+    "settingsDraft": {
+      "mode": "性能",
+      "enabled": false,
+      "volume": 10
+    },
+    "settingsDragCount": 0,
+    "settingsSaveCount": 0,
+    "settingNavigationCount": 0,
+    "gameStep": 0,
+    "gameWrong": 0,
+    "openedArticleId": "story-22",
+    "articleOpenCount": 1,
+    "newsListScrollCount": 70,
+    "detailScrollCount": 0,
+    "listScrollY": 3645,
+    "detailScrollY": 0,
+    "maxListScrollY": 3645,
+    "maxDetailScrollY": 0,
+    "footerVisible": false
+  },
+  "expected": {
+    "settingsValues": {
+      "mode": "标准",
+      "enabled": true,
+      "volume": 60
+    },
+    "newsTargetTitle": "云岭观测简报 145",
+    "newsTargetId": "story-22",
+    "newsCode": "N-79728",
+    "articleTitle": "滨海记录 230",
+    "articleTopCode": "TOP-13103",
+    "articleBottomCode": "END-39504",
+    "gameTargets": [
+      "stage-0-tile-0",
+      "stage-1-tile-5"
+    ],
+    "gameResult": "GW-10353"
+  },
+  "completed": true,
+  "interruptedReason": null,
+  "geometry": {
+    "displayId": 0,
+    "width": 1920,
+    "height": 1080,
+    "rotation": 1,
+    "densityDpi": 369
+  },
+  "agentAnswerVerified": false,
+  "receiverQualificationVersion": "scenario-ui-observation-v1",
+  "systemInjectionProven": false,
+  "evidence": {
+    "eventPrefixBytes": 67276,
+    "eventPrefixSha256": "bd4e966f59927e725848077a5e996e7f142cefa10243b75de31c4b7279e12195",
+    "eventCount": 147,
+    "incomplete": false,
+    "droppedSamples": 0,
+    "sealed": true,
+    "relativePath": "scenario-reports\/357588d7-10cc-4dda-9c35-aeee8c0bf48e\/events.jsonl"
+  }
+}
