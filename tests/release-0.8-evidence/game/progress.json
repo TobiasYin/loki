@@ -1,5 +1,5 @@
 {
-  "status": "IN_PROGRESS_GAME11_AFTER_RUNTIME_RECEIPT_FIX_NOT_GAME_GOAL_PASS",
+  "status": "GAME18_RUNNING_ORIGINAL_CONTEXT_RETAINED_NO_HOST_GAME_STEPS",
   "sessionId": "7719b29a-9c06-46a3-b2ab-96975d1f8cb7",
   "harnessGameSteps": [],
   "goalVerified": {
@@ -1211,18 +1211,390 @@
         "missingFiles": 0,
         "scope": "Read-only byte-hash comparison of external Citra sdmc/nand data; not a gameplay or new-save verdict."
       }
+    },
+    {
+      "attempt": "game-11",
+      "note": "Same durable conversation after receipt fix. Actual Citra lower surface diagnosed as WM2037 Presentation / Accessibility unknown -1. Explicit maintenance stop revoked Native authority but JS Run failed to converge; observer failed and own instrumentation process was terminated after private backup. Exact cause of the wait is not yet proven. No game input by host.",
+      "observerSuitePassed": false,
+      "observerPassIsGamePass": false,
+      "harnessGameSteps": [],
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "5b5535d2cff41a1c67cecd9dab692961f491272955c409d66f25dd1b2743b9a8",
+          "bytes": 7662245
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "d0866d32e310e099f7c71f942ffefaf824942416d2dd2946674d7f807651355c",
+          "bytes": 3226302
+        }
+      },
+      "elapsedSeconds": 1373.96,
+      "runs": [
+        {
+          "runId": "41cdb2eb-4f4a-4fab-9cca-b39b1cae275a",
+          "statusBeforeColdRecovery": "generating",
+          "statusAfterColdRecovery": "interrupted",
+          "eventCount": 336,
+          "toolCounts": {
+            "agent.background": 1,
+            "perception.select_screen": 3,
+            "perception.capture_screen": 11,
+            "input.tap": 3,
+            "perception.ui_tree": 2,
+            "input.activate": 1,
+            "input.press_button": 2,
+            "input.navigate": 3,
+            "perception.capture_companion": 1
+          },
+          "toolErrors": {
+            "TARGET_CHANGED": 3,
+            "PERMISSION_MISSING": 3
+          },
+          "profileConfigurationRestored": true,
+          "encryptedCredentialsUnchanged": true,
+          "durableTurnPreserved": true,
+          "livePiObjectSurvivedRestart": false
+        }
+      ],
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      },
+      "independentScreenReview": "Upper Citra native settings menu over title scenery; lower all three blank new-save slots. No THOR save, obtained sword or completed quest independently verified.",
+      "presentationDiagnosis": {
+        "androidApi": 33,
+        "lowerLogicalDisplayId": 4,
+        "rawAccessibilityType": -1,
+        "rawWindowManagerType": 2037,
+        "windowId": 5034,
+        "systemTokenJoinObserved": true,
+        "ownerUidValidated": 10123,
+        "postFixAcceptance": false
+      },
+      "maintenanceRecovery": {
+        "onlyOwnAssistantInstrumentationKilled": true,
+        "databaseEdited": false,
+        "gameFilesEdited": false,
+        "allProfileConfigurationPreserved": true,
+        "encryptedCredentialsPreserved": true,
+        "autoReplayed": false
+      }
+    },
+    {
+      "attempt": "game-12",
+      "runs": [
+        "b24b81d3-d267-4f6b-a27d-422238052621"
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "elapsedSeconds": 1877.8,
+      "appSha256": "429ffa7de34897990f10a0b448454a4482af17cef1c8ab22b298cf7da3ce2b13",
+      "testSha256": "2051dc083f05e05604b581db69232f23a2056e1e776cd6a5bcf24e544a946175",
+      "harnessGameSteps": [],
+      "result": "failed",
+      "stopReason": "Runtime 未完成；不重放",
+      "durablePartialTurnRetained": true,
+      "newSaveSwordQuestVerified": false
+    },
+    {
+      "attempt": "game-13",
+      "runs": [
+        "d545e2e8-8793-4562-bcbc-beb5df4acce8"
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "elapsedSeconds": 37.44,
+      "appSha256": "3afa8f9181b39345c5a253ad496ff655d696dc9921ab9230f4b5d400a11c4370",
+      "testSha256": "570ad02b0d5d2138d82d3d5cd6383333bfa99d60ca37b0d8ee199f3ba008d116",
+      "harnessGameSteps": [],
+      "result": "failed",
+      "runtimeError": "IO_ERROR",
+      "durablePartialTurnRetained": true,
+      "newSaveSwordQuestVerified": false,
+      "diagnosis": "Successful Native selected-screen read serialized error:null; rejectedScreenRead incorrectly treated null as rejection. A fixed normalization and Native-shaped tests are a later source/APK follow-up."
+    },
+    {
+      "attempt": "game-14",
+      "runs": [
+        "8b8cda33-c853-49e7-acac-ca287919d4c1"
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "elapsedSeconds": 14.97,
+      "appSha256": "28cf1a11f41df24b75273570617077624848363be1e4276e2fe3e8b1ed81f61e",
+      "testSha256": "570ad02b0d5d2138d82d3d5cd6383333bfa99d60ca37b0d8ee199f3ba008d116",
+      "harnessGameSteps": [],
+      "result": "failed",
+      "runtimeError": "IO_ERROR",
+      "durablePartialTurnRetained": true,
+      "newSaveSwordQuestVerified": false,
+      "diagnosis": "No HTTP call was reached. Previous game13 persisted a tool_result text:null; cold context projection compatibility is under controlled reproduction and repair without editing stored history."
+    },
+    {
+      "attempt": "game-15",
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "396c98cd7a1e0ed2f3bbb38cab5917370e31e783b639c5c1ce3c19c456431ae0",
+          "bytes": 7091361,
+          "copiedFrom": "build/emulator/legacy-null-2026-10-17/run-01/app-debug.apk"
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "570ad02b0d5d2138d82d3d5cd6383333bfa99d60ca37b0d8ee199f3ba008d116",
+          "bytes": 3383322,
+          "copiedFrom": "build/emulator/legacy-null-2026-10-17/run-01/app-debug-androidTest.apk"
+        }
+      },
+      "elapsedSeconds": 880.66,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      },
+      "runs": [
+        {
+          "runId": "52444cb8-cd2a-46bc-9a2b-c6921fb66a4c",
+          "status": "failed",
+          "error": "IO_ERROR",
+          "elapsedMs": 870902,
+          "eventCount": 999,
+          "modelHttpCount": 57,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true,
+          "profileConfigurationRestored": true
+        }
+      ],
+      "note": "Actual background >12 minutes; target re-observation and later actions confirmed. Pi model stream ended with error, exact upstream cause unavailable; no game-goal completion."
+    },
+    {
+      "attempt": "game-16",
+      "observerSuitePassed": false,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "ed91699051410de9e8eb0d8b51275f04fc312e69b5fc87d7e69befa6aaa6968e",
+          "bytes": 7092961,
+          "copiedFrom": "build/emulator/scoped-focus-2026-10-17/run-01/app-debug.apk"
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "cf42f277259c2da143f7f8880ed0cabeb5eef3b4cdb274d6e7e84937830c99ce",
+          "bytes": 3384066,
+          "copiedFrom": "build/emulator/scoped-focus-2026-10-17/run-01/app-debug-androidTest.apk"
+        }
+      },
+      "elapsedSeconds": 56.98,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      },
+      "runs": [],
+      "note": "Readiness setup failed before a new Run. latest.json copied by driver is stale game15 and excluded. 45-second setup bound is not a model execution timeout."
+    },
+    {
+      "attempt": "game-17",
+      "runs": [
+        {
+          "runId": "e6fb2d98-beb3-45c7-8a2b-a31053bda4b7",
+          "status": "completed",
+          "eventCount": 1031,
+          "elapsedMs": 916530,
+          "targetChangedCount": 22,
+          "profileConfigurationRestored": true,
+          "encryptedCredentialsUnchanged": true,
+          "originalRunIdsPreserved": true
+        }
+      ],
+      "observerSuitePassed": true,
+      "observerPassIsGamePass": false,
+      "apks": {
+        "app/build/outputs/apk/debug/app-debug.apk": {
+          "sha256": "dbedacdcc6f3f9e86803399b7e61e6b45d851ff9b2cc0650198eb664bc8e36fe",
+          "bytes": 7486061,
+          "copiedFrom": "build/emulator/expiry-startup-2026-10-17/run-01/app-debug.apk"
+        },
+        "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+          "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+          "bytes": 3398214,
+          "copiedFrom": "build/emulator/expiry-startup-2026-10-17/run-01/app-debug-androidTest.apk"
+        }
+      },
+      "elapsedSeconds": 923.92,
+      "secureRestored": {
+        "enabled_accessibility_services": true,
+        "accessibility_enabled": true
+      },
+      "note": "Agent completed its response after partial controller configuration; all three game goals unverified. Same Run survived 22 TARGET_CHANGED results and later inputs. No host game steps."
     }
   ],
   "continuation": {
     "sessionId": "7719b29a-9c06-46a3-b2ab-96975d1f8cb7",
-    "runId": "41cdb2eb-4f4a-4fab-9cca-b39b1cae275a",
-    "reason": "Runtime receipt defect fixed and tested. Thor Agent resumed same durable conversation, independently backgrounded chat, selected/read lower screen and submitted semantic input. No new-save/sword/quest verdict yet.",
-    "appSha256": "5b5535d2cff41a1c67cecd9dab692961f491272955c409d66f25dd1b2743b9a8",
-    "testSha256": "d0866d32e310e099f7c71f942ffefaf824942416d2dd2946674d7f807651355c",
-    "testOutputBudget": 16384,
+    "runId": "f835d303-9185-4305-b14d-a45b8e32e359",
+    "reason": "Continue same original conversation after game17 partial final answer; Agent chooses only necessary configuration and performs every game step.",
+    "appSha256": "387472aab1c12d735253879288f895a98548ad0964ed06eb69c94837e3317c46",
+    "testSha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
     "hostGameInputAllowed": false,
     "game09": "Disconnected preflight failed before installation/model actions; excluded from gameplay attempts.",
-    "runStatus": "running"
+    "runStatus": "executing_tools",
+    "testOutputBudgetRestored": null,
+    "temporaryTestOutputBudget": 16384,
+    "pageChangeRecovery": {
+      "targetChangedCount": 10,
+      "successfulReobservations": [
+        {
+          "rejectedTool": "input.navigate",
+          "rejectedResultIndex": 39,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 40,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.tap",
+          "rejectedResultIndex": 41,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 42,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.navigate",
+          "rejectedResultIndex": 43,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 44,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.tap",
+          "rejectedResultIndex": 45,
+          "freshObservationTool": "perception.window_info",
+          "freshObservationResultIndex": 46,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.navigate",
+          "rejectedResultIndex": 47,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 48,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.tap",
+          "rejectedResultIndex": 49,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 50,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.swipe",
+          "rejectedResultIndex": 52,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 53,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.press_button",
+          "rejectedResultIndex": 77,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 78,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.activate",
+          "rejectedResultIndex": 82,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 83,
+          "sameRun": true
+        },
+        {
+          "rejectedTool": "input.activate",
+          "rejectedResultIndex": 90,
+          "freshObservationTool": "perception.capture_screen",
+          "freshObservationResultIndex": 91,
+          "sameRun": true
+        }
+      ],
+      "proofScope": "Native/model tool result order within same run; does not prove game goal completion or automatic retries.",
+      "sourceRunId": "b24b81d3-d267-4f6b-a27d-422238052621",
+      "sourceAppSha256": "429ffa7de34897990f10a0b448454a4482af17cef1c8ab22b298cf7da3ce2b13"
+    },
+    "backgroundSuspension": {
+      "observed": true,
+      "applicableAppSha256": "429ffa7de34897990f10a0b448454a4482af17cef1c8ab22b298cf7da3ce2b13",
+      "webView": "109.0.5414.123",
+      "eventCountBefore": 267,
+      "elapsedMsBeforeOwnChatForeground": 757522,
+      "stalledForMsAtDiagnostic": 439609,
+      "eventCountAfterOwnChatForeground": 276,
+      "sameRunResumed": true,
+      "diagnosticAction": "Open own assistant MainActivity on lower display only",
+      "hostGameInputs": [],
+      "fixStatus": "Historical combined-document failure; separate execution document continued beyond 12 minutes in game15 without host foreground/JS keepalive. This is a bounded observation, not unlimited survival."
+    },
+    "runtimeStateAtTerminal": null,
+    "stopReason": null,
+    "observerSuitePassed": null,
+    "observerPassIsGameGoalPass": false,
+    "gameGoalComplete": false,
+    "elapsedSeconds": null,
+    "secureRestored": null,
+    "next": "Observe same Run and independently verify game phases; no host game inputs.",
+    "game12LastObservation": {
+      "elapsedMsAtLastObservation": 1678058,
+      "eventCountAtLastObservation": 1304,
+      "runStatusAtLastObservation": "generating"
+    },
+    "currentRunObservation": {
+      "runId": "f835d303-9185-4305-b14d-a45b8e32e359",
+      "elapsedMs": 57191,
+      "eventCount": 41,
+      "runStatus": "executing_tools",
+      "harnessGameSteps": [],
+      "periodicJavaScriptDiagnosticsEnabled": false,
+      "fullGameGoalVerified": false
+    },
+    "startupObservation": {
+      "engineToExecutionReadyMs": 2874,
+      "storeLoadMs": 2260,
+      "startupPersistMs": 29,
+      "awaitReadyPortionMs": 243,
+      "deviceInteractive": true,
+      "bothPhysicalDisplaysOn": true,
+      "priorTimeoutUniqueCauseProven": false,
+      "secondEngineToReadyMs": 2968
+    },
+    "game17Observation": {
+      "runId": "e6fb2d98-beb3-45c7-8a2b-a31053bda4b7",
+      "elapsedMs": 916530,
+      "eventCount": 1031,
+      "runStatus": "completed",
+      "harnessGameSteps": [],
+      "periodicJavaScriptDiagnosticsEnabled": false,
+      "fullGameGoalVerified": false,
+      "focusRecoverySequences": [
+        {
+          "rejectionIndex": 8,
+          "rejectedTool": "input.press_button",
+          "freshObservationIndex": 9,
+          "freshObservationTool": "perception.window_info",
+          "laterSubmittedIndex": 18,
+          "laterSubmittedTool": "apps.launch",
+          "sameRun": true,
+          "automaticReplay": false
+        },
+        {
+          "rejectionIndex": 12,
+          "rejectedTool": "input.press_button",
+          "freshObservationIndex": 13,
+          "freshObservationTool": "perception.select_screen",
+          "laterSubmittedIndex": 18,
+          "laterSubmittedTool": "apps.launch",
+          "sameRun": true,
+          "automaticReplay": false
+        }
+      ],
+      "targetChangedCount": 22,
+      "successfulScreenReads": 17,
+      "proofScope": "Same Run fixed Native cause followed by successful observations and later submitted actions; does not assert any prior rejected input executed or game goal completion.",
+      "gameGoalComplete": false
+    }
   },
   "withheldScreenshots": [
     {

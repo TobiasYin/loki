@@ -1,0 +1,15 @@
+{
+  "scope": "Static ASCII symbol counts in fixed APK DEX, not proof of invocation or successful refresh.",
+  "entries": {
+    "classes4.dex": {
+      "remainingLifetimeMs": 1,
+      "needsFreshProof": 1,
+      "PresentationRefreshPolicy": 1
+    },
+    "classes6.dex": {
+      "remainingLifetimeMs": 1,
+      "needsFreshProof": 1,
+      "PresentationRefreshPolicy": 2
+    }
+  }
+}

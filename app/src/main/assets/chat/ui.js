@@ -183,7 +183,7 @@
     }
     return list;
   }
-  function runView(run,runEvents) {
+  function runView(run,runEvents,message) {
     const events=(runEvents??state.events.filter(e=>e.runId===run.id)).slice().sort((a,b)=>a.sequence-b.sequence);
     const container=element('div');
     const toolLabels={'web.request':'网络请求 · curl','files.download':'下载文件','files.download_info':'查看下载','apps.install':'安装应用','apps.launch':'打开应用','agent.background':'聊天转入后台','apps.package_info':'核验应用安装','skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看当前屏幕','perception.select_screen':'选择操作屏幕','perception.capture_companion':'查看同应用下屏','perception.find_apps':'查找应用','perception.read_ui':'读取界面','perception.ui_tree':'读取组件树','input.scroll':'滚动页面','input.drag':'拖动控件','input.tap':'点击当前屏幕','input.long_press':'长按当前屏幕','input.swipe':'滑动当前屏幕','input.activate':'激活界面控件','input.navigate':'当前屏幕返回','input.press_button':'按手柄键','input.set_axes':'移动摇杆与扳机','input.release_inputs':'释放输入','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
@@ -203,18 +203,62 @@
     // Actionable summaries never depend on opening an operation history.
     if(['failed','cancelled','interrupted'].includes(run.status) && run.stopReason)container.append(element('div',run.stopReason,run.status==='cancelled'?'timeline-note':'attention'));
     else if(run.status==='failed')container.append(element('div','这次任务未能完成，请重试或检查设置。','attention'));
-    const unknown=events.filter(e=>(e.data?.outcome??e.outcome)==='unknown' && (e.type==='tool_result' || (['failed','cancelled','interrupted'].includes(run.status) && !resultIds.has(e.toolCallId))));
+    const unknown=events.filter(e=>(e.data?.outcome??e.outcome)==='unknown' && (e.data?.error??e.error)!=='TARGET_CHANGED' && (e.type==='tool_result' || (['failed','cancelled','interrupted'].includes(run.status) && !resultIds.has(e.toolCallId))));
     for(const e of unknown)container.append(element('div',`副作用未知 · ${toolLabels[e.toolId??e.data?.toolId]??e.toolId??e.data?.toolId??'工具操作'}，请检查目标状态`,'attention'));
-    for(const call of calls.values())if(call.error)container.append(element('div',`${title(call)} · ${call.error==='COMMAND_BLOCKED'?'已禁止':'执行失败'}，可展开操作详情查看原因`,'attention'));
+    const recoveryFact=call=>call.outcome==='unknown' && call.result?.recovery?.sideEffectPossible!==false && call.result?.recovery?.submission!=='not_dispatched'?'先前操作的提交状态尚未确认，请勿重复旧动作':call.result?.recovery?.submission==='submitted' || call.outcome==='submitted'?'先前操作已提交，需观察结果':'';
+    // Recovery is one current Run state, not one perpetual status per old error.
+    // A result event exists only after Runtime's post-authority checks. Companion
+    // reads/selection/discarded or failed reads cannot qualify a fresh target.
+    const currentScreenReads=new Set(['perception.app_info','perception.window_info','perception.ui_tree','perception.capture_screen']);
+    let recoverySeen=false,needsObservation=false;
+    for(const event of events)if(event.type==='tool_result') {
+      const data=event.data??{},error=data.error??event.error,toolId=data.toolId??event.toolId??calls.get(event.toolCallId)?.toolId;
+      if(error==='TARGET_CHANGED'){recoverySeen=true;needsObservation=true;}
+      else if(recoverySeen && !error && !data.contentDiscarded && (data.outcome??event.outcome)==='observed') {
+        if(currentScreenReads.has(toolId))needsObservation=false;
+        else if(toolId==='perception.select_screen')needsObservation=true;
+      }
+    }
+    const recoveryCalls=[...calls.values()].filter(call=>call.error==='TARGET_CHANGED');
+    const uncertainRecovery=recoveryCalls.find(call=>call.outcome==='unknown' && recoveryFact(call));
+    const recoveryStatus=needsObservation?(terminal.has(run.status)?'此前页面发生变化，需以新观察决定后续操作':run.status==='awaiting_user'?'页面已变化，需重新观察':'页面已变化，正在重新观察'):'';
+    const fact=uncertainRecovery?recoveryFact(uncertainRecovery):needsObservation?recoveryFact(recoveryCalls.at(-1)??{}):'';
+    if(recoveryStatus || fact) {
+      const note=element('div',[recoveryStatus,fact].filter(Boolean).join('；')+'。','timeline-note recovery-status');note.setAttribute('role','status');container.append(note);
+    }
+    for(const call of calls.values())if(call.error && call.error!=='TARGET_CHANGED')container.append(element('div',`${title(call)} · ${call.error==='COMMAND_BLOCKED'?'已禁止':'执行失败'}，可展开操作详情查看原因`,'attention'));
     if(run.status==='awaiting_user') {
       const waiting=events.findLast(e=>e.type==='awaiting_user');
       const card=element('div',run.approval?.summary??waiting?.summary??'等待用户','wait');
       card.append(document.createElement('br'),button('批准此操作',()=>command({op:'approve',runId:run.id,approvalId:run.approval?.id}),'primary'),button('拒绝',()=>command({op:'reject',runId:run.id,approvalId:run.approval?.id})));container.append(card);
     }
-    const thinking=events.filter(e=>e.type==='thinking_delta').map(e=>e.data?.text??'').join('');
-    if(thinking) {
+    const thinkingLimit=65536;
+    let thinkingLength=0,thinkingTruncated=message?.thinkingTruncated===true;
+    for(const event of events)if(event.type==='thinking_delta') {
+      if(typeof event.data?.text==='string')thinkingLength+=event.data.text.length;
+      if(event.data?.textTruncated===true)thinkingTruncated=true;
+    }
+    thinkingTruncated ||= thinkingLength>thinkingLimit;
+    if(thinkingLength) {
       const thought=element('details',undefined,'thinking');
-      thought.append(element('summary',terminal.has(run.status)?'思考过程':'思考中','activity-label'+(!terminal.has(run.status)?' shimmer':'')),element('div',thinking,'text'));rememberDisclosure(thought,`${run.id}:thinking`,false);container.append(thought);
+      thought.append(element('summary',terminal.has(run.status)?'思考过程':'思考中','activity-label'+(!terminal.has(run.status)?' shimmer':'')));
+      let body=null;
+      rememberDisclosure(thought,`${run.id}:thinking`,false,open=>{
+        if(!open){body?.remove();body=null;return;}
+        if(body)return;
+        // Fold only the visible tail and only when opened. Collapsed history
+        // never concatenates the complete ledger or builds hidden text nodes.
+        const parts=[];let remaining=thinkingLimit;
+        for(let i=events.length-1;i>=0 && remaining>0;i--)if(events[i].type==='thinking_delta' && typeof events[i].data?.text==='string') {
+          const part=events[i].data.text.slice(-remaining);parts.push(part);remaining-=part.length;
+        }
+        let text=parts.reverse().join('');
+        if(thinkingTruncated && text.charCodeAt(0)>=0xdc00 && text.charCodeAt(0)<=0xdfff)text=text.slice(1);
+        body=element('div',undefined,'thinking-body');
+        if(thinkingTruncated)body.append(element('small','仅显示最近的思考内容','muted thinking-truncation'));
+        body.append(element('div',text,'text'));thought.append(body);
+      });
+      container.append(thought);
     }
     const disclosure=element('details',undefined,'run');
     disclosure.append(element('summary',`查看 ${calls.size} 项操作`));
@@ -232,11 +276,13 @@
         const percentInput=brightnessCall && ((!call.result && !terminal.has(run.status)) || (call.result?.content??[]).some(c=>{if(c.type!=='text')return false;try{return JSON.parse(c.text)?.unit==='percent';}catch{return false;}}));
         if(call.arguments && Object.keys(call.arguments).length){body.append(element('small','输入'));body.append(structured(call.arguments,0,percentInput));}
         if(call.result) {
-          if(call.error)body.append(element('div',`失败原因：${call.error}`,'attention'));
+          if(call.error)body.append(element('div',call.error==='TARGET_CHANGED'?'此操作因页面变化被拒绝，后续需依据新观察。':`失败原因：${call.error}`,call.error==='TARGET_CHANGED'?'timeline-note':'attention'));
+          if(call.error==='TARGET_CHANGED' && recoveryFact(call))body.append(element('div',recoveryFact(call)+'。','timeline-note'));
           for(const content of call.result.content??[]) {
             if(content.type==='attachment')body.append(element('div','已返回本地图片附件','muted'));
             else if(content.type==='text') {
               let value=content.text;try{value=JSON.parse(value);}catch{if(/^[\s]*[\[{]/.test(value))value='结构化结果不完整，请请求更小的结果或重试。';}
+              if(call.error==='TARGET_CHANGED' && value?.recovery?.kind==='observe_again')continue;
               body.append(structured(value));
             }
           }
@@ -252,11 +298,11 @@
       contents=element('div',undefined,'tool-list');
       for(const call of calls.values()) {
         const card=element('details',undefined,'tool-card');
-        const status=call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
+        const status=call.error==='TARGET_CHANGED'?'需要重新观察':call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
         card.append(element('summary',`${title(call)} · ${status}`));
         renderCallBody(card,call);contents.append(card);
       }
-      if(last)contents.append(element('div',`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
+      if(last)contents.append(element('div',last.data?.code==='TARGET_CHANGED'?'页面已变化，需重新观察。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
       disclosure.append(contents);
     }
     // Native persists the outer choice. Keep an immediate local choice while
@@ -309,16 +355,20 @@
     for(const message of messages) {
       let entry=messageNodes.get(message.id);
       if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments);entry={card,runSlot,textSlot,attachments};messageNodes.set(message.id,entry);}
-      const run=runs.get(message.runId),runSignature=message.role==='assistant'&&run?JSON.stringify([run,events.get(run.id)]):'';
+      const run=runs.get(message.runId),runSignature=message.role==='assistant'&&run?JSON.stringify([run,events.get(run.id),message.thinkingTruncated===true]):'';
       if(entry.runSignature!==runSignature){
         const focused=document.activeElement;
         const focusKey=entry.runSlot.contains(focused) && focused.tagName==='SUMMARY'?focused.parentElement.dataset.disclosureKey:null;
         const transitions=pauseDisclosures(entry.runSlot);entry.runSlot.replaceChildren();
-        if(runSignature)entry.runSlot.append(runView(run,events.get(run.id)));resumeDisclosures(entry.runSlot,transitions);
+        if(runSignature)entry.runSlot.append(runView(run,events.get(run.id),message));resumeDisclosures(entry.runSlot,transitions);
         if(focusKey){const target=[...entry.runSlot.querySelectorAll('details[data-disclosure-key]')].find(node=>node.dataset.disclosureKey===focusKey);(target?.querySelector('summary')??entry.runSlot.querySelector('details.run > summary'))?.focus({preventScroll:true});}
         entry.runSignature=runSignature;
       }
-      if(entry.text!==message.text){entry.textSlot.replaceChildren(message.role==='assistant'?markdown(message.text||''):element('div',message.text||'','text'));entry.text=message.text;}
+      if(entry.text!==message.text || entry.textTruncated!==(message.textTruncated===true)){
+        entry.textSlot.replaceChildren(message.role==='assistant'?markdown(message.text||''):element('div',message.text||'','text'));
+        if(message.textTruncated===true)entry.textSlot.append(element('small','消息内容较长，仅显示最近一段。','muted message-truncation'));
+        entry.text=message.text;entry.textTruncated=message.textTruncated===true;
+      }
       const attachmentsSignature=JSON.stringify((message.attachments??[]).map(id=>state.attachments?.find(a=>a.id===id)??id));
       if(entry.attachmentsSignature!==attachmentsSignature){entry.attachments.replaceChildren();for(const aid of message.attachments??[]){const a=state.attachments?.find(a=>a.id===aid);entry.attachments.append(element('small',a?`本地附件 · ${a.size} 字节 · ${Date.now()>a.expiresAt?'已过期':'本地保存'} · SHA-256 ${a.hash.slice(0,12)}`:'附件引用不可用'));}entry.attachmentsSignature=attachmentsSignature;}
       const expected=previous?previous.nextSibling:chat.firstChild;if(expected!==entry.card)chat.insertBefore(entry.card,expected);previous=entry.card;

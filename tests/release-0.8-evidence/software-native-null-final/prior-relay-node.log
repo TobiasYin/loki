@@ -1,0 +1,11 @@
+✔ execution UI events project only fixed bounded metadata, never prompt/tool text or functions (1.090792ms)
+✔ unknown functions, phases, capabilities, oversized IDs and raw upstream error values cannot cross relay (0.153167ms)
+✔ absent UI/ack never creates pending promises and disconnected or failed delivery drops without retry (4.316834ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 49.733958

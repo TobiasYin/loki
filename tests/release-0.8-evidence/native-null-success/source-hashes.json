@@ -1,0 +1,5 @@
+{
+  "runtime/src/contracts.ts": "84c2734717b793e5e029e1d7e30ee34fe8fd141e635677b14817e496a2949606",
+  "runtime/src/runtime.ts": "20472c6a250b8068ce71683cc3a2ffb7da4f18b6ca3deb6e3f0c2bcee72dd427",
+  "runtime/test/native-null-success.test.ts": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45"
+}

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "status": "POST_429_SOURCE_SUPPLEMENT_NOT_DEVICE_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T18:31:31.693599+00:00",
+  "scope": "Native screen-read error precedence after authority revalidation. Actual Pi/three provider SDK controlled SSE and synthetic Native ports. No Gradle/APK/device execution.",
+  "runtime": {
+    "exitCode": 0,
+    "tests": 139,
+    "pass": 139,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "newTests": 24
+  },
+  "integrationTsc": {
+    "exitCode": 0,
+    "successfulOutputEmpty": true
+  },
+  "sourceSnapshot": [
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 37585,
+      "sha256": "fa33179b13654b8d5ca53c556c8c4fdb6517a4cca8d2ca70a8215015fdae3530"
+    },
+    {
+      "path": "runtime/test/native-read-error-priority.test.ts",
+      "bytes": 5824,
+      "sha256": "00b59bc0936dc234e8743e44c5d5d5cf3340e2eeaba5bf357287ed08c6280365"
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "bytes": 3736,
+      "sha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f"
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "bytes": 18499,
+      "sha256": "20a3890763f622024049a4c13a44326e5ece19293eebbd85c42bd11bcd27dda4"
+    },
+    {
+      "path": "runtime/package-lock.json",
+      "bytes": 59910,
+      "sha256": "cdcf7229207209aec2311d1a64e29383386950550da65888b43c56b95a858a24"
+    }
+  ],
+  "documentation": {
+    "path": "docs/native-read-error-priority.md",
+    "bytes": 2127,
+    "sha256": "c98a9340402a7ee54bf30bc02510e81cefc7a764d1057ed4577629fe33ebd5f7"
+  },
+  "previousRuntimeSourceSha256": "f7eb5d545ffec32a9c9a6b8e9d300ef7ac2ad076a130269c2d277569fea359f7",
+  "previous115AndGradle02SnapshotsUnmodified": true,
+  "installed429ContainsThisPatch": false,
+  "currentPhysicalRunModifiedOrStopped": false,
+  "contract": {
+    "authoritySessionRunLeaseEpochExpiryCancelCapabilitiesStillFirst": true,
+    "nativeScreenReadFixedErrorPreservedBeforeSourceFreshness": true,
+    "rejectedReadBodyAndAttachmentsDiscarded": true,
+    "unknownEvidenceReceiptPreserved": true,
+    "nativeTargetChangedStillObserveAgain": true,
+    "successfulReadSourceAndAfterAttachmentChecksPreserved": true,
+    "nonReadCommandBlockedStructuredFeedbackPreserved": true,
+    "stopEpochCapabilityPriorityTestedAcrossThreeProtocols": true,
+    "automaticToolReplay": false
+  },
+  "logs": [
+    {
+      "sourcePath": "build/native-read-error-priority-runtime.log",
+      "publishedPath": "runtime-node.log",
+      "bytes": 15426,
+      "sha256": "38dde901d4e423ab81aee36e03a337f93bf88cc2bbb0c8efeaccc8c647ce9a65",
+      "exitCode": 0
+    },
+    {
+      "sourcePath": "build/native-read-error-priority-tsc.log",
+      "publishedPath": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0
+    }
+  ],
+  "limitations": [
+    "Prior isolated reproduction established classification masking, not an authorization bypass or body leak.",
+    "This patch is not included in the already installed 429ffa7d App; historical115/429 evidence is unchanged.",
+    "Node controlled ports do not establish Android/Thor/cloud acceptance or explain the separate background scheduling hang."
+  ],
+  "devicesOperated": false,
+  "gradleExecuted": false,
+  "sharedManifestUpdated": false
+}

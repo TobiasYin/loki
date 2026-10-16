@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed ed916/cf42 emulator result: six passes and one unresolved Presentation absolute-expiry failure. Later proactive refresh/startup changes excluded; excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 5088,
+      "sha256": "5ed604ba3e423c28533b586a25661c381858069531a609f81808ba1c8ceabc9d"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "a77cc7ebd08bd54e4e7b0c9dfad6e63a2335e7d4994497882d4c96c67372873b"
+    },
+    {
+      "path": "background-long-380.log",
+      "bytes": 846,
+      "sha256": "bca3adf2799ac5e548d4207dd10eea4900a9114b70a896a875db9fb2c3288751"
+    },
+    {
+      "path": "combined-explicit-5.log",
+      "bytes": 3716,
+      "sha256": "3b793810533c921ff8b12f167edf71110d5c6ca062edf1b67ce6ce6e8944b439"
+    },
+    {
+      "path": "frozen-scoped-patch-source.json",
+      "bytes": 704,
+      "sha256": "0aae9777b831376c8eb343ad4cd8e2077a50e0b00e038f3f6f0f852f93b00d0f"
+    },
+    {
+      "path": "long-background.json",
+      "bytes": 2883,
+      "sha256": "31c7a41109a74b2a64223489b35658d9e941e5b2cdd19abd63e47496b45fcd81"
+    },
+    {
+      "path": "per-test-preservation.json",
+      "bytes": 1330,
+      "sha256": "cd537b0ace2ef4f2d1929085fa7f43c33756116ba9ccbe39731e218173b7f540"
+    },
+    {
+      "path": "presentation-explicit.log",
+      "bytes": 2581,
+      "sha256": "4d8de3d7e8cff4f98e90b65e0efcc5e404c25c15469e215afee5787c505f7084"
+    },
+    {
+      "path": "presentation-failure.json",
+      "bytes": 17009,
+      "sha256": "ae7c9691018404cea089bace924446d991d25a726a14f9f6d4d1a1b3d221b84a"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2176,
+      "sha256": "4a82925b35735338532a05faddfc42bfced6917ba24128d15f51d6519e7fd31e"
+    },
+    {
+      "path": "short-background.json",
+      "bytes": 531,
+      "sha256": "092a9bbf41f5414bee321d9194acc4b75a8635fc0d4c7d3e6215b30817266ebc"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 5369,
+      "sha256": "709f5b2d0ef5a432e30d572baa4a82b5e14144b9f1e6d9890e1984e398b1e3f1"
+    },
+    {
+      "path": "ui-provider.json",
+      "bytes": 9223,
+      "sha256": "1047251e5886a38051fdea3e042d8e1df6dda60b57cb078f859ae0302c2da359"
+    }
+  ]
+}

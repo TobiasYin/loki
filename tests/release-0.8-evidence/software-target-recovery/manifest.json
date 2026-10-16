@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local unified software Gradle02/source-test evidence only. No Android run claim; historical and shared manifests untouched.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3772,
+      "sha256": "0bf7218eaae7691908ca626a3e59f560c31e9d055b80bfba366bdc6426fc76f5"
+    },
+    {
+      "path": "app-js.log",
+      "bytes": 6301,
+      "sha256": "c1713eb2d837b8f7cdbaad78890113a11c1933a31560cbf4d22d315d07497920"
+    },
+    {
+      "path": "artifacts.log",
+      "bytes": 1899,
+      "sha256": "36ed68ac4f1feb77b50ced03211584120a3d64733653d3ceef4d66f5346fcf76"
+    },
+    {
+      "path": "gradle-02-artifact-pins.json",
+      "bytes": 1063,
+      "sha256": "242c5a471930b91700b7a8b284b464d04042d114c2ad5f99eb08993e9a31d6f4"
+    },
+    {
+      "path": "gradle-02.log",
+      "bytes": 34116,
+      "sha256": "821f25b9d2618071efb0381fc866e3b414d4f02b776ad4f83c31c0069d5fdaaf"
+    },
+    {
+      "path": "initial-gradle-failed.log",
+      "bytes": 10937,
+      "sha256": "782cf7005431952dba9d08ad45d9f0bc74c1bd60ec80ef9804f55f71333edf62"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 27043,
+      "sha256": "4719bef1ee0f8c970d6ccffa2467f4eb4361f507607b3b3575fbe0f838cf5466"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 12678,
+      "sha256": "889deebd14ffe2d05dbc9d0e8ceffc8f122baf15b97ea490ca85ac8e4207f4ec"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 8827,
+      "sha256": "9da27ac78d7b8ff6fdb667ff0652d12e06f301dd87e7f19b98a642a5efbd9a47"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 12709,
+      "sha256": "1694492daaf55cc42684daf5fd44b31b5659429434f0b55dd601bfbc9c23bed6"
+    }
+  ]
+}

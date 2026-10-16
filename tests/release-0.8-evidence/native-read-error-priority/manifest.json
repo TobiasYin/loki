@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "scope": "Post429 Runtime source supplement only; historical/shared manifests unchanged.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1620,
+      "sha256": "a255cb498cc42ead5f3659d18eaa3081a6b3ddcb0e5083b2f477ce8b178d17f3"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 15426,
+      "sha256": "38dde901d4e423ab81aee36e03a337f93bf88cc2bbb0c8efeaccc8c647ce9a65"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 3364,
+      "sha256": "147cd392ff507cb267cc26c8ac163022d586496aad3c9c29dcbd6db168c99c71"
+    }
+  ]
+}

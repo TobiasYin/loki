@@ -71,8 +71,9 @@ class MainActivity : Activity() {
         val service=runtimeService ?: return
         val engine=service.engine ?: run {showRuntimeError(service.initializationError ?: "执行环境暂不可用。");return}
         attachedEngine?.detach(runtimeUi);attachedEngine=engine
-        web=engine.web;host=engine.host;bridge=engine.bridge
+        host=engine.host;bridge=engine.bridge
         settingsView=null;container.removeAllViews();engine.attach(this,container,runtimeUi)
+        web=engine.web // Display-only WebView; execution document stays in Service.
         consumePendingPickerResult()
     }
     private fun reloadRuntime() {
@@ -116,8 +117,9 @@ class MainActivity : Activity() {
         if(android.os.Build.VERSION.SDK_INT<33 || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)==android.content.pm.PackageManager.PERMISSION_GRANTED)return
         requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),74)
     }
-    override fun onStart() {super.onStart();chatStarted=true}
+    override fun onStart() {super.onStart();chatStarted=true;attachedEngine?.uiVisibilityChanged(runtimeUi)}
     override fun onStop() {chatStarted=false;super.onStop()}
+    override fun onWindowFocusChanged(hasFocus:Boolean) {super.onWindowFocusChanged(hasFocus);attachedEngine?.uiVisibilityChanged(runtimeUi)}
     override fun onPause() {super.onPause();voice?.close();voice=null;voiceId=null}
     override fun onDestroy() {
         voice?.close();voice=null;voiceId=null
@@ -342,7 +344,7 @@ class MainActivity : Activity() {
             try {
                 require(!host.hasActiveRuns())
                 val token=host.requestProbe();val sid=host.selectedSession()
-                web.evaluateJavascript("window.runNativeProbe(${JSONObject.quote(token)}, ${JSONObject.quote(sid)})",null)
+                attachedEngine?.executionWeb?.evaluateJavascript("window.runNativeProbe(${JSONObject.quote(token)}, ${JSONObject.quote(sid)})",null)
                 Toast.makeText(this,"正在检查已保存的配置；当前草稿不会参与",Toast.LENGTH_LONG).show()
             } catch(_:Exception){Toast.makeText(this,"请先保存有效配置，并等待当前连接检查结束",Toast.LENGTH_LONG).show()}
         }

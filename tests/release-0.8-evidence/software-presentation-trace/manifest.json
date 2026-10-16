@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Incremental software-only trace identity; excludes manifest itself",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2292,
+      "sha256": "6ea4cb0e4e628b4a835107e7a7f1add3b6812a6a576cae843d6596781b405397"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "118e334c39547c9c9efb4320d580f95b8413456a64201eb5a56ed4ef48f9c177"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 50771,
+      "sha256": "6bb423b871ee927068bf4eae079afa8747dbb87768092f1aa35915cb4f2f03ad"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 21889,
+      "sha256": "216e3196a375025e06203a4bff80238df9a35634cb76cb937b1e2e6fd8705168"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 16381,
+      "sha256": "801f8d051bf43a9b76f6f11f6c3f4e454f9b7123e88efdbe6ef9107a1fef93e3"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 5256,
+      "sha256": "46db9411b374eab66378d09bb0109406c911d4e13290e8607da443266c3427b8"
+    }
+  ]
+}

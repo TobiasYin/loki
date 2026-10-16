@@ -4,7 +4,7 @@ export const CAPABILITIES = ['screen_perception', 'web_search', 'screen_control'
 export type Capability = typeof CAPABILITIES[number];
 export type Capabilities = Record<Capability, boolean>;
 export const defaultCapabilities = (): Capabilities => ({ screen_perception: true, web_search: true, screen_control: false, adb_debug: false });
-export type Availability = { status: 'ready' | 'permission_missing' | 'backend_missing' | 'unsupported' | 'temporarily_unavailable'; reason?: string };
+export type Availability = { status: 'ready' | 'permission_missing' | 'backend_missing' | 'unsupported' | 'temporarily_unavailable'; reason?: string; reasonCode?: 'TARGET_CHANGED'|'PERMISSION_MISSING'|'SECURE_CONTENT'|'DISPLAY_GONE' };
 export interface ModelProfile {
   profileId: string; revision: number; label: string;
   protocol: 'openai-responses' | 'anthropic-messages' | 'openai-completions'; baseUrl: string; modelId: string;
@@ -40,14 +40,25 @@ export interface ToolEnvelope {
   toolId: string; schemaVersion: string; capabilityEpoch: number; requestId: string;
   deadline: number; arguments: unknown; targetSnapshotId: string; resources: string[];
 }
-export type ErrorCode = 'CAPABILITY_DISABLED' | 'STALE_AUTHORIZATION' | 'PERMISSION_MISSING' | 'BACKEND_UNAVAILABLE' | 'TARGET_CHANGED' | 'UNSUPPORTED' | 'TIMEOUT' | 'CANCELLED' | 'LIMIT_EXCEEDED' | 'IO_ERROR' | 'PROTOCOL_ERROR' | 'PERSISTENCE_ERROR' | 'INVALID_ARGUMENT' | 'HASH_CONFLICT' | 'APPROVAL_REQUIRED' | 'COMMAND_BLOCKED' | 'SECURE_CONTENT' | 'DISPLAY_GONE' | 'RATE_LIMITED';
-export class RuntimeError extends Error { constructor(public code: ErrorCode, message: string = code) { super(message); } }
+export const ERROR_CODES = ['CAPABILITY_DISABLED', 'STALE_AUTHORIZATION', 'PERMISSION_MISSING', 'BACKEND_UNAVAILABLE', 'TARGET_CHANGED', 'UNSUPPORTED', 'TIMEOUT', 'CANCELLED', 'LIMIT_EXCEEDED', 'IO_ERROR', 'PROTOCOL_ERROR', 'PERSISTENCE_ERROR', 'INVALID_ARGUMENT', 'HASH_CONFLICT', 'APPROVAL_REQUIRED', 'COMMAND_BLOCKED', 'SECURE_CONTENT', 'DISPLAY_GONE', 'RATE_LIMITED'] as const;
+export type ErrorCode = typeof ERROR_CODES[number];
+export function isErrorCode(value: unknown): value is ErrorCode { return typeof value === 'string' && (ERROR_CODES as readonly string[]).includes(value); }
+export class RuntimeError extends Error {
+  public code: ErrorCode;
+  constructor(code: ErrorCode, message?: string) {
+    const normalized = isErrorCode(code) ? code : 'PROTOCOL_ERROR';
+    super(message ?? normalized); this.code = normalized;
+  }
+}
 export interface Attachment { attachmentId: string; mimeType: 'image/png' | 'image/jpeg' | 'image/webp'; data: string; observedAt: number; expiresAt: number; source: Capability[] }
 export interface AttachmentPort { put(attachment: Attachment): Promise<void>; get(id: string): Promise<Attachment | undefined> }
 export type Content = { type: 'text'; text: string } | { type: 'attachment'; attachmentId: string };
 export interface ToolOutcome {
   content: Content[]; observedAt: number; source: string; truncated: boolean; evidenceRef?: string;
-  error?: ErrorCode; outcome?: 'submitted' | 'observed' | 'unknown';
+  /** Native JSON success commonly serializes error:null. */
+  error?: ErrorCode | null; outcome?: 'submitted' | 'observed' | 'unknown';
+  /** Fixed Native control metadata, never parsed from an untrusted result body. */
+  targetChangedReason?: 'input_focus_mismatch';
 }
 export interface ToolPort { execute(envelope: ToolEnvelope, signal: AbortSignal, awaiting?: (waiting: boolean) => Promise<void>): Promise<ToolOutcome> }
 export interface NetworkEnvelope {

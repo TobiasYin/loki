@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "scope": "Selected fixture source hashes captured for audit; fixed APK/installed hashes are execution identity, not a complete source archive.",
+  "files": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorBackgroundRuntimeTest.kt",
+      "bytes": 16543,
+      "sha256": "5f49256dc7e6986d52443000dd43b74f40c191c4e41683c9bc120f43ed1ad4f9"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorBackgroundTestState.kt",
+      "bytes": 8386,
+      "sha256": "b7af87e0545a83d533a243e8e1b4833f80ddd9da62e322020f6df5177dcfbe63"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorLongBackgroundRuntimeTest.kt",
+      "bytes": 13439,
+      "sha256": "f8170853f8766a18a02fa2c605cff0b6911ee36431637d403be00601c9ee1635"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/LongBackgroundSseFixture.kt",
+      "bytes": 6905,
+      "sha256": "f4b1124618fe7483f105cdc21a2eaab5f72fb14d16c122f309cdde0fc4dd9c44"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorModernChatUiTest.kt",
+      "bytes": 20433,
+      "sha256": "d3a980f4aca7bd06ca7be33b844cc35d3c1c1bdd41bc18f2dc7a8cf5a4a02979"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorDeepSeekSettingsTest.kt",
+      "bytes": 15969,
+      "sha256": "b161600b2759baf63a2308ab7d9518a795c8f2b637352fc805ea39a2b3346025"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorPresentationControlTest.kt",
+      "bytes": 38717,
+      "sha256": "1a06efb1b656fb185d89bbf366dfef9cee49f807be4c9d473933fda3ad5257ce"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorRuntimeTestSupport.kt",
+      "bytes": 4874,
+      "sha256": "ec430d8d1c006ad5f03522783aa98dc6022eca5cabbf56a936aed330c7941023"
+    }
+  ]
+}

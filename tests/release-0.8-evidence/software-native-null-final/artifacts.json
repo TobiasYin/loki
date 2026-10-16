@@ -1,0 +1,26 @@
+{
+  "agent-debug": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "28cf1a11f41df24b75273570617077624848363be1e4276e2fe3e8b1ed81f61e",
+    "bytes": 7091361,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='dev.thor.inputlab.permission.CONTROL'\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='android.permission.POST_NOTIFICATIONS'\nuses-permission: name='android.permission.FOREGROUND_SERVICE'\nuses-permission: name='android.permission.FOREGROUND_SERVICE_SPECIAL_USE'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "agent-release-unsigned": {
+    "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+    "sha256": "d32facabc0783bda277e753554341d7c52cad112d4259412f61f4f9e99cee7f3",
+    "bytes": 5451179,
+    "permissions": "package: dev.thor.agent\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='android.permission.POST_NOTIFICATIONS'\nuses-permission: name='android.permission.FOREGROUND_SERVICE'\nuses-permission: name='android.permission.FOREGROUND_SERVICE_SPECIAL_USE'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+  },
+  "input-lab-debug": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+    "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+    "bytes": 2935291,
+    "permissions": "package: dev.thor.inputlab\npermission: dev.thor.inputlab.permission.CONTROL"
+  },
+  "input-lab-release-unsigned": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+    "sha256": "74cc639c3c41d75db1661dd5426a0de934915ec5d480b345ad654bb3abbe2817",
+    "bytes": 2287292,
+    "permissions": "package: dev.thor.inputlab"
+  }
+}

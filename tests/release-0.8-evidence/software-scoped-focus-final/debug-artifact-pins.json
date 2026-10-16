@@ -1,0 +1,17 @@
+[
+  {
+    "path": "build/emulator/scoped-focus-2026-10-17/run-01/app-debug-androidTest.apk",
+    "sha256": "cf42f277259c2da143f7f8880ed0cabeb5eef3b4cdb274d6e7e84937830c99ce",
+    "bytes": 3384066
+  },
+  {
+    "path": "build/emulator/scoped-focus-2026-10-17/run-01/app-debug.apk",
+    "sha256": "ed91699051410de9e8eb0d8b51275f04fc312e69b5fc87d7e69befa6aaa6968e",
+    "bytes": 7092961
+  },
+  {
+    "path": "build/emulator/scoped-focus-2026-10-17/run-01/input-lab-debug.apk",
+    "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+    "bytes": 2935291
+  }
+]

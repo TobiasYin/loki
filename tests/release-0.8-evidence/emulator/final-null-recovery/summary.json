@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "status": "SIX_CASES_PASS_PRESENTATION_UNRESOLVED",
+  "collectedUtc": "2026-10-16T19:33:49.491323+00:00",
+  "scope": "Isolated API36 emulator5042 only. App396c/Test570/Lab5727. Six unique requested cases passed; the separate seventh Presentation case failed in two retained attempts.",
+  "allRequestedCasesPassed": false,
+  "uniqueRequestedCases": 7,
+  "uniquePassedCases": 6,
+  "uniqueUnresolvedCases": 1,
+  "totalAttempts": 8,
+  "attemptsPassed": 6,
+  "attemptsFailed": 2,
+  "skipped": 0,
+  "artifacts": {
+    "app-debug.apk": {
+      "sha256": "396c98cd7a1e0ed2f3bbb38cab5917370e31e783b639c5c1ce3c19c456431ae0",
+      "bytes": 7091361
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "570ad02b0d5d2138d82d3d5cd6383333bfa99d60ca37b0d8ee199f3ba008d116",
+      "bytes": 3383322
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "installedHashesBeforeTests": {
+    "dev.thor.agent": "396c98cd7a1e0ed2f3bbb38cab5917370e31e783b639c5c1ce3c19c456431ae0",
+    "dev.thor.agent.test": "570ad02b0d5d2138d82d3d5cd6383333bfa99d60ca37b0d8ee199f3ba008d116",
+    "dev.thor.inputlab": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "installedHashesAfterTests": {
+    "dev.thor.agent": "396c98cd7a1e0ed2f3bbb38cab5917370e31e783b639c5c1ce3c19c456431ae0",
+    "dev.thor.agent.test": "570ad02b0d5d2138d82d3d5cd6383333bfa99d60ca37b0d8ee199f3ba008d116",
+    "dev.thor.inputlab": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "instrumentation": [
+    {
+      "name": "combined-explicit-5.log",
+      "sha256": "0c912984c59f38e73d42ec5739c889ace7cce8c104e4fb29b89f395ef70f69a5",
+      "bytes": 3716,
+      "durationSeconds": 68.143,
+      "failed": false,
+      "skipped": 0,
+      "passedTestStatusCount": 5,
+      "failedTestStatusCount": 0
+    },
+    {
+      "name": "background-long-380.log",
+      "sha256": "d11cf249df7099d78efbfdf2f967c71bde58bbf97588ad83196b1277656c320d",
+      "bytes": 846,
+      "durationSeconds": 405.389,
+      "failed": false,
+      "skipped": 0,
+      "passedTestStatusCount": 1,
+      "failedTestStatusCount": 0
+    },
+    {
+      "name": "presentation-explicit.log",
+      "sha256": "e1d0409498a60f3391af6c9fe81db5ae49cebb3a87e47e8b93f0edb65feaa507",
+      "bytes": 2581,
+      "durationSeconds": 55.358,
+      "failed": true,
+      "skipped": 0,
+      "passedTestStatusCount": 0,
+      "failedTestStatusCount": 1
+    },
+    {
+      "name": "presentation-explicit-retry-01.log",
+      "sha256": "96db9857788d85f62c6811a2b3c4f118b6e59a53b4f5366c20e8c044ebb7577c",
+      "bytes": 2580,
+      "durationSeconds": 76.05,
+      "failed": true,
+      "skipped": 0,
+      "passedTestStatusCount": 0,
+      "failedTestStatusCount": 1
+    }
+  ],
+  "shortCases": {
+    "background": 2,
+    "modernUi": 1,
+    "provider": 2,
+    "combinedSeconds": 68.143,
+    "explicitEmulatorUiComponents": true
+  },
+  "longBackground": {
+    "passed": true,
+    "seconds": 405.389,
+    "measuredBackgroundMs": 380343,
+    "liveMarkers": 380,
+    "lastCheckpoint": {
+      "elapsedMs": 380154,
+      "latestMarker": 380,
+      "persistedEventCount": 385,
+      "persistedEventBytes": 131480
+    },
+    "sameHost": true,
+    "sameUnattachedExecutionWeb": true,
+    "samePiSessionFollowup": true,
+    "all380MarkersInDurableTurnAndFollowupHttp": true,
+    "backgroundEvaluateJavascriptCalls": 0,
+    "backgroundUiLaunches": 0,
+    "outerCollectorDeviceCommandsDuringMeasuredInterval": 0,
+    "completionAfterUiReturn": true,
+    "longHiddenNotificationStopCovered": false
+  },
+  "presentation": {
+    "passed": false,
+    "explicitEmulatorAcceptance": true,
+    "attempts": 2,
+    "failureCode": "PERMISSION_MISSING",
+    "failureMessage": "Lower target must be a unique non-assistant application",
+    "latestAttemptHadRealLowerScreenshotTreeAndSemanticActivation": true,
+    "independentSemanticCount": 1,
+    "guardOrTtlRelaxed": false
+  },
+  "preservation": {
+    "passed": true,
+    "originalIdsAllRetained": true,
+    "oldRunMessageEventAttachmentPayloadsByteIdentical": true,
+    "oldSessionContentUnchangedExceptUpdatedAt": true,
+    "oneOriginalSelectedSessionUpdatedAtChangedByNormalSelectRestore": true,
+    "selectedSessionRestored": true,
+    "profilesVaultRolesRawXmlUnchanged": true,
+    "accessibilityAndNotificationFullFlagsRestoredToOriginalGlobalBaseline": true,
+    "runtimeServiceExited": true,
+    "activeRuns": 0
+  },
+  "boundaries": {
+    "cloudRequests": 0,
+    "thorOperations": false,
+    "gameCompletionProven": false,
+    "modelAutonomyOnPresentationProven": false,
+    "noSharedManifestUpdated": true,
+    "noNewSourceOrBuildPerformedByCollector": true
+  },
+  "limitations": [
+    "Modern UI uses synthetic display data and intercepted Native commands; provider requests are controlled loopback, not official cloud acceptance.",
+    "Long completion and Pi follow-up are checked after UI return; long-hidden notification stop is not covered by this test.",
+    "Two unresolved Presentation failures are not converted to a pass by the previous split package results.",
+    "The prior incorrect installation guard/old-App run belongs to another directory and is excluded.",
+    "No private DB/archive, cloud response, credential, APK, ROM or game save is published."
+  ]
+}

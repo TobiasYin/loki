@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "scope": "Current collection-time bounded source fingerprints; not an atomic build-input archive. Root reports production frozen. Instrumentation harness may change after Gradle02; its hash here is interface provenance only, not assigned to the old TEST APK.",
+  "treeHashAlgorithm": "For sorted unique relative UTF-8 paths, SHA256(path + NUL + contentSHA256Hex + NUL), concatenated.",
+  "trees": [
+    {
+      "scope": "runtime",
+      "roots": [
+        "runtime/src",
+        "runtime/test"
+      ],
+      "extensions": [
+        ".ts"
+      ],
+      "fileCount": 18,
+      "pathsAndContentSha256": "b0407aa903763e9cde1282f75e2717d0dbba1bb7ed8955b26179a6d131a3b3ee",
+      "latestSourceMtimeUtc": "2026-10-16T18:06:30.812115+00:00"
+    },
+    {
+      "scope": "integration",
+      "roots": [
+        "integration"
+      ],
+      "extensions": [
+        ".mjs",
+        ".ts"
+      ],
+      "fileCount": 6,
+      "pathsAndContentSha256": "7e3cb45cac3ad689e13d92369a4e08c1b729f3ebbae090dd36161e2707798ff1",
+      "latestSourceMtimeUtc": "2026-10-16T18:04:33.147639+00:00"
+    },
+    {
+      "scope": "app-web",
+      "roots": [
+        "app/src/main/assets/chat",
+        "app/web-tests"
+      ],
+      "extensions": [
+        ".cjs",
+        ".css",
+        ".html",
+        ".js"
+      ],
+      "fileCount": 10,
+      "pathsAndContentSha256": "725eb6cf388ae984c668f769cb46fec6163bd9124fe965c1fd86de6f86683436",
+      "latestSourceMtimeUtc": "2026-10-16T18:07:29.582082+00:00"
+    },
+    {
+      "scope": "app-native",
+      "roots": [
+        "app/src/main/java",
+        "app/src/test/java"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 44,
+      "pathsAndContentSha256": "9e38a67792216b286cc713cfdb93429cf00909d583b55575fafc4d6960509e18",
+      "latestSourceMtimeUtc": "2026-10-16T18:01:51.974350+00:00"
+    },
+    {
+      "scope": "device-core",
+      "roots": [
+        "tools/core/src/main",
+        "tools/core/src/test"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 54,
+      "pathsAndContentSha256": "d5080ed456eca27cb607554eaddd031cad4dd1713703699ded4399772ee35e68",
+      "latestSourceMtimeUtc": "2026-10-16T17:55:39.678444+00:00"
+    },
+    {
+      "scope": "device-authority",
+      "roots": [
+        "integration/device-authority/src"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 2,
+      "pathsAndContentSha256": "c653aa6ab4448aaec40006dbb3df375eb513f76e11d5e83c22edd80bc74f1c47",
+      "latestSourceMtimeUtc": "2026-10-16T16:52:03.316833+00:00"
+    },
+    {
+      "scope": "bridge-core",
+      "roots": [
+        "native-bridge/core/src"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 10,
+      "pathsAndContentSha256": "4fe2b3995483f5e87cb922f9b44c62bf24563bd16d7724083f886eb27f19317e",
+      "latestSourceMtimeUtc": "2026-10-15T18:33:53.456397+00:00"
+    },
+    {
+      "scope": "diagnostic",
+      "roots": [
+        "tools/diagnostic/src/main"
+      ],
+      "extensions": [
+        ".kt"
+      ],
+      "fileCount": 15,
+      "pathsAndContentSha256": "d239dcfa4148f5f94c8199c50e2229b0b2689cc4a210e6265ac495a375d3fb6a",
+      "latestSourceMtimeUtc": "2026-10-16T17:59:02.233747+00:00"
+    },
+    {
+      "scope": "input-lab-production-and-jvm",
+      "roots": [
+        "tests/input-lab-app/app/src/main",
+        "tests/input-lab-app/app/src/debug",
+        "tests/input-lab-app/app/src/test"
+      ],
+      "extensions": [
+        ".kt",
+        ".xml"
+      ],
+      "fileCount": 27,
+      "pathsAndContentSha256": "af36c6cf8aa0342cc7adfa1d251e8159056eca277a49c331adb68e0a63012f58",
+      "latestSourceMtimeUtc": "2026-10-16T18:09:29.193164+00:00"
+    }
+  ],
+  "selectedFiles": [
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 37077,
+      "sha256": "f7eb5d545ffec32a9c9a6b8e9d300ef7ac2ad076a130269c2d277569fea359f7",
+      "mtimeUtc": "2026-10-16T18:04:33.120982+00:00"
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "bytes": 3736,
+      "sha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f",
+      "mtimeUtc": "2026-10-16T18:04:46.962450+00:00"
+    },
+    {
+      "path": "runtime/test/stop-boundary.test.ts",
+      "bytes": 7337,
+      "sha256": "e05a074325155e788f802893331f2537b2385880dcab289a2080d5748bc1def5",
+      "mtimeUtc": "2026-10-16T18:06:30.812115+00:00"
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "bytes": 14741,
+      "sha256": "2d5ed0bc9746d07cfc8ca253f8fc590723cfe499f0b6e2e246d63581c0f0b2b4",
+      "mtimeUtc": "2026-10-16T17:51:57.731034+00:00"
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "bytes": 15010,
+      "sha256": "d21eb85a020a78aa2c2dbb0f9d793e279a669f2f456441a70863c7e30ea9b6b0",
+      "mtimeUtc": "2026-10-16T17:55:14.016796+00:00"
+    },
+    {
+      "path": "runtime/package-lock.json",
+      "bytes": 59910,
+      "sha256": "cdcf7229207209aec2311d1a64e29383386950550da65888b43c56b95a858a24",
+      "mtimeUtc": "2026-10-15T18:29:36.525803+00:00"
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "bytes": 18499,
+      "sha256": "20a3890763f622024049a4c13a44326e5ece19293eebbd85c42bd11bcd27dda4",
+      "mtimeUtc": "2026-10-16T18:04:33.147639+00:00"
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 51535,
+      "sha256": "6ea20f5f7202ad6f5e84094aefb2c11e090efe9c7e43160745de306c7a2af43a",
+      "mtimeUtc": "2026-10-16T18:07:08.368319+00:00"
+    },
+    {
+      "path": "app/src/main/assets/chat/style.css",
+      "bytes": 20052,
+      "sha256": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52",
+      "mtimeUtc": "2026-10-16T13:22:57.509367+00:00"
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 57027,
+      "sha256": "6f9b13d0a95f9c89df04a9f632a3d8c67907f249c8f206457acbbfb347240f50",
+      "mtimeUtc": "2026-10-16T18:07:29.582082+00:00"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "bytes": 84764,
+      "sha256": "dcc47f0823178d39f315196b2e931e1ad1a3874690c2199c8d22557e73ced64a",
+      "mtimeUtc": "2026-10-16T18:01:51.974350+00:00"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/PhysicalLongGameFlowTest.kt",
+      "bytes": 12946,
+      "sha256": "162244b02475b1df67c0854564579847152aecbec16d76c0c76e770273d265ba",
+      "mtimeUtc": "2026-10-16T18:04:27.426708+00:00"
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "bytes": 1655,
+      "sha256": "1a8f4ec19455b33775f499a114f8237f55cc00b16d01e023361b2e8f5da5663b",
+      "mtimeUtc": "2026-10-16T16:02:21.341841+00:00"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/PresentationWindowEvidence.kt",
+      "bytes": 9857,
+      "sha256": "b3634cd9df42da134bfbae9fa3b9daa5146d173ba71760333277aeb520e182f5",
+      "mtimeUtc": "2026-10-16T17:55:39.623893+00:00"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/NativePresentationEvidence.kt",
+      "bytes": 2298,
+      "sha256": "dbbf9453dfd02217c73e0f9c64e000127e6c0cd174a9d2b25b8019a588156cf6",
+      "mtimeUtc": "2026-10-16T17:55:39.676945+00:00"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/ThorAccessibilityService.kt",
+      "bytes": 8140,
+      "sha256": "b680264a845ec291417fea979686535164f2b1716d2d44532041f80c34e15220",
+      "mtimeUtc": "2026-10-16T17:59:02.233747+00:00"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt",
+      "bytes": 65977,
+      "sha256": "accd2aae2116a20b7e025e5ecf84d2e2e065c2142a6a4d794ce3322828175810",
+      "mtimeUtc": "2026-10-16T17:53:20.680676+00:00"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/PresentationFixtureActivity.kt",
+      "bytes": 5898,
+      "sha256": "28dbc1686b16c34468c1f77c1cb56d93838c9d7e8266ce15b2d96a40421ae42c",
+      "mtimeUtc": "2026-10-16T18:09:29.193164+00:00"
+    }
+  ],
+  "stopBoundary115SourceReuseVerification": [
+    {
+      "path": "runtime/src/runtime.ts",
+      "matchesStopBoundary115Snapshot": true
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "matchesStopBoundary115Snapshot": true
+    },
+    {
+      "path": "runtime/test/stop-boundary.test.ts",
+      "matchesStopBoundary115Snapshot": true
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "matchesStopBoundary115Snapshot": true
+    },
+    {
+      "path": "runtime/package-lock.json",
+      "matchesStopBoundary115Snapshot": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "matchesStopBoundary115Snapshot": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/PhysicalLongGameFlowTest.kt",
+      "matchesStopBoundary115Snapshot": true
+    }
+  ]
+}

@@ -14,6 +14,13 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.Before
+import org.junit.After
+import org.junit.Rule
+import org.junit.rules.TestName
+import android.app.UiAutomation
+import android.os.ParcelFileDescriptor
+import android.provider.Settings
 import org.junit.runner.RunWith
 import java.io.File
 import java.net.InetAddress
@@ -25,26 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /** Local real SSE + Native bridge/Pi execution; never uses a cloud key or device input. */
 @RunWith(AndroidJUnit4::class)
-class EmulatorBackgroundRuntimeTest {
-    private val ins get()=InstrumentationRegistry.getInstrumentation()
-    private val context get()=ins.targetContext
-    private fun until(reason:String,check:()->Boolean) {val end=SystemClock.elapsedRealtime()+60000;while(SystemClock.elapsedRealtime()<end){if(try {check()}catch(_:android.database.sqlite.SQLiteDatabaseLockedException){false})return;Thread.sleep(80)};fail(reason)}
-    private fun js(web:WebView,source:String):String {val done=CountDownLatch(1);var value="";ins.runOnMainSync {web.evaluateJavascript(source){value=it;done.countDown()}};assertTrue(done.await(10,TimeUnit.SECONDS));return value}
-    private fun field(a:MainActivity,name:String)=MainActivity::class.java.getDeclaredField(name).apply {isAccessible=true}.get(a)
-    private fun launch():MainActivity {
-        val a=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as MainActivity
-        until("Service engine attach"){a.findViewById<WebView>(android.R.id.custom)!=null}
-        val web=a.findViewById<WebView>(android.R.id.custom)
-        until("Native document ready"){js(web,"window.productReady===true && !document.getElementById('new').disabled")=="true"}
-        return a
-    }
-    private fun restore(prefs:android.content.SharedPreferences,values:Map<String,*>) {
-        val edit=prefs.edit().clear();for((key,value) in values)when(value) {
-            is String->edit.putString(key,value);is Int->edit.putInt(key,value);is Long->edit.putLong(key,value)
-            is Boolean->edit.putBoolean(key,value);is Float->edit.putFloat(key,value)
-            is Set<*>->edit.putStringSet(key,value.filterIsInstance<String>().toSet())
-        };check(edit.commit())
-    }
+class EmulatorBackgroundRuntimeTest:EmulatorBackgroundTestState() {
     @Test fun homeFinishAndReturnKeepTheSameExecutionAndNotificationStopPreservesContext() {
         assertTrue("Emulator only",Build.HARDWARE in setOf("ranchu","goldfish"))
         if(Build.VERSION.SDK_INT>=33)assertEquals("Grant POST_NOTIFICATIONS to the emulator test app before this case",PackageManager.PERMISSION_GRANTED,context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS))
@@ -102,6 +90,9 @@ class EmulatorBackgroundRuntimeTest {
             CredentialVault(context).put("model","local-disposable-background-fixture")
             activity=launch();val first=activity!!;val web=first.findViewById<WebView>(android.R.id.custom);val host=field(first,"host") as ProductHost
             val service=field(first,"runtimeService") as AgentRuntimeService;val engine=service.engine!!
+            val execution=EmulatorRuntimeTestSupport.executionWeb(first)
+            ins.runOnMainSync {assertNull("Execution document must never attach to Activity",execution.parent)}
+            js(execution,"window.__backgroundExecutionMarker='same-execution';true")
             val previous=host.selectedSession()
             js(web,"window.__backgroundRuntimeMarker='same-document';ThorUI.postMessage(JSON.stringify({op:'new'}));true")
             until("New test session"){host.selectedSession()!=previous};val sid=host.selectedSession()
@@ -116,11 +107,16 @@ class EmulatorBackgroundRuntimeTest {
             until("Actual task starts after background probe handoff"){requests.get()==3 && preferences.getString("probe","")=="passed" && host.hasActiveRuns() && service.foreground}
             val runId=runs().last {it.getString("sessionId")==sid && !it.optBoolean("probe")}.getString("id")
             report.put("backgroundProbeHandoff",true).put("firstRunId",runId);record("background-probe-and-task-started")
-            assertSame(engine,service.engine);assertSame(host,service.engine!!.host);assertTrue(service.foreground)
+            assertSame(engine,service.engine);assertSame(host,service.engine!!.host);assertSame(execution,service.engine!!.executionWeb);assertTrue(service.foreground)
+            ins.runOnMainSync {assertNull(execution.parent)}
             assertNull("Detached WebView retains no Activity context",(web.context as android.content.MutableContextWrapper).baseContext as? android.app.Activity)
             assertTrue(context.getSystemService(NotificationManager::class.java).activeNotifications.any {it.id==AgentRuntimeService.NOTIFICATION_ID})
             activity=launch();assertSame(web,activity!!.findViewById<WebView>(android.R.id.custom));assertSame(host,field(activity!!,"host"))
             assertEquals("\"same-document\"",js(web,"window.__backgroundRuntimeMarker"))
+            assertSame(execution,EmulatorRuntimeTestSupport.executionWeb(activity!!))
+            ins.runOnMainSync {assertNull(execution.parent)}
+            assertEquals("\"same-execution\"",js(execution,"window.__backgroundExecutionMarker"))
+            report.put("sameUnattachedExecutionWeb",true).put("executionNeverAttached",true)
             report.put("sameWebView",true).put("sameHost",true);record("same-document-returned")
             releaseThird.countDown()
             until("Background run completes"){runs().single {it.getString("id")==runId}.optString("status")=="completed" && !host.hasActiveRuns() && !service.foreground}
@@ -161,6 +157,8 @@ class EmulatorBackgroundRuntimeTest {
         val activity=launch();val oldHost=field(activity,"host") as ProductHost
         assertFalse("Do not reload active work",oldHost.hasActiveRuns())
         val oldWeb=activity.findViewById<WebView>(android.R.id.custom)
+        val oldExecution=EmulatorRuntimeTestSupport.executionWeb(activity)
+        ins.runOnMainSync {assertNull(oldExecution.parent)}
         val service=field(activity,"runtimeService") as AgentRuntimeService
         val serial=ProductHost::class.java.getDeclaredField("serial").apply {isAccessible=true}.get(oldHost) as java.util.concurrent.ExecutorService
         val admitted=CountDownLatch(1);val released=CountDownLatch(1)
@@ -178,9 +176,11 @@ class EmulatorBackgroundRuntimeTest {
             until("New document after actual close") {activity.findViewById<WebView>(android.R.id.custom)?.let {it!==oldWeb}==true}
             val ready=EmulatorRuntimeTestSupport.awaitReady(activity,oldWeb)
             assertTrue(oldHost.closeCompletion.isDone);assertNotSame(oldHost,ready.host)
+            assertNotSame("Reload closes the old execution document",oldExecution,ready.executionWeb)
+            ins.runOnMainSync {assertNull(ready.executionWeb.parent)}
         }finally {
             released.countDown();ins.runOnMainSync {activity.finish()}
         }
     }
-    private fun runsSafelyActive():Boolean=runCatching {SqliteStore(context,"product.db").use {store->store.readableDatabase.rawQuery("SELECT payload FROM runs",null).use {c->var active=false;while(c.moveToNext())if(JSONObject(c.getString(0)).optString("status") !in setOf("completed","failed","cancelled","interrupted"))active=true;active}}}.getOrDefault(true)
+
 }

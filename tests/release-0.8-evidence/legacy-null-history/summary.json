@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "scope": "Software regression only: explicit historical tool-result null/missing text projection; no APK/device acceptance",
+  "passed": true,
+  "typescriptCompilePassed": true,
+  "runtimeBuildPassed": true,
+  "readOnlyDiagnosis": {
+    "privateInputSha256": "19299503be68293bcedef3e2dc3a0fd7d3bb2c2ac575adf8bcde227e22294e82",
+    "fieldPath": "turn.messages[4].content[0]",
+    "fieldValue": {
+      "type": "text",
+      "text": null
+    },
+    "messageKind": "tool_result",
+    "toolName": "perception_select_screen",
+    "isError": true,
+    "turnComplete": false,
+    "messageCount": 5,
+    "effectCount": 1,
+    "privateInputNotModifiedByThisTask": true
+  },
+  "before": {
+    "tests": 6,
+    "pass": 0,
+    "expectedFail": 6,
+    "diagnostics": [
+      {
+        "protocol": "openai-responses",
+        "missing": false,
+        "state": "failed",
+        "error": "IO_ERROR",
+        "httpRequests": 0,
+        "nativeExecutions": 0,
+        "diagnostics": [
+          {
+            "code": "MODEL_STREAM_FAILED",
+            "stopReason": "error"
+          }
+        ],
+        "sdkErrors": [
+          "Cannot read properties of null (reading 'length')"
+        ]
+      },
+      {
+        "protocol": "openai-responses",
+        "missing": true,
+        "state": "failed",
+        "error": "IO_ERROR",
+        "httpRequests": 0,
+        "nativeExecutions": 0,
+        "diagnostics": [
+          {
+            "code": "MODEL_STREAM_FAILED",
+            "stopReason": "error"
+          }
+        ],
+        "sdkErrors": [
+          "Cannot read properties of undefined (reading 'length')"
+        ]
+      },
+      {
+        "protocol": "openai-completions",
+        "missing": false,
+        "state": "failed",
+        "error": "IO_ERROR",
+        "httpRequests": 0,
+        "nativeExecutions": 0,
+        "diagnostics": [
+          {
+            "code": "MODEL_STREAM_FAILED",
+            "stopReason": "error"
+          }
+        ],
+        "sdkErrors": [
+          "Cannot read properties of null (reading 'length')"
+        ]
+      },
+      {
+        "protocol": "openai-completions",
+        "missing": true,
+        "state": "failed",
+        "error": "IO_ERROR",
+        "httpRequests": 0,
+        "nativeExecutions": 0,
+        "diagnostics": [
+          {
+            "code": "MODEL_STREAM_FAILED",
+            "stopReason": "error"
+          }
+        ],
+        "sdkErrors": [
+          "Cannot read properties of undefined (reading 'length')"
+        ]
+      },
+      {
+        "protocol": "anthropic-messages",
+        "missing": false,
+        "state": "failed",
+        "error": "IO_ERROR",
+        "httpRequests": 0,
+        "nativeExecutions": 0,
+        "diagnostics": [
+          {
+            "code": "MODEL_STREAM_FAILED",
+            "stopReason": "error"
+          }
+        ],
+        "sdkErrors": [
+          "Cannot read properties of null (reading 'length')"
+        ]
+      },
+      {
+        "protocol": "anthropic-messages",
+        "missing": true,
+        "state": "failed",
+        "error": "IO_ERROR",
+        "httpRequests": 0,
+        "nativeExecutions": 0,
+        "diagnostics": [
+          {
+            "code": "MODEL_STREAM_FAILED",
+            "stopReason": "error"
+          }
+        ],
+        "sdkErrors": [
+          "Cannot read properties of undefined (reading 'length')"
+        ]
+      }
+    ],
+    "note": "Actual compiled real Pi cold-history cases. Setup-only failures are retained separately and not counted."
+  },
+  "after": {
+    "focusedTests": 22,
+    "pass": 22,
+    "fail": 0,
+    "skip": 0,
+    "coldProtocolDiagnostics": [
+      {
+        "protocol": "openai-responses",
+        "missing": false,
+        "state": "completed",
+        "httpRequests": 1,
+        "nativeExecutions": 0,
+        "diagnostics": [],
+        "sdkErrors": []
+      },
+      {
+        "protocol": "openai-responses",
+        "missing": true,
+        "state": "completed",
+        "httpRequests": 1,
+        "nativeExecutions": 0,
+        "diagnostics": [],
+        "sdkErrors": []
+      },
+      {
+        "protocol": "openai-completions",
+        "missing": false,
+        "state": "completed",
+        "httpRequests": 1,
+        "nativeExecutions": 0,
+        "diagnostics": [],
+        "sdkErrors": []
+      },
+      {
+        "protocol": "openai-completions",
+        "missing": true,
+        "state": "completed",
+        "httpRequests": 1,
+        "nativeExecutions": 0,
+        "diagnostics": [],
+        "sdkErrors": []
+      },
+      {
+        "protocol": "anthropic-messages",
+        "missing": false,
+        "state": "completed",
+        "httpRequests": 1,
+        "nativeExecutions": 0,
+        "diagnostics": [],
+        "sdkErrors": []
+      },
+      {
+        "protocol": "anthropic-messages",
+        "missing": true,
+        "state": "completed",
+        "httpRequests": 1,
+        "nativeExecutions": 0,
+        "diagnostics": [],
+        "sdkErrors": []
+      }
+    ]
+  },
+  "fullRuntime": {
+    "tests": 235,
+    "pass": 235,
+    "fail": 0,
+    "skip": 0
+  },
+  "compatibilityBoundary": "Only explicit persisted projectHistory tool_result content items with type=text and null/missing text receive a fixed unavailable/observe/do-not-replay placeholder. No archive writeback, automatic retry or fake result.",
+  "guards": [
+    "Raw input HistoryTurn JSON unchanged",
+    "isError, toolCallId/name pairing, constraints, effect ledger and unrelated valid history preserved",
+    "Cold restore and compileContext use the same explicit history projection",
+    "Ordinary project/resolveContent reject null/missing/non-string text and invalid content tags/references",
+    "Current Native tool text is rejected before TextEncoder implicit coercion; submitted receipts are retained",
+    "Historical user text and non-null malformed historical tool text remain strict",
+    "Revoked derived history does not reappear through migration",
+    "No session.save normalization or DB migration"
+  ],
+  "priorEvidencePreserved": "native-null-success 213-case source snapshot and logs were not overwritten",
+  "sources": {
+    "runtime/src/context.ts": "4a39ae62bd491d39a7e96eb0074a40f7821f56c8fc34f665dd5f72d7606db5fd",
+    "runtime/src/runtime.ts": "4aec92631fdf145ce4ed8c195d9db05567ff04625cd47879b1b5e4ca02843875",
+    "runtime/test/legacy-null-history.test.ts": "ec860259b19bb6c6544703dcbb57972b1182946dc84957c1dbc312c3a7971e79"
+  },
+  "logs": {
+    "before-fix.log": "8ee08e5ad0face9339c642aefd2a1de84192bbc72fda10e54d7f2eea55b080a6",
+    "after-fix.log": "f4cf4c715f13eeb216d69bc5fd6a3b1b6f772fe8e0adcd36db6b5235f8df645b",
+    "full-runtime.log": "a542609d36e10e02acf967f6b3abee3be5be40b1a8433ac82391ab555bead0a4",
+    "setup-failures.json": "726cf2edbdc749c5067d4451badb6fb9eee15f4d14b22699e7468473edf898fc"
+  },
+  "apkAcceptance": "pending Root unified build; no new APK hash claimed"
+}

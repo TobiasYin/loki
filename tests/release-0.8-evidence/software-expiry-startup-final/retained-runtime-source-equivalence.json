@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "referenceSnapshot": "../software-scoped-focus-final/source-hashes.json",
+  "scope": "Every Runtime source/test file recorded in prior snapshot remains byte-identical. Runtime251 log is retained, not rerun.",
+  "files": [
+    {
+      "path": "runtime/src/context.ts",
+      "sha256": "4a39ae62bd491d39a7e96eb0074a40f7821f56c8fc34f665dd5f72d7606db5fd"
+    },
+    {
+      "path": "runtime/src/contracts.ts",
+      "sha256": "8d30d2211ccd030608876b609d1a2085476587d334feeb22bd0673a830bbaa54"
+    },
+    {
+      "path": "runtime/src/index.ts",
+      "sha256": "ea0652c2394a39edc113de1f25a29d64533055fea5c9bfa97101b46b5714879c"
+    },
+    {
+      "path": "runtime/src/profile-validation.ts",
+      "sha256": "93bc7fa856ffe5c8c057e9b5d0361609be61c7b909e4621a261de4397ec9d7b5"
+    },
+    {
+      "path": "runtime/src/protocol-audit.ts",
+      "sha256": "c7f5e52ed649e69af953589c4aec61ce112515f037ae73437e3c2a28683a681c"
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "sha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f"
+    },
+    {
+      "path": "runtime/src/provider-timeouts.ts",
+      "sha256": "db698b922cd79262e9a1b257c1ff1bc1a5689b34ef92015c42548ed2247d783d"
+    },
+    {
+      "path": "runtime/src/registry.ts",
+      "sha256": "afe1beb3429916bc2e11dfb0b734a73f1581c90761cf3f1fa6716f09415fafdc"
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "sha256": "8a7078954a155dc1228f7e8e2c55a61389d56ba3e711d200bdc104ecdf0623dd"
+    },
+    {
+      "path": "runtime/src/session.ts",
+      "sha256": "fde40fce4a6f1dcd4162db8ca426d687d8b3a5ad4f3b1f16c1b5e3201b17be1e"
+    },
+    {
+      "path": "runtime/src/stream-events.ts",
+      "sha256": "871e871bb0e66b1beb96c6b571db0847ef2039ea8eca37cee2aee86b5c34a8ff"
+    },
+    {
+      "path": "runtime/src/tool-availability.ts",
+      "sha256": "21b5464f582b63f19aba55458a2e05cb77cdc6c6aa7b4d0e0a2aaab8734f65a4"
+    },
+    {
+      "path": "runtime/test/fixtures.ts",
+      "sha256": "d7dc3187f0d744580c4f8dd7eaa656ac3597971d1dc7931d255fb80cad7c0a54"
+    },
+    {
+      "path": "runtime/test/legacy-null-history.test.ts",
+      "sha256": "ec860259b19bb6c6544703dcbb57972b1182946dc84957c1dbc312c3a7971e79"
+    },
+    {
+      "path": "runtime/test/native-null-success.test.ts",
+      "sha256": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45"
+    },
+    {
+      "path": "runtime/test/native-read-error-priority.test.ts",
+      "sha256": "00b59bc0936dc234e8743e44c5d5d5cf3340e2eeaba5bf357287ed08c6280365"
+    },
+    {
+      "path": "runtime/test/profile-validation.test.ts",
+      "sha256": "153d9a1f189b099c442da36b2d6d39fd91a437767a471eabea6c862350249fa1"
+    },
+    {
+      "path": "runtime/test/runtime.test.ts",
+      "sha256": "192e8ebf8de5db855546e0cdea0169c74461e1e0edd666e4f0b9f8e8abc43ffb"
+    },
+    {
+      "path": "runtime/test/stop-boundary.test.ts",
+      "sha256": "e05a074325155e788f802893331f2537b2385880dcab289a2080d5748bc1def5"
+    },
+    {
+      "path": "runtime/test/stream-events.test.ts",
+      "sha256": "b21fc1d3ae244a5908ff3773018e886e65f5982dfa3265725c7d268b06785dae"
+    },
+    {
+      "path": "runtime/test/target-availability.test.ts",
+      "sha256": "4da1a2b9420b5e7b97e632b5cdd173be97c6c78d9ae20fc0e2732f21728539bb"
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "sha256": "f949a9a0744bbafc41e5ad263efd29c232f6738facfa19cd6a67cb85ef6b0bad"
+    },
+    {
+      "path": "runtime/test/tool-receipts.test.ts",
+      "sha256": "0bc0384dc2247ff21970a3538d42de7867e430f072c364239b58efc96abeba29"
+    }
+  ]
+}

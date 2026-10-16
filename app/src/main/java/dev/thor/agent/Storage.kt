@@ -76,6 +76,35 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         } finally { db.endTransaction() }
     }
 
+    /** Startup modifies session metadata and explicitly recovered nonterminal
+     * Runs only. Never reread/compare every old payload or rewrite/delete child
+     * history merely to open the app. The normal full-save path is unchanged. */
+    fun saveStartupRecovery(state:JSONObject,recoveredRunIds:Set<String>) {
+        val sessions=state.getJSONArray("sessions").objects()
+        val recovered=state.getJSONArray("runs").objects().filter {it.getString("id") in recoveredRunIds}
+        require(recovered.map {it.getString("id")}.toSet()==recoveredRunIds && recovered.size==recoveredRunIds.size)
+        require(recovered.all {it.optString("status")=="interrupted"})
+        require(sessions.any {it.getString("id")==state.optString("selected")})
+        val db=writableDatabase;db.beginTransaction()
+        try {
+            for(row in sessions) {
+                val values=ContentValues().apply {put("id",row.getString("id"));put("payload",row.toString())}
+                if(db.update("sessions",values,"id=?",arrayOf(row.getString("id")))==0)db.insertOrThrow("sessions",null,values)
+            }
+            for(row in recovered) {
+                val id=row.getString("id")
+                db.rawQuery("SELECT sessionId,payload FROM runs WHERE id=?",arrayOf(id)).use {c->
+                    require(c.moveToFirst() && c.getString(0)==row.getString("sessionId")) {"Unknown recovered Run"}
+                    require(JSONObject(c.getString(1)).optString("status") !in setOf("completed","failed","cancelled","interrupted")) {"Terminal Run cannot be recovered again"}
+                }
+                val values=ContentValues().apply {put("sessionId",row.getString("sessionId"));put("payload",row.toString())}
+                check(db.update("runs",values,"id=?",arrayOf(id))==1)
+            }
+            db.insertWithOnConflict("metadata",null,ContentValues().apply {put("name","selected");put("value",state.getString("selected"))},SQLiteDatabase.CONFLICT_REPLACE)
+            db.setTransactionSuccessful()
+        }finally {db.endTransaction()}
+    }
+
     /** Changing a title/selection must not reread the durable event ledger. */
     fun saveSessionUpdate(state:JSONObject,changedSessionId:String?=null) {
         val db=writableDatabase;db.beginTransaction()

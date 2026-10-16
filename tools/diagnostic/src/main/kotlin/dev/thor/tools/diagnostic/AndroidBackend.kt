@@ -83,6 +83,14 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val common = if (target == null) data else data + mapOf("displayRole" to target.role, "displayId" to target.display.id)
         return ToolResult(clock.now(), a.backend, a, common, truncated = truncated, outcome = outcome, snapshotId = e.snapshotId)
     }
+    override fun prepareObservation(envelope:Envelope,args:Map<String,Any?>,cancellation:Cancellation) {
+        if(ToolPack.descriptors[envelope.toolId]?.targetRequired!=true)return
+        val source=snapshots.validateReadSource(envelope.snapshotId)
+        val displays=mutableSetOf(source.display.id)
+        if(envelope.toolId=="perception.select_screen")displays.add(snapshots.selected(ScreenSelection.parse(args)).id)
+        if(envelope.toolId=="perception.capture_companion")displays.add(snapshots.selected("lower").id)
+        service().preparePresentationEvidence(displays,cancellation)
+    }
     override fun execute(envelope: Envelope, args: Map<String, Any?>, checkpoint: Checkpoint): ToolResult {
         lowerSafetyCache=null // A new tool never inherits a prior password scan.
         schemas.validate(envelope.toolId, args)
@@ -187,7 +195,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             "input.press_button", "input.set_axes" -> {
                 val snap=snapshots.validate(e.snapshotId);cp.check();invalidateNodeRefs()
                 if(e.toolId in setOf("input.press_button","input.set_axes")) {
-                    val window=service().windowsOnAllDisplays[snap.display.id].orEmpty().singleOrNull {it.type==AccessibilityWindowInfo.TYPE_APPLICATION && it.isFocused}
+                    val window=service().windowsOnAllDisplays[snap.display.id].orEmpty().singleOrNull {it.isFocused && service().isApplicationWindow(it)}
                     val root=window?.root
                     val focusedPackage=try {root?.packageName?.toString()} finally {if(root!=null) {@Suppress("DEPRECATION") root.recycle()}}
                     requireTool(focusedPackage==snap.target.packageName && focusedPackage!=null,Code.TARGET_CHANGED,"Physical controller requires the observed selected-screen app to have window focus")
@@ -309,7 +317,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val visitLimit=args.int("maxVisited",1024)
         requireTool(depthLimit in 0..20 && nodeLimit in 1..128 && charLimit in 1..12000 && visitLimit in 1..2048,Code.LIMIT_EXCEEDED,"UI tree budget exceeded")
         val snap=snapshots.validateObservation(e.snapshotId)
-        val windows=service().windowsOnAllDisplays[snap.display.id].orEmpty().filter {it.type==AccessibilityWindowInfo.TYPE_APPLICATION}
+        val windows=service().windowsOnAllDisplays[snap.display.id].orEmpty().filter {service().isApplicationWindow(it)}
         val window=if(args.containsKey("windowId"))windows.singleOrNull {it.id==args.int("windowId",-1)} else windows.singleOrNull()
         if(window==null)return result(e,mapOf("nodes" to emptyList<Any>(),"emptyReason" to "no_unique_application_window","coverage" to "Accessibility-exposed nodes only"))
         val root=window.root ?: return result(e,mapOf("nodes" to emptyList<Any>(),"emptyReason" to "null_root_or_surface_content","coverage" to "No exposed Accessibility tree; use screenshot for visual evidence"))
@@ -398,7 +406,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                         val windows=service().windowsOnAllDisplays[snapshot.display.id].orEmpty()
                         val windowId=UiActionWindow.select(snapshot.display,snapshot.target,binding.windowId,binding.packageName,
                             companionWindows(snapshot.display.id,windows))
-                        val window=windows.singleOrNull {it.id==windowId && it.type==AccessibilityWindowInfo.TYPE_APPLICATION}
+                        val window=windows.singleOrNull {it.id==windowId && service().isApplicationWindow(it)}
                             ?: fail(Code.TARGET_CHANGED,"Activation window disappeared from the selected screen")
                         var node=window.root ?: fail(Code.TARGET_CHANGED,"Activation tree root disappeared")
                         resolved.add(node)
@@ -546,19 +554,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         }
         cp.check();lastScreenshotAttempt=clock.now()
     }
-    private fun companionWindows(display:Int,windows:List<AccessibilityWindowInfo> = service().windowsOnAllDisplays[display].orEmpty()):List<TargetWindowEvidence> = windows.map {window->
-        val rect=Rect();window.getBoundsInScreen(rect)
-        val region=Region();window.getRegionInScreen(region)
-        val pieces=mutableListOf<TouchableBounds>();val iterator=RegionIterator(region);val piece=Rect()
-        while(iterator.next(piece))pieces.add(TouchableBounds(piece.left,piece.top,piece.right,piece.bottom))
-        var pkg:String?=null;var rootBounds:TouchableBounds?=null
-        if(window.type==AccessibilityWindowInfo.TYPE_APPLICATION)window.root?.let {root->
-            try {if(root.refresh()){pkg=root.packageName?.toString();val bounds=Rect();root.getBoundsInScreen(bounds);rootBounds=TouchableBounds(bounds.left,bounds.top,bounds.right,bounds.bottom)}}
-            finally {@Suppress("DEPRECATION") root.recycle()}
-        }
-        TargetWindowEvidence(window.id,window.type,window.layer,window.isFocused,window.isActive,
-            TouchableBounds(rect.left,rect.top,rect.right,rect.bottom),pieces,region.isRect,pkg,rootBounds)
-    }
+    private fun companionWindows(display:Int,windows:List<AccessibilityWindowInfo> = service().windowsOnAllDisplays[display].orEmpty()):List<TargetWindowEvidence> =
+        windows.map {service().windowEvidence(it)}
     private fun screenshot(e: Envelope, args: Map<String, Any?>, requestCheckpoint: Checkpoint,companion:Boolean=false): ToolResult {
         if(companion)args.only("maxEdge","quality","format") else args.only("maxEdge", "quality", "region", "format")
         requireTool(args.string("format", "jpeg") == "jpeg", Code.UNSUPPORTED, "Only JPEG implemented")

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "appSnapshot": "split-document-before-typed-availability-and-bounded-projection",
+  "artifactHashes": {
+    "app-debug.apk": {
+      "sha256": "0b68920d1e42defdc7583490a504c006696657cb1b8ec9cd5b225b1c45a62ec4",
+      "bytes": 7086841
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "92c91ad4cc2d833f30a97feea13cd9387aa382bb28cb794cf7a380d0b47d1d67",
+      "bytes": 3382298
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "passedTests": 6,
+  "skippedTests": 2,
+  "failuresInFinalExplicitCases": 0,
+  "historicalPresentationRebindFailure": 1,
+  "groups": {
+    "background-short.log": {
+      "passed": 2,
+      "skipped": 0,
+      "failed": 0,
+      "seconds": 7.233
+    },
+    "background-long.log": {
+      "passed": 1,
+      "skipped": 0,
+      "failed": 0,
+      "seconds": 383.119
+    },
+    "presentation.log": {
+      "passed": 1,
+      "skipped": 0,
+      "failed": 0,
+      "seconds": 49.385
+    },
+    "ui-provider.log": {
+      "passed": 2,
+      "skipped": 1,
+      "failed": 0,
+      "seconds": 5.548
+    }
+  },
+  "scope": "Actual emulator Native/Pi loopback lifecycle and 380s background continuity; independent real Presentation component; provider component. No cloud model, Thor background survival, Citra/game or ModernUI acceptance claimed for this App.",
+  "longBackground": {
+    "measuredBackgroundMs": 380057,
+    "all380LiveMarkersObserved": true,
+    "sameHost": true,
+    "sameUnattachedExecutionWeb": true,
+    "samePiSessionFollowup": true,
+    "followupHttpContainsAll380Markers": true,
+    "backgroundEvaluateJavascriptCalls": 0,
+    "backgroundUiLaunches": 0,
+    "fakeClockUsed": false
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "status": "UNRESOLVED_TARGET_REFUSAL_NOT_ACCEPTED",
+  "sameFixedBinary": true,
+  "sourceOrGuardChangedBetweenAttempts": false,
+  "attempts": [
+    {
+      "attempt": 1,
+      "passed": false,
+      "failedStage": "first lower UI tree after successful capture",
+      "durationSeconds": 55.358,
+      "failureType": "AssertionError",
+      "failure": "Native RPC rejected: PERMISSION_MISSING",
+      "steps": [
+        {
+          "toolId": "agent.background",
+          "elapsedMs": 188,
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "perception.select_screen",
+          "elapsedMs": 850,
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "perception.window_info",
+          "elapsedMs": 798,
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "perception.capture_screen",
+          "elapsedMs": 524,
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "perception.ui_tree",
+          "elapsedMs": 201,
+          "error": "PERMISSION_MISSING",
+          "outcome": "observed"
+        }
+      ],
+      "independentReceiverFinal": {
+        "evidenceMode": "manual_platform_api",
+        "agentAnswerVerified": false,
+        "systemInjectionProven": false,
+        "actualWindowType": 2037,
+        "semanticCount": 0,
+        "touchCount": 0,
+        "sealed": true
+      },
+      "cleanupErrors": [],
+      "restoration": {
+        "idleHostsClosedBeforeAccessibilityRestore": true,
+        "profilesRestored": true,
+        "credentialsRestored": true,
+        "rolesRestored": true,
+        "originalHistoryPreserved": true,
+        "accessibilityRestored": true,
+        "selectedSessionRestored": true,
+        "temporaryDisplayReleased": true
+      }
+    },
+    {
+      "attempt": 2,
+      "passed": false,
+      "failedStage": "second lower UI tree after successful semantic activation",
+      "durationSeconds": 76.05,
+      "failureType": "AssertionError",
+      "failure": "Native RPC rejected: PERMISSION_MISSING",
+      "steps": [
+        {
+          "toolId": "agent.background",
+          "elapsedMs": 670,
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "perception.select_screen",
+          "elapsedMs": 251,
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "perception.window_info",
+          "elapsedMs": 378,
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "perception.capture_screen",
+          "elapsedMs": 491,
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "perception.ui_tree",
+          "elapsedMs": 363,
+          "error": null,
+          "outcome": "observed"
+        },
+        {
+          "toolId": "input.activate",
+          "elapsedMs": 342,
+          "error": null,
+          "outcome": "submitted"
+        },
+        {
+          "toolId": "perception.ui_tree",
+          "elapsedMs": 264,
+          "error": "PERMISSION_MISSING",
+          "outcome": "observed"
+        }
+      ],
+      "independentReceiverFinal": {
+        "evidenceMode": "manual_platform_api",
+        "agentAnswerVerified": false,
+        "systemInjectionProven": false,
+        "actualWindowType": 2037,
+        "semanticCount": 1,
+        "touchCount": 0,
+        "sealed": true
+      },
+      "cleanupErrors": [],
+      "restoration": {
+        "idleHostsClosedBeforeAccessibilityRestore": true,
+        "profilesRestored": true,
+        "credentialsRestored": true,
+        "rolesRestored": true,
+        "originalHistoryPreserved": true,
+        "accessibilityRestored": true,
+        "selectedSessionRestored": true,
+        "temporaryDisplayReleased": true
+      }
+    }
+  ],
+  "limitations": [
+    "A successful prior capture/activation does not prove the next window proof stayed valid.",
+    "After-cleanup accessibility has no crashed service, but no metadata proof-failure snapshot was recorded at the exact rejection.",
+    "These observations do not establish whether proof invalidation, current window change or another boundary caused the refusal. No permission/secure guard or TTL was relaxed.",
+    "Independent fixture/Native component; no model or cloud execution, and no system gamepad injection claim."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local explicit-stop source-test evidence only; no APK/device result; shared manifests unchanged.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2213,
+      "sha256": "f11db502fb5071fc54a9d6be60b9914ccb5f590e6cc216dcdf4316bee7980860"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 12678,
+      "sha256": "889deebd14ffe2d05dbc9d0e8ceffc8f122baf15b97ea490ca85ac8e4207f4ec"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 5862,
+      "sha256": "1dd80b9fe4bd9a49af6e6f6647e2daec4d09e05c02177eda8d62d83ddbaf3eca"
+    }
+  ]
+}

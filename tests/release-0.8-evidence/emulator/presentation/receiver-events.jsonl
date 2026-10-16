@@ -1,0 +1,8 @@
+{"sequence":1,"eventKind":"fixture_ready","recordOrigin":"fixture_setup","uptimeMs":16718507,"data":{"actualWindowType":2037,"displayId":14,"dispatchToken":null}}
+{"sequence":2,"eventKind":"click","recordOrigin":"semantic_callback","uptimeMs":16737539,"data":{"viewId":"presentation_semantic","semanticCount":1,"touchCount":0,"displayId":14,"dispatchToken":null}}
+{"sequence":4,"eventKind":"touch","recordOrigin":"android_dispatch","uptimeMs":16738676,"data":{"actionMasked":0,"x":480.0,"y":223.0,"source":4098,"deviceId":-1,"downTime":16738672,"eventTime":16738672,"motionDisplayId":null,"motionDisplayIdReason":"not_exposed_by_public_InputEvent_API","displayId":14,"dispatchToken":3}}
+{"sequence":6,"eventKind":"touch","recordOrigin":"android_dispatch","uptimeMs":16738753,"data":{"actionMasked":1,"x":480.0,"y":223.0,"source":4098,"deviceId":-1,"downTime":16738672,"eventTime":16738752,"motionDisplayId":null,"motionDisplayIdReason":"not_exposed_by_public_InputEvent_API","displayId":14,"dispatchToken":5}}
+{"sequence":7,"eventKind":"click","recordOrigin":"semantic_callback","uptimeMs":16738754,"data":{"viewId":"presentation_touch","semanticCount":1,"touchCount":1,"displayId":14,"dispatchToken":null}}
+{"sequence":8,"eventKind":"fixture_secure","recordOrigin":"fixture_setup","uptimeMs":16739629,"data":{"enabled":true,"displayId":14,"dispatchToken":null}}
+{"sequence":9,"eventKind":"fixture_secure","recordOrigin":"fixture_setup","uptimeMs":16740409,"data":{"enabled":false,"displayId":14,"dispatchToken":null}}
+{"sequence":10,"eventKind":"fixture_release","recordOrigin":"fixture_setup","uptimeMs":16770679,"data":{"displayId":14,"dispatchToken":null}}

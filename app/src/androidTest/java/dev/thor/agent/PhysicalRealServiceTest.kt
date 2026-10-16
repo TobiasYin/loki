@@ -95,7 +95,7 @@ class PhysicalRealServiceTest {
             newSession()
             var token="";var sid=""
             instrumentation.runOnMainSync {token=host.requestProbe();sid=host.selectedSession()}
-            js(web,"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(sid)});true")
+            js(EmulatorRuntimeTestSupport.awaitExecutionReady(activity),"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(sid)});true")
             wait(web,"document.getElementById('send').textContent === '停止'",10)
             wait(web,"document.getElementById('send').textContent === '发送'")
             val state=SqliteStore(context,"product.db").use {it.load()}

@@ -103,3 +103,11 @@ UI/provider 全部测试保存了既有 profile 与凭据；没有复制真实�
 ## 文件校验
 
 `manifest.json` 为本目录除自身之外的全部文件记录字节数与 SHA-256，可用于检测整理后文件是否变化。早期 UI/provider JSON 只压缩空白；`service-ui-final/` 的 JSON 则是明确筛选后的摘要与布尔结果，没有复制完整原始报告。原始报告与固定 APK 仍留在上述 ignored build 目录，本目录提供可审阅的紧凑证据，不替代真实云端或真机验收。
+
+## Subsequent long-background and Presentation boundaries
+
+`final-null-recovery/` fixes App `396c98cd…` / Test `570ad02b…`: six cases passed (explicit background/UI/provider 5 and real 380-second background 1), but Presentation failed in two independent attempts. `scoped-focus/` fixes App `ed916990…` / Test `cf42f277…`: the same six cases passed, while Presentation failed once with a passive trace proving the same-key proof reached its 5-second absolute expiry. These groups are not all-passed acceptance, and their results do not transfer to the later proactive-refresh/startup-storage package. Each README records exact identities, durations, unresolved boundaries and complete preservation, including the one selected-session `updatedAt` metadata change. No Thor/cloud/game success is claimed.
+
+`expiry-startup/` separately fixes App `dbedacdc…` / Test `1bea4c10…`: three isolated startup-recovery SQLite cases passed, followed by one Presentation failure at same-key proof expiry. The additional five cases and 380-second test were not executed on this pair; earlier packages' results are not transferred. The attempt and restored baseline are retained pending more precise reader diagnostics.
+
+`presentation-trace/` fixes App `387472aa…` / Test `1bea4c10…`: all seven actually executed emulator cases passed without skip, failure or retry (Presentation 1, short background/UI/provider 5, real 380-second background 1). The earlier startup-storage 3 result remains a separate dbed source-equivalent check and is not counted again. Current full-proof reconstruction is observed, but the tail 64 does not prove 1,999 ms near-expiry invocation or explain older missing reader traces. All old failed groups remain intact; no Thor/cloud/game completion is claimed.

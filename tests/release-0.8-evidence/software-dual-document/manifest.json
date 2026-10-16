@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed final split-document software build only; later typed-target source and Android runs excluded. Shared manifests unchanged.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4048,
+      "sha256": "1ec729fae52119e5fde07169ba5afd0f3e35ac37e94afff7ad105175eb9aa0a6"
+    },
+    {
+      "path": "bridge-node.log",
+      "bytes": 1256,
+      "sha256": "11a5199aebcf7c0c4ef2f5af153a7b2c84dee3ec9e5084282c6e72753614c335"
+    },
+    {
+      "path": "chat-node.log",
+      "bytes": 7211,
+      "sha256": "7e6e44c069971f5f58621a3d55b6d29fc975876f73ac21ab1d9e7fffb86654a1"
+    },
+    {
+      "path": "final-artifacts.json",
+      "bytes": 1899,
+      "sha256": "3efd26f93070a08c2cc8df5aee83967c9e4f40b9348afb420bc73e95ba7894b2"
+    },
+    {
+      "path": "final-debug-artifact-pins.json",
+      "bytes": 407,
+      "sha256": "234cead707042e1806b093d3690e15c058484dc24fff447821e21dbeca240e6a"
+    },
+    {
+      "path": "final-gradle.log",
+      "bytes": 33305,
+      "sha256": "5003171e4f53fc237c8e208a9a949453a03a4338b78804a0f37261a36c468df0"
+    },
+    {
+      "path": "initial-artifacts-before-stop-hardening.json",
+      "bytes": 1899,
+      "sha256": "7a30aa69919d0ac78709ec1986a9bd0bd0c8626ef1cca11e5baf8f9661a312c3"
+    },
+    {
+      "path": "initial-gradle-before-stop-hardening.log",
+      "bytes": 35503,
+      "sha256": "35b454ff4b5a610a88d19a28a17a150dacc4c543d53c1a8ad08313a636e6e31c"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 27451,
+      "sha256": "fd5a5f392cee0d2cd725d03566db341ee13a83adbbcd6488953f30ddcec2964c"
+    },
+    {
+      "path": "relay-node.log",
+      "bytes": 463,
+      "sha256": "6dd6d0f4ff8490222596355e7f60df523478f361121b9f6d13b08ac120d8735d"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 15454,
+      "sha256": "1bd2071e6c19d9e277759012dfd7b58d9e728b8f7377e6f60edbd1e85c57a999"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 6697,
+      "sha256": "a2dedf23fdea73008af14dee47ba0a51007bc86dba73a066ac0c3155c1dacd7e"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 16195,
+      "sha256": "96015064aa870ce8652d7a2e7269cdf14cd048004adc7233d7b56d41b824558e"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "scope": "Final legacy-history software-only snapshot. Device/cloud/game acceptance remains separate; manifest excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4573,
+      "sha256": "3291d55c47abb40d9b7d28237b8c7848950fb16f33540c5518ae0967d3a7da0a"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "ae35cdf3fc35cd2f996a7c34c1753e5c8c8ac01625233b925a0e67f15065a836"
+    },
+    {
+      "path": "debug-artifact-pins.json",
+      "bytes": 407,
+      "sha256": "60166ed590c3d7dd6401ae1a7096e06388ab121c9297bcf984b7f9f445d16687"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 33414,
+      "sha256": "b41b27f6dccff4951d945e545d9927fd82f64fc11301871c25d5a87b59a30e78"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 24162,
+      "sha256": "c0cf60e52c7baea2487d4177245058783b4f8893b7b6fdb9a15a31d5b086465d"
+    },
+    {
+      "path": "prior-bridge-node.log",
+      "bytes": 1256,
+      "sha256": "11a5199aebcf7c0c4ef2f5af153a7b2c84dee3ec9e5084282c6e72753614c335"
+    },
+    {
+      "path": "prior-chat-node.log",
+      "bytes": 7571,
+      "sha256": "f35f497ae5dc49d73708031148719f2caf0f5dc2822cbc35ae8eba7e01e42baf"
+    },
+    {
+      "path": "prior-relay-node.log",
+      "bytes": 463,
+      "sha256": "6dd6d0f4ff8490222596355e7f60df523478f361121b9f6d13b08ac120d8735d"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 27083,
+      "sha256": "a542609d36e10e02acf967f6b3abee3be5be40b1a8433ac82391ab555bead0a4"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 12195,
+      "sha256": "90c74ee88eee37e340224253b78a5e539725302e0fbcc03ba766e64ebbd85d88"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 16489,
+      "sha256": "3cc8569c55c6caa982cf410a8e2db755a904554eac7724760cb2301e08456e36"
+    }
+  ]
+}

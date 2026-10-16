@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed traceApp3874/Test1bea emulator7 actual passes,0 failures/skips/retries; storage3 not rerun and not counted. Old failures unchanged; no cloud/Thor/game or final release claim. Excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 5898,
+      "sha256": "2a197b75bea06ba8d4f16621bc29fa1c5a5c819d68d5ee65ae2262cdf5aac26e"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "6be858d9d3380285b49fc79a0f4d820e9563765067804368d4cfc0f7c43f03be"
+    },
+    {
+      "path": "background-long-380.log",
+      "bytes": 846,
+      "sha256": "864bd9916b12b9774a0886bc737e8fc295fb470e9a82178cd4d7ed6f5d6e7e2b"
+    },
+    {
+      "path": "combined-explicit-5.log",
+      "bytes": 3716,
+      "sha256": "455a656b4b87b0bf7e597fa51b2c54ef8a6981d58b7553c2c52b594381eb4dc0"
+    },
+    {
+      "path": "long-background.json",
+      "bytes": 2883,
+      "sha256": "85b1eb373ccae40df756b1332a321914beaed81d63de6afa94f37b3a2ff42194"
+    },
+    {
+      "path": "per-test-preservation.json",
+      "bytes": 1330,
+      "sha256": "cd537b0ace2ef4f2d1929085fa7f43c33756116ba9ccbe39731e218173b7f540"
+    },
+    {
+      "path": "presentation-explicit.log",
+      "bytes": 811,
+      "sha256": "68bd0bd01d6ccbe575cc20af5700f0d0bebc538afe84253ac25f1855cdbbfae1"
+    },
+    {
+      "path": "presentation.json",
+      "bytes": 33096,
+      "sha256": "163bc82a8a6e0b8220e4bc83ffd4da75418b6ee9cded46922d70b65594a94448"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2177,
+      "sha256": "86cbb29e6a58f01ad28d9bddbe848fad75f90a4c3befe698324c6717b164f895"
+    },
+    {
+      "path": "short-background.json",
+      "bytes": 531,
+      "sha256": "dffca8d1505bd7a468bd07cc5aef7b6c5d75645f583690f0204c9c85deaf5a9a"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 5135,
+      "sha256": "18087a53c0d9026959d84d5cbe3daa096d30fdb15517a9801d1b751d4d13e72e"
+    },
+    {
+      "path": "ui-provider.json",
+      "bytes": 9223,
+      "sha256": "1047251e5886a38051fdea3e042d8e1df6dda60b57cb078f859ae0302c2da359"
+    }
+  ]
+}

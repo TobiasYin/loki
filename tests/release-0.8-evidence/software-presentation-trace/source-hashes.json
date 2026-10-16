@@ -1,0 +1,435 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T20:04:33.014208+00:00",
+  "baseline": "../software-expiry-startup-final/source-hashes.json",
+  "scope": "Selected71 source/test files including all trace-edit paths and unchanged retained suites; not atomic complete source archive",
+  "files": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorBackgroundRuntimeTest.kt",
+      "bytes": 16543,
+      "sha256": "5f49256dc7e6986d52443000dd43b74f40c191c4e41683c9bc120f43ed1ad4f9",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorBackgroundTestState.kt",
+      "bytes": 8386,
+      "sha256": "b7af87e0545a83d533a243e8e1b4833f80ddd9da62e322020f6df5177dcfbe63",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorLongBackgroundRuntimeTest.kt",
+      "bytes": 13439,
+      "sha256": "f8170853f8766a18a02fa2c605cff0b6911ee36431637d403be00601c9ee1635",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorPresentationControlTest.kt",
+      "bytes": 38984,
+      "sha256": "eab0c846f4a09b666d7d5626ede8775a788304a71a94cc5395ce70f7595c9deb",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorRuntimeTestSupport.kt",
+      "bytes": 7319,
+      "sha256": "feea1b07a218909c4f1694172c5cfa17ea64542301ed1659a56ae0fae31b3a1f",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/LongBackgroundSseFixture.kt",
+      "bytes": 6905,
+      "sha256": "f4b1124618fe7483f105cdc21a2eaab5f72fb14d16c122f309cdde0fc4dd9c44",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/StartupRecoveryStorageTest.kt",
+      "bytes": 6134,
+      "sha256": "218b8142289d90b6fe22368abd8ea4466b575d19156f06af074e39329ea65b1f",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/debug/java/dev/thor/agent/RuntimeStartupDiagnostics.kt",
+      "bytes": 2354,
+      "sha256": "61591c26f78316fa34c1f77fb9b96b1e36ce0023516cb461e554c23bd9d76872",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/assets/chat/chat-host.js",
+      "bytes": 3645,
+      "sha256": "0bab3871d51f88eee7d8ddb7fe981ef624478aaaec07e40cbf0dcf9750654dec",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/assets/chat/index.html",
+      "bytes": 5783,
+      "sha256": "220616c3db459c130faf9d842a884ef1954146efa1a994a5b92f9d43ff702bcc",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/assets/chat/runtime.html",
+      "bytes": 350,
+      "sha256": "90c513c0f8ad70fd7d2886e894b6ed636e557c6306a5fc96afb90beb774ca2b7",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/assets/chat/send-errors.js",
+      "bytes": 1176,
+      "sha256": "f6106c543eb839952d36aa4410eea4cfe191a01077097cfd6955c27733ec8aac",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/assets/chat/style.css",
+      "bytes": 20052,
+      "sha256": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 53118,
+      "sha256": "cca33d8aa3062d00a89bc56ffa2419198a7f54d24084f489edb2047b0eb82697",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/AgentRuntimeEngine.kt",
+      "bytes": 13710,
+      "sha256": "a4000462ad4619ff94b57654ab170a81540c58725389971026b2fc2f2177a018",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/AgentRuntimeService.kt",
+      "bytes": 6943,
+      "sha256": "4b15b36844cf97607f0aa4da5d43cc4e0034bcada00e2a1c21ba619873a6fb1a",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/BridgePolicy.kt",
+      "bytes": 5455,
+      "sha256": "4484585f2d54eb0facc79b1504470cd6cea2c6a2bf03966169e7303cb152aa4b",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ChatEventProjection.kt",
+      "bytes": 2268,
+      "sha256": "7a35b8112e1dc1f8f4451384c9b3a3ee59d07203f333cec57603d957c919870c",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ChatSnapshot.kt",
+      "bytes": 2876,
+      "sha256": "5dc7bd05f5c5102553f8e32c54b46a4c648e5cbbc72e4ef84eedd1b18d2f7832",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ChatUiBridge.kt",
+      "bytes": 6871,
+      "sha256": "a4d5c40f4e958a8c27653576154bf5add24ef465d0f9cbbeb0f1608e47c968f1",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/InputFocusFailure.kt",
+      "bytes": 1013,
+      "sha256": "d4c899ccec12ba769432d26798ccd072f64287d39ba7486f8f48a42217179d6c",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/MainActivity.kt",
+      "bytes": 36048,
+      "sha256": "b33bae5ae3ca954fcd188b8236f7c7d46c7e7e1ba87b2a48507a181f2e9094c5",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "bytes": 85026,
+      "sha256": "4929fc0d998de10aadad8666fab7eee53199d22ecf1f6e439b43eb274a619296",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/RuntimeStartupPhase.kt",
+      "bytes": 539,
+      "sha256": "150cb8ddaf0d9cf6046e2b5c0b9fc1676b97b05ea26382f5f13fdfa8d3896b83",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/Storage.kt",
+      "bytes": 14273,
+      "sha256": "72d7c2bda905d0b2ebffcff8ca55ab35cf800331caf8f8524354498d73e69ac1",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/StreamDisplayProjection.kt",
+      "bytes": 3106,
+      "sha256": "2496741257cb6e3ffe9513a6c310ec456fa4bd43a987a6afea388391776886aa",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/release/java/dev/thor/agent/RuntimeStartupDiagnostics.kt",
+      "bytes": 401,
+      "sha256": "cb761c6237829c830322a6eb76e62e9a979790ec0080a989ff33265f26ec61aa",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/ChatEventProjectionTest.kt",
+      "bytes": 4465,
+      "sha256": "2429af7cf8f223cdbdbce2955561c8a0cd4ea4c140684281ed4bdcd76630fead",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/ChatSnapshotTest.kt",
+      "bytes": 3577,
+      "sha256": "5b39180c765b61d3f44085def9c08e1c5e7068b6ca03242326c4ac425d1757dd",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/InputFocusFailureTest.kt",
+      "bytes": 2616,
+      "sha256": "20edf4ff5dafce8c5be8b9edba847ab13892195f18db822e6c8a4d6e51e3f5ea",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/StreamDisplayProjectionTest.kt",
+      "bytes": 4340,
+      "sha256": "ec734a8b5f42991b468eaa7aea6d74a749f454990774f6286647c3911b805120",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/src/testDebug/java/dev/thor/agent/RuntimeStartupDiagnosticsTest.kt",
+      "bytes": 1524,
+      "sha256": "9e43110bb4ea024bb419fcf5466e4aea954c3e80474c69cb392b0b2081c751d3",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/web-tests/chat-host.test.cjs",
+      "bytes": 6367,
+      "sha256": "5d504da67115b07fdcdcf250210b9571a372ac28b724f1f4ec64f3da0267b042",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 61636,
+      "sha256": "0b35874c1a4a33dc7439e7e51bea3c69b8fafcf8ce6d478795d895419718c64d",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "docs/presentation-windows.md",
+      "bytes": 12665,
+      "sha256": "0beb52eeb800e9fc4eeb9fb146b8c6e5ab36a4ad54cae86a488015559acbf010",
+      "matchesExpiryStartupBaseline": false
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "bytes": 18697,
+      "sha256": "41d7b794b2acd4aec1f4f8c502e5df7afdaf569d7ec1f411d7d9006f5ffd6274",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "integration/runtime-ui-events.mjs",
+      "bytes": 2400,
+      "sha256": "cae9fa578c40b3b614a78dd22f5dd125b36af2060d1d3a19dfc050072399cb00",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "integration/runtime-ui-events.test.mjs",
+      "bytes": 2794,
+      "sha256": "37da39e5c15cb247564c94fe62b66e15dddb135f5b7031c37d6518b9563efe9c",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "native-bridge/js/fetch-adapter.js",
+      "bytes": 11926,
+      "sha256": "ab5a90d7b6158362eef16df271526a7de8785f3115ad85c44103155862033219",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "native-bridge/js/fetch-adapter.test.mjs",
+      "bytes": 10284,
+      "sha256": "c0d01c8629109cf02ded54b65cca044090290f6b834483e24811a205303610a1",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "bytes": 15984,
+      "sha256": "4a39ae62bd491d39a7e96eb0074a40f7821f56c8fc34f665dd5f72d7606db5fd",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/contracts.ts",
+      "bytes": 8520,
+      "sha256": "8d30d2211ccd030608876b609d1a2085476587d334feeb22bd0673a830bbaa54",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/index.ts",
+      "bytes": 184,
+      "sha256": "ea0652c2394a39edc113de1f25a29d64533055fea5c9bfa97101b46b5714879c",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/profile-validation.ts",
+      "bytes": 2530,
+      "sha256": "93bc7fa856ffe5c8c057e9b5d0361609be61c7b909e4621a261de4397ec9d7b5",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/protocol-audit.ts",
+      "bytes": 2377,
+      "sha256": "c7f5e52ed649e69af953589c4aec61ce112515f037ae73437e3c2a28683a681c",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "bytes": 3736,
+      "sha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/provider-timeouts.ts",
+      "bytes": 1443,
+      "sha256": "db698b922cd79262e9a1b257c1ff1bc1a5689b34ef92015c42548ed2247d783d",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/registry.ts",
+      "bytes": 3875,
+      "sha256": "afe1beb3429916bc2e11dfb0b734a73f1581c90761cf3f1fa6716f09415fafdc",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 39089,
+      "sha256": "8a7078954a155dc1228f7e8e2c55a61389d56ba3e711d200bdc104ecdf0623dd",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/session.ts",
+      "bytes": 1554,
+      "sha256": "fde40fce4a6f1dcd4162db8ca426d687d8b3a5ad4f3b1f16c1b5e3201b17be1e",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/stream-events.ts",
+      "bytes": 2265,
+      "sha256": "871e871bb0e66b1beb96c6b571db0847ef2039ea8eca37cee2aee86b5c34a8ff",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/src/tool-availability.ts",
+      "bytes": 1634,
+      "sha256": "21b5464f582b63f19aba55458a2e05cb77cdc6c6aa7b4d0e0a2aaab8734f65a4",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/fixtures.ts",
+      "bytes": 11018,
+      "sha256": "d7dc3187f0d744580c4f8dd7eaa656ac3597971d1dc7931d255fb80cad7c0a54",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/legacy-null-history.test.ts",
+      "bytes": 9460,
+      "sha256": "ec860259b19bb6c6544703dcbb57972b1182946dc84957c1dbc312c3a7971e79",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/native-null-success.test.ts",
+      "bytes": 8134,
+      "sha256": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/native-read-error-priority.test.ts",
+      "bytes": 5824,
+      "sha256": "00b59bc0936dc234e8743e44c5d5d5cf3340e2eeaba5bf357287ed08c6280365",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/profile-validation.test.ts",
+      "bytes": 4779,
+      "sha256": "153d9a1f189b099c442da36b2d6d39fd91a437767a471eabea6c862350249fa1",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/runtime.test.ts",
+      "bytes": 42418,
+      "sha256": "192e8ebf8de5db855546e0cdea0169c74461e1e0edd666e4f0b9f8e8abc43ffb",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/stop-boundary.test.ts",
+      "bytes": 7337,
+      "sha256": "e05a074325155e788f802893331f2537b2385880dcab289a2080d5748bc1def5",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/stream-events.test.ts",
+      "bytes": 3034,
+      "sha256": "b21fc1d3ae244a5908ff3773018e886e65f5982dfa3265725c7d268b06785dae",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/target-availability.test.ts",
+      "bytes": 8184,
+      "sha256": "4da1a2b9420b5e7b97e632b5cdd173be97c6c78d9ae20fc0e2732f21728539bb",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "bytes": 21285,
+      "sha256": "f949a9a0744bbafc41e5ad263efd29c232f6738facfa19cd6a67cb85ef6b0bad",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "runtime/test/tool-receipts.test.ts",
+      "bytes": 10600,
+      "sha256": "0bc0384dc2247ff21970a3538d42de7867e430f072c364239b58efc96abeba29",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt",
+      "bytes": 8175,
+      "sha256": "81657db355598db09b435e1472f84097bbe726778402e38f4ec276e830b44d92",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/PresentationWindowEvidence.kt",
+      "bytes": 15641,
+      "sha256": "ad11b82bc93396ebbdce036ace9f093d4ec1e36287f2fb84288ea999ea548240",
+      "matchesExpiryStartupBaseline": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/TargetObservationAvailability.kt",
+      "bytes": 1795,
+      "sha256": "d71954dee4945f33d699014886522d31816a8597026ffc1f7f4be4bad10a4992",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationCacheInvalidationTest.kt",
+      "bytes": 4961,
+      "sha256": "ddf92130563f6fb0fa46a41e578be20a47fe234195ab09b3b0ec18729e0b49bb",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationProofRefreshTest.kt",
+      "bytes": 6916,
+      "sha256": "3e72057eb2b7d7df4377343f74f072c0b010d875f4bb4257c4f3491f6f48d94b",
+      "matchesExpiryStartupBaseline": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/TargetObservationAvailabilityTest.kt",
+      "bytes": 3856,
+      "sha256": "a53fd4e0aa9e7f948fdf75af0c1597e2f4d58356eed893308fcc6c15f84710e6",
+      "matchesExpiryStartupBaseline": true
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugConnection.kt",
+      "bytes": 19693,
+      "sha256": "466d84e9b2e8422e89437fd560eaced58b68430d949fab80ccedf515b1f3ddcd",
+      "matchesExpiryStartupBaseline": null,
+      "baselineHashUnavailable": true
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/ThorAccessibilityService.kt",
+      "bytes": 13400,
+      "sha256": "803ade35335827986c0b9296aa0cf3beea8343eb7434f8ba283d4ddcb8def507",
+      "matchesExpiryStartupBaseline": false
+    }
+  ]
+}

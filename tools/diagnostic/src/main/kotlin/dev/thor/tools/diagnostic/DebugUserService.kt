@@ -25,6 +25,22 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     private val watchdog = Executors.newSingleThreadScheduledExecutor().apply {
         scheduleWithFixedDelay({ synchronized(this@DebugUserService) { lease?.let { if (clock.now() >= it.deadline) retire(it) } } }, 100, 100, TimeUnit.MILLISECONDS)
     }
+    /** Does not acquire/open a mutation lease or hold the service monitor. */
+    override fun presentationEvidence(displayId:Int,windowIds:IntArray):String {
+        val caller=Binder.getCallingUid()
+        return try {
+            requireTool(Process.myUid()==2000,Code.PERMISSION_MISSING,"Presentation metadata requires shell UID 2000")
+            val host=hostContext ?: fail(Code.UNSUPPORTED,"Shizuku v14 context required")
+            requireTool(host.packageManager.getPackagesForUid(caller).orEmpty().contains(host.packageName),Code.PERMISSION_MISSING,"Only the bound application may inspect Presentation metadata")
+            val identity=Binder.clearCallingIdentity()
+            val proofs=try {NativePresentationEvidence.inspect(host,caller,displayId,windowIds)} finally {Binder.restoreCallingIdentity(identity)}
+            (json(mapOf("proofs" to proofs.map {p->mapOf("displayId" to p.displayId,"windowId" to p.windowId,"token" to p.token,"ownerUid" to p.ownerUid,
+                "packageName" to p.packageName,"flags" to p.flags,"frame" to listOf(p.frame.left,p.frame.top,p.frame.right,p.frame.bottom),"rawWindowType" to p.rawWindowType)})) as JSONObject).toString()
+        } catch(t:Exception) {
+            // Fixed reason only: dump text, titles and unrelated private packages never cross IPC.
+            JSONObject().put("error",((t as? ToolFailure)?.code ?: Code.UNSUPPORTED).name).put("message","Presentation system metadata unavailable or changed").toString()
+        }
+    }
     override fun identity() = Process.myUid()
     @Synchronized private fun nativeGamepad(): NativeGamepad = gamepad ?: NativeGamepad().also {gamepad=it}
     private fun shellIdentity(action:()->String): String {

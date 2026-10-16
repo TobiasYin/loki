@@ -23,6 +23,11 @@ for name,path in artifacts.items():
    assert 'android.permission.INTERNET' in permissions
    assert re.search(r'android:usesCleartextTraffic.*0xffffffff', manifest), 'HTTP must work in both debug and release'
    assert 'assets/chat/runtime-host.js' in files
+   assert all('assets/chat/'+f in files for f in ('runtime.html','chat-host.js','send-errors.js'))
+   chat_page=z.read('assets/chat/index.html').decode()
+   execution_page=z.read('assets/chat/runtime.html').decode()
+   assert 'runtime-host.js' not in chat_page and 'chat-host.js' in chat_page
+   assert 'runtime-host.js' in execution_page and 'ui.js' not in execution_page and 'chat-host.js' not in execution_page
    offline_tts={p.name for p in (root/'tests/fixtures/volc-voice').glob('*.wav')}
    assert not any(pathlib.Path(f).name in offline_tts for f in files), 'Offline TTS fixtures must not enter APK'
    assert not any(b'/api/v3/tts/' in z.read(f) for f in files if f.endswith('.dex') or f.startswith('assets/')), 'TTS integration must remain host-only'
@@ -31,6 +36,7 @@ for name,path in artifacts.items():
    assert not any('node_modules' in f or f.endswith('.test.mjs') or f.endswith('package-lock.json') for f in files)
    if 'release' in name:
     assert 'runPreparedNative' not in bundle
+    assert '__thorRuntimeDiagnostics' not in bundle and '__thorRuntimeNativeDiagnostics' not in bundle
     assert 'dev.thor.inputlab.permission.CONTROL' not in permissions
     assert 'debug_network' not in manifest
   else:
@@ -39,6 +45,8 @@ for name,path in artifacts.items():
    assert not any('/chat/' in f for f in files)
    assert ('dev.thor.inputlab.RunnerProvider' in manifest) == ('debug' in name)
    assert ('dev.thor.inputlab.ScenarioRunnerProvider' in manifest) == ('debug' in name)
+   assert ('dev.thor.inputlab.PresentationFixtureActivity' in manifest) == ('debug' in name)
+   assert ('dev.thor.inputlab.PresentationFixtureProvider' in manifest) == ('debug' in name)
    assert ('dev.thor.inputlab.permission.CONTROL' in manifest) == ('debug' in name)
   report[name]={'path':str(path.relative_to(root)),'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'bytes':path.stat().st_size,'permissions':permissions.strip()}
  (root/'build/integration'/f'{name}-manifest.txt').write_text(manifest)

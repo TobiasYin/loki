@@ -58,6 +58,8 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
         var cp: Checkpoint? = null
         try {
             val cancellation = authority.validate(e)
+            backend.prepareObservation(e,args,cancellation)
+            cancellation.check()
             cp = Checkpoint({
                 authority.validate(e)
                 val descriptor = ToolPack.descriptors.getValue(e.toolId)

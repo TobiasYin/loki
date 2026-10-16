@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed dbed/1bea emulator group:3 isolated SQLite passes,1 Presentation failure;5+380 not executed. No all-pass or transferred earlier results. Excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4098,
+      "sha256": "806b8a55149b84df587170aee51c03c8bdda3d1f23a8d779e561b66132e02fe5"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "ef4d56e6c13598e91318514e3a0b41e86264aedcb05817530ad5b765791ceb66"
+    },
+    {
+      "path": "packaged-refresh-symbols.json",
+      "bytes": 380,
+      "sha256": "528862077328fc495445f51e5a916054f5d1f2f0fea136cc7fb03fe6ce523cdf"
+    },
+    {
+      "path": "presentation-explicit.log",
+      "bytes": 2581,
+      "sha256": "a40077047abb76956d2073f6197f40b11a94bf8ba937cbe38c426454c94cca1f"
+    },
+    {
+      "path": "presentation-failure.json",
+      "bytes": 16810,
+      "sha256": "73bc49b37d8c2693ba7cabed5d489b469503ea75331268e7d1d2a98127754fb2"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2175,
+      "sha256": "f048c311589a73de5716127f2a5fd39d2e73b51ab45c684ee08413a1098d2b06"
+    },
+    {
+      "path": "startup-storage.log",
+      "bytes": 2242,
+      "sha256": "05f65d04ed54b77958d27d36568183c2d216849f73f140fdcbba7831b51c4b3e"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 4482,
+      "sha256": "3c57526fcc2c2bbfe5f88a8a0ac25858a58eb6f2fb6126c06412fe7e970e6a09"
+    }
+  ]
+}

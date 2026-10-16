@@ -48,7 +48,7 @@ class WebViewFlowTest {
     private fun probe(activity: MainActivity, web: WebView) {
         var token="";var sid=""
         instrumentation.runOnMainSync { token=host(activity).requestProbe();sid=host(activity).selectedSession() }
-        javascript(web,"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(sid)});true")
+        javascript(EmulatorRuntimeTestSupport.awaitExecutionReady(activity),"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(sid)});true")
         waitFor(web,"document.getElementById('send').textContent === '停止'",60)
         waitFor(web,"document.getElementById('send').textContent === '发送'",30)
         assertEquals("passed",context.getSharedPreferences("profiles",0).getString("probe",null))
@@ -148,7 +148,7 @@ class WebViewFlowTest {
         try {
             waitFor(web,"window.productReady===true")
             var token="";instrumentation.runOnMainSync {token=host(activity).requestProbe()}
-            javascript(web,"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(host(activity).selectedSession())});true")
+            javascript(EmulatorRuntimeTestSupport.awaitExecutionReady(activity),"window.runNativeProbe(${JSONObject.quote(token)},${JSONObject.quote(host(activity).selectedSession())});true")
             waitFor(web,"document.getElementById('send').textContent==='停止'")
             javascript(web,"document.getElementById('send').click()")
             waitFor(web,"document.getElementById('send').textContent==='发送'")
@@ -338,7 +338,7 @@ class WebViewFlowTest {
             while(snapshot.optString("testRunId") != testRun && System.nanoTime()-start<TimeUnit.SECONDS.toNanos(3)) {Thread.sleep(100);snapshot=JSONObject(receiver("report",args).getString("snapshot")!!)}
             assertEquals(testRun,snapshot.getString("testRunId"))
             Thread.sleep(500) // Allow Accessibility window/content notifications from receiver preparation to settle.
-            javascript(web,"window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}));true")
+            javascript(EmulatorRuntimeTestSupport.awaitExecutionReady(activity),"window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}));true")
             waitFor(web,"document.getElementById('send').textContent === '发送'",30)
             while(snapshot.isNull("report") && System.nanoTime()-start<TimeUnit.SECONDS.toNanos(12)) {Thread.sleep(100);snapshot=JSONObject(receiver("report",args).getString("snapshot")!!)}
             val report=snapshot.getJSONObject("report")
@@ -362,7 +362,7 @@ class WebViewFlowTest {
             val frameSetup=receiver("prepare",android.os.Bundle().apply {putInt("version",1);putString("testRunId",frameTest);putString("caseId","LAB-02");putString("agentRunId",frameRid);putString("senderTraceRef","product-native:$frameRid:frame-input")})
             val frameArgs=android.os.Bundle().apply {putInt("version",1);putString("testRunId",frameTest);putString("lease",frameSetup.getString("lease"))}
             Thread.sleep(1000)
-            javascript(web,"window.runPreparedNative(JSON.parse(${JSONObject.quote(frameBegun.toString())}));true")
+            javascript(EmulatorRuntimeTestSupport.awaitExecutionReady(activity),"window.runPreparedNative(JSON.parse(${JSONObject.quote(frameBegun.toString())}));true")
             waitFor(web,"document.getElementById('send').textContent === '发送'")
             var frameSnapshot=JSONObject(receiver("report",frameArgs).getString("snapshot")!!);val frameEnd=System.nanoTime()+TimeUnit.SECONDS.toNanos(8)
             while(frameSnapshot.isNull("report") && System.nanoTime()<frameEnd) {Thread.sleep(100);frameSnapshot=JSONObject(receiver("report",frameArgs).getString("snapshot")!!)}

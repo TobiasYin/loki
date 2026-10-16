@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_TEST_SNAPSHOT_NOT_DEVICE_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T18:02:19.181957+00:00",
+  "scope": "TARGET_CHANGED recovery only. Node with actual Pi/provider adapters and controlled SSE plus synthetic authority/tool ports; JSDOM UI checks; integration tsc. No cloud, emulator or physical-device acceptance.",
+  "runtimeTests": 109,
+  "runtimePassed": 109,
+  "appJsTests": 55,
+  "appJsPassed": 55,
+  "newRuntimeTests": 27,
+  "newAppJsTests": 3,
+  "failures": 0,
+  "cancelled": 0,
+  "skipped": 0,
+  "integrationTscPassed": true,
+  "sourceSnapshot": [
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 35242,
+      "sha256": "4207e85a9927e6886a7b3f115adab07e3168ce8d8bbad3b58c5150b64be6c671",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "bytes": 14741,
+      "sha256": "2d5ed0bc9746d07cfc8ca253f8fc590723cfe499f0b6e2e246d63581c0f0b2b4",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "bytes": 15010,
+      "sha256": "d21eb85a020a78aa2c2dbb0f9d793e279a669f2f456441a70863c7e30ea9b6b0",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 49939,
+      "sha256": "ea897219eebc56a1f1f4d4f74494b5c1a79a4d35604c107048eed6120b1727b7",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 52340,
+      "sha256": "11b98ca4d2ad3e815f45d0799d1d89e9230ea46cb9c9f8f7ae9d27d6ca4f4c27",
+      "matchesCurrentAtCollection": true
+    }
+  ],
+  "sourceHashOrigin": "Final successful109/55 source snapshot recorded before handing runtime writer to release_review; no claim for later revisions. matchesCurrentAtCollection only describes collection time.",
+  "logs": [
+    {
+      "sourcePath": "build/target-recovery-runtime-tests.log",
+      "publishedPath": "runtime-node.log",
+      "bytes": 11886,
+      "sha256": "6be17a0eaa22ef70ce5955b3e094b036beb7ed14addcce02e64e9ec654f94eaf",
+      "exitCode": 0,
+      "summary": {
+        "tests": 109,
+        "pass": 109,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "note": "Actual successful Node test log; no provider transcript."
+    },
+    {
+      "sourcePath": "build/target-recovery-ui-tests.log",
+      "publishedPath": "app-js.log",
+      "bytes": 5927,
+      "sha256": "8d47ab0055c54658fcef8e17b6559ce98db0c05e52ae54fa597c33b30ab5d9b0",
+      "exitCode": 0,
+      "summary": {
+        "tests": 55,
+        "pass": 55,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "note": "Actual successful Node test log; no provider transcript."
+    },
+    {
+      "sourcePath": "build/target-recovery-integration-tsc.log",
+      "publishedPath": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0,
+      "summary": {},
+      "note": "Successful tsc emits no output."
+    }
+  ],
+  "recoveryContract": {
+    "kind": "observe_again",
+    "sameRun": true,
+    "samePiAgent": true,
+    "automaticSideEffectRetry": false,
+    "priorSubmissionStatesPreserved": [
+      "not_dispatched",
+      "submitted",
+      "unknown"
+    ],
+    "unknownDoesNotMeanNotExecuted": true,
+    "observationGate": "Current-Run input/launch with target-screen resources; clears only after successful validated current-screen capture/tree/app/window observation.",
+    "selectionAndCompanionDoNotClearGate": true,
+    "nonScreenCleanupAndBrightnessNotGated": true,
+    "stopRevocationSafetyTimeoutPersistenceBoundariesPreserved": true
+  },
+  "androidApkTested": false,
+  "devicesOperated": false,
+  "sharedManifestUpdated": false
+}

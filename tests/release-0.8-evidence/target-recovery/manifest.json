@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "scope": "Local target-recovery source-test evidence only; not an APK/device result. Upper/shared manifests unchanged.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1974,
+      "sha256": "0d8b91651404823b89d65947adfabaf721c12072ba9bc7e8d101996743db3c33"
+    },
+    {
+      "path": "app-js.log",
+      "bytes": 5927,
+      "sha256": "8d47ab0055c54658fcef8e17b6559ce98db0c05e52ae54fa597c33b30ab5d9b0"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 11886,
+      "sha256": "6be17a0eaa22ef70ce5955b3e094b036beb7ed14addcce02e64e9ec654f94eaf"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 3790,
+      "sha256": "e5a8d372b60a6265775d3b844344c58748726a390c87318c26093a2b0aa24cc3"
+    }
+  ]
+}

@@ -22,8 +22,28 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(13)
-    private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; invalidated() }
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(14)
+    private val presentationReader:(Int,IntArray)->List<PresentationWindowProof> = {display,ids->
+        val remote=service ?: fail(Code.BACKEND_UNAVAILABLE,"Presentation metadata service is not bound")
+        requireTool(!closed && availability().status==Status.READY,Code.PERMISSION_MISSING,"Presentation metadata backend is not authorized")
+        val raw=remote.presentationEvidence(display,ids)
+        requireTool(raw.toByteArray().size<=16384,Code.LIMIT_EXCEEDED,"Presentation metadata response too large")
+        val response=JSONObject(raw)
+        if(response.has("error")) {
+            val safeCode=runCatching {Code.valueOf(response.getString("error"))}.getOrNull()
+            ThorAccessibilityService.recordPresentationReaderFailure(display,safeCode)
+        }
+        requireTool(!response.has("error"),Code.UNSUPPORTED,"Presentation metadata unavailable")
+        val values=response.getJSONArray("proofs")
+        requireTool(values.length() in 1..8,Code.UNSUPPORTED,"Presentation metadata missing")
+        (0 until values.length()).map {i->
+            val p=values.getJSONObject(i);val f=p.getJSONArray("frame")
+            requireTool(f.length()==4,Code.UNSUPPORTED,"Presentation frame missing")
+            PresentationWindowProof(p.getInt("displayId"),p.getInt("windowId"),p.getString("token"),p.getInt("ownerUid"),p.getString("packageName"),p.getString("flags"),
+                TouchableBounds(f.getInt(0),f.getInt(1),f.getInt(2),f.getInt(3)),p.getInt("rawWindowType"))
+        }
+    }
+    private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; ThorAccessibilityService.invalidatePresentationEvidence(); invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
             requireTool(Shizuku.getUid() == 2000,Code.UNSUPPORTED,"Root backend refused")
@@ -31,7 +51,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         }.onFailure { invalidated() }
     }
     private val received = Shizuku.OnBinderReceivedListener { bindGranted() }
-    init { Shizuku.addRequestPermissionResultListener(permission); Shizuku.addBinderDeadListener(dead); Shizuku.addBinderReceivedListenerSticky(received) }
+    init { ThorAccessibilityService.installPresentationReader(this,presentationReader); Shizuku.addRequestPermissionResultListener(permission); Shizuku.addBinderDeadListener(dead); Shizuku.addBinderReceivedListenerSticky(received) }
     @Synchronized private fun bindGranted() {
         if(closed || bindingRequested || service!=null)return
         runCatching {
@@ -98,7 +118,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         try {
             val actual = IDebugService.Stub.asInterface(binder)
             requireTool(actual.identity() == 2000, Code.UNSUPPORTED, "Actual UserService UID is not shell")
-            binder?.linkToDeath({ bindingRequested=false; service = null; invalidated() }, 0)
+            binder?.linkToDeath({ bindingRequested=false; service = null; ThorAccessibilityService.invalidatePresentationEvidence(); invalidated() }, 0)
             worker.submit {
                 val token="accessibility:${UUID.randomUUID()}"
                 try {
@@ -111,13 +131,13 @@ class DebugConnection(private val context: Context, private val invalidated: () 
                 } catch (_: Exception) {accessibilityPrepared=false;setupMessage="自动开启无障碍失败；可在系统设置中手动开启"}
                 finally {
                     runCatching {actual.cancel(token)}
-                    if(!closed)service=actual
+                    if(!closed){service=actual;ThorAccessibilityService.invalidatePresentationEvidence()}
                     bindingRequested=false
                 }
             }
         } catch (_: Exception) { bindingRequested=false;service = null; invalidated() }
     }
-    override fun onServiceDisconnected(name: ComponentName?) { bindingRequested=false;service = null; invalidated() }
+    override fun onServiceDisconnected(name: ComponentName?) { bindingRequested=false;service = null;ThorAccessibilityService.invalidatePresentationEvidence(); invalidated() }
     fun call(runId: String, request: Map<String, Any?>, cp: Checkpoint): Map<String, Any?> {
         val available = availability()
         requireTool(available.status == Status.READY, Code.BACKEND_UNAVAILABLE, available.reason)
@@ -239,5 +259,5 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         } finally {runCatching {remote.cancel(token)}}
     }
     fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint, approvalHash: String? = null) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max,"approvalHash" to approvalHash), cp)
-    fun close() { closed=true;invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
+    fun close() { closed=true;ThorAccessibilityService.removePresentationReader(this);invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
 }

@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "status": "SIX_PASS_ONE_PRESENTATION_PROOF_EXPIRY_FAILURE",
+  "collectedUtc": "2026-10-16T19:52:23.091545+00:00",
+  "scope": "Isolated API36 emulator5042 only. Apped916/Testcf42/Lab5727. Scoped invalidation and fixed focus hints included; later proactive TTL refresh and startup-storage changes excluded.",
+  "allRequestedCasesPassed": false,
+  "uniqueCasesExecuted": 7,
+  "passed": 6,
+  "failed": 1,
+  "skipped": 0,
+  "presentationRetried": false,
+  "artifacts": {
+    "app-debug-androidTest.apk": {
+      "sha256": "cf42f277259c2da143f7f8880ed0cabeb5eef3b4cdb274d6e7e84937830c99ce",
+      "bytes": 3384066
+    },
+    "app-debug.apk": {
+      "sha256": "ed91699051410de9e8eb0d8b51275f04fc312e69b5fc87d7e69befa6aaa6968e",
+      "bytes": 7092961
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "installedHashesBeforeTests": {
+    "dev.thor.agent": "ed91699051410de9e8eb0d8b51275f04fc312e69b5fc87d7e69befa6aaa6968e",
+    "dev.thor.agent.test": "cf42f277259c2da143f7f8880ed0cabeb5eef3b4cdb274d6e7e84937830c99ce",
+    "dev.thor.inputlab": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "installedHashesAfterTests": {
+    "dev.thor.agent": "ed91699051410de9e8eb0d8b51275f04fc312e69b5fc87d7e69befa6aaa6968e",
+    "dev.thor.agent.test": "cf42f277259c2da143f7f8880ed0cabeb5eef3b4cdb274d6e7e84937830c99ce",
+    "dev.thor.inputlab": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "instrumentation": [
+    {
+      "name": "combined-explicit-5.log",
+      "sha256": "3b793810533c921ff8b12f167edf71110d5c6ca062edf1b67ce6ce6e8944b439",
+      "bytes": 3716,
+      "durationSeconds": 53.541,
+      "passedTestStatusCount": 5,
+      "failedTestStatusCount": 0,
+      "skipped": 0
+    },
+    {
+      "name": "background-long-380.log",
+      "sha256": "bca3adf2799ac5e548d4207dd10eea4900a9114b70a896a875db9fb2c3288751",
+      "bytes": 846,
+      "durationSeconds": 395.074,
+      "passedTestStatusCount": 1,
+      "failedTestStatusCount": 0,
+      "skipped": 0
+    },
+    {
+      "name": "presentation-explicit.log",
+      "sha256": "4d8de3d7e8cff4f98e90b65e0efcc5e404c25c15469e215afee5787c505f7084",
+      "bytes": 2581,
+      "durationSeconds": 31.793,
+      "passedTestStatusCount": 0,
+      "failedTestStatusCount": 1,
+      "skipped": 0
+    }
+  ],
+  "shortCases": {
+    "background": 2,
+    "modernUi": 1,
+    "provider": 2,
+    "seconds": 53.541,
+    "explicitEmulatorUiComponents": true
+  },
+  "longBackground": {
+    "passed": true,
+    "seconds": 395.074,
+    "measuredBackgroundMs": 380101,
+    "liveMarkers": 380,
+    "lastCheckpoint": {
+      "elapsedMs": 380084,
+      "latestMarker": 380,
+      "persistedEventCount": 385,
+      "persistedEventBytes": 131481
+    },
+    "sameHost": true,
+    "sameUnattachedExecutionWeb": true,
+    "samePiSessionFollowup": true,
+    "all380MarkersInDurableTurnAndFollowupHttp": true,
+    "backgroundEvaluateJavascriptCalls": 0,
+    "backgroundUiLaunches": 0,
+    "outerDeviceCommandsDuringMeasuredInterval": 0,
+    "completionAfterUiReturn": true,
+    "longHiddenNotificationStopCovered": false
+  },
+  "presentation": {
+    "passed": false,
+    "explicitEmulatorAcceptance": true,
+    "seconds": 31.793,
+    "failureCode": "PERMISSION_MISSING",
+    "failedStage": "second UI tree after successful lower screenshot/tree/semantic activation",
+    "independentSemanticCount": 1,
+    "proofExpiredAtAgeMs": 5006,
+    "sameStoredExpiredKey": true,
+    "structureEventsBetweenLastStoreAndExpiry": 0,
+    "retryOrGuardOrTtlRelaxation": false
+  },
+  "preservation": {
+    "passed": true,
+    "originalIdsAllRetained": true,
+    "oldRunMessageEventAttachmentPayloadsByteIdentical": true,
+    "oldSessionContentUnchangedExceptUpdatedAt": true,
+    "oneOriginalSessionUpdatedAtChangedByNormalSelectRestore": true,
+    "selectedSessionRestored": true,
+    "profilesVaultRolesRawXmlUnchanged": true,
+    "accessibilityAndNotificationFullFlagsMatchOriginalGlobalBaseline": true,
+    "runtimeServiceExited": true,
+    "activeRuns": 0,
+    "runCountAfter": 91
+  },
+  "boundaries": {
+    "cloudRequests": 0,
+    "thorOperations": false,
+    "gameCompletionProven": false,
+    "presentationModelAutonomyProven": false,
+    "modelWallClockDeadlineAdded": false,
+    "laterProofRefreshInstalled": false,
+    "laterStartupStorageFixInstalled": false,
+    "noSourceBuildByCollector": true
+  },
+  "limitations": [
+    "Scoped invalidation did not make this full Presentation case pass; exact absolute-TTL expiry is retained instead of claiming a complete fix.",
+    "Node focus-recovery prompt tests are separate; these emulator cases do not prove a cloud Agent solved focus recovery.",
+    "Prior App396 and earlier Presentation passes/failures retain their own APK scope.",
+    "Long completion and Pi follow-up happen after UI return; long-hidden notification-stop is outside this long case.",
+    "UI uses synthetic display state/intercepted Native commands; provider calls are controlled loopback.",
+    "Frozen selected four-file scoped source manifest predates later refresh edits; no current mutable source file is claimed to be the installed test-helper version.",
+    "No private DB/system dump/full cloud response/credential/APK/ROM/game save is published."
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "status": "DIAGNOSTIC_INCREMENT_NOT_ANDROID_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T20:04:33.014208+00:00",
+  "baseline": "../software-expiry-startup-final/summary.json",
+  "scope": "Only bounded Presentation scheduling/worker/result/wait tracing and equivalent fixed-hex hashing change; no TTL, refresh-reserve, permission, guard or replay-policy change",
+  "gradle": {
+    "log": "gradle.log",
+    "success": true,
+    "seconds": 15,
+    "actionable": 506,
+    "executed": 77,
+    "upToDate": 429
+  },
+  "jvm": {
+    "totals": {
+      "tests": 421,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 63
+    },
+    "modules": [
+      {
+        "module": "app",
+        "gradleTask": ":app:testDebugUnitTest",
+        "taskStatus": "EXECUTED",
+        "tests": 95,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 22
+      },
+      {
+        "module": "device-core",
+        "gradleTask": ":device-core:test",
+        "taskStatus": "EXECUTED",
+        "tests": 198,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 29
+      },
+      {
+        "module": "core",
+        "gradleTask": ":core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 3
+      },
+      {
+        "module": "device-authority",
+        "gradleTask": ":device-authority:test",
+        "taskStatus": "EXECUTED",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 1
+      },
+      {
+        "module": "input-lab",
+        "gradleTask": ":input-lab:testDebugUnitTest",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 8
+      }
+    ],
+    "traceDiagnosticCasesAdded": 2,
+    "includedIn421": true,
+    "hexVectorAddedToExistingCaseNoAdditionalCase": true,
+    "xmlHashes": "junit-xml-hashes.json"
+  },
+  "retainedSoftware": {
+    "runtime": {
+      "tests": 251,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "chat": {
+      "tests": 69,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "bridge": {
+      "tests": 13,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "relay": {
+      "tests": 3,
+      "rerun": false,
+      "sourceMatchesBaseline": true
+    },
+    "logsAndLimitations": "Retained prior logs/source provenance remain in baseline; original Bridge13 source archive limitation unchanged"
+  },
+  "sourceHashes": "source-hashes.json",
+  "changedSourcePaths": [
+    "docs/presentation-windows.md",
+    "tools/core/src/main/kotlin/dev/thor/tools/PresentationWindowEvidence.kt",
+    "tools/core/src/test/kotlin/dev/thor/tools/PresentationProofRefreshTest.kt",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/ThorAccessibilityService.kt",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugConnection.kt"
+  ],
+  "pins": [
+    {
+      "path": "build/emulator/presentation-trace-2026-10-17/run-01/app-debug-androidTest.apk",
+      "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+      "bytes": 3398214
+    },
+    {
+      "path": "build/emulator/presentation-trace-2026-10-17/run-01/app-debug.apk",
+      "sha256": "387472aab1c12d735253879288f895a98548ad0964ed06eb69c94837e3317c46",
+      "bytes": 7864725
+    },
+    {
+      "path": "build/emulator/presentation-trace-2026-10-17/run-01/input-lab-debug.apk",
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  ],
+  "pinsVerifiedActualBytes": true,
+  "artifactCheck": {
+    "file": "artifacts.json",
+    "allFourActualFilesVerified": true
+  },
+  "diagnosticBoundary": [
+    "Fixed enum/numeric/hash fields only; reader error preserved as known Code or unknown/null, never raw message",
+    "Same catch-Throwable rejection behavior as prior runCatching; no new authorization, retry or changed TTL",
+    "Trace cannot mutate generation/proof/deadline;64-entry bound retained",
+    "Fixed lowercase hex nibble conversion replaces formatting, with known abc SHA256 assertion in existing test"
+  ],
+  "acceptance": {
+    "androidTestsRunByCollector": false,
+    "newApkAndroidPassClaim": false,
+    "priorApkPassTransfer": false,
+    "thorOrGameCompletionClaim": false,
+    "independentReviewerAcceptanceIncluded": false,
+    "SQLiteAndroidCasesIncludedInJvm": false
+  },
+  "limits": [
+    "This is an incremental software record, not a duplicate full acceptance archive",
+    "JVM421 includes mixed executed/cached tasks, not421 claimed fresh executions",
+    "Runtime251/Chat69/Bridge13/relay3 are retained same-source results, not this build reruns",
+    "Reviewer AVD trace and independent Thor attempts are separate",
+    "Collector wrote only this new directory and made no source modifications, builds, test executions or device commands"
+  ],
+  "sourceInventoryCount": 71,
+  "sourceComparisonLimit": "DebugConnection baseline hash was absent from prior selected-file inventory; current trace-edited file archived without invented baseline equivalence"
+}

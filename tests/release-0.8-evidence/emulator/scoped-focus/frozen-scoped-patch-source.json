@@ -1,0 +1,9 @@
+{
+  "scope": "Source freeze candidate; no Gradle or device commands run",
+  "files": {
+    "tools/core/src/main/kotlin/dev/thor/tools/PresentationWindowEvidence.kt": "0bfa39c00165a28a208fa85c189980a81dc80f9e0c60843c3c3ff258764524f0",
+    "tools/core/src/test/kotlin/dev/thor/tools/PresentationCacheInvalidationTest.kt": "ddf92130563f6fb0fa46a41e578be20a47fe234195ab09b3b0ec18729e0b49bb",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/ThorAccessibilityService.kt": "1d38e5d702ab6f3543f87369a1d6e304a06b4266412ed31cbd9f171bc049846e",
+    "app/src/androidTest/java/dev/thor/agent/EmulatorPresentationControlTest.kt": "eab0c846f4a09b666d7d5626ede8775a788304a71a94cc5395ce70f7595c9deb"
+  }
+}

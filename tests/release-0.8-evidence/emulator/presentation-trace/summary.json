@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "status": "SEVEN_PINNED_EMULATOR_CASES_PASS",
+  "collectedUtc": "2026-10-16T20:14:22.233945+00:00",
+  "scope": "Fixed trace-onlyApp3874/Test1bea/Lab5727 on isolated API36 emulator5042. Presentation1, background2, ModernUI1, provider2, real380s long-background1. Currentpair7actual passes, no transfer of old passes.",
+  "allCasesExecutedInThisGroupPassed": true,
+  "finalReleaseAcceptanceClaim": false,
+  "executedCases": 7,
+  "passed": 7,
+  "failed": 0,
+  "skipped": 0,
+  "retries": 0,
+  "artifacts": {
+    "app-debug-androidTest.apk": {
+      "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+      "bytes": 3398214
+    },
+    "app-debug.apk": {
+      "sha256": "387472aab1c12d735253879288f895a98548ad0964ed06eb69c94837e3317c46",
+      "bytes": 7864725
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "installedHashesBeforeAndAfter": {
+    "dev.thor.agent": "387472aab1c12d735253879288f895a98548ad0964ed06eb69c94837e3317c46",
+    "dev.thor.agent.test": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+    "dev.thor.inputlab": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "instrumentation": [
+    {
+      "name": "presentation-explicit.log",
+      "bytes": 811,
+      "sha256": "68bd0bd01d6ccbe575cc20af5700f0d0bebc538afe84253ac25f1855cdbbfae1",
+      "durationSeconds": 58.969,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "combined-explicit-5.log",
+      "bytes": 3716,
+      "sha256": "455a656b4b87b0bf7e597fa51b2c54ef8a6981d58b7553c2c52b594381eb4dc0",
+      "durationSeconds": 54.116,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "background-long-380.log",
+      "bytes": 846,
+      "sha256": "864bd9916b12b9774a0886bc737e8fc295fb470e9a82178cd4d7ed6f5d6e7e2b",
+      "durationSeconds": 395.558,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "explicitFlags": {
+    "Presentation": "emulatorAcceptance=true",
+    "ModernUI": "emulatorUiComponents=true",
+    "LongBackground": "longBackgroundAcceptance=true"
+  },
+  "storageCases": {
+    "rerunOnThisPair": false,
+    "countIncludedInSeven": 0,
+    "priorScope": "dbed/1bea expiry-startup3 isolated SQLite passes; unchanged storage source per coordinator, not claimed freshly executed here"
+  },
+  "presentation": {
+    "passed": true,
+    "seconds": 58.969,
+    "sameSelectedScreenCaptureTreeSemanticAndCoordinateReceiverVerified": true,
+    "oldCrossRoleSnapshotNodeFrameRejected": true,
+    "actualSecurePixelsWithheldAndABARestored": true,
+    "completeNewProofReadAndStoreObserved": true,
+    "nearExpiry1999MsBranchProven": false,
+    "oldDbEdMissingRefreshCauseProven": false,
+    "modelAutonomyProven": false,
+    "physicalGamepadInjectionProven": false
+  },
+  "shortGroup": {
+    "passed": 5,
+    "seconds": 54.116,
+    "cloudCalls": 0
+  },
+  "longBackground": {
+    "passed": true,
+    "seconds": 395.558,
+    "measuredBackgroundMs": 380260,
+    "markers": 380,
+    "checkpoints": 13,
+    "lastCheckpoint": {
+      "elapsedMs": 380228,
+      "latestMarker": 380,
+      "persistedEventCount": 385,
+      "persistedEventBytes": 131481
+    },
+    "sameHost": true,
+    "sameUnattachedExecutionWeb": true,
+    "samePiSessionFollowup": true,
+    "fullDurableAndFollowupHttpAll380Markers": true,
+    "backgroundEvaluateJavascriptCalls": 0,
+    "backgroundUiLaunches": 0,
+    "outerAvdCommandsDuringMeasuredInterval": 0,
+    "completionAfterUiReturn": true,
+    "longHiddenNotificationStopCovered": false
+  },
+  "preservation": {
+    "passed": true,
+    "rawPrefsVaultRolesXmlRestored": true,
+    "originalHistoryIdsPreserved": true,
+    "originalRunMessageEventAttachmentPayloadsByteIdentical": true,
+    "originalSessionContentUnchangedExceptUpdatedAt": true,
+    "oneSessionUpdatedAtChangedByNormalSelectedSessionRestore": true,
+    "selectedSessionRestored": true,
+    "originalAccessibilityAndNotificationFullFlagsRestored": true,
+    "originalOverlayImmersiveAnimatorSettingsRestored": true,
+    "runtimeServiceExited": true,
+    "activeRuns": 0,
+    "runCountAfter": 102
+  },
+  "boundaries": {
+    "cloudRequests": 0,
+    "thorOperations": false,
+    "gameCompletionClaim": false,
+    "noProductionOrTestSourceOrBuildByCollector": true,
+    "noTtlOwnerClipSecureGuardRelaxationByCollector": true
+  },
+  "limitations": [
+    "Presentation is manual-platform Native with an independent synthetic receiver, not autonomous cloud or physical gamepad/game acceptance.",
+    "Modern UI uses synthetic display data/intercepted commands; provider settings and background cases use controlled loopback rather than official cloud.",
+    "Only the retained bounded trace is published; successful remaining0 rebuild does not establish prior near-threshold invocation or historical failure cause.",
+    "Storage3 remains a separate prior dbed acceptance, not counted again.",
+    "No DB/archive/raw dump/credential/full cloud response/APK/ROM/game save is published."
+  ]
+}

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 fun interface Clock { fun now(): Long }
 enum class Capability { SCREEN_PERCEPTION, WEB_SEARCH, SCREEN_CONTROL, ADB_DEBUG }
 enum class Status { READY, PERMISSION_MISSING, BACKEND_MISSING, UNSUPPORTED, TEMPORARILY_UNAVAILABLE }
-data class Availability(val status: Status, val reason: String, val backend: String)
+data class Availability(val status: Status, val reason: String, val backend: String, val reasonCode:Code?=null)
 enum class Code { CAPABILITY_DISABLED, STALE_AUTHORIZATION, PERMISSION_MISSING, BACKEND_UNAVAILABLE, TARGET_CHANGED, UNSUPPORTED, TIMEOUT, CANCELLED, LIMIT_EXCEEDED, IO_ERROR, INVALID_ARGUMENT, HASH_CONFLICT, APPROVAL_REQUIRED, COMMAND_BLOCKED, SECURE_CONTENT, DISPLAY_GONE, RATE_LIMITED }
 class ToolFailure(val code: Code, override val message: String) : RuntimeException(message)
 fun fail(code: Code, message: String): Nothing = throw ToolFailure(code, message)
@@ -101,6 +101,8 @@ class Checkpoint(private val checkAction: () -> Unit, val cancellation: Cancella
     }
 }
 interface DeviceBackend {
+    /** Read-only, outside commit/authority/resource locks; default backends need no metadata preflight. */
+    fun prepareObservation(envelope:Envelope,args:Map<String,Any?>,cancellation:Cancellation) {}
     fun availability(toolId: String): Availability
     fun availability(toolId: String, args: Map<String, Any?>): Availability = availability(toolId)
     fun execute(envelope: Envelope, args: Map<String, Any?>, checkpoint: Checkpoint): ToolResult

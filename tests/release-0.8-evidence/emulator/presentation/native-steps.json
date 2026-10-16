@@ -1,0 +1,98 @@
+[
+  {
+    "toolId": "agent.background",
+    "elapsedMs": 11,
+    "error": null,
+    "outcome": "submitted"
+  },
+  {
+    "toolId": "perception.select_screen",
+    "elapsedMs": 39,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "perception.window_info",
+    "elapsedMs": 333,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "perception.capture_screen",
+    "elapsedMs": 397,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "perception.ui_tree",
+    "elapsedMs": 329,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "input.activate",
+    "elapsedMs": 328,
+    "error": null,
+    "outcome": "submitted"
+  },
+  {
+    "toolId": "perception.ui_tree",
+    "elapsedMs": 76,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "input.tap",
+    "elapsedMs": 395,
+    "error": null,
+    "outcome": "submitted"
+  },
+  {
+    "toolId": "perception.select_screen",
+    "elapsedMs": 14,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "input.tap",
+    "elapsedMs": 0,
+    "error": "TARGET_CHANGED",
+    "outcome": "observed"
+  },
+  {
+    "toolId": "input.activate",
+    "elapsedMs": 15,
+    "error": "TARGET_CHANGED",
+    "outcome": "observed"
+  },
+  {
+    "toolId": "input.tap",
+    "elapsedMs": 9,
+    "error": "TARGET_CHANGED",
+    "outcome": "observed"
+  },
+  {
+    "toolId": "perception.select_screen",
+    "elapsedMs": 26,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "perception.capture_screen",
+    "elapsedMs": 1,
+    "error": "TARGET_CHANGED",
+    "outcome": "observed"
+  },
+  {
+    "toolId": "perception.select_screen",
+    "elapsedMs": 38,
+    "error": null,
+    "outcome": "observed"
+  },
+  {
+    "toolId": "perception.capture_screen",
+    "elapsedMs": 349,
+    "error": null,
+    "outcome": "observed"
+  }
+]

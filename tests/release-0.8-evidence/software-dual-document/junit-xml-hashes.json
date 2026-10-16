@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual retained JUnit XML and final build task status. Collection launches no tests; cached modules not claimed freshly run.",
+  "totals": {
+    "tests": 387,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suiteCount": 57
+  },
+  "modules": [
+    {
+      "module": "app",
+      "xmlDirectory": "app/build/test-results/testDebugUnitTest",
+      "gradleTask": ":app:testDebugUnitTest",
+      "finalTaskStatus": "EXECUTED",
+      "suiteCount": 19,
+      "tests": 85,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatBridgePolicyTest.xml",
+          "bytes": 901,
+          "sha256": "53fac9c21a6457c842254f044a285b1f3a323ea4df5013338c12d6cf9c664c28",
+          "mtimeUtc": "2026-10-16T18:50:52.253988+00:00",
+          "name": "dev.thor.agent.ChatBridgePolicyTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatEventProjectionTest.xml",
+          "bytes": 782,
+          "sha256": "a275d63b21f099a40054eb5fd92b56398037cbb82ee29a448d7a009abfae4f96",
+          "mtimeUtc": "2026-10-16T18:50:52.257637+00:00",
+          "name": "dev.thor.agent.ChatEventProjectionTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatSnapshotTest.xml",
+          "bytes": 743,
+          "sha256": "b936a3c1fc4dedb7ad4f7686faed22db4fcaff7b7c4d95f3c9c66c563b1ead9f",
+          "mtimeUtc": "2026-10-16T18:50:52.256803+00:00",
+          "name": "dev.thor.agent.ChatSnapshotTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.CoordinatorTest.xml",
+          "bytes": 2405,
+          "sha256": "8c7caa6935cd2ab0c82f09bb123d41955c2776e384f665b47f69a14988577703",
+          "mtimeUtc": "2026-10-16T18:50:52.256842+00:00",
+          "name": "dev.thor.agent.CoordinatorTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.DeepSeekCatalogTest.xml",
+          "bytes": 864,
+          "sha256": "b36385c7ca0aa7184c541db36404e4cc2add75e1576f5509b1f87b86cf66e9a1",
+          "mtimeUtc": "2026-10-16T18:50:52.254764+00:00",
+          "name": "dev.thor.agent.DeepSeekCatalogTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.EventIndexIsolationTest.xml",
+          "bytes": 473,
+          "sha256": "a6510d041cf5bd43772b5bac622a64b99b0ddd28f0a71a5d18d2457245156fc6",
+          "mtimeUtc": "2026-10-16T18:50:52.258903+00:00",
+          "name": "dev.thor.agent.EventIndexIsolationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.HostRpcPayloadTest.xml",
+          "bytes": 1130,
+          "sha256": "feecb70214f6250272706ffe7ba6f0d936a9b396f39fb856343095b32cbc859c",
+          "mtimeUtc": "2026-10-16T18:50:52.255198+00:00",
+          "name": "dev.thor.agent.HostRpcPayloadTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.LatestValueTest.xml",
+          "bytes": 802,
+          "sha256": "82ef0b818d11c2269c8c60c39d2656cd02f8fb367c32d107c39c83dad0d7ae72",
+          "mtimeUtc": "2026-10-16T18:50:52.257302+00:00",
+          "name": "dev.thor.agent.LatestValueTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelCatalogTest.xml",
+          "bytes": 1310,
+          "sha256": "fdb7f1261487c40f7714f7e52e6276709b85b7308dcc0d464b318eb9f9e81ece",
+          "mtimeUtc": "2026-10-16T18:50:52.258363+00:00",
+          "name": "dev.thor.agent.ModelCatalogTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelConnectionTestTest.xml",
+          "bytes": 1575,
+          "sha256": "5d41ec167b1ce4ba0eb9f5dfc1f07b7ed2c16a7c3ca4c9beab6a667953e1d4c2",
+          "mtimeUtc": "2026-10-16T18:50:52.254788+00:00",
+          "name": "dev.thor.agent.ModelConnectionTestTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.OfficialProfilePolicyTest.xml",
+          "bytes": 777,
+          "sha256": "c8c239716385dbefcbb3dfb6620c78adb6ba2821d8b9787f688faa0c3ae5d86f",
+          "mtimeUtc": "2026-10-16T18:50:52.253987+00:00",
+          "name": "dev.thor.agent.OfficialProfilePolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.PreparedToolsTest.xml",
+          "bytes": 1041,
+          "sha256": "f71aaebb233c00efcf6093eb1966bf8fe01f7ed13726680312cee5b5d7f78fe5",
+          "mtimeUtc": "2026-10-16T18:50:52.258434+00:00",
+          "name": "dev.thor.agent.PreparedToolsTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RecoveryHistoryTest.xml",
+          "bytes": 468,
+          "sha256": "81338ab4974d1d8e641dbef2a9d383003f85365860f8992f7ca3f34b767af9b3",
+          "mtimeUtc": "2026-10-16T18:50:52.258739+00:00",
+          "name": "dev.thor.agent.RecoveryHistoryTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SearchConnectionTestTest.xml",
+          "bytes": 578,
+          "sha256": "9b195b775cde0efff4205dc26998811adfe2525612eaebca06542a5da8ca2afc",
+          "mtimeUtc": "2026-10-16T18:50:52.255297+00:00",
+          "name": "dev.thor.agent.SearchConnectionTestTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillStoreTest.xml",
+          "bytes": 1199,
+          "sha256": "4c5f47b28badd152004193acba3423d01c7ea07cbc260d2c0d0375a714236294",
+          "mtimeUtc": "2026-10-16T18:50:52.256807+00:00",
+          "name": "dev.thor.agent.SkillStoreTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillTextResourcesTest.xml",
+          "bytes": 462,
+          "sha256": "0cd19f8e9727e2b8435de1586d35d31e3f578b8b1cd670285c5e67272a8a80fd",
+          "mtimeUtc": "2026-10-16T18:50:52.258485+00:00",
+          "name": "dev.thor.agent.SkillTextResourcesTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StartupRegressionTest.xml",
+          "bytes": 606,
+          "sha256": "80a2799feb0cf7fb8abcba279cf33e97658f880f3be3543c6dd941ac2b85b682",
+          "mtimeUtc": "2026-10-16T18:50:52.257292+00:00",
+          "name": "dev.thor.agent.StartupRegressionTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VoiceTransportTest.xml",
+          "bytes": 593,
+          "sha256": "952e49f580875888d6b1a165fe4e7049517fa9b754eaed1cda74a3644caf6ba9",
+          "mtimeUtc": "2026-10-16T18:50:52.257291+00:00",
+          "name": "dev.thor.agent.VoiceTransportTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+          "bytes": 944,
+          "sha256": "2b39d9b34e4467294e7767e788c000481c7bf9aebcfdcca02f0b8cc31aabe1d8",
+          "mtimeUtc": "2026-10-16T18:50:52.253987+00:00",
+          "name": "dev.thor.agent.VolcAsrProtocolTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "device-core",
+      "xmlDirectory": "tools/core/build/test-results/test",
+      "gradleTask": ":device-core:test",
+      "finalTaskStatus": "Classes UP-TO-DATE",
+      "suiteCount": 26,
+      "tests": 174,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AccessibilitySetupTest.xml",
+          "bytes": 738,
+          "sha256": "0e82d3b6e9bd1d7ee23ce5aa4bcb269b65f3ca874ed54e7fc0444e918bd7db74",
+          "mtimeUtc": "2026-10-16T18:02:42.334710+00:00",
+          "name": "dev.thor.tools.AccessibilitySetupTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AgentBackgroundTest.xml",
+          "bytes": 1043,
+          "sha256": "b28fdf9b3934f6e4898c6129aa2a474f0727358848f48b5ed7cfb76461eff679",
+          "mtimeUtc": "2026-10-16T18:02:42.336144+00:00",
+          "name": "dev.thor.tools.AgentBackgroundTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.BoundedInputStateTest.xml",
+          "bytes": 1324,
+          "sha256": "377b011a90002c8acd51c0303637467a0a2fdf6b1c611b89bee840cbe99a707d",
+          "mtimeUtc": "2026-10-16T18:02:42.334728+00:00",
+          "name": "dev.thor.tools.BoundedInputStateTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CompanionObservationTest.xml",
+          "bytes": 1058,
+          "sha256": "790996a218c5a5a3ca8fa185e4a345b6dc239fd97247b3f9e68d7cb4937c0ffd",
+          "mtimeUtc": "2026-10-16T18:02:42.331965+00:00",
+          "name": "dev.thor.tools.CompanionObservationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CoreTest.xml",
+          "bytes": 5133,
+          "sha256": "f71f993d0551a7476eae2dae1bf0675b88ae3887cbb035ef0758b99f1fd9af78",
+          "mtimeUtc": "2026-10-16T18:02:42.333648+00:00",
+          "name": "dev.thor.tools.CoreTest",
+          "tests": 39,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayRolePolicyTest.xml",
+          "bytes": 744,
+          "sha256": "292e6b444673c7d47fa0325cea90b30cc28dc3d9b460c1c2d3575f631080a908",
+          "mtimeUtc": "2026-10-16T18:02:42.331739+00:00",
+          "name": "dev.thor.tools.DisplayRolePolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayVisibilityTest.xml",
+          "bytes": 1051,
+          "sha256": "8e031fbf74e3d74ab2fef41d9888f3b03eea3eb7c231d8222ba78a8b6b87f0bf",
+          "mtimeUtc": "2026-10-16T18:02:42.336476+00:00",
+          "name": "dev.thor.tools.DisplayVisibilityTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevAxesTest.xml",
+          "bytes": 1124,
+          "sha256": "fe21f93c14a64ce3d15c159cad2b44b5f82fc6b2441fe5aec9c77a7882ac6744",
+          "mtimeUtc": "2026-10-16T18:02:42.335773+00:00",
+          "name": "dev.thor.tools.EvdevAxesTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevButtonsTest.xml",
+          "bytes": 898,
+          "sha256": "bcd3a8a051bf2b83b6c5b68424c71fda8903838b812a379c3cafa78c6191089a",
+          "mtimeUtc": "2026-10-16T18:02:42.331113+00:00",
+          "name": "dev.thor.tools.EvdevButtonsTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCleanupTest.xml",
+          "bytes": 871,
+          "sha256": "8addced7428db36685228e61d67b8ba2160442443e510c23bf1b183a1e54bb3a",
+          "mtimeUtc": "2026-10-16T18:02:42.333700+00:00",
+          "name": "dev.thor.tools.GamepadCleanupTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCommandTest.xml",
+          "bytes": 703,
+          "sha256": "70bbad01137e3a38066fc882f408b6eaa2d5131e5e50db95943c772f9cd1764b",
+          "mtimeUtc": "2026-10-16T18:02:42.330739+00:00",
+          "name": "dev.thor.tools.GamepadCommandTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadHoldTargetTest.xml",
+          "bytes": 918,
+          "sha256": "976328e1a51ac93ff87a3e07361b491c797ebd3be441665a7ef4fd5b346e339b",
+          "mtimeUtc": "2026-10-16T18:02:42.331331+00:00",
+          "name": "dev.thor.tools.GamepadHoldTargetTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadLeaseGuardTest.xml",
+          "bytes": 727,
+          "sha256": "7efd62935a2701012c63273d03ec2e57d92fe6a353d92598f6c5f3739f90dcff",
+          "mtimeUtc": "2026-10-16T18:02:42.336288+00:00",
+          "name": "dev.thor.tools.GamepadLeaseGuardTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.InputTargetPolicyTest.xml",
+          "bytes": 626,
+          "sha256": "77f9445bc9e53b49ee4e166ac05ecf0f1f0ececedc702c7cf518053d5e1da6b6",
+          "mtimeUtc": "2026-10-16T18:02:42.335416+00:00",
+          "name": "dev.thor.tools.InputTargetPolicyTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.LauncherAppsTest.xml",
+          "bytes": 899,
+          "sha256": "2bcb9783fb0260a19748f061e1f025ba41b315b3f3282656bf5fe46390d846d8",
+          "mtimeUtc": "2026-10-16T18:02:42.334450+00:00",
+          "name": "dev.thor.tools.LauncherAppsTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationCommandTest.xml",
+          "bytes": 997,
+          "sha256": "fb5311f087cfcaf05a5046e7ba04f7fe67cd1296e577c597db26d205d1e64a6c",
+          "mtimeUtc": "2026-10-16T18:02:42.332512+00:00",
+          "name": "dev.thor.tools.NavigationCommandTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationFocusTest.xml",
+          "bytes": 855,
+          "sha256": "878c29a8bd64092a961a4bc390a534eebb03dbe261dda8d17ec2f941bf571355",
+          "mtimeUtc": "2026-10-16T18:02:42.335420+00:00",
+          "name": "dev.thor.tools.NavigationFocusTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationWindowEvidenceTest.xml",
+          "bytes": 2308,
+          "sha256": "04cff5e213215eee8a24e6c040bc3a9d8ec142d50b0c6dd55883c2f9dfbbcb3c",
+          "mtimeUtc": "2026-10-16T18:02:42.332382+00:00",
+          "name": "dev.thor.tools.PresentationWindowEvidenceTest",
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ReadObservationTest.xml",
+          "bytes": 1373,
+          "sha256": "1338ad989f90defa78b6b4bbd250a23bba20513a69b32086fef7714d6320505d",
+          "mtimeUtc": "2026-10-16T18:02:42.331127+00:00",
+          "name": "dev.thor.tools.ReadObservationTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ScreenSelectionTest.xml",
+          "bytes": 1306,
+          "sha256": "d5f525d876dd22cd396a1aa284f0268c2ed724887db0b1b53a0fb054fd4b32e8",
+          "mtimeUtc": "2026-10-16T18:02:42.331121+00:00",
+          "name": "dev.thor.tools.ScreenSelectionTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.SemanticTreeTest.xml",
+          "bytes": 1474,
+          "sha256": "ca199515ec7293b11d443de7f2646dc5e3bf6f2a4df076b31a4ab34d9ebe43ee",
+          "mtimeUtc": "2026-10-16T18:02:42.332924+00:00",
+          "name": "dev.thor.tools.SemanticTreeTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ShellCommandPolicyTest.xml",
+          "bytes": 1346,
+          "sha256": "798b763d88f68a8d0abdff7919223f73168099f4184bff420b0cedbd837106d7",
+          "mtimeUtc": "2026-10-16T18:02:42.333829+00:00",
+          "name": "dev.thor.tools.ShellCommandPolicyTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ThorBrightnessCommandTest.xml",
+          "bytes": 877,
+          "sha256": "b8d11efd718a2cecd1dff48b5489f2ca192e7f3ede0e8cd93a13323b139d6077",
+          "mtimeUtc": "2026-10-16T18:02:42.334498+00:00",
+          "name": "dev.thor.tools.ThorBrightnessCommandTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActionWindowTest.xml",
+          "bytes": 1168,
+          "sha256": "ef834ec90ef370250a0a494c8d23d534696cc1097e26812b95babe885fa3d91f",
+          "mtimeUtc": "2026-10-16T18:02:42.333136+00:00",
+          "name": "dev.thor.tools.UiActionWindowTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActivationTest.xml",
+          "bytes": 997,
+          "sha256": "c000eab373affae5b06cdbdb9e0b090aedb89349dd0eac7321932198dca68d4b",
+          "mtimeUtc": "2026-10-16T18:02:42.335523+00:00",
+          "name": "dev.thor.tools.UiActivationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UpperTargetResolverTest.xml",
+          "bytes": 1909,
+          "sha256": "8e6455f18168b3b4c93e9b5687afad5f60578c272275ef4f78c069e7c812b5b6",
+          "mtimeUtc": "2026-10-16T18:02:42.333654+00:00",
+          "name": "dev.thor.tools.UpperTargetResolverTest",
+          "tests": 10,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "core",
+      "xmlDirectory": "native-bridge/core/build/test-results/test",
+      "gradleTask": ":core:test",
+      "finalTaskStatus": "Classes UP-TO-DATE",
+      "suiteCount": 3,
+      "tests": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.AuthorityBudgetTest.xml",
+          "bytes": 901,
+          "sha256": "b903a9a455769e8d1cad3cef5531b8c2f59e8e46de11128b7a3b51ca06d6c007",
+          "mtimeUtc": "2026-10-16T18:47:33.479847+00:00",
+          "name": "dev.thor.bridge.AuthorityBudgetTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.GatewayTest.xml",
+          "bytes": 2404,
+          "sha256": "eab28ebdaeb7b3a24d2763e414da699829caf204188b7d0d0b1b94211e87a357",
+          "mtimeUtc": "2026-10-16T18:47:33.479981+00:00",
+          "name": "dev.thor.bridge.GatewayTest",
+          "tests": 17,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.TransportTest.xml",
+          "bytes": 2776,
+          "sha256": "f186b50dbca0aba678a8979c82990f09b8d3776555dcff94a745516726e9b055",
+          "mtimeUtc": "2026-10-16T18:47:33.479849+00:00",
+          "name": "dev.thor.bridge.TransportTest",
+          "tests": 20,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "device-authority",
+      "xmlDirectory": "integration/device-authority/build/test-results/test",
+      "gradleTask": ":device-authority:test",
+      "finalTaskStatus": "Classes UP-TO-DATE",
+      "suiteCount": 1,
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "integration/device-authority/build/test-results/test/TEST-dev.thor.integration.DeviceAuthorityTest.xml",
+          "bytes": 2167,
+          "sha256": "efd3d818a724d7ab7abff86b81b8d2471b46a4f892d06993364d5c661823557f",
+          "mtimeUtc": "2026-10-16T18:47:30.161284+00:00",
+          "name": "dev.thor.integration.DeviceAuthorityTest",
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "input-lab",
+      "xmlDirectory": "tests/input-lab-app/app/build/test-results/testDebugUnitTest",
+      "gradleTask": ":input-lab:testDebugUnitTest",
+      "finalTaskStatus": "UP-TO-DATE",
+      "suiteCount": 8,
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AttemptTest.xml",
+          "bytes": 4205,
+          "sha256": "0842d7501130f1fc48955c04bd64b38e2e18da0a108d7d359851e472d1ca59a2",
+          "mtimeUtc": "2026-10-16T18:47:34.148315+00:00",
+          "name": "dev.thor.inputlab.AttemptTest",
+          "tests": 37,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AxisProfileTest.xml",
+          "bytes": 1011,
+          "sha256": "c288ce7c864dfce77a101df18415f0d917c02d2c212a7f0f8314983765edc7ab",
+          "mtimeUtc": "2026-10-16T18:47:34.146990+00:00",
+          "name": "dev.thor.inputlab.AxisProfileTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.DeviceContinuityTest.xml",
+          "bytes": 1321,
+          "sha256": "0ad1bc111c7e30878ee4207e9952bd5e6db302570515e67a3df5a1ae9b59fcd2",
+          "mtimeUtc": "2026-10-16T18:47:34.148164+00:00",
+          "name": "dev.thor.inputlab.DeviceContinuityTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.JournalTest.xml",
+          "bytes": 1090,
+          "sha256": "807ce1bea8f1677ce9c1cf0bcfcbf4ec6c7d62aa52d7f4f54cde1f2400e3f2fe",
+          "mtimeUtc": "2026-10-16T18:47:34.146534+00:00",
+          "name": "dev.thor.inputlab.JournalTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerEvidenceModeTest.xml",
+          "bytes": 891,
+          "sha256": "a93d0338c41899e81ebc9651c92186553e7f365045401a4dbddf5d8554dbf440",
+          "mtimeUtc": "2026-10-16T18:47:34.146949+00:00",
+          "name": "dev.thor.inputlab.RunnerEvidenceModeTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerWindowTest.xml",
+          "bytes": 905,
+          "sha256": "3f241e0e9634a1a4893e0763c7cbf337df71f54c9dbc1b5420fcd3e23043ff29",
+          "mtimeUtc": "2026-10-16T18:47:34.146772+00:00",
+          "name": "dev.thor.inputlab.RunnerWindowTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioModelTest.xml",
+          "bytes": 1032,
+          "sha256": "0f054fcf94b20efe904da45a4f9fd72a704c2e256b94b4dee4817975207a3590",
+          "mtimeUtc": "2026-10-16T18:47:34.147727+00:00",
+          "name": "dev.thor.inputlab.ScenarioModelTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioSessionTest.xml",
+          "bytes": 1044,
+          "sha256": "7bd5f0c855e85b1264219f4c06311990e6329c4f23d9b6087f93d1f838852fdc",
+          "mtimeUtc": "2026-10-16T18:47:34.147964+00:00",
+          "name": "dev.thor.inputlab.ScenarioSessionTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ]
+}

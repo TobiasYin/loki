@@ -108,7 +108,7 @@ class PhysicalDeviceFlowTest {
                         }
                     }
                     observeTarget()
-                    js(web,"window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}));true")
+                    js(EmulatorRuntimeTestSupport.awaitExecutionReady(activity),"window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}));true")
                     until(observationSeconds+2) {observeTarget();snapshot=receiver("report",receiverArgs).getJSONObject("snapshot");!snapshot.isNull("report")}
                     val report=snapshot.getJSONObject("report")
                     File(context.filesDir,"physical-cloud-$kind-report.json").writeText(report.toString(2))

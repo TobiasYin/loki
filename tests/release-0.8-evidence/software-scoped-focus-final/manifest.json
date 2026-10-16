@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "scope": "Scoped Presentation/fixed focus final software-only snapshot; no new Android/cloud/game acceptance. Manifest excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 6222,
+      "sha256": "21a36f816e7d24bb6acc88d8b21c0cf1323a47d0c274aceb4b97482821b85ad0"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "ea5e72221c3d9aa47e7ae360e25b4185f3d61122a2517264cbd8f2519c74cc2b"
+    },
+    {
+      "path": "debug-artifact-pins.json",
+      "bytes": 582,
+      "sha256": "8b9196ac0bfc721463b3c169c49c963067234a7886a4a764e8931b99764ff1f4"
+    },
+    {
+      "path": "focus-policy-jvm.log",
+      "bytes": 52,
+      "sha256": "501310898cf4730cad34f6495f540ac0c1f7bcacd06e9ecd8a0949020a05c097"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 50360,
+      "sha256": "dbb763dcb143b5dcb50a80ecbb28378ecd76e8a7793e73f1256d9fc06d4661ec"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 24943,
+      "sha256": "04f93cc2e0d6f44c86f9b7a3daa07bf72bfc22f46afc6ddc04ae68b4853568bd"
+    },
+    {
+      "path": "prior-bridge-node.log",
+      "bytes": 1256,
+      "sha256": "11a5199aebcf7c0c4ef2f5af153a7b2c84dee3ec9e5084282c6e72753614c335"
+    },
+    {
+      "path": "prior-chat-node.log",
+      "bytes": 7571,
+      "sha256": "f35f497ae5dc49d73708031148719f2caf0f5dc2822cbc35ae8eba7e01e42baf"
+    },
+    {
+      "path": "prior-relay-node.log",
+      "bytes": 463,
+      "sha256": "6dd6d0f4ff8490222596355e7f60df523478f361121b9f6d13b08ac120d8735d"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 29166,
+      "sha256": "d51cf05ab412a1af8070d1a058884fd16cf095db7f8c02e0f391a048d1596d09"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 17450,
+      "sha256": "364c789935ddd7d9585dbcb6a9afc07e355c2651e42f4cbec1e6c68905de401f"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 17716,
+      "sha256": "c34d7dd9fd4e2f149a9c71c6019d0de9522687723aa65994d01b5fd218603f94"
+    }
+  ]
+}

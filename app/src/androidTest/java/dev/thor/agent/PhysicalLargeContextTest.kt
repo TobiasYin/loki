@@ -106,7 +106,9 @@ class PhysicalLargeContextTest {
         assertFalse("Do not launch over an active user task",rows("runs").any {it.optString("status") !in terminals})
         val before=historyIds()
         val activity=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay")!!.toInt()).toBundle()) as MainActivity
-        val web=activity.findViewById<WebView>(android.R.id.custom)
+        val ready=EmulatorRuntimeTestSupport.awaitReady(activity)
+        val web=ready.web
+        val executionWeb=ready.executionWeb
         val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
         val restoreSession=args.getString("restoreSession") ?: host.selectedSession()
         val active=linkedMapOf<String,JSONObject>()
@@ -121,7 +123,7 @@ class PhysicalLargeContextTest {
             val sid=host.selectedSession();evidence.put("sessionId",sid)
             for(cap in listOf("debug","perception","search","screen_control"))ui(web,obj("op" to "capability","sessionId" to sid,"capability" to cap,"enabled" to false))
             until {val caps=rows("sessions").single {it.getString("id")==sid}.getJSONObject("capabilities");listOf("debug","perception","search","screen_control").all {!caps.getBoolean(it)}}
-            js(web,"""
+            js(executionWeb,"""
                 window.__largeAck={};window.__largeSent={};window.__largePrevious=ThorNative.onmessage;
                 ThorNative.onmessage=function(event){
                   try {
@@ -150,7 +152,7 @@ class PhysicalLargeContextTest {
             assertTrue("Regression must cross the old 128KiB RPC failure size",turnBytes>128*1024)
             evidence.put("firstRunId",runId).put("turnId",turnId).put("turnBytes",turnBytes).put("turnSha256",sha(turn.toString())).put("bodyBytes",body.toString().toByteArray(Charsets.UTF_8).size)
             val originalRun=rows("runs",runId).single().toString()
-            val bad=rpc(web,connection,"persist",body,conflictingInline=true,seconds=5)
+            val bad=rpc(executionWeb,connection,"persist",body,conflictingInline=true,seconds=5)
             evidence.put("conflictingInlineAndBody",bad)
             assertEquals("INVALID_REQUEST",bad.getJSONObject("message").getString("code"))
             assertEquals("Malformed body must not write any part of the run",sha(originalRun),sha(rows("runs",runId).single().toString()))
@@ -160,18 +162,18 @@ class PhysicalLargeContextTest {
             if(bridge.javaClass.getMethod("getArrayBufferSupported").invoke(bridge)==true)transports.add("binary")
             evidence.put("binarySupported",transports.contains("binary"))
             for(transport in transports) {
-                val ack=rpc(web,connection,"persist",body,transport);evidence.getJSONArray("acks").put(ack);successful(ack)
+                val ack=rpc(executionWeb,connection,"persist",body,transport);evidence.getJSONArray("acks").put(ack);successful(ack)
                 val stored=rows("runs",runId).single().getJSONObject("turn")
                 assertEquals("Persisted large turn differs byte-for-byte",sha(turn.toString()),sha(stored.toString()))
                 assertEquals(userText,stored.getJSONArray("messages").getJSONObject(0).getJSONArray("content").getJSONObject(0).getString("text"))
                 assertEquals(toolText,stored.getJSONArray("messages").getJSONObject(2).getJSONArray("content").getJSONObject(0).getString("text"))
                 save()
             }
-            successful(rpc(web,connection,"end",firstLease));active.remove(runId)
+            successful(rpc(executionWeb,connection,"end",firstLease));active.remove(runId)
             assertEquals("Component execution must never claim model completion","failed",rows("runs",runId).single().getString("status"))
             // Use the real bridge in both directions: the large recovered history must
             // reach JavaScript in host.result, rather than being read through Java directly.
-            val secondAck=rpc(web,connection,"begin",obj("sessionId" to sid,"text" to "继续之前的上下文；仍然只验证组件，不启动云端请求。"))
+            val secondAck=rpc(executionWeb,connection,"begin",obj("sessionId" to sid,"text" to "继续之前的上下文；仍然只验证组件，不启动云端请求。"))
             successful(secondAck)
             val second=secondAck.getJSONObject("message").getJSONObject("value")
             // beginAck contains lease/network credentials; only history metrics may be evidence.
@@ -185,7 +187,7 @@ class PhysicalLargeContextTest {
             assertEquals(userText,restored.getJSONArray("messages").getJSONObject(0).getJSONArray("content").getJSONObject(0).getString("text"))
             assertEquals(toolText,restored.getJSONArray("messages").getJSONObject(2).getJSONArray("content").getJSONObject(0).getString("text"))
             evidence.put("secondRunId",secondId).put("historyRestored",true).put("restoredTurnSha256",sha(restored.toString()))
-            successful(rpc(web,connection,"end",secondLease));active.remove(secondId)
+            successful(rpc(executionWeb,connection,"end",secondLease));active.remove(secondId)
             for(rid in listOf(runId,secondId)) {
                 assertEquals("failed",rows("runs",rid).single().getString("status"))
                 assertTrue("Manual turn must not manufacture real execution events",rows("events",rid).isEmpty())
@@ -196,9 +198,9 @@ class PhysicalLargeContextTest {
         finally {
             for((rid,lease) in active.toMap())runCatching {
                 val connection=ProductHost::class.java.getDeclaredField("connection").apply {isAccessible=true}.get(host) as String
-                successful(rpc(web,connection,"end",lease));active.remove(rid)
+                successful(rpc(executionWeb,connection,"end",lease));active.remove(rid)
             }.onFailure {evidence.getJSONArray("cleanupErrors").put("$rid: ${it.message}")}
-            if(installedObserver)runCatching {js(web,"ThorNative.onmessage=window.__largePrevious;delete window.__largePrevious;delete window.__largeAck;delete window.__largeSent;true")}
+            if(installedObserver)runCatching {js(executionWeb,"ThorNative.onmessage=window.__largePrevious;delete window.__largePrevious;delete window.__largeAck;delete window.__largeSent;true")}
             runCatching {ui(web,obj("op" to "select","sessionId" to restoreSession));until {host.selectedSession()==restoreSession};evidence.put("selectionRestored",true)}
                 .onFailure {evidence.getJSONArray("cleanupErrors").put("restore selection: ${it.message}")}
             val after=historyIds();val preserved=before.all {(table,ids)->after.getValue(table).containsAll(ids)}

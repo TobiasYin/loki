@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_TEST_SNAPSHOT_NOT_DEVICE_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T18:09:20.020483+00:00",
+  "scope": "Explicit stop boundaries and bounded safe diagnostics. Actual Pi/provider SDK under controlled streams and synthetic Runtime ports; integration TypeScript. No Android/Gradle/cloud/device execution in this evidence collection.",
+  "runtime": {
+    "exitCode": 0,
+    "tests": 115,
+    "pass": 115,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "newStopBoundaryTests": 6
+  },
+  "integrationTsc": {
+    "exitCode": 0,
+    "passed": true,
+    "successfulOutputEmpty": true
+  },
+  "sourceHashOrigin": "Final successful 115-test and integration-tsc snapshot after stop-boundary writer freeze. Native host/physical-observer frozen by root and included for interface provenance only. Current match fields describe collection time, not future revisions.",
+  "sourceSnapshot": [
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 37077,
+      "sha256": "f7eb5d545ffec32a9c9a6b8e9d300ef7ac2ad076a130269c2d277569fea359f7",
+      "verificationScope": "Full 115-test Runtime source snapshot; integration tsc.",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "bytes": 3736,
+      "sha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f",
+      "verificationScope": "Full Runtime suite including 6 new stop-boundary tests; integration tsc.",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "runtime/test/stop-boundary.test.ts",
+      "bytes": 7337,
+      "sha256": "e05a074325155e788f802893331f2537b2385880dcab289a2080d5748bc1def5",
+      "verificationScope": "Six new actual-Pi/SDK controlled-source cancellation regressions.",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "bytes": 18499,
+      "sha256": "20a3890763f622024049a4c13a44326e5ece19293eebbd85c42bd11bcd27dda4",
+      "verificationScope": "Integration tsc only; DEBUG hooks not device-accepted in this snapshot.",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "runtime/package-lock.json",
+      "bytes": 59910,
+      "sha256": "cdcf7229207209aec2311d1a64e29383386950550da65888b43c56b95a858a24",
+      "verificationScope": "Dependency lock for actual Pi/provider versions used by Node tests.",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "bytes": 84764,
+      "sha256": "dcc47f0823178d39f315196b2e931e1ad1a3874690c2199c8d22557e73ced64a",
+      "verificationScope": "Frozen companion Native diagnostic interface; source hash only here, no Android acceptance claim.",
+      "matchesCurrentAtCollection": true
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/PhysicalLongGameFlowTest.kt",
+      "bytes": 12946,
+      "sha256": "162244b02475b1df67c0854564579847152aecbec16d76c0c76e770273d265ba",
+      "verificationScope": "Frozen diagnostic observer companion; source hash only here, not executed for this snapshot.",
+      "matchesCurrentAtCollection": true
+    }
+  ],
+  "documentation": {
+    "path": "docs/stop-boundary-diagnostics.md",
+    "bytes": 3568,
+    "sha256": "a882d93412cbb181a6aff7b24805a6e9ff404fa904b4fbcb0fb95b239ab51e3a"
+  },
+  "logs": [
+    {
+      "sourcePath": "build/stop-boundary-runtime-tests.log",
+      "publishedPath": "runtime-node.log",
+      "bytes": 12678,
+      "sha256": "889deebd14ffe2d05dbc9d0e8ceffc8f122baf15b97ea490ca85ac8e4207f4ec",
+      "exitCode": 0,
+      "note": "Raw software command/test-name/result log; no model transcript."
+    },
+    {
+      "sourcePath": "build/stop-boundary-integration-tsc.log",
+      "publishedPath": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0,
+      "note": "Successful tsc emits no output."
+    }
+  ],
+  "cancellationContract": {
+    "noModelWallTimeAdded": true,
+    "actualPiPromptAwaited": true,
+    "partialAssistantAndToolContextPreserved": true,
+    "samePiAgentFollowupTested": true,
+    "lateProviderEventsCannotWriteAfterTerminalTested": true,
+    "automaticToolReplay": false,
+    "durableWritesNotBypassed": true,
+    "requestBodySerializationAbortAware": true
+  },
+  "diagnostics": {
+    "debugGlobalsOnly": true,
+    "jsGlobal": "__thorRuntimeDiagnostics",
+    "nativeGlobal": "__thorRuntimeNativeDiagnostics",
+    "nativeOp": "runtime.diagnostics.native",
+    "nativeRpcWaitMs": 5000,
+    "nativeRequiresDebugCurrentConnectionEmptyData": true,
+    "fixedWaitPhases": [
+      "agent_prompt",
+      "provider_next",
+      "provider_result",
+      "request_body",
+      "authority",
+      "persist",
+      "network_headers",
+      "network_read"
+    ],
+    "bounds": {
+      "jsExecutions": 8,
+      "jsPendingRpcDetails": 64,
+      "jsWaitDetailsPerExecution": 32,
+      "nativeRuns": 8,
+      "nativeTransportReceiptsPerRun": 64
+    },
+    "opaqueRunSessionIdentifiersIncluded": true,
+    "modelTextToolArgumentsUrlsHeadersCredentialsApprovalLeaseTokensIncluded": false,
+    "observerCadenceMs": 10000,
+    "observerWaitsForNativePromise": false,
+    "observerNativeValueMayBePreviousCompletedSample": true,
+    "androidHookAcceptanceInThisSnapshot": false
+  },
+  "causalConclusion": {
+    "game11ExactHangReproduced": false,
+    "game11RootCauseEstablished": false,
+    "ordinaryStalledSseBaselineAlreadyStopped": true,
+    "conclusion": "Proven cancellation-boundary gaps are covered; this does not establish the cause of the earlier physical stop hang. Fresh runtime/native phase diagnostics are required for the next device observation."
+  },
+  "androidApkTested": false,
+  "devicesOperated": false,
+  "gradleExecuted": false,
+  "sharedManifestUpdated": false
+}

@@ -193,7 +193,9 @@ class PhysicalScenarioFlowTest {
         val activity=instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
             ActivityOptions.makeBasic().setLaunchDisplayId(lower).toBundle()) as MainActivity
         instrumentation.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
-        val web=activity.findViewById<WebView>(android.R.id.custom)
+        val ready=EmulatorRuntimeTestSupport.awaitReady(activity)
+        val web=ready.web
+        val executionWeb=ready.executionWeb
         val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
         val snapshots=ProductHost::class.java.getDeclaredField("snapshots").apply {isAccessible=true}.get(host) as Snapshots
         val evidence=obj("schemaVersion" to 1,"evidenceMode" to "agent_e2e","model" to "deepseek-v4.1-flash","service" to "live OpenCode Go Responses",
@@ -201,7 +203,7 @@ class PhysicalScenarioFlowTest {
         val failures=mutableListOf<String>()
         val selectedBefore=args.getString("restoreSession") ?: host.selectedSession()
         try {
-            until {js(web,"window.productReady === true && typeof window.runPreparedNative === 'function' && !document.getElementById('new').disabled")=="true"}
+            until {js(web,"window.productReady === true && !document.getElementById('new').disabled")=="true"}
             assertFalse("Do not interrupt an existing user task",host.hasActiveRuns())
             until(40) {ThorAccessibilityService.instance!=null && host.accessibilitySetupStatus().contains("已通过 Shizuku")}
             assertEquals("Normal startup must resolve upper display roles",upper,snapshots.selected().id)
@@ -243,10 +245,10 @@ class PhysicalScenarioFlowTest {
                     for(key in listOf("newsCode","articleTopCode","articleBottomCode","gameResult"))initial.getJSONObject("expected").optString(key).takeIf {it.isNotEmpty()}?.let {hidden->assertFalse("Prompt must not contain hidden answer $key",task.contains(hidden))}
                     Thread.sleep(700)
                     val marker="scenario-${id()}"
-                    js(web,"window.__scenarioRuns=window.__scenarioRuns||{};window.__scenarioRuns[${JSONObject.quote(marker)}]={done:false};Promise.resolve(window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}))).then(()=>{window.__scenarioRuns[${JSONObject.quote(marker)}].done=true},error=>{window.__scenarioRuns[${JSONObject.quote(marker)}]={done:true,error:String(error)}});true")
+                    js(executionWeb,"window.__scenarioRuns=window.__scenarioRuns||{};window.__scenarioRuns[${JSONObject.quote(marker)}]={done:false};Promise.resolve(window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}))).then(()=>{window.__scenarioRuns[${JSONObject.quote(marker)}].done=true},error=>{window.__scenarioRuns[${JSONObject.quote(marker)}]={done:true,error:String(error)}});true")
                     val started=SystemClock.elapsedRealtime();var heartbeat=0L
                     // No generation deadline: observer reporting does not end or restart the model task.
-                    while(js(web,"window.__scenarioRuns[${JSONObject.quote(marker)}].done === true")!="true") {
+                    while(js(executionWeb,"window.__scenarioRuns[${JSONObject.quote(marker)}].done === true")!="true") {
                         Thread.sleep(500)
                         if(SystemClock.elapsedRealtime()-heartbeat>=5000) {
                             heartbeat=SystemClock.elapsedRealtime()
@@ -272,7 +274,7 @@ class PhysicalScenarioFlowTest {
                     failures.add("$scene: ${t.message}");record.put("failure","${t.javaClass.simpleName}: ${t.message.orEmpty().take(2500)}")
                 } finally {
                     if(!sealed)receiverArgs?.let {params->runCatching {val final=receiver("release",params).getJSONObject("snapshot");collect(final,scene,record,automation)}.onFailure {record.put("receiverCollectionError",it.javaClass.simpleName+": "+it.message)}}
-                    if(runId!=null)runCatching {if(readDbRows("runs",runId).single().optString("status") !in setOf("completed","failed","cancelled","interrupted"))ui(web,obj("op" to "stop","runId" to runId,"sessionId" to sessionId))}
+                    if(runId!=null)runCatching {if(readDbRows("runs",runId).single().optString("status") !in setOf("completed","failed","cancelled","interrupted"))ui(web,obj("op" to "stop","runId" to runId))}
                     if(sessionId!=null)runCatching {ui(web,obj("op" to "capability","sessionId" to sessionId,"capability" to "screen_control","enabled" to false))}
                     File(context.filesDir,"physical-scenario-flow.json").writeText(evidence.toString(2))
                     File(context.filesDir,"physical-scenario-$scene-native.json").writeText(record.toString(2))

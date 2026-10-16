@@ -1,0 +1,49 @@
+{
+  "app": {
+    "suites": 18,
+    "tests": 81,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "device-core": {
+    "suites": 26,
+    "tests": 174,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "core": {
+    "suites": 3,
+    "tests": 39,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "authority": {
+    "suites": 1,
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input-lab": {
+    "suites": 8,
+    "tests": 74,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "app/build/outputs/apk/debug/app-debug.apk": {
+    "bytes": 7058081,
+    "sha256": "429ffa7de34897990f10a0b448454a4482af17cef1c8ab22b298cf7da3ce2b13"
+  },
+  "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+    "bytes": 3308850,
+    "sha256": "0d6604db98d0450a5733d95c9b467574a7ca7bc4058d6c00ff49b39bdb7d207e"
+  },
+  "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk": {
+    "bytes": 2935255,
+    "sha256": "ab0de9aded3cdd11a0b9b87cda3526b0ddc03c568067a9bbcfbbfb30d292b25f"
+  }
+}

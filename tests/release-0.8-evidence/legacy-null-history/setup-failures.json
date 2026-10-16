@@ -1,0 +1,17 @@
+{
+  "scope": "Setup-only failures recorded from actual command tool outputs; not counted as regression reproduction",
+  "events": [
+    {
+      "kind": "wrong-shell-working-directory",
+      "output": "zsh:1: no such file or directory: runtime/test/legacy-null-history.test.ts"
+    },
+    {
+      "kind": "TypeScript assertion narrowing in new test",
+      "output": "test/legacy-null-history.test.ts(26,55): error TS2339: Property 'state' does not exist on type 'never'."
+    },
+    {
+      "kind": "missing-dist-after-setup-failure",
+      "output": "Could not find 'dist/test/legacy-null-history.test.js'"
+    }
+  ]
+}

@@ -2,7 +2,9 @@ package dev.thor.tools
 
 /** Observed Android window evidence, excluding titles/text/style from system window identity. */
 data class TargetWindowEvidence(val id:Int,val type:Int,val layer:Int,val focused:Boolean,val active:Boolean,
-    val bounds:TouchableBounds,val region:List<TouchableBounds>,val rectangular:Boolean,val packageName:String?,val rootBounds:TouchableBounds?) {
+    val bounds:TouchableBounds,val region:List<TouchableBounds>,val rectangular:Boolean,val packageName:String?,val rootBounds:TouchableBounds?,
+    val presentation:PresentationWindowProof?=null) {
+    fun isApplicationOn(display:Int)=type==APPLICATION || presentation?.matches(this,display)==true
     companion object {const val APPLICATION=1;const val SYSTEM=3}
 }
 enum class TargetEventKind {
@@ -31,7 +33,7 @@ class TargetWindowRevisions {
         val display=displays[windowId] ?: return
         val window=current[display]?.singleOrNull {it.id==windowId}
         if(kind==TargetEventKind.CONTENT && window?.type==TargetWindowEvidence.SYSTEM && window.packageName=="com.android.systemui" && eventPackage=="com.android.systemui")return
-        if(kind!=TargetEventKind.STRUCTURE && window?.type==TargetWindowEvidence.APPLICATION)content[windowId]=(content[windowId] ?: 0)+1
+        if(kind!=TargetEventKind.STRUCTURE && window?.isApplicationOn(display)==true)content[windowId]=(content[windowId] ?: 0)+1
         else structure[display]=(structure[display] ?: 0)+1
     }
     @Synchronized fun content(window:Int)=content[window] ?: 0L
@@ -53,7 +55,7 @@ object UpperTargetResolver {
     }
     fun resolve(display:DisplayFact,windows:List<TargetWindowEvidence>,revisions:TargetWindowRevisions):Target {
         revisions.observe(display.id,windows)
-        val applications=windows.filter {it.type==TargetWindowEvidence.APPLICATION}
+        val applications=windows.filter {it.isApplicationOn(display.id)}
         val packages=applications.mapNotNull {it.packageName}.distinct()
         val validity=when {packages.size>1->"ambiguous";packages.isEmpty()->"unknown";else->"valid"}
         val selected=applications.singleOrNull() ?: applications.filter {it.focused}.singleOrNull()
@@ -72,7 +74,7 @@ object UpperTargetResolver {
         val clip=safePieces.singleOrNull() ?: empty
         val layout=windows.joinToString(";") {window->
             val geometry=if(canonical!=null && window.id==selected?.id)"canonical:$canonical" else "bounds:${window.bounds}:region:${window.rectangular}:${window.region}"
-            val app=if(window.type==TargetWindowEvidence.APPLICATION)":package:${window.packageName}:root:${window.rootBounds}" else ""
+            val app=if(window.isApplicationOn(display.id))":package:${window.packageName}:root:${window.rootBounds}:presentation:${window.presentation?.identity()}" else ""
             "${window.id}:${window.type}:${window.layer}:${window.focused}:${window.active}:$geometry$app"
         }+":structure:${revisions.structure(display.id)}"
         val content=applications.joinToString(";") {"${it.id}:${revisions.content(it.id)}"}

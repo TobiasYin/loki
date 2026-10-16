@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "status": "THREE_STORAGE_PASSES_ONE_PRESENTATION_FAILURE",
+  "collectedUtc": "2026-10-16T19:58:35.442054+00:00",
+  "scope": "Fixed dbed/1bea isolated API36 emulator5042; startup-recovery storage tests and one Presentation attempt. Not final release acceptance.",
+  "allRequestedAcceptancePassed": false,
+  "executedCases": 4,
+  "passed": 3,
+  "failed": 1,
+  "skipped": 0,
+  "presentationRetried": false,
+  "artifacts": {
+    "app-debug-androidTest.apk": {
+      "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+      "bytes": 3398214
+    },
+    "app-debug.apk": {
+      "sha256": "dbedacdcc6f3f9e86803399b7e61e6b45d851ff9b2cc0650198eb664bc8e36fe",
+      "bytes": 7486061
+    },
+    "input-lab-debug.apk": {
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291
+    }
+  },
+  "installedHashesBeforeTests": {
+    "dev.thor.agent": "dbedacdcc6f3f9e86803399b7e61e6b45d851ff9b2cc0650198eb664bc8e36fe",
+    "dev.thor.agent.test": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+    "dev.thor.inputlab": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "installedHashesAfterTests": {
+    "dev.thor.agent": "dbedacdcc6f3f9e86803399b7e61e6b45d851ff9b2cc0650198eb664bc8e36fe",
+    "dev.thor.agent.test": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+    "dev.thor.inputlab": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "instrumentation": [
+    {
+      "name": "startup-storage.log",
+      "sha256": "05f65d04ed54b77958d27d36568183c2d216849f73f140fdcbba7831b51c4b3e",
+      "bytes": 2242,
+      "seconds": 1.173,
+      "passedTestStatusCount": 3,
+      "failedTestStatusCount": 0,
+      "skipped": 0
+    },
+    {
+      "name": "presentation-explicit.log",
+      "sha256": "a40077047abb76956d2073f6197f40b11a94bf8ba937cbe38c426454c94cca1f",
+      "bytes": 2581,
+      "seconds": 30.034,
+      "passedTestStatusCount": 0,
+      "failedTestStatusCount": 1,
+      "skipped": 0
+    }
+  ],
+  "startupStorage": {
+    "passed": 3,
+    "seconds": 1.173,
+    "disposableRandomDatabaseOnly": true,
+    "productDbOrSettingsAccessByStorageTests": false,
+    "contracts": [
+      "Only explicit nonterminal recovered runs and session metadata are saved; child history and terminal rows cannot be written.",
+      "A metadata-trigger failure rolls back session title/creation/selection and recovered run atomically.",
+      "Unknown and terminal recovery IDs are rejected without partial writes."
+    ]
+  },
+  "presentation": {
+    "passed": false,
+    "seconds": 30.034,
+    "explicitEmulatorAcceptance": true,
+    "failureCode": "PERMISSION_MISSING",
+    "failedStage": "second UI tree after real screenshot/tree/semantic activation",
+    "independentSemanticCount": 1,
+    "proofExpiryAgeMs": 5138,
+    "sameKey": true,
+    "structureEventsBetweenLastStoreAndExpiry": 0,
+    "newSuccessfulStoreRecorded": false,
+    "readerInvocationOrFailureCauseEstablished": false
+  },
+  "notExecutedOnThisPair": [
+    "EmulatorBackgroundRuntimeTest2",
+    "EmulatorModernChatUiTest1",
+    "EmulatorDeepSeekSettingsTest2",
+    "EmulatorLongBackgroundRuntimeTest380s"
+  ],
+  "preservation": {
+    "passed": true,
+    "originalIdsAllRetained": true,
+    "oldRunMessageEventAttachmentPayloadsByteIdentical": true,
+    "oldSessionContentUnchangedExceptUpdatedAt": true,
+    "oneSessionUpdatedAtChangedByNormalSelectionRestore": true,
+    "selectedSessionRestored": true,
+    "rawProfilesVaultRolesXmlRestored": true,
+    "accessibilityAndNotificationFullFlagsRestoredToOriginalGlobalBaseline": true,
+    "runtimeServiceExited": true,
+    "activeRuns": 0,
+    "runCountAfter": 92
+  },
+  "boundaries": {
+    "cloudRequests": 0,
+    "thorOperations": false,
+    "gameCompletionClaim": false,
+    "allPassClaim": false,
+    "priorPairPassesTransferred": false,
+    "productionOrTestSourceOrBuildModifiedByCollector": false,
+    "noBlindRetry": true
+  },
+  "limitations": [
+    "Earlier ed916 six passes remain attached to that earlier App/Test pair, not dbed/1bea.",
+    "Following the Presentation failure, the additional5+380 tests were not run per coordinator instruction.",
+    "A manual Native Presentation component does not prove model autonomy or physical gamepad delivery.",
+    "Only numeric/hash/enumerated failure facts are published; no DB/archive/raw dumps/cloud response/credential/APK/ROM/game save."
+  ]
+}

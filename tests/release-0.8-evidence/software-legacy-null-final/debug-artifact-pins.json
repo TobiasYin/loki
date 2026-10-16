@@ -1,0 +1,14 @@
+{
+  "app-debug.apk": {
+    "sha256": "396c98cd7a1e0ed2f3bbb38cab5917370e31e783b639c5c1ce3c19c456431ae0",
+    "bytes": 7091361
+  },
+  "app-debug-androidTest.apk": {
+    "sha256": "570ad02b0d5d2138d82d3d5cd6383333bfa99d60ca37b0d8ee199f3ba008d116",
+    "bytes": 3383322
+  },
+  "input-lab-debug.apk": {
+    "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+    "bytes": 2935291
+  }
+}

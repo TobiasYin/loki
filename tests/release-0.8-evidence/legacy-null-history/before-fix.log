@@ -1,0 +1,130 @@
+✖ openai-responses: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (9.409875ms)
+ℹ {"protocol":"openai-responses","missing":false,"state":"failed","error":"IO_ERROR","httpRequests":0,"nativeExecutions":0,"diagnostics":[{"code":"MODEL_STREAM_FAILED","stopReason":"error"}],"sdkErrors":["Cannot read properties of null (reading 'length')"]}
+✖ openai-responses: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (7.654792ms)
+ℹ {"protocol":"openai-responses","missing":true,"state":"failed","error":"IO_ERROR","httpRequests":0,"nativeExecutions":0,"diagnostics":[{"code":"MODEL_STREAM_FAILED","stopReason":"error"}],"sdkErrors":["Cannot read properties of undefined (reading 'length')"]}
+✖ openai-completions: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (3.11125ms)
+ℹ {"protocol":"openai-completions","missing":false,"state":"failed","error":"IO_ERROR","httpRequests":0,"nativeExecutions":0,"diagnostics":[{"code":"MODEL_STREAM_FAILED","stopReason":"error"}],"sdkErrors":["Cannot read properties of null (reading 'length')"]}
+✖ openai-completions: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (2.803916ms)
+ℹ {"protocol":"openai-completions","missing":true,"state":"failed","error":"IO_ERROR","httpRequests":0,"nativeExecutions":0,"diagnostics":[{"code":"MODEL_STREAM_FAILED","stopReason":"error"}],"sdkErrors":["Cannot read properties of undefined (reading 'length')"]}
+✖ anthropic-messages: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (1.836542ms)
+ℹ {"protocol":"anthropic-messages","missing":false,"state":"failed","error":"IO_ERROR","httpRequests":0,"nativeExecutions":0,"diagnostics":[{"code":"MODEL_STREAM_FAILED","stopReason":"error"}],"sdkErrors":["Cannot read properties of null (reading 'length')"]}
+✖ anthropic-messages: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (1.371625ms)
+ℹ {"protocol":"anthropic-messages","missing":true,"state":"failed","error":"IO_ERROR","httpRequests":0,"nativeExecutions":0,"diagnostics":[{"code":"MODEL_STREAM_FAILED","stopReason":"error"}],"sdkErrors":["Cannot read properties of undefined (reading 'length')"]}
+ℹ tests 6
+ℹ suites 0
+ℹ pass 0
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 303.788084
+
+✖ failing tests:
+
+test at dist/test/legacy-null-history.test.js:18:9
+✖ openai-responses: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (9.409875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'failed'
+  - 'completed'
+  
+      at TestContext.<anonymous> (./runtime/dist/test/legacy-null-history.test.js:28:20)
+      at async Test.run (node:internal/test_runner/test:981:9)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:297:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'failed',
+    expected: 'completed',
+    operator: 'strictEqual'
+  }
+
+test at dist/test/legacy-null-history.test.js:18:9
+✖ openai-responses: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (7.654792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'failed'
+  - 'completed'
+  
+      at TestContext.<anonymous> (./runtime/dist/test/legacy-null-history.test.js:28:20)
+      at async Test.run (node:internal/test_runner/test:981:9)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:678:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'failed',
+    expected: 'completed',
+    operator: 'strictEqual'
+  }
+
+test at dist/test/legacy-null-history.test.js:18:9
+✖ openai-completions: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (3.11125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'failed'
+  - 'completed'
+  
+      at TestContext.<anonymous> (./runtime/dist/test/legacy-null-history.test.js:28:20)
+      at async Test.run (node:internal/test_runner/test:981:9)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:678:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'failed',
+    expected: 'completed',
+    operator: 'strictEqual'
+  }
+
+test at dist/test/legacy-null-history.test.js:18:9
+✖ openai-completions: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (2.803916ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'failed'
+  - 'completed'
+  
+      at TestContext.<anonymous> (./runtime/dist/test/legacy-null-history.test.js:28:20)
+      at async Test.run (node:internal/test_runner/test:981:9)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:678:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'failed',
+    expected: 'completed',
+    operator: 'strictEqual'
+  }
+
+test at dist/test/legacy-null-history.test.js:18:9
+✖ anthropic-messages: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (1.836542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'failed'
+  - 'completed'
+  
+      at TestContext.<anonymous> (./runtime/dist/test/legacy-null-history.test.js:28:20)
+      at async Test.run (node:internal/test_runner/test:981:9)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:678:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'failed',
+    expected: 'completed',
+    operator: 'strictEqual'
+  }
+
+test at dist/test/legacy-null-history.test.js:18:9
+✖ anthropic-messages: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (1.371625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'failed'
+  - 'completed'
+  
+      at TestContext.<anonymous> (./runtime/dist/test/legacy-null-history.test.js:28:20)
+      at async Test.run (node:internal/test_runner/test:981:9)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:678:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'failed',
+    expected: 'completed',
+    operator: 'strictEqual'
+  }

@@ -1,0 +1,93 @@
+{
+  "evidenceMode": "manual_platform_api",
+  "scope": "emulator real Native component with independent WM2037 Presentation; no model execution",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "passed": true,
+  "realAccessibilityWindowType": -1,
+  "realWindowManagerType": 2037,
+  "beforeSecureImage": {
+    "bytes": 16823,
+    "sha256": "cc62c0090512a8ec968800298bc365224d296711b34b5d99c3188a4b39d92512",
+    "displayId": 14
+  },
+  "afterSecureImage": {
+    "bytes": 16632,
+    "sha256": "1968cd254e9712d0c451400ad09c1288f242de91a7e3402e67cb551535c6f60b",
+    "displayId": 14
+  },
+  "semanticReceived": true,
+  "coordinateDownUpReceived": true,
+  "coordinateTargetReobservations": 0,
+  "oldCrossScreenSnapshotRejected": true,
+  "oldCrossScreenNodeRejected": true,
+  "oldCrossScreenFrameRejected": true,
+  "actualWindowManagerSecureFlagConfirmed": true,
+  "secureUnobservableStableMs": 655,
+  "secureUnobservableChecks": 4,
+  "secureRefusalCode": "TARGET_CHANGED",
+  "securePixelsWithheld": true,
+  "secureGuardLayer": "presentation-classification-or-observation-admission",
+  "screenshotSecureCallbackProven": false,
+  "secureABACaptureRestored": true,
+  "motionEventDisplayIdVerified": false,
+  "receiverWindowDisplayIdVerified": true,
+  "receiverRawSha256": "2ed13c1a04040274e12bad7971cec9a9f1dd562aa3726326cb23e2010e5bb0d9",
+  "profilesRestored": true,
+  "credentialsRestored": true,
+  "rolesRestored": true,
+  "overlayDisplaySettingUnchanged": true,
+  "originalHistoryPreserved": true,
+  "accessibilityRestored": true,
+  "immersiveLessonSettingRestored": true,
+  "selectedSessionRestored": true,
+  "temporaryDisplayReleased": true,
+  "idleHostsClosedBeforeAccessibilityRestore": true,
+  "cleanupErrors": [],
+  "schemaVersion": 1,
+  "testCount": 1,
+  "failures": 0,
+  "skips": 0,
+  "durationSeconds": 59.352,
+  "artifactsSha256": {
+    "app-debug.apk": "429ffa7de34897990f10a0b448454a4482af17cef1c8ab22b298cf7da3ce2b13",
+    "app-debug-androidTest.apk": "82461feef8ceda1be9cce8fb298a4a7809bf0c184bc0b23078b5339de3bf763b",
+    "input-lab-debug.apk": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "attempt": "run-07",
+  "sourceProvenance": "Exact installed APKs only; later workspace Runtime changes are not attributed to this app.",
+  "historicalFailures": [
+    {
+      "attempt": "run-01",
+      "reason": "Shizuku server authorization precondition; no tool execution"
+    },
+    {
+      "attempt": "run-02",
+      "reason": "secure refusal category assertion narrower than actual admission guard"
+    },
+    {
+      "attempt": "run-03",
+      "reason": "coordinate observation changed before submission; receiver touch count remained zero"
+    },
+    {
+      "attempt": "run-04",
+      "reason": "overly strict full-content stabilization in test setup"
+    },
+    {
+      "attempt": "run-05",
+      "reason": "return to lower screen rejected PERMISSION_MISSING after earlier successful real operations"
+    },
+    {
+      "attempt": "run-06",
+      "reason": "lower re-observation did not stabilize after selection refusal; earlier real operations succeeded"
+    }
+  ],
+  "limitations": [
+    "Manual Native component; no cloud model, Citra or game acceptance.",
+    "Secure A/B/A validates admission/classification denial and withheld pixels, not a screenshot API secure callback.",
+    "Public MotionEvent does not expose displayId; raw event field remains null, while receiving window display is verified.",
+    "Failed attempts remain in ignored local build evidence; one passing attempt does not establish all timing interleavings."
+  ],
+  "installedHashesVerified": true
+}

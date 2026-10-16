@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed Native-null final software supplement only; final software identity is not Android/release acceptance. Earlier checks explicitly cached. Manifest excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4261,
+      "sha256": "895bd94e62943f87fe9ad7b9380f0a047f34ee834c38020f33fc2b3099fe2e4f"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "0809ec98dc27a3905b67d17d1a2afc3da304ef60b1a5a0bdbcf26bd09b6c50ef"
+    },
+    {
+      "path": "debug-artifact-pins.json",
+      "bytes": 407,
+      "sha256": "1d734fb66258cf8a130c3cb7fce3b90c05aa94e14ac0a673bb44ee667db32dfa"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 33414,
+      "sha256": "062b3817a256a1b4b5f4be80faa885ceaf24b75f23ff968d1719c67ffa48de38"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 24180,
+      "sha256": "dc40aece2bb69df557d4e1a4be093c6aa5af078382271de06e050169c9790148"
+    },
+    {
+      "path": "prior-bridge-node.log",
+      "bytes": 1256,
+      "sha256": "11a5199aebcf7c0c4ef2f5af153a7b2c84dee3ec9e5084282c6e72753614c335"
+    },
+    {
+      "path": "prior-chat-node.log",
+      "bytes": 7571,
+      "sha256": "f35f497ae5dc49d73708031148719f2caf0f5dc2822cbc35ae8eba7e01e42baf"
+    },
+    {
+      "path": "prior-integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "prior-relay-node.log",
+      "bytes": 463,
+      "sha256": "6dd6d0f4ff8490222596355e7f60df523478f361121b9f6d13b08ac120d8735d"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 23529,
+      "sha256": "6cd15138c9baad8eea3b9ee2e3d8453be113fde22902e2a118118a547340d6d9"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 11138,
+      "sha256": "2f4477b25933306a2acc3c5a87d2047a2f50e750cc00c61d07f0a6bfc269a1d2"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 15860,
+      "sha256": "afec1bd77502ce15496257a2bb092e1838199419255ec2c8cc9554b9f6cdf0f1"
+    }
+  ]
+}

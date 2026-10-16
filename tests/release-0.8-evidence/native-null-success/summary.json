@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "scope": "Software regression only: Native-shaped successful error:null outcomes; no new APK/device acceptance",
+  "passed": true,
+  "typescriptCompilePassed": true,
+  "runtimeBuildPassed": true,
+  "newTestCases": 31,
+  "newTestsExecutedAsPartOfFullSuite": true,
+  "fullRuntime": {
+    "tests": 213,
+    "pass": 213,
+    "fail": 0,
+    "skip": 0
+  },
+  "protocols": [
+    "openai-responses",
+    "openai-completions",
+    "anthropic-messages"
+  ],
+  "execution": "Actual Pi agents with controlled in-memory SSE and synthetic Native-shaped ToolOutcome JSON; no cloud requests",
+  "successSemantics": "error:null and absent error both normalize to undefined; unknown non-null values fail PROTOCOL_ERROR without body admission",
+  "coverage": [
+    "select_screen error:null preserves successful Native fresh identity",
+    "Selection still requires new current-screen observation before input",
+    "capture error:null transports its attachment to the next real provider request",
+    "Successful current-screen capture clears the observation gate",
+    "Successful nullable input is not marked isError",
+    "Source replacement still discards successful nullable read text and pixels",
+    "Unknown falsy/non-string error values fail closed",
+    "Unknown input error retains already-submitted Native receipt and withholds body",
+    "Stop outranks nullable success",
+    "Existing Native PERMISSION_MISSING/SECURE_CONTENT/DISPLAY_GONE and typed-target regressions remain passing",
+    "RuntimeError constructor normalizes unknown/null bridge codes to fixed PROTOCOL_ERROR"
+  ],
+  "sources": {
+    "runtime/src/contracts.ts": "84c2734717b793e5e029e1d7e30ee34fe8fd141e635677b14817e496a2949606",
+    "runtime/src/runtime.ts": "20472c6a250b8068ce71683cc3a2ffb7da4f18b6ca3deb6e3f0c2bcee72dd427",
+    "runtime/test/native-null-success.test.ts": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45"
+  },
+  "logSha256": "6cd15138c9baad8eea3b9ee2e3d8453be113fde22902e2a118118a547340d6d9",
+  "limitations": [
+    "Node/source acceptance only; Root owns new unified APK and device validation",
+    "Earlier App429 and failed game13 are separate pinned results, not acceptance of this patch",
+    "Optional future nullable outcome/source/truncated contracts were not introduced"
+  ]
+}

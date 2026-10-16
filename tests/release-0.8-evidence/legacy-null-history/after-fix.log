@@ -1,0 +1,36 @@
+✔ openai-responses: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (26.947458ms)
+ℹ {"protocol":"openai-responses","missing":false,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+✔ openai-responses: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (8.496333ms)
+ℹ {"protocol":"openai-responses","missing":true,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+✔ openai-completions: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (8.60425ms)
+ℹ {"protocol":"openai-completions","missing":false,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+✔ openai-completions: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (4.517541ms)
+ℹ {"protocol":"openai-completions","missing":true,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+✔ anthropic-messages: cold saved history with null old tool text resumes through real Pi HTTP without rewriting or replay (8.405625ms)
+ℹ {"protocol":"anthropic-messages","missing":false,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+✔ anthropic-messages: cold saved history with missing old tool text resumes through real Pi HTTP without rewriting or replay (6.725167ms)
+ℹ {"protocol":"anthropic-messages","missing":true,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+✔ openai-responses: current user null/missing/non-string Content is rejected without an HTTP request (1.932834ms)
+✔ openai-responses: historical user text is never eligible for legacy tool repair (0.320083ms)
+✔ openai-responses: historical non-null malformed tool text is not silently repaired (1.057917ms)
+✔ openai-responses: revoked derived history does not reappear through the compatibility projection (4.418042ms)
+✔ openai-responses: malformed current tool text fails protocol and retains its submitted receipt rather than coercing text (55.360291ms)
+✔ openai-completions: current user null/missing/non-string Content is rejected without an HTTP request (1.010833ms)
+✔ openai-completions: historical user text is never eligible for legacy tool repair (0.235292ms)
+✔ openai-completions: historical non-null malformed tool text is not silently repaired (0.836125ms)
+✔ openai-completions: revoked derived history does not reappear through the compatibility projection (6.867542ms)
+✔ openai-completions: malformed current tool text fails protocol and retains its submitted receipt rather than coercing text (29.365292ms)
+✔ anthropic-messages: current user null/missing/non-string Content is rejected without an HTTP request (1.028209ms)
+✔ anthropic-messages: historical user text is never eligible for legacy tool repair (0.229708ms)
+✔ anthropic-messages: historical non-null malformed tool text is not silently repaired (0.949ms)
+✔ anthropic-messages: revoked derived history does not reappear through the compatibility projection (2.584ms)
+✔ anthropic-messages: malformed current tool text fails protocol and retains its submitted receipt rather than coercing text (30.386625ms)
+✔ historical projection preserves failure flags/pairs while ordinary project remains strict and content references are validated (0.455791ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 448.449167

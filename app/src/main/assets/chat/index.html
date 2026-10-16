@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"><meta name="color-scheme" content="light dark"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>Thor Agent</title><link rel="stylesheet" href="style.css"><script src="runtime-host.js" defer></script><script src="vendor/marked.umd.js" defer></script><script src="vendor/purify.min.js" defer></script><script src="ui.js" defer></script></head>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"><meta name="color-scheme" content="light dark"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>Thor Agent</title><link rel="stylesheet" href="style.css"><script src="send-errors.js" defer></script><script src="chat-host.js" defer></script><script src="vendor/marked.umd.js" defer></script><script src="vendor/purify.min.js" defer></script><script src="ui.js" defer></script></head>
 <body>
 <div class="shell">
 <header><button id="menu" aria-label="打开会话列表">☰</button><div class="heading"><h1 id="title">Thor Agent</h1></div><button id="new" aria-label="新建会话">＋</button><button id="settings" aria-label="设置">⚙</button></header>
@@ -7,7 +7,7 @@
 <main id="chat" aria-label="聊天记录" tabindex="0"><div class="empty">今天想做什么？</div></main>
 <footer>
 <form id="composer">
-<label class="sr" for="input">消息</label><textarea id="input" rows="2" maxlength="8000" placeholder="向 Thor 提问或安排任务"></textarea>
+<label class="sr" for="input">消息</label><textarea id="input" rows="2" maxlength="20000" placeholder="向 Thor 提问或安排任务"></textarea>
 <section id="voice-panel" hidden aria-label="语音输入"><button id="voice-hold" type="button" aria-describedby="voice-status">按住说话</button><div id="voice-status" role="status" aria-live="polite" hidden></div><div id="voice-transcript" hidden></div><button id="voice-edit" type="button" hidden>恢复文字草稿</button><button id="voice-cancel" class="sr" type="button" hidden>取消本次录音</button></section>
 <div id="preparation-status" class="activity-label shimmer" role="status" hidden></div><div class="controls"><button type="button" id="more" class="icon-button" aria-label="添加附件或选择 Skill" aria-expanded="false">＋</button><button type="button" id="capabilities" aria-expanded="false">◇ 能力 ⌄</button><div class="control-spacer"></div><button type="button" id="model-picker" aria-label="选择模型和思考强度" aria-expanded="false">选择模型 ⌄</button><button id="voice-toggle" class="icon-button" type="button" aria-label="切换到语音输入" aria-pressed="false"><span aria-hidden="true">♩</span></button><button id="send" type="submit" class="primary" aria-label="发送">发送</button></div>
 </form>

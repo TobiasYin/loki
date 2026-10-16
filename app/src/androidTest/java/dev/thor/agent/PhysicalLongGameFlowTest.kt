@@ -53,6 +53,7 @@ class PhysicalLongGameFlowTest {
         val profileBefore=profile.all.toMap();val credentialsBefore=credentials.all.toMap()
         val originalIds=rows("runs").map {it.getString("id")}.toSet()
         val testBudget=args.getString("gameOutputBudget")?.toInt()?.also {require(it in 2048..65536)}
+        val captureRuntimeDiagnostics=args.getString("gameDiagnostics")=="true"
         if(testBudget!=null) {
             savedOutputBudget=profile.contains("maxOutput") to profile.getInt("maxOutput",2048)
             check(profile.edit().putInt("maxOutput",testBudget).commit())
@@ -60,9 +61,10 @@ class PhysicalLongGameFlowTest {
         ins.getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
         val activity=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(4).toBundle()) as MainActivity
         ins.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
-        until {activity.findViewById<WebView>(android.R.id.custom)!=null}
-        val web=activity.findViewById<WebView>(android.R.id.custom)
-        val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
+        val ready=EmulatorRuntimeTestSupport.awaitReady(activity)
+        val web=ready.web
+        val executionWeb=ready.executionWeb
+        val host=ready.host
         val directory=File(context.filesDir,"long-game-flow").apply {mkdirs()}
         val record=obj("schemaVersion" to 1,"evidenceMode" to "agent_e2e_observation","harnessGameSteps" to JSONArray(),"modelTimeoutMs" to 0,"goalIndependentlyVerified" to false,"scope" to "normal send; real cloud/Native tools; completion requires independent game screen review","passed" to false)
         record.put("temporaryTestOutputBudget",testBudget ?: JSONObject.NULL)
@@ -91,13 +93,28 @@ class PhysicalLongGameFlowTest {
             var started:JSONObject?=null
             until {started=rows("runs",sid).lastOrNull {it.getString("id") !in beforeRuns};started!=null || js(web,"document.getElementById('send').dataset.running")=="\"false\"" && js(web,"!!document.querySelector('.error:not(:empty)')")=="true"}
             requireNotNull(started){"Normal send did not create a model Run"}
-            val rid=started!!.getString("id");record.put("runId",rid);val begin=SystemClock.elapsedRealtime();save()
+            val rid=started!!.getString("id");record.put("runId",rid);val begin=SystemClock.elapsedRealtime();var diagnosticAt=Long.MIN_VALUE;save()
             while(true) {
                 val run=rows("runs",sid).single {it.getString("id")==rid}
                 val events=rows("events",sid).filter {it.getString("runId")==rid}
                 record.put("elapsedMs",SystemClock.elapsedRealtime()-begin).put("runStatus",run.optString("status")).put("runtimeState",run.optJSONObject("runtime")?.optString("state"))
                     .put("eventCount",events.size).put("toolResults",JSONArray(events.filter {it.optString("type")=="tool_result"}.map {it.getJSONObject("data")}))
                     .put("assistantAnswer",rows("messages",sid).lastOrNull {it.optString("runId")==rid && it.optString("role")=="assistant"}?.optString("text"))
+                if(captureRuntimeDiagnostics && (diagnosticAt==Long.MIN_VALUE || SystemClock.elapsedRealtime()-diagnosticAt>=10000)) {
+                    diagnosticAt=SystemClock.elapsedRealtime()
+                    // Debug-only fixed numeric/phase snapshots. The observer does
+                    // not inspect arguments, model text, URLs or credentials, and
+                    // never waits for the asynchronous Native diagnostic reply.
+                    val diagnostic=js(executionWeb,"""(()=>{
+                      if(typeof window.__thorRuntimeDiagnostics!=='function')return {available:false};
+                      if(typeof window.__thorRuntimeNativeDiagnostics==='function' && !window.__thorObserverDiagnosticPending){
+                        window.__thorObserverDiagnosticPending=true;
+                        window.__thorRuntimeNativeDiagnostics().then(value=>{window.__thorObserverNativeDiagnostic={ok:true,value};},()=>{window.__thorObserverNativeDiagnostic={ok:false};}).finally(()=>{window.__thorObserverDiagnosticPending=false;});
+                      }
+                      return {available:true,js:window.__thorRuntimeDiagnostics(),native:window.__thorObserverNativeDiagnostic??null};
+                    })()""")
+                    runCatching {JSONObject(diagnostic)}.getOrNull()?.let {record.put("runtimeDiagnostics",it)}
+                }
                 save()
                 if(run.optString("status") in terminal && !host.hasActiveRuns()) {
                     record.put("runtime",run.optJSONObject("runtime")).put("timings",run.optJSONObject("timings")).put("modelTransport",run.optJSONArray("modelTransport"))
@@ -105,7 +122,7 @@ class PhysicalLongGameFlowTest {
                     File(directory,"$rid-run.json").writeText(run.toString(2));record.put("observedTerminalRun",true);break
                 }
                 val stop=File(directory,"stop-requested")
-                if(stop.exists()) {stop.delete();record.put("stoppedByObserver",true);ui(web,obj("op" to "stop","sessionId" to sid,"runId" to rid))}
+                if(stop.exists()) {stop.delete();record.put("stoppedByObserver",true);ui(web,obj("op" to "stop","runId" to rid))}
                 Thread.sleep(2000)
             }
             completedRunIds.put(rid)

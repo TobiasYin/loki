@@ -16,5 +16,6 @@ interface IDebugService {
     String pollGamepad(String token) = 12;
     String releaseGamepad(String runId) = 13;
     String prepareGamepad(String token, String request) = 14;
+    String presentationEvidence(int displayId, in int[] windowIds) = 15;
     void destroy() = 16777114;
 }

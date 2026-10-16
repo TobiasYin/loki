@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 1,
+  "status": "PROOF_REACQUISITION_STARTUP_SOFTWARE_BUILD_NOT_ANDROID_ACCEPTANCE",
+  "collectedUtc": "2026-10-16T19:54:59.096384+00:00",
+  "scope": "Near-expiry full Presentation-proof reacquisition and minimal transactional startup recovery with safe debug startup phases. Software identity only, independent Thor attempts and emulator acceptance recorded separately.",
+  "gradle": {
+    "log": "gradle.log",
+    "successful": true,
+    "durationSeconds": 18,
+    "actionableTasks": 506,
+    "executed": 85,
+    "upToDate": 421,
+    "deprecationWarningsPresent": true
+  },
+  "junit": {
+    "totals": {
+      "tests": 419,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 63
+    },
+    "modules": [
+      {
+        "module": "app",
+        "xmlDirectory": "app/build/test-results/testDebugUnitTest",
+        "gradleTask": ":app:testDebugUnitTest",
+        "taskStatus": "EXECUTED",
+        "tests": 95,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 22
+      },
+      {
+        "module": "device-core",
+        "xmlDirectory": "tools/core/build/test-results/test",
+        "gradleTask": ":device-core:test",
+        "taskStatus": "EXECUTED",
+        "tests": 196,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 29
+      },
+      {
+        "module": "core",
+        "xmlDirectory": "native-bridge/core/build/test-results/test",
+        "gradleTask": ":core:test",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 3
+      },
+      {
+        "module": "device-authority",
+        "xmlDirectory": "integration/device-authority/build/test-results/test",
+        "gradleTask": ":device-authority:test",
+        "taskStatus": "EXECUTED",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 1
+      },
+      {
+        "module": "input-lab",
+        "xmlDirectory": "tests/input-lab-app/app/build/test-results/testDebugUnitTest",
+        "gradleTask": ":input-lab:testDebugUnitTest",
+        "taskStatus": "UP-TO-DATE",
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 8
+      }
+    ],
+    "xmlHashes": "junit-xml-hashes.json",
+    "newTests": 10,
+    "newCoreProofRefreshTests": 8,
+    "newDebugStartupDiagnosticTests": 2,
+    "newTestsIncludedIn419": true,
+    "androidSQLiteCasesIncluded": false
+  },
+  "node": {
+    "runtime": {
+      "log": "prior-runtime-node.log",
+      "tests": 251,
+      "passCount": 251,
+      "fail": 0,
+      "skipped": 0,
+      "rerun": false,
+      "sameSourceVerified": true,
+      "sourceEquivalence": "retained-runtime-source-equivalence.json"
+    },
+    "chat": {
+      "log": "prior-chat-node.log",
+      "tests": 69,
+      "passCount": 69,
+      "rerun": false
+    },
+    "bridge": {
+      "log": "prior-bridge-node.log",
+      "tests": 13,
+      "passCount": 13,
+      "rerun": false
+    },
+    "relay": {
+      "log": "prior-relay-node.log",
+      "tests": 3,
+      "passCount": 3,
+      "rerun": false
+    }
+  },
+  "integrationTsc": {
+    "log": "prior-integration-tsc.log",
+    "currentCheck": false,
+    "rerun": false,
+    "priorExitCodeReportedByOwner": 0,
+    "emptyLogIsExpected": true
+  },
+  "reusedSourceEquivalence": [
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "sha256": "cca33d8aa3062d00a89bc56ffa2419198a7f54d24084f489edb2047b0eb82697",
+      "matchesScopedFocusFinalSnapshot": true,
+      "rerun": false
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "sha256": "0b35874c1a4a33dc7439e7e51bea3c69b8fafcf8ce6d478795d895419718c64d",
+      "matchesScopedFocusFinalSnapshot": true,
+      "rerun": false
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "sha256": "41d7b794b2acd4aec1f4f8c502e5df7afdaf569d7ec1f411d7d9006f5ffd6274",
+      "matchesScopedFocusFinalSnapshot": true,
+      "rerun": false
+    },
+    {
+      "path": "integration/runtime-ui-events.mjs",
+      "sha256": "cae9fa578c40b3b614a78dd22f5dd125b36af2060d1d3a19dfc050072399cb00",
+      "matchesScopedFocusFinalSnapshot": true,
+      "rerun": false,
+      "originalDualDocumentSourceHashAvailable": true,
+      "matchesOriginalDualDocumentSnapshot": true
+    },
+    {
+      "path": "integration/runtime-ui-events.test.mjs",
+      "sha256": "37da39e5c15cb247564c94fe62b66e15dddb135f5b7031c37d6518b9563efe9c",
+      "matchesScopedFocusFinalSnapshot": true,
+      "rerun": false,
+      "originalDualDocumentSourceHashAvailable": true,
+      "matchesOriginalDualDocumentSnapshot": true
+    },
+    {
+      "path": "native-bridge/js/fetch-adapter.js",
+      "sha256": "ab5a90d7b6158362eef16df271526a7de8785f3115ad85c44103155862033219",
+      "matchesScopedFocusFinalSnapshot": true,
+      "rerun": false,
+      "originalDualDocumentSourceHashAvailable": false,
+      "scope": "Current bytes match prior Native-null snapshot; original Bridge13 source hashes were not independently archived, so no new original-source equivalence claim."
+    },
+    {
+      "path": "native-bridge/js/fetch-adapter.test.mjs",
+      "sha256": "c0d01c8629109cf02ded54b65cca044090290f6b834483e24811a205303610a1",
+      "matchesScopedFocusFinalSnapshot": true,
+      "rerun": false,
+      "originalDualDocumentSourceHashAvailable": false,
+      "scope": "Current bytes match prior Native-null snapshot; original Bridge13 source hashes were not independently archived, so no new original-source equivalence claim."
+    }
+  ],
+  "artifactCheck": {
+    "log": "artifacts.json",
+    "scope": "Static identities/permissions only",
+    "artifacts": {
+      "agent-debug": {
+        "path": "app/build/outputs/apk/debug/app-debug.apk",
+        "sha256": "dbedacdcc6f3f9e86803399b7e61e6b45d851ff9b2cc0650198eb664bc8e36fe",
+        "bytes": 7486061,
+        "permissions": "package: dev.thor.agent\nuses-permission: name='dev.thor.inputlab.permission.CONTROL'\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='android.permission.POST_NOTIFICATIONS'\nuses-permission: name='android.permission.FOREGROUND_SERVICE'\nuses-permission: name='android.permission.FOREGROUND_SERVICE_SPECIAL_USE'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+      },
+      "agent-release-unsigned": {
+        "path": "app/build/outputs/apk/release/app-release-unsigned.apk",
+        "sha256": "c2c85c9dc21b36628505bfb94d674ec469ecb705fd24688bca76a5b5a85d68d9",
+        "bytes": 5471583,
+        "permissions": "package: dev.thor.agent\nuses-permission: name='android.permission.INTERNET'\nuses-permission: name='android.permission.RECORD_AUDIO'\nuses-permission: name='android.permission.POST_NOTIFICATIONS'\nuses-permission: name='android.permission.FOREGROUND_SERVICE'\nuses-permission: name='android.permission.FOREGROUND_SERVICE_SPECIAL_USE'\nuses-permission: name='moe.shizuku.manager.permission.API_V23'"
+      },
+      "input-lab-debug": {
+        "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+        "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+        "bytes": 2935291,
+        "permissions": "package: dev.thor.inputlab\npermission: dev.thor.inputlab.permission.CONTROL"
+      },
+      "input-lab-release-unsigned": {
+        "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+        "sha256": "74cc639c3c41d75db1661dd5426a0de934915ec5d480b345ad654bb3abbe2817",
+        "bytes": 2287292,
+        "permissions": "package: dev.thor.inputlab"
+      }
+    }
+  },
+  "fixedDebugPins": [
+    {
+      "path": "build/emulator/expiry-startup-2026-10-17/run-01/app-debug-androidTest.apk",
+      "sha256": "1bea4c10a729d38a4c4e208a59553b24f19ebe4a3dec6b28c4b62ee0c4117c5c",
+      "bytes": 3398214,
+      "verifiedPinnedFileAtCollection": true,
+      "androidExecutionClaim": false
+    },
+    {
+      "path": "build/emulator/expiry-startup-2026-10-17/run-01/app-debug.apk",
+      "sha256": "dbedacdcc6f3f9e86803399b7e61e6b45d851ff9b2cc0650198eb664bc8e36fe",
+      "bytes": 7486061,
+      "verifiedPinnedFileAtCollection": true,
+      "androidExecutionClaim": false
+    },
+    {
+      "path": "build/emulator/expiry-startup-2026-10-17/run-01/input-lab-debug.apk",
+      "sha256": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3",
+      "bytes": 2935291,
+      "verifiedPinnedFileAtCollection": true,
+      "androidExecutionClaim": false
+    }
+  ],
+  "compiledApkAssets": [
+    {
+      "apkEntry": "assets/chat/index.html",
+      "bytes": 5783,
+      "sha256": "220616c3db459c130faf9d842a884ef1954146efa1a994a5b92f9d43ff702bcc",
+      "matchesSourceAtCollection": true
+    },
+    {
+      "apkEntry": "assets/chat/runtime.html",
+      "bytes": 350,
+      "sha256": "90c513c0f8ad70fd7d2886e894b6ed636e557c6306a5fc96afb90beb774ca2b7",
+      "matchesSourceAtCollection": true
+    },
+    {
+      "apkEntry": "assets/chat/chat-host.js",
+      "bytes": 3645,
+      "sha256": "0bab3871d51f88eee7d8ddb7fe981ef624478aaaec07e40cbf0dcf9750654dec",
+      "matchesSourceAtCollection": true
+    },
+    {
+      "apkEntry": "assets/chat/send-errors.js",
+      "bytes": 1176,
+      "sha256": "f6106c543eb839952d36aa4410eea4cfe191a01077097cfd6955c27733ec8aac",
+      "matchesSourceAtCollection": true
+    },
+    {
+      "apkEntry": "assets/chat/ui.js",
+      "bytes": 53118,
+      "sha256": "cca33d8aa3062d00a89bc56ffa2419198a7f54d24084f489edb2047b0eb82697",
+      "matchesSourceAtCollection": true
+    },
+    {
+      "apkEntry": "assets/chat/style.css",
+      "bytes": 20052,
+      "sha256": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52",
+      "matchesSourceAtCollection": true
+    },
+    {
+      "apkEntry": "assets/chat/runtime-host.js",
+      "bytes": 819454,
+      "sha256": "2e9d9ec7ca1970cef2f692629802deb33cd6e149f978b6ce7aa024538668e06b",
+      "scope": "Compiled bundle identity, not TypeScript byte equivalence",
+      "matchesPriorScopedFocusApkBundle": true
+    }
+  ],
+  "sourceHashes": "source-hashes.json",
+  "lint": {
+    "issueCount": 106,
+    "severities": {
+      "Warning": 106
+    },
+    "reports": [
+      {
+        "path": "app/build/reports/lint-results-debug.xml",
+        "bytes": 42444,
+        "sha256": "ad47b92295d73e548d074977e92f1f44f10cf817be31817f97d80c60b5b638ab",
+        "mtimeUtc": "2026-10-16T19:53:16.546071+00:00",
+        "issues": 30,
+        "severities": {
+          "Warning": 30
+        }
+      },
+      {
+        "path": "integration/device-android/build/reports/lint-results-debug.xml",
+        "bytes": 13547,
+        "sha256": "04e477971b7c8f00378911f88b913cd8921d82d0b80a5dffde1b73374572e454",
+        "mtimeUtc": "2026-10-16T19:53:12.303740+00:00",
+        "issues": 10,
+        "severities": {
+          "Warning": 10
+        }
+      },
+      {
+        "path": "native-bridge/android/build/reports/lint-results-debug.xml",
+        "bytes": 3098,
+        "sha256": "42f8f9f035c6366af8b862da933d2af4f284a54013fe38ea0fd7952da6d97614",
+        "mtimeUtc": "2026-10-16T16:59:01.780472+00:00",
+        "issues": 3,
+        "severities": {
+          "Warning": 3
+        }
+      },
+      {
+        "path": "native-bridge/host/build/reports/lint-results-debug.xml",
+        "bytes": 7579,
+        "sha256": "ee0cba01a20376831a723a31eb4299a1e39958a5b5aeea0eb483bc3bcf4ce1bc",
+        "mtimeUtc": "2026-10-16T16:59:19.612973+00:00",
+        "issues": 4,
+        "severities": {
+          "Warning": 4
+        }
+      },
+      {
+        "path": "tests/input-lab-app/app/build/reports/lint-results-debug.xml",
+        "bytes": 78603,
+        "sha256": "ca39d7969498bd871aec9982f79d79ca90000642b6e3ebcb4acc6e6a484423d1",
+        "mtimeUtc": "2026-10-16T18:10:04.706782+00:00",
+        "issues": 48,
+        "severities": {
+          "Warning": 48
+        }
+      },
+      {
+        "path": "tools/diagnostic/build/reports/lint-results-debug.xml",
+        "bytes": 15506,
+        "sha256": "b3500ce66f96fdfed4c53a83cc2261da426a17550dc7a7d5f6fe45ef46514c16",
+        "mtimeUtc": "2026-10-16T16:59:20.580206+00:00",
+        "issues": 11,
+        "severities": {
+          "Warning": 11
+        }
+      }
+    ],
+    "note": "Actual current XML; warnings retained, not zero-warning claim."
+  },
+  "logs": [
+    {
+      "path": "build/expiry-startup-final-gradle.log",
+      "bytes": 52930,
+      "sha256": "542b9bdae768b5076444c6f1568033b4138747357b877b4dd00cdbd77cbbbaa6",
+      "mtimeUtc": "2026-10-16T19:53:19.259812+00:00",
+      "publishedPath": "gradle.log",
+      "scope": "Current unified near-expiry proof reacquisition plus startup storage/diagnostic software build"
+    },
+    {
+      "path": "build/expiry-startup-artifacts.json",
+      "bytes": 1899,
+      "sha256": "a7acde31b391afd71096b3a5222b5a63c679bd20d3416e9d84e952625ac134b0",
+      "mtimeUtc": "2026-10-16T19:53:38.801865+00:00",
+      "publishedPath": "artifacts.json",
+      "scope": "Current static artifact identities/permissions; no device execution"
+    },
+    {
+      "path": "build/emulator/expiry-startup-2026-10-17/run-01/pins.json",
+      "bytes": 588,
+      "sha256": "bb8ce0879cdb873c1f85726779bafa7e941ce7711da29a71f1d8327a5fc3bbd8",
+      "mtimeUtc": "2026-10-16T19:53:38.914839+00:00",
+      "publishedPath": "debug-artifact-pins.json",
+      "scope": "Current fixed package copies, direct file hashes verified"
+    },
+    {
+      "path": "build/input-focus-recovery-runtime-tests.log",
+      "bytes": 29166,
+      "sha256": "d51cf05ab412a1af8070d1a058884fd16cf095db7f8c02e0f391a048d1596d09",
+      "mtimeUtc": "2026-10-16T19:36:57.255613+00:00",
+      "publishedPath": "prior-runtime-node.log",
+      "scope": "Retained Runtime251 same-source prior result; not rerun in this software build"
+    },
+    {
+      "path": "build/input-focus-recovery-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mtimeUtc": "2026-10-16T19:36:52.909133+00:00",
+      "publishedPath": "prior-integration-tsc.log",
+      "scope": "Retained integration tsc exit0 owner report, empty successful log; not a new check"
+    },
+    {
+      "path": "build/startup-diagnostics-tests.log",
+      "bytes": 51,
+      "sha256": "78251b0a9b29b3d824899a6b333f6e4780453c43e1c0aed25a0e1fd18d0ea783",
+      "mtimeUtc": "2026-10-16T19:51:41.678985+00:00",
+      "publishedPath": "startup-diagnostics-jvm.log",
+      "scope": "Owner standalone startup diagnostic2 JVM cases; also included in current App95"
+    },
+    {
+      "path": "build/long-task-recovery-chat.log",
+      "bytes": 7571,
+      "sha256": "f35f497ae5dc49d73708031148719f2caf0f5dc2822cbc35ae8eba7e01e42baf",
+      "mtimeUtc": "2026-10-16T19:00:09.131249+00:00",
+      "publishedPath": "prior-chat-node.log",
+      "scope": "Retained Chat69 unchanged source, not rerun"
+    },
+    {
+      "path": "build/dual-document-final-bridge.log",
+      "bytes": 1256,
+      "sha256": "11a5199aebcf7c0c4ef2f5af153a7b2c84dee3ec9e5084282c6e72753614c335",
+      "mtimeUtc": "2026-10-16T18:47:38.382333+00:00",
+      "publishedPath": "prior-bridge-node.log",
+      "scope": "Retained Bridge13 prior source snapshot matches, not rerun"
+    },
+    {
+      "path": "build/dual-document-final-relay.log",
+      "bytes": 463,
+      "sha256": "6dd6d0f4ff8490222596355e7f60df523478f361121b9f6d13b08ac120d8735d",
+      "mtimeUtc": "2026-10-16T18:48:13.536721+00:00",
+      "publishedPath": "prior-relay-node.log",
+      "scope": "Retained relay3 unchanged source, not rerun"
+    }
+  ],
+  "androidSQLiteInstrumentation": {
+    "class": "dev.thor.agent.StartupRecoveryStorageTest",
+    "cases": 3,
+    "compiledInTestApk": true,
+    "executedByCollector": false,
+    "acceptanceStatus": "NOT_CLAIMED_HERE",
+    "includedInJvm419": false,
+    "classNamePresentInTestDex": true
+  },
+  "coveredSemantics": [
+    "Read-only remaining lifetime triggers full original a11y-WM-a11y and owner verification below2000ms reserve; never cache touch renewal",
+    "Original valid proof remains available until original5s deadline; complete new proof starts lifetime before new full read, same livekey/generation/reader checks preserved",
+    "Failed, expired, clock-rollback and late-refresh cases remain fail-closed; fixed layout identity unchanged for identical new facts",
+    "Startup persistence only upserts sessions, explicitly recovered nonterminal runs and selected metadata in one transaction; ordinary full save unchanged",
+    "Debug startup recorder retains only4 attempts and fixed enum/numeric/byte-count phases; release implementation no-op, no body/key/title/URL export",
+    "Three temporary real-SQLite instrumentation cases compile but are not Android-accepted within this software snapshot"
+  ],
+  "acceptanceBoundaries": {
+    "androidTestsExecutedByCollector": false,
+    "newAppAndroidAcceptanceClaim": false,
+    "thorGameCloudCompletionClaim": false,
+    "priorAppResultsTransferred": false,
+    "oldEvidenceOverwritten": false,
+    "sharedManifestUpdated": false,
+    "modelWallClockDeadlineAdded": false
+  },
+  "limitations": [
+    "JVM419/63 suites is mixed executed/cached XML: app/device-core/device-authority tasks executed, bridge-core/InputLab tasks UP-TO-DATE",
+    "Runtime251/Chat69/Bridge13/relay3 are retained prior checks, not new executions; source equivalence is explicit",
+    "Original Bridge13 source hashes not independently archived; no invented original-check source proof",
+    "2000ms preflight reserve is a refresh trigger, not a guarantee every tool finishes before absolute expiry",
+    "Earlier scoped-focus Apped916 Presentation failure remains a recorded TTL failure; no retrofit acceptance transfer",
+    "Android SQLite3 and reviewer new-pin emulator validation are not counted as software JVM passes",
+    "Selected-file source hashes are not an atomic full source archive",
+    "No source modifications, builds, test executions or device commands were issued by this collector"
+  ]
+}

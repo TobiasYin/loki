@@ -1,0 +1,10 @@
+{
+  "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt": "81657db355598db09b435e1472f84097bbe726778402e38f4ec276e830b44d92",
+  "tools/core/src/main/kotlin/dev/thor/tools/TargetObservationAvailability.kt": "d71954dee4945f33d699014886522d31816a8597026ffc1f7f4be4bad10a4992",
+  "tools/core/src/test/kotlin/dev/thor/tools/TargetObservationAvailabilityTest.kt": "a53fd4e0aa9e7f948fdf75af0c1597e2f4d58356eed893308fcc6c15f84710e6",
+  "app/src/main/java/dev/thor/agent/ProductHost.kt": "b32cbff511a35c2c95a92f589a2c9140390426a5da0214cdbccaf95bd312f325",
+  "runtime/src/contracts.ts": "ddfe4fa1f4d3b830a70097094bb667c2048fb4cb41c1fdbc3ce05d73e9bf0bb3",
+  "runtime/src/runtime.ts": "41889c7bb7e52ee9d33b1b5bbfdc42bb431e8813663a2404a5754f9aa83215a5",
+  "runtime/src/tool-availability.ts": "21b5464f582b63f19aba55458a2e05cb77cdc6c6aa7b4d0e0a2aaab8734f65a4",
+  "runtime/test/target-availability.test.ts": "4da1a2b9420b5e7b97e632b5cdd173be97c6c78d9ae20fc0e2732f21728539bb"
+}

@@ -80,7 +80,9 @@ class PhysicalBrightnessPercentTest {
         assertEquals("Do not override automatic brightness; this acceptance requires existing manual mode","0",mode)
         val activity=ins.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay")!!.toInt()).toBundle()) as MainActivity
         ins.runOnMainSync {activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}
-        val web=activity.findViewById<WebView>(android.R.id.custom)
+        val ready=EmulatorRuntimeTestSupport.awaitReady(activity)
+        val web=ready.web
+        val executionWeb=ready.executionWeb
         val host=MainActivity::class.java.getDeclaredField("host").apply {isAccessible=true}.get(activity) as ProductHost
         val backend=ProductHost::class.java.getDeclaredField("backend").apply {isAccessible=true}.get(host) as AndroidBackend
         val selectedBefore=args.getString("restoreSession") ?: host.selectedSession()
@@ -98,7 +100,7 @@ class PhysicalBrightnessPercentTest {
         }
         fun raw(data:JSONObject)=data.getJSONObject("firmwareDiagnostics").getInt("brightness")
         try {
-            until {js(web,"window.productReady===true && typeof window.runPreparedNative==='function' && !document.getElementById('new').disabled")=="true"}
+            until {js(web,"window.productReady===true && !document.getElementById('new').disabled")=="true"}
             assertFalse("Do not interrupt a user task",host.hasActiveRuns())
             until {backend.availability("debug.thor_brightness").status==Status.READY}
             remote=DebugConnection::class.java.getDeclaredField("service").apply {isAccessible=true}.get(backend.shizuku) as IDebugService
@@ -118,10 +120,10 @@ class PhysicalBrightnessPercentTest {
             assertEquals("Model must execute the exact configured test session",sessionId,begun.getJSONObject("lease").getString("sessionId"))
             runId=begun.getJSONObject("lease").getString("runId");evidence.put("sessionId",sessionId).put("runId",runId).put("prompt",task)
             val marker="brightness-${id()}"
-            js(web,"window.__brightnessPercent={marker:${JSONObject.quote(marker)},done:false};Promise.resolve(window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}))).then(()=>window.__brightnessPercent.done=true,e=>{window.__brightnessPercent.done=true;window.__brightnessPercent.error=String(e)});true")
+            js(executionWeb,"window.__brightnessPercent={marker:${JSONObject.quote(marker)},done:false};Promise.resolve(window.runPreparedNative(JSON.parse(${JSONObject.quote(begun.toString())}))).then(()=>window.__brightnessPercent.done=true,e=>{window.__brightnessPercent.done=true;window.__brightnessPercent.error=String(e)});true")
             val started=SystemClock.elapsedRealtime();var heartbeat=0L
             // No model/task deadline. These read-only observer updates never restart the session.
-            while(js(web,"window.__brightnessPercent.done===true")!="true") {
+            while(js(executionWeb,"window.__brightnessPercent.done===true")!="true") {
                 assertEquals("White brightness actions must not request approval","false",js(web,"!!document.querySelector('.wait')"))
                 Thread.sleep(500)
                 if(SystemClock.elapsedRealtime()-heartbeat>=5000){heartbeat=SystemClock.elapsedRealtime();evidence.put("runningElapsedMs",heartbeat-started);save()}
@@ -176,7 +178,7 @@ class PhysicalBrightnessPercentTest {
         finally {
             if(runId!=null)runCatching {
                 if(rows("runs",runId).single().optString("status") !in setOf("completed","failed","cancelled","interrupted")) {
-                    ui(web,obj("op" to "stop","runId" to runId,"sessionId" to sessionId))
+                    ui(web,obj("op" to "stop","runId" to runId))
                     until {rows("runs",runId).single().optString("status") in setOf("completed","failed","cancelled","interrupted")}
                 }
             }.onFailure {cleanupFailures.add("stop: ${it.message}")}

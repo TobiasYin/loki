@@ -1,0 +1,26 @@
+[
+  {
+    "test": "idleConfigurationReloadWaitsForTheActualWriterCloseWithoutBlockingMain",
+    "passed": true,
+    "scope": "short lifecycle preservation; not long-background acceptance",
+    "profilesRestored": true,
+    "credentialsRestored": true,
+    "rolesUnchanged": true,
+    "selectedSessionRestored": true,
+    "accessibilityRestoredLast": true,
+    "originalHistoryPreserved": true,
+    "idleHostsAndSetupWorkersClosed": true
+  },
+  {
+    "test": "homeFinishAndReturnKeepTheSameExecutionAndNotificationStopPreservesContext",
+    "passed": true,
+    "scope": "short lifecycle preservation; not long-background acceptance",
+    "profilesRestored": true,
+    "credentialsRestored": true,
+    "rolesUnchanged": true,
+    "selectedSessionRestored": true,
+    "accessibilityRestoredLast": true,
+    "originalHistoryPreserved": true,
+    "idleHostsAndSetupWorkersClosed": true
+  }
+]

@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-16T19:11:00.548899+00:00",
+  "scope": "Final Native nullable-success source selected-file snapshot, including31 new regression cases; not atomic full build input archive.",
+  "files": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorBackgroundRuntimeTest.kt",
+      "bytes": 16543,
+      "sha256": "5f49256dc7e6986d52443000dd43b74f40c191c4e41683c9bc120f43ed1ad4f9",
+      "mtimeUtc": "2026-10-16T18:41:13.783906+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorLongBackgroundRuntimeTest.kt",
+      "bytes": 13439,
+      "sha256": "f8170853f8766a18a02fa2c605cff0b6911ee36431637d403be00601c9ee1635",
+      "mtimeUtc": "2026-10-16T18:44:39.150167+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorRuntimeTestSupport.kt",
+      "bytes": 4874,
+      "sha256": "ec430d8d1c006ad5f03522783aa98dc6022eca5cabbf56a936aed330c7941023",
+      "mtimeUtc": "2026-10-16T18:41:22.436178+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/LongBackgroundSseFixture.kt",
+      "bytes": 6905,
+      "sha256": "f4b1124618fe7483f105cdc21a2eaab5f72fb14d16c122f309cdde0fc4dd9c44",
+      "mtimeUtc": "2026-10-16T18:42:08.807598+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/chat-host.js",
+      "bytes": 3645,
+      "sha256": "0bab3871d51f88eee7d8ddb7fe981ef624478aaaec07e40cbf0dcf9750654dec",
+      "mtimeUtc": "2026-10-16T18:42:21.188149+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/index.html",
+      "bytes": 5783,
+      "sha256": "220616c3db459c130faf9d842a884ef1954146efa1a994a5b92f9d43ff702bcc",
+      "mtimeUtc": "2026-10-16T18:41:42.874475+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/runtime.html",
+      "bytes": 350,
+      "sha256": "90c513c0f8ad70fd7d2886e894b6ed636e557c6306a5fc96afb90beb774ca2b7",
+      "mtimeUtc": "2026-10-16T18:41:42.783555+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/send-errors.js",
+      "bytes": 1176,
+      "sha256": "f6106c543eb839952d36aa4410eea4cfe191a01077097cfd6955c27733ec8aac",
+      "mtimeUtc": "2026-10-16T18:41:42.876801+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/style.css",
+      "bytes": 20052,
+      "sha256": "748fb6e252f1c9de87da36a36f2469217c4a7cb87e7e386ad90370ee4ef52d52",
+      "mtimeUtc": "2026-10-16T13:22:57.509367+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 53118,
+      "sha256": "cca33d8aa3062d00a89bc56ffa2419198a7f54d24084f489edb2047b0eb82697",
+      "mtimeUtc": "2026-10-16T18:57:10.290262+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/AgentRuntimeEngine.kt",
+      "bytes": 12340,
+      "sha256": "8142bd746ff4b25d64e1868274051e0cc6765093eea7e01df2dcac3fc79cdc7b",
+      "mtimeUtc": "2026-10-16T18:50:43.433161+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/AgentRuntimeService.kt",
+      "bytes": 6943,
+      "sha256": "4b15b36844cf97607f0aa4da5d43cc4e0034bcada00e2a1c21ba619873a6fb1a",
+      "mtimeUtc": "2026-10-16T16:21:09.889987+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/BridgePolicy.kt",
+      "bytes": 5455,
+      "sha256": "4484585f2d54eb0facc79b1504470cd6cea2c6a2bf03966169e7303cb152aa4b",
+      "mtimeUtc": "2026-10-16T18:41:01.748424+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ChatEventProjection.kt",
+      "bytes": 2268,
+      "sha256": "7a35b8112e1dc1f8f4451384c9b3a3ee59d07203f333cec57603d957c919870c",
+      "mtimeUtc": "2026-10-16T18:58:16.237094+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ChatSnapshot.kt",
+      "bytes": 2876,
+      "sha256": "5dc7bd05f5c5102553f8e32c54b46a4c648e5cbbc72e4ef84eedd1b18d2f7832",
+      "mtimeUtc": "2026-10-16T18:58:59.706786+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ChatUiBridge.kt",
+      "bytes": 6362,
+      "sha256": "813fa7ce0ffbe1863b73322c1c239dd418c78f600af2c41c3f11f46938da2c33",
+      "mtimeUtc": "2026-10-16T18:45:42.030044+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/MainActivity.kt",
+      "bytes": 36048,
+      "sha256": "b33bae5ae3ca954fcd188b8236f7c7d46c7e7e1ba87b2a48507a181f2e9094c5",
+      "mtimeUtc": "2026-10-16T18:43:31.724557+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "bytes": 83973,
+      "sha256": "b32cbff511a35c2c95a92f589a2c9140390426a5da0214cdbccaf95bd312f325",
+      "mtimeUtc": "2026-10-16T18:57:30.438015+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/StreamDisplayProjection.kt",
+      "bytes": 3106,
+      "sha256": "2496741257cb6e3ffe9513a6c310ec456fa4bd43a987a6afea388391776886aa",
+      "mtimeUtc": "2026-10-16T18:57:30.373177+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/ChatEventProjectionTest.kt",
+      "bytes": 4465,
+      "sha256": "2429af7cf8f223cdbdbce2955561c8a0cd4ea4c140684281ed4bdcd76630fead",
+      "mtimeUtc": "2026-10-16T18:58:16.316425+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/ChatSnapshotTest.kt",
+      "bytes": 3577,
+      "sha256": "5b39180c765b61d3f44085def9c08e1c5e7068b6ca03242326c4ac425d1757dd",
+      "mtimeUtc": "2026-10-15T17:43:14.044965+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/StreamDisplayProjectionTest.kt",
+      "bytes": 4340,
+      "sha256": "ec734a8b5f42991b468eaa7aea6d74a749f454990774f6286647c3911b805120",
+      "mtimeUtc": "2026-10-16T18:58:16.259464+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/web-tests/chat-host.test.cjs",
+      "bytes": 6367,
+      "sha256": "5d504da67115b07fdcdcf250210b9571a372ac28b724f1f4ec64f3da0267b042",
+      "mtimeUtc": "2026-10-16T18:44:45.089423+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 61636,
+      "sha256": "0b35874c1a4a33dc7439e7e51bea3c69b8fafcf8ce6d478795d895419718c64d",
+      "mtimeUtc": "2026-10-16T18:57:10.290639+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "bytes": 18697,
+      "sha256": "41d7b794b2acd4aec1f4f8c502e5df7afdaf569d7ec1f411d7d9006f5ffd6274",
+      "mtimeUtc": "2026-10-16T18:42:32.426437+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "integration/runtime-ui-events.mjs",
+      "bytes": 2400,
+      "sha256": "cae9fa578c40b3b614a78dd22f5dd125b36af2060d1d3a19dfc050072399cb00",
+      "mtimeUtc": "2026-10-16T18:40:25.940542+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "integration/runtime-ui-events.test.mjs",
+      "bytes": 2794,
+      "sha256": "37da39e5c15cb247564c94fe62b66e15dddb135f5b7031c37d6518b9563efe9c",
+      "mtimeUtc": "2026-10-16T18:40:25.963414+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "native-bridge/js/fetch-adapter.js",
+      "bytes": 11926,
+      "sha256": "ab5a90d7b6158362eef16df271526a7de8785f3115ad85c44103155862033219",
+      "mtimeUtc": "2026-10-15T18:26:02.791175+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "native-bridge/js/fetch-adapter.test.mjs",
+      "bytes": 10284,
+      "sha256": "c0d01c8629109cf02ded54b65cca044090290f6b834483e24811a205303610a1",
+      "mtimeUtc": "2026-10-15T18:37:17.419371+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "runtime/src/contracts.ts",
+      "bytes": 8388,
+      "sha256": "84c2734717b793e5e029e1d7e30ee34fe8fd141e635677b14817e496a2949606",
+      "mtimeUtc": "2026-10-16T19:06:34.405035+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "bytes": 3736,
+      "sha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f",
+      "mtimeUtc": "2026-10-16T18:04:46.962450+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 38085,
+      "sha256": "20472c6a250b8068ce71683cc3a2ffb7da4f18b6ca3deb6e3f0c2bcee72dd427",
+      "mtimeUtc": "2026-10-16T19:06:34.406141+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "runtime/src/tool-availability.ts",
+      "bytes": 1634,
+      "sha256": "21b5464f582b63f19aba55458a2e05cb77cdc6c6aa7b4d0e0a2aaab8734f65a4",
+      "mtimeUtc": "2026-10-16T18:53:53.406429+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "runtime/test/native-null-success.test.ts",
+      "bytes": 8134,
+      "sha256": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45",
+      "mtimeUtc": "2026-10-16T19:06:58.415529+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "runtime/test/native-read-error-priority.test.ts",
+      "bytes": 5824,
+      "sha256": "00b59bc0936dc234e8743e44c5d5d5cf3340e2eeaba5bf357287ed08c6280365",
+      "mtimeUtc": "2026-10-16T18:28:33.090554+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "runtime/test/target-availability.test.ts",
+      "bytes": 8184,
+      "sha256": "4da1a2b9420b5e7b97e632b5cdd173be97c6c78d9ae20fc0e2732f21728539bb",
+      "mtimeUtc": "2026-10-16T18:55:12.410371+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt",
+      "bytes": 8175,
+      "sha256": "81657db355598db09b435e1472f84097bbe726778402e38f4ec276e830b44d92",
+      "mtimeUtc": "2026-10-16T18:52:52.904717+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/TargetObservationAvailability.kt",
+      "bytes": 1795,
+      "sha256": "d71954dee4945f33d699014886522d31816a8597026ffc1f7f4be4bad10a4992",
+      "mtimeUtc": "2026-10-16T18:52:52.928181+00:00",
+      "modifiedAfterFinalGradleLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/TargetObservationAvailabilityTest.kt",
+      "bytes": 3856,
+      "sha256": "a53fd4e0aa9e7f948fdf75af0c1597e2f4d58356eed893308fcc6c15f84710e6",
+      "mtimeUtc": "2026-10-16T18:53:53.495676+00:00",
+      "modifiedAfterFinalGradleLog": false
+    }
+  ]
+}

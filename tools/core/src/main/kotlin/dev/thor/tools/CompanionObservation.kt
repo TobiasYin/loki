@@ -10,7 +10,7 @@ object CompanionWindows {
         requireTool(!upperPackage.isNullOrBlank() && upperPackage !in forbidden,Code.PERMISSION_MISSING,"Companion capture cannot observe the assistant or an unknown app")
         val screen=TouchableBounds(0,0,display.width,display.height)
         fun visible(w:TargetWindowEvidence)=w.region.any {valid(intersect(it,screen))}
-        val apps=windows.filter {it.type==TargetWindowEvidence.APPLICATION && visible(it)}
+        val apps=windows.filter {it.isApplicationOn(display.id) && visible(it)}
         requireTool(apps.size==1,Code.TARGET_CHANGED,"Companion requires exactly one visible application window")
         val app=apps.single()
         requireTool(app.packageName==upperPackage && app.packageName !in forbidden,Code.PERMISSION_MISSING,"Companion window does not belong to the authorized upper app")
@@ -21,7 +21,7 @@ object CompanionWindows {
         // Only app pixels are encoded. Any overlapping system/IME/other overlay
         // rejects capture instead of exposing a sensitive system surface.
         requireTool(windows.filter {it.id!=app.id}.none {other->
-            (if(other.type==TargetWindowEvidence.APPLICATION)other.region else other.region.ifEmpty {listOf(other.bounds)}).any {valid(intersect(it,clip))}
+            (if(other.isApplicationOn(display.id))other.region else other.region.ifEmpty {listOf(other.bounds)}).any {valid(intersect(it,clip))}
         },Code.SECURE_CONTENT,"Companion application is occluded by another window; no screenshot fallback")
         return CompanionWindowState(display.id,app.id,upperPackage!!,clip,windows.toList())
     }

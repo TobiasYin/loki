@@ -25,12 +25,13 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 
 /** Owns product state, Native leases and audited RPC. No model protocol parsing. */
-class ProductHost private constructor(private val context: Context, private val notify: (JSONObject) -> Unit) : AutoCloseable {
+class ProductHost private constructor(private val context: Context, private val notify: (JSONObject) -> Unit,private val startupAttempt:Long=0) : AutoCloseable {
     companion object {
         private val storageOwner=java.util.concurrent.Semaphore(1)
-        fun create(context: Context,notify:(JSONObject)->Unit):ProductHost {
+        fun create(context: Context,notify:(JSONObject)->Unit):ProductHost = create(context,notify,0)
+        internal fun create(context:Context,notify:(JSONObject)->Unit,startupAttempt:Long):ProductHost {
             check(storageOwner.tryAcquire(1,TimeUnit.SECONDS)) {"Previous storage owner is still closing"}
-            return try {ProductHost(context,notify)}catch(t:Throwable){storageOwner.release();throw t}
+            return try {ProductHost(context,notify,startupAttempt)}catch(t:Throwable){storageOwner.release();throw t}
         }
     }
     val authority = Authority(dev.thor.bridge.MonotonicClock { SystemClock.elapsedRealtime() })
@@ -40,7 +41,10 @@ class ProductHost private constructor(private val context: Context, private val 
     private val clock = Clock { SystemClock.elapsedRealtime() }
     val closeCompletion=CompletableFuture<Unit>()
     private val store = SqliteStore(context, "product.db")
-    private var state = store.load()
+    private var state = kotlin.run {
+        RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.STORE_LOAD_BEGIN)
+        try {store.load()}finally {RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.STORE_LOAD_END)}
+    }
     private val bindings=linkedMapOf<String,Binding>()
     private class RunScope(val profile:JSONObject) {
         @Volatile var selectedScreen="upper"
@@ -176,7 +180,8 @@ class ProductHost private constructor(private val context: Context, private val 
     private val capNames = mapOf("perception" to dev.thor.bridge.Capability.screen_perception, "search" to dev.thor.bridge.Capability.web_search, "screen_control" to dev.thor.bridge.Capability.screen_control, "debug" to dev.thor.bridge.Capability.adb_debug)
     init {
         for (key in listOf("sessions", "messages", "runs", "events", "attachments")) if (!state.has(key)) state.put(key, JSONArray())
-        for (r in rows("runs")) if (r.optString("status") !in terminal) r.put("status", "interrupted").put("stopReason", "进程恢复：不重放任何副作用")
+        val recoveredRunIds=rows("runs").filter {it.optString("status") !in terminal}.map {it.getString("id")}.toSet()
+        for (r in rows("runs")) if (r.getString("id") in recoveredRunIds) r.put("status", "interrupted").put("stopReason", "进程恢复：不重放任何副作用")
         for (s in rows("sessions")) authority.restoreSession(s.getString("id"), enabled(s), s.optLong("capabilityEpoch", 1).coerceAtLeast(1))
         if (rows("sessions").isEmpty()) newSession()
         if (rows("sessions").none { it.getString("id") == state.optString("selected") && it.isNull("archivedAt") }) state.put("selected", rows("sessions").first().getString("id"))
@@ -186,7 +191,8 @@ class ProductHost private constructor(private val context: Context, private val 
             firstPrompts.putIfAbsent(message.getString("sessionId"),message.optString("text"))
         for(s in rows("sessions"))if(s.optString("title") in setOf("","新会话"))firstPrompts[s.getString("id")]?.let {s.put("title",promptTitle(it))}
         updateDisplays()
-        persist()
+        RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.INIT_PERSIST_BEGIN)
+        try {persist(startupRecoveredRunIds=recoveredRunIds)}finally {RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.INIT_PERSIST_END)}
         val profiles = mutableListOf<NetworkProfile>()
         try {
             val base = prefs.getString("url", "")!!.trimEnd('/')
@@ -273,10 +279,10 @@ class ProductHost private constructor(private val context: Context, private val 
         val remaining=authority.remainingLeaseMs(b)
         return if(remaining>9_007_199_254_740_991L-System.currentTimeMillis())9_007_199_254_740_991L else System.currentTimeMillis()+remaining
     }
-    private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null, sessionsOnly:Boolean=false,changedSessionId:String?=null,newAttachment:JSONObject?=null) { try {
+    private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null, sessionsOnly:Boolean=false,changedSessionId:String?=null,newAttachment:JSONObject?=null,startupRecoveredRunIds:Set<String>?=null) { try {
         val affected=changedSessionId ?: currentRun?.optString("sessionId") ?: newAttachment?.getString("sessionId")
         for(s in rows("sessions").filter {affected==null || it.getString("id")==affected}) {s.put("capabilityEpoch",authority.sessionEpoch(s.getString("id")));val granted=authority.sessionEnabled(s.getString("id"));for((name,cap) in capNames)s.getJSONObject("capabilities").put(name,cap in granted)}
-        if(newAttachment!=null)store.saveAttachment(newAttachment) else if(sessionsOnly)store.saveSessionUpdate(state,changedSessionId) else if(currentRun==null)store.save(state) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
+        if(startupRecoveredRunIds!=null)store.saveStartupRecovery(state,startupRecoveredRunIds) else if(newAttachment!=null)store.saveAttachment(newAttachment) else if(sessionsOnly)store.saveSessionUpdate(state,changedSessionId) else if(currentRun==null)store.save(state) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.load();for(r in rows("runs"))if(r.optString("status") !in terminal)r.put("status","interrupted").put("stopReason","本地存储失败；执行已停止，重启不重放");throw PersistenceFailure(e) } }
     private fun newSession(): String {
         val previous=rows("sessions").singleOrNull {it.getString("id")==state.optString("selected")}
         val caps=previous?.getJSONObject("capabilities")?.let {JSONObject(it.toString())} ?: obj("perception" to true,"search" to true,"screen_control" to false,"debug" to false)
@@ -296,14 +302,27 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     fun rpc(c: String, request: JSONObject): CompletableFuture<JSONObject> {
         val future = CompletableFuture<JSONObject>()
+        val enqueuedAt=clock.now()
         if(closing) {future.completeExceptionally(IllegalStateException("Closed host"));return future}
         serial.execute {
             try {
                 require(c == connection && request.toString().length <= 3 * 1024 * 1024)
-                val op = request.getString("op"); require(!storageFailed || op == "view"); val data = request.optJSONObject("data") ?: JSONObject()
+                val op = request.getString("op"); require(!storageFailed || op == "view" || BuildConfig.DEBUG && op == "runtime.diagnostics.native"); val data = request.optJSONObject("data") ?: JSONObject()
                 if (op == "tool.execute") { execute(c, data, future); return@execute }
                 val value = when (op) {
                     "view" -> view()
+                    "runtime.diagnostics.native" -> {
+                        require(BuildConfig.DEBUG && data.length()==0)
+                        // A serial barrier and bounded transport receipts only. This
+                        // debug observation never returns model text, tool arguments,
+                        // headers, URLs, credentials or approval/lease tokens.
+                        obj("serialBarrierMs" to (clock.now()-enqueuedAt).coerceAtLeast(0),
+                            "activeBindingCount" to bindings.size,"closing" to closing,"storageFailed" to storageFailed,
+                            "runs" to JSONArray(bindings.values.take(8).map {b->
+                                obj("runId" to b.runId,"stopRequested" to !run(b.runId).optString("stopReason").isNullOrBlank(),
+                                    "modelTransport" to JSONArray(modelHttpReceipts[b.runId]?.values?.take(64)?.map {it.snapshot()}.orEmpty()))
+                            }))
+                    }
                     "profile.check" -> {
                         val sid=data.getString("sessionId");val p=selectedProfile(session(sid),false)
                         val needed=model!=null && requiresProbe(p) && !profilePassed(p)
@@ -355,7 +374,7 @@ class ProductHost private constructor(private val context: Context, private val 
         require(!probe || probeRun==null)
         if (probe) { probeToken = null; probeTools = 0; probeImageReads = 0;probeHeads.clear();probeCompleted.clear();probeBodies.clear();probeConsumerClosed.clear() }
         val pendingImages=if(probe)JSONArray() else s.optJSONArray("pendingAttachments") ?: JSONArray()
-        val text=if(probe && !supportsImages(profile))"Configuration probe: text-only model. Call probe_picture once, read its returned text, then answer PROBE_OK." else d.getString("text"); require(text.isNotBlank() && text.length <= 8000)
+        val text=if(probe && !supportsImages(profile))"Configuration probe: text-only model. Call probe_picture once, read its returned text, then answer PROBE_OK." else d.getString("text"); require(text.isNotBlank() && text.length <= 20000)
         val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } },durationMs=if(probe)180_000 else 0)
         bindings[b.runId]=b;scopes[b.runId]=RunScope(profile);runMetrics[b.runId]=java.util.concurrent.ConcurrentHashMap<String,Long>().apply {put("beginElapsedRealtime",began)};deviceAuthority.bind(b);if(probe)probeRun=b.runId
         val r = obj("id" to b.runId, "sessionId" to sid, "status" to "queued", "expanded" to false, "startedAt" to System.currentTimeMillis(), "probe" to probe,
@@ -384,7 +403,14 @@ class ProductHost private constructor(private val context: Context, private val 
         val granted=authority.enabled(b)
         var snapshot=scope.snapshot;var pendingPerceptionSnapshot=scope.pendingPerceptionSnapshot
         val wantsScreen=dev.thor.bridge.Capability.screen_perception in granted || dev.thor.bridge.Capability.screen_control in granted
-        if(wantsScreen)updateDisplays() else {snapshot=null;pendingPerceptionSnapshot=null}
+        if(wantsScreen) {
+            updateDisplays()
+            // Read-only classification may wait only here on the serial worker,
+            // before snapshot/commit locks. Actual target checks use cached facts.
+            check(!Thread.holdsLock(authority))
+            val calibrated=listOf("upper","lower").mapNotNull {role->runCatching {snapshots.selected(role).id}.getOrNull()}.toSet()
+            ThorAccessibilityService.instance?.preparePresentationEvidence(calibrated)
+        } else {snapshot=null;pendingPerceptionSnapshot=null}
         if (wantsScreen && (refresh || snapshot == null)) {
             // Preserve a valid frame/snapshot identity across model requests; changed/expired resources get a new identity.
             snapshot = pendingPerceptionSnapshot?.let { fresh -> runCatching { snapshots.validateObservation(fresh.id) }.getOrNull() }
@@ -405,10 +431,10 @@ class ProductHost private constructor(private val context: Context, private val 
                 capability !in granted->Availability(Status.UNSUPPORTED,"本会话未启用此能力；后端未探查","not-probed")
                 !scope.profile.optBoolean("supportsTools",true)->Availability(Status.UNSUPPORTED,"所选模型未声明工具调用支持","not-probed")
                 else->backend.availability(t.toolId)}
-            if(t.targetRequired && snapshot==null)a=a.copy(status=Status.TEMPORARILY_UNAVAILABLE,reason="无法确定上下屏，请在设备设置确认映射")
-            else if(t.targetRequired && t.toolId!="perception.select_screen" && snapshot?.role!=scope.selectedScreen)a=a.copy(status=Status.TEMPORARILY_UNAVAILABLE,reason="目标屏幕暂不可访问，请先选择其他屏幕")
-            else if(t.targetRequired && t.effect==Effect.INPUT && (snapshot?.target?.validity!="valid" || runCatching {snapshots.validateObservation(snapshot?.id)}.isFailure))a=a.copy(status=Status.TEMPORARILY_UNAVAILABLE,reason="目标屏幕应用无法唯一确定，请重新观察")
-            available.put(t.toolId, obj("status" to a.status.name.lowercase(), "reason" to a.reason))
+            a=TargetObservationAvailability.project(a,t,snapshot,scope.selectedScreen) {snapshots.validateObservation(snapshot?.id)}
+            val state=obj("status" to a.status.name.lowercase(), "reason" to a.reason)
+            a.reasonCode?.let {state.put("reasonCode",it.name)}
+            available.put(t.toolId,state)
             if (a.status == Status.READY && capability in granted) allowed.add(t.toolId)
         }
         available.put("web.search", obj("status" to if(searchConfigured && b.runId != probeRun) "ready" else "backend_missing", "reason" to "Brave 搜索需独立配置/key"))
@@ -608,8 +634,10 @@ class ProductHost private constructor(private val context: Context, private val 
                                 target.pendingPerceptionSnapshot=current
                             }
                         }
-                        future.complete(obj("content" to content, "observedAt" to (System.currentTimeMillis() - (clock.now()-result.observedAt).coerceAtLeast(0)), "source" to result.source, "truncated" to result.truncated,
-                            "evidenceRef" to (data["backupId"]?.let {"backup:$it"} ?: "native-event:${e.runId}:${e.requestId}"), "error" to result.error?.name, "outcome" to if(result.outcome == "not_submitted") "observed" else result.outcome))
+                        val reply=obj("content" to content, "observedAt" to (System.currentTimeMillis() - (clock.now()-result.observedAt).coerceAtLeast(0)), "source" to result.source, "truncated" to result.truncated,
+                            "evidenceRef" to (data["backupId"]?.let {"backup:$it"} ?: "native-event:${e.runId}:${e.requestId}"), "error" to result.error?.name, "outcome" to if(result.outcome == "not_submitted") "observed" else result.outcome)
+                        InputFocusFailure.classify(e.toolId,result.error,result.message)?.let {reply.put("targetChangedReason",it)}
+                        future.complete(reply)
                     } catch (error: Exception) { future.complete(obj("error" to ((error as? ToolFailure)?.code?.name ?: "STALE_AUTHORIZATION"), "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "unknown")) }
                 }
             } catch(e: Exception) { future.complete(obj("error" to (e as? ToolFailure)?.code?.name.orEmpty().ifEmpty { "CANCELLED" }, "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "observed")) }
@@ -642,17 +670,9 @@ class ProductHost private constructor(private val context: Context, private val 
         when(kind) {
             "event", "commit" -> {
                 val event = if(kind == "commit") d.getJSONObject("event") else value
-                require(event.getString("sessionId") == b.sessionId && event.getString("runId") == b.runId)
                 val sequence = eventIndex.runEventCount(state.getJSONArray("events"),b.runId) + 1
-                require(event.getInt("sequence") == sequence)
-                val copy = JSONObject(event.toString()).put("id", event.getString("eventId")).put("summary", eventSummary(event))
-                for(key in listOf("toolId","outcome","error")) if(event.getJSONObject("data").has(key))copy.put(key,event.getJSONObject("data").get(key))
-                state.getJSONArray("events").put(copy)
-                appendedEvent=copy
-                val data = event.getJSONObject("data")
-                if(event.getString("type") == "text_delta") rows("messages").single { it.getString("runId") == b.runId && it.getString("role") == "assistant" }.let { m -> val text = m.getString("text") + data.getString("text"); require(text.length <= 65536); m.put("text", text) }
-                if(event.getString("type")=="thinking_delta") rows("messages").single {it.getString("runId")==b.runId && it.getString("role")=="assistant"}.let {m->val text=m.optString("thinking")+data.getString("text");require(text.length<=65536);m.put("thinking",text)}
-                if(kind == "commit") { require(value.getString("sessionId") == b.sessionId && value.getString("runId") == b.runId); r.put("status", value.getString("state")); r.put("runtime", value); if(value.getString("state") in terminal) r.put("expanded", false) }
+                appendedEvent=StreamDisplayProjection.append(state.getJSONArray("events"),rows("messages"),r,event,
+                    b.sessionId,b.runId,sequence,eventSummary(event),if(kind=="commit")value else null)
             }
             "run" -> { require(value.getString("runId") == b.runId && value.getString("sessionId") == b.sessionId); r.put("runtime", value).put("status", value.getString("state")) }
             "context" -> { require(value.getInt("modelProfileRevision") == revision && value.getLong("capabilityEpoch") == b.capabilityEpoch); require(value.getJSONArray("effectiveTools").let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } == scope(b).publishedTools); r.getJSONArray("contexts").put(value) }
@@ -757,6 +777,22 @@ class ProductHost private constructor(private val context: Context, private val 
         authority.stopRun(runId);deviceAuthority.stop(runId)
         prepared.values.filter {runId==null || it.e.runId==runId}.forEach {it.approved.complete(false)}
         bindings.values.filter {runId==null || it.runId==runId}.forEach {b->backend.release(b.runId);run(b.runId).takeIf {it.optString("status") !in terminal}?.put("stopReason",reason)}
+    }
+    /** Trusted chat UI stop: revoke the captured work before its serial cleanup
+     * or either WebView can respond. Never stop a later Run or another chat. */
+    fun stopFromChat(runId:String?=null,sessionId:String?=null) {
+        require(!runId.isNullOrBlank() || !sessionId.isNullOrBlank())
+        if(closing)return
+        val affected=if(!sessionId.isNullOrBlank())authority.stopSessionRuns(sessionId,runId) else if(!runId.isNullOrBlank()) {
+            authority.stopRun(runId);listOf(runId)
+        } else emptyList()
+        affected.forEach {deviceAuthority.stop(it)}
+        runCatching {serial.execute {
+            if(closing)return@execute
+            val existing=affected.filter {it in bindings}
+            existing.forEach {stop("用户停止",it)}
+            try {existing.forEach {persist(run(it))}} finally {publish()}
+        }}
     }
     /** Notification stop revokes Native authority immediately on its owner queue,
      * even when no chat Activity or responsive renderer is available. */

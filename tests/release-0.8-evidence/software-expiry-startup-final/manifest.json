@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "scope": "Near-expiry proof reacquisition/startup recovery software-only identity; no Android/cloud/game acceptance. Excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 6352,
+      "sha256": "3afe0cfbab7ea84ff50fb59a1edada65680266c09372a298babf4669ca858cf0"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "a7acde31b391afd71096b3a5222b5a63c679bd20d3416e9d84e952625ac134b0"
+    },
+    {
+      "path": "debug-artifact-pins.json",
+      "bytes": 588,
+      "sha256": "bb8ce0879cdb873c1f85726779bafa7e941ce7711da29a71f1d8327a5fc3bbd8"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 52930,
+      "sha256": "542b9bdae768b5076444c6f1568033b4138747357b877b4dd00cdbd77cbbbaa6"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 25720,
+      "sha256": "22e1f687d726b80228dfdf7f68698d06d6e3c468823e0805df6b90bac038e8bf"
+    },
+    {
+      "path": "prior-bridge-node.log",
+      "bytes": 1256,
+      "sha256": "11a5199aebcf7c0c4ef2f5af153a7b2c84dee3ec9e5084282c6e72753614c335"
+    },
+    {
+      "path": "prior-chat-node.log",
+      "bytes": 7571,
+      "sha256": "f35f497ae5dc49d73708031148719f2caf0f5dc2822cbc35ae8eba7e01e42baf"
+    },
+    {
+      "path": "prior-integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "prior-relay-node.log",
+      "bytes": 463,
+      "sha256": "6dd6d0f4ff8490222596355e7f60df523478f361121b9f6d13b08ac120d8735d"
+    },
+    {
+      "path": "prior-runtime-node.log",
+      "bytes": 29166,
+      "sha256": "d51cf05ab412a1af8070d1a058884fd16cf095db7f8c02e0f391a048d1596d09"
+    },
+    {
+      "path": "retained-runtime-source-equivalence.json",
+      "bytes": 3585,
+      "sha256": "1e600213d230b8cc246e2cc9c2b1a323ec0625cf8633a46f92b62d1df83552ea"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 19864,
+      "sha256": "09189ba7cfe598f1514e5026889c32a7efdf97e82f8dcd7db8352ac5d49d295e"
+    },
+    {
+      "path": "startup-diagnostics-jvm.log",
+      "bytes": 51,
+      "sha256": "78251b0a9b29b3d824899a6b333f6e4780453c43e1c0aed25a0e1fd18d0ea783"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 18091,
+      "sha256": "e4ae38178d142f2ac2126ca547d7f8ca2b7c9027ca678d94a2678faa6300299d"
+    }
+  ]
+}

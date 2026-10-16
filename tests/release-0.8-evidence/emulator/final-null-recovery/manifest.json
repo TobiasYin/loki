@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed App396c/Test570 emulator evidence: six passing unique cases and two failed attempts of unresolved Presentation; no all-pass/cloud/Thor/game claim. Excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 5960,
+      "sha256": "9c03a1bfc52c722ac624effa20f3b0d1d7c0490ef6a0c5678bb7e13f5e18ee3d"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "3c7d2ac7b9be296833266ca0da256bfdb689fd1a9eabcc5ab9cd06d0e95aa3a0"
+    },
+    {
+      "path": "background-long-380.log",
+      "bytes": 846,
+      "sha256": "d11cf249df7099d78efbfdf2f967c71bde58bbf97588ad83196b1277656c320d"
+    },
+    {
+      "path": "combined-explicit-5.log",
+      "bytes": 3716,
+      "sha256": "0c912984c59f38e73d42ec5739c889ace7cce8c104e4fb29b89f395ef70f69a5"
+    },
+    {
+      "path": "long-background.json",
+      "bytes": 2883,
+      "sha256": "c28c3b0a6ac30ede2a2c81eedec4f4440ef891315e048480f2fa7d45083d16ef"
+    },
+    {
+      "path": "per-test-preservation.json",
+      "bytes": 1330,
+      "sha256": "cd537b0ace2ef4f2d1929085fa7f43c33756116ba9ccbe39731e218173b7f540"
+    },
+    {
+      "path": "presentation-explicit-retry-01.log",
+      "bytes": 2580,
+      "sha256": "96db9857788d85f62c6811a2b3c4f118b6e59a53b4f5366c20e8c044ebb7577c"
+    },
+    {
+      "path": "presentation-explicit.log",
+      "bytes": 2581,
+      "sha256": "e1d0409498a60f3391af6c9fe81db5ae49cebb3a87e47e8b93f0edb65feaa507"
+    },
+    {
+      "path": "presentation-failures.json",
+      "bytes": 4458,
+      "sha256": "134f9182e0d265594f9f1d6a9d0acc323bcfe9685b5aab5c704c29a9c2192df0"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2175,
+      "sha256": "c626420f15afaef0493fa8823b5c69f0120a7a9e2caaea36b95280f3c4ea0407"
+    },
+    {
+      "path": "short-background.json",
+      "bytes": 531,
+      "sha256": "de2854a8037648cee961c2699c646822becb0da65e8dc3a32b827dd66a90423b"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 5379,
+      "sha256": "c2f3d28002cce242c3000d71ad344c40e7f5712107e6cdda92f4790a13dcc9d4"
+    },
+    {
+      "path": "test-source-hashes.json",
+      "bytes": 1840,
+      "sha256": "eec1c0f482ea88b009bbfd16a2639a7c25d0be11b07d26b9b16f3af96133c5f8"
+    },
+    {
+      "path": "ui-provider.json",
+      "bytes": 9223,
+      "sha256": "1047251e5886a38051fdea3e042d8e1df6dda60b57cb078f859ae0302c2da359"
+    }
+  ]
+}

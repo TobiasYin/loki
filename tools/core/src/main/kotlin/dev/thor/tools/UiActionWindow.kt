@@ -13,7 +13,7 @@ object UiActionWindow {
             Code.TARGET_CHANGED,"Semantic action requires the exact visible input region")
         requireTool(windows.map {it.id}.distinct().size==windows.size,Code.TARGET_CHANGED,"Semantic window evidence is ambiguous")
         val screen=TouchableBounds(0,0,display.width,display.height)
-        val applications=windows.filter {it.type==TargetWindowEvidence.APPLICATION && it.region.any {r->intersects(r,screen)}}
+        val applications=windows.filter {it.isApplicationOn(display.id) && it.region.any {r->intersects(r,screen)}}
         requireTool(applications.size==1,Code.TARGET_CHANGED,"Semantic action requires exactly one visible application window on the selected screen")
         val app=applications.single()
         requireTool(app.id==windowId && app.packageName==packageName && app.rootBounds!=null && app.rectangular && app.region.size==1,

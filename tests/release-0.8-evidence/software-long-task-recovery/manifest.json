@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "scope": "Historical pre-null-normalization fixed long-task-recovery software snapshot; not final release or Android acceptance. Previous evidence unchanged; excludes manifest itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4448,
+      "sha256": "572621c94c4fbaadbac6e909f3f6d25f0372d21011c0871ef2139cba4e4d5709"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "db7f61fe5758a4602bb51cc62d65079455c35cef4d87de849f6aa50a7d3dc9d7"
+    },
+    {
+      "path": "chat-node.log",
+      "bytes": 7571,
+      "sha256": "f35f497ae5dc49d73708031148719f2caf0f5dc2822cbc35ae8eba7e01e42baf"
+    },
+    {
+      "path": "debug-artifact-pins.json",
+      "bytes": 407,
+      "sha256": "7b1d82eac0d5bf3c2c2a944c6401bb4749755fef467d5fb912cea6e90585d577"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 49551,
+      "sha256": "d69e0a02633166699c4036d6849744ac51cd441f9e9e80744cc665a1c37f5c4a"
+    },
+    {
+      "path": "integration-tsc.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 24141,
+      "sha256": "801da956cfc3488fb9a04cc518f9a680ea85170d0644972c93b40b3224949856"
+    },
+    {
+      "path": "prior-bridge-node.log",
+      "bytes": 1256,
+      "sha256": "11a5199aebcf7c0c4ef2f5af153a7b2c84dee3ec9e5084282c6e72753614c335"
+    },
+    {
+      "path": "prior-relay-node.log",
+      "bytes": 463,
+      "sha256": "6dd6d0f4ff8490222596355e7f60df523478f361121b9f6d13b08ac120d8735d"
+    },
+    {
+      "path": "runtime-node.log",
+      "bytes": 20008,
+      "sha256": "6365e9d974cc7ffdda25b689cf89bcedd7649c38c15bd8672b5d0ca266ee0ef4"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 10794,
+      "sha256": "4528c7f4a3704d9be7f8d8bc4cf369215ffa7895854dafff9cebdbf0e34b3ae2"
+    },
+    {
+      "path": "standalone-projection-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "standalone-projection-junit.log",
+      "bytes": 60,
+      "sha256": "e7dd19c2ced87c89e7ec9e768be34ec2dfd8a68b81ac4aea45905eae8957c04c"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 16588,
+      "sha256": "2692359a4141c8de45feefff5e30ef3e7b59faffe5dd6d495fe1080ad2c45d2b"
+    }
+  ]
+}

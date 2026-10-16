@@ -1,0 +1,10 @@
+{
+  "profiles": true,
+  "native-credentials": true,
+  "display-roles": true,
+  "originalHistoryPreserved": true,
+  "selectedSessionRestored": true,
+  "activeRuns": 0,
+  "notificationPermissionAndFlagsRestored": true,
+  "serviceExited": true
+}

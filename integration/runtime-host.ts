@@ -11,8 +11,8 @@ import { readableText } from './web-text.mjs';
 import { StartupCoordinator } from './startup-coordinator.mjs';
 // @ts-ignore Bounded host payload framing is shared with Node regression tests.
 import { encodeHostRpc } from './rpc-frame.mjs';
-// @ts-ignore Local categorized user-facing error text.
-import { sendFailureMessage } from './send-errors.mjs';
+// @ts-ignore Fixed execution-to-chat metadata; no transcript or arbitrary callback relay.
+import { postRuntimeUiEvent } from './runtime-ui-events.mjs';
 import { skillTools } from './skill-tools.js';
 import contract from '../tools/contracts/toolpack-v1.json';
 
@@ -20,7 +20,6 @@ declare const __THOR_DEBUG__: boolean;
 declare global { interface Window {
   ThorNative: { postMessage(data: string | ArrayBuffer): void; onmessage: (event: MessageEvent) => void };
   ThorUI: { postMessage(data: string): void };
-  receiveNative: (state: any) => void;
   runNativeProbe: (token: string, sessionId: string) => Promise<void>;
   productReady?: boolean;
 } }
@@ -29,17 +28,17 @@ const executions=new Map<string,ReturnType<typeof createExecution>>();
 const starting=new Set<string>();
 const sessions=new Map<string,RuntimeSession>();
 const startupCoordinator=new StartupCoordinator();
-const preparations=new Map<string,{cancelled:boolean,startedAt:number,runId?:string}>();
+const preparations=new Map<string,{cancelled:boolean,startedAt:number,runId?:string,phase?:string}>();
 // Native notification stop has its own immediate authority revocation. This
 // companion hook lets every Pi execution unwind and save its current context.
 (window as any).stopAllNativeRuns = () => {
   for(const pending of preparations.values())pending.cancelled=true;
   for(const execution of executions.values())execution.runtime.stop();
 };
-function preparation(sessionId:string,state:{cancelled:boolean,startedAt:number,runId?:string},phase:string) {
-  if(preparations.get(sessionId)===state)(window as any).receivePreparationState?.({sessionId,phase,elapsedMs:Math.round(performance.now()-state.startedAt)});
+function preparation(sessionId:string,state:{cancelled:boolean,startedAt:number,runId?:string,phase?:string},phase:string,force=false) {
+  if(preparations.get(sessionId)===state && (force || state.phase!==phase)) {state.phase=phase;relayUi('preparationState',{sessionId,phase,elapsedMs:Math.round(performance.now()-state.startedAt)});}
 }
-const pending = new Map<string, { resolve: (v: any) => void; reject: (e: any) => void; timer: ReturnType<typeof setTimeout> }>();
+const pending = new Map<string, { resolve: (v: any) => void; reject: (e: any) => void; timer: ReturnType<typeof setTimeout>; op: string; kind?: string; since: number }>();
 const queue: string[] = [];
 
 let currentState: any;
@@ -48,13 +47,28 @@ const rpc = (op: string, data: any = {}, timeout = 185000): Promise<any> => new 
   if (!connectionId) { reject(new RuntimeError('BACKEND_UNAVAILABLE')); return; }
   const requestId = crypto.randomUUID();
   const timer = setTimeout(() => { pending.delete(requestId); reject(new RuntimeError('TIMEOUT')); executions.get(data.runId)?.runtime.stop(); }, timeout);
-  pending.set(requestId, { resolve, reject, timer });
+  pending.set(requestId, { resolve, reject, timer, op, kind: op==='persist'?data.kind:undefined, since:performance.now() });
   try {send(encodeHostRpc({ type:'host.rpc',bridgeVersion:1,connectionId,requestId,op },data));}
   catch(error:any){clearTimeout(timer);pending.delete(requestId);reject(new RuntimeError(error?.code==='LIMIT_EXCEEDED'?'LIMIT_EXCEEDED':'PROTOCOL_ERROR'));}
 });
+if (__THOR_DEBUG__) {
+  const safeOps=new Set(['view','authority','persist','tool.prepare','tool.execute','tool.cancel','network.tool.begin','begin','end','runtime.work.begin','runtime.work.end','runtime.diagnostics.native']);
+  const safeKinds=new Set(['run','event','commit','turn','context']);
+  (window as any).__thorRuntimeDiagnostics = () => ({
+    connected:!!connectionId, executionCount:executions.size, preparationCount:preparations.size, startingCount:starting.size,
+    pendingRpcCount:pending.size,
+    pendingRpc:[...pending.values()].slice(0,64).map(p=>({op:safeOps.has(p.op)?p.op:'other',...(p.kind?{kind:safeKinds.has(p.kind)?p.kind:'other'}:{}),ageMs:Math.max(0,Math.round(performance.now()-p.since))})),
+    executions:[...executions.values()].slice(0,8).map(e=>({runId:e.lease.runId,sessionId:e.lease.sessionId,...e.runtime.diagnostics()})),
+  });
+  (window as any).__thorRuntimeNativeDiagnostics = () => rpc('runtime.diagnostics.native',{},5000);
+}
+function relayUi(name:string,payload:Record<string,unknown>={}) {
+  // No RPC promise/timer or absent-chat queue: a view cannot block execution.
+  postRuntimeUiEvent(send,connectionId,name,payload);
+}
 function handle(message: any) {
   if (message.type === 'bridge.ready') {
-    connectionId = message.connectionId; window.productReady = true;
+    connectionId = message.connectionId; window.productReady = true;relayUi('ready');
     void rpc('view').then(update);
     for (const raw of queue.splice(0)) window.ThorUI.postMessage(raw);
   } else if (message.type === 'host.result' || message.type==='response.error' && pending.has(message.requestId)) {
@@ -74,7 +88,6 @@ function update(state: any) {
     const r=(state.activeRuns??state.runs)?.find((r:any)=>r.id===lease.runId);
     if(r?.stopReason)execution.runtime.stop();
   }
-  if (window.receiveNative) window.receiveNative(state);
 }
 (window as any).receiveProductState = update;
 window.ThorNative.onmessage = event => {
@@ -195,15 +208,18 @@ window.runNativeProbe = (token, sessionId) => start(sessionId,probeText,token);
 window.ThorUI = { postMessage(raw) {
   if(!connectionId) { queue.push(raw); return; }
   const command = JSON.parse(raw);
+  if(command.op==='ready') {
+    for(const [sessionId,state] of preparations)preparation(sessionId,state,state.phase??'checking',true);
+  }
   if(command.op==='stopPreparing') {
     const state=preparations.get(command.sessionId);if(state){state.cancelled=true;preparation(command.sessionId,state,'idle');starting.delete(command.sessionId);}
     for(const e of executions.values())if(e.lease.sessionId===command.sessionId){e.runtime.stop();void rpc('ui',{op:'stop',sessionId:command.sessionId,runId:e.lease.runId}).then(update).catch(()=>{});}
     return;
   }
   if(['openLink','settings','pickImage','skillImport','voiceSettings','voice.start','voice.finish','voice.cancel','voice.permission'].includes(command.op)) { send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId: crypto.randomUUID(), op: command.op, data: command })); return; }
-  if(command.op === 'send') { void start(command.sessionId, command.text).catch((error) => { (window as any).receiveSendFailure?.(command.text,command.sessionId); if(error?.code==='CANCELLED'||error?.message==='CANCELLED')return;update({ ...currentState, error: sendFailureMessage(error?.code??error?.message,currentState?.modelSelection) }); }); return; }
+  if(command.op === 'send') { void start(command.sessionId, command.text).catch((error) => {relayUi('sendFailure',{sessionId:command.sessionId,clientSendId:command.clientSendId,errorCode:error?.code??error?.message});}); return; }
   if(command.op === 'stop')executions.get(command.runId)?.runtime.stop();
-  void rpc('ui', command).then(state=>{if(command.op==='delete')sessions.delete(command.sessionId);update(state);}).catch(() => {if(command.op==='capability')(window as any).receiveCapabilityFailure?.(command);update({ ...currentState, error: '操作被拒绝：检查授权、活动运行或本地存储。' });});
+  void rpc('ui', command).then(state=>{if(command.op==='delete')sessions.delete(command.sessionId);update(state);}).catch(() => {if(command.op==='capability')relayUi('capabilityFailure',command);relayUi('operationFailure',{sessionId:command.sessionId});});
 } };
 // SDK receives only the supplied native Fetch. CSP and WebView interception also block all direct requests.
 globalThis.fetch = (() => Promise.reject(new RuntimeError('PERMISSION_MISSING'))) as typeof fetch;

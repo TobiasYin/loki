@@ -3,14 +3,17 @@ import type { Message, Model } from '@earendil-works/pi-ai';
 import { streamSimple as responses } from '@earendil-works/pi-ai/api/openai-responses';
 import { streamSimple as completions } from '@earendil-works/pi-ai/api/openai-completions';
 import { streamSimple as anthropic } from '@earendil-works/pi-ai/api/anthropic-messages';
-import { compileContext, project, resolveContent } from './context.js';
-import { DEFAULT_LIMITS, RuntimeError, type AgentRun, type AuthoritySnapshot, type Content, type DomainMessage, type EffectRecord, type HistoryTurn, type ModelProfile, type RunEvent, type RunLease, type RunState, type RuntimeLimits, type RuntimePorts, type ToolDescriptor, type ToolEnvelope, type ToolOutcome, type ErrorCode, type Capability } from './contracts.js';
+import { compileContext, project, projectHistory, resolveContent } from './context.js';
+import { DEFAULT_LIMITS, isErrorCode, RuntimeError, type AgentRun, type AuthoritySnapshot, type Content, type DomainMessage, type EffectRecord, type HistoryTurn, type ModelProfile, type RunEvent, type RunLease, type RunState, type RuntimeLimits, type RuntimePorts, type ToolDescriptor, type ToolEnvelope, type ToolOutcome, type ErrorCode, type Capability } from './contracts.js';
 import { ToolRegistry } from './registry.js';
 import { ProtocolAudit } from './protocol-audit.js';
 import { RuntimeSession, closeInterruptedRound } from './session.js';
 import { withoutProviderDeadline } from './provider-timeouts.js';
 import { StreamEvents } from './stream-events.js';
 import { checkProfile } from './profile-validation.js';
+import { providerStopBoundary } from './provider-stop.js';
+import { unavailableToolReason } from './tool-availability.js';
+type WaitPhase = 'agent_prompt' | 'provider_next' | 'provider_result' | 'request_body' | 'authority' | 'persist' | 'network_headers' | 'network_read';
 
 const terminal = new Set<RunState>(['completed', 'failed', 'cancelled', 'interrupted']);
 const transitions: Record<RunState, RunState[]> = {
@@ -25,8 +28,20 @@ interface Active {
   effective: ToolDescriptor[]; seenCalls: Set<string>; source: Set<Capability>; stopReason?: ErrorCode;
   stream?: StreamEvents; persistenceFailed: boolean; requestMessages: Message[]; resultRefs: Map<string, Content[]>;
   failure?: ErrorCode;
+  observationRequired: boolean;
+  waits: Map<number, { phase: WaitPhase; since: number }>; waitSequence: number; lastProgress: number;
   effects: EffectRecord[];
   turnId: string; streamMessage: number; messageOffset: number; input: Content[];
+}
+const currentScreenReads = new Set(['perception.app_info', 'perception.window_info', 'perception.ui_tree', 'perception.capture_screen']);
+const screenResources = new Set(['selected-screen/snapshot', 'upper-display/snapshot']);
+function dependsOnScreen(t: ToolDescriptor): boolean { return t.effectClass === 'input' && t.resources.some(r => screenResources.has(r)); }
+function isCurrentScreenRead(t: ToolDescriptor): boolean {
+  return t.effectClass === 'read' && t.requiredCapabilities.includes('screen_perception') && currentScreenReads.has(t.toolId) && t.resources.some(r => screenResources.has(r));
+}
+function toolOutcomeError(value: unknown): ErrorCode | undefined {
+  if (value === undefined || value === null) return undefined;
+  return isErrorCode(value) ? value : 'PROTOCOL_ERROR';
 }
 function fail(code: ErrorCode): never { throw new RuntimeError(code); }
 export function assertRuntimeFeatures(): void {
@@ -61,6 +76,21 @@ export class ThorRuntime {
   }
   subscribe(listener: (event: RunEvent) => void): () => void { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   get currentRun(): AgentRun | undefined { return this.active && structuredClone(this.active.run); }
+  /** Fixed local labels and numeric timing only; never provider payloads or credentials. */
+  diagnostics() {
+    const a = this.active, now = performance.now();
+    return { reserved: this.reserved, preparing: !!this.pending && !a, ...(a ? {
+      state: a.run.state, stopRequested: a.controller.signal.aborted, requests: a.requests,
+      eventCount: a.sequence, toolCallCount: a.seenCalls.size, effectCount: a.effects.length,
+      sinceProgressMs: Math.max(0, Math.round(now - a.lastProgress)),
+      piStreaming: !!a.agent?.state.isStreaming, pendingToolCount: a.agent?.state.pendingToolCalls.size ?? 0,
+      waits: [...a.waits.values()].slice(0, 32).map(w => ({phase:w.phase, ageMs:Math.max(0,Math.round(now-w.since))})),
+    } : {}) };
+  }
+  private async watch<T>(a:Active, phase:WaitPhase, work:()=>Promise<T>):Promise<T> {
+    const id=++a.waitSequence; a.waits.set(id,{phase,since:performance.now()});
+    try {return await work();} finally {a.waits.delete(id);}
+  }
   stop(): void {
     if (this.pending) { this.pending.reason = 'CANCELLED'; this.pending.controller.abort(); }
     if (this.active && !terminal.has(this.active.run.state)) { this.active.stopReason = 'CANCELLED'; this.active.controller.abort(); this.active.agent?.abort(); }
@@ -86,11 +116,12 @@ export class ThorRuntime {
   private async writeEvent(a: Active, type: RunEvent['type'], data: Record<string, unknown>, toolCallId?: string, run?: AgentRun): Promise<void> {
     const e: RunEvent = { sessionId: a.run.sessionId, runId: a.run.runId, eventId: crypto.randomUUID(), sequence: ++a.sequence, wallTime: Date.now(), elapsedMs: Math.round(performance.now() - a.startMono), type, data, ...(toolCallId ? { toolCallId } : {}) };
     await this.persist(a, () => run ? this.ports.persistence.commitRun(structuredClone(run), structuredClone(e)) : this.ports.persistence.appendEvent(structuredClone(e)));
+    a.lastProgress = performance.now();
     if (run) a.run = run;
     for (const listener of this.listeners) { try { listener(structuredClone(e)); } catch { /* A view cannot change persisted execution state. */ } }
   }
   private async persist(a: Active, write: () => Promise<void>): Promise<void> {
-    try { await write(); } catch { a.persistenceFailed = true; a.stopReason = 'PERSISTENCE_ERROR'; a.controller.abort(); a.agent?.abort(); fail('PERSISTENCE_ERROR'); }
+    try { await this.watch(a, 'persist', write); } catch { a.persistenceFailed = true; a.stopReason = 'PERSISTENCE_ERROR'; a.controller.abort(); a.agent?.abort(); fail('PERSISTENCE_ERROR'); }
   }
   private async state(a: Active, next: RunState): Promise<void> {
     if (a.run.state === next || terminal.has(a.run.state)) return;
@@ -100,7 +131,7 @@ export class ThorRuntime {
   }
   private async authority(a: Active, refresh = false): Promise<AuthoritySnapshot> {
     if (a.controller.signal.aborted) fail(a.stopReason ?? 'CANCELLED');
-    const s = await abortable(this.ports.authority.read(a.run.sessionId, a.run.runId, refresh), a.controller.signal);
+    const s = await this.watch(a, 'authority', () => abortable(this.ports.authority.read(a.run.sessionId, a.run.runId, refresh), a.controller.signal));
     if (s.session.sessionId !== a.run.sessionId || s.lease.sessionId !== a.run.sessionId || s.lease.runId !== a.run.runId || s.lease.leaseId !== a.lease.leaseId || s.lease.capabilityEpoch !== a.lease.capabilityEpoch || s.session.capabilityEpoch !== a.lease.capabilityEpoch || s.lease.expiresAt <= Date.now()) fail('STALE_AUTHORIZATION');
     if (a.controller.signal.aborted) fail(a.stopReason ?? 'CANCELLED');
     return s;
@@ -108,63 +139,101 @@ export class ThorRuntime {
   private async toolCheck(a: Active, t: ToolDescriptor): Promise<AuthoritySnapshot> {
     const s = await this.authority(a);
     if (!t.requiredCapabilities.every(c => s.session.enabled[c])) fail('CAPABILITY_DISABLED');
-    if (!a.effective.some(x => x.toolId === t.toolId) || !this.registry.effective(s).some(x => x.toolId === t.toolId)) fail('BACKEND_UNAVAILABLE');
+    if (!a.effective.some(x => x.toolId === t.toolId)) fail('BACKEND_UNAVAILABLE');
+    if (!this.registry.effective(s).some(x => x.toolId === t.toolId)) fail(unavailableToolReason(t, s));
     if (s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
+    if (a.observationRequired && dependsOnScreen(t)) fail('TARGET_CHANGED');
     return s;
   }
-  private async toolResultCheck(a: Active, t: ToolDescriptor): Promise<AuthoritySnapshot> {
+  private async toolResultCheck(a: Active, t: ToolDescriptor, checkReadSource = true): Promise<AuthoritySnapshot> {
     const s = await this.authority(a);
     if (!t.requiredCapabilities.every(c => s.session.enabled[c])) fail('CAPABILITY_DISABLED');
     // An action can legitimately navigate, replace its old window or make its
     // own backend unavailable. Those are execution preconditions, not grounds
     // to discard Native's receipt. Pure screen reads still cannot deliver data
     // after their request source is replaced by an unrelated observation.
-    if (t.effectClass === 'read' && t.requiredCapabilities.includes('screen_perception') && s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
+    if (checkReadSource && t.effectClass === 'read' && t.requiredCapabilities.includes('screen_perception') && s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
     return s;
   }
   private tools(a: Active, descriptors: ToolDescriptor[]): AgentTool[] {
     return descriptors.map(t => ({ name: t.modelName, label: t.toolId, description: t.description, parameters: t.inputSchema, replay: 'never', executionMode: 'sequential',
       prepareArguments: args => { this.registry.validate(t.modelName, args); return args as any; },
       execute: async (callId, args, signal) => {
-        const s = await this.toolCheck(a, t);
-        if (a.seenCalls.has(callId)) fail('PROTOCOL_ERROR');
-        a.seenCalls.add(callId); t.requiredCapabilities.forEach(c => a.source.add(c));
-        const effect = t.effectClass !== 'read' && t.effectClass !== 'network' ? { toolCallId: callId, toolId: t.toolId, effectClass: t.effectClass, outcome: 'unknown' as const } : undefined;
-        if (effect) a.effects.push(effect);
         const deadline = Math.min(Date.now() + t.timeoutMs, a.lease.expiresAt, this.limits.runTimeoutMs ? a.run.startedAt + this.limits.runTimeoutMs : Number.MAX_SAFE_INTEGER);
-        const envelope: ToolEnvelope = { bridgeVersion: '0.1', sessionId: a.run.sessionId, runId: a.run.runId, leaseId: a.lease.leaseId, toolCallId: callId, toolId: t.toolId, schemaVersion: t.schemaVersion,
-          capabilityEpoch: a.lease.capabilityEpoch, requestId: crypto.randomUUID(), deadline, arguments: args, targetSnapshotId: s.l0.snapshotId, resources: t.resources };
-        // Intent commits before the port may perform a side effect.
-        await this.event(a, 'tool_intent', { toolId: t.toolId, schemaVersion: t.schemaVersion, capabilityEpoch: a.lease.capabilityEpoch, requestId: envelope.requestId, outcome: 'unknown' }, callId);
-        await this.toolCheck(a, t);
         const controller = new AbortController();
         const cancel = () => controller.abort(); a.controller.signal.addEventListener('abort', cancel, { once: true }); signal?.addEventListener('abort', cancel, { once: true });
-        let timedOut = false;
+        if (a.controller.signal.aborted || signal?.aborted) controller.abort();
+        let timedOut = false, dispatched = false;
+        let effect: EffectRecord | undefined;
         let receipt: { outcome: NonNullable<ToolOutcome['outcome']>; evidenceRef?: string } | undefined;
+        let targetChangedReason: 'input_focus_mismatch' | undefined;
         const timer = setTimeout(() => { timedOut = true; controller.abort(); }, Math.max(0, deadline - Date.now()));
         try {
+          // Preflight failures must return through the same durable tool-result
+          // path as Native rejections, rather than becoming an opaque SDK error.
+          if (a.seenCalls.has(callId)) fail('PROTOCOL_ERROR');
+          a.seenCalls.add(callId);
+          const s = await abortable(this.toolCheck(a, t), controller.signal);
+          t.requiredCapabilities.forEach(c => a.source.add(c));
+          effect = t.effectClass !== 'read' && t.effectClass !== 'network' ? { toolCallId: callId, toolId: t.toolId, effectClass: t.effectClass, outcome: 'unknown' } : undefined;
+          if (effect) a.effects.push(effect);
+          const envelope: ToolEnvelope = { bridgeVersion: '0.1', sessionId: a.run.sessionId, runId: a.run.runId, leaseId: a.lease.leaseId, toolCallId: callId, toolId: t.toolId, schemaVersion: t.schemaVersion,
+            capabilityEpoch: a.lease.capabilityEpoch, requestId: crypto.randomUUID(), deadline, arguments: args, targetSnapshotId: s.l0.snapshotId, resources: t.resources };
+          // Intent commits before the port may perform a side effect.
+          await this.event(a, 'tool_intent', { toolId: t.toolId, schemaVersion: t.schemaVersion, capabilityEpoch: a.lease.capabilityEpoch, requestId: envelope.requestId, outcome: 'unknown' }, callId);
+          await abortable(this.toolCheck(a, t), controller.signal);
           await this.event(a, 'tool_started', { toolId: t.toolId, arguments: args }, callId);
-          await this.toolCheck(a, t);
+          await abortable(this.toolCheck(a, t), controller.signal);
+          if (controller.signal.aborted) fail(timedOut ? 'TIMEOUT' : 'CANCELLED');
+          if (Date.now() >= deadline) fail('TIMEOUT');
+          dispatched = true;
           const outcome = await abortable(this.ports.tools.execute(envelope, controller.signal, async waiting => { await this.state(a, waiting ? 'awaiting_user' : 'executing_tools'); }), controller.signal);
           receipt = { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef };
           if (effect) Object.assign(effect, receipt);
-          const current = await abortable(this.toolResultCheck(a, t), controller.signal);
+          const outcomeError = toolOutcomeError(outcome.error);
+          const rejectedScreenRead = t.effectClass === 'read' && t.requiredCapabilities.includes('screen_perception') && outcomeError !== undefined;
+          // A rejected read has no body to admit. Recheck authority/capabilities
+          // first, then preserve Native's fixed refusal instead of masking it
+          // with a source change. Successful reads keep both source checks.
+          const current = await abortable(this.toolResultCheck(a, t, !rejectedScreenRead), controller.signal);
+          if (rejectedScreenRead) fail(outcomeError!);
+          if (outcomeError === 'TARGET_CHANGED') {
+            if (outcome.targetChangedReason === 'input_focus_mismatch' &&
+                ['input.press_button', 'input.set_axes', 'input.navigate'].includes(t.toolId) && t.effectClass === 'input') targetChangedReason = 'input_focus_mismatch';
+            fail('TARGET_CHANGED');
+          }
+          if (outcomeError === 'PROTOCOL_ERROR' && outcome.error !== 'PROTOCOL_ERROR') fail('PROTOCOL_ERROR');
           const bounded = await abortable(this.boundOutcome(outcome, t, current), controller.signal);
           // Attachment resolution is asynchronous too: revocation or stop while
           // unpacking must not admit its text/images into the transcript.
           await abortable(this.toolResultCheck(a, t), controller.signal);
           a.resultRefs.set(callId, bounded.domain);
-          await this.event(a, 'tool_result', { toolId: t.toolId, observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, error: outcome.error, outcome: outcome.outcome, evidenceRef: outcome.evidenceRef, content: bounded.domain }, callId);
-          return { content: bounded.content, details: { observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, outcome: outcome.outcome ?? 'observed' }, isError: !!outcome.error };
+          await this.event(a, 'tool_result', { toolId: t.toolId, observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, error: outcomeError, outcome: outcome.outcome, evidenceRef: outcome.evidenceRef, content: bounded.domain }, callId);
+          if (outcomeError === undefined) {
+            if (t.toolId === 'perception.select_screen') a.observationRequired = true;
+            else if (isCurrentScreenRead(t)) a.observationRequired = false;
+          }
+          return { content: bounded.content, details: { observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, outcome: outcome.outcome ?? 'observed' }, isError: outcomeError !== undefined };
         } catch (error) {
           const code = timedOut ? 'TIMEOUT' : a.controller.signal.aborted ? a.stopReason ?? 'CANCELLED' : error instanceof RuntimeError ? error.code : 'IO_ERROR';
           if (code === 'PERSISTENCE_ERROR') { a.stopReason = code; a.controller.abort(); }
           // Revocation withholds content, but cannot undo a submitted action.
           // Only a receipt already received before this rejection is retained;
           // uncooperative executors never write events after terminal state.
-          const result = { error: code, outcome: receipt?.outcome ?? 'unknown', evidenceRef: receipt?.evidenceRef, contentDiscarded: receipt !== undefined };
-          await this.event(a, 'tool_result', { toolId: t.toolId, ...result }, callId);
-          return { content: [{ type: 'text' as const, text: code }], details: result, isError: true, terminate: a.controller.signal.aborted };
+          const recovery = code === 'TARGET_CHANGED' ? {
+            kind: 'observe_again', continueRun: true, retryPreviousAction: false, discardPreviousTarget: true,
+            submission: !dispatched ? 'not_dispatched' : receipt?.outcome === 'submitted' ? 'submitted' : 'unknown',
+            sideEffectPossible: t.effectClass !== 'read' && t.effectClass !== 'network',
+            ...(targetChangedReason ? { reason: targetChangedReason } : {}),
+            instruction: 'The page or target changed. Continue this Run by observing the current selected screen before deciding the next action. Discard old coordinates, frame IDs and node refs. Do not replay the previous action. Unknown submission is not proof it did not execute.' +
+              (targetChangedReason ? ' The authorized target does not currently own the required input focus. Repeated screenshots alone do not restore input focus. First observe the current windows and focus; if still permitted by the task and current guards, use an existing legal app launch or a touch on the selected screen to restore focus, then observe again before deciding a new action. Do not change focus locks or permissions, auto-focus, or automatically retry the rejected input.' : ''),
+          } : undefined;
+          if (recovery) a.observationRequired = true;
+          const result = { error: code, outcome: receipt?.outcome ?? 'unknown', evidenceRef: receipt?.evidenceRef, contentDiscarded: receipt !== undefined, ...(recovery ? { recovery } : {}) };
+          const content = [{ type: 'text' as const, text: recovery ? JSON.stringify(result) : code }];
+          if (recovery) a.resultRefs.set(callId, content);
+          await this.event(a, 'tool_result', { toolId: t.toolId, ...result, ...(recovery ? { content } : {}) }, callId);
+          return { content, details: result, isError: true, terminate: a.controller.signal.aborted || !!signal?.aborted };
         } finally { clearTimeout(timer); a.controller.signal.removeEventListener('abort', cancel); signal?.removeEventListener('abort', cancel); }
       } }));
   }
@@ -173,6 +242,7 @@ export class ThorRuntime {
     const domain: Content[] = [];
     for (const c of outcome.content) {
       if (c.type === 'text') {
+        if (typeof c.text !== 'string') fail('PROTOCOL_ERROR');
         const bytes = new TextEncoder().encode(c.text);
         const cut = bytes.subarray(0, remaining);
         const text = new TextDecoder('utf-8', { fatal: false }).decode(cut, { stream: true });
@@ -196,24 +266,24 @@ export class ThorRuntime {
       const expectedPath = a.profile.protocol === 'openai-responses' ? `${base.pathname.replace(/\/$/, '')}/responses` : a.profile.protocol==='openai-completions' ? `${base.pathname.replace(/\/$/,'')}/chat/completions` : `${base.pathname.replace(/\/$/, '').replace(/\/v1$/, '')}/v1/messages`;
       const allowedQuery = a.profile.protocol === 'anthropic-messages' ? u.search === '?beta=true' || u.search === '' : u.search === '';
       if (request.method !== 'POST' || u.origin !== base.origin || u.pathname !== expectedPath || !allowedQuery) fail('UNSUPPORTED');
-      const body = new Uint8Array(await request.clone().arrayBuffer());
+      const body = new Uint8Array(await this.watch(a, 'request_body', () => abortable(request.clone().arrayBuffer(), a.controller.signal)));
       if (body.byteLength > this.limits.maxRequestBytes) fail('LIMIT_EXCEEDED');
       const controller = new AbortController();
       const abort = () => controller.abort(); a.controller.signal.addEventListener('abort', abort, { once: true }); request.signal.addEventListener('abort', abort, { once: true });
       const cleanup = () => { a.controller.signal.removeEventListener('abort', abort); request.signal.removeEventListener('abort', abort); };
       if (a.controller.signal.aborted || request.signal.aborted) controller.abort();
       try {
-        const response = await abortable(this.ports.network.fetch(request, { signal: controller.signal, redirect: 'error' }, {
+        const response = await this.watch(a, 'network_headers', () => abortable(this.ports.network.fetch(request, { signal: controller.signal, redirect: 'error' }, {
           bridgeVersion: '0.1', purpose: 'model', requestId: crypto.randomUUID(), sessionId: a.run.sessionId, runId: a.run.runId, leaseId: a.lease.leaseId, capabilityEpoch: a.lease.capabilityEpoch,
           profileRef: a.profile.profileId, profileRevision: a.profile.revision, credentialRef: a.profile.credentialRef, credentialPlaceholder: 'sk-thor-native-placeholder', deadline: Math.min(a.lease.expiresAt, this.limits.runTimeoutMs ? a.run.startedAt + this.limits.runTimeoutMs : Number.MAX_SAFE_INTEGER),
-        }), controller.signal);
+        }), controller.signal));
         if (response.redirected || response.status >= 300 && response.status < 400 || response.url && new URL(response.url).origin !== base.origin) fail('UNSUPPORTED');
         if (!response.body) { cleanup(); return response; }
         const reader = response.body.getReader(); let received = 0;
         const limited = new ReadableStream<Uint8Array>({
           pull: async stream => {
             try {
-              const next = await abortable(reader.read(), controller.signal);
+              const next = await this.watch(a, 'network_read', () => abortable(reader.read(), controller.signal));
               if (next.done) { cleanup(); stream.close(); return; }
               received += next.value.byteLength;
               if (received > this.limits.maxResponseBytes) fail('LIMIT_EXCEEDED');
@@ -266,7 +336,7 @@ export class ThorRuntime {
     // A tool-local timeout/rejection can finish while its Native approval RPC is
     // still unwinding. Leave awaiting_user before Pi starts its next model turn.
     if(e.type==='tool_execution_end' && a.run.state==='awaiting_user' && !a.controller.signal.aborted)await this.state(a,'executing_tools');
-    if (e.type === 'tool_execution_end' && e.isError) await this.event(a, 'diagnostic', { code: 'TOOL_FAILED', toolName: e.toolName }, e.toolCallId);
+    if (e.type === 'tool_execution_end' && e.isError) await this.event(a, 'diagnostic', { code: e.result.details?.recovery?.kind === 'observe_again' ? 'TARGET_CHANGED' : 'TOOL_FAILED', toolName: e.toolName }, e.toolCallId);
   }
   async run(lease: RunLease, input: Content[], history: HistoryTurn[] = []): Promise<AgentRun> {
     assertRuntimeFeatures();
@@ -285,7 +355,7 @@ export class ThorRuntime {
       const initial = await abortable(this.ports.authority.read(lease.sessionId, lease.runId), pending.controller.signal);
       const profile = structuredClone(initial.session.model); checkProfile(profile);
       a = { run: { sessionId: lease.sessionId, runId: lease.runId, state: 'queued', modelProfileRevision: profile.revision, capabilityEpoch: lease.capabilityEpoch, startedAt: Date.now() },
-        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], streamMessage: 0, messageOffset:0, input, turnId: crypto.randomUUID() };
+        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], observationRequired:false, waits:new Map(),waitSequence:0,lastProgress:performance.now(), streamMessage: 0, messageOffset:0, input, turnId: crypto.randomUUID() };
       this.active = a; const active = a; const model = toModel(profile);
       active.stream=new StreamEvents(f=>this.writeEvent(active,f.type,f.data,f.toolCallId));
       if(initial.session.enabled.screen_perception && (initial.l0.device || initial.l0.upperApp))a.source.add('screen_perception');
@@ -296,7 +366,7 @@ export class ThorRuntime {
       let audit = new ProtocolAudit();
       if(this.session && this.session.sessionId!==lease.sessionId)fail('STALE_AUTHORIZATION');
       const previous=this.session?.agent;
-      const restored=previous?[]:await project(history.slice(-this.limits.maxHistoryTurns).flatMap(t=>t.source.every(c=>initial.session.enabled[c])?closeInterruptedRound(t.messages):t.messages.filter(m=>m.kind==='user')),model,this.ports.attachments,initial);
+      const restored=previous?[]:await projectHistory(history.slice(-this.limits.maxHistoryTurns).flatMap(t=>t.source.every(c=>initial.session.enabled[c])?closeInterruptedRound(t.messages):t.messages.filter(m=>m.kind==='user')),model,this.ports.attachments,initial);
       active.messageOffset=previous?.state.messages.filter(m=>m.role!=='system').length??restored.length;
       const agentOptions:AgentOptions={initialState:{model,thinkingLevel:profile.thinkingEffort??'off',messages:restored},sessionId:lease.sessionId,toolExecution:'sequential',transport:'sse',
         beforeToolCall: async ({ toolCall }) => audit.permits(toolCall.id, toolCall.arguments) ? undefined : { block: true, reason: 'PROTOCOL_ERROR: incomplete or conflicting JSON', terminate: true },
@@ -329,7 +399,8 @@ export class ThorRuntime {
         streamFn: (_model, context, options) => {
           const fetcher=this.fetch(active);
           const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onProviderStreamEvent: (event: unknown) => audit.observe(profile.protocol, event), apiKey: 'sk-thor-native-placeholder', fetch: this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher), transport: 'sse' as const, maxTokens: profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
-          return profile.protocol === 'openai-responses' ? responses(model, context, common) : profile.protocol==='openai-completions' ? completions(model,context,common) : anthropic(model, context, common);
+          const source = profile.protocol === 'openai-responses' ? responses(model, context, common) : profile.protocol==='openai-completions' ? completions(model,context,common) : anthropic(model, context, common);
+          return providerStopBoundary(source, active.controller.signal, model, (phase, work) => this.watch(active, phase, work));
         },
       };
       const agent=previous??new Agent(agentOptions);
@@ -338,7 +409,7 @@ export class ThorRuntime {
       a.agent = agent;
       const abortAgent = () => agent.abort(); a.controller.signal.addEventListener('abort', abortAgent, { once: true });
       const unsubscribe=agent.subscribe(e => this.onPi(active, e));
-      try {await agent.prompt(user);} finally {unsubscribe();}
+      try {await this.watch(a, 'agent_prompt', () => agent.prompt(user));} finally {unsubscribe();a.controller.signal.removeEventListener('abort',abortAgent);}
       if (a.persistenceFailed) fail('PERSISTENCE_ERROR');
       const assistant = agent.state.messages.filter(m => m.role === 'assistant').at(-1);
       const saveIncomplete = () => this.saveTurn(active,false);

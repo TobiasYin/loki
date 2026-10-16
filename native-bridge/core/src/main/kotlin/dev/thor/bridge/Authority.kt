@@ -41,6 +41,14 @@ class Authority(val clock: MonotonicClock = SYSTEM_CLOCK) {
     @Synchronized fun invalidateResources(sessionId: String) { sessions.getValue(sessionId).epoch++; changed() }
     @Synchronized fun disconnect(connectionId: String) { connections.remove(connectionId); runs.values.filter { it.connection == connectionId }.forEach { it.alive = false }; changed() }
     @Synchronized fun stopRun(runId: String? = null) { runs.values.filter { runId == null || it.id == runId }.forEach { it.alive = false }; changed() }
+    /** Capture exactly the existing work in one chat before a queued UI stop.
+     * A later Run in that chat must never inherit an earlier stop request. */
+    @Synchronized fun stopSessionRuns(sessionId:String,runId:String?=null):List<String> {
+        val affected=runs.values.filter {it.session==sessionId && (runId==null || it.id==runId) && it.alive}.map {it.id}
+        affected.forEach {runs.getValue(it).alive=false}
+        if(affected.isNotEmpty())changed()
+        return affected
+    }
     @Synchronized fun onChange(listener: () -> Unit): AutoCloseable { listeners.add(listener); return AutoCloseable { synchronized(this) { listeners.remove(listener) } } }
     private fun changed() { listeners.toList().forEach { listener -> try { listener() } catch (_: Exception) { /* One observer cannot prevent the others from revoking. */ } } }
     @Synchronized fun validate(binding: Binding, strictEpoch: Boolean = true) {

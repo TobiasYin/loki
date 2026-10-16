@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "testCount": 2,
+  "failures": 0,
+  "skips": 0,
+  "durationSeconds": 6.783,
+  "cloudRequests": 0,
+  "localLoopbackSseRequests": 5,
+  "deviceInputCalls": 0,
+  "notificationPermissionAndFullFlagsRestored": true,
+  "profilesCredentialsRolesByteHashesRestored": true,
+  "selectedSessionRestored": true,
+  "originalHistoryPreserved": true,
+  "activeRuns": 0,
+  "serviceExited": true,
+  "scope": "Short Native/Pi lifecycle and stop regression only; long-background timer survival is not established.",
+  "artifactHashes": {
+    "app-debug.apk": "429ffa7de34897990f10a0b448454a4482af17cef1c8ab22b298cf7da3ce2b13",
+    "app-debug-androidTest.apk": "82461feef8ceda1be9cce8fb298a4a7809bf0c184bc0b23078b5339de3bf763b",
+    "input-lab-debug.apk": "57278e3c3a49f8cee4e73850ed05fdcf01ae612d4e4e8dc70795542c221333f3"
+  },
+  "historyCountsBefore": {
+    "sessions": 22,
+    "runs": 44,
+    "messages": 88,
+    "events": 274,
+    "attachments": 12
+  },
+  "historyCountsAfter": {
+    "sessions": 23,
+    "runs": 48,
+    "messages": 96,
+    "events": 308,
+    "attachments": 12
+  }
+}
