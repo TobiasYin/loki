@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "scope": "ThirdfixedApp7da2/Testcdac/Lab4cd0 Dynamic1+ModernUI1 actual2passes; earlier2fails retained. No cloud/Thor/model/game/2037/380 claim. Excludesitself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3927,
+      "sha256": "d9e74839488ed046dd2cee9c7e9690786285179bb3cd1c84844a6cb8ab52e29e"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "11b68ccbb134b9db93b8499af7036ce2d9e3de47ac3565b88b2c28b2bc2a6247"
+    },
+    {
+      "path": "component.json",
+      "bytes": 6432,
+      "sha256": "c2f4908d02afb4a5750c4f0558f8d64ee01087392c94a80f43eb2f9516743cf5"
+    },
+    {
+      "path": "dynamic-after.jpg",
+      "bytes": 19457,
+      "sha256": "249ccd79f0536ae4e4863c614309c5fbda5fbb46d2109566bb34d6238b8ce9b6"
+    },
+    {
+      "path": "dynamic-before.jpg",
+      "bytes": 19802,
+      "sha256": "5edc0fd5586e4f9fd1de57855b1e4d1d20d77abad6d82fa47ae778d911606af0"
+    },
+    {
+      "path": "dynamic-content-explicit.log",
+      "bytes": 844,
+      "sha256": "533c81ec5ad67148123557ce423452dbcb362a6e34df7eeaf1593d4af7e81c9e"
+    },
+    {
+      "path": "fixture-before-swipe.jpg",
+      "bytes": 17580,
+      "sha256": "75eefddef9e2f709d96e0b133274145709091f866bb0aeb1bae2dce915c9073e"
+    },
+    {
+      "path": "modern-ui-explicit.log",
+      "bytes": 844,
+      "sha256": "15985bd0cd7492d947d273023c7253242e4c3756ec9264d5abd1c8346cfdd8f2"
+    },
+    {
+      "path": "modern-ui.json",
+      "bytes": 7510,
+      "sha256": "648e6f94c897227dd8b6e7f491be7aa9219fc4d7f90d7b5ca5c8ebd5d5140bd4"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2176,
+      "sha256": "6d8fbfbb066615de19c3d6af1cc0f4090d787ecb5fbb78ff9eee4507ab2398a3"
+    },
+    {
+      "path": "received-gestures.json",
+      "bytes": 4509,
+      "sha256": "5be1a7ac05835a927aeae277845d19c012be8589dc7260eda8745966f4122cb4"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 3279,
+      "sha256": "5dd0dcac263e0bbcc9f5a8260a7744414a3ca2d72f4aaeaf19274cb685a3dddf"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "status": "THIRD_FIXED_PAIR_DYNAMIC_AND_MODERN_UI_PASS",
+  "collectedUtc": "2026-10-17T04:22:45.588814+00:00",
+  "scope": "App7da2/Testcdac/Lab4cd0 only. DynamicrealNativeordinaryActivity1+ModernUI1 actual2passes. Previousattempt1/2failures unchanged.",
+  "artifacts": {
+    "app-debug.apk": {
+      "sha256": "7da2c6d3063f7877e467e6334b89d6c2156bbce5655d1e5606652e18187010cf",
+      "bytes": 7496753
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "cdacb660d1f45155c32de0aabcbefed21a4e52d81c88fb428dad913439f170dc",
+      "bytes": 3480986
+    },
+    "input-lab-debug.apk": {
+      "sha256": "4cd028e29e8ae4b8fb40217f70eaa0304c21b2a28a7f43fd9b313dc536f36689",
+      "bytes": 2952047
+    }
+  },
+  "executedCases": 2,
+  "passed": 2,
+  "failed": 0,
+  "skipped": 0,
+  "retriesWithinThisPair": 0,
+  "attemptIndex": 3,
+  "explicitFlags": {
+    "Dynamic": "dynamicContentAcceptance=true",
+    "ModernUI": "emulatorUiComponents=true"
+  },
+  "instrumentation": [
+    {
+      "name": "dynamic-content-explicit.log",
+      "bytes": 844,
+      "sha256": "533c81ec5ad67148123557ce423452dbcb362a6e34df7eeaf1593d4af7e81c9e",
+      "durationSeconds": 42.729,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "modern-ui-explicit.log",
+      "bytes": 844,
+      "sha256": "15985bd0cd7492d947d273023c7253242e4c3756ec9264d5abd1c8346cfdd8f2",
+      "durationSeconds": 16.914,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "component": {
+    "realChangingImageHashes": true,
+    "oldFrameTapAfterVisualUpdates": true,
+    "oldLogicalPointAfterVisualUpdates": true,
+    "stableSemanticNodeAfterVisualUpdates": true,
+    "movedNodeRejected": true,
+    "realModalOldFrameRejectedWithoutDispatch": true,
+    "actualScrollGeometry": {
+      "viewportHeight": 2400,
+      "contentHeight": 3776,
+      "scrollRange": 1376,
+      "canScrollDown": true
+    },
+    "committedSwipeSurvivedItsOwnFeedback": true,
+    "actualScrollY": 1376,
+    "scrollCallbacks": 36,
+    "oldFrameAfterScrollRejectedWithoutDispatch": true,
+    "clickCount": 3,
+    "motionSamples": 28,
+    "ticks": 242,
+    "canvasFrames": 1179,
+    "cleanupErrors": 0
+  },
+  "preservation": {
+    "passed": true,
+    "initialRuns": 119,
+    "finalRuns": 120,
+    "sessionUpdatedAtChanges": 0,
+    "allOriginalPayloadsByteIdentical": true,
+    "runtimeServiceExited": true,
+    "allRunsTerminal": true,
+    "actualInstalledHashesMatch": true
+  },
+  "cloudCalls": 0,
+  "modelExecutions": 0,
+  "thorOperations": false,
+  "gameOrPhysicalControllerAcceptance": false,
+  "presentation2037Executed": false,
+  "long380Executed": false,
+  "sourceOrBuildByCollector": false,
+  "finalReleaseAllCasesClaim": false,
+  "limitations": [
+    "RealNativeordinaryActivity fixture, not autonomous model/game/controller execution.",
+    "ModernUI uses syntheticstate/interceptedNativecommands and doesnot prove model execution.",
+    "contentChangedDuringCapture is observedAccessibility revision, not literal pixel identity; originalcaptureidentity remains distinct.",
+    "Previousfails kept separately; no singlepass rewrites their error origin.",
+    "Future malicious/coarse Accessibility semantics and apps without exposednodes remain outside this fixture."
+  ]
+}

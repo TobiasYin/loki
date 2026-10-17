@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-17T04:13:24.205165+00:00",
+  "status": "TEST_FIXTURE_BUILD_INCREMENT_NOT_NEW_JVM_OR_DEVICE_PASS",
+  "baseline": "../software/summary.json",
+  "gradle": {
+    "seconds": 6,
+    "tasks": 158,
+    "executed": 18,
+    "upToDate": 140,
+    "success": true,
+    "log": "gradle.log"
+  },
+  "change": {
+    "files": [
+      "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/DynamicContentFixtureActivity.kt",
+      "app/src/androidTest/java/dev/thor/agent/EmulatorDynamicContentTest.kt"
+    ],
+    "fixture": "rowCount=max(22,heightPixels/rowHeight+12), with actual viewport/content/scrollRange/canScrollDown reported",
+    "test": "Assert real scrollRange>0 and canScrollDown before Native swipe; retain actual receiver scrollY>0 requirement",
+    "productionBehaviorChanged": false
+  },
+  "pins": [
+    {
+      "path": "build/dynamic-input/pinned-fixture-fix/app-debug.apk",
+      "sha256": "33f084ad42b2436669f5e3ea4a4594290a4061953add561f3d34121b8c28b36c",
+      "bytes": 7494093
+    },
+    {
+      "path": "build/dynamic-input/pinned-fixture-fix/app-debug-androidTest.apk",
+      "sha256": "d4d4f09c09809434fbc23d90d4939271ce7dc969910f82775ebc577db71aef5c",
+      "bytes": 3477762
+    },
+    {
+      "path": "build/dynamic-input/pinned-fixture-fix/input-lab-debug.apk",
+      "sha256": "4cd028e29e8ae4b8fb40217f70eaa0304c21b2a28a7f43fd9b313dc536f36689",
+      "bytes": 2952047
+    }
+  ],
+  "actualPinHashesVerified": true,
+  "productionAppByteIdenticalToBaseline": true,
+  "selectedBaselineSourcesUnchanged": 66,
+  "jvm": {
+    "newExecution": false,
+    "newTestsAddedToTotal": 0,
+    "retainedPriorTotal": 441,
+    "baseline": "../software/junit-xml-hashes.json"
+  },
+  "retainedSoftware": {
+    "runtime251": "unchanged-source prior result; not rerun",
+    "chatJs73": "unchanged-source prior result; not rerun"
+  },
+  "initialFailure": "initial-fixture-failure-summary.json",
+  "limits": [
+    "Original software package and original failed device run are preserved",
+    "Delivered DOWN/16 MOVE/UP did not imply scroll: fixed 22-row content did not exceed viewport",
+    "This increment builds changed debug fixture/test only and does not claim a rerun of JVM441 or device acceptance",
+    "No model/cloud/game completion claim; device evidence handled independently",
+    "Collector wrote only this sibling directory and did not modify source, build, device or parent manifest"
+  ]
+}

@@ -17,9 +17,9 @@ class ReadObservationTest {
         val completed=snapshots.captureReadCompletion(capture.id)
         assertNotEquals(capture.id,completed.id);assertEquals("text-1",capture.target.revision);assertEquals("RAM-99",completed.target.revision)
         assertFalse("New content identity must not pretend to be captured pixels",capture.target.sameLayout(completed.target))
-        rejected {snapshots.validate(capture.id)};assertEquals(completed,snapshots.validate(completed.id))
+        assertEquals(capture,snapshots.validate(capture.id));assertEquals(completed,snapshots.validate(completed.id))
         current=current.copy(revision="RAM-100")
-        assertEquals(completed,snapshots.validateObservation(completed.id));rejected {snapshots.validate(completed.id)}
+        assertEquals(completed,snapshots.validateObservation(completed.id));assertEquals(completed,snapshots.validate(completed.id))
     }
     @Test fun packageWindowFocusGeometryClippingAndValidityStillInvalidateARead() {
         for(change in listOf<(Target)->Target>(
@@ -70,17 +70,16 @@ class ReadObservationTest {
         val result=Gateway(authority,backend,snapshots,clock).execute(Envelope(lease.session,lease.run,"read","perception.capture_screen",lease.epoch,lease.deadline,source.id),emptyMap())
         assertNull(result.error);assertEquals("captured-earlier",result.data["pixels"])
         assertNotEquals(result.data["captureSnapshotId"],result.data["targetSnapshotId"])
-        rejected {snapshots.validate(result.snapshotId)} // Never relax a subsequent coordinate input.
+        assertNotNull(snapshots.validate(result.snapshotId)) // Pure content does not move the input target.
     }
-    @Test fun fixedBackCanStartAfterContentUpdateWhileCoordinateAndExistingScrollInputsRemainStrict() {
+    @Test fun allInputKindsCanStartAfterPureContentUpdatesWhileNodeIdentityIsCheckedSeparately() {
         val clock=Clock {1000};var current=initial();val snapshots=snapshots(clock){current};val source=snapshots.capture()
         current=current.copy(revision="RAM-before-input");var entries=0;var submissions=0
         val backend=object:DeviceBackend {
             override fun availability(toolId:String)=Availability(Status.READY,"test","navigation-fixture")
             override fun release(runId:String)="none"
             override fun execute(envelope:Envelope,args:Map<String,Any?>,checkpoint:Checkpoint):ToolResult {
-                entries++;assertEquals("input.navigate",envelope.toolId)
-                NavigationCommand.parse(args);current=current.copy(revision="RAM-before-BACK")
+                entries++;current=current.copy(revision="RAM-before-input")
                 checkpoint.effect {submissions++}
                 return ToolResult(clock.now(),"navigation-fixture",availability(envelope.toolId),outcome="submitted")
             }
@@ -89,10 +88,10 @@ class ReadObservationTest {
         val gateway=Gateway(authority,backend,snapshots,clock)
         fun envelope(tool:String)=Envelope(lease.session,lease.run,tool,tool,lease.epoch,lease.deadline,source.id)
         for(tool in listOf("input.tap","input.long_press","input.swipe","input.drag","input.scroll","input.press_button","input.set_axes"))
-            assertEquals(tool,Code.TARGET_CHANGED,gateway.execute(envelope(tool),emptyMap()).error)
-        assertEquals(0,entries)
+            assertNull(tool,gateway.execute(envelope(tool),emptyMap()).error)
+        assertEquals(7,entries)
         assertNull(gateway.execute(envelope("input.navigate"),mapOf("action" to "back")).error)
-        assertEquals(1,entries);assertEquals(1,submissions)
+        assertEquals(8,entries);assertEquals(8,submissions)
     }
     @Test fun fixedBackStillRejectsWindowOrTouchableGeometryChangesBeforeCommit() {
         for(change in listOf<(Target)->Target>({it.copy(layoutRevision="overlay")},{it.copy(packageName="other.app")},{it.copy(touchableBounds=TouchableBounds(0,70,1920,1080))})) {

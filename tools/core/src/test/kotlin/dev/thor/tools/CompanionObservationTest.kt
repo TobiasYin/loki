@@ -38,7 +38,7 @@ class CompanionObservationTest {
         val f=Fixture(upper,lower);val o=f.companion()
         f.targets[0]=f.targets.getValue(0).copy(revision="ram-2");f.targets[4]=f.targets.getValue(4).copy(revision="game-animation-2")
         f.snapshots.validateCompanion(o)
-        rejects(Code.TARGET_CHANGED) {f.snapshots.validate(o.upper.id)} // Coordinates remain strict.
+        assertEquals(o.upper,f.snapshots.validate(o.upper.id)) // Animation alone does not move the upper input target.
         for(change in listOf(f.targets.getValue(4).copy(layoutRevision="new-dialog"),f.targets.getValue(4).copy(packageName="other.app"),f.targets.getValue(4).copy(touchableBounds=TouchableBounds(0,1,1240,1080)))) {
             val original=f.targets.getValue(4);f.targets[4]=change;rejects(Code.TARGET_CHANGED) {f.snapshots.validateCompanion(o)};f.targets[4]=original
         }

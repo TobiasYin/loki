@@ -19,9 +19,18 @@ object FullScreenGeometry {
 data class Target(val packageName: String?, val validity: String, val revision: String,val touchableBounds:TouchableBounds?=null,
     // Null preserves legacy/synthetic semantics, including copy(revision=...).
     // Real Accessibility targets provide structure separately from content events.
-    val layoutRevision:String?=null) {
+    val layoutRevision:String?=null,
+    // Scroll/subtree changes expire new coordinates without cancelling a hold
+    // that caused them or invalidating an unchanged physical window proof.
+    val interactionRevision:String?=null) {
     fun sameStructure(other:Target)=packageName==other.packageName && validity==other.validity && (layoutRevision ?: revision)==(other.layoutRevision ?: other.revision)
+    /** Content identity remains useful for diagnostics and captured-pixel provenance. */
     fun sameLayout(other:Target)=sameStructure(other) && revision==other.revision && (touchableBounds==null)==(other.touchableBounds==null)
+    /** Normal text/caret/render updates do not move an input target. Actual
+     * window identity and visibility evidence must remain available. Coordinate
+     * inputs separately require every point inside both observed/current clips. */
+    fun sameInputTarget(other:Target)=sameStructure(other) && (touchableBounds==null)==(other.touchableBounds==null) &&
+        (interactionRevision ?: layoutRevision ?: revision)==(other.interactionRevision ?: other.layoutRevision ?: other.revision)
 }
 data class Snapshot(val id: String, val display: DisplayFact, val displayEpoch: Long, val target: Target, val expires: Long,val role:String="upper")
 class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Target) {
@@ -76,11 +85,12 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
         requireTool(clock.now() < snap.expires && snap.displayEpoch == epoch && snap.display == selected(snap.role),
             Code.TARGET_CHANGED, "Display snapshot expired/changed")
         val current=currentTarget(snap.display.id);checkRoleTarget(snap.display,snap.role,current)
-        requireTool(snap.target.sameLayout(current), Code.TARGET_CHANGED, "Selected screen windows/app/layout changed")
+        requireTool(snap.target.sameInputTarget(current), Code.TARGET_CHANGED, "Selected screen windows/app/layout changed")
         return snap
     }
     /** An already-submitted bounded hold may ignore its own content feedback.
-     * New coordinate inputs and existing node references keep strict validate(). */
+     * New inputs still check exact clipping; node references check their own
+     * identity/path/signature independently of visual content revisions. */
     @Synchronized fun validateHeld(id:String?):Snapshot {
         val snap=snapshots[id] ?: fail(Code.TARGET_CHANGED,"Snapshot missing/invalidated")
         requireTool(clock.now()<snap.expires && snap.displayEpoch==epoch && snap.display==selected(snap.role),
@@ -91,7 +101,8 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
     }
     /** Reading pixels/text and fixed non-coordinate navigation may span app text
      * updates. Window identity, focus, package, exact clipping and display remain
-     * bound to the original observation. This never authorizes coordinates/refs. */
+     * bound to the original observation. Node references need independent identity
+     * verification and frame coordinates retain their separate frame binding. */
     @Synchronized fun validateObservation(id:String?):Snapshot {
         val snap=snapshots[id] ?: fail(Code.TARGET_CHANGED,"Observation missing/invalidated")
         requireTool(clock.now()<snap.expires && snap.displayEpoch==epoch && snap.display==selected(snap.role),
@@ -115,7 +126,7 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
         val snap=validate(id)
         snap.target.touchableBounds?.let { observed ->
             val current=currentTarget(snap.display.id)
-            requireTool(snap.target.sameLayout(current) && current.touchableBounds!=null,Code.TARGET_CHANGED,"Input touch region evidence changed")
+            requireTool(snap.target.sameInputTarget(current) && current.touchableBounds!=null,Code.TARGET_CHANGED,"Input touch region evidence changed")
             val currentClip=current.touchableBounds ?: fail(Code.TARGET_CHANGED,"Current touchable region missing")
             requireTool(points.isNotEmpty() && points.all {observed.contains(it) && currentClip.contains(it)},Code.TARGET_CHANGED,"Input leaves observed/current touchable region")
             // Both clips are rectangles: a polyline with every vertex inside their

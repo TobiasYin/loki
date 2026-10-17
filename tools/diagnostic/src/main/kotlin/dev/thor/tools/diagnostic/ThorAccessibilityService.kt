@@ -138,7 +138,7 @@ class ThorAccessibilityService : AccessibilityService() {
     }
     override fun onAccessibilityEvent(event:AccessibilityEvent?) {
         if(event==null)return
-        val kind=TargetEventKind.fromAndroidType(event.eventType)
+        val kind=TargetEventKind.fromAndroidType(event.eventType,event.windowChanges,event.contentChangeTypes)
         val all=windowsOnAllDisplays
         if(kind==TargetEventKind.STRUCTURE) {
             val windows=linkedMapOf<Int,Set<Int>>()

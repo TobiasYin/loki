@@ -1,0 +1,954 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:compileKotlin UP-TO-DATE
+> Task :core:compileJava NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :core:compileTestKotlin UP-TO-DATE
+> Task :core:compileTestJava NO-SOURCE
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses UP-TO-DATE
+> Task :core:test UP-TO-DATE
+> Task :device-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :device-core:processResources NO-SOURCE
+> Task :device-core:processTestResources UP-TO-DATE
+> Task :device-authority:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :device-authority:processResources NO-SOURCE
+> Task :device-authority:processTestResources NO-SOURCE
+> Task :android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :android:copyFetchAssets UP-TO-DATE
+> Task :android:preBuild UP-TO-DATE
+> Task :android:preDebugBuild UP-TO-DATE
+> Task :android:generateDebugResValues UP-TO-DATE
+> Task :android:generateDebugResources UP-TO-DATE
+> Task :android:packageDebugResources UP-TO-DATE
+> Task :android:parseDebugLocalResources UP-TO-DATE
+> Task :android:generateDebugRFile UP-TO-DATE
+> Task :android:compileDebugKotlin UP-TO-DATE
+> Task :android:javaPreCompileDebug UP-TO-DATE
+> Task :android:compileDebugJavaWithJavac NO-SOURCE
+> Task :android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :android:processDebugJavaRes UP-TO-DATE
+> Task :android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :bundleRuntime
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :android:compileDebugLibraryResources UP-TO-DATE
+> Task :android:writeDebugAarMetadata UP-TO-DATE
+> Task :device-android:preBuild UP-TO-DATE
+> Task :device-android:preDebugBuild UP-TO-DATE
+> Task :device-android:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :device-android:generateDebugResValues UP-TO-DATE
+> Task :device-android:generateDebugResources UP-TO-DATE
+> Task :device-android:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android:extractDeepLinksDebug UP-TO-DATE
+> Task :android:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :device-android:extractDeepLinksDebug UP-TO-DATE
+> Task :device-android:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :device-android:compileDebugLibraryResources UP-TO-DATE
+> Task :device-android:parseDebugLocalResources UP-TO-DATE
+> Task :device-android:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :device-android:compileDebugAidl UP-TO-DATE
+> Task :device-android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :device-android:javaPreCompileDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:preDebugUnitTestBuild
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :input-lab:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :input-lab:preBuild UP-TO-DATE
+> Task :input-lab:preDebugBuild UP-TO-DATE
+> Task :input-lab:generateDebugBuildConfig UP-TO-DATE
+> Task :input-lab:checkDebugAarMetadata UP-TO-DATE
+> Task :input-lab:generateDebugResValues UP-TO-DATE
+> Task :input-lab:mapDebugSourceSetPaths
+> Task :input-lab:generateDebugResources
+> Task :input-lab:packageDebugResources
+> Task :input-lab:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :input-lab:extractDeepLinksDebug UP-TO-DATE
+> Task :input-lab:parseDebugLocalResources
+> Task :input-lab:mergeDebugResources
+> Task :input-lab:processDebugMainManifest
+> Task :input-lab:processDebugManifest
+> Task :input-lab:javaPreCompileDebug UP-TO-DATE
+> Task :input-lab:preDebugUnitTestBuild UP-TO-DATE
+> Task :input-lab:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :android:mergeDebugNativeLibs NO-SOURCE
+> Task :android:stripDebugDebugSymbols NO-SOURCE
+> Task :android:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :android:extractDebugAnnotations UP-TO-DATE
+> Task :android:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :android:mergeDebugShaders UP-TO-DATE
+> Task :android:compileDebugShaders NO-SOURCE
+> Task :android:generateDebugAssets UP-TO-DATE
+> Task :android:mergeDebugAssets UP-TO-DATE
+> Task :android:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :android:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :android:prepareDebugArtProfile UP-TO-DATE
+> Task :android:prepareLintJarForPublish UP-TO-DATE
+> Task :android:mergeDebugJavaResource UP-TO-DATE
+> Task :android:syncDebugLibJars UP-TO-DATE
+> Task :android:bundleDebugLocalLintAar UP-TO-DATE
+> Task :input-lab:processDebugManifestForPackage
+> Task :android:createFullJarDebug UP-TO-DATE
+> Task :android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :android:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :android:writeDebugLintModelMetadata UP-TO-DATE
+> Task :android:generateDebugAndroidTestLintModel UP-TO-DATE
+> Task :android:extractProguardFiles UP-TO-DATE
+> Task :android:generateDebugLintModel UP-TO-DATE
+> Task :android:preDebugUnitTestBuild UP-TO-DATE
+> Task :android:generateDebugUnitTestLintModel UP-TO-DATE
+> Task :android:lintAnalyzeDebug UP-TO-DATE
+> Task :android:lintAnalyzeDebugAndroidTest UP-TO-DATE
+> Task :android:lintAnalyzeDebugUnitTest UP-TO-DATE
+> Task :device-android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :device-android:mergeDebugNativeLibs NO-SOURCE
+> Task :device-android:stripDebugDebugSymbols NO-SOURCE
+> Task :device-android:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :device-android:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :device-android:mergeDebugShaders UP-TO-DATE
+> Task :device-android:compileDebugShaders NO-SOURCE
+> Task :device-android:generateDebugAssets UP-TO-DATE
+> Task :device-android:mergeDebugAssets UP-TO-DATE
+> Task :device-android:prepareDebugArtProfile UP-TO-DATE
+> Task :device-android:prepareLintJarForPublish UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :device-android:writeDebugLintModelMetadata UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :device-android:extractProguardFiles UP-TO-DATE
+> Task :device-android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :device-android:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :device-android:preDebugUnitTestBuild UP-TO-DATE
+> Task :diagnostic:preBuild UP-TO-DATE
+> Task :diagnostic:preDebugBuild UP-TO-DATE
+> Task :diagnostic:compileDebugAidl UP-TO-DATE
+> Task :diagnostic:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :diagnostic:generateDebugBuildConfig UP-TO-DATE
+> Task :diagnostic:checkDebugAarMetadata UP-TO-DATE
+> Task :diagnostic:generateDebugResValues UP-TO-DATE
+> Task :diagnostic:mapDebugSourceSetPaths UP-TO-DATE
+> Task :diagnostic:generateDebugResources UP-TO-DATE
+> Task :diagnostic:mergeDebugResources UP-TO-DATE
+> Task :diagnostic:packageDebugResources UP-TO-DATE
+> Task :diagnostic:parseDebugLocalResources UP-TO-DATE
+> Task :diagnostic:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :diagnostic:extractDeepLinksDebug UP-TO-DATE
+> Task :diagnostic:processDebugMainManifest UP-TO-DATE
+> Task :diagnostic:processDebugManifest UP-TO-DATE
+> Task :diagnostic:processDebugManifestForPackage UP-TO-DATE
+> Task :diagnostic:processDebugResources UP-TO-DATE
+> Task :diagnostic:javaPreCompileDebug UP-TO-DATE
+> Task :diagnostic:preDebugAndroidTestBuild SKIPPED
+> Task :diagnostic:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :diagnostic:extractProguardFiles UP-TO-DATE
+> Task :diagnostic:preDebugUnitTestBuild UP-TO-DATE
+> Task :input-lab:preDebugAndroidTestBuild SKIPPED
+> Task :input-lab:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :input-lab:extractProguardFiles UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :input-lab:processDebugResources
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :android:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :android:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :device-android:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :android:preReleaseBuild UP-TO-DATE
+> Task :android:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :android:mergeReleaseNativeLibs NO-SOURCE
+> Task :android:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :app:preReleaseBuild
+> Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :device-android:preReleaseBuild UP-TO-DATE
+> Task :device-android:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :device-android:mergeReleaseNativeLibs NO-SOURCE
+> Task :device-android:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :android:generateReleaseResValues UP-TO-DATE
+> Task :android:generateReleaseResources UP-TO-DATE
+> Task :android:packageReleaseResources UP-TO-DATE
+> Task :android:parseReleaseLocalResources UP-TO-DATE
+> Task :android:generateReleaseRFile UP-TO-DATE
+> Task :android:compileReleaseKotlin UP-TO-DATE
+> Task :android:javaPreCompileRelease UP-TO-DATE
+> Task :android:compileReleaseJavaWithJavac NO-SOURCE
+> Task :android:bundleLibRuntimeToDirRelease UP-TO-DATE
+> Task :device-android:compileReleaseAidl UP-TO-DATE
+> Task :device-android:generateReleaseResValues UP-TO-DATE
+> Task :device-android:generateReleaseResources UP-TO-DATE
+> Task :device-android:packageReleaseResources UP-TO-DATE
+> Task :device-android:parseReleaseLocalResources UP-TO-DATE
+> Task :device-android:generateReleaseRFile UP-TO-DATE
+> Task :device-android:javaPreCompileRelease UP-TO-DATE
+> Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:generateReleaseBuildConfig UP-TO-DATE
+> Task :android:compileReleaseLibraryResources UP-TO-DATE
+> Task :android:writeReleaseAarMetadata UP-TO-DATE
+> Task :device-android:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :android:extractDeepLinksRelease UP-TO-DATE
+> Task :android:processReleaseManifest UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :device-android:extractDeepLinksRelease UP-TO-DATE
+> Task :device-android:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :device-android:compileReleaseLibraryResources UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app:desugarReleaseFileDependencies UP-TO-DATE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexRelease UP-TO-DATE
+> Task :android:prepareReleaseArtProfile UP-TO-DATE
+> Task :device-android:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :android:mergeReleaseShaders UP-TO-DATE
+> Task :android:compileReleaseShaders NO-SOURCE
+> Task :android:generateReleaseAssets UP-TO-DATE
+> Task :android:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseShaders UP-TO-DATE
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :device-android:mergeReleaseShaders UP-TO-DATE
+> Task :device-android:compileReleaseShaders NO-SOURCE
+> Task :device-android:generateReleaseAssets UP-TO-DATE
+> Task :device-android:mergeReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets UP-TO-DATE
+> Task :app:compressReleaseAssets UP-TO-DATE
+> Task :app:extractReleaseVersionControlInfo
+> Task :android:generateReleaseLintVitalModel UP-TO-DATE
+> Task :android:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :android:processReleaseJavaRes UP-TO-DATE
+> Task :android:createFullJarRelease UP-TO-DATE
+> Task :android:generateReleaseLintModel UP-TO-DATE
+> Task :android:stripReleaseDebugSymbols NO-SOURCE
+> Task :android:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :android:extractReleaseAnnotations UP-TO-DATE
+> Task :android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :android:mergeReleaseJavaResource UP-TO-DATE
+> Task :android:syncReleaseLibJars UP-TO-DATE
+> Task :android:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :device-android:stripReleaseDebugSymbols NO-SOURCE
+> Task :device-android:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :device-android:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :android:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :device-android:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :app:optimizeReleaseResources UP-TO-DATE
+> Task :app:collectReleaseDependencies UP-TO-DATE
+> Task :app:sdkReleaseDependencyData UP-TO-DATE
+> Task :app:writeReleaseAppMetadata UP-TO-DATE
+> Task :app:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :input-lab:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :input-lab:mergeDebugShaders UP-TO-DATE
+> Task :input-lab:compileDebugShaders NO-SOURCE
+> Task :input-lab:generateDebugAssets UP-TO-DATE
+> Task :input-lab:mergeDebugAssets UP-TO-DATE
+> Task :input-lab:compressDebugAssets UP-TO-DATE
+> Task :input-lab:desugarDebugFileDependencies UP-TO-DATE
+> Task :input-lab:checkDebugDuplicateClasses UP-TO-DATE
+> Task :input-lab:mergeExtDexDebug UP-TO-DATE
+> Task :input-lab:mergeLibDexDebug UP-TO-DATE
+> Task :input-lab:mergeDebugJniLibFolders UP-TO-DATE
+> Task :input-lab:mergeDebugNativeLibs NO-SOURCE
+> Task :input-lab:stripDebugDebugSymbols NO-SOURCE
+> Task :input-lab:validateSigningDebug UP-TO-DATE
+> Task :input-lab:writeDebugAppMetadata UP-TO-DATE
+> Task :input-lab:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :input-lab:preReleaseBuild UP-TO-DATE
+> Task :input-lab:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :input-lab:mergeReleaseNativeLibs NO-SOURCE
+> Task :input-lab:stripReleaseDebugSymbols NO-SOURCE
+> Task :input-lab:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :input-lab:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :input-lab:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :input-lab:buildKotlinToolingMetadata UP-TO-DATE
+> Task :input-lab:generateReleaseBuildConfig UP-TO-DATE
+> Task :input-lab:checkReleaseAarMetadata UP-TO-DATE
+> Task :input-lab:generateReleaseResValues UP-TO-DATE
+> Task :input-lab:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :input-lab:generateReleaseResources UP-TO-DATE
+> Task :input-lab:mergeReleaseResources UP-TO-DATE
+> Task :input-lab:packageReleaseResources UP-TO-DATE
+> Task :input-lab:parseReleaseLocalResources UP-TO-DATE
+> Task :input-lab:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :input-lab:extractDeepLinksRelease UP-TO-DATE
+> Task :input-lab:processReleaseMainManifest UP-TO-DATE
+> Task :input-lab:processReleaseManifest UP-TO-DATE
+> Task :input-lab:processReleaseManifestForPackage UP-TO-DATE
+> Task :input-lab:processReleaseResources UP-TO-DATE
+> Task :input-lab:compileReleaseKotlin UP-TO-DATE
+> Task :input-lab:javaPreCompileRelease UP-TO-DATE
+> Task :input-lab:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :input-lab:dexBuilderRelease UP-TO-DATE
+> Task :input-lab:desugarReleaseFileDependencies UP-TO-DATE
+> Task :input-lab:mergeReleaseStartupProfile UP-TO-DATE
+> Task :input-lab:mergeExtDexRelease UP-TO-DATE
+> Task :input-lab:mergeDexRelease UP-TO-DATE
+> Task :input-lab:mergeReleaseArtProfile UP-TO-DATE
+> Task :input-lab:mergeReleaseGlobalSynthetics UP-TO-DATE
+> Task :input-lab:compileReleaseArtProfile UP-TO-DATE
+> Task :input-lab:mergeReleaseShaders UP-TO-DATE
+> Task :input-lab:compileReleaseShaders NO-SOURCE
+> Task :input-lab:generateReleaseAssets UP-TO-DATE
+> Task :input-lab:mergeReleaseAssets UP-TO-DATE
+> Task :input-lab:compressReleaseAssets UP-TO-DATE
+> Task :input-lab:extractReleaseVersionControlInfo
+> Task :input-lab:generateReleaseLintVitalReportModel UP-TO-DATE
+> Task :input-lab:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :input-lab:lintVitalReportRelease UP-TO-DATE
+> Task :input-lab:lintVitalRelease
+> Task :input-lab:processReleaseJavaRes UP-TO-DATE
+> Task :input-lab:mergeReleaseJavaResource UP-TO-DATE
+> Task :input-lab:optimizeReleaseResources UP-TO-DATE
+> Task :input-lab:collectReleaseDependencies UP-TO-DATE
+> Task :input-lab:sdkReleaseDependencyData UP-TO-DATE
+> Task :input-lab:writeReleaseAppMetadata UP-TO-DATE
+> Task :input-lab:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :device-core:compileKotlin
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :device-core:compileJava NO-SOURCE
+> Task :device-core:classes UP-TO-DATE
+> Task :device-core:jar
+> Task :input-lab:packageRelease
+> Task :device-authority:compileKotlin
+> Task :device-authority:compileJava NO-SOURCE
+> Task :device-authority:classes UP-TO-DATE
+> Task :device-authority:jar UP-TO-DATE
+> Task :device-authority:compileTestKotlin
+> Task :device-authority:compileTestJava NO-SOURCE
+> Task :device-authority:testClasses UP-TO-DATE
+
+> Task :input-lab:compileDebugKotlin
+w: ./tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/DynamicContentFixtureActivity.kt:35:102 'static field FLAG_FULLSCREEN: Int' is deprecated. Deprecated in Java.
+w: ./tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/PresentationFixtureActivity.kt:50:58 'static field FLAG_FULLSCREEN: Int' is deprecated. Deprecated in Java.
+w: ./tests/input-lab-app/app/src/main/java/dev/thor/inputlab/ScenarioActivity.kt:156:89 'fun onBackPressed(): Unit' is deprecated. Deprecated in Java.
+
+> Task :device-authority:test
+> Task :input-lab:compileDebugJavaWithJavac UP-TO-DATE
+> Task :input-lab:bundleDebugClassesToRuntimeJar
+> Task :input-lab:bundleDebugClassesToCompileJar
+> Task :input-lab:processDebugJavaRes UP-TO-DATE
+> Task :input-lab:compileDebugUnitTestKotlin
+> Task :input-lab:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :input-lab:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :input-lab:testDebugUnitTest
+> Task :input-lab:generateDebugAndroidTestLintModel
+> Task :input-lab:generateDebugLintReportModel
+> Task :device-core:compileTestKotlin
+> Task :input-lab:generateDebugUnitTestLintModel
+> Task :device-core:compileTestJava NO-SOURCE
+> Task :device-core:testClasses UP-TO-DATE
+> Task :device-android:compileDebugKotlin
+
+> Task :device-core:test
+
+AccessibilitySetupTest > emptyAndNullSettingsOnlyAddOwnFixedComponent PASSED
+
+AccessibilitySetupTest > preservesOtherServicesAndDoesNotDuplicateOwnService PASSED
+
+AccessibilitySetupTest > malformedOrOversizedSettingsCannotBecomeCommandsOrOtherComponents PASSED
+
+AgentBackgroundTest > delegatedCommitRetainsAuthorityAndPropagatesPartialSubmissionImmediately PASSED
+
+AgentBackgroundTest > cancelledQueuedWorkCannotMoveAndHiddenReceiptDoesNotFabricateSubmission PASSED
+
+AgentBackgroundTest > actualReceiptMustAgreeWithSubmittedEffect PASSED
+
+AgentBackgroundTest > queuedExpiryIsRecheckedInsideNativeCommitBeforeAnyMovement PASSED
+
+AgentBackgroundTest > fixedAssistantActionRejectsCallerRoutingAndNeedsScreenControlWithoutTarget PASSED
+
+BoundedInputStateTest > racingCompletionAndAbandonNeverRecreateUnknownAfterCallback PASSED
+
+BoundedInputStateTest > simultaneousRegistrationsAtomicallyAllowOnlyOneOwner PASSED
+
+BoundedInputStateTest > earlyCompletionFollowedByExceptionCannotLeaveGhostUnknown PASSED
+
+BoundedInputStateTest > lateMatchingCallbackClearsAbandonedDispatchAndAllowsRecovery PASSED
+
+BoundedInputStateTest > staleCallbacksAndExceptionsCannotClearOrPoisonANewerRequest PASSED
+
+BoundedInputStateTest > normalPendingKeepsCurrentCheckpointAvailableButRejectsAnotherDispatch PASSED
+
+BoundedInputStateTest > runReleaseAffectsOnlyItsOwnPendingDispatchAndNeverPretendsToCompleteIt PASSED
+
+CompanionObservationTest > sameAppCompanionHasSeparateNonInputIdentityAndReturnsUpperSnapshot PASSED
+
+CompanionObservationTest > onlyUniqueSameAppVisiblePixelsWithNoOverlayCanBeCaptured PASSED
+
+CompanionObservationTest > contentChangesAreReadableButWindowGeometryRoleAndExpiryChangesReject PASSED
+
+CompanionObservationTest > outputCannotSmuggleCompanionIdentityIntoUpperInputAuthority PASSED
+
+CompanionObservationTest > unknownAmbiguousOwnAndOtherAppCannotBecomeCompanion PASSED
+
+CoreTest > finalCommitCheckDetectsConcurrentWriterAndSymlinkSwap PASSED
+
+CoreTest > displayRolesRequireTwoDistinctKnownDisplays PASSED
+
+CoreTest > configurationSizeAndFormatLimitsPreventWrites PASSED
+
+CoreTest > staticTargetCanReceiveTapAfterSixteenSecondsButAnAppChangeImmediatelyRejectsIt PASSED
+
+CoreTest > freshReadGatewayDiscardsMissingOldOrChangedObservationsBeforeReturningAnyData PASSED
+
+CoreTest > screenshotCropScalingHasIndependentExpectedCoordinates PASSED
+
+CoreTest > snapshotsExpireAndCacheIsBounded PASSED
+
+CoreTest > gestureRejectsDurationOversizedPathNanAndOffscreen PASSED
+
+CoreTest > restoreConflictPreservesCurrentFileAndBackupQuotaRefusesWithoutDeleting PASSED
+
+CoreTest > encryptedBackupSurvivesReopenAndTamperFails PASSED
+
+CoreTest > postCommitCorruptionIsFailureWithRecoveryAndSubmittedMarker PASSED
+
+CoreTest > byteBudgetDistinguishesExactEofAndTruncationAndChecksCancellation PASSED
+
+CoreTest > inputEffectMayChangeItsOwnLayoutAfterSubmission PASSED
+
+CoreTest > detachedShellChildCannotHoldOutputDrainForever PASSED
+
+CoreTest > gatewayDiscardsLateReadAfterRevocation PASSED
+
+CoreTest > defaultsAndEffectiveSetAreLeastPrivilege PASSED
+
+CoreTest > shellTimeoutAndCancellationStopDirectChildWithoutClaimingDescendants PASSED
+
+CoreTest > writesRequireExactApprovalMatchingBackupAndCurrentHash PASSED
+
+CoreTest > requestSpecificBackendPermissionIsCheckedAndReportedBeforeDispatch PASSED
+
+CoreTest > submittedCancellationIsUnknownAndInvokesOwnedCleanup PASSED
+
+CoreTest > freshReadGetsNewIdentityAndExpiryWithoutRevivingOldInputSnapshot PASSED
+
+CoreTest > capabilityDisabledHasExplicitError PASSED
+
+CoreTest > observationIsValidUntilJustBeforeSixtySecondsAndExpiresAtTheBoundary PASSED
+
+CoreTest > finalAtomicEffectGuardRejectsRevokedQueuedCommit PASSED
+
+CoreTest > shellOutputIsCombinedBoundedAndNonzeroExitPreserved PASSED
+
+CoreTest > freshObservationStillBecomesInvalidImmediatelyWhenTargetChangesAgain PASSED
+
+CoreTest > crossSessionUnknownToolSchemaAndDeadlineAreRejected PASSED
+
+CoreTest > replayAndRunToolBudgetAreRejected PASSED
+
+CoreTest > pathTraversalSymlinksAndNonexistentTargetsAreDenied PASSED
+
+CoreTest > queuedAuthorizationNeverRevivesAfterOffOn PASSED
+
+CoreTest > boundedNetworkWorkDoesNotOwnTheDeviceCommitLock PASSED
+
+CoreTest > rotationGeometryRemovalAndAppChangeInvalidateSnapshots PASSED
+
+CoreTest > singleDeviceRunAndResourceLockPreventParallelEffects PASSED
+
+CoreTest > everyFreshUpperReadGetsCurrentObservationWhileStaleInputStillStopsBeforeBackend PASSED
+
+CoreTest > freshReadCannotCrossCalibrationRotationRemovalOrInventedSource PASSED
+
+CoreTest > cancelledCommitDoesNotWriteOrAutoRestore PASSED
+
+CoreTest > cancellationRegistrationAfterStopStillRuns PASSED
+
+CoreTest > backupWriteVerifyRestorePreservesUnknownFieldsAndBeforeRestoreBackup PASSED
+
+CoreTest > staleTargetNeverReachesInputBackend PASSED
+
+DisplayRolePolicyTest > savedMappingNeverSilentlyFallsBackWhenAnExternalPanelDisappears PASSED
+
+DisplayRolePolicyTest > restoredHintsUseNewDescriptorsAndNeverStaleGeometryOrIds PASSED
+
+DisplayRolePolicyTest > thorDefaultWorksWithUnrelatedVirtualDisplayAndSparseIds PASSED
+
+DisplayVisibilityTest > clippingNormalizationNeverExtendsTheConfiguredInputExpiry PASSED
+
+DisplayVisibilityTest > canonicalLayoutRequiresCompleteSoleFullscreenRectangularEvidence PASSED
+
+DisplayVisibilityTest > clippingDoesNotRebindLayoutButCurrentClippedEdgesCannotReceiveInput PASSED
+
+DisplayVisibilityTest > newlyVisibleEdgesCannotBeUsedFromAnImageThatNeverObservedThem PASSED
+
+DisplayVisibilityTest > unknownVisibilityAndRealRootOrAppChangesStillInvalidateTheTarget PASSED
+
+EvdevAxesTest > actualNonNeutralValuesAreNotHiddenByReceiverFivePercentTolerance PASSED
+
+EvdevAxesTest > oneArm64FrameContainsOnlyRequestedAbsAxesAndOneSynBoundary PASSED
+
+EvdevAxesTest > discoveryNeverAcceptsAnotherNodeDuplicateAxisOrMissingRange PASSED
+
+EvdevAxesTest > discoversExactControllerAndDoesNotBindFixedEventNumber PASSED
+
+EvdevAxesTest > noUnknownEventCodeOrOutOfRangeRawValueCanReachFrameEncoding PASSED
+
+EvdevAxesTest > parsesActualSixAxisDomainsWithoutTreatingHatAsAnAllowedWrite PASSED
+
+EvdevButtonsTest > missingLabelsAmbiguousLabelsAndChangedFirmwareMappingAreUnsupported PASSED
+
+EvdevButtonsTest > buttonFramesOnlyContainAnAllowedEvKeyThenSynAndReleaseUsesZero PASSED
+
+EvdevButtonsTest > actualThorLabelsAndKeyLayoutCoverTheAllowedButtonsWithoutGuessingAliases PASSED
+
+EvdevButtonsTest > currentlyPressedStarBlocksOnlyTheRequestedButtonBeforeSubmission PASSED
+
+GamepadCleanupTest > preparedButNeverSubmittedClosesWithoutManufacturingUpOrNeutral PASSED
+
+GamepadCleanupTest > normalCleanupAcknowledgesOnlyAfterReleaseThenClose PASSED
+
+GamepadCleanupTest > rejectedNeutralWriteCannotBeReportedAsReleasedAndStillClosesOriginalFd PASSED
+
+GamepadCleanupTest > closeFailureIsDistinctFromAcknowledgedInputRelease PASSED
+
+GamepadCommandTest > normalizedAxesKeepTriggerAndStickDomainsSeparate PASSED
+
+GamepadCommandTest > durationCannotEscapeTheBoundThroughCoercion PASSED
+
+GamepadCommandTest > boundedButtonsHaveSafeDefaultAndNoPersistentDownOrUp PASSED
+
+GamepadHoldTargetTest > pureContentFeedbackDoesNotCancelHoldOrPreventNextButton PASSED
+
+GamepadHoldTargetTest > submittedHoldStillChecksAppLayoutExpiryAndRevocationAndRunsCleanup PASSED
+
+GamepadHoldTargetTest > partialSubmissionThenRemoteFailurePropagatesThroughNestedTargetCheckpoints PASSED
+
+GamepadHoldTargetTest > legacyTargetsStillTreatChangedRevisionAsChangedStructure PASSED
+
+GamepadLeaseGuardTest > serviceTimerUsesCapturedLeaseInsteadOfItsOwnShellUid PASSED
+
+GamepadLeaseGuardTest > exactDeadlineExpiresWithoutPollingFromTheApp PASSED
+
+GamepadLeaseGuardTest > replacingLeaseOrKillingHostRejectsPreviouslyCapturedTimer PASSED
+
+InputTargetPolicyTest > fixedBackgroundHasNoArbitraryTargetAndReadDoesNotGrantApproval PASSED
+
+InputTargetPolicyTest > everyScreenInputRejectsOwnAssistantOnEitherRoleButKeepsExternalAppsAvailable PASSED
+
+LauncherAppsTest > queryMustBeExplicitNonblankBoundedAndCannotExpandIntoPackageEnumeration PASSED
+
+LauncherAppsTest > purposeQueryMatchesLauncherClassWhenVisibleProductAndPackageNamesDiffer PASSED
+
+LauncherAppsTest > launchOnlyAcceptsOneCanonicalPackageAndRejectsOwnAssistant PASSED
+
+LauncherAppsTest > resultsAreDeduplicatedAndLimitedWithoutReturningUnrelatedInventory PASSED
+
+NavigationCommandTest > cancelledBeforeSubmissionDoesNotEmitAnyEvent PASSED
+
+NavigationCommandTest > stopAfterDownStillReleasesAndPreservesCancellation PASSED
+
+NavigationCommandTest > missingUpAcknowledgmentIsAnErrorAndNormalPairHasNoHold PASSED
+
+NavigationCommandTest > onlyBackWithoutCallerRoutingOrArbitraryKeysIsAccepted PASSED
+
+NavigationCommandTest > failedOrThrowingDownStillAttemptsUpAndDoesNotReportSuccess PASSED
+
+NavigationFocusTest > explicitlyRoutedUpperNavigationWorksWithGlobalFocusOnLowerPresentation PASSED
+
+NavigationFocusTest > upperWindowAndApplicationMustBothMatchExactPackage PASSED
+
+NavigationFocusTest > missingOrAmbiguousUpperFocusIsRejected PASSED
+
+NavigationFocusTest > oldAnrAndFocusRequestsCannotSubstituteForCurrentFocus PASSED
+
+PresentationCacheInvalidationTest > publicDisplayAndCurrentWindowMappingMustAgree PASSED
+
+PresentationCacheInvalidationTest > sameDisplayAndUnknownStructureRejectLateWorkerAndStillClearProof PASSED
+
+PresentationCacheInvalidationTest > serviceOrDisplayIdentityResetInvalidatesBothRolesAfterScopedChanges PASSED
+
+PresentationCacheInvalidationTest > removedWindowRequiresKnownPublicDisplayAndZeroIsValid PASSED
+
+PresentationCacheInvalidationTest > unrelatedUpperStructureDoesNotRevokeLowerProofOrLowerWorker PASSED
+
+PresentationCacheInvalidationTest > preApi33UsesUniqueWindowMappingAndUnknownOriginRevokesAll PASSED
+
+PresentationCacheInvalidationTest > absoluteFiveSecondTtlAndChangedKeyRemainFailClosed PASSED
+
+PresentationCacheInvalidationTest > diagnosticsAreBoundedAndRetainOnlyHashedWindowIdentity PASSED
+
+PresentationProofRefreshTest > unknownReaderFailureAndWaitDiagnosticsRemainBoundedAndDoNotInvalidateEvidence PASSED
+
+PresentationProofRefreshTest > schedulingDiagnosticsCaptureNumericStageWithoutRenewingOrExposingProofKey PASSED
+
+PresentationProofRefreshTest > completedFullNewReadReplacesOnlyWithItsOwnStartTime PASSED
+
+PresentationProofRefreshTest > sameDisplayOrGlobalInvalidationRejectsInFlightRefresh PASSED
+
+PresentationProofRefreshTest > remainingLifetimeIsPassiveAndDoesNotRenewOrRemoveTheEntry PASSED
+
+PresentationProofRefreshTest > missingWrongKeyExpiredAndClockRollbackAllRequireCompleteNewProof PASSED
+
+PresentationProofRefreshTest > unchangedNewProofFactsKeepTargetLayoutIdentity PASSED
+
+PresentationProofRefreshTest > failedRefreshLeavesOriginalEntryAndDeadlineIntact PASSED
+
+PresentationProofRefreshTest > reserveSchedulesCompleteRefreshBeforeOldAbsoluteExpiry PASSED
+
+PresentationProofRefreshTest > failedRefreshOnAnotherDisplayCannotEvictValidConcurrentProof PASSED
+
+PresentationWindowEvidenceTest > rootPackageRequiresRealPackageOwnerAndNeverAssistantOrSystemUid PASSED
+
+PresentationWindowEvidenceTest > changedAccessibilityStructureDuringReadIsRejected PASSED
+
+PresentationWindowEvidenceTest > unknownWithReadableRootAloneCannotBecomeApplication PASSED
+
+PresentationWindowEvidenceTest > tokenDisplayOwnerAndDuplicateMetadataCannotBeSubstituted PASSED
+
+PresentationWindowEvidenceTest > rawTypesPrivatePresentationsAndSystemOverlaysAreRejected PASSED
+
+PresentationWindowEvidenceTest > missingSecureOrTouchableVisibilityAndGeometryFactsFailClosed PASSED
+
+PresentationWindowEvidenceTest > exactServerTokenJoinQualifiesWithoutChangingRawUnknownType PASSED
+
+PresentationWindowEvidenceTest > absoluteCacheTtlAndGenerationRejectExpiredOrLateProofsWithoutTouchRenewal PASSED
+
+PresentationWindowEvidenceTest > exactRootClipAndOverlaysStillApplyToQualifiedPresentations PASSED
+
+PresentationWindowEvidenceTest > stableProofRefreshKeepsLayoutButRealIdentityChangesInvalidateIt PASSED
+
+PresentationWindowEvidenceTest > preflightRunsBeforeAnyClaimOrCommitAndCancellationPreventsExecution PASSED
+
+PresentationWindowEvidenceTest > namesTitlesAndOtherAppsDoNotAuthorizeAnUnknownWindow PASSED
+
+PresentationWindowEvidenceTest > presentationContentIsStillAppContentAndStructureRemainsStrict PASSED
+
+ReadObservationTest > changedStructureBetweenReadValidationAndCompletionCannotBeSignedAsTheOldRead PASSED
+
+ReadObservationTest > gatewayReturnsPureReadDespiteContentUpdatesBeforeItsFinalValidation PASSED
+
+ReadObservationTest > changingCounterTextDuringReadKeepsCaptureIdentitySeparateFromFreshCompletion PASSED
+
+ReadObservationTest > packageWindowFocusGeometryClippingAndValidityStillInvalidateARead PASSED
+
+ReadObservationTest > expiryRotationRoleAndDisplayEpochGuardsStillApply PASSED
+
+ReadObservationTest > fixedBackStillRejectsWindowOrTouchableGeometryChangesBeforeCommit PASSED
+
+ReadObservationTest > allInputKindsCanStartAfterPureContentUpdatesWhileNodeIdentityIsCheckedSeparately PASSED
+
+ScreenSelectionTest > lowerOwnUnknownAmbiguousOrNativeUnsafeTargetsAreRejected PASSED
+
+ScreenSelectionTest > selectingAScreenDoesNotGrantInputCapability PASSED
+
+ScreenSelectionTest > callersCannotSelectArbitraryDisplayIdsOrMutateAnotherRun PASSED
+
+ScreenSelectionTest > lowerSelectionAndSubsequentReadsStayOnLowerWithoutChangingGlobalCalibration PASSED
+
+ScreenSelectionTest > onlySelectScreenMayReturnADifferentRoleInTheFreshReadChain PASSED
+
+ScreenSelectionTest > sameRoleCannotForgeSelectionMetadataOrCompanionShortcutOnLower PASSED
+
+ScreenSelectionTest > lowerCoordinatesStillUseLowerGeometryAndCannotReuseUpperFrameNamespace PASSED
+
+SemanticTreeTest > removesWrappersButPreservesSemanticParentsAndScrollContainers PASSED
+
+SemanticTreeTest > platformTextWindowKeepsOriginalOffsetAndLengthForVeryLongExposedText PASSED
+
+SemanticTreeTest > offscreenIsReadEvidenceAndPasswordCannotBeSearchedThroughAnyField PASSED
+
+SemanticTreeTest > scrollOwnContentUpdateMayFinishButOldObservationCannotAuthorizeAnotherInput PASSED
+
+SemanticTreeTest > tooSmallAncestorBudgetStopsPagingInsteadOfReturningSameOffsetForever PASSED
+
+SemanticTreeTest > paginationReportsNodeCharacterAndTotalWireByteLimits PASSED
+
+SemanticTreeTest > refsRejectSamePathWithWrongSnapshotWindowPackageOrRefreshedIdentityAndExpiry PASSED
+
+SemanticTreeTest > longTextSearchFindsTailBeforeClippingAndTextOffsetCanReadLater PASSED
+
+ShellCommandPolicyTest > directArgvDoesNotInterpretShellText PASSED
+
+ShellCommandPolicyTest > thorHardwareReadsAndSafeFanModesAreBounded PASSED
+
+ShellCommandPolicyTest > destructiveCommandsCannotBeApproved PASSED
+
+ShellCommandPolicyTest > reviewedMutationsAndSensitiveReadsRequireExactApproval PASSED
+
+ShellCommandPolicyTest > argumentInjectionAndOutOfRangeValuesNeverGainApproval PASSED
+
+ShellCommandPolicyTest > publicReadsRunWithoutApprovalAndHaveCanonicalExecutable PASSED
+
+ShellCommandPolicyTest > parserAcceptsOnlyEquivalentSafeQuotedForms PASSED
+
+ShellCommandPolicyTest > shellAndWrapperBypassesFailClosed PASSED
+
+TargetObservationAvailabilityTest > realBackendFailuresHavePriorityAndNeverInvokeTargetValidator PASSED
+
+TargetObservationAvailabilityTest > hardTargetRefusalsKeepTheirOwnCategoryRatherThanRecoverableTargetChanged PASSED
+
+TargetObservationAvailabilityTest > staleObservationStaysNonReadyAndHasExactRecoveryReasonWithoutExecutingAnything PASSED
+
+TargetObservationAvailabilityTest > freshReadsAndHealthyInputKeepExistingPolicyAndUnknownTargetNeverBecomesReady PASSED
+
+TargetObservationAvailabilityTest > calibrationAndRoleLossRemainExplicitWhileFixedBackgroundRequiresNoTarget PASSED
+
+TargetObservationAvailabilityTest > genericValidationFailuresDoNotAcquireTheTargetRecoveryTag PASSED
+
+ThorBrightnessCommandTest > allPercentagesRoundTripAcrossFirmwareQuantization PASSED
+
+ThorBrightnessCommandTest > unreviewedActionsTargetsValuesAndBinderParametersAreRejected PASSED
+
+ThorBrightnessCommandTest > strictFirmwareVerificationDoesNotWidenToOnePercent PASSED
+
+ThorBrightnessCommandTest > readsAndBoundedSetsAreWhiteWhileOnlySetsMutate PASSED
+
+UiActionWindowTest > hiddenOffscreenNonRectangularOrRootlessWindowsAreNotTargets PASSED
+
+UiActionWindowTest > allowingUnfocusedActionsDoesNotPermitFocusStructureToChangeAfterObservation PASSED
+
+UiActionWindowTest > fullObservedClipMustStillMatchProductionOcclusionAndBoundsRules PASSED
+
+UiActionWindowTest > focusedCandidateCannotHideASecondVisibleApplicationWindow PASSED
+
+UiActionWindowTest > soleVisibleBoundApplicationDoesNotNeedGlobalKeyboardFocus PASSED
+
+UiActionWindowTest > windowPackageValidityAndDuplicateIdentityCannotBeSubstituted PASSED
+
+UiActivationTest > unrelatedContentAllowsCoordinatesButStillRejectsChangedStructure PASSED
+
+UiActivationTest > refsCannotCrossOwnerSnapshotWindowPackagePathIdentityOrNodeContent PASSED
+
+UiActivationTest > passwordDisabledOffscreenAndNonClickableNodesAreRejected PASSED
+
+UiActivationTest > schemaRejectsCoordinateFallbackArbitraryActionsAndOtherFields PASSED
+
+UiActivationTest > stableTargetAcceptsDespiteUnrelatedContentChanges PASSED
+
+UpperTargetResolverTest > overlaysPackagesRootGeometryFocusLayerAndRegionChangesRemainStrict PASSED
+
+UpperTargetResolverTest > structuralSystemEventsAndSpoofedOrUnknownSystemOwnersAreNeverFiltered PASSED
+
+UpperTargetResolverTest > edgeToEdgeRootNeverAuthorizesStatusNavigationBarsOrAnOverlayHole PASSED
+
+UpperTargetResolverTest > scrollAndSubtreeExpireNewCoordinatesWithoutCancellingTheirOwnBoundedInput PASSED
+
+UpperTargetResolverTest > ownAppVisualContentChangesPixelIdentityButNotTheInputTarget PASSED
+
+UpperTargetResolverTest > regionIsIntersectedWithRootWindowAndDisplayAndUnsafeShapesCannotTouchAnywhere PASSED
+
+UpperTargetResolverTest > compatibleInputStillRejectsActualWindowIdentityAndRegionEvidenceChanges PASSED
+
+UpperTargetResolverTest > lowerScreenChangesDoNotInvalidateUpperAndRemovedWindowEventsRetainDisplayOwnership PASSED
+
+UpperTargetResolverTest > onlyTrueWindowEventsAreStructuralAndSystemInteractionsCannotUseContentExclusion PASSED
+
+UpperTargetResolverTest > typedWindowMetadataDoesNotExpireApplicationOrSystemWindowInput PASSED
+
+UpperTargetResolverTest > applicationViewFeedbackKeepsVisualContentSeparateFromInteractionLayout PASSED
+
+UpperTargetResolverTest > soleFullscreenCanonicalClippingKeepsExistingIntersectionGuardAndExpiry PASSED
+
+UpperTargetResolverTest > ordinaryApplicationKeepsClipWhileClockAndBatteryContentUpdatesDoNotInvalidateInput PASSED
+
+> Task :device-android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :diagnostic:compileDebugKotlin
+> Task :device-android:processDebugJavaRes UP-TO-DATE
+> Task :device-android:extractDebugAnnotations
+> Task :device-android:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :device-android:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :device-android:mergeDebugJavaResource UP-TO-DATE
+> Task :device-android:bundleLibRuntimeToJarDebug
+> Task :device-android:bundleLibCompileToJarDebug
+> Task :device-android:syncDebugLibJars
+> Task :device-android:bundleDebugLocalLintAar
+> Task :device-android:createFullJarDebug
+> Task :device-android:generateDebugLintModel
+> Task :device-android:generateDebugAndroidTestLintModel
+> Task :device-android:generateDebugUnitTestLintModel
+> Task :device-android:lintAnalyzeDebugUnitTest
+> Task :device-android:lintAnalyzeDebugAndroidTest
+> Task :diagnostic:compileDebugJavaWithJavac UP-TO-DATE
+> Task :diagnostic:generateDebugLintReportModel
+> Task :diagnostic:bundleDebugClassesToCompileJar
+> Task :diagnostic:generateDebugAndroidTestLintModel
+> Task :diagnostic:generateDebugUnitTestLintModel
+
+> Task :app:compileDebugKotlin
+w: ./app/src/main/java/dev/thor/agent/ProductHost.kt:146:17 'when' is exhaustive so 'else' is redundant here.
+w: ./app/src/main/java/dev/thor/agent/ProductHost.kt:177:13 'when' is exhaustive so 'else' is redundant here.
+w: ./app/src/main/java/dev/thor/agent/ProductHost.kt:252:115 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :diagnostic:lintAnalyzeDebugAndroidTest
+> Task :app:testDebugUnitTest
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :device-android:generateDebugLintReportModel
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugJavaResource
+> Task :device-android:bundleLibRuntimeToDirDebug
+> Task :app:mergeLibDexDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :device-android:compileReleaseKotlin
+> Task :device-android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :device-android:bundleLibRuntimeToDirRelease
+> Task :device-android:bundleLibCompileToJarRelease
+
+> Task :app:compileReleaseKotlin
+w: ./app/src/main/java/dev/thor/agent/ProductHost.kt:146:17 'when' is exhaustive so 'else' is redundant here.
+w: ./app/src/main/java/dev/thor/agent/ProductHost.kt:177:13 'when' is exhaustive so 'else' is redundant here.
+w: ./app/src/main/java/dev/thor/agent/ProductHost.kt:252:115 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+
+> Task :app:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :device-android:lintAnalyzeDebug
+> Task :diagnostic:lintAnalyzeDebug
+> Task :app:dexBuilderRelease
+> Task :app:mergeDexRelease
+> Task :device-android:bundleLibRuntimeToJarRelease
+> Task :app:mergeReleaseGlobalSynthetics UP-TO-DATE
+> Task :app:compileReleaseArtProfile
+> Task :device-android:processReleaseJavaRes UP-TO-DATE
+> Task :device-android:createFullJarRelease
+> Task :device-android:generateReleaseLintModel
+> Task :app:generateReleaseLintVitalReportModel
+> Task :device-android:extractReleaseAnnotations
+> Task :device-android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :device-android:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :device-android:mergeReleaseJavaResource UP-TO-DATE
+> Task :device-android:syncReleaseLibJars
+> Task :device-android:bundleReleaseLocalLintAar
+> Task :device-android:generateReleaseLintVitalModel
+> Task :app:processReleaseJavaRes UP-TO-DATE
+> Task :app:mergeReleaseJavaResource
+> Task :input-lab:dexBuilderDebug
+> Task :input-lab:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :input-lab:mergeDebugJavaResource UP-TO-DATE
+> Task :input-lab:mergeProjectDexDebug
+> Task :input-lab:packageDebug
+> Task :input-lab:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :input-lab:assembleDebug
+> Task :input-lab:createReleaseApkListingFileRedirect UP-TO-DATE
+> Task :input-lab:assembleRelease
+> Task :app:generateDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :diagnostic:lintAnalyzeDebugUnitTest
+> Task :diagnostic:lintReportDebug UP-TO-DATE
+> Task :diagnostic:lintDebug
+> Task :app:compileDebugAndroidTestKotlin
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :app:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :app:compileDebugAndroidTestShaders NO-SOURCE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:lintAnalyzeDebug
+> Task :input-lab:lintAnalyzeDebug
+> Task :input-lab:lintAnalyzeDebugAndroidTest
+> Task :app:dexBuilderDebugAndroidTest
+
+> Task :device-android:lintReportDebug
+Wrote HTML report to ./integration/device-android/build/reports/lint-results-debug.html
+
+> Task :app:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :device-android:lintDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to ./app/build/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+> Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest
+> Task :app:packageDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebugAndroidTest
+> Task :input-lab:lintAnalyzeDebugUnitTest
+
+> Task :input-lab:lintReportDebug
+Wrote HTML report to ./tests/input-lab-app/app/build/reports/lint-results-debug.html
+
+> Task :input-lab:lintDebug
+> Task :device-android:lintVitalAnalyzeRelease
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease UP-TO-DATE
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleRelease
+
+[Incubating] Problems report is available at: ./build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 52s
+414 actionable tasks: 105 executed, 309 up-to-date

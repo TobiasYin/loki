@@ -32,13 +32,15 @@ class UpperTargetResolverTest {
         assertNotNull(target.touchableBounds);assertFalse(target.touchableBounds!!.contains(Point(500.0,400.0)))
         assertFalse("Nonrectangular safe region must not fall back to display",target.touchableBounds!!.contains(Point(800.0,600.0)))
     }
-    @Test fun ownAppContentStillInvalidatesNewInputButHeldStructureIsIndependent() {
+    @Test fun ownAppVisualContentChangesPixelIdentityButNotTheInputTarget() {
         val windows=listOf(app(),bar());val revisions=TargetWindowRevisions();var target=UpperTargetResolver.resolve(upper,windows,revisions)
         val snapshots=Snapshots(Clock {1}){target};snapshots.update(listOf(upper,lower));snapshots.calibrate(0,4);val old=snapshots.capture()
         revisions.event(TargetEventKind.CONTENT,10,"example.app",current(windows));target=UpperTargetResolver.resolve(upper,windows,revisions)
-        rejected {snapshots.validate(old.id)};assertEquals(old,snapshots.validateHeld(old.id))
+        assertFalse(old.target.sameLayout(target));assertTrue(old.target.sameInputTarget(target))
+        assertEquals(old,snapshots.validate(old.id));assertEquals(old,snapshots.validateHeld(old.id))
+        snapshots.validateInputPoints(old.id,listOf(Point(400.0,300.0)))
     }
-    @Test fun applicationViewFeedbackExpiresNewObservationsWithoutInventingWindowStructureChanges() {
+    @Test fun applicationViewFeedbackKeepsVisualContentSeparateFromInteractionLayout() {
         // CLICKED, SELECTED, FOCUSED, TEXT_CHANGED, SCROLLED, TEXT_SELECTION_CHANGED, ACCESSIBILITY_FOCUSED.
         for(type in listOf(1,4,8,16,4096,8192,32768)) {
             val windows=listOf(app(),bar());val revisions=TargetWindowRevisions();var target=UpperTargetResolver.resolve(upper,windows,revisions)
@@ -47,7 +49,7 @@ class UpperTargetResolverTest {
             assertNotEquals("App feedback is not a window event",TargetEventKind.STRUCTURE,kind)
             revisions.event(kind,10,"example.app",current(windows));target=UpperTargetResolver.resolve(upper,windows,revisions)
             assertEquals("Held input must survive its own app feedback: $type",original,snapshots.validateHeld(original.id))
-            rejected {snapshots.validate(original.id)}
+            if(type==4096)rejected {snapshots.validate(original.id)} else assertEquals(original,snapshots.validate(original.id))
         }
     }
     @Test fun onlyTrueWindowEventsAreStructuralAndSystemInteractionsCannotUseContentExclusion() {
@@ -91,6 +93,41 @@ class UpperTargetResolverTest {
         overlayRevisions.event(TargetEventKind.CONTENT,30,"com.android.systemui",current(withOverlay))
         assertFalse(initial.sameStructure(UpperTargetResolver.resolve(upper,withOverlay,overlayRevisions)))
     }
+
+    @Test fun typedWindowMetadataDoesNotExpireApplicationOrSystemWindowInput() {
+        val windows=listOf(app(),bar());val revisions=TargetWindowRevisions();val original=UpperTargetResolver.resolve(upper,windows,revisions)
+        for(id in listOf(10,20))for(mask in listOf(4,128,132)) {
+            val kind=TargetEventKind.fromAndroidType(0x400000,mask,0)
+            assertEquals(TargetEventKind.WINDOW_METADATA,kind)
+            revisions.event(kind,id,if(id==10)"example.app" else "com.android.systemui",current(windows))
+            assertTrue(original.sameInputTarget(UpperTargetResolver.resolve(upper,windows,revisions)))
+        }
+        for(mask in listOf(0,1,2,8,16,32,64,256,512,1024,2048,4096,4 or 8,128 or 0x8000))
+            assertEquals("Unknown/mixed/real window flags must remain structural: $mask",TargetEventKind.STRUCTURE,TargetEventKind.fromAndroidType(0x400000,mask,0))
+    }
+    @Test fun scrollAndSubtreeExpireNewCoordinatesWithoutCancellingTheirOwnBoundedInput() {
+        for(kind in listOf(TargetEventKind.fromAndroidType(4096),TargetEventKind.fromAndroidType(2048,0,1),TargetEventKind.fromAndroidType(2048,0,1 or 2))) {
+            assertEquals(TargetEventKind.INTERACTION_LAYOUT,kind)
+            val windows=listOf(app(),bar());val revisions=TargetWindowRevisions();var target=UpperTargetResolver.resolve(upper,windows,revisions)
+            val snapshots=Snapshots(Clock {1}){target};snapshots.update(listOf(upper,lower));snapshots.calibrate(0,4);val old=snapshots.capture()
+            revisions.event(kind,10,"example.app",current(windows));target=UpperTargetResolver.resolve(upper,windows,revisions)
+            assertTrue(old.target.sameStructure(target));assertEquals(old,snapshots.validateHeld(old.id));assertEquals(old,snapshots.validateObservation(old.id))
+            rejected {snapshots.validate(old.id)};rejected {snapshots.validateInputPoints(old.id,listOf(Point(500.0,500.0)))}
+            assertEquals(0L,revisions.structure(0));assertEquals(1L,revisions.interaction(10))
+        }
+        for(mask in listOf(0,2,4,8,16,32,64,128))assertEquals(TargetEventKind.CONTENT,TargetEventKind.fromAndroidType(2048,0,mask))
+    }
+    @Test fun compatibleInputStillRejectsActualWindowIdentityAndRegionEvidenceChanges() {
+        val windows=listOf(app(),bar());val revisions=TargetWindowRevisions();var target=UpperTargetResolver.resolve(upper,windows,revisions)
+        val snapshots=Snapshots(Clock {1}){target};snapshots.update(listOf(upper,lower));snapshots.calibrate(0,4);val old=snapshots.capture()
+        for(changed in listOf(listOf(app(id=11),bar()),listOf(app(pkg="other.app"),bar()),listOf(app().copy(focused=false),bar()),
+            listOf(app().copy(layer=8),bar()),listOf(app(bounds=TouchableBounds(1,72,1920,1008)),bar()),
+            listOf(app().copy(rootBounds=TouchableBounds(0,80,1920,1008)),bar()),listOf(app().copy(region=listOf(TouchableBounds(0,72,1900,1008))),bar()),
+            windows+TargetWindowEvidence(30,4,7,false,true,appBounds,listOf(appBounds),true,"overlay",null))) {
+            target=UpperTargetResolver.resolve(upper,changed,revisions)
+            rejected {snapshots.validate(old.id)};rejected {snapshots.validateInputPoints(old.id,listOf(Point(500.0,500.0)))}
+        }
+    }
     @Test fun regionIsIntersectedWithRootWindowAndDisplayAndUnsafeShapesCannotTouchAnywhere() {
         val revisions=TargetWindowRevisions()
         val clipped=app(bounds=TouchableBounds(-10,50,2000,1050)).copy(rootBounds=TouchableBounds(0,70,1920,1000),region=listOf(TouchableBounds(0,80,1910,1060)))
@@ -113,8 +150,12 @@ class UpperTargetResolverTest {
         var now=1L;val snapshots=Snapshots(Clock {now}){target};snapshots.update(listOf(upper,lower));snapshots.calibrate(0,4);val old=snapshots.capture()
         window=window.copy(bounds=TouchableBounds(1,0,1920,1079),region=listOf(TouchableBounds(1,0,1920,1079)))
         target=UpperTargetResolver.resolve(upper,listOf(window),revisions)
+        assertTrue(old.target.sameStructure(target))
         assertEquals(old,snapshots.validate(old.id));snapshots.validateInputPoints(old.id,listOf(Point(500.0,500.0)))
         rejected {snapshots.validateInputPoints(old.id,listOf(Point(0.0,500.0)))}
+        val visible=target;target=target.copy(touchableBounds=null)
+        rejected {snapshots.validate(old.id)};rejected {snapshots.validateInputPoints(old.id,listOf(Point(500.0,500.0)))}
+        target=visible
         now+=Snapshots.OBSERVATION_TTL_MS;rejected {snapshots.validate(old.id)}
     }
 }

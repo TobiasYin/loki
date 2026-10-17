@@ -667,13 +667,17 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                     // image identity is deliberately absent from the input frames map.
                     return result(e.copy(snapshotId=completed.id),emptyMap()).copy(data=metadata)
                 }
-                val unchanged=snap.target.sameLayout(completed.target)
-                // Never re-label old pixels with a newer content revision. A frame
-                // whose content changed remains visible but cannot authorize input
-                // against the separately signed current observation.
-                frames[frame] = (if(unchanged)completed.id else snap.id) to transform
+                val contentUnchanged=snap.target.sameLayout(completed.target)
+                val inputCompatible=snap.target.sameInputTarget(completed.target)
+                // Captured pixels retain their original identity below. Content
+                // animation does not change the coordinate transform or input
+                // target: bind that frame to the completion observation only if
+                // window, exact clipping and interaction layout still match.
+                // Scrolling/reflow cannot make an older image newly input-usable.
+                frames[frame] = (if(inputCompatible)completed.id else snap.id) to transform
                 return result(e.copy(snapshotId=completed.id), mapOf("displayRole" to snap.role, "displayId" to snap.display.id, "frameId" to frame, "attachmentRef" to output.absolutePath,
-                    "requestSnapshotId" to e.snapshotId,"captureSnapshotId" to snap.id,"targetSnapshotId" to completed.id,"frameInputUsable" to unchanged,"contentChangedDuringCapture" to !unchanged,"observedTargetPackage" to snap.target.packageName,
+                    "requestSnapshotId" to e.snapshotId,"captureSnapshotId" to snap.id,"targetSnapshotId" to completed.id,"frameInputUsable" to inputCompatible,"contentChangedDuringCapture" to !contentUnchanged,
+                    "inputTargetChangedDuringCapture" to !inputCompatible,"frameInputPolicy" to "same_window_geometry_and_interaction_layout","observedTargetPackage" to snap.target.packageName,
                     "touchableWindowBounds" to snap.target.touchableBounds?.let {mapOf("left" to it.left,"top" to it.top,"right" to it.right,"bottom" to it.bottom)},
                     "mime" to "image/jpeg", "bytes" to encoded.size, "width" to scaled!!.width, "height" to scaled!!.height, "quality" to maxOf(30, q + 15), "rotation" to snap.display.rotation,
                     "transform" to mapOf("left" to rect.left, "top" to rect.top, "displayWidth" to rect.width(), "displayHeight" to rect.height(), "imageWidth" to scaled!!.width, "imageHeight" to scaled!!.height)))

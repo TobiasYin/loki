@@ -1,0 +1,63 @@
+{
+  "eventCount": 11,
+  "touchCount": 4,
+  "touches": [
+    {
+      "actionMasked": 0,
+      "x": 540.0,
+      "y": 234.0,
+      "source": 4098,
+      "deviceId": -1,
+      "downTime": 51363297,
+      "eventTime": 51363297
+    },
+    {
+      "actionMasked": 1,
+      "x": 540.0,
+      "y": 234.0,
+      "source": 4098,
+      "deviceId": -1,
+      "downTime": 51363297,
+      "eventTime": 51363377
+    },
+    {
+      "actionMasked": 0,
+      "x": 540.0,
+      "y": 234.0,
+      "source": 4098,
+      "deviceId": -1,
+      "downTime": 51366791,
+      "eventTime": 51366791
+    },
+    {
+      "actionMasked": 1,
+      "x": 540.0,
+      "y": 234.0,
+      "source": 4098,
+      "deviceId": -1,
+      "downTime": 51366791,
+      "eventTime": 51366871
+    }
+  ],
+  "clickEvents": [
+    {
+      "clickCount": 1
+    },
+    {
+      "clickCount": 2
+    },
+    {
+      "clickCount": 3
+    }
+  ],
+  "scrollEvents": [],
+  "configure": [
+    {
+      "change": "move"
+    },
+    {
+      "change": "dialog"
+    }
+  ],
+  "lastEventKind": "release"
+}

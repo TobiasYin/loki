@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "status": "SECOND_ATTEMPT_FAILED_BEFORE_SCROLL_NEW_REJECTION_CODE_AND_CLEANUP_ASSERT",
+  "collectedUtc": "2026-10-17T04:18:34.742334+00:00",
+  "scope": "SameApp33f0, newfixedTestd4d4/Lab4cd0 fixture-height correction. Onefailedcomponent; noModernUI orscroll-range verification reached.",
+  "artifacts": {
+    "app-debug.apk": {
+      "sha256": "33f084ad42b2436669f5e3ea4a4594290a4061953add561f3d34121b8c28b36c",
+      "bytes": 7494093
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "d4d4f09c09809434fbc23d90d4939271ce7dc969910f82775ebc577db71aef5c",
+      "bytes": 3477762
+    },
+    "input-lab-debug.apk": {
+      "sha256": "4cd028e29e8ae4b8fb40217f70eaa0304c21b2a28a7f43fd9b313dc536f36689",
+      "bytes": 2952047
+    }
+  },
+  "executedCases": 1,
+  "passed": 0,
+  "failed": 1,
+  "skipped": 0,
+  "retriesWithinThisPair": 0,
+  "attemptIndex": 2,
+  "reasonForNewAttempt": "Concrete previous fixture fit viewport; onlyTest/Lab corrected to height-dependent rows and positive scroll-range precondition. Apphash unchanged.",
+  "durationSeconds": 37.053,
+  "explicitOptIn": "dynamicContentAcceptance=true",
+  "modernUiExecuted": false,
+  "positivePartial": {
+    "differentCapturedPixels": true,
+    "oldFrameTap": true,
+    "oldLogicalTap": true,
+    "stableSemanticActivation": true,
+    "movedNodeRejected": true,
+    "compatibleCaptureRecordedContentChange": true
+  },
+  "failure": {
+    "originalType": "ComparisonFailure",
+    "stage": "real dialog old-frame refusal expectedTARGET_CHANGED butreceivedINVALID_ARGUMENT",
+    "actualCode": "INVALID_ARGUMENT",
+    "outcome": "observed",
+    "sourceExactExceptionOriginKnown": false,
+    "newScrollRangePreconditionReached": false,
+    "swipeExecuted": false,
+    "cleanupSelectionReportedAssertionError": true,
+    "finalJUnitFailureMaskedOriginalWithCleanup": true
+  },
+  "receiver": {
+    "touchCount": 4,
+    "clickCount": 3,
+    "scrollEvents": 0,
+    "released": true
+  },
+  "preservation": {
+    "passed": true,
+    "manualDatabaseMutation": false,
+    "selectedActuallyRestored": true,
+    "allOriginalHistoryPayloadsByteIdentical": true,
+    "sessionUpdatedAtChanges": 0,
+    "finalRuns": 119,
+    "allRunsTerminal": true,
+    "runtimeServiceExited": true
+  },
+  "cloudCalls": 0,
+  "thorOperations": false,
+  "collectorSourceOrBuildMutation": false,
+  "limitations": [
+    "Unpublished tool bare require is a plausible fixed-code classification defect, but this old attempt lacks Native exception origin to exclude post-persist/view failure.",
+    "Selection RPC asserted failure although the actual durable selected value and every oldsession payload were restored; no manual repair was needed.",
+    "No newscroll or fullcomponent pass is claimed; previous attempt1 remains unchanged."
+  ]
+}

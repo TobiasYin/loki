@@ -1,0 +1,49 @@
+{
+  "reports": [
+    {
+      "module": "app",
+      "path": "app/build/reports/lint-results-debug.xml",
+      "bytes": 42444,
+      "sha256": "ad47b92295d73e548d074977e92f1f44f10cf817be31817f97d80c60b5b638ab",
+      "issuesBySeverity": {
+        "Warning": 30
+      },
+      "lintTaskStatus": "EXECUTED",
+      "reportTaskStatus": "EXECUTED"
+    },
+    {
+      "module": "diagnostic",
+      "path": "tools/diagnostic/build/reports/lint-results-debug.xml",
+      "bytes": 15506,
+      "sha256": "b3500ce66f96fdfed4c53a83cc2261da426a17550dc7a7d5f6fe45ef46514c16",
+      "issuesBySeverity": {
+        "Warning": 11
+      },
+      "lintTaskStatus": "EXECUTED",
+      "reportTaskStatus": "UP-TO-DATE"
+    },
+    {
+      "module": "device-android",
+      "path": "integration/device-android/build/reports/lint-results-debug.xml",
+      "bytes": 13547,
+      "sha256": "04e477971b7c8f00378911f88b913cd8921d82d0b80a5dffde1b73374572e454",
+      "issuesBySeverity": {
+        "Warning": 10
+      },
+      "lintTaskStatus": "EXECUTED",
+      "reportTaskStatus": "EXECUTED"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/reports/lint-results-debug.xml",
+      "bytes": 89631,
+      "sha256": "32713536ccc1c3e7347847d1fcdd144cf5a5baff17d226716e5206e9229e18b6",
+      "issuesBySeverity": {
+        "Warning": 55
+      },
+      "lintTaskStatus": "EXECUTED",
+      "reportTaskStatus": "EXECUTED"
+    }
+  ],
+  "scope": "Actual current lint XML counts, not a claim of zero warnings"
+}

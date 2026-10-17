@@ -1,0 +1,414 @@
+{
+  "baselines": [
+    "../software/source-hashes.json",
+    "../software-fixture-fix/source-hashes.json"
+  ],
+  "merge": "Fixture-fix two file hashes override original snapshot",
+  "scope": "Prior selected inventory excluding new changed-source list. ProductHost/new helper/test were not in that inventory; their current hashes are recorded separately. Not complete repository equality.",
+  "comparedFiles": 67,
+  "allUnchanged": true,
+  "files": [
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "baselineSha256": "e624673bcb67c189e0699453ca6918ac803e2f943f02ba59380ae9f64a9d45d2",
+      "currentSha256": "e624673bcb67c189e0699453ca6918ac803e2f943f02ba59380ae9f64a9d45d2",
+      "unchanged": true
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "baselineSha256": "c7a24edbb22eba45bf57d9eb681ab5ae92b72a44b6dbaf30b25c8c59a65c20db",
+      "currentSha256": "c7a24edbb22eba45bf57d9eb681ab5ae92b72a44b6dbaf30b25c8c59a65c20db",
+      "unchanged": true
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "baselineSha256": "41d7b794b2acd4aec1f4f8c502e5df7afdaf569d7ec1f411d7d9006f5ffd6274",
+      "currentSha256": "41d7b794b2acd4aec1f4f8c502e5df7afdaf569d7ec1f411d7d9006f5ffd6274",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "baselineSha256": "4a39ae62bd491d39a7e96eb0074a40f7821f56c8fc34f665dd5f72d7606db5fd",
+      "currentSha256": "4a39ae62bd491d39a7e96eb0074a40f7821f56c8fc34f665dd5f72d7606db5fd",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/contracts.ts",
+      "baselineSha256": "8d30d2211ccd030608876b609d1a2085476587d334feeb22bd0673a830bbaa54",
+      "currentSha256": "8d30d2211ccd030608876b609d1a2085476587d334feeb22bd0673a830bbaa54",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/index.ts",
+      "baselineSha256": "ea0652c2394a39edc113de1f25a29d64533055fea5c9bfa97101b46b5714879c",
+      "currentSha256": "ea0652c2394a39edc113de1f25a29d64533055fea5c9bfa97101b46b5714879c",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/profile-validation.ts",
+      "baselineSha256": "93bc7fa856ffe5c8c057e9b5d0361609be61c7b909e4621a261de4397ec9d7b5",
+      "currentSha256": "93bc7fa856ffe5c8c057e9b5d0361609be61c7b909e4621a261de4397ec9d7b5",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/protocol-audit.ts",
+      "baselineSha256": "c7f5e52ed649e69af953589c4aec61ce112515f037ae73437e3c2a28683a681c",
+      "currentSha256": "c7f5e52ed649e69af953589c4aec61ce112515f037ae73437e3c2a28683a681c",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "baselineSha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f",
+      "currentSha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/provider-timeouts.ts",
+      "baselineSha256": "db698b922cd79262e9a1b257c1ff1bc1a5689b34ef92015c42548ed2247d783d",
+      "currentSha256": "db698b922cd79262e9a1b257c1ff1bc1a5689b34ef92015c42548ed2247d783d",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/registry.ts",
+      "baselineSha256": "afe1beb3429916bc2e11dfb0b734a73f1581c90761cf3f1fa6716f09415fafdc",
+      "currentSha256": "afe1beb3429916bc2e11dfb0b734a73f1581c90761cf3f1fa6716f09415fafdc",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "baselineSha256": "8a7078954a155dc1228f7e8e2c55a61389d56ba3e711d200bdc104ecdf0623dd",
+      "currentSha256": "8a7078954a155dc1228f7e8e2c55a61389d56ba3e711d200bdc104ecdf0623dd",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/session.ts",
+      "baselineSha256": "fde40fce4a6f1dcd4162db8ca426d687d8b3a5ad4f3b1f16c1b5e3201b17be1e",
+      "currentSha256": "fde40fce4a6f1dcd4162db8ca426d687d8b3a5ad4f3b1f16c1b5e3201b17be1e",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/stream-events.ts",
+      "baselineSha256": "871e871bb0e66b1beb96c6b571db0847ef2039ea8eca37cee2aee86b5c34a8ff",
+      "currentSha256": "871e871bb0e66b1beb96c6b571db0847ef2039ea8eca37cee2aee86b5c34a8ff",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/src/tool-availability.ts",
+      "baselineSha256": "21b5464f582b63f19aba55458a2e05cb77cdc6c6aa7b4d0e0a2aaab8734f65a4",
+      "currentSha256": "21b5464f582b63f19aba55458a2e05cb77cdc6c6aa7b4d0e0a2aaab8734f65a4",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/fixtures.ts",
+      "baselineSha256": "d7dc3187f0d744580c4f8dd7eaa656ac3597971d1dc7931d255fb80cad7c0a54",
+      "currentSha256": "d7dc3187f0d744580c4f8dd7eaa656ac3597971d1dc7931d255fb80cad7c0a54",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/legacy-null-history.test.ts",
+      "baselineSha256": "ec860259b19bb6c6544703dcbb57972b1182946dc84957c1dbc312c3a7971e79",
+      "currentSha256": "ec860259b19bb6c6544703dcbb57972b1182946dc84957c1dbc312c3a7971e79",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/native-null-success.test.ts",
+      "baselineSha256": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45",
+      "currentSha256": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/native-read-error-priority.test.ts",
+      "baselineSha256": "00b59bc0936dc234e8743e44c5d5d5cf3340e2eeaba5bf357287ed08c6280365",
+      "currentSha256": "00b59bc0936dc234e8743e44c5d5d5cf3340e2eeaba5bf357287ed08c6280365",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/profile-validation.test.ts",
+      "baselineSha256": "153d9a1f189b099c442da36b2d6d39fd91a437767a471eabea6c862350249fa1",
+      "currentSha256": "153d9a1f189b099c442da36b2d6d39fd91a437767a471eabea6c862350249fa1",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/runtime.test.ts",
+      "baselineSha256": "192e8ebf8de5db855546e0cdea0169c74461e1e0edd666e4f0b9f8e8abc43ffb",
+      "currentSha256": "192e8ebf8de5db855546e0cdea0169c74461e1e0edd666e4f0b9f8e8abc43ffb",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/stop-boundary.test.ts",
+      "baselineSha256": "e05a074325155e788f802893331f2537b2385880dcab289a2080d5748bc1def5",
+      "currentSha256": "e05a074325155e788f802893331f2537b2385880dcab289a2080d5748bc1def5",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/stream-events.test.ts",
+      "baselineSha256": "b21fc1d3ae244a5908ff3773018e886e65f5982dfa3265725c7d268b06785dae",
+      "currentSha256": "b21fc1d3ae244a5908ff3773018e886e65f5982dfa3265725c7d268b06785dae",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/target-availability.test.ts",
+      "baselineSha256": "4da1a2b9420b5e7b97e632b5cdd173be97c6c78d9ae20fc0e2732f21728539bb",
+      "currentSha256": "4da1a2b9420b5e7b97e632b5cdd173be97c6c78d9ae20fc0e2732f21728539bb",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "baselineSha256": "f949a9a0744bbafc41e5ad263efd29c232f6738facfa19cd6a67cb85ef6b0bad",
+      "currentSha256": "f949a9a0744bbafc41e5ad263efd29c232f6738facfa19cd6a67cb85ef6b0bad",
+      "unchanged": true
+    },
+    {
+      "path": "runtime/test/tool-receipts.test.ts",
+      "baselineSha256": "0bc0384dc2247ff21970a3538d42de7867e430f072c364239b58efc96abeba29",
+      "currentSha256": "0bc0384dc2247ff21970a3538d42de7867e430f072c364239b58efc96abeba29",
+      "unchanged": true
+    },
+    {
+      "path": "settings.gradle.kts",
+      "baselineSha256": "e4f94b3facdfee5f04157cc27a24b4c23e3d9e0b2f41e959ed4f0811ad6c7f18",
+      "currentSha256": "e4f94b3facdfee5f04157cc27a24b4c23e3d9e0b2f41e959ed4f0811ad6c7f18",
+      "unchanged": true
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/AndroidManifest.xml",
+      "baselineSha256": "c67ac899a2e77ace78ffc10d8be04d82e34db8bb13a67b693be8987cdef50109",
+      "currentSha256": "c67ac899a2e77ace78ffc10d8be04d82e34db8bb13a67b693be8987cdef50109",
+      "unchanged": true
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/DynamicContentFixtureActivity.kt",
+      "baselineSha256": "c19d9c116179f369d290925cd6ec63de78d2585282361701fc49bf2ec8ebbe68",
+      "currentSha256": "c19d9c116179f369d290925cd6ec63de78d2585282361701fc49bf2ec8ebbe68",
+      "unchanged": true
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/DynamicContentFixtureProvider.kt",
+      "baselineSha256": "935ab8d3a78f0bdaf2ab2ca7c684e2a8b5ca4766a14718e36be4063600de4808",
+      "currentSha256": "935ab8d3a78f0bdaf2ab2ca7c684e2a8b5ca4766a14718e36be4063600de4808",
+      "unchanged": true
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/res/values/dynamic_ids.xml",
+      "baselineSha256": "8f11eff447a766cd477e2dd0ba0d3aad9d27cf62fb400f4c3843910f1d1055fe",
+      "currentSha256": "8f11eff447a766cd477e2dd0ba0d3aad9d27cf62fb400f4c3843910f1d1055fe",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Authorization.kt",
+      "baselineSha256": "b6f8a3653a999dfb8e39ec8eb40af5faf5497a9fa79010dcd8abe67f4821d125",
+      "currentSha256": "b6f8a3653a999dfb8e39ec8eb40af5faf5497a9fa79010dcd8abe67f4821d125",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt",
+      "baselineSha256": "81657db355598db09b435e1472f84097bbe726778402e38f4ec276e830b44d92",
+      "currentSha256": "81657db355598db09b435e1472f84097bbe726778402e38f4ec276e830b44d92",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Displays.kt",
+      "baselineSha256": "3ccb2e9fd4db9306e52f0b1c70e003ce06424f839797d744ca7e818049206d3a",
+      "currentSha256": "3ccb2e9fd4db9306e52f0b1c70e003ce06424f839797d744ca7e818049206d3a",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/SemanticTree.kt",
+      "baselineSha256": "a27d47a80cc24051c1ab4804f466edd417ecb49a32be6b3b9b946b3fc12e74e7",
+      "currentSha256": "a27d47a80cc24051c1ab4804f466edd417ecb49a32be6b3b9b946b3fc12e74e7",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/UpperTargetResolver.kt",
+      "baselineSha256": "d09b36a07ba522436fd98ededeffea3929bd34b10b71d7a7be573050c8a1be16",
+      "currentSha256": "d09b36a07ba522436fd98ededeffea3929bd34b10b71d7a7be573050c8a1be16",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/AccessibilitySetupTest.kt",
+      "baselineSha256": "5e887246bb6e0847ad26cc6c1d824ea68380fbaaf02faf68c520491154778b25",
+      "currentSha256": "5e887246bb6e0847ad26cc6c1d824ea68380fbaaf02faf68c520491154778b25",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/AgentBackgroundTest.kt",
+      "baselineSha256": "5867affe2928eea60b3e88c3b907fdd6765fcc415ec0b7531c9e885fbc91e6c6",
+      "currentSha256": "5867affe2928eea60b3e88c3b907fdd6765fcc415ec0b7531c9e885fbc91e6c6",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/BoundedInputStateTest.kt",
+      "baselineSha256": "380e7f0cbd84341fd4c42020b0b2579f11a111c736d5d7074a321c7824b332fa",
+      "currentSha256": "380e7f0cbd84341fd4c42020b0b2579f11a111c736d5d7074a321c7824b332fa",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/CompanionObservationTest.kt",
+      "baselineSha256": "8e30b35fdcf60d5560594a2bf298f9e2e4595847b9c32456061e33f389b87086",
+      "currentSha256": "8e30b35fdcf60d5560594a2bf298f9e2e4595847b9c32456061e33f389b87086",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/CoreTest.kt",
+      "baselineSha256": "b136d7e003d7f85617a22cf10b4d25e57cf943962d710992da1db8c13117f125",
+      "currentSha256": "b136d7e003d7f85617a22cf10b4d25e57cf943962d710992da1db8c13117f125",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/DisplayRolePolicyTest.kt",
+      "baselineSha256": "96c3ce22d8140d72f742b8ce5ac9e0b647549430ab3a540d0a0226f9acf6a992",
+      "currentSha256": "96c3ce22d8140d72f742b8ce5ac9e0b647549430ab3a540d0a0226f9acf6a992",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/DisplayVisibilityTest.kt",
+      "baselineSha256": "ba9ff5804691d7ea5fed47479b4ed7ab65f4e562c527cdaa322f0c62bd0abebf",
+      "currentSha256": "ba9ff5804691d7ea5fed47479b4ed7ab65f4e562c527cdaa322f0c62bd0abebf",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/EvdevAxesTest.kt",
+      "baselineSha256": "8c611101ff1aa947433510a6d0ac35ee81b3c0367fb9df5ef4a7aebeedd30516",
+      "currentSha256": "8c611101ff1aa947433510a6d0ac35ee81b3c0367fb9df5ef4a7aebeedd30516",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/EvdevButtonsTest.kt",
+      "baselineSha256": "34f8282e2ef80c322f1900b5f3aa1b9057126e9ff55a4ab2714fbbeab21175da",
+      "currentSha256": "34f8282e2ef80c322f1900b5f3aa1b9057126e9ff55a4ab2714fbbeab21175da",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadCleanupTest.kt",
+      "baselineSha256": "60634245dc9d31fb83614f4fcf853f0ac95e253ab227fa4774ce056c3c007e38",
+      "currentSha256": "60634245dc9d31fb83614f4fcf853f0ac95e253ab227fa4774ce056c3c007e38",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadCommandTest.kt",
+      "baselineSha256": "f5895d9d04c90baf420aa6242b56b8bc4f32b0e4b879dd8883d98868746e5411",
+      "currentSha256": "f5895d9d04c90baf420aa6242b56b8bc4f32b0e4b879dd8883d98868746e5411",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadHoldTargetTest.kt",
+      "baselineSha256": "0fca4b75e96c613ed723784bb9c5852881e83f3ce75d86f9a7135e422c9bfafb",
+      "currentSha256": "0fca4b75e96c613ed723784bb9c5852881e83f3ce75d86f9a7135e422c9bfafb",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadLeaseGuardTest.kt",
+      "baselineSha256": "01f01dc711f8b31da29205dd6b0de5e5e5ed2d5c37393a4e8eefb774608786f7",
+      "currentSha256": "01f01dc711f8b31da29205dd6b0de5e5e5ed2d5c37393a4e8eefb774608786f7",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/InputTargetPolicyTest.kt",
+      "baselineSha256": "f7178da836a40f495775c7f846a897f19f36ce466c49011e4a08e667df0712e8",
+      "currentSha256": "f7178da836a40f495775c7f846a897f19f36ce466c49011e4a08e667df0712e8",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/LauncherAppsTest.kt",
+      "baselineSha256": "2a47e44faa933f513a13264abcc3e8db0e35ee6b2b070cd28efc6b1f401d835d",
+      "currentSha256": "2a47e44faa933f513a13264abcc3e8db0e35ee6b2b070cd28efc6b1f401d835d",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/NavigationCommandTest.kt",
+      "baselineSha256": "6a9195cb6515d312924b7bf27c204e566442390c515cb0a708e8e5298a3cb72b",
+      "currentSha256": "6a9195cb6515d312924b7bf27c204e566442390c515cb0a708e8e5298a3cb72b",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/NavigationFocusTest.kt",
+      "baselineSha256": "891d8ac99c1c2996bc21e90addf9f74108c52470db44686c1e2f5dcd38196da4",
+      "currentSha256": "891d8ac99c1c2996bc21e90addf9f74108c52470db44686c1e2f5dcd38196da4",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationCacheInvalidationTest.kt",
+      "baselineSha256": "ddf92130563f6fb0fa46a41e578be20a47fe234195ab09b3b0ec18729e0b49bb",
+      "currentSha256": "ddf92130563f6fb0fa46a41e578be20a47fe234195ab09b3b0ec18729e0b49bb",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationProofRefreshTest.kt",
+      "baselineSha256": "3e72057eb2b7d7df4377343f74f072c0b010d875f4bb4257c4f3491f6f48d94b",
+      "currentSha256": "3e72057eb2b7d7df4377343f74f072c0b010d875f4bb4257c4f3491f6f48d94b",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationWindowEvidenceTest.kt",
+      "baselineSha256": "52f56939cc27367376db49f6a9eeb108eed5f2bf190761fb057f395cc0a3f692",
+      "currentSha256": "52f56939cc27367376db49f6a9eeb108eed5f2bf190761fb057f395cc0a3f692",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ReadObservationTest.kt",
+      "baselineSha256": "260e710b4335829efc40f916ffb7829ff944145908e7be0abd30dc88f154259f",
+      "currentSha256": "260e710b4335829efc40f916ffb7829ff944145908e7be0abd30dc88f154259f",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ScreenSelectionTest.kt",
+      "baselineSha256": "6d45da886b92bd0dc6960f63afaaef7a539d9aab67ecfb5714d2b53e2532ceb8",
+      "currentSha256": "6d45da886b92bd0dc6960f63afaaef7a539d9aab67ecfb5714d2b53e2532ceb8",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/SemanticTreeTest.kt",
+      "baselineSha256": "d8cea2af072ba58f369b5bab453b1ebe643fe15cfa7d2e14836f99ec8c9d39ac",
+      "currentSha256": "d8cea2af072ba58f369b5bab453b1ebe643fe15cfa7d2e14836f99ec8c9d39ac",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ShellCommandPolicyTest.kt",
+      "baselineSha256": "829e99c079111d0c4971441b86bad78c7a0fbd748856d511f57a41370243e3b1",
+      "currentSha256": "829e99c079111d0c4971441b86bad78c7a0fbd748856d511f57a41370243e3b1",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/TargetObservationAvailabilityTest.kt",
+      "baselineSha256": "a53fd4e0aa9e7f948fdf75af0c1597e2f4d58356eed893308fcc6c15f84710e6",
+      "currentSha256": "a53fd4e0aa9e7f948fdf75af0c1597e2f4d58356eed893308fcc6c15f84710e6",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ThorBrightnessCommandTest.kt",
+      "baselineSha256": "2545dce28bd91ee961622e9b678ba66a5f1462b267df48c2c98029d1eecda81c",
+      "currentSha256": "2545dce28bd91ee961622e9b678ba66a5f1462b267df48c2c98029d1eecda81c",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/UiActionWindowTest.kt",
+      "baselineSha256": "ef06015ffb9f265d076a729323335605c3928a0550ef2d87e93c2e780d11a296",
+      "currentSha256": "ef06015ffb9f265d076a729323335605c3928a0550ef2d87e93c2e780d11a296",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/UiActivationTest.kt",
+      "baselineSha256": "3cc37a8ee0a82ce13304c5183a2fd4d16b6aa3e5e3a289d13aa86a1ca0a5e487",
+      "currentSha256": "3cc37a8ee0a82ce13304c5183a2fd4d16b6aa3e5e3a289d13aa86a1ca0a5e487",
+      "unchanged": true
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/UpperTargetResolverTest.kt",
+      "baselineSha256": "f2e4cd31caf88c73562c380cbbcba5831e441f1d631d6ca5d950b67485a1c399",
+      "currentSha256": "f2e4cd31caf88c73562c380cbbcba5831e441f1d631d6ca5d950b67485a1c399",
+      "unchanged": true
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt",
+      "baselineSha256": "0fb2b88eebd15578a7a37f861775968faca8811d862acf2ae4c95b1d0ea58446",
+      "currentSha256": "0fb2b88eebd15578a7a37f861775968faca8811d862acf2ae4c95b1d0ea58446",
+      "unchanged": true
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/ThorAccessibilityService.kt",
+      "baselineSha256": "a8e79cdc89f4508da66a4c7abb462e95cfc2e6353e65f05f76745acdafa1539e",
+      "currentSha256": "a8e79cdc89f4508da66a4c7abb462e95cfc2e6353e65f05f76745acdafa1539e",
+      "unchanged": true
+    }
+  ]
+}

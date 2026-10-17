@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "profilesVaultRolesRawXmlRestored": {
+    "profiles": {
+      "before": "3325d2a819fdd8062c2cdc48a09b995c9b012915bcdf88b1cf9742a7f057c793",
+      "after": "3325d2a819fdd8062c2cdc48a09b995c9b012915bcdf88b1cf9742a7f057c793",
+      "restored": true
+    },
+    "native-credentials": {
+      "before": "3325d2a819fdd8062c2cdc48a09b995c9b012915bcdf88b1cf9742a7f057c793",
+      "after": "3325d2a819fdd8062c2cdc48a09b995c9b012915bcdf88b1cf9742a7f057c793",
+      "restored": true
+    },
+    "display-roles": {
+      "before": "3325d2a819fdd8062c2cdc48a09b995c9b012915bcdf88b1cf9742a7f057c793",
+      "after": "3325d2a819fdd8062c2cdc48a09b995c9b012915bcdf88b1cf9742a7f057c793",
+      "restored": true
+    }
+  },
+  "originalHistoryIdsPreserved": {
+    "sessions": true,
+    "runs": true,
+    "messages": true,
+    "events": true,
+    "attachments": true
+  },
+  "originalHistoryPayloadsByteIdentical": {
+    "sessions": true,
+    "runs": true,
+    "messages": true,
+    "events": true,
+    "attachments": true
+  },
+  "selectedSessionRestored": true,
+  "metadataOnlySessionUpdatedAtChanges": 0,
+  "originalSessionContentUnchangedExceptUpdatedAt": true,
+  "activeRuns": 0,
+  "runCountAfter": 120,
+  "runtimeServiceExited": true,
+  "accessibilityMatchesOriginalGlobalBaseline": true,
+  "notificationPermissionAndFullFlagsMatchOriginalGlobalBaseline": true,
+  "notificationLineAfter": "android.permission.POST_NOTIFICATIONS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]",
+  "globalSettingsUnchanged": {
+    "overlay_display_devices": "null",
+    "animator_duration_scale": "null",
+    "immersive": "null"
+  },
+  "installedHashesAfter": {
+    "dev.thor.agent": "7da2c6d3063f7877e467e6334b89d6c2156bbce5655d1e5606652e18187010cf",
+    "dev.thor.agent.test": "cdacb660d1f45155c32de0aabcbefed21a4e52d81c88fb428dad913439f170dc",
+    "dev.thor.inputlab": "4cd028e29e8ae4b8fb40217f70eaa0304c21b2a28a7f43fd9b313dc536f36689"
+  },
+  "baselineSource": "build/emulator/dual-document-2026-10-17/run-01/preflight.json",
+  "handoffBaselineHadOwnAccessibilityAndGrantedNotifications": false,
+  "cloudCredentialsUsed": false,
+  "thorOperations": false
+}

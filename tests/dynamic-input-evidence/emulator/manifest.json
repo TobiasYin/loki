@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent fixed-pair dynamic-input emulator attempts; firstfailure retained, no cloud/Thor/model/game claim. Excludesitself. SecondsameApp/newTestLabfailure retained separately; no firstfailure overwrite. Thirdindependentfixedpair records2passes; prior2failures unchanged.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1176,
+      "sha256": "30d94c0903f18895cce4f5e2be0014c176c36903e6175f7eaf84831ca9fdd5b9"
+    },
+    {
+      "path": "attempt-01/README.md",
+      "bytes": 3198,
+      "sha256": "41cc3d9877a14259296bd43448ea67b75fdfdf8eda3c02a560f873a8657c85c4"
+    },
+    {
+      "path": "attempt-01/artifacts.json",
+      "bytes": 408,
+      "sha256": "d10d1d114a8f38020ad0b0271ca97e71b5a9c8e3a4a9b4a8498d29b5dd97a4ed"
+    },
+    {
+      "path": "attempt-01/component.json",
+      "bytes": 83574,
+      "sha256": "6499fadb49978dce94f766f655aab0e1edd50f1b6e2bdf222f22ba3cf0fad6ba"
+    },
+    {
+      "path": "attempt-01/display-facts.json",
+      "bytes": 79,
+      "sha256": "a341d2f4e91af73f3798debeae9e7d23339412b6064cca06cfa1fa3a13541c59"
+    },
+    {
+      "path": "attempt-01/dynamic-content-explicit.log",
+      "bytes": 2547,
+      "sha256": "09d84fd245d8ee7036820fde0951ef3e1056d4cea3c4efa8d79954b467fe6354"
+    },
+    {
+      "path": "attempt-01/fixture-before-swipe.jpg",
+      "bytes": 17481,
+      "sha256": "de905dfdae3370d8af39be7c0571304975a9012b00b6df0f74e76f210adf0e38"
+    },
+    {
+      "path": "attempt-01/manifest.json",
+      "bytes": 1570,
+      "sha256": "e4b8c3158349ac942b09b76cd8cc9b3e53ff9b417c71e21dd7eefa9a8ad2be77"
+    },
+    {
+      "path": "attempt-01/preservation.json",
+      "bytes": 2176,
+      "sha256": "3da9b7303e7df729eb3eec9dd28847175880274bb7ead6214d5dd4ffb41dfc21"
+    },
+    {
+      "path": "attempt-01/received-gestures.json",
+      "bytes": 1683,
+      "sha256": "ddac81210a7307d59cb7c26bc8761bbdce00efd5cde9ab63b7c5c67d27b8087b"
+    },
+    {
+      "path": "attempt-01/summary.json",
+      "bytes": 2854,
+      "sha256": "02bd20da5a8ac5657229bd9bb4b3ae5e072a5e1e82ba2296f3505ebf9a6985f9"
+    },
+    {
+      "path": "attempt-02/README.md",
+      "bytes": 3512,
+      "sha256": "31f6d55818b0ad7828c7e60bbbe554de78abf9d9e8a90e2d3632a4cf462e1586"
+    },
+    {
+      "path": "attempt-02/artifacts.json",
+      "bytes": 408,
+      "sha256": "e6cf64d5ae0b66bce3238a7380fe54a890b9fda71dfea51064f654d800a763f5"
+    },
+    {
+      "path": "attempt-02/component.json",
+      "bytes": 3366,
+      "sha256": "8ab8e85a266799b679db65a970aeff6db28cb4ef6cecbfb0c5705f9311467fb6"
+    },
+    {
+      "path": "attempt-02/dynamic-content-explicit.log",
+      "bytes": 2331,
+      "sha256": "d1d3f37c1f92afc326ea66e1f00bf5f3abd8b19657d30b471686c07d8168e9e3"
+    },
+    {
+      "path": "attempt-02/manifest.json",
+      "bytes": 1263,
+      "sha256": "145d6457feddfa51e3e654883f752bbdce6cd59dbf128df2ff2fae7f5f802ef7"
+    },
+    {
+      "path": "attempt-02/preservation.json",
+      "bytes": 2176,
+      "sha256": "65fdeda59c02aaacc325bf2eb959b1cde07e376db43f9145a25d60dee56ef343"
+    },
+    {
+      "path": "attempt-02/receiver.json",
+      "bytes": 1032,
+      "sha256": "0de0784b45574447a20df5cefd4e94f3ec86f189f912cfcc7d968aff7ed30917"
+    },
+    {
+      "path": "attempt-02/summary.json",
+      "bytes": 2788,
+      "sha256": "9688ee6f94a2479d36b4661d701d51b1b6c2a4d81c9126afea8246aa15546331"
+    },
+    {
+      "path": "attempt-03/README.md",
+      "bytes": 3927,
+      "sha256": "d9e74839488ed046dd2cee9c7e9690786285179bb3cd1c84844a6cb8ab52e29e"
+    },
+    {
+      "path": "attempt-03/artifacts.json",
+      "bytes": 408,
+      "sha256": "11b68ccbb134b9db93b8499af7036ce2d9e3de47ac3565b88b2c28b2bc2a6247"
+    },
+    {
+      "path": "attempt-03/component.json",
+      "bytes": 6432,
+      "sha256": "c2f4908d02afb4a5750c4f0558f8d64ee01087392c94a80f43eb2f9516743cf5"
+    },
+    {
+      "path": "attempt-03/dynamic-after.jpg",
+      "bytes": 19457,
+      "sha256": "249ccd79f0536ae4e4863c614309c5fbda5fbb46d2109566bb34d6238b8ce9b6"
+    },
+    {
+      "path": "attempt-03/dynamic-before.jpg",
+      "bytes": 19802,
+      "sha256": "5edc0fd5586e4f9fd1de57855b1e4d1d20d77abad6d82fa47ae778d911606af0"
+    },
+    {
+      "path": "attempt-03/dynamic-content-explicit.log",
+      "bytes": 844,
+      "sha256": "533c81ec5ad67148123557ce423452dbcb362a6e34df7eeaf1593d4af7e81c9e"
+    },
+    {
+      "path": "attempt-03/fixture-before-swipe.jpg",
+      "bytes": 17580,
+      "sha256": "75eefddef9e2f709d96e0b133274145709091f866bb0aeb1bae2dce915c9073e"
+    },
+    {
+      "path": "attempt-03/manifest.json",
+      "bytes": 2037,
+      "sha256": "d106dd7dc6258a94c8aa2df57aa06e3b1c6d7e3a92fdf11bbe06b05cd4fcdb19"
+    },
+    {
+      "path": "attempt-03/modern-ui-explicit.log",
+      "bytes": 844,
+      "sha256": "15985bd0cd7492d947d273023c7253242e4c3756ec9264d5abd1c8346cfdd8f2"
+    },
+    {
+      "path": "attempt-03/modern-ui.json",
+      "bytes": 7510,
+      "sha256": "648e6f94c897227dd8b6e7f491be7aa9219fc4d7f90d7b5ca5c8ebd5d5140bd4"
+    },
+    {
+      "path": "attempt-03/preservation.json",
+      "bytes": 2176,
+      "sha256": "6d8fbfbb066615de19c3d6af1cc0f4090d787ecb5fbb78ff9eee4507ab2398a3"
+    },
+    {
+      "path": "attempt-03/received-gestures.json",
+      "bytes": 4509,
+      "sha256": "5be1a7ac05835a927aeae277845d19c012be8589dc7260eda8745966f4122cb4"
+    },
+    {
+      "path": "attempt-03/summary.json",
+      "bytes": 3279,
+      "sha256": "5dd0dcac263e0bbcc9f5a8260a7744414a3ca2d72f4aaeaf19274cb685a3dddf"
+    }
+  ]
+}

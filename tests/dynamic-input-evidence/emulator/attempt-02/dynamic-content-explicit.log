@@ -1,0 +1,44 @@
+INSTRUMENTATION_STATUS: class=dev.thor.agent.EmulatorDynamicContentTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.EmulatorDynamicContentTest:
+INSTRUMENTATION_STATUS: test=changingPixelsKeepStableTargetsUsableButRealWindowsAndNodeGeometryStillReject
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.EmulatorDynamicContentTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Cleanup must remain complete expected:<0> but was:<1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at dev.thor.agent.EmulatorDynamicContentTest.changingPixelsKeepStableTargetsUsableButRealWindowsAndNodeGeometryStillReject(EmulatorDynamicContentTest.kt:230)
+
+INSTRUMENTATION_STATUS: stream=
+Error in changingPixelsKeepStableTargetsUsableButRealWindowsAndNodeGeometryStillReject(dev.thor.agent.EmulatorDynamicContentTest):
+java.lang.AssertionError: Cleanup must remain complete expected:<0> but was:<1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at dev.thor.agent.EmulatorDynamicContentTest.changingPixelsKeepStableTargetsUsableButRealWindowsAndNodeGeometryStillReject(EmulatorDynamicContentTest.kt:230)
+
+INSTRUMENTATION_STATUS: test=changingPixelsKeepStableTargetsUsableButRealWindowsAndNodeGeometryStillReject
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 37.053
+There was 1 failure:
+1) changingPixelsKeepStableTargetsUsableButRealWindowsAndNodeGeometryStillReject(dev.thor.agent.EmulatorDynamicContentTest)
+java.lang.AssertionError: Cleanup must remain complete expected:<0> but was:<1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at dev.thor.agent.EmulatorDynamicContentTest.changingPixelsKeepStableTargetsUsableButRealWindowsAndNodeGeometryStillReject(EmulatorDynamicContentTest.kt:230)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

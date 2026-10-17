@@ -8,13 +8,18 @@ data class TargetWindowEvidence(val id:Int,val type:Int,val layer:Int,val focuse
     companion object {const val APPLICATION=1;const val SYSTEM=3}
 }
 enum class TargetEventKind {
-    CONTENT, APP_CONTENT, STRUCTURE;
+    CONTENT, APP_CONTENT, WINDOW_METADATA, INTERACTION_LAYOUT, STRUCTURE;
     companion object {
         /** Android public AccessibilityEvent constants; kept platform-free for guard regression tests. */
-        fun fromAndroidType(type:Int)=when(type) {
-            0x00000800,0x00000010->CONTENT // WINDOW_CONTENT_CHANGED, VIEW_TEXT_CHANGED
-            0x00000020,0x00400000->STRUCTURE // WINDOW_STATE_CHANGED, WINDOWS_CHANGED
-            else->APP_CONTENT // clicked/scrolled/selected/focused etc. remain app content, never a system exclusion.
+        fun fromAndroidType(type:Int,windowChanges:Int=0,contentChangeTypes:Int=0)=when(type) {
+            // A real scroll or subtree replacement may move/recycle controls even
+            // when the application window rectangle remains unchanged.
+            0x00001000->INTERACTION_LAYOUT // VIEW_SCROLLED
+            0x00000800->if(contentChangeTypes and 1 != 0)INTERACTION_LAYOUT else CONTENT
+            0x00000010->CONTENT // VIEW_TEXT_CHANGED
+            0x00400000->if(windowChanges!=0 && windowChanges and (4 or 128).inv()==0)WINDOW_METADATA else STRUCTURE
+            0x00000020->STRUCTURE // WINDOW_STATE_CHANGED
+            else->APP_CONTENT // clicked/selected/focused/caret feedback
         }
     }
 }
@@ -23,21 +28,28 @@ enum class TargetEventKind {
 class TargetWindowRevisions {
     private val content=LinkedHashMap<Int,Long>()
     private val structure=LinkedHashMap<Int,Long>()
+    private val interaction=LinkedHashMap<Int,Long>()
     private val displays=LinkedHashMap<Int,Int>()
     @Synchronized fun observe(display:Int,windows:List<TargetWindowEvidence>) {
         windows.forEach {displays[it.id]=display}
-        while(displays.size>512){val id=displays.keys.first();displays.remove(id);content.remove(id)}
+        while(displays.size>512){val id=displays.keys.first();displays.remove(id);content.remove(id);interaction.remove(id)}
     }
     @Synchronized fun event(kind:TargetEventKind,windowId:Int,eventPackage:String?,current:Map<Int,List<TargetWindowEvidence>>) {
         current.forEach { (display,windows)->observe(display,windows) }
         val display=displays[windowId] ?: return
         val window=current[display]?.singleOrNull {it.id==windowId}
         if(kind==TargetEventKind.CONTENT && window?.type==TargetWindowEvidence.SYSTEM && window.packageName=="com.android.systemui" && eventPackage=="com.android.systemui")return
-        if(kind!=TargetEventKind.STRUCTURE && window?.isApplicationOn(display)==true)content[windowId]=(content[windowId] ?: 0)+1
+        if(kind==TargetEventKind.INTERACTION_LAYOUT && window?.isApplicationOn(display)==true)
+            interaction[windowId]=(interaction[windowId] ?: 0)+1
+        // Public title/accessibility-focus-only window flags do not imply a
+        // window replacement, including on SystemUI/non-application windows.
+        // Live evidence still carries actual window/focus/geometry/owner facts.
+        if(kind==TargetEventKind.WINDOW_METADATA || (kind!=TargetEventKind.STRUCTURE && window?.isApplicationOn(display)==true))content[windowId]=(content[windowId] ?: 0)+1
         else structure[display]=(structure[display] ?: 0)+1
     }
     @Synchronized fun content(window:Int)=content[window] ?: 0L
     @Synchronized fun structure(display:Int)=structure[display] ?: 0L
+    @Synchronized fun interaction(window:Int)=interaction[window] ?: 0L
 }
 object UpperTargetResolver {
     private val empty=TouchableBounds(0,0,0,0)
@@ -78,6 +90,7 @@ object UpperTargetResolver {
             "${window.id}:${window.type}:${window.layer}:${window.focused}:${window.active}:$geometry$app"
         }+":structure:${revisions.structure(display.id)}"
         val content=applications.joinToString(";") {"${it.id}:${revisions.content(it.id)}"}
-        return Target(packages.singleOrNull(),validity,"$layout:app-content:$content",clip,layout)
+        val interaction=applications.joinToString(";") {"${it.id}:${revisions.interaction(it.id)}"}
+        return Target(packages.singleOrNull(),validity,"$layout:app-content:$content",clip,layout,interaction)
     }
 }

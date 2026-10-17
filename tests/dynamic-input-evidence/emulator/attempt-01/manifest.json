@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "scope": "FirstfixedApp33f0/Test01be/Lab9d4f dynamiccomponent failed onfixturewithnoscrollrange; earlierpositive stages arepartialonly. Excludesitself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3198,
+      "sha256": "41cc3d9877a14259296bd43448ea67b75fdfdf8eda3c02a560f873a8657c85c4"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "d10d1d114a8f38020ad0b0271ca97e71b5a9c8e3a4a9b4a8498d29b5dd97a4ed"
+    },
+    {
+      "path": "component.json",
+      "bytes": 83574,
+      "sha256": "6499fadb49978dce94f766f655aab0e1edd50f1b6e2bdf222f22ba3cf0fad6ba"
+    },
+    {
+      "path": "display-facts.json",
+      "bytes": 79,
+      "sha256": "a341d2f4e91af73f3798debeae9e7d23339412b6064cca06cfa1fa3a13541c59"
+    },
+    {
+      "path": "dynamic-content-explicit.log",
+      "bytes": 2547,
+      "sha256": "09d84fd245d8ee7036820fde0951ef3e1056d4cea3c4efa8d79954b467fe6354"
+    },
+    {
+      "path": "fixture-before-swipe.jpg",
+      "bytes": 17481,
+      "sha256": "de905dfdae3370d8af39be7c0571304975a9012b00b6df0f74e76f210adf0e38"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2176,
+      "sha256": "3da9b7303e7df729eb3eec9dd28847175880274bb7ead6214d5dd4ffb41dfc21"
+    },
+    {
+      "path": "received-gestures.json",
+      "bytes": 1683,
+      "sha256": "ddac81210a7307d59cb7c26bc8761bbdce00efd5cde9ab63b7c5c67d27b8087b"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 2854,
+      "sha256": "02bd20da5a8ac5657229bd9bb4b3ae5e072a5e1e82ba2296f3505ebf9a6985f9"
+    }
+  ]
+}

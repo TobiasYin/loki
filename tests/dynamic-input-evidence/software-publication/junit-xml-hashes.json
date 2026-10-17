@@ -1,0 +1,453 @@
+{
+  "totals": {
+    "tests": 446,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suiteCount": 65
+  },
+  "modules": [
+    {
+      "module": "app",
+      "gradleTask": ":app:testDebugUnitTest",
+      "taskStatus": "EXECUTED",
+      "suiteCount": 24,
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "device-core",
+      "gradleTask": ":device-core:test",
+      "taskStatus": "UP-TO-DATE",
+      "suiteCount": 29,
+      "tests": 201,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "core",
+      "gradleTask": ":core:test",
+      "taskStatus": "UP-TO-DATE",
+      "suiteCount": 3,
+      "tests": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "device-authority",
+      "gradleTask": ":device-authority:test",
+      "taskStatus": "UP-TO-DATE",
+      "suiteCount": 1,
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "input-lab",
+      "gradleTask": ":input-lab:testDebugUnitTest",
+      "taskStatus": "EXECUTED",
+      "suiteCount": 8,
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "files": [
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatBridgePolicyTest.xml",
+      "bytes": 904,
+      "sha256": "b1bde1ab424b70d4a02541b2f0e1121b5b9508bb40b9aada8612b1f31ccedce8"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatEventProjectionTest.xml",
+      "bytes": 936,
+      "sha256": "96cdd04e6cce57b57acf8bbc0bef8d38a767895d01f629401ca63df488a0bb8b"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatSnapshotTest.xml",
+      "bytes": 743,
+      "sha256": "6e76f0017be7565156d0741e235f1355219625a5f8cf1cf11529a701d36657ea"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.CoordinatorTest.xml",
+      "bytes": 2407,
+      "sha256": "fc6834b143f871c01ac9a0ce820633a9234a06588b8d996ae446e9190f7aba2f"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.DeepSeekCatalogTest.xml",
+      "bytes": 863,
+      "sha256": "9c23ebe6a3b1ab6c18d43a3e7fb18b49cebd23a974e0b76220feef8f66661f61"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.EventIndexIsolationTest.xml",
+      "bytes": 469,
+      "sha256": "6d2e5a2299a74604d2ea4e1ddac584fbf4fe56dad05481f68ab6632f63342644"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ExecutionStateProjectionTest.xml",
+      "bytes": 1059,
+      "sha256": "64a362d9b9a8b308d594e8e483fd7cc586833ca6f4f2fd2ffbd1bb05f6d37dbe"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.HostRpcPayloadTest.xml",
+      "bytes": 1125,
+      "sha256": "3961004cc81b8fe7d52ba9fbf597874ff31eacef0946fa0f4c8f8982a06daae9"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.InputFocusFailureTest.xml",
+      "bytes": 758,
+      "sha256": "cf5960c9c5f347780b488c91aa830b62c8dbbc64d98e3ca17a739c355e33e201"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.LatestValueTest.xml",
+      "bytes": 800,
+      "sha256": "175ff328f3b0e4c8d021b58afbffdf68987bda085bfbe0c2ae9359ea65fe1cb8"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelCatalogTest.xml",
+      "bytes": 1306,
+      "sha256": "80b9d9ca489dc8fa9c5a7350281ade87d74d037fdd9f175a1480f314f1177b2e"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelConnectionTestTest.xml",
+      "bytes": 1573,
+      "sha256": "6139dda18e4006d926ce7b7312235058f1aae6dfcffdc3ae35364c9189480a2d"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.OfficialProfilePolicyTest.xml",
+      "bytes": 771,
+      "sha256": "2e16903abb8ca2ed8cb3637f546da7f201587fbbed5d3a0c433fa4a03d587f77"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.PreparedToolsTest.xml",
+      "bytes": 1041,
+      "sha256": "105d6ed0cc74bc79b543db7ed239e3395221bfcea97dd2178658d533132fa322"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RecoveryHistoryTest.xml",
+      "bytes": 468,
+      "sha256": "0501dacf61e183ebecc784537e3ca7e6792591a03e6999c69da3b7cc4f68c327"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RuntimeStartupDiagnosticsTest.xml",
+      "bytes": 645,
+      "sha256": "6d625bf975cef1d531ec5f1e593e2f056c334cda564272620c3130df310f0055"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SearchConnectionTestTest.xml",
+      "bytes": 579,
+      "sha256": "b30554bf5ba043c61971e2f3aa9ad9c82e60e061e602d000f5111f74ba04df82"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillStoreTest.xml",
+      "bytes": 1202,
+      "sha256": "b7856fcca6066b732fa6dd6732a63fe1ae354a24148a3561bf6e7c2670307f9a"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillTextResourcesTest.xml",
+      "bytes": 462,
+      "sha256": "8d3c6d67f26e263984004f6866f5433c8d337095c286d1921b8071863b08dddd"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StartupRegressionTest.xml",
+      "bytes": 605,
+      "sha256": "63e1fc4fe196f56dc465e97f9122d41fe7c9d426df4ea0b6361088d908ff6413"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StreamDisplayProjectionTest.xml",
+      "bytes": 982,
+      "sha256": "caa1d9f9938dff243df763d4c4e3930bb85500f682c61413267c825284cf3ccc"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ToolPublicationTest.xml",
+      "bytes": 1078,
+      "sha256": "ef6854178922ef70af1209dfb2ebd492915f10a79f16e39ae426a211f4f29939"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VoiceTransportTest.xml",
+      "bytes": 1511,
+      "sha256": "372d4f389dbc8b2dd113436f92c41d81d357fafbac271c4a61cea38d868203a8"
+    },
+    {
+      "module": "app",
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+      "bytes": 1803,
+      "sha256": "40ff325d41b209fd30e81127e9a6197f4cfeb03153a46f5e60753add4f2991f9"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AccessibilitySetupTest.xml",
+      "bytes": 737,
+      "sha256": "5baa2f843102d249e5e3d5015f498dcf7b5d5bfe244c16541c2afdef760ea816"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AgentBackgroundTest.xml",
+      "bytes": 1046,
+      "sha256": "e420ce2f3574dee9279343986aa2630571009c456a8aeab453ae7e40d617714c"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.BoundedInputStateTest.xml",
+      "bytes": 1327,
+      "sha256": "ce1d6ece9fe5d7bc35e67f93d096737692fb440a9007db6a2e0657e51c4653db"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CompanionObservationTest.xml",
+      "bytes": 1056,
+      "sha256": "ba0139311c09cb07ca2655b177da9d0e7bf98e4c5f66ad6badc633ecd315d015"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CoreTest.xml",
+      "bytes": 5132,
+      "sha256": "b1b48ca3bcc34281efe1298430f9ef16be9ad9242dd799ef8568b020da877985"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayRolePolicyTest.xml",
+      "bytes": 744,
+      "sha256": "9626fedf62f37bd3d23181a7c5c2bbda5d1ecb92eeeead4976de1adc8aa8b7d6"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayVisibilityTest.xml",
+      "bytes": 1051,
+      "sha256": "a017f0879f7fbff646379eff9e4359e0626b5ba999f0f49cb8617de8e7099e05"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevAxesTest.xml",
+      "bytes": 1122,
+      "sha256": "367ac21465f5038521dfc8bc397629635c0ad8d2fd39838873e0fc3e437249c0"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevButtonsTest.xml",
+      "bytes": 896,
+      "sha256": "572987f548a3910d2b29ca540449393919be9aa6ed0433e212cfc81a3c9e45e3"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCleanupTest.xml",
+      "bytes": 871,
+      "sha256": "761c05a3d12885e225aa9988d4e5b68c892cb61862989644c6196ce2c83ec158"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCommandTest.xml",
+      "bytes": 703,
+      "sha256": "06d370942646b73fa6fdd920a7699473eb228fad9cc541266d5b0f01fbf391a3"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadHoldTargetTest.xml",
+      "bytes": 907,
+      "sha256": "5fd124df46d20142559c354a332a5acb8b93d731443344d644869549c675f1e5"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadLeaseGuardTest.xml",
+      "bytes": 725,
+      "sha256": "06e982ed13671a80845fed7e2bda6bd8825d11e9e23dc57153c7979aaa322b7e"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.InputTargetPolicyTest.xml",
+      "bytes": 626,
+      "sha256": "e28df22df6a1e634b07d2a7aecb68ec488aa0a34a9cdb09099d4901ec00fba61"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.LauncherAppsTest.xml",
+      "bytes": 898,
+      "sha256": "36fd03416835de8eadc34d45a591cdc770627af476c0793a34c87ec374e2aa5d"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationCommandTest.xml",
+      "bytes": 999,
+      "sha256": "e37c524957d432c8409fff056ead10c1c44c33a21b5e257f2c8db12c7f35b9cc"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationFocusTest.xml",
+      "bytes": 859,
+      "sha256": "63af431b59b343828f322d5c04e48f530ac03d9f6b9efdde80baa36ca77e60aa"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationCacheInvalidationTest.xml",
+      "bytes": 1543,
+      "sha256": "ae4009cc2f6091ce12bf672efbe173e230675c1a4245efc58a8527fc01059055"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationProofRefreshTest.xml",
+      "bytes": 1816,
+      "sha256": "8f67637dff8750956d843e542893d46fab7bf05ae59ad6967a8c06b4710b5c56"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationWindowEvidenceTest.xml",
+      "bytes": 2308,
+      "sha256": "4c27f28a704a230af23617def44c3422d2b7daef2cf81ae2136a109219501b87"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ReadObservationTest.xml",
+      "bytes": 1371,
+      "sha256": "f3c3f573d4d7de015ea81867893db5278d7ce8721ec110aba8121ca870bfb9d7"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ScreenSelectionTest.xml",
+      "bytes": 1308,
+      "sha256": "2b725990eda2935683c00d3ecef0594d89fb815e1e0a4d6d15aabc998ac2eb5e"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.SemanticTreeTest.xml",
+      "bytes": 1474,
+      "sha256": "2b6cdf0b4c44d97cf563872c7a250b5162868afdd7218c6cbca6edd4368ebada"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ShellCommandPolicyTest.xml",
+      "bytes": 1348,
+      "sha256": "a30283c5b687cf5a3a2324c6612f4e9dec824e0760b5c1938739d464c592427c"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.TargetObservationAvailabilityTest.xml",
+      "bytes": 1319,
+      "sha256": "70b023a021ef1d7de18e5588e3c78e4a4810dee21b04ca3da82102aab26ac2df"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ThorBrightnessCommandTest.xml",
+      "bytes": 879,
+      "sha256": "77ae52e5edb44751b224c659c0d14305ccb022a039e12e4d6880c4e24d0b227c"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActionWindowTest.xml",
+      "bytes": 1172,
+      "sha256": "84e7e1e8b7923d2cfc048f3a040a61f6f7a1667f675cfde3e061746049aa043c"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActivationTest.xml",
+      "bytes": 1002,
+      "sha256": "74aef6fe83cb7e2a3717beaa3c7048c75fc2885ed1908e17cae65fa53ab6d7c6"
+    },
+    {
+      "module": "device-core",
+      "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UpperTargetResolverTest.xml",
+      "bytes": 2353,
+      "sha256": "f8d641692dbac36bbfd36a4b3c0e034b6592eaac4164b35005089518d68609b6"
+    },
+    {
+      "module": "core",
+      "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.AuthorityBudgetTest.xml",
+      "bytes": 901,
+      "sha256": "b903a9a455769e8d1cad3cef5531b8c2f59e8e46de11128b7a3b51ca06d6c007"
+    },
+    {
+      "module": "core",
+      "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.GatewayTest.xml",
+      "bytes": 2404,
+      "sha256": "eab28ebdaeb7b3a24d2763e414da699829caf204188b7d0d0b1b94211e87a357"
+    },
+    {
+      "module": "core",
+      "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.TransportTest.xml",
+      "bytes": 2776,
+      "sha256": "f186b50dbca0aba678a8979c82990f09b8d3776555dcff94a745516726e9b055"
+    },
+    {
+      "module": "device-authority",
+      "path": "integration/device-authority/build/test-results/test/TEST-dev.thor.integration.DeviceAuthorityTest.xml",
+      "bytes": 2166,
+      "sha256": "ec1678e097c3d41af2d6884a0587b4157dc0a6cab0962c2b0ddd514df9337e06"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AttemptTest.xml",
+      "bytes": 4205,
+      "sha256": "b08621b1387e2c950020a85f3aaadae341ca244bcc3b68086972dc6b9cfca42a"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AxisProfileTest.xml",
+      "bytes": 1009,
+      "sha256": "f0a4683afd9481dfcede262534087d804049a911d456ecfed92292f1c2380a03"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.DeviceContinuityTest.xml",
+      "bytes": 1317,
+      "sha256": "f63eb10b8c0a09adff0818ebb7f821a3d2ce8ff336537aa2a7a0f1b2e489f131"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.JournalTest.xml",
+      "bytes": 1090,
+      "sha256": "2fff40534c1d3599467641456135aabd064b1b80453680ba2d57a90f7024fd63"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerEvidenceModeTest.xml",
+      "bytes": 891,
+      "sha256": "a648530542d3bc83d3817c14267e98bb3e3b9f583fa4d5ff2721255634d763e6"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerWindowTest.xml",
+      "bytes": 905,
+      "sha256": "a131cc3c2290b780aa12542ae2970fd64722b290bcd31690186cb8ab5174c8a2"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioModelTest.xml",
+      "bytes": 1032,
+      "sha256": "5daec63a17702fd6227bf6be651518acedc00f783d066c013fd00f143a02ef01"
+    },
+    {
+      "module": "input-lab",
+      "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioSessionTest.xml",
+      "bytes": 1044,
+      "sha256": "b25b0f6919e3244f9dd35e326f6dcebeff69fcaa9bc9f49de5b0173d1ce0bc1d"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only changed debug receiver fixture and instrumentation test; no production source changes",
+  "files": [
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/DynamicContentFixtureActivity.kt",
+      "bytes": 7119,
+      "sha256": "c19d9c116179f369d290925cd6ec63de78d2585282361701fc49bf2ec8ebbe68"
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorDynamicContentTest.kt",
+      "bytes": 24301,
+      "sha256": "408b1bfe6589fabbf343b72a1bfb1e04c48156a58d69b751f9a1a718e763fa1d"
+    }
+  ]
+}

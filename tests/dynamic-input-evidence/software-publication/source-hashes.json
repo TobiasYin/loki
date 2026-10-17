@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "scope": "Four changed/current source files; final instrumentation APK includes the later test diagnostic build",
+  "files": [
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "bytes": 85639,
+      "sha256": "b63b8f5480cfd7888747a04228016cb8b9f7929fda374f4ee2fa4af40e102fcb",
+      "modifiedAfterMainBuildLog": false,
+      "modifiedAfterDiagnosticsBuildLog": false
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ToolPublication.kt",
+      "bytes": 1342,
+      "sha256": "1b00c15df44d2805e2536ad6f17671e616c36578cbc5e1f76cb158a4931fc9e7",
+      "modifiedAfterMainBuildLog": false,
+      "modifiedAfterDiagnosticsBuildLog": false
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/ToolPublicationTest.kt",
+      "bytes": 4936,
+      "sha256": "ca5ea453ebc6b90ae2915cbf18a9f660f0f1187dc7b3235eee1ff3845b2918c0",
+      "modifiedAfterMainBuildLog": false,
+      "modifiedAfterDiagnosticsBuildLog": false
+    },
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorDynamicContentTest.kt",
+      "bytes": 25854,
+      "sha256": "ab90e07a938a32b4208848c438e619c00bbb3fea47aea5844cf2f2e714014f1e",
+      "modifiedAfterMainBuildLog": true,
+      "modifiedAfterDiagnosticsBuildLog": false
+    }
+  ]
+}

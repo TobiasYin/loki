@@ -10,13 +10,13 @@ class UiActivationTest {
         guard.check("run","session","tree-snapshot",7,"game.app","root/0/2",true,"node-own-signature",99)
         UiActivationGuard.requireClickable(true,true,true,false,true,TouchableBounds(100,200,400,300),display,null)
     }
-    @Test fun unrelatedContentDoesNotRelaxCoordinateInputOrChangedStructure() {
+    @Test fun unrelatedContentAllowsCoordinatesButStillRejectsChangedStructure() {
         var current=Target("game.app","valid","content-1",TouchableBounds(0,0,1920,1080),"same-window-layout")
         val snapshots=Snapshots(Clock {0}) {current}
         snapshots.update(listOf(display,display.copy(id=4,identity="lower")));snapshots.calibrate(0,4)
         val observed=snapshots.capture();current=current.copy(revision="ram-updated")
         snapshots.validateObservation(observed.id)
-        rejects(Code.TARGET_CHANGED) {snapshots.validate(observed.id)}
+        assertEquals(observed,snapshots.validate(observed.id))
         current=current.copy(layoutRevision="different-window")
         rejects(Code.TARGET_CHANGED) {snapshots.validateObservation(observed.id)}
     }

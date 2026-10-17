@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "scope": "emulator real Native RPC dynamic-content component; ordinary Activity; no model execution",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "passed": true,
+  "cleanupErrors": [],
+  "setupPermissionsDroppedBeforeTools": true,
+  "upperImage": {
+    "bytes": 17580,
+    "sha256": "75eefddef9e2f709d96e0b133274145709091f866bb0aeb1bae2dce915c9073e",
+    "displayId": 0
+  },
+  "dynamicImageComparison": {
+    "beforeSha256": "5edc0fd5586e4f9fd1de57855b1e4d1d20d77abad6d82fa47ae778d911606af0",
+    "afterSha256": "249ccd79f0536ae4e4863c614309c5fbda5fbb46d2109566bb34d6238b8ce9b6",
+    "ticksAdvanced": 21
+  },
+  "dynamicOldFramePositive": {
+    "ticksAdvanced": 20,
+    "imageHashesDiffer": true,
+    "geometryUnchanged": true,
+    "clickCount": 1
+  },
+  "movedNodeRejected": true,
+  "realDialogRejectedWithoutDispatch": true,
+  "scrollFixtureGeometry": {
+    "viewportHeight": 2400,
+    "contentHeight": 3776,
+    "scrollRange": 1376,
+    "canScrollDown": true
+  },
+  "committedSwipeSurvivedFeedback": true,
+  "oldFrameAfterScrollRejectedWithoutDispatch": true,
+  "profilesRestored": true,
+  "credentialsRestored": true,
+  "rolesRestored": true,
+  "steps": [
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 1202,
+      "error": null,
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 816,
+      "error": null,
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "input.tap",
+      "elapsedMs": 688,
+      "error": null,
+      "outcome": "submitted",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 829,
+      "error": null,
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "input.tap",
+      "elapsedMs": 479,
+      "error": null,
+      "outcome": "submitted",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "elapsedMs": 2873,
+      "error": null,
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "input.activate",
+      "elapsedMs": 322,
+      "error": null,
+      "outcome": "submitted",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "elapsedMs": 2242,
+      "error": null,
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "input.activate",
+      "elapsedMs": 559,
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 782,
+      "error": null,
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "input.tap",
+      "elapsedMs": 3,
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "temporarily_unavailable",
+        "reason": "Observed app/windows/geometry changed",
+        "reasonCode": "TARGET_CHANGED"
+      }
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 771,
+      "error": null,
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "input.swipe",
+      "elapsedMs": 1118,
+      "error": null,
+      "outcome": "submitted",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    },
+    {
+      "toolId": "input.tap",
+      "elapsedMs": 82,
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "authorityAvailability": {
+        "status": "ready",
+        "reason": "Android API exists; delivery on Thor is unverified"
+      }
+    }
+  ],
+  "captureCompatibility": [
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    },
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    },
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    },
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    },
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    }
+  ],
+  "receiver": {
+    "displayId": 0,
+    "windowType": 1,
+    "ticks": 242,
+    "frames": 1179,
+    "clickCount": 3,
+    "touchCount": 28,
+    "scrollCount": 36,
+    "scrollY": 1376,
+    "viewportHeight": 2400,
+    "contentHeight": 3776,
+    "scrollRange": 1376,
+    "canScrollDown": false,
+    "sealed": true
+  }
+}

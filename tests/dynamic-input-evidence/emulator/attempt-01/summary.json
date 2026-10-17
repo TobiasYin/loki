@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "status": "FIRST_ATTEMPT_FAILED_FIXTURE_HAS_NO_SCROLL_RANGE",
+  "collectedUtc": "2026-10-17T04:12:21.577503+00:00",
+  "artifacts": {
+    "app-debug.apk": {
+      "sha256": "33f084ad42b2436669f5e3ea4a4594290a4061953add561f3d34121b8c28b36c",
+      "bytes": 7494093
+    },
+    "app-debug-androidTest.apk": {
+      "sha256": "01be29c6fc73e7e2b07bd8fecccf6de6d524a6647f947e43bb8767bae05b6108",
+      "bytes": 3477242
+    },
+    "input-lab-debug.apk": {
+      "sha256": "9d4f952028368a4490be17a9a81ae1c2335ad8ba5c9c65ec1732ef9821902aa6",
+      "bytes": 2951507
+    }
+  },
+  "scope": "FixedApp33f0/Test01be/Lab9d4f realNative ordinaryActivity component, no model/cloud; oneattempt failed at actualScroll precondition gap, notallpass.",
+  "executedCases": 1,
+  "passed": 0,
+  "failed": 1,
+  "skipped": 0,
+  "retries": 0,
+  "durationSeconds": 88.146,
+  "explicitOptIn": "dynamicContentAcceptance=true",
+  "modernUiExecuted": false,
+  "positiveBeforeFailure": {
+    "differentCapturedImageHashes": true,
+    "ticksAdvancedBetweenImages": 25,
+    "oldFrameTapAfterMoreTicks": {
+      "ticksAdvanced": 27,
+      "imageHashesDiffer": true,
+      "geometryUnchanged": true,
+      "clickCount": 1
+    },
+    "oldLogicalTapReceived": true,
+    "stableSemanticNodeActivationReceived": true,
+    "movedNodeRejected": true,
+    "realModalRejectedWithoutDispatch": true
+  },
+  "failure": {
+    "type": "AssertionError",
+    "assertion": "Committed swipe did not actually scroll receiver",
+    "testLine": 203,
+    "nativeSwipeOutcome": "submitted",
+    "nativeSwipeError": null,
+    "receiverReceivedDownMoveUp": true,
+    "receiverSwipeDurationMs": 500,
+    "receiverSwipeStart": [
+      540,
+      1920
+    ],
+    "receiverSwipeEnd": [
+      540,
+      720
+    ],
+    "receiverTouchSamples": 22,
+    "receiverScrollEvents": 0,
+    "actualDisplayPixels": [
+      1080,
+      2400
+    ],
+    "actualDensityDpi": 160,
+    "fixtureRows": 22,
+    "fixtureRowHeightDp": 90,
+    "fixtureBaseBodyHeightDp": 2264,
+    "fixtureMovedBodyHeightDp": 2336,
+    "fixtureContentFitsViewport": true,
+    "oldFrameAfterScrollRejectionStageNotReached": true
+  },
+  "preservationPassed": true,
+  "finalRuns": 118,
+  "sessionUpdatedAtChanges": 0,
+  "cloudCalls": 0,
+  "thorOperations": false,
+  "collectorSourceOrBuildChange": false,
+  "productionGuardRelaxed": false,
+  "limitations": [
+    "The swipe was received but non-scrollable fixture cannot test scrolling-feedback invalidation.",
+    "No new frame-after-scroll refusal or overall component pass is claimed.",
+    "Dynamic input positive and moved-node/modal negatives were reached, but not autonomous model/game/controller coverage.",
+    "Read-only geometry diagnosis supports correcting fixture content height/precondition; a later justified newTest/Lab attempt must retain this failure unchanged."
+  ]
+}

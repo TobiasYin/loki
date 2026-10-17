@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "scope": "All files in this software subdirectory except manifest.json",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1907,
+      "sha256": "5f0441c06dfc42a76daed4e311f6eb43580342cf12ab1d363ecd7e6acc57f3db"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "040937f8be897804e799e5e283a783876e17f301c5801b4bb77d6c79a62cbe09"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 45710,
+      "sha256": "55e3eb1f32f996ac4ea971baba22495862229c29d363b514f5532952d80af1d3"
+    },
+    {
+      "path": "independent-core-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "independent-core-tests.log",
+      "bytes": 252,
+      "sha256": "6e3ad0865d80039fa112092aa6f0b2bc06e022c80384d63322a8d9e36e57f9de"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 17114,
+      "sha256": "604119f04e60f6a1c9ac3c7ae0c65add626633cf8062675d012aa1936dd4d8a3"
+    },
+    {
+      "path": "lint-report-hashes.json",
+      "bytes": 1507,
+      "sha256": "5dcbc44c3872a041514df6c6839072d8b1eeb297fdcc0c395acc2264738e0922"
+    },
+    {
+      "path": "pins.json",
+      "bytes": 525,
+      "sha256": "e4b0afdbdb7e1fdb56d75e66d3bd194cfde8b384438cc4eeaba7fc6c92d1cb60"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 15505,
+      "sha256": "21ec22d223a310f870d9e8586b1752a592c15710055383ccc6273a3e1d280478"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 6475,
+      "sha256": "0e3d45ccf83821bd546f97943aa91b5a0575a40206ace4280fc4683098159a74"
+    }
+  ]
+}

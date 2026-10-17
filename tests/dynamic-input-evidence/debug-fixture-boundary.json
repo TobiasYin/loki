@@ -1,0 +1,10 @@
+{
+  "debug": {
+    "dev.thor.inputlab.DynamicContentFixtureActivity": true,
+    "dev.thor.inputlab.DynamicContentFixtureProvider": true
+  },
+  "release": {
+    "dev.thor.inputlab.DynamicContentFixtureActivity": false,
+    "dev.thor.inputlab.DynamicContentFixtureProvider": false
+  }
+}

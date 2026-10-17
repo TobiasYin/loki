@@ -1,0 +1,19 @@
+{
+  "source": {
+    "path": "build/emulator/dynamic-input-acceptance-2026-10-17/run-01/receiver-motion-summary.json",
+    "bytes": 7640,
+    "sha256": "80577457b3a54b3f5148421204d25ee5285064535f2234b383f8006591b13933"
+  },
+  "swipeDown": 1,
+  "swipeMove": 16,
+  "swipeUp": 1,
+  "receiverScrollEvents": 0,
+  "reportedFixtureDiagnosis": {
+    "rows": 22,
+    "viewportHeight": 2400,
+    "contentHeightAfterMove": 2336,
+    "density": 1,
+    "treeScrollable": false
+  },
+  "scope": "Receiver motion independently proves delivered swipe; viewport/content diagnosis supplied by parent investigation. Not a production gesture failure and not complete acceptance."
+}

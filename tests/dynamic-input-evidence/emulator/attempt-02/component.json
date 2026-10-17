@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "scope": "emulator real Native RPC dynamic-content component; ordinary Activity; no model execution",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "passed": false,
+  "cleanupErrors": [
+    {
+      "stage": "selection",
+      "error": "AssertionError"
+    }
+  ],
+  "failureType": "ComparisonFailure",
+  "setupPermissionsDroppedBeforeTools": true,
+  "upperImage": {
+    "bytes": 17748,
+    "sha256": "bd7abfeefb6bb028a4e0969c6e2695a1246f87db665efb587a7d57193e5f6977",
+    "displayId": 0
+  },
+  "dynamicImageComparison": {
+    "beforeSha256": "6b79753cf7c6d837ee023e111a543e00653f83fe4d6378afb01b95e0edd1189a",
+    "afterSha256": "413c7c00c08d0e1e9d2b846fefbf855743f65e4b5aeba6f89aeba914caf32e10",
+    "ticksAdvanced": 24
+  },
+  "dynamicOldFramePositive": {
+    "ticksAdvanced": 20,
+    "imageHashesDiffer": true,
+    "geometryUnchanged": true,
+    "clickCount": 1
+  },
+  "movedNodeRejected": true,
+  "profilesRestored": true,
+  "credentialsRestored": true,
+  "rolesRestored": true,
+  "steps": [
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 1204,
+      "error": null,
+      "outcome": "observed"
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 1002,
+      "error": null,
+      "outcome": "observed"
+    },
+    {
+      "toolId": "input.tap",
+      "elapsedMs": 697,
+      "error": null,
+      "outcome": "submitted"
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 571,
+      "error": null,
+      "outcome": "observed"
+    },
+    {
+      "toolId": "input.tap",
+      "elapsedMs": 592,
+      "error": null,
+      "outcome": "submitted"
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "elapsedMs": 2904,
+      "error": null,
+      "outcome": "observed"
+    },
+    {
+      "toolId": "input.activate",
+      "elapsedMs": 591,
+      "error": null,
+      "outcome": "submitted"
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "elapsedMs": 2065,
+      "error": null,
+      "outcome": "observed"
+    },
+    {
+      "toolId": "input.activate",
+      "elapsedMs": 524,
+      "error": "TARGET_CHANGED",
+      "outcome": "observed"
+    },
+    {
+      "toolId": "perception.capture_screen",
+      "elapsedMs": 760,
+      "error": null,
+      "outcome": "observed"
+    },
+    {
+      "toolId": "input.tap",
+      "elapsedMs": 13,
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed"
+    }
+  ],
+  "captureCompatibility": [
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    },
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    },
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    },
+    {
+      "frameInputUsable": true,
+      "contentChangedDuringCapture": true,
+      "inputTargetChangedDuringCapture": false,
+      "frameInputPolicy": "same_window_geometry_and_interaction_layout"
+    }
+  ]
+}

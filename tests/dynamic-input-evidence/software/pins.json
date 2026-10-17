@@ -1,0 +1,17 @@
+[
+  {
+    "path": "build/dynamic-input/pinned/app-debug.apk",
+    "sha256": "33f084ad42b2436669f5e3ea4a4594290a4061953add561f3d34121b8c28b36c",
+    "bytes": 7494093
+  },
+  {
+    "path": "build/dynamic-input/pinned/app-debug-androidTest.apk",
+    "sha256": "01be29c6fc73e7e2b07bd8fecccf6de6d524a6647f947e43bb8767bae05b6108",
+    "bytes": 3477242
+  },
+  {
+    "path": "build/dynamic-input/pinned/input-lab-debug.apk",
+    "sha256": "9d4f952028368a4490be17a9a81ae1c2335ad8ba5c9c65ec1732ef9821902aa6",
+    "bytes": 2951507
+  }
+]

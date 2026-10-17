@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "scope": "Every file in this directory except manifest.json",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2169,
+      "sha256": "15a4b87a0c2ea02e3bdeccb552869681f5097ce60b744266ed93b4ce69e924fb"
+    },
+    {
+      "path": "ToolPublicationTest.xml",
+      "bytes": 1078,
+      "sha256": "ef6854178922ef70af1209dfb2ebd492915f10a79f16e39ae426a211f4f29939"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "4fd350f8a70b4e575160762265650c44b66f7a5ed198a2e9051d325a695cbe8c"
+    },
+    {
+      "path": "baseline-source-equality.json",
+      "bytes": 19859,
+      "sha256": "19b3abe46ac14d6d6ab17414a064fbcf94f143ab9e2120e28bf3849b2927af58"
+    },
+    {
+      "path": "diagnostics-gradle.log",
+      "bytes": 10133,
+      "sha256": "3b638029f3a24314ed5ac8d977fbef51a906e181f9bdda79ec258d3939e94df4"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 25859,
+      "sha256": "d94de92b4c3fa745739d5f38c88499a9871c19d1dfc366bced513ba2f59e7650"
+    },
+    {
+      "path": "independent-publication-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "independent-publication-tests.log",
+      "bytes": 54,
+      "sha256": "17f173a45ac363ccce3c1fad830392876dfa12c20574e9d3aa57204fa98ab7f5"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 17338,
+      "sha256": "fa9f3f6d4eb8ce7d08af8a8edb4e200b74f51a0240dceb4dec12fc7a585a6fc9"
+    },
+    {
+      "path": "pins.json",
+      "bytes": 561,
+      "sha256": "296d482b4fda1465de92cd6c94740054c7eea377d26bcfa4d0d8b79a4bd53295"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 1285,
+      "sha256": "6b587d02c78a624ad8c9bddb0ecbcb21ae5d6c90ec4a6106b4dc55e33c987ee0"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 6678,
+      "sha256": "4c98a5c63e0a8819445799557501b26b52a70d3ed8d1685fdef4097db9fb34c0"
+    }
+  ]
+}

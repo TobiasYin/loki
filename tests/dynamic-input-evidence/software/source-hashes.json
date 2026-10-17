@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 1,
+  "scope": "Selected production/test integration plus complete Runtime src/test inventory and all core test files; not an atomic archive of all build inputs",
+  "files": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorDynamicContentTest.kt",
+      "bytes": 23747,
+      "sha256": "e514c7becf733dd807700891d7c0ae3ef462ef540e9ea5af6b488b5e0722895d",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 53171,
+      "sha256": "e624673bcb67c189e0699453ca6918ac803e2f943f02ba59380ae9f64a9d45d2",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 66459,
+      "sha256": "c7a24edbb22eba45bf57d9eb681ab5ae92b72a44b6dbaf30b25c8c59a65c20db",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "integration/runtime-host.ts",
+      "bytes": 18697,
+      "sha256": "41d7b794b2acd4aec1f4f8c502e5df7afdaf569d7ec1f411d7d9006f5ffd6274",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "bytes": 15984,
+      "sha256": "4a39ae62bd491d39a7e96eb0074a40f7821f56c8fc34f665dd5f72d7606db5fd",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/contracts.ts",
+      "bytes": 8520,
+      "sha256": "8d30d2211ccd030608876b609d1a2085476587d334feeb22bd0673a830bbaa54",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/index.ts",
+      "bytes": 184,
+      "sha256": "ea0652c2394a39edc113de1f25a29d64533055fea5c9bfa97101b46b5714879c",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/profile-validation.ts",
+      "bytes": 2530,
+      "sha256": "93bc7fa856ffe5c8c057e9b5d0361609be61c7b909e4621a261de4397ec9d7b5",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/protocol-audit.ts",
+      "bytes": 2377,
+      "sha256": "c7f5e52ed649e69af953589c4aec61ce112515f037ae73437e3c2a28683a681c",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/provider-stop.ts",
+      "bytes": 3736,
+      "sha256": "3db937c9314ec4b3d606d9459e53d8ed13f54d7893a80a09b3435b315bbd6b4f",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/provider-timeouts.ts",
+      "bytes": 1443,
+      "sha256": "db698b922cd79262e9a1b257c1ff1bc1a5689b34ef92015c42548ed2247d783d",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/registry.ts",
+      "bytes": 3875,
+      "sha256": "afe1beb3429916bc2e11dfb0b734a73f1581c90761cf3f1fa6716f09415fafdc",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 39089,
+      "sha256": "8a7078954a155dc1228f7e8e2c55a61389d56ba3e711d200bdc104ecdf0623dd",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/session.ts",
+      "bytes": 1554,
+      "sha256": "fde40fce4a6f1dcd4162db8ca426d687d8b3a5ad4f3b1f16c1b5e3201b17be1e",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/stream-events.ts",
+      "bytes": 2265,
+      "sha256": "871e871bb0e66b1beb96c6b571db0847ef2039ea8eca37cee2aee86b5c34a8ff",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/src/tool-availability.ts",
+      "bytes": 1634,
+      "sha256": "21b5464f582b63f19aba55458a2e05cb77cdc6c6aa7b4d0e0a2aaab8734f65a4",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/fixtures.ts",
+      "bytes": 11018,
+      "sha256": "d7dc3187f0d744580c4f8dd7eaa656ac3597971d1dc7931d255fb80cad7c0a54",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/legacy-null-history.test.ts",
+      "bytes": 9460,
+      "sha256": "ec860259b19bb6c6544703dcbb57972b1182946dc84957c1dbc312c3a7971e79",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/native-null-success.test.ts",
+      "bytes": 8134,
+      "sha256": "aa74cfbeba225f60316110ffcf0edf0f1978bd5158f43664b4ac918d1170fc45",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/native-read-error-priority.test.ts",
+      "bytes": 5824,
+      "sha256": "00b59bc0936dc234e8743e44c5d5d5cf3340e2eeaba5bf357287ed08c6280365",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/profile-validation.test.ts",
+      "bytes": 4779,
+      "sha256": "153d9a1f189b099c442da36b2d6d39fd91a437767a471eabea6c862350249fa1",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/runtime.test.ts",
+      "bytes": 42418,
+      "sha256": "192e8ebf8de5db855546e0cdea0169c74461e1e0edd666e4f0b9f8e8abc43ffb",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/stop-boundary.test.ts",
+      "bytes": 7337,
+      "sha256": "e05a074325155e788f802893331f2537b2385880dcab289a2080d5748bc1def5",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/stream-events.test.ts",
+      "bytes": 3034,
+      "sha256": "b21fc1d3ae244a5908ff3773018e886e65f5982dfa3265725c7d268b06785dae",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/target-availability.test.ts",
+      "bytes": 8184,
+      "sha256": "4da1a2b9420b5e7b97e632b5cdd173be97c6c78d9ae20fc0e2732f21728539bb",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "bytes": 21285,
+      "sha256": "f949a9a0744bbafc41e5ad263efd29c232f6738facfa19cd6a67cb85ef6b0bad",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "runtime/test/tool-receipts.test.ts",
+      "bytes": 10600,
+      "sha256": "0bc0384dc2247ff21970a3538d42de7867e430f072c364239b58efc96abeba29",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "settings.gradle.kts",
+      "bytes": 710,
+      "sha256": "e4f94b3facdfee5f04157cc27a24b4c23e3d9e0b2f41e959ed4f0811ad6c7f18",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/AndroidManifest.xml",
+      "bytes": 1340,
+      "sha256": "c67ac899a2e77ace78ffc10d8be04d82e34db8bb13a67b693be8987cdef50109",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/DynamicContentFixtureActivity.kt",
+      "bytes": 6645,
+      "sha256": "7c76390f77701e1774dc888f92d6033879ec17d9575c9eb8f6e681e41d1327a0",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/DynamicContentFixtureProvider.kt",
+      "bytes": 2685,
+      "sha256": "935ab8d3a78f0bdaf2ab2ca7c684e2a8b5ca4766a14718e36be4063600de4808",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/res/values/dynamic_ids.xml",
+      "bytes": 180,
+      "sha256": "8f11eff447a766cd477e2dd0ba0d3aad9d27cf62fb400f4c3843910f1d1055fe",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Authorization.kt",
+      "bytes": 7419,
+      "sha256": "b6f8a3653a999dfb8e39ec8eb40af5faf5497a9fa79010dcd8abe67f4821d125",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt",
+      "bytes": 8175,
+      "sha256": "81657db355598db09b435e1472f84097bbe726778402e38f4ec276e830b44d92",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Displays.kt",
+      "bytes": 14952,
+      "sha256": "3ccb2e9fd4db9306e52f0b1c70e003ce06424f839797d744ca7e818049206d3a",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/SemanticTree.kt",
+      "bytes": 7395,
+      "sha256": "a27d47a80cc24051c1ab4804f466edd417ecb49a32be6b3b9b946b3fc12e74e7",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/UpperTargetResolver.kt",
+      "bytes": 7142,
+      "sha256": "d09b36a07ba522436fd98ededeffea3929bd34b10b71d7a7be573050c8a1be16",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/AccessibilitySetupTest.kt",
+      "bytes": 1227,
+      "sha256": "5e887246bb6e0847ad26cc6c1d824ea68380fbaaf02faf68c520491154778b25",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/AgentBackgroundTest.kt",
+      "bytes": 3306,
+      "sha256": "5867affe2928eea60b3e88c3b907fdd6765fcc415ec0b7531c9e885fbc91e6c6",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/BoundedInputStateTest.kt",
+      "bytes": 5386,
+      "sha256": "380e7f0cbd84341fd4c42020b0b2579f11a111c736d5d7074a321c7824b332fa",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/CompanionObservationTest.kt",
+      "bytes": 6498,
+      "sha256": "8e30b35fdcf60d5560594a2bf298f9e2e4595847b9c32456061e33f389b87086",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/CoreTest.kt",
+      "bytes": 29823,
+      "sha256": "b136d7e003d7f85617a22cf10b4d25e57cf943962d710992da1db8c13117f125",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/DisplayRolePolicyTest.kt",
+      "bytes": 1379,
+      "sha256": "96c3ce22d8140d72f742b8ce5ac9e0b647549430ab3a540d0a0226f9acf6a992",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/DisplayVisibilityTest.kt",
+      "bytes": 4169,
+      "sha256": "ba9ff5804691d7ea5fed47479b4ed7ab65f4e562c527cdaa322f0c62bd0abebf",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/EvdevAxesTest.kt",
+      "bytes": 4513,
+      "sha256": "8c611101ff1aa947433510a6d0ac35ee81b3c0367fb9df5ef4a7aebeedd30516",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/EvdevButtonsTest.kt",
+      "bytes": 2855,
+      "sha256": "34f8282e2ef80c322f1900b5f3aa1b9057126e9ff55a4ab2714fbbeab21175da",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadCleanupTest.kt",
+      "bytes": 1652,
+      "sha256": "60634245dc9d31fb83614f4fcf853f0ac95e253ab227fa4774ce056c3c007e38",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadCommandTest.kt",
+      "bytes": 1776,
+      "sha256": "f5895d9d04c90baf420aa6242b56b8bc4f32b0e4b879dd8883d98868746e5411",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadHoldTargetTest.kt",
+      "bytes": 6723,
+      "sha256": "0fca4b75e96c613ed723784bb9c5852881e83f3ce75d86f9a7135e422c9bfafb",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GamepadLeaseGuardTest.kt",
+      "bytes": 1819,
+      "sha256": "01f01dc711f8b31da29205dd6b0de5e5e5ed2d5c37393a4e8eefb774608786f7",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/InputTargetPolicyTest.kt",
+      "bytes": 1078,
+      "sha256": "f7178da836a40f495775c7f846a897f19f36ce466c49011e4a08e667df0712e8",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/LauncherAppsTest.kt",
+      "bytes": 3049,
+      "sha256": "2a47e44faa933f513a13264abcc3e8db0e35ee6b2b070cd28efc6b1f401d835d",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/NavigationCommandTest.kt",
+      "bytes": 2766,
+      "sha256": "6a9195cb6515d312924b7bf27c204e566442390c515cb0a708e8e5298a3cb72b",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/NavigationFocusTest.kt",
+      "bytes": 2161,
+      "sha256": "891d8ac99c1c2996bc21e90addf9f74108c52470db44686c1e2f5dcd38196da4",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationCacheInvalidationTest.kt",
+      "bytes": 4961,
+      "sha256": "ddf92130563f6fb0fa46a41e578be20a47fe234195ab09b3b0ec18729e0b49bb",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationProofRefreshTest.kt",
+      "bytes": 6916,
+      "sha256": "3e72057eb2b7d7df4377343f74f072c0b010d875f4bb4257c4f3491f6f48d94b",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/PresentationWindowEvidenceTest.kt",
+      "bytes": 11313,
+      "sha256": "52f56939cc27367376db49f6a9eeb108eed5f2bf190761fb057f395cc0a3f692",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ReadObservationTest.kt",
+      "bytes": 8227,
+      "sha256": "260e710b4335829efc40f916ffb7829ff944145908e7be0abd30dc88f154259f",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ScreenSelectionTest.kt",
+      "bytes": 5746,
+      "sha256": "6d45da886b92bd0dc6960f63afaaef7a539d9aab67ecfb5714d2b53e2532ceb8",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/SemanticTreeTest.kt",
+      "bytes": 7424,
+      "sha256": "d8cea2af072ba58f369b5bab453b1ebe643fe15cfa7d2e14836f99ec8c9d39ac",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ShellCommandPolicyTest.kt",
+      "bytes": 5765,
+      "sha256": "829e99c079111d0c4971441b86bad78c7a0fbd748856d511f57a41370243e3b1",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/TargetObservationAvailabilityTest.kt",
+      "bytes": 3856,
+      "sha256": "a53fd4e0aa9e7f948fdf75af0c1597e2f4d58356eed893308fcc6c15f84710e6",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/ThorBrightnessCommandTest.kt",
+      "bytes": 3135,
+      "sha256": "2545dce28bd91ee961622e9b678ba66a5f1462b267df48c2c98029d1eecda81c",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/UiActionWindowTest.kt",
+      "bytes": 4463,
+      "sha256": "ef06015ffb9f265d076a729323335605c3928a0550ef2d87e93c2e780d11a296",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/UiActivationTest.kt",
+      "bytes": 3438,
+      "sha256": "3cc37a8ee0a82ce13304c5183a2fd4d16b6aa3e5e3a289d13aa86a1ca0a5e487",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/UpperTargetResolverTest.kt",
+      "bytes": 14770,
+      "sha256": "f2e4cd31caf88c73562c380cbbcba5831e441f1d631d6ca5d950b67485a1c399",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt",
+      "bytes": 66392,
+      "sha256": "0fb2b88eebd15578a7a37f861775968faca8811d862acf2ae4c95b1d0ea58446",
+      "modifiedAfterBuildLog": false
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/ThorAccessibilityService.kt",
+      "bytes": 13445,
+      "sha256": "a8e79cdc89f4508da66a4c7abb462e95cfc2e6353e65f05f76745acdafa1539e",
+      "modifiedAfterBuildLog": false
+    }
+  ]
+}

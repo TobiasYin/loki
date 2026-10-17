@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-17T04:09:14.899852+00:00",
+  "status": "DYNAMIC_INPUT_SOFTWARE_VERIFIED_NOT_DEVICE_ACCEPTANCE",
+  "scope": "Pure visual/text/caret content does not expire stable input targets; scroll/subtree revisions expire new coordinates while allowing a submitted bounded action to finish",
+  "gradle": {
+    "success": true,
+    "seconds": 52,
+    "tasks": 414,
+    "executed": 105,
+    "upToDate": 309,
+    "log": "gradle.log"
+  },
+  "jvm": {
+    "totals": {
+      "tests": 441,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 64
+    },
+    "modules": [
+      {
+        "module": "device-core",
+        "gradleTask": ":device-core:test",
+        "taskStatus": "EXECUTED",
+        "suiteCount": 29,
+        "tests": 201,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "app",
+        "gradleTask": ":app:testDebugUnitTest",
+        "taskStatus": "EXECUTED",
+        "suiteCount": 23,
+        "tests": 112,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "core",
+        "gradleTask": ":core:test",
+        "taskStatus": "UP-TO-DATE",
+        "suiteCount": 3,
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "device-authority",
+        "gradleTask": ":device-authority:test",
+        "taskStatus": "EXECUTED",
+        "suiteCount": 1,
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "input-lab",
+        "gradleTask": ":input-lab:testDebugUnitTest",
+        "taskStatus": "EXECUTED",
+        "suiteCount": 8,
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "xmlHashes": "junit-xml-hashes.json",
+    "independentCore201IncludedIn441": true,
+    "independentCoreAddedToTotalAgain": false
+  },
+  "retainedSoftware": {
+    "runtime251": {
+      "rerun": false,
+      "completeSrcAndTestInventoryPlusHostMatchesPriorSnapshot": true,
+      "comparedFiles": 24,
+      "baseline": "../../release-0.8-evidence/software-full-snapshot/source-hashes.json"
+    },
+    "chat73": {
+      "rerun": false,
+      "uiAndTestSourceMatchesPriorSnapshot": true,
+      "baseline": "../../voice-empty-evidence/software/source-hashes.json"
+    },
+    "logs": [
+      {
+        "path": "build/input-focus-recovery-runtime-tests.log",
+        "bytes": 29166,
+        "sha256": "d51cf05ab412a1af8070d1a058884fd16cf095db7f8c02e0f391a048d1596d09",
+        "tests": 251,
+        "rerunThisBuild": false
+      },
+      {
+        "path": "build/voice-empty-ui-js-tests.log",
+        "bytes": 7994,
+        "sha256": "72c5580e9b018216066f280c97023cfcc017c5060c1f9aade69c4492e6c19f73",
+        "tests": 73,
+        "rerunThisBuild": false
+      }
+    ]
+  },
+  "policy": {
+    "contentIdentity": "sameLayout and revision remain distinct for diagnostics; contentChangedDuringCapture uses event revisions, not pixel-by-pixel equality",
+    "inputCompatibility": "sameStructure + interaction revision + clip presence; coordinates must lie within both observed/current clips",
+    "canonicalClipping": "Existing sole-fullscreen canonical conditions and observed/current rectangle intersection preserved; no new pixel tolerance",
+    "interactionLayout": "VIEW_SCROLLED and WINDOW_CONTENT_CHANGED SUBTREE change input interaction revision, not stable window proof generation",
+    "metadata": "Only nonzero TITLE4/ACCESSIBILITY_FOCUSED128 window flags are nonstructural; zero, unknown and mixed flags remain structural",
+    "security": "Window/package/display/epoch/role/TTL/owner/secure/live clipping and node path/signature checks retained"
+  },
+  "pins": [
+    {
+      "path": "build/dynamic-input/pinned/app-debug.apk",
+      "sha256": "33f084ad42b2436669f5e3ea4a4594290a4061953add561f3d34121b8c28b36c",
+      "bytes": 7494093
+    },
+    {
+      "path": "build/dynamic-input/pinned/app-debug-androidTest.apk",
+      "sha256": "01be29c6fc73e7e2b07bd8fecccf6de6d524a6647f947e43bb8767bae05b6108",
+      "bytes": 3477242
+    },
+    {
+      "path": "build/dynamic-input/pinned/input-lab-debug.apk",
+      "sha256": "9d4f952028368a4490be17a9a81ae1c2335ad8ba5c9c65ec1732ef9821902aa6",
+      "bytes": 2951507
+    }
+  ],
+  "pinsVerifiedActualBytes": true,
+  "artifactCheck": {
+    "file": "artifacts.json",
+    "allFourActualFilesVerified": true
+  },
+  "lint": "lint-report-hashes.json",
+  "sourceHashes": "source-hashes.json",
+  "logs": [
+    {
+      "path": "build/dynamic-input-gradle.log",
+      "bytes": 45710,
+      "sha256": "55e3eb1f32f996ac4ea971baba22495862229c29d363b514f5532952d80af1d3",
+      "publishedPath": "gradle.log"
+    },
+    {
+      "path": "build/dynamic-input-artifacts.json",
+      "bytes": 1899,
+      "sha256": "040937f8be897804e799e5e283a783876e17f301c5801b4bb77d6c79a62cbe09",
+      "publishedPath": "artifacts.json"
+    },
+    {
+      "path": "build/dynamic-input/pinned/pins.json",
+      "bytes": 525,
+      "sha256": "e4b0afdbdb7e1fdb56d75e66d3bd194cfde8b384438cc4eeaba7fc6c92d1cb60",
+      "publishedPath": "pins.json"
+    },
+    {
+      "path": "build/dynamic-target-core/compile-canonical-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publishedPath": "independent-core-compile.log"
+    },
+    {
+      "path": "build/dynamic-target-core/tests-canonical-final.log",
+      "bytes": 252,
+      "sha256": "6e3ad0865d80039fa112092aa6f0b2bc06e022c80384d63322a8d9e36e57f9de",
+      "publishedPath": "independent-core-tests.log"
+    }
+  ],
+  "acceptance": {
+    "androidInstrumentationIncluded": false,
+    "physicalThorInputIncluded": false,
+    "emulatorAcceptanceIncluded": false,
+    "cloudOrGameCompletionClaim": false,
+    "collectorDeviceOrBuildActions": false
+  },
+  "limits": [
+    "Core201 is one component of five-module441 and is not counted twice for its independent run",
+    "Core41 is retained UP-TO-DATE XML; other four test tasks executed in this build",
+    "Runtime251 and Chat73 are prior unchanged-source software results, not new runs",
+    "Screenshot event revision diagnostics do not prove exact captured pixel equality",
+    "Source hashes are a selected current inventory, not an atomic full source snapshot",
+    "Android/emulator/physical receiver evidence is separate and no device pass is implied here"
+  ]
+}

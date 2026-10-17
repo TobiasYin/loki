@@ -69,7 +69,7 @@ class SemanticTreeTest {
             override fun availability(toolId:String)=Availability(Status.READY,"test","test")
             override fun release(runId:String)="none"
             override fun execute(envelope:Envelope,args:Map<String,Any?>,checkpoint:Checkpoint):ToolResult {
-                checkpoint.effect {target=target.copy(revision="own-scroll-content-update")}
+                checkpoint.effect {target=target.copy(revision="own-scroll-content-update",interactionRevision="scrolled-list-layout")}
                 checkpoint.check();snapshots.validateHeld(envelope.snapshotId)
                 return ToolResult(now,"test",availability(envelope.toolId),snapshotId=envelope.snapshotId)
             }

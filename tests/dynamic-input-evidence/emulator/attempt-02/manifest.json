@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "scope": "SameApp33f0/Testd4d4/Lab4cd0 secondattempt failed before scroll; originalComparisonFailure and cleanupassert retained, exactorigin unknown. Excludesitself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3512,
+      "sha256": "31f6d55818b0ad7828c7e60bbbe554de78abf9d9e8a90e2d3632a4cf462e1586"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 408,
+      "sha256": "e6cf64d5ae0b66bce3238a7380fe54a890b9fda71dfea51064f654d800a763f5"
+    },
+    {
+      "path": "component.json",
+      "bytes": 3366,
+      "sha256": "8ab8e85a266799b679db65a970aeff6db28cb4ef6cecbfb0c5705f9311467fb6"
+    },
+    {
+      "path": "dynamic-content-explicit.log",
+      "bytes": 2331,
+      "sha256": "d1d3f37c1f92afc326ea66e1f00bf5f3abd8b19657d30b471686c07d8168e9e3"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 2176,
+      "sha256": "65fdeda59c02aaacc325bf2eb959b1cde07e376db43f9145a25d60dee56ef343"
+    },
+    {
+      "path": "receiver.json",
+      "bytes": 1032,
+      "sha256": "0de0784b45574447a20df5cefd4e94f3ec86f189f912cfcc7d968aff7ed30917"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 2788,
+      "sha256": "9688ee6f94a2479d36b4661d701d51b1b6c2a4d81c9126afea8246aa15546331"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "scope": "All files except manifest.json",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1599,
+      "sha256": "4de163b284a01e1e068ff1b3d597654f61a3ddbe9ceb49722d043c6e2bd16958"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "05b992d9cf0bc897b0ff2ea0b180ce4ca6047af6f661c0121cb1ebaa7523f0f3"
+    },
+    {
+      "path": "baseline-source-equality.json",
+      "bytes": 19328,
+      "sha256": "e3690bdc95f179215a77cb5d18841ce98e228bd1d93209e008cef257a7bb5492"
+    },
+    {
+      "path": "gradle.log",
+      "bytes": 11180,
+      "sha256": "2d93301d499b8109443bdc8f8c3d5043ab20dd548707b88d894794172fcfb3c9"
+    },
+    {
+      "path": "initial-fixture-failure-summary.json",
+      "bytes": 660,
+      "sha256": "3c80d960070a68d5623dd5a72c8ad5eb84de3ebc44b6f7cb7404e95ae316f48d"
+    },
+    {
+      "path": "pins.json",
+      "bytes": 561,
+      "sha256": "402e6bae688bbb7626e57e117d55341359de15abe1ca771f8b96831b39ab274e"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 576,
+      "sha256": "3782fb31e1571573d87fcdb616ea307eef424b3821cee690bd36f11c054f5678"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 2446,
+      "sha256": "514a1dbafa9fc7cd6ee71519b010bc8609afcb9707ae24bbc2b6a22c647744ab"
+    }
+  ]
+}

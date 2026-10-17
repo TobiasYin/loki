@@ -33,7 +33,7 @@ class GamepadHoldTargetTest {
         }
     }
 
-    @Test fun contentFeedbackMayFinishSubmittedHoldButCannotAuthorizeANewInput() {
+    @Test fun pureContentFeedbackDoesNotCancelHoldOrPreventNextButton() {
         val clock=Clock {1000};var target=Target("game","valid","content-1",layoutRevision="window-1:focused:root-1")
         val snapshots=Snapshots(clock){target};snapshots.update(listOf(DisplayFact(0,"upper",800,600,0,240),DisplayFact(4,"lower",640,600,0,240)));snapshots.calibrate(0,4)
         val observed=snapshots.capture();val authority=ManualTestAuthority(clock);authority.set(Capability.SCREEN_CONTROL,true)
@@ -54,8 +54,8 @@ class GamepadHoldTargetTest {
         val lease=authority.begin(backend);val gate=Gateway(authority,backend,snapshots,clock)
         fun input(call:String)=Envelope(lease.session,lease.run,call,"input.press_button",lease.epoch,lease.deadline,observed.id)
         assertNull(gate.execute(input("hold-with-feedback"),emptyMap()).error);assertEquals(1,submissions);assertEquals(1,cleanups)
-        assertEquals(Code.TARGET_CHANGED,gate.execute(input("new-input-with-old-snapshot"),emptyMap()).error)
-        assertEquals(1,submissions);assertEquals(1,cleanups)
+        assertNull(gate.execute(input("new-input-with-old-snapshot"),emptyMap()).error)
+        assertEquals(2,submissions);assertEquals(2,cleanups)
     }
     @Test fun legacyTargetsStillTreatChangedRevisionAsChangedStructure() {
         val original=Target("game","valid","revision-1")

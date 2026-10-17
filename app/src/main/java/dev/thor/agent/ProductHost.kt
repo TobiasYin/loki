@@ -51,6 +51,7 @@ class ProductHost private constructor(private val context: Context, private val 
         var snapshot:Snapshot?=null
         var pendingPerceptionSnapshot:Snapshot?=null
         var publishedTools=emptySet<String>()
+        var publicationRejections=emptyMap<String,Code>()
         val networkCalls=mutableSetOf<String>()
     }
     private val scopes=java.util.concurrent.ConcurrentHashMap<String,RunScope>()
@@ -426,6 +427,7 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         scope.snapshot=snapshot;scope.pendingPerceptionSnapshot=pendingPerceptionSnapshot
         val available = JSONObject(); val allowed = mutableSetOf<String>()
+        val publicationRejections=mutableMapOf<String,Code>()
         for (t in ToolPack.descriptors.values) {
             val capability=dev.thor.bridge.Capability.valueOf(t.capability.name.lowercase())
             // Disabled capabilities cannot execute. Do not synchronously inspect
@@ -437,6 +439,7 @@ class ProductHost private constructor(private val context: Context, private val 
             a=TargetObservationAvailability.project(a,t,snapshot,scope.selectedScreen) {snapshots.validateObservation(snapshot?.id)}
             val state=obj("status" to a.status.name.lowercase(), "reason" to a.reason)
             a.reasonCode?.let {state.put("reasonCode",it.name)}
+            ToolPublication.projectedRejection(a,capability in granted,scope.profile.optBoolean("supportsTools",true) && b.runId!=probeRun)?.let {publicationRejections[t.toolId]=it}
             available.put(t.toolId,state)
             if (a.status == Status.READY && capability in granted) allowed.add(t.toolId)
         }
@@ -457,6 +460,7 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         if(b.runId!=probeRun && !profile.optBoolean("supportsTools",true))publishedTools=emptySet()
         scope.publishedTools=publishedTools
+        scope.publicationRejections=publicationRejections.toMap()
         deviceAuthority.publish(b,allowed.filter {it in publishedTools}.toSet())
         val l0 = obj("snapshotId" to (snapshot?.id ?: "no-target:${b.runId}"))
         if (dev.thor.bridge.Capability.screen_perception in authority.enabled(b)) {
@@ -482,7 +486,7 @@ class ProductHost private constructor(private val context: Context, private val 
         val e = toolEnvelope(c, j);val scoped=scopes.getValue(e.runId);val networkCalls=scoped.networkCalls;val publishedTools=scoped.publishedTools; val args = j.getJSONObject("arguments").args()
         if(ToolPack.descriptors[e.toolId]?.targetRequired==true && e.toolId!="perception.select_screen")
             requireTool(snapshots.validateReadSource(e.snapshotId).role==scoped.selectedScreen,Code.TARGET_CHANGED,"Target screen selection changed; re-observe in the next model round")
-        require(e.toolId in publishedTools) {"Tool is not published for the selected model and capabilities"}
+        ToolPublication.requirePublished(e.toolId,publishedTools,scoped.publicationRejections)
         if(e.toolId in contract) {
             require(j.getJSONArray("resources").toString() == contract.getValue(e.toolId).getJSONArray("resources").toString())
         }

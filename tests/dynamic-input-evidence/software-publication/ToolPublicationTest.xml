@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.ToolPublicationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-17T04:18:35.274Z" hostname="JGJHX5JPGF" time="0.013">
+  <properties/>
+  <testcase name="aFreshProjectionReplacesOldReasonsAndPublishedToolsStillRequireNormalExecutionChecks" classname="dev.thor.agent.ToolPublicationTest" time="0.001"/>
+  <testcase name="exactPermissionSecureAndDisplayRefusalsKeepTheirOriginalCodes" classname="dev.thor.agent.ToolPublicationTest" time="0.001"/>
+  <testcase name="nonReadyHardwareUnknownReasonsAndMissingPublicationAreNotTargetRecovery" classname="dev.thor.agent.ToolPublicationTest" time="0.001"/>
+  <testcase name="disabledCapabilityAndModelWithoutToolsCannotInheritAnOldTargetReason" classname="dev.thor.agent.ToolPublicationTest" time="0.0"/>
+  <testcase name="realDialogObservationInvalidationSurvivesRemovalFromThePublishedSet" classname="dev.thor.agent.ToolPublicationTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
