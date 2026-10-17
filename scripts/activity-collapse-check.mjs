@@ -53,7 +53,18 @@ try {
   assert.equal(await page.locator('.execution-history > summary').textContent(),'正在运行 · 已完成 2 项操作');
   await page.evaluate(()=>{fixture.events.push({runId:'recovery',sequence:5,type:'diagnostic',toolCallId:'old-tap',data:{code:'TARGET_CHANGED'}});receiveNative(fixture);});
   assert.equal(await page.locator('.recovery-status').count(),0);assert.doesNotMatch(await page.locator('#chat').innerText(),/页面已变化|需重新观察|需要重新观察/);assert.deepEqual(errors,[]);
-  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',answerAlwaysVisible:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,...layout});await page.close();
+  await page.evaluate(()=>{
+   fixture.runs=[{id:'tool-failure',sessionId:'a',status:'completed'}];fixture.messages=[{id:'m',sessionId:'a',runId:'tool-failure',role:'assistant',text:'重新读取后已确认结果。'}];
+   fixture.events=[{sequence:1,type:'tool_result',toolCallId:'failed-read',data:{toolId:'perception.capture_screen',error:'BACKEND_UNAVAILABLE',outcome:'observed'}},{sequence:2,type:'diagnostic',toolCallId:'failed-read',data:{code:'TOOL_FAILED',toolName:'perception_capture_screen'}},{sequence:3,type:'tool_result',toolCallId:'retry-read',data:{toolId:'perception.capture_screen',outcome:'observed'}}].map(e=>({...e,runId:'tool-failure'}));receiveNative(fixture);
+  });
+  assert.doesNotMatch(await page.locator('#chat').innerText(),/运行提示|TOOL_FAILED|执行失败|BACKEND_UNAVAILABLE/);assert.match(await page.locator('.markdown:visible').innerText(),/已确认结果/);
+  await page.locator('.execution-history > summary').click();await page.locator('.execution-history[data-disclosure-animating=true]').waitFor({state:'detached'});
+  const failedTool=page.locator('.tool-card').first();assert.match(await failedTool.locator('summary').innerText(),/执行失败/);
+  await failedTool.locator('summary').click();await page.locator('.tool-card[data-disclosure-animating=true]').waitFor({state:'detached'});assert.match(await failedTool.locator('.tool-body').innerText(),/BACKEND_UNAVAILABLE/);
+  assert.equal(await page.locator('.attention').evaluateAll(nodes=>nodes.every(n=>n.closest('.tool-card'))),true);assert.doesNotMatch(await page.locator('.tool-card').nth(1).innerText(),/执行失败|BACKEND_UNAVAILABLE/);
+  if(height===540)await page.screenshot({path:`${directory}/tool-failure-inline.png`});
+  await page.locator('.execution-history > summary').click();await page.locator('.execution-history[data-disclosure-animating=true]').waitFor({state:'detached'});assert.doesNotMatch(await page.locator('#chat').innerText(),/运行提示|TOOL_FAILED|执行失败|BACKEND_UNAVAILABLE/);assert.deepEqual(errors,[]);
+  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',answerAlwaysVisible:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,toolWarningsInlineOnly:true,...layout});await page.close();
  }
  report.passed=true;
 } finally {writeFileSync(`${directory}/browser-check.json`,JSON.stringify(report,null,2)+'\n');await browser.close();await new Promise(resolve=>server.close(resolve));}

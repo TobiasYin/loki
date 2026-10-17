@@ -15,10 +15,14 @@ test('gray approval binds actual run and approval ID; black denial stays structu
  s.runs=[{id:'r',sessionId:'a',status:'awaiting_user',approval:{id:'approval-1',summary:'灰名单 · 屏幕焦点锁 1'}}];window.receiveNative(s);
  doc.querySelector('.wait button').click();assert.deepEqual(calls.at(-1),{op:'approve',runId:'r',approvalId:'approval-1'});
  s.runs[0].status='completed';s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'c',data:{toolId:'debug.shell',error:'COMMAND_BLOCKED',outcome:'observed',content:[{type:'text',text:JSON.stringify({policyTier:'black',executed:false,reason:'禁止格式化'})}]}}];window.receiveNative(s);
- assert.equal(doc.querySelector('.wait'),null);assert.match(doc.querySelector('.attention').textContent,/已禁止/);assert.equal(doc.querySelector('.tool-body'),null);openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-card').textContent,/已禁止/);assert.match(doc.querySelector('.structured').textContent,/禁止格式化/);assert.doesNotMatch(doc.querySelector('.tool-card').textContent,/"executed"/);
+ assert.equal(doc.querySelector('.wait'),null);assert.equal(doc.querySelector('.attention'),null);assert.equal(doc.querySelector('.tool-body'),null);openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-card').textContent,/已禁止/);assert.match(doc.querySelector('.structured').textContent,/禁止格式化/);assert.doesNotMatch(doc.querySelector('.tool-card').textContent,/"executed"/);
 });
 test('untrusted text never creates HTML, scripts, remote links or images',()=>{const{window,doc}=setup();const s=state();s.messages.push({id:'m',sessionId:'a',role:'assistant',text:'<img src="https://evil.invalid" onerror="alert(1)"><script>bad()</script>',status:'completed'});window.receiveNative(s);assert.equal(doc.querySelector('#chat img'),null);assert.equal(doc.querySelector('#chat script'),null);assert.match(doc.querySelector('#chat').textContent,/<img/);});
-test('failed and unknown remain visible outside collapsed disclosure',()=>{const{window,doc}=setup();const s=state();s.messages.push({id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'failed'});s.runs.push({id:'r',sessionId:'a',status:'failed',expanded:false,stopReason:'工具失败'});s.events.push({runId:'r',sequence:1,outcome:'unknown',summary:'提交结果未知',elapsedMs:100,type:'tool_result'});window.receiveNative(s);assert.ok(!doc.querySelector('details.run') || !doc.querySelector('details.run').open);const warnings=[...doc.querySelectorAll('.attention')];assert.equal(warnings.length,2);assert.ok(warnings.every(n=>n.parentElement.tagName!=='DETAILS'));});
+test('run failure stays visible while uncertain tool details belong to their own collapsed operation',()=>{
+ const{window,doc}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'failed'}];s.runs=[{id:'r',sessionId:'a',status:'failed',stopReason:'任务中断'}];s.events=[{runId:'r',sequence:1,outcome:'unknown',type:'tool_result'}];window.receiveNative(s);
+ assert.equal(doc.querySelector('.execution-history').open,false);assert.equal(doc.querySelectorAll('.attention').length,1);assert.equal(doc.querySelector('.attention').textContent,'任务中断');
+ openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-body .attention').textContent,/副作用未知/);
+});
 test('page-change recovery stays neutral and visible while operation details remain lazy',()=>{
  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
  const recovery={kind:'observe_again',continueRun:true,retryPreviousAction:false,submission:'not_dispatched',sideEffectPossible:true};
@@ -90,13 +94,13 @@ test('failed discarded companion and other-run reads do not clear recovery, and 
 test('successful observation clears dynamic recovery but preserves historical unknown and submitted facts in lazy details',()=>{
  const{window,doc}=setup();const s=recoveryHistory();s.events[0].data.recovery.submission='unknown';s.events[1].data.recovery.submission='submitted';s.events[1].data.outcome='submitted';
  s.events.push({runId:'r',sequence:4,type:'tool_result',toolCallId:'fresh',data:{toolId:'perception.ui_tree',outcome:'observed'}});window.receiveNative(s);
- assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/提交状态尚未确认/);assert.doesNotMatch(doc.querySelector('.recovery-status').textContent,/正在重新观察|未执行|未提交/);assert.equal(doc.querySelector('.attention,.tool-body'),null);
+ assert.equal(doc.querySelector('.recovery-status'),null);assert.equal(doc.querySelector('.attention,.tool-body'),null);
  openOperations(window,doc);const cards=doc.querySelectorAll('.tool-card');disclose(window,cards[0]);assert.match(cards[0].querySelector('.tool-body').textContent,/提交状态尚未确认/);disclose(window,cards[1]);assert.match(cards[1].querySelector('.tool-body').textContent,/先前操作已提交/);
- s.runs[0].status='completed';window.receiveNative(s);assert.doesNotMatch(doc.querySelector('#chat').textContent,/正在重新观察/);assert.match(doc.querySelector('.recovery-status').textContent,/提交状态尚未确认/);
+ s.runs[0].status='completed';window.receiveNative(s);assert.doesNotMatch(doc.querySelector('#chat').textContent,/正在重新观察/);assert.equal(doc.querySelector('.recovery-status'),null);
 });
 test('real permission and safety errors remain distinct from neutral page recovery',()=>{
  for(const error of ['PERMISSION_MISSING','COMMAND_BLOCKED','SECURE_CONTENT']){
-  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'denied',data:{toolId:'input.tap',error,outcome:'observed'}}];window.receiveNative(s);assert.ok(doc.querySelector('.attention'));assert.doesNotMatch(doc.querySelector('.attention').textContent,/重新观察/);
+  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'denied',data:{toolId:'input.tap',error,outcome:'observed'}}];window.receiveNative(s);assert.equal(doc.querySelector('.attention'),null);assert.match(doc.querySelector('.tool-card summary').textContent,/已禁止|执行失败/);disclose(window,doc.querySelector('.tool-card'));assert.doesNotMatch(doc.querySelector('.tool-body .attention').textContent,/重新观察/);
  }
 });
 test('background tasks keep running while composer stop targets only the selected session',()=>{const{window,doc,calls}=setup();const s=state();s.selected='b';s.sessions.push({...s.sessions[0],id:'b',title:'会话 B'});s.runs.push({id:'r',sessionId:'a',status:'executing_tools'});window.receiveNative(s);assert.equal(doc.querySelector('#active').hidden,true);assert.equal(doc.querySelector('#send').textContent,'发送');assert.ok(doc.querySelector('.session-running'));s.runs.push({id:'r2',sessionId:'b',status:'generating'});window.receiveNative(s);assert.equal(doc.querySelector('#send').textContent,'停止');doc.querySelector('#composer').dispatchEvent(new window.Event('submit',{cancelable:true}));assert.deepEqual(calls.at(-1),{op:'stop',runId:'r2'});});
@@ -334,12 +338,35 @@ test('expanded timeline operations stay current through stream updates, session 
  assert.ok(doc.querySelector('.tool-card').open);assert.match(doc.querySelector('.tool-body').textContent,/更新后的实际字段/);
  const finished=structuredClone(next);finished.runs[0].status='completed';finished.runs[0].expanded=false;window.receiveNative(finished);assert.ok(doc.querySelector('.tool-card').open);assert.equal(doc.querySelectorAll('#chat .activity-label.shimmer').length,0,[...doc.querySelectorAll('#chat .activity-label.shimmer')].map(n=>n.outerHTML).join(''));
 });
-test('collapsed operation history keeps nested unknown outcomes, failed tools and approval actions immediately visible',()=>{
+test('tool warnings remain local to lazy operation details while approvals stay immediately visible',()=>{
  const{window,doc,calls}=setup();const s=treeHistory(2);s.runs[0].status='awaiting_user';s.runs[0].approval={id:'actual-approval',summary:'确认安装这个应用'};
  s.events[1].data.outcome='unknown';s.events[3].data.error='BACKEND_UNAVAILABLE';window.receiveNative(s);
- assert.equal(doc.querySelector('.tool-body,.structured'),null);const warnings=[...doc.querySelectorAll('.attention')];assert.ok(warnings.some(n=>n.textContent.includes('副作用未知')));assert.ok(warnings.some(n=>n.textContent.includes('执行失败')));assert.ok(warnings.every(n=>!n.closest('details')));
+ assert.equal(doc.querySelector('.tool-body,.structured,.attention'),null);assert.match(doc.querySelectorAll('.tool-card summary')[0].textContent,/结果未知/);assert.match(doc.querySelectorAll('.tool-card summary')[1].textContent,/执行失败/);
  assert.match(doc.querySelector('.wait').textContent,/确认安装这个应用/);doc.querySelector('.wait button').click();assert.deepEqual(calls.at(-1),{op:'approve',runId:'large',approvalId:'actual-approval'});
- openOperations(window,doc);disclose(window,doc.querySelectorAll('.tool-card')[1]);assert.match(doc.querySelectorAll('.tool-card')[1].textContent,/BACKEND_UNAVAILABLE/);
+ openOperations(window,doc);disclose(window,doc.querySelectorAll('.tool-card')[0]);assert.match(doc.querySelectorAll('.tool-card')[0].textContent,/副作用未知/);disclose(window,doc.querySelectorAll('.tool-card')[1]);assert.match(doc.querySelectorAll('.tool-card')[1].textContent,/BACKEND_UNAVAILABLE/);
+});
+
+test('Pi tool failures stay with the matching call and never trail a successful final answer or reloaded history',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'generating'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
+ s.events=[{sequence:1,type:'tool_result',toolCallId:'bad',data:{toolId:'perception.capture_screen',error:'BACKEND_UNAVAILABLE',outcome:'observed'}},{sequence:2,type:'tool_result',toolCallId:'good',data:{toolId:'perception.capture_screen',outcome:'observed'}},{sequence:3,type:'thinking_delta',data:{text:'继续整理'}},{sequence:4,type:'diagnostic',toolCallId:'bad',data:{code:'TOOL_FAILED',toolName:'perception_capture_screen'}},{sequence:5,type:'thinking_delta',data:{text:'已确认结果'}}].map(e=>({...e,runId:'r'}));window.receiveNative(s);
+ assert.equal(doc.querySelector('.attention,.tool-body'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/运行提示|TOOL_FAILED/);assert.equal(doc.querySelectorAll('.thinking').length,1);assert.match(doc.querySelector('.thinking summary').textContent,/思考中/);assert.equal(doc.querySelectorAll('.tool-card').length,2);
+ s.runs[0].status='completed';s.messages[0].text='已完成任务。';s.events.push({runId:'r',sequence:6,type:'text_delta',data:{text:s.messages[0].text}});
+ for(const snapshot of [s,JSON.parse(JSON.stringify(s))]) {
+  window.receiveNative(snapshot);assert.equal(doc.querySelector('.execution-history').open,false);assert.ok([...doc.querySelectorAll('.attention')].every(node=>node.closest('.tool-card')));assert.ok([...doc.querySelectorAll('.activity-item')].every(node=>node.hidden));assert.doesNotMatch(doc.querySelector('#chat').textContent,/运行提示|TOOL_FAILED/);assert.match(doc.querySelector('.markdown').textContent,/已完成任务/);
+  openOperations(window,doc);const cards=doc.querySelectorAll('.tool-card');disclose(window,cards[0]);assert.match(cards[0].textContent,/执行失败.*BACKEND_UNAVAILABLE/s);assert.equal(cards[0].querySelectorAll('.attention').length,1);assert.doesNotMatch(cards[1].textContent,/执行失败|BACKEND_UNAVAILABLE/);assert.ok([...doc.querySelectorAll('.attention')].every(node=>node.closest('.tool-card')));disclose(window,doc.querySelector('.execution-history'),false);
+ }
+});
+
+test('diagnostic-only tool failures remain inspectable without reviving a global footer',()=>{
+ for(const toolCallId of ['missing-history-call',undefined]) {
+  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'已完成'}];s.events=[{runId:'r',sequence:1,type:'diagnostic',toolCallId,data:{code:'TOOL_FAILED',toolName:'web_search'}}];window.receiveNative(s);
+  assert.doesNotMatch(doc.querySelector('#chat').textContent,/运行提示|TOOL_FAILED/);assert.equal(doc.querySelector('.tool-body'),null);openOperations(window,doc);const card=doc.querySelector('.tool-card');assert.match(card.querySelector('summary').textContent,/搜索网页.*执行失败/);disclose(window,card);assert.match(card.querySelector('.tool-body').textContent,/工具执行失败/);
+ }
+});
+
+test('tool diagnostics do not mask a separate model-level continuation message',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'failed'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.events=[{runId:'r',sequence:1,type:'diagnostic',data:{code:'MODEL_OUTPUT_LIMIT'}},{runId:'r',sequence:2,type:'diagnostic',toolCallId:'c',data:{code:'TOOL_FAILED',toolName:'web_search'}}];window.receiveNative(s);
+ assert.match(doc.querySelector('#chat').textContent,/达到模型输出上限.*保留上下文/);assert.doesNotMatch(doc.querySelector('#chat').textContent,/运行提示|TOOL_FAILED/);
 });
 
 test('common input operations and streaming tool aliases remain readable; toggling one row never changes Native expansion state',()=>{
@@ -372,8 +399,8 @@ test('normal pending input never flashes unknown-action warnings; explicit uncer
  s.events=[{runId:'r',sequence:1,type:'tool_intent',toolCallId:'c',outcome:'unknown',data:{toolId:'input.tap'}},{runId:'r',sequence:2,type:'tool_started',toolCallId:'c',outcome:'unknown',data:{toolId:'input.tap'}}];window.receiveNative(s);
  assert.equal(doc.querySelector('.attention'),null);assert.ok(doc.querySelector('#chat .activity-label.shimmer'));
  const done=structuredClone(s);done.runs[0].status='completed';done.events.push({runId:'r',sequence:3,type:'tool_result',toolCallId:'c',data:{toolId:'input.tap',outcome:'submitted'}});window.receiveNative(done);assert.equal(doc.querySelector('.attention'),null);
- const uncertain=structuredClone(s);uncertain.runs[0].stopReason='';uncertain.events.push({runId:'r',sequence:3,type:'tool_result',toolCallId:'c',data:{toolId:'input.tap',outcome:'unknown'}});window.receiveNative(uncertain);assert.match(doc.querySelector('.attention').textContent,/副作用未知/);
- s.runs[0].status='interrupted';s.runs[0].stopReason='';window.receiveNative(s);assert.ok([...doc.querySelectorAll('.attention')].some(n=>n.textContent.includes('检查目标状态')));
+ const uncertain=structuredClone(s);uncertain.runs[0].stopReason='';uncertain.events.push({runId:'r',sequence:3,type:'tool_result',toolCallId:'c',data:{toolId:'input.tap',outcome:'unknown'}});window.receiveNative(uncertain);assert.equal(doc.querySelector('.attention'),null);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-body .attention').textContent,/副作用未知/);
+ s.runs[0].status='interrupted';s.runs[0].stopReason='';window.receiveNative(s);openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-body .attention').textContent,/检查目标状态/);
 });
 test('capability toggles acknowledge exact mutation IDs, resist stale snapshots, isolate sessions and roll back actual failures',()=>{
  const{window,doc,calls}=setup();const s=state();s.sessions[0].capabilityRevision=10;s.sessions.push({...s.sessions[0],id:'b',title:'会话 B',capabilities:{...s.sessions[0].capabilities}});window.receiveNative(s);

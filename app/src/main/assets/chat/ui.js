@@ -195,23 +195,26 @@
     const container=element('div');
     const toolLabels={'web.request':'网络请求 · curl','files.download':'下载文件','files.download_info':'查看下载','apps.install':'安装应用','apps.launch':'打开应用','agent.background':'聊天转入后台','agent.sleep':'等待','apps.package_info':'核验应用安装','skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看当前屏幕','perception.select_screen':'选择操作屏幕','perception.capture_companion':'查看同应用下屏','perception.find_apps':'查找应用','perception.read_ui':'读取界面','perception.ui_tree':'读取组件树','input.scroll':'滚动页面','input.drag':'拖动控件','input.tap':'点击当前屏幕','input.long_press':'长按当前屏幕','input.swipe':'滑动当前屏幕','input.activate':'激活界面控件','input.navigate':'当前屏幕返回','input.type_text':'输入文字','input.key_press':'按键盘键','input.press_button':'按手柄键','input.set_axes':'移动摇杆与扳机','input.release_inputs':'释放输入','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
     const outcomeLabels={observed:'已完成',submitted:'已提交',unknown:'结果未知'};
-    const calls=new Map(),resultIds=new Set();
+    const isToolDiagnostic=event=>event.type==='diagnostic' && event.data?.code!=='TARGET_CHANGED' && (event.toolCallId || event.toolId || event.data?.toolId || event.data?.toolName || event.data?.code==='TOOL_FAILED');
+    const callId=event=>event.toolCallId??`event:${event.sequence}`;
+    const calls=new Map();
     for(const event of events) {
-      if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type))continue;
-      const id=event.toolCallId??`event:${event.sequence}`;
+      if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type) && !isToolDiagnostic(event))continue;
+      const id=callId(event);
       const current=calls.get(id)??{id};const data=event.data??{};
       Object.assign(current,{toolId:data.toolId??event.toolId??current.toolId,toolName:data.toolName??current.toolName});
       if(event.type==='tool_call_update')current.arguments=data.arguments;
       if(event.type==='tool_started'){current.started=true;current.arguments=data.arguments??current.arguments;}
-      if(event.type==='tool_result'){current.result=data;current.outcome=data.outcome??event.outcome;current.error=data.error??event.error;if(event.toolCallId)resultIds.add(event.toolCallId);}
+      if(event.type==='tool_result'){current.result=data;current.outcome=data.outcome??event.outcome;current.error=data.error??event.error;}
+      if(event.type==='diagnostic' && data.code!=='TARGET_CHANGED')current.diagnostics=[...new Set([...(current.diagnostics??[]),data.code??'TOOL_FAILED'])];
+      if(event.type!=='diagnostic' && !current.result)current.outcome=data.outcome??event.outcome??current.outcome;
       calls.set(id,current);
     }
     const title=call=>toolLabels[call.toolId]??toolLabels[call.toolName?.replace('_','.')]??call.toolId??call.toolName??'工具';
-    // Actionable summaries never depend on opening an operation history.
+    // Run failures and live approvals stay visible; historical tool warnings
+    // belong to their operation and fold with the rest of its details.
     if(['failed','cancelled','interrupted'].includes(run.status) && run.stopReason)container.append(element('div',run.stopReason,run.status==='cancelled'?'timeline-note':'attention'));
     else if(run.status==='failed')container.append(element('div','这次任务未能完成，请重试或检查设置。','attention'));
-    const unknown=events.filter(e=>(e.data?.outcome??e.outcome)==='unknown' && (e.data?.error??e.error)!=='TARGET_CHANGED' && (e.type==='tool_result' || (['failed','cancelled','interrupted'].includes(run.status) && !resultIds.has(e.toolCallId))));
-    for(const e of unknown)container.append(element('div',`副作用未知 · ${toolLabels[e.toolId??e.data?.toolId]??e.toolId??e.data?.toolId??'工具操作'}，请检查目标状态`,'attention'));
     const recoveryFact=call=>call.outcome==='unknown' && call.result?.recovery?.sideEffectPossible!==false && call.result?.recovery?.submission!=='not_dispatched'?'先前操作的提交状态尚未确认，请勿重复旧动作':call.result?.recovery?.submission==='submitted' || call.outcome==='submitted'?'先前操作已提交，需观察结果':'';
     // Recovery is one current Run state, not one perpetual status per old error.
     // A result event exists only after Runtime's post-authority checks. Companion
@@ -239,13 +242,11 @@
       }
     }
     const recoveryCalls=[...calls.values()].filter(call=>call.error==='TARGET_CHANGED');
-    const uncertainRecovery=recoveryCalls.find(call=>call.outcome==='unknown' && recoveryFact(call));
     const recoveryStatus=needsObservation && !terminal.has(run.status)?(run.status==='awaiting_user'?'页面已变化，需重新观察':'页面已变化，正在重新观察'):'';
-    const fact=uncertainRecovery?recoveryFact(uncertainRecovery):needsObservation?recoveryFact(recoveryCalls.at(-1)??{}):'';
+    const fact=recoveryStatus?recoveryFact(recoveryCalls.at(-1)??{}):'';
     if(recoveryStatus || fact) {
       const note=element('div',[recoveryStatus,fact].filter(Boolean).join('；')+'。','timeline-note recovery-status');note.setAttribute('role','status');container.append(note);
     }
-    for(const call of calls.values())if(call.error && call.error!=='TARGET_CHANGED')container.append(element('div',`${title(call)} · ${call.error==='COMMAND_BLOCKED'?'已禁止':'执行失败'}，可展开操作详情查看原因`,'attention'));
     if(run.status==='awaiting_user') {
       const waiting=events.findLast(e=>e.type==='awaiting_user');
       const card=element('div',run.approval?.summary??waiting?.summary??'等待用户','wait');
@@ -264,9 +265,18 @@
         stream.truncated ||= data.textTruncated===true;
         stream.order=Math.max(stream.order??order,order);
         if(!latest || order>=latest.order)latest={kind,key:stream.key,order};
+      }else if(isToolDiagnostic(event)) {
+        const id=callId(event);
+        // A late Pi diagnostic enriches its original call, without moving that
+        // call to the newest activity or interrupting a subsequent text stream.
+        if(!byCall.has(id)) {
+          stream=null;
+          const item={kind:'tool',key:`${run.id}:tool:${id}`,call:calls.get(id),order};byCall.set(id,item);timeline.push(item);
+          if(!latest || order>=latest.order)latest={kind:'completed',key:item.key,order};
+        }
       }else if(['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type)) {
         stream=null;
-        const id=event.toolCallId??`event:${sequence}`;
+        const id=callId(event);
         if(!byCall.has(id)){const item={kind:'tool',key:`${run.id}:tool:${id}`,call:calls.get(id)};byCall.set(id,item);timeline.push(item);}
         byCall.get(id).order=Math.max(byCall.get(id).order??order,order);
         if(!latest || order>=latest.order)latest={kind:event.type==='tool_result'?'completed':'tool',key:byCall.get(id).key,order};
@@ -299,6 +309,8 @@
         const brightnessCall=call.toolId==='debug.thor_brightness' || call.toolName==='debug_thor_brightness';
         const percentInput=brightnessCall && ((!call.result && !terminal.has(run.status)) || (call.result?.content??[]).some(c=>{if(c.type!=='text')return false;try{return JSON.parse(c.text)?.unit==='percent';}catch{return false;}}));
         if(call.arguments && Object.keys(call.arguments).length){body.append(element('small','输入'));body.append(structured(call.arguments,0,percentInput));}
+        if(call.outcome==='unknown' && call.error!=='TARGET_CHANGED' && (call.result || ['failed','cancelled','interrupted'].includes(run.status)))body.append(element('div','副作用未知，请检查目标状态。','attention'));
+        for(const code of call.diagnostics??[])if(code!==call.error && !(code==='TOOL_FAILED' && call.error))body.append(element('div',code==='TOOL_FAILED'?'工具执行失败。':`工具提示：${code}`,'timeline-note'));
         if(call.result) {
           if(call.error)body.append(element('div',call.error==='TARGET_CHANGED'?(reobservedCalls.has(call.id)?'此操作当时遇到页面变化，随后已重新观察。':'此操作当时遇到页面变化，未直接重放旧动作。'):`失败原因：${call.error}`,call.error==='TARGET_CHANGED'?'timeline-note':'attention'));
           if(call.error==='TARGET_CHANGED' && recoveryFact(call))body.append(element('div',recoveryFact(call)+'。','timeline-note'));
@@ -339,9 +351,9 @@
         });activity.append(node);
       }else if(item.kind==='tool' && item.call) {
         const call=item.call;
-        const status=call.error==='TARGET_CHANGED'?(reobservedCalls.has(call.id)?'已重新观察':terminal.has(run.status)?'页面发生变化':'需要重新观察'):call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):terminal.has(run.status)?'未完成':isCurrent?(call.started?'执行中':'正在准备'):'待执行';
+        const status=call.error==='TARGET_CHANGED'?(reobservedCalls.has(call.id)?'已重新观察':terminal.has(run.status)?'页面发生变化':'需要重新观察'):call.error==='COMMAND_BLOCKED'?'已禁止':call.error || (!call.result && call.diagnostics?.length)?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):terminal.has(run.status)?'未完成':isCurrent?(call.started?'执行中':'正在准备'):'待执行';
         const node=cached(item.key,JSON.stringify([call,status,isCurrent,terminal.has(run.status)]),()=>{
-          const card=element('details',undefined,'tool-card activity-item');card.dataset.activityKind='tool';card.dataset.activityState=isCurrent?'active':call.result?'completed':'pending';card.dataset.activityKey=item.key;
+          const card=element('details',undefined,'tool-card activity-item');card.dataset.activityKind='tool';card.dataset.activityState=isCurrent?'active':call.result || call.diagnostics?.length?'completed':'pending';card.dataset.activityKey=item.key;
           const summary=element('summary');summary.append(element('span',`${title(call)} · ${status}`,'activity-label'+(isCurrent?' shimmer':'')));card.append(summary);
           renderCallBody(card,call);return card;
         });activity.append(node);
@@ -388,7 +400,7 @@
       if(open)history.append(activity);
       else container.insertBefore(activity,history.nextSibling);
     });
-    const last=events.findLast(e=>e.type==='diagnostic' && !compactionCodes.has(e.data?.code));
+    const last=events.findLast(e=>e.type==='diagnostic' && e.data?.code!=='TARGET_CHANGED' && !isToolDiagnostic(e) && !compactionCodes.has(e.data?.code));
     if(last && last.data?.code!=='TARGET_CHANGED')container.append(element('div',last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
     return container;
   }
