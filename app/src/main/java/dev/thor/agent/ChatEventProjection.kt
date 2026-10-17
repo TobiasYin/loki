@@ -20,7 +20,9 @@ internal class PresentationEventFold {
         if(type=="text_delta" || type=="thinking_delta") {
             val data=original.getJSONObject("data")
             val explicit=original.optString("presentationSegment").takeIf {it.isNotEmpty()}
-            val current=streams[run]?.takeIf {blocks[it]?.first?.optString("type")==type && (explicit==null || explicit==it)}
+            val blockId=data.optString("blockId").takeIf {it.isNotBlank()}
+            val current=streams[run]?.takeIf {blocks[it]?.first?.optString("type")==type && (explicit==null || explicit==it) &&
+                (blockId==null || blocks[it]?.first?.getJSONObject("data")?.optString("blockId")==blockId)}
             val key=current ?: explicit ?: "$run:$type:${original.optLong("sequence")}:${rows.size}"
             if(!blocks.containsKey(key)) {
                 val row=JSONObject(original.toString()).put("presentationSegment",key)

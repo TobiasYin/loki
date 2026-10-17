@@ -609,6 +609,72 @@ function replyHistory(){
  ].map((event,index)=>({...event,runId:'r',sequence:index+1}));return s;
 }
 function visibleReplies(doc){return [...doc.querySelectorAll('.timeline-answer')].filter(node=>!node.hidden);}
+function textSegment(runId,sequence,blockId,text,extra={}){return{runId,sequence,lastSequence:sequence,presentationSegment:`${runId}:text:${blockId}:${sequence}`,type:'text_delta',data:{text,blockId,...extra}};}
+function projectedReplyHistory(){
+ const s=replyHistory();s.runs[0].textSegments=s.events.filter(event=>event.type==='text_delta').map((event,index)=>textSegment('r',event.sequence,`${index+1}:0`,event.data.text));return s;
+}
+test('independent reply projection keeps only the latest message when over 600 events evict all earlier text',()=>{
+ const{window,doc}=setup();const s=projectedReplyHistory();window.receiveNative(s);const latest=visibleReplies(doc)[0];
+ // A long sequence of later non-text receipts can evict every text delta,
+ // while the complete durable message still contains all earlier replies.
+ s.events=Array.from({length:650},(_,index)=>({runId:'r',sequence:10+index,type:'state',data:{state:'generating'}}));
+ window.receiveNative(s);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);assert.equal(visibleReplies(doc)[0],latest);
+ assert.equal(doc.querySelectorAll('.message > div:nth-child(3) .markdown').length,0);assert.equal(doc.querySelectorAll('.timeline-answer').length,3);
+ for(const limit of [2,0]){s.events=s.events.slice(-limit || s.events.length);if(limit===0)s.events=[];window.receiveNative(s);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);assert.equal(doc.querySelectorAll('.timeline-answer').length,3);}
+ openOperations(window,doc);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['开始检查','已找到入口','正在核验']);
+});
+test('reply projection replaces paged text rather than rendering duplicates and restores exact mixed chronology',()=>{
+ const{window,doc}=setup();const s=projectedReplyHistory();window.receiveNative(s);
+ assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);
+ const expanded=openOperations(window,doc);assert.deepEqual([...expanded.children].map(node=>node.dataset.activityKind),['text','thinking','tool','text','thinking','tool','text']);
+ assert.equal(doc.querySelectorAll('.markdown').length,3);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['开始检查','已找到入口','正在核验']);
+ disclose(window,doc.querySelector('.execution-history'),false);const original=visibleReplies(doc)[0],before=doc.querySelector('#chat').textContent;
+ for(let i=0;i<100;i++)window.receiveNative(structuredClone(s));assert.equal(doc.querySelector('#chat').textContent,before);assert.equal(visibleReplies(doc)[0],original);assert.equal(doc.querySelectorAll('.timeline-answer').length,3);
+ const partial=structuredClone(s);partial.events=partial.events.slice(4);window.receiveNative(partial);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);
+ window.receiveNative(s);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);assert.equal(doc.querySelectorAll('.timeline-answer').length,3);
+});
+test('projected streaming replaces its current segment and folds it only when the next Assistant message begins',()=>{
+ const{window,doc}=setup();const s=projectedReplyHistory();s.events=[];window.receiveNative(s);const original=[...doc.querySelectorAll('.timeline-answer')];
+ const current=s.runs[0].textSegments.at(-1);current.data.text+='结果';current.lastSequence=10;window.receiveNative(s);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验结果']);assert.equal(doc.querySelectorAll('.timeline-answer').length,3);assert.equal(doc.querySelectorAll('.timeline-answer')[0],original[0]);
+ // The saved cumulative text need not be equal (or even updated) to receive a
+ // freshly streamed, authoritative reply. The previous message stays folded.
+ s.runs[0].textSegments.push(textSegment('r',11,'4:0','完成'));window.receiveNative(s);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['完成']);assert.equal(doc.querySelectorAll('.timeline-answer').length,4);
+ openOperations(window,doc);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['开始检查','已找到入口','正在核验结果','完成']);
+});
+test('real Assistant message boundaries split adjacent replies while adjacent content blocks preserve intentional repetition',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'generating',textSegments:[textSegment('r',1,'1:0','哈哈'),textSegment('r',2,'1:1','哈哈'),textSegment('r',3,'2:0','新阶段')]}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'哈哈哈哈新阶段'}];
+ window.receiveNative(s);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['新阶段']);assert.equal(doc.querySelectorAll('.timeline-answer').length,2);
+ openOperations(window,doc);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['哈哈哈哈','新阶段']);
+ // Do not merge a message's fragments across intervening activity: it would
+ // move text past the thought/tool that really appeared between its blocks.
+ s.runs[0].textSegments=[textSegment('r',1,'1:0','前段'),textSegment('r',3,'1:1','后段')];s.events=[{runId:'r',sequence:2,type:'thinking_delta',data:{text:'中间思考'}}];window.receiveNative(s);
+ assert.deepEqual([...doc.querySelector('.activity-timeline').children].map(node=>node.dataset.activityKind),['text','thinking','text']);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['前段','后段']);
+});
+test('noncontiguous fragments of the same block preserve their boundary even when intervening activity leaves the event page',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed',textSegments:[textSegment('r',1,'1:0','前段'),textSegment('r',3,'1:0','后段')]}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'前段后段'}];s.events=[{runId:'r',sequence:2,type:'thinking_delta',data:{text:'中间思考'}}];
+ window.receiveNative(s);assert.equal(doc.querySelectorAll('.timeline-answer').length,2);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['后段']);
+ openOperations(window,doc);assert.deepEqual([...doc.querySelector('.activity-timeline').children].map(node=>node.dataset.activityKind),['text','thinking','text']);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['前段','后段']);
+ s.events=[];window.receiveNative(s);assert.deepEqual([...doc.querySelector('.activity-timeline').children].map(node=>node.dataset.activityKind),['text','text']);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['前段','后段']);
+ disclose(window,doc.querySelector('.execution-history'),false);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['后段']);assert.equal(doc.querySelectorAll('.timeline-answer').length,2);
+ // A folded source range covers its interior deltas: use lastSequence, not
+ // the row's first sequence, when deciding whether the next block is adjacent.
+ s.runs[0].textSegments[0].lastSequence=2;window.receiveNative(s);assert.equal(doc.querySelectorAll('.timeline-answer').length,1);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['前段后段']);
+});
+test('an authoritative empty reply projection does not revive cumulative text and remains scoped to each run',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'generating',textSegments:[]}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'旧累计正文'}];s.events=[{runId:'r',sequence:1,type:'text_delta',data:{text:'过期事件片段'}}];window.receiveNative(s);
+ assert.equal(doc.querySelectorAll('.markdown').length,0);assert.doesNotMatch(doc.querySelector('#chat').textContent,/旧累计正文|过期事件片段/);
+ s.runs[0].textSegments=[textSegment('r',1,'1:0','第一轮'),textSegment('other',2,'1:0','错误串入')];s.runs.push({id:'other',sessionId:'a',status:'completed',textSegments:[textSegment('other',1,'1:0','第二轮')]});s.messages.push({id:'other-message',sessionId:'a',runId:'other',role:'assistant',text:'第二轮'});window.receiveNative(s);
+ assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['第一轮','第二轮']);assert.doesNotMatch(doc.querySelector('#chat').textContent,/错误串入|旧累计正文|过期事件片段/);
+ const other=structuredClone(s);other.selected='b';other.sessions.push({...other.sessions[0],id:'b',title:'另一个会话'});other.runs=[{id:'b-run',sessionId:'b',status:'completed',textSegments:[textSegment('b-run',1,'1:0','另一个会话回复')]}];other.messages=[{id:'b-message',sessionId:'b',runId:'b-run',role:'assistant',text:'另一个会话回复'}];other.events=[];window.receiveNative(other);
+ assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['另一个会话回复']);assert.doesNotMatch(doc.querySelector('#chat').textContent,/第一轮|第二轮/);
+});
+test('bounded projected reply tails and terminal states never restore the full cumulative body',()=>{
+ for(const status of ['generating','completed','failed','interrupted','cancelled']){
+  const{window,doc}=setup();const s=projectedReplyHistory();s.runs[0].status=status;s.runs[0].textSegments[0].data.text='';s.runs[0].textSegments[0].data.textTruncated=true;
+  const latest=s.runs[0].textSegments.at(-1);latest.data={text:'😀'.repeat(32760),blockId:'3:0',textTruncated:true,omittedUtf16Units:80000};s.messages[0].text='此前完整累计正文'+latest.data.text;s.messages[0].textTruncated=true;s.events=[];window.receiveNative(s);
+  assert.equal(visibleReplies(doc).length,1);assert.equal(visibleReplies(doc)[0].querySelector('.markdown').textContent.trim(),latest.data.text);assert.ok(visibleReplies(doc)[0].querySelector('.message-truncation'));assert.equal(doc.querySelector('.message > div:nth-child(3) .markdown'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/此前完整累计正文/);
+ }
+});
 test('compact process keeps only its latest assistant reply and expanding restores the mixed chronology without duplicates',()=>{
  const{window,doc,calls}=setup();const s=replyHistory();window.receiveNative(s);
  const replies=[...doc.querySelectorAll('.timeline-answer')];assert.equal(replies.length,3);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);

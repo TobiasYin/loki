@@ -90,8 +90,22 @@ try {
   assert.equal(await page.locator('.timeline-answer:visible').count(),4);assert.equal(await page.locator('.markdown').count(),4);
   await page.locator('.execution-history > summary').click();await page.waitForFunction(()=>!document.querySelector('[data-disclosure-animating=true]'));
   assert.equal(await page.locator('.timeline-answer:visible').count(),1);assert.deepEqual(errors,[]);
+  await page.evaluate(()=>{
+   fixture.runs[0].textSegments=fixture.events.filter(event=>event.type==='text_delta').map((event,index)=>({...event,presentationSegment:`reply-${index}`,data:{...event.data,blockId:`${index+1}:0`}}));
+   // The latest message must survive even after every text event left the page.
+   fixture.events=Array.from({length:650},(_,index)=>({runId:'reply-progress',sequence:1000+index,type:'state',data:{state:'completed'}}));receiveNative(fixture);
+  });
+  assert.equal(await page.locator('.timeline-answer:visible').count(),1);assert.equal((await page.locator('.timeline-answer:visible').innerText()).trim(),'已完成。');
+  for(const limit of [2,0,600,0]){
+   await page.evaluate(limit=>{fixture.events=fixture.events.slice(-limit || fixture.events.length);if(limit===0)fixture.events=[];for(let repeat=0;repeat<20;repeat++)receiveNative(fixture);},limit);
+   assert.equal(await page.locator('.timeline-answer').count(),4);assert.equal(await page.locator('.timeline-answer:visible').count(),1);
+   assert.equal((await page.locator('.timeline-answer:visible').innerText()).trim(),'已完成。');
+  }
+  await page.locator('.execution-history > summary').click();await page.waitForFunction(()=>!document.querySelector('[data-disclosure-animating=true]'));
+  assert.equal(await page.locator('.timeline-answer:visible').count(),4);assert.equal(await page.locator('.markdown').count(),4);
+  await page.locator('.execution-history > summary').click();await page.waitForFunction(()=>!document.querySelector('[data-disclosure-animating=true]'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',latestReplyOnly:true,earlierRepliesChronological:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,toolWarningsInlineOnly:true,tokenFooterVerified:true,...layout});await page.close();
+  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',latestReplyOnly:true,earlierRepliesChronological:true,pagedTextRemainsStable:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,toolWarningsInlineOnly:true,tokenFooterVerified:true,...layout});await page.close();
  }
  report.passed=true;
 } finally {writeFileSync(`${directory}/browser-check.json`,JSON.stringify(report,null,2)+'\n');await browser.close();await new Promise(resolve=>server.close(resolve));}

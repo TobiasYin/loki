@@ -363,6 +363,29 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         }
         state.put("messages",JSONArray(projectedRows("messages",related,args,"ORDER BY rowid DESC LIMIT ${runLimit*4+32}",
             messageProjectionSql(),::stripMessageData).reversed()))
+        val assistantMessages=state.getJSONArray("messages").objects().filter {it.optString("role")=="assistant"}.associateBy {it.optString("runId")}
+        for(run in visibleRuns) {
+            val runId=run.getString("id");val message=assistantMessages[runId] ?: continue
+            if(run.optBoolean("probe"))continue
+            val projection=AssistantTextProjection()
+            // Only text rows, no Pi journal, images, thinking or tool payloads.
+            // LIKE also works on Thor's SQLite build without JSON1 functions.
+            readableDatabase.rawQuery("SELECT payload FROM events WHERE sessionId=? AND runId=? AND payload LIKE ? ORDER BY sequence DESC LIMIT 2049",
+                arrayOf(sessionId,runId,"%\"type\":\"text_delta\"%")).use {cursor->
+                var count=0
+                while(cursor.moveToNext()) {
+                    val event=JSONObject(cursor.getString(0))
+                    if(event.optString("type")!="text_delta")continue
+                    if(count++==2048){projection.omitOlder(event);break}
+                    if(!projection.appendDescending(event))break
+                }
+            }
+            projection.snapshot()?.let {segments->
+                // Imported legacy prose without stream rows retains its safe
+                // saved-text fallback; real segmented replies are authoritative.
+                if(segments.isNotEmpty() || message.optString("text").isEmpty())run.put("textSegments",JSONArray(segments))
+            }
+        }
         state.put("events",JSONArray(projectedRows("events",related,args,"ORDER BY rowid DESC LIMIT $eventLimit","payload") {it}.reversed()))
         state.put("attachments",JSONArray(projectedRows("attachments",related,args,"ORDER BY rowid DESC LIMIT 256",
             "json_remove(payload,'$.data','$.path')") {row->row.remove("data");row.remove("path");row}.reversed()))
@@ -534,7 +557,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         db.beginTransaction()
         try {
             for(sid in deletedSessionIds)db.delete("sessions","id=?",arrayOf(sid))
-            for(table in tables)for(row in state.getJSONArray(table).objects()) {
+            for(table in tables)for(row in if(table=="events")StoredStreamEvent.compact(state.getJSONArray(table).objects()) else state.getJSONArray(table).objects()) {
                 if(table!="sessions") {
                     val sid=row.getString("sessionId");require(sid in sessionIds && sid !in deletedSessionIds)
                     db.rawQuery("SELECT sessionId FROM $table WHERE id=?",arrayOf(row.getString("id"))).use {c->
@@ -547,6 +570,10 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
                 val values=rowValues(table,row);val rowId=row.getString("id");val payload=values.getAsString("payload")
                 val changed=db.update(table,values,"id=? AND payload<>?",arrayOf(rowId,payload))
                 if(changed==0)db.rawQuery("SELECT 1 FROM $table WHERE id=?",arrayOf(rowId)).use {c->if(!c.moveToFirst())db.insertOrThrow(table,null,values)}
+                // A resident full source range can replace older delta rows,
+                // without touching any tool/authorization boundary or Pi row.
+                if(table=="events" && row.optLong("lastSequence",row.optLong("sequence"))>row.getLong("sequence"))
+                    db.delete("events","runId=? AND sequence>? AND sequence<=?",arrayOf(row.getString("runId"),row.getLong("sequence").toString(),row.getLong("lastSequence").toString()))
             }
             db.insertWithOnConflict("metadata",null,ContentValues().apply {put("name","selected");put("value",selected)},SQLiteDatabase.CONFLICT_REPLACE)
             db.setTransactionSuccessful()
@@ -556,6 +583,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
     @Synchronized override fun save(state: JSONObject) {
         usageRoundCache.clear()
         val db = writableDatabase
+        val rowsByTable=tables.associateWith {table->state.getJSONArray(table).objects().let {if(table=="events")StoredStreamEvent.compact(it) else it}}
         db.beginTransaction()
         try {
             // Keep identities only. Reading all committed payloads here duplicates
@@ -570,7 +598,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
             // Delete children first, insert parents first; unchanged rows do not
             // execute UPDATE triggers or replace parents/cascade their history.
             for (table in tables.asReversed()) {
-                val wanted = state.getJSONArray(table).objects().map { it.getString("id") }.toSet()
+                val wanted = rowsByTable.getValue(table).map { it.getString("id") }.toSet()
                 existingIds(table).filter { it !in wanted }.forEach { db.delete(table, "id=?", arrayOf(it)) }
             }
             for (table in tables) {
@@ -578,7 +606,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
                 // snapshot under a different parent. Inspect current IDs after all
                 // deletions so those rows are inserted rather than silently lost.
                 val existing=existingIds(table)
-                for (row in state.getJSONArray(table).objects()) {
+                for (row in rowsByTable.getValue(table)) {
                     val payload = row.toString(); val id = row.getString("id")
                     val values = ContentValues().apply {
                         put("id", id); put("payload", payload)
@@ -659,9 +687,9 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         } finally {db.endTransaction()}
     }
 
-    /** Current-run streaming transaction. Full snapshots still handle deletion and UI changes.
-     * Updating parents in place preserves their existing children. Events only append;
-     * a duplicate ID/sequence rolls back the run, message and selection together.
+    /** Current-run streaming transaction. Adjacent deltas extend one bounded
+     * content-block row; all other events append separately. Source sequence
+     * ranges preserve order and reject replays atomically with parent updates.
      */
     @Synchronized fun saveRunUpdate(state: JSONObject, run: JSONObject, event: JSONObject?) {
         val rid=run.getString("id");val sid=run.getString("sessionId")
@@ -683,7 +711,20 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
             upsert("sessions",state.getJSONArray("sessions").objects().single {it.getString("id")==sid})
             upsert("runs",run)
             state.getJSONArray("messages").objects().filter {it.optString("runId")==rid}.forEach {upsert("messages",it)}
-            if(event!=null)db.insertOrThrow("events",null,values("events",event))
+            if(event!=null) {
+                val previousId=db.rawQuery("SELECT id FROM events WHERE runId=? ORDER BY sequence DESC LIMIT 1",arrayOf(rid)).use {c->if(c.moveToFirst())c.getString(0) else null}
+                val previous=previousId?.let {readPayload("events",it,sid)}
+                if(previous!=null && event.getLong("sequence")<=previous.optLong("lastSequence",previous.getLong("sequence")))
+                    throw android.database.sqlite.SQLiteConstraintException("Duplicate or out-of-order source event sequence")
+                val merged=previous?.let {StoredStreamEvent.merge(it,event)}
+                if(merged==null)db.insertOrThrow("events",null,values("events",event))
+                else {
+                    db.rawQuery("SELECT 1 FROM events WHERE id=?",arrayOf(event.getString("id"))).use {c->
+                        if(c.moveToFirst())throw android.database.sqlite.SQLiteConstraintException("Duplicate retained event identity")
+                    }
+                    check(db.update("events",values("events",merged),"id=?",arrayOf(merged.getString("id")))==1)
+                }
+            }
             db.insertWithOnConflict("metadata",null,ContentValues().apply {put("name","selected");put("value",state.optString("selected"))},SQLiteDatabase.CONFLICT_REPLACE)
             db.setTransactionSuccessful()
         } finally {db.endTransaction()}

@@ -230,6 +230,14 @@
     // results and external text never supply an image URL or a file path.
     image.src=`/chat-images/${encodeURIComponent(run.sessionId)}/${encodeURIComponent(run.id)}/${view.image.attachmentId}`;
   }
+  function timelineEvents(run,events) {
+    if(!Array.isArray(run?.textSegments))return events;
+    // The bounded event page can omit any number of earlier replies. Native's
+    // independently projected text segments are authoritative, including an
+    // empty array; never mix them with copies from the paged event ledger.
+    const text=run.textSegments.filter(event=>event.runId===run.id && event.type==='text_delta');
+    return [...events.filter(event=>event.type!=='text_delta'),...text].sort((a,b)=>a.sequence-b.sequence);
+  }
   function runView(run,runEvents,message,nodeCache,textInTimeline) {
     const events=(runEvents??state.events.filter(e=>e.runId===run.id)).slice().sort((a,b)=>a.sequence-b.sequence);
     const container=element('div');
@@ -301,11 +309,17 @@
       const sequence=event.sequence??index,data=event.data??{},order=event.lastSequence??sequence;
       if(event.type==='thinking_delta' || event.type==='text_delta') {
         const kind=event.type==='thinking_delta'?'thinking':'text',explicit=event.presentationSegment;
-        if(!stream || stream.kind!==kind || (explicit && explicit!==stream.segment)) {
-          stream={kind,key:`${run.id}:${kind}:${explicit??sequence}`,segment:explicit,parts:[],truncated:false};timeline.push(stream);
+        // One Pi Assistant message can contain several text content blocks.
+        // Join adjacent blocks of that message, but split a newer message even
+        // when there is no intervening thought or tool event in this UI page.
+        const messageId=kind==='text' && Array.isArray(run.textSegments)?/^(\d+):\d+$/.exec(data.blockId??'')?.[1]:undefined;
+        const sameMessage=messageId!==undefined && stream?.messageId===messageId && sequence===stream.sourceEnd+1;
+        if(!stream || stream.kind!==kind || (messageId!==undefined && !sameMessage) || (!sameMessage && explicit && explicit!==stream.segment)) {
+          stream={kind,key:`${run.id}:${kind}:${explicit??sequence}`,segment:explicit,messageId,parts:[],truncated:false};timeline.push(stream);
         }
         if(typeof data.text==='string')stream.parts.push(data.text);
         stream.truncated ||= data.textTruncated===true;
+        stream.sourceEnd=order;
         stream.order=Math.max(stream.order??order,order);
         if(!latest || order>=latest.order)latest={kind,key:stream.key,order};
       }else if(isToolDiagnostic(event)) {
@@ -509,15 +523,16 @@
     for(const message of messages) {
       let entry=messageNodes.get(message.id);
       if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments'),usage=element('div',undefined,'run-usage-footer');usage.hidden=true;usage.setAttribute('aria-label','本轮 Token 与估算费用');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments,usage);entry={card,runSlot,textSlot,attachments,usage,activityNodes:new Map()};messageNodes.set(message.id,entry);}
-      const run=runs.get(message.runId),runEvents=events.get(run?.id)??[];
-      const streamedText=runEvents.slice().sort((a,b)=>a.sequence-b.sequence).filter(event=>event.type==='text_delta').map(event=>event.data?.text??'').join('');
-      const textInTimeline=message.role==='assistant' && streamedText.length>0 && (!message.text || streamedText===message.text);
-      const runSignature=message.role==='assistant'&&run?JSON.stringify([run,runEvents,message.thinkingTruncated===true,textInTimeline]):'';
+      const run=runs.get(message.runId),runEvents=events.get(run?.id)??[],projectedEvents=timelineEvents(run,runEvents);
+      const hasTextProjection=Array.isArray(run?.textSegments);
+      const streamedText=hasTextProjection?'':runEvents.slice().sort((a,b)=>a.sequence-b.sequence).filter(event=>event.type==='text_delta').map(event=>event.data?.text??'').join('');
+      const textInTimeline=message.role==='assistant' && (hasTextProjection || streamedText.length>0 && (!message.text || streamedText===message.text));
+      const runSignature=message.role==='assistant'&&run?JSON.stringify([run,projectedEvents,message.thinkingTruncated===true,textInTimeline]):'';
       if(entry.runSignature!==runSignature){
         const focused=document.activeElement;
         const focusKey=entry.runSlot.contains(focused) && focused.tagName==='SUMMARY'?focused.parentElement.dataset.disclosureKey:null;
         const transitions=pauseDisclosures(entry.runSlot);entry.runSlot.replaceChildren();
-        if(runSignature)entry.runSlot.append(runView(run,events.get(run.id),message,entry.activityNodes,textInTimeline));resumeDisclosures(entry.runSlot,transitions);
+        if(runSignature)entry.runSlot.append(runView(run,projectedEvents,message,entry.activityNodes,textInTimeline));resumeDisclosures(entry.runSlot,transitions);
         if(focusKey){const target=[...entry.runSlot.querySelectorAll('details[data-disclosure-key]')].find(node=>node.dataset.disclosureKey===focusKey);(target?.querySelector('summary')??entry.runSlot.querySelector('details.run > summary'))?.focus({preventScroll:true});}
         entry.runSignature=runSignature;
       }

@@ -72,13 +72,14 @@ class ChatEventProjectionTest {
         repeat(120) {i->val text="block-$i:"+"思考😀".repeat(300);original.append(text);events.put(event(i+1,"thinking_delta",text).also {it.getJSONObject("data").put("blockId","$i:0")})}
         val before=events.toString();val cache=ChatEventProjection();val index=EventIndex()
         val projected=cache.project(events,"s",index)
-        assertEquals(1,projected.size);val data=projected.single().getJSONObject("data")
-        assertTrue(data.getString("text").length<=65536);assertTrue(data.getBoolean("textTruncated"));assertTrue(data.getLong("omittedUtf16Units")>0)
-        assertTrue(original.toString().endsWith(data.getString("text")));assertFalse(data.getString("text").first().isLowSurrogate())
+        assertEquals(120,projected.size);val data=projected.first().getJSONObject("data")
+        val displayed=projected.joinToString(""){it.getJSONObject("data").getString("text")}
+        assertTrue(displayed.length<=65536);assertTrue(data.getBoolean("textTruncated"));assertTrue(data.getLong("omittedUtf16Units")>0)
+        assertTrue(original.toString().endsWith(displayed));assertFalse(displayed.first().isLowSurrogate())
         assertEquals(before,events.toString());assertEquals(120L,cache.foldedEvents)
         repeat(10){cache.project(events,"s",index)};assertEquals(120L,cache.foldedEvents)
         events.put(event(121,"thinking_delta","最新尾部").also {it.getJSONObject("data").put("blockId","new")})
-        val fresh=cache.project(events,"s",index).single().getJSONObject("data")
+        val fresh=cache.project(events,"s",index).last().getJSONObject("data")
         assertTrue(fresh.getString("text").endsWith("最新尾部"));assertTrue(fresh.getString("text").length<=65536)
     }
 
