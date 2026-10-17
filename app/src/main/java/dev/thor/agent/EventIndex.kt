@@ -10,6 +10,11 @@ internal class EventIndex {
     private var length=0
     private val bySession=mutableMapOf<String,MutableList<JSONObject>>()
     private val byRun=mutableMapOf<String,MutableList<JSONObject>>()
+    /** Release every ledger reference when an owning host closes, even if the
+     * host itself remains reachable during renderer/runtime replacement. */
+    @Synchronized fun clear() {
+        source=null;length=0;bySession.clear();byRun.clear()
+    }
     private fun update(events:JSONArray) {
         if(events!==source || events.length()<length) {source=events;length=0;bySession.clear();byRun.clear()}
         while(length<events.length()) {

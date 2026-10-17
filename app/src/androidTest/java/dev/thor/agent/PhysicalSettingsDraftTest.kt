@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -59,24 +58,35 @@ class PhysicalSettingsDraftTest {
         org.junit.Assume.assumeTrue("Explicit real-device test required",args.getString("physicalAcceptance")=="true")
         assertEquals("AYN Thor",android.os.Build.MODEL)
         val activity=instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay","4").toInt()).toBundle()) as MainActivity
-        val web=activity.findViewById<WebView>(android.R.id.custom)
         val report=JSONObject().put("saved",false)
         try {
+            val web=EmulatorRuntimeTestSupport.awaitReady(activity).web
             until {js(web,"window.productReady===true")=="true"}
             val prefs=context.getSharedPreferences("profiles",0)
             val before=HashMap(prefs.all)
+            val providers=ProviderStore(context)
+            val activeProvider=requireNotNull(providers.defaultId()) {"An active saved provider is required"}
+            assertEquals("The current service needs its own saved usable key","已加密保存",providers.credentialStatus(activeProvider))
+            val providerPrefs=context.getSharedPreferences("provider-configs",0)
+            val providersBefore=providerPrefs.getString("document",null)
             val vault=CredentialVault(context)
-            val modelHash=hash(vault.readNative("model") ?: error("Saved model Key required"))
+            val modelHash=vault.readNative("model")?.let(::hash)
             val searchHash=hash(vault.readNative("search") ?: error("Saved Brave Key required"))
             val countBefore=SqliteStore(context,"product.db").use {it.load().getJSONArray("sessions").length()}
             show(activity,"model")
-            // Switch to custom editing so the actual draft model field is visible.
-            onUi {views(activity.window.decorView).filterIsInstance<Spinner>().first().setSelection(1)}
+            // Enter the active saved service. A blank key draft reuses only this
+            // record's key; never switch provider or replace any saved setting.
+            onUi {
+                val edit=activity.window.decorView.findViewWithTag<Button>("provider-edit-$activeProvider")
+                assertNotNull("The provider list must expose the active service editor",edit)
+                edit.performClick()
+            }
             instrumentation.waitForIdleSync()
+            onUi {assertEquals("Saved provider keys never populate the draft field",0,activity.window.decorView.findViewWithTag<EditText>("provider-api-key").text.length)}
             val modelTest=button(activity,"测试当前填写的连接")
             onUi {modelTest.performClick()}
             until {var enabled=false;onUi {enabled=modelTest.isEnabled};enabled}
-            val modelStatus=textContaining(activity,"草稿未保存，点击右上角保存后生效")
+            val modelStatus=textContaining(activity,"草稿未保存")
             report.put("modelDraft",modelStatus)
             File(context.filesDir,"physical-settings-draft.json").writeText(report.toString(2))
             assertTrue("Draft model test must receive text streaming: $modelStatus",modelStatus.contains("文本流式连接可用"))
@@ -84,9 +94,9 @@ class PhysicalSettingsDraftTest {
             onUi {modelField.setText("thor-missing-model-for-draft-test")}
             onUi {modelTest.performClick()}
             until {var enabled=false;onUi {enabled=modelTest.isEnabled};enabled}
-            val rejected=textContaining(activity,"草稿未保存，点击右上角保存后生效")
+            val rejected=textContaining(activity,"草稿未保存")
             assertFalse("Invalid draft model must not pass using the saved profile",rejected.contains("文本流式连接可用"))
-            assertTrue("Invalid model must show a draft failure",rejected.contains("失败") || rejected.contains("不存在") || rejected.contains("错误") || rejected.contains("没有收到文本增量"))
+            assertTrue("Invalid model must show a draft failure",rejected.contains("失败") || rejected.contains("不存在") || rejected.contains("错误") || rejected.contains("没有收到文本增量") || rejected.contains("请检查"))
             report.put("invalidModelDraft",rejected)
             show(activity,"search") // Discard model draft by leaving; never click Save.
             val searchTest=button(activity,"测试当前搜索连接")
@@ -96,11 +106,13 @@ class PhysicalSettingsDraftTest {
             report.put("searchDraft",searchStatus)
             assertTrue("Draft Brave test must return search results: $searchStatus",searchStatus.contains("Brave 搜索连接可用"))
             assertTrue("Profile preferences must remain identical",before==prefs.all)
-            assertTrue("Model credential must remain identical",modelHash==hash(vault.readNative("model").orEmpty()))
+            assertEquals("Provider records must not be saved by connection testing",providersBefore,providerPrefs.getString("document",null))
+            assertEquals("Draft testing must not activate another service",activeProvider,providers.defaultId())
+            assertTrue("Legacy model credential must remain identical",modelHash==vault.readNative("model")?.let(::hash))
             assertTrue("Search credential must remain identical",searchHash==hash(vault.readNative("search").orEmpty()))
             val countAfter=SqliteStore(context,"product.db").use {it.load().getJSONArray("sessions").length()}
             assertEquals("Draft testing must not create conversations",countBefore,countAfter)
-            report.put("profileUnchanged",true).put("credentialHashesUnchanged",true).put("sessionCountUnchanged",true).put("passed",true)
+            report.put("profileUnchanged",true).put("providerRecordsUnchanged",true).put("activeProviderUnchanged",true).put("emptyKeyDraftUsesCurrentSavedService",true).put("credentialHashesUnchanged",true).put("sessionCountUnchanged",true).put("passed",true)
         }finally {
             File(context.filesDir,"physical-settings-draft.json").writeText(report.toString(2))
             onUi {activity.finish()};instrumentation.waitForIdleSync()

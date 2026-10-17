@@ -15,7 +15,12 @@ internal class ChatEventProjection {
     private val updates=mutableMapOf<String,Int>()
     internal var foldedEvents=0L;private set
 
-    fun project(events:JSONArray,sid:String,index:EventIndex):List<JSONObject> {
+    /** Discard source, copied text windows and borrowed event rows on host close. */
+    @Synchronized fun clear() {
+        source=null;selected=null;consumed=0;rows.clear();blocks.clear();updates.clear();foldedEvents=0
+    }
+
+    @Synchronized fun project(events:JSONArray,sid:String,index:EventIndex):List<JSONObject> {
         if(source!==events || selected!=sid || consumed>index.sessionEventCount(events,sid)) {
             source=events;selected=sid;consumed=0;rows.clear();blocks.clear();updates.clear()
         }

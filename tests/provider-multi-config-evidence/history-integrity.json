@@ -1,0 +1,40 @@
+{
+  "tables": {
+    "sessions": {
+      "before": 189,
+      "after": 189,
+      "identical": true
+    },
+    "runs": {
+      "before": 200,
+      "after": 200,
+      "identical": true
+    },
+    "messages": {
+      "before": 400,
+      "after": 400,
+      "identical": true
+    },
+    "events": {
+      "before": 63499,
+      "after": 63499,
+      "identical": true
+    },
+    "attachments": {
+      "before": 249,
+      "after": 249,
+      "identical": true
+    },
+    "metadata": {
+      "before": 1,
+      "after": 1,
+      "identical": true
+    }
+  },
+  "originalHistoryUnchanged": true,
+  "profilesUnchanged": true,
+  "voiceUnchanged": true,
+  "originalCredentialEntriesUnchanged": true,
+  "newEncryptedCredentialEntries": 2,
+  "display-rolesUnchanged": true
+}

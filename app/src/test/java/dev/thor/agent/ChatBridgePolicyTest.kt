@@ -52,4 +52,24 @@ class ChatBridgePolicyTest {
         assertFalse(RuntimeUiEventPolicy.accepts("eval",emptyMap(),30));assertFalse(RuntimeUiEventPolicy.accepts("ready",emptyMap(),2049))
         assertFalse(RuntimeUiEventPolicy.accepts("ready",mapOf("lease" to "secret"),60))
     }
+    @Test fun modelProviderChoiceCarriesOnlyAnOptionalBoundedConfigurationId() {
+        val legacy=mapOf("op" to "sessionOptions","sessionId" to "chat","modelId" to "deepseek-chat")
+        assertTrue(BridgePolicy.acceptsCommand(legacy))
+        val choice=legacy+mapOf("providerConfigId" to "provider-one")
+        assertTrue(BridgePolicy.acceptsCommand(choice))
+        assertTrue(BridgePolicy.acceptsCommand(choice+mapOf("providerConfigId" to "p".repeat(160))))
+        for(invalid in listOf("","p".repeat(161),true,17,mapOf("apiKey" to "forbidden")))
+            assertFalse(BridgePolicy.acceptsCommand(choice+mapOf("providerConfigId" to invalid)))
+        assertFalse(BridgePolicy.acceptsCommand(choice+mapOf("apiKey" to "forbidden")))
+        assertFalse(BridgePolicy.acceptsCommand(choice+mapOf("endpoint" to "https://invalid.example")))
+    }
+    @Test fun historyPagingRequestsOnlyTheSelectedSessionWithoutClientControlledLimitsOrSql() {
+        val command=mapOf("op" to "historyMore","sessionId" to "chat")
+        assertTrue(BridgePolicy.acceptsCommand(command))
+        assertTrue(BridgePolicy.acceptsCommand(command+mapOf("sessionId" to "s".repeat(160))))
+        assertFalse(BridgePolicy.acceptsCommand(mapOf("op" to "historyMore")))
+        for(value in listOf("","s".repeat(161),true,18))assertFalse(BridgePolicy.acceptsCommand(command+mapOf("sessionId" to value)))
+        for(key in listOf("limit","offset","pageLimit","historyPageLimit","cursor","query","sql","includeAll"))
+            assertFalse("Paging must retain host-selected budgets",BridgePolicy.acceptsCommand(command+mapOf(key to "arbitrary")))
+    }
 }

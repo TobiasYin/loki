@@ -1,0 +1,72 @@
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalProviderSwitchingTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.PhysicalProviderSwitchingTest:
+INSTRUMENTATION_STATUS: test=savedProvidersSwitchAndRunConcurrently
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalProviderSwitchingTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.OutOfMemoryError: Failed to allocate a 177952 byte allocation with 76928 free bytes and 75KB until OOM, target footprint 268435456, growth limit 268435456
+	at java.lang.StringFactory.newStringFromChars(StringFactory.java:112)
+	at java.lang.StringBuilder.toString(StringBuilder.java:413)
+	at org.json.JSONTokener.nextString(JSONTokener.java:217)
+	at org.json.JSONTokener.nextValue(JSONTokener.java:111)
+	at org.json.JSONTokener.readObject(JSONTokener.java:394)
+	at org.json.JSONTokener.nextValue(JSONTokener.java:104)
+	at org.json.JSONObject.<init>(JSONObject.java:168)
+	at org.json.JSONObject.<init>(JSONObject.java:185)
+	at dev.thor.agent.SqliteStore.load(Storage.kt:38)
+	at dev.thor.agent.ProductHost.<init>(ProductHost.kt:46)
+	at dev.thor.agent.ProductHost.<init>(Unknown Source:0)
+	at dev.thor.agent.ProductHost$Companion.create$app_debug(ProductHost.kt:34)
+	at dev.thor.agent.AgentRuntimeEngine.<init>(AgentRuntimeEngine.kt:58)
+	at dev.thor.agent.AgentRuntimeService.createEngine(AgentRuntimeService.kt:36)
+	at dev.thor.agent.AgentRuntimeService.reloadConfiguration$lambda$5$lambda$4(AgentRuntimeService.kt:111)
+	at dev.thor.agent.AgentRuntimeService.$r8$lambda$k4hKv3gqmIZILchER7-qesft_nw(Unknown Source:0)
+	at dev.thor.agent.AgentRuntimeService$$ExternalSyntheticLambda1.run(D8$$SyntheticClass:0)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:201)
+	at android.os.Looper.loop(Looper.java:288)
+	at android.app.ActivityThread.main(ActivityThread.java:8195)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:942)
+
+INSTRUMENTATION_STATUS: stream=
+Process crashed while executing savedProvidersSwitchAndRunConcurrently(dev.thor.agent.PhysicalProviderSwitchingTest):
+java.lang.OutOfMemoryError: Failed to allocate a 177952 byte allocation with 76928 free bytes and 75KB until OOM, target footprint 268435456, growth limit 268435456
+	at java.lang.StringFactory.newStringFromChars(StringFactory.java:112)
+	at java.lang.StringBuilder.toString(StringBuilder.java:413)
+	at org.json.JSONTokener.nextString(JSONTokener.java:217)
+	at org.json.JSONTokener.nextValue(JSONTokener.java:111)
+	at org.json.JSONTokener.readObject(JSONTokener.java:394)
+	at org.json.JSONTokener.nextValue(JSONTokener.java:104)
+	at org.json.JSONObject.<init>(JSONObject.java:168)
+	at org.json.JSONObject.<init>(JSONObject.java:185)
+	at dev.thor.agent.SqliteStore.load(Storage.kt:38)
+	at dev.thor.agent.ProductHost.<init>(ProductHost.kt:46)
+	at dev.thor.agent.ProductHost.<init>(Unknown Source:0)
+	at dev.thor.agent.ProductHost$Companion.create$app_debug(ProductHost.kt:34)
+	at dev.thor.agent.AgentRuntimeEngine.<init>(AgentRuntimeEngine.kt:58)
+	at dev.thor.agent.AgentRuntimeService.createEngine(AgentRuntimeService.kt:36)
+	at dev.thor.agent.AgentRuntimeService.reloadConfiguration$lambda$5$lambda$4(AgentRuntimeService.kt:111)
+	at dev.thor.agent.AgentRuntimeService.$r8$lambda$k4hKv3gqmIZILchER7-qesft_nw(Unknown Source:0)
+	at dev.thor.agent.AgentRuntimeService$$ExternalSyntheticLambda1.run(D8$$SyntheticClass:0)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:201)
+	at android.os.Looper.loop(Looper.java:288)
+	at android.app.ActivityThread.main(ActivityThread.java:8195)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:942)
+
+INSTRUMENTATION_STATUS: test=savedProvidersSwitchAndRunConcurrently
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: shortMsg=Process crashed.
+INSTRUMENTATION_CODE: 0

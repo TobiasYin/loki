@@ -342,16 +342,36 @@
     }
     return body;
   }
-  const messageNodes=new Map();let renderedSession=null;
+  const messageNodes=new Map();let renderedSession=null,historyPending=null;
+  const historyMore=button('加载更早消息',()=>{
+    if(!state || state.historyHasMore!==true || historyPending)return;
+    historyPending={sessionId:state.selected,pageLimit:state.historyPageLimit,runCount:state.historyRunCount};
+    refreshHistoryButton();command({op:'historyMore',sessionId:state.selected});
+  },'wide');
+  historyMore.id='history-more';
+  function refreshHistoryButton() {
+    const waiting=historyPending?.sessionId===state?.selected;
+    historyMore.disabled=waiting;historyMore.textContent=waiting?'正在加载…':'加载更早消息';
+    historyMore.setAttribute('aria-busy',String(waiting));
+  }
   function renderChat() {
     const chat=$('chat'),bottom=chat.scrollHeight-chat.clientHeight-chat.scrollTop<80,oldTop=chat.scrollTop;
-    if(renderedSession!==state.selected){pauseDisclosures(chat);chat.replaceChildren();messageNodes.clear();renderedSession=state.selected;}
+    const sameSession=renderedSession===state.selected,oldFirst=chat.querySelector('.message');
+    const oldFirstId=oldFirst?[...messageNodes].find(([,entry])=>entry.card===oldFirst)?.[0]:null;
+    const chatTop=chat.getBoundingClientRect().top;
+    const anchor=sameSession?([...chat.children].find(card=>card.classList.contains('message') && card.getBoundingClientRect().bottom>chatTop)??oldFirst):null;
+    const anchorTop=anchor?.getBoundingClientRect().top,hadHistoryHeader=historyMore.parentElement===chat;
+    if(!sameSession){historyPending=null;pauseDisclosures(chat);chat.replaceChildren();messageNodes.clear();renderedSession=state.selected;}
+    if(historyPending && (state.historyHasMore!==true || state.error || (state.historyPageLimit!==undefined?state.historyPageLimit!==historyPending.pageLimit:state.historyRunCount!==historyPending.runCount)))historyPending=null;
+    refreshHistoryButton();
+    if(state.historyHasMore===true){if(historyMore!==chat.firstChild)chat.insertBefore(historyMore,chat.firstChild);}else historyMore.remove();
     const runs=new Map(state.runs.map(r=>[r.id,r])),events=new Map();
     for(const event of state.events){if(!events.has(event.runId))events.set(event.runId,[]);events.get(event.runId).push(event);}
     const messages=state.messages.filter(m=>m.sessionId===state.selected && !runs.get(m.runId)?.probe),keep=new Set(messages.map(m=>m.id));
     for(const [id,entry] of messageNodes)if(!keep.has(id)){entry.card.remove();messageNodes.delete(id);}
     chat.querySelector('.empty')?.remove();if(!messages.length)chat.append(element('div','今天想做什么？','empty'));
-    let previous=null;
+    const loadedEarlier=sameSession && oldFirstId && messages.findIndex(message=>message.id===oldFirstId)>0;
+    let previous=historyMore.parentElement===chat?historyMore:null;
     for(const message of messages) {
       let entry=messageNodes.get(message.id);
       if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments);entry={card,runSlot,textSlot,attachments};messageNodes.set(message.id,entry);}
@@ -373,7 +393,11 @@
       if(entry.attachmentsSignature!==attachmentsSignature){entry.attachments.replaceChildren();for(const aid of message.attachments??[]){const a=state.attachments?.find(a=>a.id===aid);entry.attachments.append(element('small',a?`本地附件 · ${a.size} 字节 · ${Date.now()>a.expiresAt?'已过期':'本地保存'} · SHA-256 ${a.hash.slice(0,12)}`:'附件引用不可用'));}entry.attachmentsSignature=attachmentsSignature;}
       const expected=previous?previous.nextSibling:chat.firstChild;if(expected!==entry.card)chat.insertBefore(entry.card,expected);previous=entry.card;
     }
-    chat.scrollTop=bottom?chat.scrollHeight:oldTop;
+    if(anchor?.parentElement===chat && (loadedEarlier || hadHistoryHeader!==(historyMore.parentElement===chat))) {
+      // Preserve the first visible message through prepending (including any
+      // browser scroll anchoring), rather than jumping to the newest answer.
+      chat.scrollTop=Math.max(0,chat.scrollTop+anchor.getBoundingClientRect().top-anchorTop);
+    }else chat.scrollTop=bottom?chat.scrollHeight:oldTop;
   }
   window.receiveNative = next => {
     if(next.fatal) { $('notice').hidden=false; $('notice').textContent=next.fatal; $('send').disabled=true; return; }
@@ -432,13 +456,33 @@
     if(active)activePickerOption(list,active);else list.removeAttribute('aria-activedescendant');
     if(focused)list.focus();
   }
+  const modelChoiceValue=model=>model.providerConfigId?(model.choiceId??`${model.providerConfigId}::${model.id}`):model.id;
+  const modelProviderLabel=model=>model.providerName||model.provider||model.providerConfigId||'';
+  function renderModelSummary(profile) {
+    const name=profile.label||profile.name||profile.modelId||'选择模型',provider=modelProviderLabel(profile);
+    $('model-picker').textContent=`${provider?provider+' · ':''}${name}${profile.configured===false?' · 不可用':''}${profile.thinkingEffort && profile.thinkingEffort!=='off'?' · '+(effortNames[profile.thinkingEffort]??profile.thinkingEffort):''} ⌄`;
+    $('model-context').textContent=profile.contextWindow?`上下文 ${Intl.NumberFormat('en',{notation:'compact'}).format(profile.contextWindow)} tokens`:'';
+  }
+  function renderModelEfforts(profile) {
+    fillPicker('effort-select',(profile.efforts??['off']).map(value=>({value,label:effortNames[value]??value})),profile.thinkingEffort??'off',thinkingEffort=>{
+      renderModelSummary({...profile,thinkingEffort});
+      command({op:'sessionOptions',sessionId:state.selected,thinkingEffort});
+    });
+  }
   function renderModelPicker() {
     if(!changedSection('model',[state.modelSelection,state.modelChoices]))return;
-    const profile=state.modelSelection??{};
-    fillPicker('model-select',(state.modelChoices??[]).map(model=>({value:model.id,label:model.name??model.id})),profile.modelId,modelId=>command({op:'sessionOptions',sessionId:state.selected,modelId}));
-    fillPicker('effort-select',(profile.efforts??['off']).map(value=>({value,label:effortNames[value]??value})),profile.thinkingEffort??'off',thinkingEffort=>command({op:'sessionOptions',sessionId:state.selected,thinkingEffort}));
-    $('model-picker').textContent=`${profile.label||'选择模型'}${profile.thinkingEffort && profile.thinkingEffort!=='off'?' · '+effortNames[profile.thinkingEffort]:''} ⌄`;
-    $('model-context').textContent=profile.contextWindow?`上下文 ${Intl.NumberFormat('en',{notation:'compact'}).format(profile.contextWindow)} tokens`:'';
+    const profile=state.modelSelection??{},choices=state.modelChoices??[];
+    const chosen=choices.find(model=>model.id===profile.modelId && (!profile.providerConfigId || model.providerConfigId===profile.providerConfigId));
+    fillPicker('model-select',choices.map(model=>({value:modelChoiceValue(model),label:`${modelProviderLabel(model)?modelProviderLabel(model)+' · ':''}${model.name??model.id}`})),chosen?modelChoiceValue(chosen):profile.modelId,value=>{
+      const model=choices.find(choice=>modelChoiceValue(choice)===value);if(!model)return;
+      // Reflect a click immediately; ordinary streaming snapshots with unchanged
+      // model metadata leave this choice intact until the host confirms it.
+      const next={...profile,...model,configured:true,modelId:model.id,label:model.name??model.id};
+      if(Array.isArray(model.efforts))next.thinkingEffort=model.efforts.includes(model.defaultEffort)?model.defaultEffort:(model.provider && model.provider!=='custom' && model.efforts.includes('high')?'high':model.efforts[0]??'off');
+      renderModelSummary(next);renderModelEfforts(next);
+      command({op:'sessionOptions',sessionId:state.selected,...(model.providerConfigId?{providerConfigId:model.providerConfigId}:{}),modelId:model.id});
+    });
+    renderModelEfforts(profile);renderModelSummary(profile);
   }
   function renderSkillSelection() {
     if(!changedSection('skill-selection',[state.skills,selected()?.selectedSkills]))return;

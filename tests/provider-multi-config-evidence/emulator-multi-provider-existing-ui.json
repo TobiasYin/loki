@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "providerCount": 2,
+  "checkedEditorCount": 2,
+  "navigationCount": 3,
+  "providerChoicesUnique": true,
+  "emptySecretFields": true,
+  "statusPreserved": true,
+  "metadataUnchanged": true,
+  "activeProviderSwitchAndRestore": true,
+  "engineAndWebViewsPreserved": true,
+  "onlyActiveModelsListed": true,
+  "cloudCalled": false,
+  "keysReadOrWrittenByTest": false,
+  "draftSaved": false,
+  "deviceKind": "physical"
+}

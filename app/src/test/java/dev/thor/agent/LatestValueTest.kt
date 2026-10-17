@@ -37,4 +37,34 @@ class LatestValueTest {
         latest.close();acks.removeAt(0).invoke();assertTrue(tasks.isEmpty())
     }
 
+    @Test fun runtimeNotificationIngressQueuesOneTaskAndOnlyTheLatestSnapshot() {
+        val tasks=mutableListOf<Runnable>();val sent=mutableListOf<Int>()
+        val mailbox=RuntimeStateMailbox<Int>({tasks.add(it)},{tasks.remove(it)},{sent.add(it)})
+        repeat(10000){mailbox.offer(it)}
+        assertEquals(1,tasks.size);assertTrue(sent.isEmpty())
+        tasks.removeAt(0).run();assertEquals(listOf(9999),sent)
+        mailbox.offer(10000);assertEquals(1,tasks.size)
+        tasks.removeAt(0).run();assertEquals(listOf(9999,10000),sent)
+    }
+
+    @Test fun closedRuntimeIngressRemovesPendingStateAndRejectsLateNotifications() {
+        val tasks=mutableListOf<Runnable>();val sent=mutableListOf<Any>()
+        val mailbox=RuntimeStateMailbox<Any>({tasks.add(it)},{tasks.remove(it)},{sent.add(it)})
+        mailbox.offer(Any());val oldTask=tasks.single()
+        mailbox.close();assertTrue(tasks.isEmpty())
+        val pending=RuntimeStateMailbox::class.java.getDeclaredField("pending").apply {isAccessible=true}
+        assertNull("Closing releases the last snapshot reference",pending.get(mailbox))
+        mailbox.offer(Any());oldTask.run();mailbox.close()
+        assertTrue(tasks.isEmpty());assertTrue(sent.isEmpty());assertNull(pending.get(mailbox))
+    }
+
+    @Test fun runtimeNotificationDuringDeliverySchedulesOneSubsequentLatestValue() {
+        val tasks=mutableListOf<Runnable>();val sent=mutableListOf<Int>()
+        lateinit var mailbox:RuntimeStateMailbox<Int>
+        mailbox=RuntimeStateMailbox({tasks.add(it)},{tasks.remove(it)},{value->sent.add(value);if(value==1){mailbox.offer(2);mailbox.offer(3)}})
+        mailbox.offer(1);tasks.removeAt(0).run()
+        assertEquals(listOf(1),sent);assertEquals(1,tasks.size)
+        tasks.removeAt(0).run();assertEquals(listOf(1,3),sent)
+    }
+
 }

@@ -26,7 +26,6 @@ declare global { interface Window {
 let connectionId = '';
 const executions=new Map<string,ReturnType<typeof createExecution>>();
 const starting=new Set<string>();
-const sessions=new Map<string,RuntimeSession>();
 const startupCoordinator=new StartupCoordinator();
 const preparations=new Map<string,{cancelled:boolean,startedAt:number,runId?:string,phase?:string}>();
 // Native notification stop has its own immediate authority revocation. This
@@ -56,7 +55,7 @@ if (__THOR_DEBUG__) {
   const safeKinds=new Set(['run','event','commit','turn','context']);
   (window as any).__thorRuntimeDiagnostics = () => ({
     connected:!!connectionId, executionCount:executions.size, preparationCount:preparations.size, startingCount:starting.size,
-    pendingRpcCount:pending.size,
+    pendingRpcCount:pending.size, residentSessionCount:[...executions.values()].filter(e=>e.modelSession).length,
     pendingRpc:[...pending.values()].slice(0,64).map(p=>({op:safeOps.has(p.op)?p.op:'other',...(p.kind?{kind:safeKinds.has(p.kind)?p.kind:'other'}:{}),ageMs:Math.max(0,Math.round(performance.now()-p.since))})),
     executions:[...executions.values()].slice(0,8).map(e=>({runId:e.lease.runId,sessionId:e.lease.sessionId,...e.runtime.diagnostics()})),
   });
@@ -79,7 +78,13 @@ function handle(message: any) {
   }
 }
 function update(state: any) {
-  currentState = state;
+  // A direct `view` RPC can return a chat projection. Keep only execution
+  // invalidation metadata, never an idle chat's messages, images or tool ledger.
+  currentState = {
+    sessions:(state.sessions??[]).map((s:any)=>({id:s.id,capabilityEpoch:s.capabilityEpoch})),
+    activeRuns:(state.activeRuns??state.runs??[]).map((r:any)=>({id:r.id,sessionId:r.sessionId,status:r.status,stopReason:r.stopReason})),
+  };
+  state=currentState;
   for(const [sessionId,preparing] of preparations)if(preparing.runId && (state.activeRuns??state.runs)?.some((r:any)=>r.id===preparing.runId))preparation(sessionId,preparing,'idle');
   for(const execution of executions.values()) {
     const lease=execution.lease;
@@ -158,10 +163,15 @@ const ports: RuntimePorts = {
   persistence: { appendEvent: e => persist('event', e), commitRun: (r,e) => persist('commit',r,e), saveRun: r => persist('run',r), saveContext: s => persist('context',s), saveTurn: (_sid,t) => persist('turn',t) },
   attachments: { put: a => rpc('attachment.put', bound({ value: a })).then(() => undefined), get: async id => { const a = await rpc('attachment.get', bound({ id })); return a.attachmentId ? a : undefined; } }
 };
-const session=networkContext.purpose==='model'?(sessions.get(activeLease.sessionId)??new RuntimeSession(activeLease.sessionId)):undefined;
-if(session)sessions.set(activeLease.sessionId,session);
+// Native's durable domain history owns idle conversations. A Pi Agent lives only
+// for this execution; the same conversation ID is reconstructed on the next send.
+const session=networkContext.purpose==='model'?new RuntimeSession(activeLease.sessionId):undefined;
 const runtime=new ThorRuntime(ports,registry,{runTimeoutMs:begun.runTimeoutMs??0},session);
-return {runtime,lease:activeLease,receive:(raw:any)=>{fetchBridge.receive(raw);toolFetchBridge.receive(raw);},run:()=>runtime.run(activeLease,begun.input,begun.history)};
+let input=begun.input, history=begun.history;
+return {runtime,lease:activeLease,modelSession:!!session,
+  receive:(raw:any)=>{fetchBridge.receive(raw);toolFetchBridge.receive(raw);},run:()=>runtime.run(activeLease,input,history),
+  dispose:()=>{if(session)session.agent=undefined;input=[];history=[];toolNetworkContext=undefined;
+    try {fetchBridge.close();}finally {toolFetchBridge.close();}}};
 }
 async function start(sessionId:string,text:string,probeToken?:string) {
   if(starting.has(sessionId) || [...executions.values()].some(e=>e.lease.sessionId===sessionId))throw new RuntimeError('BACKEND_UNAVAILABLE');
@@ -200,7 +210,11 @@ async function executeBegun(begun:any) {
   const execution=createExecution(begun);const lease=execution.lease;executions.set(lease.runId,execution);
   try {await execution.run();}
   catch { /* Native end records failure; no intent replay. */ }
-  finally {await rpc('end',lease).catch(()=>{});executions.delete(lease.runId);void rpc('view').then(update);}
+  finally {
+    try {await rpc('end',lease).catch(()=>{});}
+    finally {try {execution.dispose();}finally {executions.delete(lease.runId);}}
+    void rpc('view').then(update).catch(()=>{});
+  }
 }
 const probeText='Configuration probe: inspect the attached red image, call probe_picture once, inspect its returned image, and finish with PROBE_OK. Do not call any device tool.';
 if(__THOR_DEBUG__) (window as any).runPreparedNative = executeBegun;
@@ -219,7 +233,7 @@ window.ThorUI = { postMessage(raw) {
   if(['openLink','settings','pickImage','skillImport','voiceSettings','voice.start','voice.finish','voice.cancel','voice.permission'].includes(command.op)) { send(JSON.stringify({ type: 'host.rpc', bridgeVersion: 1, connectionId, requestId: crypto.randomUUID(), op: command.op, data: command })); return; }
   if(command.op === 'send') { void start(command.sessionId, command.text).catch((error) => {relayUi('sendFailure',{sessionId:command.sessionId,clientSendId:command.clientSendId,errorCode:error?.code??error?.message});}); return; }
   if(command.op === 'stop')executions.get(command.runId)?.runtime.stop();
-  void rpc('ui', command).then(state=>{if(command.op==='delete')sessions.delete(command.sessionId);update(state);}).catch(() => {if(command.op==='capability')relayUi('capabilityFailure',command);relayUi('operationFailure',{sessionId:command.sessionId});});
+  void rpc('ui', command).then(update).catch(() => {if(command.op==='capability')relayUi('capabilityFailure',command);relayUi('operationFailure',{sessionId:command.sessionId});});
 } };
 // SDK receives only the supplied native Fetch. CSP and WebView interception also block all direct requests.
 globalThis.fetch = (() => Promise.reject(new RuntimeError('PERMISSION_MISSING'))) as typeof fetch;

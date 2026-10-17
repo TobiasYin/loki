@@ -51,4 +51,30 @@ class ChatEventProjectionTest {
         assertTrue(fresh.getString("text").endsWith("最新尾部"));assertTrue(fresh.getString("text").length<=65536)
     }
 
+    @Test fun clearReleasesEveryLedgerAndTextWindowReferenceAndCanRebuildSameSource() {
+        val index=EventIndex();val cache=ChatEventProjection()
+        val events=JSONArray().put(event(1,"thinking_delta","think")).put(event(2,text="answer"))
+            .put(event(3,"tool_call_update").put("toolCallId","call")).put(event(4,"tool_start"))
+        val before=events.toString();val published=cache.project(events,"s",index);val expected=JSONArray(published).toString()
+        assertEquals(4L,cache.foldedEvents)
+        cache.clear();cache.clear()
+        fun field(name:String):Any?=ChatEventProjection::class.java.getDeclaredField(name).apply {isAccessible=true}.get(cache)
+        assertNull(field("source"));assertNull(field("selected"));assertEquals(0,field("consumed"));assertEquals(0L,cache.foldedEvents)
+        assertTrue((field("rows") as List<*>).isEmpty());assertTrue((field("blocks") as Map<*,*>).isEmpty());assertTrue((field("updates") as Map<*,*>).isEmpty())
+        assertEquals(before,events.toString());assertEquals(expected,JSONArray(published).toString())
+        assertEquals(expected,JSONArray(cache.project(events,"s",index)).toString());assertEquals(4L,cache.foldedEvents)
+        events.put(event(5,text="more"));assertTrue(cache.project(events,"s",index).any {it.getJSONObject("data").optString("text")=="answermore"})
+        assertEquals("Published results stay readable after clearing the owner cache",expected,JSONArray(published).toString())
+    }
+
+    @Test fun clearedProjectionAndIndexCannotReuseOldToolOrTextBlocksForAnotherHost() {
+        val index=EventIndex();val cache=ChatEventProjection()
+        val old=JSONArray().put(event(1,text="old secret")).put(event(2,"tool_call_update").put("toolCallId","call"))
+        cache.project(old,"s",index);cache.clear();index.clear()
+        val next=JSONArray().put(event(1,text="new")).put(event(2,"tool_call_update","new tool").put("toolCallId","call"))
+        val result=cache.project(next,"s",index)
+        assertEquals(2,result.size);assertEquals("new",result.first().getJSONObject("data").getString("text"))
+        assertEquals("new tool",result.last().getJSONObject("data").getString("text"));assertFalse(JSONArray(result).toString().contains("old secret"));assertEquals(2L,cache.foldedEvents)
+    }
+
 }

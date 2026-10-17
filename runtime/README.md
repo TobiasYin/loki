@@ -45,7 +45,7 @@ const result = await runtime.run(lease, [
 
 完整可运行的 fake ports、ToolPack 和 SSE 服务见 `test/fixtures.ts`，浏览器入口见 `demo/harness.ts`。
 
-2026-10-16：产品为每个聊天持有一个 `RuntimeSession(sessionId)`，作为 `ThorRuntime` 构造器第四个参数传入，复用其中的 Pi Agent。新 Run 重新绑定权限与工具，`run(..., domainHistory)` 仍接收 Native 持久历史，宿主重启可重建会话。失败回合保留消息和工具结果检查点，并关闭未知工具结果的配对，避免恢复时重放。`runTimeoutMs: 0`（默认）不设模型/整轮时间上限，单工具时限仍有效。Pi 1.2.0 的 SDK 会把 0 当成立即超时，因此 `provider-timeouts.ts` 仅为标记的 Native Fetch、显式零超时适配 SDK 传输钩子；两个 SDK 版本显式锁定，有限时调用与其他 SDK 客户端保持原行为。升级依赖必须重跑三协议延迟响应、停止、失败继续和宿主恢复测试。最新验收见 [Skill 与会话验收](../docs/skill-agent-acceptance.md)。
+2026-10-17：产品只为正在执行的聊天持有 `RuntimeSession(sessionId)` 与 Pi Agent，同一次执行中的多轮模型/工具循环复用该 Agent。完成、失败或取消后，等待 Native `end` 结束确认，再卸载 Agent、输入/历史引用及网络桥；空闲聊天保留在 Native 磁盘存储。追问仍使用原会话 ID，通过 `run(..., domainHistory)` 从持久消息和工具结果重建上下文，不重放已执行的工具。`context` 事件用 `historyRestored` 和 `restoredHistoryMessages` 记录重建，`piSessionReused` 仅表示是否实际复用了内存中的 Agent；产品空闲卸载后的下一轮为 false。Runtime 库仍允许调用方显式持有 `RuntimeSession`，但产品不再永久缓存它。`runTimeoutMs: 0`（默认）不设模型/整轮时间上限，单工具时限仍有效。Pi 1.2.0 的 SDK 会把 0 当成立即超时，因此 `provider-timeouts.ts` 仅为标记的 Native Fetch、显式零超时适配 SDK 传输钩子；两个 SDK 版本显式锁定，有限时调用与其他 SDK 客户端保持原行为。升级依赖必须重跑三协议延迟响应、停止、失败继续和宿主恢复测试。产品空闲卸载的实际浏览器宿主回归见 `test/product-idle-session.test.ts`。
 
 - `SessionConfig` 包含模型修订、四能力意愿和 Native 单调 epoch。默认感知/搜索/操作/调试依次为 ON/ON/OFF/OFF；enabled 与 availability 分离。搜索未配置时不注入搜索工具。
 - Run 经过 queued、preparing、generating、executing_tools 等状态，完成/失败/取消各有终态。单个实例只接受一个活动 Run；同 lease 不重用。恢复非终态为 interrupted，不执行旧调用。`awaiting_user` 是预留状态，首版没有确认恢复流程。

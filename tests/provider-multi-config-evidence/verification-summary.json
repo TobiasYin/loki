@@ -1,0 +1,29 @@
+{
+  "androidUnit": {
+    "passed": 200,
+    "failures": 0
+  },
+  "nativeCore": {
+    "passed": 48,
+    "failures": 0
+  },
+  "runtime": {
+    "passed": 294,
+    "failures": 0
+  },
+  "chatUi": {
+    "passed": 82,
+    "failures": 0
+  },
+  "androidEmulator": {
+    "passed": 31,
+    "failures": 0
+  },
+  "physicalAcceptance": {
+    "passed": 3,
+    "failures": 0
+  },
+  "integrationTypeCheck": "passed",
+  "lintDebug": "passed",
+  "build": "passed"
+}

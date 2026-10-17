@@ -41,6 +41,240 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         readableDatabase.rawQuery("SELECT value FROM metadata WHERE name='selected'", null).use { if(it.moveToFirst()) state.put("selected", it.getString(0)) }
         return state
     }
+    /** Startup shell: only session metadata and selection enter the Java heap.
+     * All conversation bodies remain on disk until explicitly requested. */
+    fun loadShell(): JSONObject {
+        val db=readableDatabase
+        val state=JSONObject()
+        for(table in tables)state.put(table,JSONArray())
+        db.rawQuery("SELECT payload FROM sessions ORDER BY rowid",null).use {c->while(c.moveToNext())state.getJSONArray("sessions").put(JSONObject(c.getString(0)))}
+        db.rawQuery("SELECT value FROM metadata WHERE name='selected'",null).use {c->if(c.moveToFirst())state.put("selected",c.getString(0))}
+        return state
+    }
+
+    /** Load one session for an active task or explicit history inspection.
+     * Callers own and may discard the returned objects; the store retains none. */
+    fun loadSession(sessionId:String): JSONObject {
+        require(sessionId.isNotBlank())
+        val db=readableDatabase
+        val state=JSONObject().put("selected",sessionId)
+        db.beginTransactionNonExclusive()
+        try {
+            val sessions=JSONArray()
+            db.rawQuery("SELECT payload FROM sessions WHERE id=?",arrayOf(sessionId)).use {c->if(c.moveToFirst())sessions.put(JSONObject(c.getString(0)))}
+            require(sessions.length()==1) {"Unknown session"}
+            state.put("sessions",sessions)
+            for(table in tables.drop(1)) {
+                state.put(table,JSONArray(completeRows(table,"sessionId=?",arrayOf(sessionId),"ORDER BY rowid")))
+            }
+            db.setTransactionSuccessful()
+        }finally {db.endTransaction()}
+        return state
+    }
+
+    /** Runtime history is hydrated only while this session is executing.
+     * Complete Pi turns already contain their history; do not load their
+     * duplicate streamed event ledger or any image bodies alongside them. */
+    fun loadRuntimeSession(sessionId:String):JSONObject {
+        val state=sessionShell(sessionId)
+        val runs=projectedRows("runs","sessionId=?",arrayOf(sessionId),"ORDER BY rowid",
+            "json_remove(payload,'$.contexts','$.runtime')") {row->row.remove("contexts");row.remove("runtime");row}
+        state.put("runs",JSONArray(runs))
+        // Pi turns are the authoritative task history. Chat messages duplicate
+        // their prose and thinking and belong only in the bounded UI projection.
+        val events=JSONArray()
+        for(run in runs) {
+            if(run.optBoolean("probe"))continue
+            val turn=run.optJSONObject("turn") ?: continue
+            val messages=turn.optJSONArray("messages")
+            val needsRecovery=!turn.optBoolean("complete") && messages!=null && (0 until messages.length()).all {messages.getJSONObject(it).optString("kind")=="user"}
+            if(needsRecovery)completeRows("events","sessionId=? AND runId=?",arrayOf(sessionId,run.getString("id")),"ORDER BY sequence,rowid").forEach(events::put)
+        }
+        state.put("events",events)
+        return state
+    }
+
+    /** Filter statuses inside SQLite, so completed Pi turns are never parsed or
+     * retained by startup merely to discover interrupted tasks. */
+    fun loadRecoveryRuns(): List<JSONObject> {
+        val rows=mutableListOf<JSONObject>()
+        try {
+            readableDatabase.rawQuery("SELECT id FROM runs WHERE COALESCE(json_extract(payload,'$.status'),'') NOT IN ('completed','failed','cancelled','interrupted') ORDER BY rowid",null)
+                .use {c->while(c.moveToNext())readPayload("runs",c.getString(0))?.let(rows::add)}
+        }catch(error:android.database.sqlite.SQLiteException) {
+            if(!missingJsonFunction(error))throw error
+            readableDatabase.rawQuery("SELECT id FROM runs ORDER BY rowid",null).use {c->while(c.moveToNext()) {
+                val row=requireNotNull(readPayload("runs",c.getString(0)))
+                if(row.optString("status") !in setOf("completed","failed","cancelled","interrupted"))rows.add(row)
+            }}
+        }
+        return rows
+    }
+
+    /** A bounded, temporary UI window. Heavy Pi turns and image bodies are
+     * removed inside SQLite before any CursorWindow/Java object is allocated. */
+    fun loadChatPage(sessionId:String,runLimit:Int=12,eventLimit:Int=600):JSONObject {
+        require(runLimit in 1..4096 && eventLimit in 0..2000)
+        val state=sessionShell(sessionId)
+        val total=readableDatabase.rawQuery("SELECT COUNT(*) FROM runs WHERE sessionId=?",arrayOf(sessionId)).use {c->check(c.moveToFirst());c.getInt(0)}
+        state.put("historyHasMore",total>runLimit).put("historyRunCount",total).put("historyPageLimit",runLimit)
+        val runIds="SELECT id FROM runs WHERE sessionId=? ORDER BY rowid DESC LIMIT ?"
+        val related="sessionId=? AND (runId IS NULL OR runId IN ($runIds))"
+        val args=arrayOf(sessionId,sessionId,runLimit.toString())
+        state.put("runs",JSONArray(projectedRows("runs","sessionId=?",arrayOf(sessionId),"ORDER BY rowid DESC LIMIT $runLimit",
+            "json_remove(payload,'$.turn','$.contexts','$.runtime')") {row->row.remove("turn");row.remove("contexts");row.remove("runtime");row}.reversed()))
+        state.put("messages",JSONArray(projectedRows("messages",related,args,"ORDER BY rowid DESC LIMIT ${runLimit*4+32}",
+            messageProjectionSql(),::stripMessageData).reversed()))
+        state.put("events",JSONArray(projectedRows("events",related,args,"ORDER BY rowid DESC LIMIT $eventLimit","payload") {it}.reversed()))
+        state.put("attachments",JSONArray(projectedRows("attachments",related,args,"ORDER BY rowid DESC LIMIT 256",
+            "json_remove(payload,'$.data','$.path')") {row->row.remove("data");row.remove("path");row}.reversed()))
+        return state
+    }
+
+    /** Only recent conversation text plus the source tags needed to honour
+     * screen-perception revocation. Never load full Pi turns for ASR hints. */
+    fun loadRecentVoiceContext(sessionId:String,limit:Int=6):JSONObject {
+        require(limit in 1..24)
+        val state=sessionShell(sessionId)
+        val messages=projectedRows("messages","sessionId=?",arrayOf(sessionId),"ORDER BY rowid DESC LIMIT ${limit*4}",
+            "json_remove(payload,'$.thinking','$.attachments','$.data','$.path')") {row->
+                row.remove("thinking");row.remove("attachments");row.remove("data");row.remove("path");row
+            }.filter {it.optString("role") in setOf("user","assistant") && it.optString("status")!="streaming" && it.optString("text").isNotBlank()}.take(limit)
+        state.put("messages",JSONArray(messages.reversed()))
+        val runs=JSONArray()
+        for(runId in messages.map {it.optString("runId")}.filter {it.isNotBlank() && it!="null"}.distinct()) {
+            val rows=projectedRows("runs","id=? AND sessionId=?",arrayOf(runId,sessionId),"LIMIT 1",
+                "json_set(json_remove(payload,'$.turn','$.contexts','$.runtime'),'$.turn',json_object('source',json_extract(payload,'$.turn.source')))") {row->
+                    val source=row.optJSONObject("turn")?.optJSONArray("source")
+                    row.remove("contexts");row.remove("runtime");row.put("turn",JSONObject().apply {if(source!=null)put("source",source)});row
+                }
+            rows.firstOrNull()?.let(runs::put)
+        }
+        state.put("runs",runs)
+        return state
+    }
+
+    /** Explicit history-row lookup for a local expansion or retry update. */
+    fun getRun(runId:String):JSONObject? {
+        require(runId.isNotBlank())
+        return readPayload("runs",runId)
+    }
+
+    /** Explicit, session-scoped image/content lookup. Chunked reads also work
+     * for a single attachment larger than Android's ordinary CursorWindow. */
+    fun getAttachment(attachmentId:String,sessionId:String):JSONObject? {
+        require(attachmentId.isNotBlank() && sessionId.isNotBlank())
+        return readPayload("attachments",attachmentId,sessionId)
+    }
+    private fun readPayload(table:String,rowId:String,sessionId:String?=null):JSONObject? {
+        require(table in tables)
+        val db=readableDatabase
+        val where=if(sessionId==null)"id=?" else "id=? AND sessionId=?"
+        val args=if(sessionId==null)arrayOf(rowId) else arrayOf(rowId,sessionId)
+        val length=db.rawQuery("SELECT length(payload) FROM $table WHERE $where",args).use {c->if(c.moveToFirst())c.getInt(0) else return null}
+        val text=StringBuilder(length)
+        var offset=1
+        while(offset<=length) {
+            db.rawQuery("SELECT substr(payload,?,65536) FROM $table WHERE $where",arrayOf(offset.toString(),*args)).use {c->
+                check(c.moveToFirst()) {"Stored row disappeared during read"};text.append(c.getString(0))
+            }
+            offset+=65536
+        }
+        return JSONObject(text.toString())
+    }
+
+    /** Global quota needs scalar sizes, never all encoded image payloads. */
+    fun attachmentBytes():Long {
+        try {
+            readableDatabase.rawQuery("SELECT COALESCE(SUM(CAST(json_extract(payload,'$.size') AS INTEGER)),0) FROM attachments",null).use {c->check(c.moveToFirst());return c.getLong(0)}
+        }catch(error:android.database.sqlite.SQLiteException) {
+            if(!missingJsonFunction(error))throw error
+        }
+        var total=0L
+        // Compatibility path for builds without SQLite JSON functions: inspect
+        // one row at a time, retaining only its numeric size between rows.
+        readableDatabase.rawQuery("SELECT id,sessionId FROM attachments ORDER BY rowid",null).use {c->while(c.moveToNext()) {
+            total+=getAttachment(c.getString(0),c.getString(1))?.optLong("size",0) ?: 0
+        }}
+        return total
+    }
+    private fun sessionShell(sessionId:String):JSONObject {
+        require(sessionId.isNotBlank())
+        val state=JSONObject().put("selected",sessionId)
+        for(table in tables)state.put(table,JSONArray())
+        readableDatabase.rawQuery("SELECT payload FROM sessions WHERE id=?",arrayOf(sessionId)).use {c->
+            require(c.moveToFirst()) {"Unknown session"};state.getJSONArray("sessions").put(JSONObject(c.getString(0)))
+        }
+        return state
+    }
+    private fun missingJsonFunction(error:android.database.sqlite.SQLiteException)=error.message.orEmpty().contains("no such function",ignoreCase=true)
+    private fun messageProjectionSql():String {
+        // Native messages currently allow at most two images; trim a wider
+        // compatibility window before Java allocation as well as after parsing.
+        val paths=mutableListOf("'$.data'","'$.path'")
+        repeat(16){i->paths.add("'$.attachments[$i].data'");paths.add("'$.attachments[$i].path'")}
+        return "json_remove(payload,${paths.joinToString(",")})"
+    }
+    private fun stripMessageData(row:JSONObject):JSONObject {
+        row.remove("data");row.remove("path")
+        row.optJSONArray("attachments")?.let {attachments->for(i in 0 until attachments.length())attachments.optJSONObject(i)?.let {it.remove("data");it.remove("path")}}
+        return row
+    }
+    private fun completeRows(table:String,where:String,args:Array<String>,tail:String):List<JSONObject> {
+        return try {readableDatabase.rawQuery("SELECT payload FROM $table WHERE $where $tail",args).use {c->buildList {while(c.moveToNext())add(JSONObject(c.getString(0)))}}}
+        catch(_:android.database.sqlite.SQLiteBlobTooBigException) {
+            readableDatabase.rawQuery("SELECT id FROM $table WHERE $where $tail",args).use {c->buildList {while(c.moveToNext())readPayload(table,c.getString(0))?.let(::add)}}
+        }
+    }
+    private fun projectedRows(table:String,where:String,args:Array<String>,tail:String,expression:String,trim:(JSONObject)->JSONObject):List<JSONObject> {
+        fun read(sql:String)=readableDatabase.rawQuery(sql,args).use {c->buildList {while(c.moveToNext())add(trim(JSONObject(c.getString(0))))}}
+        return try {read("SELECT $expression FROM $table WHERE $where $tail")}
+        catch(error:android.database.sqlite.SQLiteException) {
+            if(error !is android.database.sqlite.SQLiteBlobTooBigException && (expression=="payload" || !missingJsonFunction(error)))throw error
+            readableDatabase.rawQuery("SELECT id FROM $table WHERE $where $tail",args).use {c->buildList {
+                while(c.moveToNext())readPayload(table,c.getString(0))?.let {add(trim(it))}
+            }}
+        }
+    }
+
+    /** Persist explicitly resident rows without treating missing disk history
+     * as deletion. Destructive deletion requires an explicit session ID set.
+     * Parent updates stay in place, preserving child rows and durable row IDs. */
+    fun savePartialSnapshot(state:JSONObject,deletedSessionIds:Set<String> = emptySet()) {
+        val sessions=state.getJSONArray("sessions").objects()
+        val sessionIds=sessions.map {it.getString("id")}.toSet()
+        val selected=state.getString("selected")
+        require(selected in sessionIds && selected !in deletedSessionIds)
+        require(sessionIds.intersect(deletedSessionIds).isEmpty()) {"Deleted sessions cannot also be saved"}
+        val db=writableDatabase
+        fun rowValues(table:String,row:JSONObject)=ContentValues().apply {
+            put("id",row.getString("id"));put("payload",row.toString())
+            if(table!="sessions")put("sessionId",row.getString("sessionId"))
+            if(table!="sessions" && table!="runs") {if(row.isNull("runId"))putNull("runId") else put("runId",row.getString("runId"))}
+            if(table=="events")put("sequence",row.getInt("sequence"))
+        }
+        db.beginTransaction()
+        try {
+            for(sid in deletedSessionIds)db.delete("sessions","id=?",arrayOf(sid))
+            for(table in tables)for(row in state.getJSONArray(table).objects()) {
+                if(table!="sessions") {
+                    val sid=row.getString("sessionId");require(sid in sessionIds && sid !in deletedSessionIds)
+                    db.rawQuery("SELECT sessionId FROM $table WHERE id=?",arrayOf(row.getString("id"))).use {c->
+                        require(!c.moveToFirst() || c.getString(0)==sid) {"Existing row belongs to another session"}
+                    }
+                    if(table!="runs" && !row.isNull("runId"))db.rawQuery("SELECT sessionId FROM runs WHERE id=?",arrayOf(row.getString("runId"))).use {c->
+                        require(c.moveToFirst() && c.getString(0)==sid) {"Child Run/Session mismatch"}
+                    }
+                }
+                val values=rowValues(table,row);val rowId=row.getString("id");val payload=values.getAsString("payload")
+                val changed=db.update(table,values,"id=? AND payload<>?",arrayOf(rowId,payload))
+                if(changed==0)db.rawQuery("SELECT 1 FROM $table WHERE id=?",arrayOf(rowId)).use {c->if(!c.moveToFirst())db.insertOrThrow(table,null,values)}
+            }
+            db.insertWithOnConflict("metadata",null,ContentValues().apply {put("name","selected");put("value",selected)},SQLiteDatabase.CONFLICT_REPLACE)
+            db.setTransactionSuccessful()
+        }finally {db.endTransaction()}
+    }
+
     override fun save(state: JSONObject) {
         val db = writableDatabase
         db.beginTransaction()

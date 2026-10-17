@@ -1,0 +1,13 @@
+{
+  "saved": false,
+  "modelDraft": "文本流式连接可用；图片和工具能力需另行完整检查 · 2267 ms\n草稿未保存，点击保存后生效。",
+  "invalidModelDraft": "请检查此服务的地址、模型、输出预算和 API Key；草稿未保存",
+  "searchDraft": "Brave 搜索连接可用，当前草稿未保存 · 1032 ms",
+  "profileUnchanged": true,
+  "providerRecordsUnchanged": true,
+  "activeProviderUnchanged": true,
+  "emptyKeyDraftUsesCurrentSavedService": true,
+  "credentialHashesUnchanged": true,
+  "sessionCountUnchanged": true,
+  "passed": true
+}

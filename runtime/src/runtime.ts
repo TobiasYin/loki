@@ -402,7 +402,7 @@ export class ThorRuntime {
             history, current, currentRefs: [...input, ...[...active.resultRefs.values()].flat()].filter(c => c.type === 'attachment').map(c => c.attachmentId), attachments: this.ports.attachments, imageTokens: this.limits.imageTokenEstimate, maxHistoryTurns: this.limits.maxHistoryTurns });
           active.requestMessages = compiled.messages;
           active.requestMaxOutput = compiled.maxOutput;
-          await this.persist(active, () => this.ports.persistence.saveContext(compiled.manifest)); await this.event(active, 'context', { snapshotId: compiled.manifest.snapshotId, estimatedTokens: compiled.manifest.estimatedTokens, droppedTurnIds: compiled.manifest.droppedTurnIds, piSessionReused:!!previous });
+          await this.persist(active, () => this.ports.persistence.saveContext(compiled.manifest)); await this.event(active, 'context', { snapshotId: compiled.manifest.snapshotId, estimatedTokens: compiled.manifest.estimatedTokens, droppedTurnIds: compiled.manifest.droppedTurnIds, piSessionReused:!!previous, historyRestored:!previous && restored.length>0, restoredHistoryMessages:restored.length });
           await this.state(active, 'generating');
           // Keep history out of Agent's evolving transcript; inject the bounded projection only at convertToLlm.
           return { context: { messages: request.context.messages.filter(m => m.role !== 'system'), tools } };

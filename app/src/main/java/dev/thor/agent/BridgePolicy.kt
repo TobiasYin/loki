@@ -17,10 +17,10 @@ object BridgePolicy {
     private val fields=mapOf(
         "ready" to emptySet(),"new" to emptySet(),"seed" to emptySet(),"settings" to emptySet(),"pickImage" to emptySet(),
         "skillImport" to emptySet(),"voiceSettings" to emptySet(),"voice.permission" to emptySet(),"skillClose" to emptySet(),
-        "select" to setOf("sessionId"),"rename" to setOf("sessionId","title"),"archive" to setOf("sessionId","archived"),
+        "select" to setOf("sessionId"),"historyMore" to setOf("sessionId"),"rename" to setOf("sessionId","title"),"archive" to setOf("sessionId","archived"),
         "delete" to setOf("sessionId"),"capability" to setOf("sessionId","capability","enabled","clientMutationId"),
         "approve" to setOf("runId","approvalId"),"reject" to setOf("runId","approvalId"),"expanded" to setOf("runId","expanded"),
-        "sessionOptions" to setOf("sessionId","modelId","thinkingEffort","selectedSkills"),
+        "sessionOptions" to setOf("sessionId","providerConfigId","modelId","thinkingEffort","selectedSkills"),
         "skillRead" to setOf("name","path"),"skillEnable" to setOf("name","hash","enabled"),"skillDelete" to setOf("name","hash"),
         "openLink" to setOf("url"),"voice.start" to setOf("id","sessionId"),"voice.finish" to setOf("id","sessionId"),
         "voice.cancel" to setOf("id","sessionId"),"send" to setOf("sessionId","text","scenario","clientSendId"),
@@ -44,7 +44,7 @@ object BridgePolicy {
             }
             if(!valid)return false
         }
-        val optional=when(op){"send"->setOf("scenario");"skillRead"->setOf("path");"sessionOptions"->setOf("modelId","thinkingEffort","selectedSkills");else->emptySet()}
+        val optional=when(op){"send"->setOf("scenario");"skillRead"->setOf("path");"sessionOptions"->setOf("providerConfigId","modelId","thinkingEffort","selectedSkills");else->emptySet()}
         return allowed.minus(optional).all {command.containsKey(it)} &&
             (op!="sessionOptions" || command.keys.any {it in optional}) &&
             (op!="capability" || command["capability"] in setOf("perception","search","screen_control","debug"))

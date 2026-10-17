@@ -40,7 +40,7 @@ internal class AgentRuntimeEngine(private val owner:AgentRuntimeService):AutoClo
     val closeCompletion get()=host.closeCompletion
     val identity=java.util.UUID.randomUUID().toString()
     private var ui=WeakReference<Ui>(null)
-    private var closed=false
+    @Volatile private var closed=false
     var failed=false;private set
     private var lastState:JSONObject?=null
     private val pendingUiEvents=LinkedHashMap<String,Pair<String,JSONObject>>()
@@ -51,12 +51,17 @@ internal class AgentRuntimeEngine(private val owner:AgentRuntimeService):AutoClo
             executionWeb.evaluateJavascript("window.receiveProductState?.(JSON.parse(${JSONObject.quote(text)}))"){RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.EXEC_STATE_ACK);delivered()}
         }else delivered()
     })
+    // ProductHost publishes from its serial writer. Queue one stable Runnable,
+    // rather than one closure retaining a full snapshot for every notification.
+    private val stateUpdates=RuntimeStateMailbox<JSONObject>({main.post(it)},{main.removeCallbacks(it)}) {state->
+        if(!closed && !failed){observe(state);uiStates.offer(state)}
+    }
     init {
         check(Looper.myLooper()==Looper.getMainLooper())
         RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.WEBS_CREATED)
         RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.HOST_CREATE_BEGIN)
-        host=try {ProductHost.create(owner.applicationContext,{state->main.post {observe(state);uiStates.offer(state)}},startupAttempt)}
-            catch(error:Exception){uiStates.close();web.destroy();executionWeb.destroy();throw error}
+        host=try {ProductHost.create(owner.applicationContext,stateUpdates::offer,startupAttempt)}
+            catch(error:Exception){stateUpdates.close();uiStates.close();main.removeCallbacksAndMessages(null);web.destroy();executionWeb.destroy();throw error}
         RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.HOST_CREATE_END)
         host.setBackgroundAgentAction {cp->
             check(Looper.myLooper()==Looper.getMainLooper())
@@ -92,7 +97,7 @@ internal class AgentRuntimeEngine(private val owner:AgentRuntimeService):AutoClo
                         try {owner.ensureForegroundForRun()}
                         catch(_:Exception) {return@TrustedWebViewBridge CompletableFuture.completedFuture(obj("error" to "BACKEND_UNAVAILABLE"))}
                     }
-                    host.rpc(connection,request).also {future->future.whenComplete {result,error->main.post {
+                    host.rpc(connection,request).also {future->future.whenComplete {result,error->if(!closed && !failed)main.post {
                         if(!closed && !failed) {
                             if(result?.has("activeRuns")==true){RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.VIEW_RESPONSE);observe(result);uiStates.offer(result)}
                             if(op=="begin")owner.beginResolved(error==null && result?.has("lease")==true)
@@ -100,14 +105,14 @@ internal class AgentRuntimeEngine(private val owner:AgentRuntimeService):AutoClo
                     }}}
                 }
             },{executionReady=false;queuedCommands.clear();queuedBytes=0;host.interrupt("执行页面连接失效；保留上下文，不重放");owner.connectionInvalidated()},host::auditHttp,{
-                failed=true;uiStates.close();host.interrupt("执行渲染进程已退出；保留上下文，不重放")
+                failed=true;stateUpdates.close();lastState=null;uiStates.close();host.interrupt("执行渲染进程已退出；保留上下文，不重放")
                 owner.rendererFailed();ui.get()?.runtimeUnavailable("聊天执行进程已退出；运行已中断，历史保留，不会自动重放。")
-            })}catch(error:Exception){uiStates.close();host.close();chatBridge.close();web.destroy();executionWeb.destroy();throw error}
+            })}catch(error:Exception){stateUpdates.close();lastState=null;uiStates.close();main.removeCallbacksAndMessages(null);host.close();chatBridge.close();web.destroy();executionWeb.destroy();throw error}
         // onResume before load while unattached; never attach this WebView later.
         RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.BRIDGES_CREATED)
         executionWeb.onResume()
         RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.BRIDGE_LOAD)
-        if(bridge.supported)bridge.load() else {failed=true;uiStates.close()}
+        if(bridge.supported)bridge.load() else {failed=true;stateUpdates.close();lastState=null;uiStates.close()}
         if(chatBridge.supported)chatBridge.load() else ui.get()?.runtimeUnavailable("当前 WebView 不支持安全聊天连接。")
     }
     private fun createChatBridge() {
@@ -209,10 +214,42 @@ internal class AgentRuntimeEngine(private val owner:AgentRuntimeService):AutoClo
     override fun close() {
         if(closed)return;closed=true
         RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.ENGINE_CLOSED)
-        uiStates.close();ui.clear();(web.parent as? ViewGroup)?.removeView(web);webContext.baseContext=owner.applicationContext
+        stateUpdates.close();lastState=null;uiStates.close();main.removeCallbacksAndMessages(null)
+        ui.clear();(web.parent as? ViewGroup)?.removeView(web);webContext.baseContext=owner.applicationContext
         queuedCommands.clear();queuedBytes=0;executionReady=false;pendingUiEvents.clear()
         host.setBackgroundAgentAction(null);chatBridge.close();bridge.close();host.close()
         if(!chatRendererGone)web.destroy()
         if(!failed)executionWeb.destroy() // execution renderer callback already destroyed it.
+    }
+}
+
+/** Cross-thread ingress; pending notifications retain only the newest value.
+ * The posted task captures this mailbox, never an individual state. Closing is
+ * synchronized with posting so it cannot leave a late queued snapshot behind. */
+internal class RuntimeStateMailbox<T:Any>(private val post:(Runnable)->Unit,
+    private val remove:(Runnable)->Unit,private val deliver:(T)->Unit):AutoCloseable {
+    private val lock=Any()
+    private var closed=false
+    private var scheduled=false
+    private var pending:T?=null
+    private val delivery=Runnable {
+        val value=synchronized(lock) {
+            scheduled=false
+            if(closed)null else pending.also {pending=null}
+        }
+        if(value!=null)deliver(value)
+    }
+    fun offer(value:T) {
+        synchronized(lock) {
+            if(closed)return
+            pending=value
+            if(!scheduled){scheduled=true;post(delivery)}
+        }
+    }
+    override fun close() {
+        synchronized(lock) {
+            if(closed)return
+            closed=true;pending=null;scheduled=false;remove(delivery)
+        }
     }
 }

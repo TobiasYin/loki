@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "scope": "real saved-provider Native\/Runtime acceptance",
+  "syntheticPromptsOnly": true,
+  "runs": [
+    {
+      "kind": "go-initial",
+      "provider": "opencode-go",
+      "modelId": "deepseek-v4.1-flash",
+      "status": "completed",
+      "markerMatches": true,
+      "toolCalls": 0,
+      "piSessionReused": false,
+      "historyRestored": false,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 384000,
+          "inputTokens": 2589,
+          "outputTokens": 91,
+          "reasoningTokens": 80,
+          "stopReason": "stop"
+        }
+      ],
+      "transportCount": 1,
+      "httpStatuses": [
+        200
+      ],
+      "allHttp200": true
+    },
+    {
+      "kind": "deepseek-followup",
+      "provider": "deepseek",
+      "modelId": "deepseek-flash",
+      "status": "completed",
+      "markerMatches": true,
+      "toolCalls": 0,
+      "piSessionReused": false,
+      "historyRestored": true,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 393216,
+          "inputTokens": 2595,
+          "outputTokens": 10,
+          "reasoningTokens": 0,
+          "stopReason": "stop"
+        }
+      ],
+      "transportCount": 1,
+      "httpStatuses": [
+        200
+      ],
+      "allHttp200": true
+    },
+    {
+      "kind": "go-followup",
+      "provider": "opencode-go",
+      "modelId": "deepseek-v4.1-flash",
+      "status": "completed",
+      "markerMatches": true,
+      "toolCalls": 0,
+      "piSessionReused": false,
+      "historyRestored": true,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 384000,
+          "inputTokens": 2653,
+          "outputTokens": 11,
+          "reasoningTokens": 0,
+          "stopReason": "stop"
+        }
+      ],
+      "transportCount": 1,
+      "httpStatuses": [
+        200
+      ],
+      "allHttp200": true
+    },
+    {
+      "kind": "parallel-go",
+      "provider": "opencode-go",
+      "modelId": "deepseek-v4.1-flash",
+      "status": "completed",
+      "markerMatches": true,
+      "toolCalls": 0,
+      "piSessionReused": false,
+      "historyRestored": true,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 384000,
+          "inputTokens": 2689,
+          "outputTokens": 10,
+          "reasoningTokens": 0,
+          "stopReason": "stop"
+        }
+      ],
+      "transportCount": 1,
+      "httpStatuses": [
+        200
+      ],
+      "allHttp200": true
+    },
+    {
+      "kind": "parallel-deepseek",
+      "provider": "deepseek",
+      "modelId": "deepseek-flash",
+      "status": "completed",
+      "markerMatches": true,
+      "toolCalls": 0,
+      "piSessionReused": false,
+      "historyRestored": false,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 393216,
+          "inputTokens": 2558,
+          "outputTokens": 11,
+          "reasoningTokens": 0,
+          "stopReason": "stop"
+        }
+      ],
+      "transportCount": 1,
+      "httpStatuses": [
+        200
+      ],
+      "allHttp200": true
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": 0,
+  "deepSeekConfigId": "23131ecd-7fb7-45eb-8dfd-00728c198b95",
+  "keyFileRemoved": true,
+  "providerStoreReopenPassed": true,
+  "nativeResidencyChecks": [
+    {
+      "phase": "startup",
+      "activeBindings": 0,
+      "runs": 0,
+      "messages": 0,
+      "events": 0,
+      "attachments": 0
+    },
+    {
+      "phase": "go-initial",
+      "activeBindings": 0,
+      "runs": 0,
+      "messages": 0,
+      "events": 0,
+      "attachments": 0
+    },
+    {
+      "phase": "deepseek-followup",
+      "activeBindings": 0,
+      "runs": 0,
+      "messages": 0,
+      "events": 0,
+      "attachments": 0
+    },
+    {
+      "phase": "go-followup",
+      "activeBindings": 0,
+      "runs": 0,
+      "messages": 0,
+      "events": 0,
+      "attachments": 0
+    },
+    {
+      "phase": "parallel-active",
+      "activeBindings": 2,
+      "runs": 2,
+      "messages": 4,
+      "events": 4,
+      "attachments": 0
+    },
+    {
+      "phase": "parallel-go",
+      "activeBindings": 0,
+      "runs": 0,
+      "messages": 0,
+      "events": 0,
+      "attachments": 0
+    },
+    {
+      "phase": "parallel-deepseek",
+      "activeBindings": 0,
+      "runs": 0,
+      "messages": 0,
+      "events": 0,
+      "attachments": 0
+    }
+  ],
+  "runtimeResidencyChecks": [
+    {
+      "phase": "startup",
+      "executionCount": 0,
+      "residentSessionCount": 0,
+      "pendingRpcCount": 0
+    },
+    {
+      "phase": "go-initial",
+      "executionCount": 0,
+      "residentSessionCount": 0,
+      "pendingRpcCount": 0
+    },
+    {
+      "phase": "deepseek-followup",
+      "executionCount": 0,
+      "residentSessionCount": 0,
+      "pendingRpcCount": 0
+    },
+    {
+      "phase": "go-followup",
+      "executionCount": 0,
+      "residentSessionCount": 0,
+      "pendingRpcCount": 0
+    },
+    {
+      "phase": "parallel-go",
+      "executionCount": 0,
+      "residentSessionCount": 0,
+      "pendingRpcCount": 0
+    },
+    {
+      "phase": "parallel-deepseek",
+      "executionCount": 0,
+      "residentSessionCount": 0,
+      "pendingRpcCount": 0
+    }
+  ],
+  "sameChatProviderSwitchPassed": true,
+  "oldProviderRunPreservedDuringSwitch": true,
+  "twoIndependentRunsAdmitted": true,
+  "parallelGeneratingOverlapMs": 836,
+  "parallelOutputsIsolated": true,
+  "originalProvidersAndDefaultPreserved": true,
+  "originalCredentialRecordsPreserved": true,
+  "originalConfigurationPreserved": true,
+  "originalHistoryPreserved": true
+}

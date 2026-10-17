@@ -218,6 +218,141 @@ class MainActivity : Activity() {
         (web.parent as FrameLayout).addView(page,FrameLayout.LayoutParams(-1,-1));settingsView=page;settingsBack=back
         return page
     }
+    private fun showModelProviders() {
+        val store=ProviderStore(this)
+        val content=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(24,16,24,24)}
+        content.addView(TextView(this).apply {text="保存多套服务配置，一次使用一个 Provider。在这里切换后直接使用已保存的 API Key；发送框可选择当前服务的模型。";setPadding(0,0,0,16)})
+        for(config in store.list()) {
+            val id=config.getString("id")
+            val row=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(0,12,0,16)}
+            row.addView(TextView(this).apply {text=config.getString("name")+if(store.defaultId()==id)" · 当前使用" else "";textSize=18f;setTypeface(null,android.graphics.Typeface.BOLD)})
+            row.addView(TextView(this).apply {text="${providerKindLabel(config.getString("kind"))} · ${config.getString("model")}\nAPI Key：${store.credentialStatus(id)}";setPadding(0,6,0,8)})
+            val buttons=LinearLayout(this).apply {orientation=LinearLayout.HORIZONTAL}
+            buttons.addView(Button(this).apply {text="编辑";tag="provider-edit-$id";setOnClickListener {showProviderEditor(config,config.getString("kind"))}})
+            if(config.getBoolean("enabled") && store.defaultId()!=id)buttons.addView(Button(this).apply {text="使用此服务";tag="provider-activate-$id";setOnClickListener {
+                isEnabled=false
+                host.activateProvider(id).whenComplete {_,error->runOnUiThread {
+                    if(error==null)showModelProviders() else {isEnabled=true;Toast.makeText(this@MainActivity,"请先编辑并保存此服务的 API Key",Toast.LENGTH_LONG).show()}
+                }}
+            }})
+            buttons.addView(Button(this).apply {text="删除";setOnClickListener {
+                AlertDialog.Builder(this@MainActivity).setTitle("删除 ${config.getString("name")}？").setMessage("只会删除此服务配置和它的 API Key；其他服务与聊天记录会保留。")
+                    .setNegativeButton("取消",null).setPositiveButton("删除") {_,_->if(changeProviderSettings {store.delete(id)})showModelProviders()}.show()
+            }})
+            row.addView(buttons);content.addView(row)
+            content.addView(View(this).apply {setBackgroundColor(0x22888888)},LinearLayout.LayoutParams(-1,1))
+        }
+        content.addView(Button(this).apply {text="添加模型服务";tag="provider-add";isEnabled=store.list().size<ProviderStore.MAX_PROVIDERS;setOnClickListener {
+            val kinds=listOf("opencode-go","deepseek","custom")
+            AlertDialog.Builder(this@MainActivity).setTitle("添加模型服务").setItems(kinds.map(::providerKindLabel).toTypedArray()) {_,index->showProviderEditor(null,kinds[index])}.show()
+        }})
+        settingsPage("模型服务",content,back={showSettings()})
+    }
+    private fun providerKindLabel(kind:String)=when(kind){"opencode-go"->"OpenCode Go";"deepseek"->"DeepSeek 官方";else->"自定义 API Key"}
+    private fun changeProviderSettings(action:()->Unit):Boolean = try {
+        require(!host.hasActiveRuns()) {"请等待活动任务完成后再修改服务配置"}
+        action()
+        val prefs=getSharedPreferences("profiles",MODE_PRIVATE)
+        check(prefs.edit().putInt("revision",prefs.getInt("revision",0)+1).commit())
+        reloadRuntime();true
+    }catch(_:Exception){Toast.makeText(this,"修改未完成：请等待活动任务结束，并检查服务配置",Toast.LENGTH_LONG).show();false}
+    private fun showProviderEditor(saved:JSONObject?,kind:String) {
+        val store=ProviderStore(this);val custom=kind=="custom"
+        val config=saved ?: JSONObject().put("kind",kind).put("enabled",true).put("name",providerKindLabel(kind)).put("protocol",0)
+            .put("url",when(kind){"opencode-go"->"https://opencode.ai/zen/go/v1";"deepseek"->DeepSeekCatalog.BASE_URL;else->""})
+            .put("model","").put("contextBudget",32768).put("maxOutput",2048).put("supportsImages",true)
+        val id=saved?.getString("id")
+        val content=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(24,16,24,24)}
+        fun text(value:String)=TextView(this).apply {text=value;setPadding(0,12,0,8);content.addView(this)}
+        fun field(hintValue:String,key:String,secret:Boolean=false)=EditText(this).apply {
+            hint=hintValue;setSingleLine(true);inputType=if(secret)InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD else InputType.TYPE_CLASS_TEXT
+            if(!secret)setText(config.optString(key)) else {importantForAutofill=View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS;isSaveEnabled=false}
+            content.addView(this)
+        }
+        text("服务类型：${providerKindLabel(kind)}")
+        val name=field("服务名称（便于区分账号）","name")
+        val enabled=CheckBox(this).apply {text="允许使用此配置";isChecked=config.optBoolean("enabled",true);content.addView(this)}
+        val protocol=Spinner(this).apply {adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,arrayOf("OpenAI Responses","Anthropic Messages","OpenAI Chat Completions"));setSelection(config.optInt("protocol",0));content.addView(this);visibility=if(custom)View.VISIBLE else View.GONE}
+        val url=field("模型基础 URL（HTTP / HTTPS）","url").apply {visibility=if(custom)View.VISIBLE else View.GONE}
+        val model=field("模型 ID","model").apply {visibility=if(custom)View.VISIBLE else View.GONE}
+        val contextBudget=field("上下文上限（tokens）","contextBudgetText").apply {if(text.isBlank())setText(config.optInt("contextBudget",32768).toString());inputType=InputType.TYPE_CLASS_NUMBER}
+        val maxOutput=field("输出上限（tokens；留空跟随模型）","maxOutputText").apply {inputType=InputType.TYPE_CLASS_NUMBER}
+        val outputHelp=text(if(custom)"输出上限留空使用 2048。" else "输出上限留空自动跟随所选模型，包含思考与正文。")
+        val imageSupport=CheckBox(this).apply {text="支持图片输入";isChecked=config.optBoolean("supportsImages",true);content.addView(this)}
+        val catalog=ModelCatalog(this);val deepseek=DeepSeekCatalog(this)
+        val modelPicker=Spinner(this).apply {tag="model-picker";contentDescription="选择模型";visibility=if(custom)View.GONE else View.VISIBLE;content.addView(this)}
+        val catalogStatus=text("").apply {tag="model-catalog-status";visibility=modelPicker.visibility}
+        val refreshModels=Button(this).apply {text=if(kind=="deepseek")"刷新 DeepSeek 官方模型列表" else "刷新 OpenCode Go 模型列表";visibility=modelPicker.visibility;content.addView(this)}
+        val headerName=field("自定义凭据头（可选）","headerName")
+        val headerTemplate=field("凭据格式，例如 Bearer {{credential}}（可选）","headerTemplate")
+        text("API Key：${id?.let {store.credentialStatus(it)} ?: "未保存"}；留空保留此服务已保存的 Key")
+        val key=field("此服务的 API Key（留空保留）","",true).apply {tag="provider-api-key"}
+        val removeKey=CheckBox(this).apply {text="删除此服务已保存的 API Key";content.addView(this)}
+        fun draftKey():String {
+            if(removeKey.isChecked)return ""
+            if(key.text.isNotBlank())return key.text.toString()
+            if(id!=null)require(saved.getString("url").trimEnd('/')==url.text.toString().trim().trimEnd('/')) {"修改服务地址后请重新填写 API Key"}
+            return id?.let {store.credential(it)}.orEmpty()
+        }
+        var advancedExpanded=false
+        val advanced=listOf(contextBudget,maxOutput,outputHelp,imageSupport,headerName,headerTemplate)
+        fun renderAdvanced() {
+            advanced.forEach {it.visibility=if(advancedExpanded && (custom || it !in listOf(headerName,headerTemplate)))View.VISIBLE else View.GONE}
+            contextBudget.isEnabled=custom;imageSupport.isEnabled=custom
+        }
+        renderAdvanced()
+        content.addView(Button(this).apply {text="高级选项 ›";setOnClickListener {advancedExpanded=!advancedExpanded;renderAdvanced();text=if(advancedExpanded)"收起高级选项 ‹" else "高级选项 ›"}})
+        fun metadata():JSONObject?=(when(kind){"deepseek"->deepseek.models();"opencode-go"->catalog.models();else->null})?.objects()?.firstOrNull {it.getString("id")==model.text.toString() && it.getString("protocol")==ModelCatalog.protocols[protocol.selectedItemPosition]}
+        fun updateModels() {
+            if(custom)return
+            val choices=(if(kind=="deepseek")deepseek.models() else catalog.models()).objects()
+            modelPicker.onItemSelectedListener=null
+            modelPicker.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,choices.map {it.getString("name")})
+            fun applyChoice(index:Int) {
+                val choice=choices[index];model.setText(choice.getString("id"));protocol.setSelection(ModelCatalog.protocols.indexOf(choice.getString("protocol")))
+                contextBudget.setText(choice.getInt("contextWindow").toString());imageSupport.isChecked=choice.optJSONArray("input")?.let {a->(0 until a.length()).any {a.optString(it)=="image"}}==true
+                catalogStatus.text="${if(kind=="deepseek")deepseek.source() else catalog.source()}\n上下文 ${choice.getInt("contextWindow")} · 输出容量 ${choice.getInt("maxOutput")} tokens\n思考强度 ${choice.getJSONArray("efforts").join(" / ")}"
+            }
+            val choice=choices.indexOfFirst {it.getString("id")==model.text.toString()}.coerceAtLeast(0)
+            modelPicker.setSelection(choice);applyChoice(choice)
+            modelPicker.onItemSelectedListener=object:android.widget.AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent:android.widget.AdapterView<*>?)=Unit
+                override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long)=applyChoice(position)
+            }
+        }
+        updateModels()
+        refreshModels.setOnClickListener {
+            val credential=draftKey()
+            if(kind=="deepseek" && credential.isBlank()){catalogStatus.text="请填写此服务的 DeepSeek API Key 后刷新";return@setOnClickListener}
+            refreshModels.isEnabled=false;catalogStatus.text="正在读取模型资料…"
+            Thread {val success=runCatching {if(kind=="deepseek")deepseek.refresh(credential) else catalog.refresh()}.isSuccess
+                runOnUiThread {if(refreshModels.isAttachedToWindow){refreshModels.isEnabled=true;if(success)updateModels() else catalogStatus.text="暂时无法刷新，请检查此服务的 Key、网络或额度；保留缓存模型资料"}}
+            }.start()
+        }
+        fun outputBudget()=OutputBudgetPolicy.resolve(kind,contextBudget.text.toString().toInt(),metadata()?.getInt("maxOutput"),maxOutput.text.toString(),rejectExcess=true)
+        fun draft()=ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),draftKey(),if(custom)headerName.text.toString() else "",if(custom)headerTemplate.text.toString() else "",maxOutput=outputBudget().tokens).withProfile(metadata(),maxOutput.text.toString())
+        val testStatus=text("测试只使用此服务当前填写的配置与 Key；草稿不会自动保存。").apply {tag="model-test-status"}
+        val test=Button(this).apply {text="测试当前填写的连接";tag="model-test";content.addView(this)}
+        test.setOnClickListener {
+            val testDraft=runCatching {draft().also {it.validate()}}.getOrElse {testStatus.text="请检查此服务的地址、模型、输出预算和 API Key；草稿未保存";return@setOnClickListener}
+            test.isEnabled=false;testStatus.text="正在测试当前填写的连接…"
+            Thread {val result=ModelConnectionTest.run(testDraft);runOnUiThread {if(test.isAttachedToWindow){test.isEnabled=true;testStatus.text="${result.message} · ${result.elapsedMs} ms\n草稿未保存，点击保存后生效。"}}}.start()
+        }
+        settingsPage(if(saved==null)"添加模型服务" else "编辑模型服务",content,save={
+            try {
+                val value=JSONObject(config.toString()).put("kind",kind).put("name",name.text.toString().trim()).put("enabled",enabled.isChecked)
+                    .put("url",url.text.toString().trim()).put("protocol",protocol.selectedItemPosition).put("model",model.text.toString().trim())
+                    .put("contextBudget",contextBudget.text.toString().toInt()).put("contextBudgetText",contextBudget.text.toString()).put("maxOutputText",maxOutput.text.toString())
+                    .put("maxOutput",outputBudget().tokens).put("supportsImages",imageSupport.isChecked)
+                    .put("headerName",if(custom)headerName.text.toString() else "").put("headerTemplate",if(custom)headerTemplate.text.toString() else "")
+                // Validate destination changes before touching this record's encrypted credential.
+                if(id!=null && saved.getString("url").trimEnd('/')!=value.getString("url").trimEnd('/') && key.text.isBlank() && !removeKey.isChecked) {
+                    testStatus.text="修改服务地址后，请重新填写此服务的 API Key；不会将已保存 Key 自动发送到新地址。";return@settingsPage
+                }
+                if(changeProviderSettings {store.save(value,key.text.toString(),removeKey.isChecked)}){key.text.clear();showModelProviders()}
+            }catch(_:Exception){testStatus.text="保存失败：请检查服务名称、地址、模型、预算和 Key；其他服务配置保持不变"}
+        },back={key.text.clear();showModelProviders()})
+    }
     private fun showSettings(section:String?=null) {
         if(section==null) {
             val content=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(24,16,24,24)}
@@ -248,144 +383,7 @@ class MainActivity : Activity() {
             if(secret) { importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS; setSaveEnabled(false) }
             content.addView(this)
         }
-        if(section=="model") {
-        label("模型服务")
-        val savedProvider=prefs.getString("provider",null) ?: if(prefs.getString("url","").orEmpty().startsWith("https://opencode.ai/zen/go"))"opencode-go" else "custom"
-        val providerIds=listOf("opencode-go","custom","deepseek") // Keep existing Go/custom positions compatible.
-        val provider=Spinner(this).apply {
-            tag="model-provider";contentDescription="模型服务商"
-            adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,arrayOf("OpenCode Go","自定义 API Key","DeepSeek 官方"))
-            setSelection(if(prefs.getString("url","").isNullOrBlank())2 else providerIds.indexOf(savedProvider).let {if(it<0)1 else it});content.addView(this)
-        }
-        fun providerId()=providerIds[provider.selectedItemPosition]
-        val name = field("模型显示名", "name")
-        val protocol = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, arrayOf("OpenAI Responses", "Anthropic Messages","OpenAI Chat Completions")); setSelection(prefs.getInt("protocol", 0)); content.addView(this) }
-        val url = field("模型基础 URL（HTTP / HTTPS）", "url"); val model = field("模型 ID", "model")
-        val contextBudget = field("自定义模型上下文上限（tokens）", "contextBudgetText")
-        val maxOutput = field("输出上限（tokens；留空跟随模型）", "maxOutputText").apply {inputType=InputType.TYPE_CLASS_NUMBER}
-        val outputHelp=TextView(this).apply {textSize=13f;setPadding(0,0,0,12);content.addView(this)}
-        val imageSupport=CheckBox(this).apply {text="支持图片输入";isChecked=prefs.getBoolean("supportsImages",true);content.addView(this)}
-        val catalog=ModelCatalog(this);val deepseek=DeepSeekCatalog(this)
-        val modelPicker=Spinner(this).apply {tag="model-picker";contentDescription="选择模型"};content.addView(modelPicker)
-        val catalogStatus=TextView(this).apply {tag="model-catalog-status";content.addView(this)}
-        val refreshModels=Button(this).apply {content.addView(this)}
-        val headerName = field("自定义凭据头（可选）", "headerName")
-        val headerTemplate = field("凭据格式，例如 Bearer {{credential}}（可选）", "headerTemplate")
-        val keyStatus=TextView(this).apply {setPadding(0,20,0,8);content.addView(this)}
-        val modelKey = field("API Key（留空保留）", "", true)
-        val removeModel = CheckBox(this).apply { text = "删除已保存模型 Key"; content.addView(this) }
-        var advancedExpanded=false
-        val advanced=listOf(contextBudget,maxOutput,outputHelp,imageSupport,headerName,headerTemplate)
-        fun renderAdvanced() {
-            advanced.forEach {it.visibility=if(advancedExpanded && (providerId()=="custom" || it==contextBudget || it==maxOutput || it==outputHelp || it==imageSupport))View.VISIBLE else View.GONE}
-            contextBudget.isEnabled=providerId()=="custom";imageSupport.isEnabled=providerId()=="custom"
-            maxOutput.hint=if(providerId()=="custom")"输出上限（tokens；留空默认 2048）" else "输出上限（tokens；留空跟随模型）"
-            outputHelp.text=if(providerId()=="custom")"留空使用 2048；填写整数，并小于上下文容量。" else "留空自动使用当前模型的输出容量；填写整数可限制输出，清空即可恢复自动。输出预算包含思考内容。"
-        }
-        renderAdvanced()
-        content.addView(Button(this).apply {text="高级选项 ›";setOnClickListener {advancedExpanded=!advancedExpanded;renderAdvanced();text=if(advancedExpanded)"收起高级选项 ‹" else "高级选项 ›"}})
-        fun draftKey():String=if(removeModel.isChecked)"" else modelKey.text.toString().ifBlank {
-            if(DeepSeekCatalog.canReuseCredential(savedProvider,providerId()))vault.readNative("model").orEmpty() else ""
-        }
-        fun selectedMetadata():JSONObject?=when(providerId()) {"deepseek"->deepseek.models();"opencode-go"->catalog.models();else->null}
-            ?.objects()?.find {it.optString("id")==model.text.toString() && it.optString("protocol")==ModelCatalog.protocols[protocol.selectedItemPosition]}
-        fun updateModels() {
-            val selectedProvider=providerId();if(selectedProvider=="custom")return
-            val choices=(if(selectedProvider=="deepseek")deepseek.models() else catalog.models()).objects()
-            modelPicker.onItemSelectedListener=null
-            modelPicker.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,choices.map {it.getString("name")})
-            val chosen=choices.indexOfFirst {it.getString("id")==model.text.toString()}.coerceAtLeast(0)
-            fun applyChoice(position:Int) {
-                val choice=choices[position];model.setText(choice.getString("id"));name.setText(choice.getString("name"))
-                contextBudget.setText(choice.getInt("contextWindow").toString());protocol.setSelection(ModelCatalog.protocols.indexOf(choice.getString("protocol")))
-                imageSupport.isChecked=choice.optJSONArray("input")?.let {a->(0 until a.length()).any {a.getString(it)=="image"}}==true
-                val source=if(selectedProvider=="deepseek")deepseek.source() else catalog.source()
-                val labels=mapOf("off" to "关闭","low" to "低","high" to "高","max" to "最大")
-                val effort=if(selectedProvider=="deepseek")choice.getJSONArray("efforts").let {a->(0 until a.length()).joinToString(" / "){labels[a.getString(it)] ?: a.getString(it)}}+"（默认${labels[choice.optString("defaultEffort","high")] ?: "高"}）" else choice.getJSONArray("efforts").join(" / ")
-                catalogStatus.text="$source\n上下文 ${choice.getInt("contextWindow")} tokens · 输出容量 ${choice.getInt("maxOutput")} tokens\n思考强度 $effort\n"+if(imageSupport.isChecked)"支持文字和图片" else "仅支持文字"
-            }
-            modelPicker.setSelection(chosen);applyChoice(chosen)
-            modelPicker.onItemSelectedListener=object:android.widget.AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent:android.widget.AdapterView<*>?)=Unit
-                override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long) {if(providerId()==selectedProvider)applyChoice(position)}
-            }
-        }
-        refreshModels.setOnClickListener {
-            val selectedProvider=providerId();val key=draftKey()
-            if(selectedProvider=="deepseek" && key.isBlank()){catalogStatus.text="请填写 DeepSeek 官方 API Key 后刷新；可先选择内置官方模型";return@setOnClickListener}
-            refreshModels.isEnabled=false;catalogStatus.text="正在读取模型资料…"
-            Thread {
-                val success=runCatching {if(selectedProvider=="deepseek")deepseek.refresh(key) else catalog.refresh()}.isSuccess
-                runOnUiThread {if(refreshModels.isAttachedToWindow){refreshModels.isEnabled=true;if(providerId()==selectedProvider){if(success)updateModels() else catalogStatus.text="暂时无法刷新，请检查该服务的 Key、网络或额度；保留已缓存模型资料"}}}
-            }.start()
-        }
-        var lastProvider=savedProvider
-        provider.onItemSelectedListener=object:android.widget.AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent:android.widget.AdapterView<*>?)=Unit
-            override fun onItemSelected(parent:android.widget.AdapterView<*>?,view:View?,position:Int,itemId:Long) {
-                val id=providerId();val fixed=id!="custom"
-                if(!DeepSeekCatalog.canReuseCredential(lastProvider,id))modelKey.text.clear()
-                lastProvider=id
-                modelPicker.visibility=if(fixed)View.VISIBLE else View.GONE;refreshModels.visibility=modelPicker.visibility;catalogStatus.visibility=modelPicker.visibility
-                for(v in listOf(protocol,model,name,url))v.visibility=if(fixed)View.GONE else View.VISIBLE
-                keyStatus.text=if(DeepSeekCatalog.canReuseCredential(savedProvider,id))"模型 API Key：${vault.status("model")}；留空保留，勾选后删除" else "切换服务请填写该服务的 API Key；不会复用其他服务的 Key"
-                refreshModels.text=if(id=="deepseek")"刷新 DeepSeek 官方模型列表" else "刷新 OpenCode Go 模型列表"
-                if(fixed){url.setText(if(id=="deepseek")DeepSeekCatalog.BASE_URL else "https://opencode.ai/zen/go/v1");updateModels()}
-                renderAdvanced()
-            }
-        }
-        fun currentOutputBudget():OutputBudgetPolicy.Budget {
-            val custom=providerId()=="custom"
-            val metadata=selectedMetadata()
-            val context=if(custom)contextBudget.text.toString().ifBlank {"32768"}.toInt() else requireNotNull(metadata).getInt("contextWindow")
-            return OutputBudgetPolicy.resolve(providerId(),context,if(custom)null else metadata!!.getInt("maxOutput"),maxOutput.text.toString(),rejectExcess=true)
-        }
-        fun currentModelDraft():ModelConnectionTest.Draft {
-            val custom=providerId()=="custom"
-            return ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),
-                draftKey(),if(custom)headerName.text.toString() else "",if(custom)headerTemplate.text.toString() else "",maxOutput=currentOutputBudget().tokens).withProfile(selectedMetadata(),maxOutput.text.toString())
-        }
-        val testStatus=TextView(this).apply {tag="model-test-status";text="测试当前页面填写的配置；同一服务的空白 Key 使用已保存 Key。草稿不会自动保存。";setPadding(0,12,0,12);content.addView(this)}
-        val test=Button(this).apply {text="测试当前填写的连接";tag="model-test";content.addView(this)}
-        test.setOnClickListener {
-            val draft=runCatching {currentModelDraft()}.getOrElse {testStatus.text="输出上限需为不超过所选模型容量的整数，留空可恢复默认；草稿未保存";return@setOnClickListener}
-            if(runCatching {draft.validate()}.isFailure){testStatus.text="请填写该服务有效的 API Key 和模型配置；草稿未保存";return@setOnClickListener}
-            test.isEnabled=false;testStatus.text="正在测试当前填写的连接…（草稿未保存）"
-            Thread {
-                val result=ModelConnectionTest.run(draft)
-                runOnUiThread {if(testStatus.isAttachedToWindow){test.isEnabled=true;testStatus.text="${result.message} · ${result.elapsedMs} ms\n草稿未保存，点击右上角保存后生效。"}}
-            }.start()
-        }
-        val fullTest=Button(this).apply {text="完整检查已保存配置（图片与工具）";content.addView(this)}
-        fullTest.setOnClickListener {
-            try {
-                require(!host.hasActiveRuns())
-                val token=host.requestProbe();val sid=host.selectedSession()
-                attachedEngine?.executionWeb?.evaluateJavascript("window.runNativeProbe(${JSONObject.quote(token)}, ${JSONObject.quote(sid)})",null)
-                Toast.makeText(this,"正在检查已保存的配置；当前草稿不会参与",Toast.LENGTH_LONG).show()
-            } catch(_:Exception){Toast.makeText(this,"请先保存有效配置，并等待当前连接检查结束",Toast.LENGTH_LONG).show()}
-        }
-        val probeStatus=TextView(this).apply {text="已保存配置：${host.modelStatus()}";content.addView(this)}
-        val statusPoll=object:Runnable {override fun run(){if(probeStatus.isAttachedToWindow){val value="已保存配置：${host.modelStatus()}";if(probeStatus.text.toString()!=value)probeStatus.text=value;probeStatus.postDelayed(this,1000)}}}
-        probeStatus.postDelayed(statusPoll,1000)
-        settingsPage("模型服务",content,save={
-            try {
-                require(!host.hasActiveRuns())
-                currentModelDraft().let {if(removeModel.isChecked)it.copy(credential="removed") else it}.validate()
-                val budget=if(providerId()=="custom")contextBudget.text.toString().ifBlank {"32768"}.toInt() else requireNotNull(selectedMetadata()).getInt("contextWindow")
-                val outputBudget=currentOutputBudget().tokens
-                require(budget in 4096..4000000 && outputBudget<budget)
-                val nextRevision=prefs.getInt("revision",0)+1
-                check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
-                if(removeModel.isChecked)vault.remove("model") else if(modelKey.length()>0)vault.put("model",modelKey.text.toString())
-                check(prefs.edit().putBoolean("supportsImages",imageSupport.isChecked).putString("provider",providerId()).putString("name",name.text.toString().take(80)).putInt("protocol",protocol.selectedItemPosition)
-                    .putString("url",url.text.toString().trim()).putString("model",model.text.toString().trim()).putString("contextBudgetText",contextBudget.text.toString()).putString("maxOutputText",maxOutput.text.toString())
-                    .putInt("contextBudget",budget).putInt("maxOutput",outputBudget).putString("headerName",if(providerId()=="custom")headerName.text.toString() else "").putString("headerTemplate",if(providerId()=="custom")headerTemplate.text.toString() else "").commit())
-                modelKey.text.clear();closeSettings();reloadRuntime();Toast.makeText(this,if(providerId()!="custom")"设置已保存；官方模型可直接使用，也可在设置中测试连接" else "设置已保存；自定义模型首次使用会检查连接与工具能力",Toast.LENGTH_LONG).show()
-            }catch(_:Exception){Toast.makeText(this,"保存失败：请先停止活动任务，并检查地址、预算和密钥配置",Toast.LENGTH_LONG).show()}
-        },back={showSettings()})
-        return
-        }
+        if(section=="model") { showModelProviders(); return }
         if(section=="search") {
         label("联网搜索 · Brave")
         val searchUrl = field("搜索 API 地址", "searchUrl").apply {if(text.isBlank())setText("https://api.search.brave.com/res/v1/web/search")}

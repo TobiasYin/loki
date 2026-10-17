@@ -1,0 +1,53 @@
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalProviderSwitchingTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.PhysicalProviderSwitchingTest:
+INSTRUMENTATION_STATUS: test=savedProvidersSwitchAndRunConcurrently
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalProviderSwitchingTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=savedProvidersSwitchAndRunConcurrently
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.thor.agent.EmulatorMultiProviderUiTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.EmulatorMultiProviderUiTest:
+INSTRUMENTATION_STATUS: test=existingProviderEditorsKeepIndependentKeyStatusAcrossRepeatedNavigation
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.EmulatorMultiProviderUiTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=existingProviderEditorsKeepIndependentKeyStatusAcrossRepeatedNavigation
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalSettingsDraftTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.PhysicalSettingsDraftTest:
+INSTRUMENTATION_STATUS: test=currentDraftModelAndBraveAreTestedWithoutChangingSavedProfile
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalSettingsDraftTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=currentDraftModelAndBraveAreTestedWithoutChangingSavedProfile
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 30.242
+
+OK (3 tests)
+
+
+INSTRUMENTATION_CODE: -1

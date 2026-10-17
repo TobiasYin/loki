@@ -160,6 +160,7 @@ class EmulatorBackgroundRuntimeTest:EmulatorBackgroundTestState() {
         val oldExecution=EmulatorRuntimeTestSupport.executionWeb(activity)
         ins.runOnMainSync {assertNull(oldExecution.parent)}
         val service=field(activity,"runtimeService") as AgentRuntimeService
+        val oldEngine=requireNotNull(service.engine)
         val serial=ProductHost::class.java.getDeclaredField("serial").apply {isAccessible=true}.get(oldHost) as java.util.concurrent.ExecutorService
         val admitted=CountDownLatch(1);val released=CountDownLatch(1)
         serial.submit {admitted.countDown();released.await(15,TimeUnit.SECONDS)}
@@ -167,6 +168,13 @@ class EmulatorBackgroundRuntimeTest:EmulatorBackgroundTestState() {
         try {
             val start=SystemClock.elapsedRealtime()
             ins.runOnMainSync {MainActivity::class.java.getDeclaredMethod("reloadRuntime").apply {isAccessible=true}.invoke(activity)}
+            ins.runOnMainSync {
+                fun retained(target:Any,name:String)=target.javaClass.getDeclaredField(name).apply {isAccessible=true}.get(target)
+                assertNull("Closing the engine releases its last chat snapshot",retained(oldEngine,"lastState"))
+                val updates=retained(oldEngine,"stateUpdates")!!
+                assertNull("Closing the engine releases queued writer notifications",retained(updates,"pending"))
+                assertEquals(true,retained(updates,"closed"))
+            }
             assertTrue("Reload must not synchronously wait for the old writer",SystemClock.elapsedRealtime()-start<1000)
             Thread.sleep(1300) // Exceeds the former create() semaphore wait.
             ins.runOnMainSync {assertNull("Do not construct a second owner while close is pending",service.engine)}
