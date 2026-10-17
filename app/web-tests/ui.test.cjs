@@ -10,6 +10,26 @@ test('model output limit explains continuation while ordinary model counters sta
  s.runs[0].status='failed';s.events.push({runId:'r',sequence:2,type:'diagnostic',data:{code:'MODEL_OUTPUT_LIMIT',requestedMaxOutputTokens:2048,outputTokens:2048,reasoningTokens:2048}});window.receiveNative(s);
  openOperations(window,doc);assert.match(doc.querySelector('.timeline-note').textContent,/达到模型输出上限.*保留上下文.*当前会话继续/);assert.doesNotMatch(doc.querySelector('#chat').textContent,/MODEL_OUTPUT_LIMIT|reasoningTokens/);
 });
+test('unscoped historical diagnostics never become a catch-all footer or leave a warning on completed runs',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed',stopReason:'TOOL_FAILED'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'已完成当前任务'}];
+ s.events=['MODEL_OUTPUT_LIMIT','MODEL_STREAM_FAILED','IO_ERROR','PERMISSION_MISSING','UNRECOGNIZED_DIAGNOSTIC'].map((code,index)=>({runId:'r',sequence:index+1,type:'diagnostic',data:{code}}));
+ for(const status of ['generating','completed']) {
+  s.runs[0].status=status;window.receiveNative(s);assert.equal(doc.querySelector('.run-notice,.attention'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/运行提示|MODEL_OUTPUT_LIMIT|MODEL_STREAM_FAILED|IO_ERROR|PERMISSION_MISSING|UNRECOGNIZED_DIAGNOSTIC|TOOL_FAILED/);
+ }
+});
+test('a genuine model failure has one readable run explanation rather than duplicate warnings or raw codes',()=>{
+ for(const code of ['MODEL_OUTPUT_LIMIT','MODEL_STREAM_FAILED']) {
+  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'failed',stopReason:'IO_ERROR'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.events=[{runId:'r',sequence:1,type:'diagnostic',data:{code}}];window.receiveNative(s);
+  assert.equal(doc.querySelectorAll('.run-notice').length,1);assert.equal(doc.querySelector('.attention'),null);assert.match(doc.querySelector('.run-notice').textContent,/保留上下文.*当前会话/);assert.doesNotMatch(doc.querySelector('#chat').textContent,/运行提示|MODEL_OUTPUT_LIMIT|MODEL_STREAM_FAILED|IO_ERROR/);
+ }
+});
+test('interruption and internal terminal reasons are readable and never exposed as protocol details',()=>{
+ const{window,doc}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.runs=[{id:'r',sessionId:'a',status:'failed',stopReason:'Runtime 未完成；不重放'}];
+ for(const [status,stopReason] of [['failed','Runtime 未完成；不重放'],['failed','IO_ERROR'],['interrupted','进程恢复：不重放任何副作用'],['cancelled','CANCELLED']]) {
+  Object.assign(s.runs[0],{status,stopReason});window.receiveNative(s);assert.equal(doc.querySelectorAll('.run-notice').length,1);assert.doesNotMatch(doc.querySelector('#chat').textContent,/Runtime|IO_ERROR|进程恢复|副作用|CANCELLED/);
+ }
+ Object.assign(s.runs[0],{status:'cancelled',stopReason:'系统授权或后端失效'});window.receiveNative(s);assert.match(doc.querySelector('.run-notice').textContent,/系统授权或设备连接已失效/);
+});
 test('gray approval binds actual run and approval ID; black denial stays structured',()=>{
  const{window,doc,calls}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'streaming'}];
  s.runs=[{id:'r',sessionId:'a',status:'awaiting_user',approval:{id:'approval-1',summary:'灰名单 · 屏幕焦点锁 1'}}];window.receiveNative(s);

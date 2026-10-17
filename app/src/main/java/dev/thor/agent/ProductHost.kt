@@ -419,11 +419,9 @@ class ProductHost private constructor(private val context: Context, private val 
                     val origin=e.stackTrace.firstOrNull {it.className.startsWith("dev.thor.")}
                     android.util.Log.w("ThorNativeRpc", "${request.optString("op").take(32)}:$code:${e.javaClass.simpleName}:${origin?.className}:${origin?.lineNumber}")
                 }
-                // Recoverable stale tool targets remain tool results; do not
-                // overwrite an unrelated page error while asking for a new observation.
-                val quietCancellation=request.optString("op") in setOf("tool.cancel","authority") && code in setOf("STALE_AUTHORIZATION","CANCELLED")
-                if(!quietCancellation && !(request.optString("op")=="tool.prepare" && code=="TARGET_CHANGED"))
-                    lastError = if(request.optString("op") == "begin") when {providerModels.isEmpty()->"模型未配置：请在设置填写 API Key 和服务地址。";storageFailed->"本地存储不可用，历史已保留。";else->"任务暂未启动：检查当前会话是否仍有任务，或查看模型设置中的具体错误。"} else "操作被拒绝：检查授权、活动运行或本地存储。"
+                // Every prepare rejection is returned below as a tool receipt.
+                // Keep it local without overwriting an unrelated chat error.
+                lastError=ChatNoticePolicy.rpcFailure(lastError,request.optString("op"),code,storageFailed,providerModels.isNotEmpty())
                 val content=JSONArray()
                 if(code=="COMMAND_BLOCKED")content.put(obj("type" to "text","text" to obj("policyVersion" to ShellCommandPolicy.VERSION,"policyTier" to "black","executed" to false,"reason" to (e as ToolFailure).message).toString()))
                 if(request.optString("op") == "tool.prepare")future.complete(obj("content" to content,"observedAt" to System.currentTimeMillis(),"source" to "native-gateway","truncated" to false,"outcome" to "observed","error" to code)) else future.complete(obj("error" to code)); publish()
@@ -929,7 +927,8 @@ class ProductHost private constructor(private val context: Context, private val 
                     lastError=null;ack(true)
                 }catch(t:Exception) {
                     ack(false,if(t is PersistenceFailure)"STORAGE_FAILURE" else "INVALID_ARGUMENT")
-                    lastError=if(storageFailed)"能力变更保存失败，已停止相关执行并保留历史。" else "能力设置未生效，请重试。"
+                    // The capability acknowledgement owns its inline error.
+                    if(storageFailed)lastError="能力变更保存失败，已停止相关执行并保留历史。"
                 }
             }
             "stop" -> { val b=bindingFor(d);stop("用户停止",b.runId) }
@@ -945,6 +944,7 @@ class ProductHost private constructor(private val context: Context, private val 
         }
         // The ui RPC caller immediately applies this result. Do not build and
         // serialize the same whole snapshot a second time through notify().
+        if(!storageFailed)lastError=null
         cancelPendingPublish();return view()
     }
     fun stop(reason:String,runId:String?=null) {
@@ -1121,7 +1121,7 @@ class ProductHost private constructor(private val context: Context, private val 
             val files=context.contentResolver.openInputStream(uri)!!.use {SkillStore.unpack(it,name.endsWith(".zip",true) || context.contentResolver.getType(uri)=="application/zip")}
             // Import never silently overwrites an installed skill.
             val result=skills.save(files);lastError=null;publish();future.complete(result)
-        } catch(_:Exception) {lastError="Skill 导入失败：检查 YAML 名称/简介、重复名称、目录路径和文件大小（单文件 64 KiB，包 2 MiB）。";publish();future.completeExceptionally(IllegalArgumentException("Skill import rejected"))} }
+        } catch(_:Exception) {publish();future.completeExceptionally(IllegalArgumentException("Skill import rejected"))} }
         return future
     }
     private fun skillAction(tool:String,args:JSONObject,preview:Boolean):JSONObject {

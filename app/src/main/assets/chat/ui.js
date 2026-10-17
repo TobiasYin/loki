@@ -211,10 +211,13 @@
       calls.set(id,current);
     }
     const title=call=>toolLabels[call.toolId]??toolLabels[call.toolName?.replace('_','.')]??call.toolId??call.toolName??'工具';
-    // Run failures and live approvals stay visible; historical tool warnings
-    // belong to their operation and fold with the rest of its details.
-    if(['failed','cancelled','interrupted'].includes(run.status) && run.stopReason)container.append(element('div',run.stopReason,run.status==='cancelled'?'timeline-note':'attention'));
-    else if(run.status==='failed')container.append(element('div','这次任务未能完成，请重试或检查设置。','attention'));
+    // Show one explanation for an actual failed task, never a catch-all footer
+    // made from an arbitrary historical diagnostic or an internal reason code.
+    const modelFailure=run.status==='failed'?events.findLast(event=>event.type==='diagnostic' && !isToolDiagnostic(event) && ['MODEL_OUTPUT_LIMIT','MODEL_STREAM_FAILED'].includes(event.data?.code)):null;
+    if(modelFailure)container.append(element('div',modelFailure.data.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':'本轮模型响应未能完成，已保留上下文，可在当前会话重试或继续。','timeline-note run-notice'));
+    else if(run.status==='failed')container.append(element('div',run.stopReason && !/^[A-Z][A-Z0-9_]+$/.test(run.stopReason) && run.stopReason!=='Runtime 未完成；不重放'?run.stopReason:'这次任务未能完成，可在当前会话重试或继续。','attention run-notice'));
+    else if(run.status==='cancelled' && run.stopReason)container.append(element('div',({'用户停止':'已停止本次任务。','用户通过运行通知停止':'已停止本次任务。','能力已变更；旧 lease 不会复活':'能力设置已变更，本次任务已停止。','系统授权或后端失效':'系统授权或设备连接已失效，本次任务已停止。','宿主关闭':'应用已关闭，本次任务已停止。'})[run.stopReason]??'本次任务已停止，可在当前会话继续。','timeline-note run-notice'));
+    else if(run.status==='interrupted')container.append(element('div','任务中断，已保留上下文，可在当前会话继续。','timeline-note run-notice'));
     const recoveryFact=call=>call.outcome==='unknown' && call.result?.recovery?.sideEffectPossible!==false && call.result?.recovery?.submission!=='not_dispatched'?'先前操作的提交状态尚未确认，请勿重复旧动作':call.result?.recovery?.submission==='submitted' || call.outcome==='submitted'?'先前操作已提交，需观察结果':'';
     // Recovery is one current Run state, not one perpetual status per old error.
     // A result event exists only after Runtime's post-authority checks. Companion
@@ -400,8 +403,6 @@
       if(open)history.append(activity);
       else container.insertBefore(activity,history.nextSibling);
     });
-    const last=events.findLast(e=>e.type==='diagnostic' && e.data?.code!=='TARGET_CHANGED' && !isToolDiagnostic(e) && !compactionCodes.has(e.data?.code));
-    if(last && last.data?.code!=='TARGET_CHANGED')container.append(element('div',last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
     return container;
   }
   // HTML from messages is treated as text. Markdown images remain text too:
