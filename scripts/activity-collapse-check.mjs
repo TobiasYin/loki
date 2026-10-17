@@ -72,7 +72,26 @@ try {
   assert.equal(await page.locator('.attention').evaluateAll(nodes=>nodes.every(n=>n.closest('.tool-card'))),true);assert.doesNotMatch(await page.locator('.tool-card').nth(1).innerText(),/执行失败|BACKEND_UNAVAILABLE/);
   if(height===540)await page.screenshot({path:`${directory}/tool-failure-inline.png`});
   await page.locator('.execution-history > summary').click();await page.locator('.execution-history[data-disclosure-animating=true]').waitFor({state:'detached'});assert.doesNotMatch(await page.locator('#chat').innerText(),/运行提示|TOOL_FAILED|执行失败|BACKEND_UNAVAILABLE/);assert.deepEqual(errors,[]);
-  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',answerAlwaysVisible:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,toolWarningsInlineOnly:true,tokenFooterVerified:true,...layout});await page.close();
+  await page.evaluate(()=>{
+   fixture.runs=[{id:'reply-progress',sessionId:'a',status:'generating'}];fixture.messages=[{id:'m',sessionId:'a',runId:'reply-progress',role:'assistant',text:'我先查看页面。已找到入口。正在核验结果。'}];
+   fixture.events=[{type:'text_delta',data:{text:'我先查看页面。'}},{type:'thinking_delta',data:{text:'识别应用入口'}},{type:'tool_result',toolCallId:'screen',data:{toolId:'perception.capture_screen',outcome:'observed'}},{type:'text_delta',data:{text:'已找到入口。'}},{type:'thinking_delta',data:{text:'确认点击位置'}},{type:'tool_result',toolCallId:'tap',data:{toolId:'input.tap',outcome:'submitted'}},{type:'text_delta',data:{text:'正在核验结果。'}}].map((event,index)=>({...event,runId:'reply-progress',sequence:index+1}));receiveNative(fixture);
+  });
+  assert.equal(await page.locator('.timeline-answer:visible').count(),1);assert.equal((await page.locator('.timeline-answer:visible').innerText()).trim(),'正在核验结果。');
+  assert.equal(await page.locator('.activity-item:visible').count(),2);
+  if(height===540)await page.screenshot({path:`${directory}/latest-reply-running.png`});
+  await page.locator('.execution-history > summary').click();await page.waitForFunction(()=>!document.querySelector('[data-disclosure-animating=true]'));
+  assert.equal(await page.locator('.timeline-answer:visible').count(),3);
+  assert.deepEqual(await page.locator('.activity-timeline').evaluate(node=>[...node.children].map(n=>n.dataset.activityKind)),['text','thinking','tool','text','thinking','tool','text']);
+  if(height===540)await page.screenshot({path:`${directory}/latest-reply-expanded.png`});
+  await page.evaluate(()=>{fixture.runs[0].status='completed';fixture.messages[0].text+='**已完成**。';fixture.events.push({runId:'reply-progress',sequence:8,type:'thinking_delta',data:{text:'核验完毕'}},{runId:'reply-progress',sequence:9,type:'text_delta',data:{text:'**已完成**。'}});receiveNative(fixture);});
+  assert.equal(await page.locator('.timeline-answer:visible').count(),1);assert.equal((await page.locator('.timeline-answer:visible').innerText()).trim(),'已完成。');assert.equal(await page.locator('.activity-item:visible').count(),0);
+  if(height===540)await page.screenshot({path:`${directory}/latest-reply-completed.png`});
+  await page.locator('.execution-history > summary').click();await page.waitForFunction(()=>!document.querySelector('[data-disclosure-animating=true]'));
+  assert.equal(await page.locator('.timeline-answer:visible').count(),4);assert.equal(await page.locator('.markdown').count(),4);
+  await page.locator('.execution-history > summary').click();await page.waitForFunction(()=>!document.querySelector('[data-disclosure-animating=true]'));
+  assert.equal(await page.locator('.timeline-answer:visible').count(),1);assert.deepEqual(errors,[]);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',latestReplyOnly:true,earlierRepliesChronological:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,toolWarningsInlineOnly:true,tokenFooterVerified:true,...layout});await page.close();
  }
  report.passed=true;
 } finally {writeFileSync(`${directory}/browser-check.json`,JSON.stringify(report,null,2)+'\n');await browser.close();await new Promise(resolve=>server.close(resolve));}

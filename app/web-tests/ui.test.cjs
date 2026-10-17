@@ -594,6 +594,51 @@ test('failed or cancelled Pi compaction remains neutral, preserves context expla
 });
 
 function visibleOperations(doc){return [...doc.querySelectorAll('.activity-item,.activity-pending')].filter(node=>!node.hidden);}
+function replyHistory(){
+ const s=state();s.runs=[{id:'r',sessionId:'a',status:'generating'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'**开始检查**已找到入口正在核验'}];
+ s.events=[
+  {type:'text_delta',data:{text:'**开始检查**'}},
+  {type:'thinking_delta',data:{text:'判断页面'}},
+  {type:'tool_started',toolCallId:'read',data:{toolId:'perception.ui_tree'}},
+  {type:'tool_result',toolCallId:'read',data:{toolId:'perception.ui_tree',outcome:'observed'}},
+  {type:'text_delta',data:{text:'已找到入口'}},
+  {type:'thinking_delta',data:{text:'选择入口'}},
+  {type:'tool_started',toolCallId:'tap',data:{toolId:'input.tap'}},
+  {type:'tool_result',toolCallId:'tap',data:{toolId:'input.tap',outcome:'submitted'}},
+  {type:'text_delta',data:{text:'正在核验'}}
+ ].map((event,index)=>({...event,runId:'r',sequence:index+1}));return s;
+}
+function visibleReplies(doc){return [...doc.querySelectorAll('.timeline-answer')].filter(node=>!node.hidden);}
+test('compact process keeps only its latest assistant reply and expanding restores the mixed chronology without duplicates',()=>{
+ const{window,doc,calls}=setup();const s=replyHistory();window.receiveNative(s);
+ const replies=[...doc.querySelectorAll('.timeline-answer')];assert.equal(replies.length,3);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);
+ assert.deepEqual(visibleOperations(doc).map(node=>node.dataset.activityKind),['thinking','tool']);
+ const timeline=openOperations(window,doc);assert.deepEqual([...timeline.children].map(node=>node.dataset.activityKind),['text','thinking','tool','text','thinking','tool','text']);
+ assert.equal(visibleReplies(doc).length,3);assert.equal(doc.querySelectorAll('.markdown').length,3);assert.ok(replies.every(node=>timeline.contains(node)));
+ disclose(window,doc.querySelector('.execution-history'),false);assert.deepEqual(visibleReplies(doc),[replies[2]]);assert.ok(replies[0].hidden && replies[1].hidden);
+ assert.equal(calls.some(call=>call.op!=='ready'),false);
+});
+test('streamed latest reply updates in place and folds only after a newer reply starts, with expanded choices preserved',()=>{
+ const{window,doc}=setup();const s=replyHistory();window.receiveNative(s);const old=[...doc.querySelectorAll('.timeline-answer')];
+ s.messages[0].text+='结果';s.events.push({runId:'r',sequence:10,type:'text_delta',data:{text:'结果'}});window.receiveNative(s);
+ assert.equal(visibleReplies(doc).length,1);assert.equal(visibleReplies(doc)[0].textContent.trim(),'正在核验结果');assert.equal(doc.querySelectorAll('.timeline-answer')[0],old[0]);
+ s.events.push({runId:'r',sequence:11,type:'thinking_delta',data:{text:'继续处理'}});window.receiveNative(s);assert.equal(visibleReplies(doc)[0].textContent.trim(),'正在核验结果');
+ s.messages[0].text+='**已完成**';s.events.push({runId:'r',sequence:12,type:'text_delta',data:{text:'**已完成**'}});window.receiveNative(s);
+ assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['已完成']);assert.equal(doc.querySelectorAll('.timeline-answer').length,4);
+ openOperations(window,doc);s.messages[0].text+='。';s.events.push({runId:'r',sequence:13,type:'text_delta',data:{text:'。'}});window.receiveNative(s);
+ assert.ok(doc.querySelector('.execution-history').open);assert.equal(visibleReplies(doc).length,4);assert.deepEqual([...doc.querySelectorAll('.timeline-answer')].map(node=>node.textContent.trim()),['开始检查','已找到入口','正在核验结果','已完成。']);
+ disclose(window,doc.querySelector('.execution-history'),false);assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['已完成。']);
+});
+test('terminal runs fold earlier replies too, preserve the last progress reply on failure and restore order on history reload',()=>{
+ for(const status of ['completed','failed','cancelled','interrupted']){
+  const{window,doc}=setup();const s=replyHistory();window.receiveNative(s);openOperations(window,doc);
+  s.runs[0].status=status;window.receiveNative(s);assert.equal(doc.querySelector('.execution-history').open,false);
+  assert.deepEqual(visibleReplies(doc).map(node=>node.textContent.trim()),['正在核验']);assert.equal(visibleOperations(doc).length,0);
+  openOperations(window,doc);assert.equal(visibleReplies(doc).length,3);assert.deepEqual([...doc.querySelector('.activity-timeline').children].map(node=>node.dataset.activityKind),['text','thinking','tool','text','thinking','tool','text']);
+  disclose(window,doc.querySelector('.execution-history'),false);
+  const restored=setup();restored.window.receiveNative(structuredClone(s));assert.deepEqual(visibleReplies(restored.doc).map(node=>node.textContent.trim()),['正在核验']);assert.equal(restored.doc.querySelectorAll('.timeline-answer').length,3);
+ }
+});
 test('compact running process shows only its two newest activities and advances with the live thought',()=>{
  const{window,doc}=setup();const s=treeHistory(20);s.runs[0].status='generating';
  s.events.push({runId:'large',sequence:41,type:'thinking_delta',data:{text:'继续思考'}});window.receiveNative(s);

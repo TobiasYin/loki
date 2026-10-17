@@ -435,6 +435,8 @@
     const completedOperations=[...calls.values()].filter(call=>call.result && !call.error && ['observed','submitted'].includes(call.outcome)).length;
     const orderByKey=new Map(timeline.map(item=>[item.key,item.order]));
     const operations=[...activity.children].filter(node=>node.classList.contains('activity-item') || node.classList.contains('activity-pending'));
+    const answers=[...activity.children].filter(node=>node.dataset.activityKind==='text');
+    const latestAnswer=answers.at(-1);
     const recent=new Set(activeRun?operations.slice().sort((a,b)=>(orderByKey.get(b.dataset.activityKey)??Infinity)-(orderByKey.get(a.dataset.activityKey)??Infinity)).slice(0,2):[]);
     // Completion always starts folded, even if the user inspected the running
     // task. A later explicit expansion remains local to this completed run.
@@ -446,9 +448,11 @@
         node.hidden=!open && !recent.has(node);
         if(node.hidden && node.open && node.querySelector('.tool-figure')){node.open=false;node.dispatchEvent(new Event('toggle'));}
       }
+      for(const node of answers)node.hidden=!open && node!==latestAnswer;
       activity.dataset.view=open?'full':'compact';
-      // User-facing Markdown stays visible when the process folds. Reuse the
-      // same ordered nodes, so expansion never duplicates text or tool bodies.
+      // Only the newest reply stays visible in compact mode. Earlier replies
+      // fold with the process; the same nodes retain their original chronology
+      // when expanded, without duplicating messages or changing Pi history.
       if(open)history.append(activity);
       else container.insertBefore(activity,history.nextSibling);
     });
