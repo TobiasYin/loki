@@ -78,3 +78,5 @@ button:active{opacity:.72}button:disabled:active{opacity:.55}
 .execution-history>summary::after{content:'';width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .18s ease}
 .execution-history[data-expanded=true]>summary::after{transform:rotate(45deg)}
 @media(prefers-reduced-motion:reduce){.execution-history>summary::after{transition:none}}
+
+.run-usage-footer{margin-top:9px;color:var(--muted);font-size:10px;line-height:1.6;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}

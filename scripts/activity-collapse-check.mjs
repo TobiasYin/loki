@@ -2,7 +2,7 @@ import {chromium} from '../runtime/node_modules/@playwright/test/index.mjs';
 import {createServer} from 'node:http';
 import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
-const base='app/src/main/assets/chat/',allowed=new Set(['index.html','style.css','ui.js','vendor/marked.umd.js','vendor/purify.min.js']);
+const base='app/src/main/assets/chat/',allowed=new Set(['index.html','style.css','usage-footer.js','ui.js','vendor/marked.umd.js','vendor/purify.min.js']);
 const server=createServer((req,res)=>{const name=req.url==='/'?'index.html':req.url.slice(1);if(name==='runtime-host.js'){res.setHeader('content-type','text/javascript');res.end('');return;}if(!allowed.has(name)){res.writeHead(404);res.end();return;}res.setHeader('content-type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(readFileSync(base+name));});
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
@@ -58,13 +58,21 @@ try {
    fixture.events=[{sequence:1,type:'tool_result',toolCallId:'failed-read',data:{toolId:'perception.capture_screen',error:'BACKEND_UNAVAILABLE',outcome:'observed'}},{sequence:2,type:'diagnostic',toolCallId:'failed-read',data:{code:'TOOL_FAILED',toolName:'perception_capture_screen'}},{sequence:3,type:'tool_result',toolCallId:'retry-read',data:{toolId:'perception.capture_screen',outcome:'observed'}}].map(e=>({...e,runId:'tool-failure'}));receiveNative(fixture);
   });
   assert.doesNotMatch(await page.locator('#chat').innerText(),/运行提示|TOOL_FAILED|执行失败|BACKEND_UNAVAILABLE/);assert.match(await page.locator('.markdown:visible').innerText(),/已确认结果/);
+  await page.evaluate(pricing=>{
+   fixture.tokenPricing=pricing;Object.assign(fixture.runs[0],{provider:'opencode-go',modelId:'gpt-6-luna',startedAt:Date.parse('2026-10-18T02:00:00Z')});
+   fixture.events.push({runId:'tool-failure',sequence:4,type:'model_round',data:{modelRound:1,totalInputTokens:100000,cacheReadTokens:90000,outputTokens:1000}},{runId:'tool-failure',sequence:5,type:'model_round',data:{modelRound:2,totalInputTokens:100000,cacheReadTokens:95000,outputTokens:1000}});receiveNative(fixture);
+  },JSON.parse(readFileSync('app/src/main/assets/token-pricing.json','utf8')));
+  assert.match(await page.locator('.run-usage-footer:visible').innerText(),/输入 200,000 · 缓存 185,000 · 输出 2,000 · 估算 US\$0.0044/);
+  assert.equal(await page.locator('.run-usage-footer:visible').evaluate(node=>!node.closest('details') && node===node.parentElement.lastElementChild),true);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  if(height===540)await page.screenshot({path:`${directory}/token-footer-completed.png`});
   await page.locator('.execution-history > summary').click();await page.locator('.execution-history[data-disclosure-animating=true]').waitFor({state:'detached'});
   const failedTool=page.locator('.tool-card').first();assert.match(await failedTool.locator('summary').innerText(),/执行失败/);
   await failedTool.locator('summary').click();await page.locator('.tool-card[data-disclosure-animating=true]').waitFor({state:'detached'});assert.match(await failedTool.locator('.tool-body').innerText(),/BACKEND_UNAVAILABLE/);
   assert.equal(await page.locator('.attention').evaluateAll(nodes=>nodes.every(n=>n.closest('.tool-card'))),true);assert.doesNotMatch(await page.locator('.tool-card').nth(1).innerText(),/执行失败|BACKEND_UNAVAILABLE/);
   if(height===540)await page.screenshot({path:`${directory}/tool-failure-inline.png`});
   await page.locator('.execution-history > summary').click();await page.locator('.execution-history[data-disclosure-animating=true]').waitFor({state:'detached'});assert.doesNotMatch(await page.locator('#chat').innerText(),/运行提示|TOOL_FAILED|执行失败|BACKEND_UNAVAILABLE/);assert.deepEqual(errors,[]);
-  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',answerAlwaysVisible:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,toolWarningsInlineOnly:true,...layout});await page.close();
+  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',answerAlwaysVisible:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,toolWarningsInlineOnly:true,tokenFooterVerified:true,...layout});await page.close();
  }
  report.passed=true;
 } finally {writeFileSync(`${directory}/browser-check.json`,JSON.stringify(report,null,2)+'\n');await browser.close();await new Promise(resolve=>server.close(resolve));}

@@ -455,7 +455,7 @@
     let previous=historyMore.parentElement===chat?historyMore:null;
     for(const message of messages) {
       let entry=messageNodes.get(message.id);
-      if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments);entry={card,runSlot,textSlot,attachments,activityNodes:new Map()};messageNodes.set(message.id,entry);}
+      if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments'),usage=element('div',undefined,'run-usage-footer');usage.hidden=true;usage.setAttribute('aria-label','本轮 Token 与估算费用');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments,usage);entry={card,runSlot,textSlot,attachments,usage,activityNodes:new Map()};messageNodes.set(message.id,entry);}
       const run=runs.get(message.runId),runEvents=events.get(run?.id)??[];
       const streamedText=runEvents.slice().sort((a,b)=>a.sequence-b.sequence).filter(event=>event.type==='text_delta').map(event=>event.data?.text??'').join('');
       const textInTimeline=message.role==='assistant' && streamedText.length>0 && (!message.text || streamedText===message.text);
@@ -475,6 +475,8 @@
       }
       const attachmentsSignature=JSON.stringify((message.attachments??[]).map(id=>state.attachments?.find(a=>a.id===id)??id));
       if(entry.attachmentsSignature!==attachmentsSignature){entry.attachments.replaceChildren();for(const aid of message.attachments??[]){const a=state.attachments?.find(a=>a.id===aid);entry.attachments.append(element('small',a?`本地附件 · ${a.size} 字节 · ${Date.now()>a.expiresAt?'已过期':'本地保存'} · SHA-256 ${a.hash.slice(0,12)}`:'附件引用不可用'));}entry.attachmentsSignature=attachmentsSignature;}
+      const usage=message.role==='assistant' && run?window.ThorUsage?.format(window.ThorUsage.summarize(run,runEvents,state.tokenPricing)):null;
+      entry.usage.hidden=!usage;if(usage){entry.usage.textContent=usage.text;entry.usage.title=usage.title;}
       const expected=previous?previous.nextSibling:chat.firstChild;if(expected!==entry.card)chat.insertBefore(entry.card,expected);previous=entry.card;
     }
     if(anchor?.parentElement===chat && (loadedEarlier || hadHistoryHeader!==(historyMore.parentElement===chat))) {

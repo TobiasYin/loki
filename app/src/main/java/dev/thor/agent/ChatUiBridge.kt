@@ -17,7 +17,7 @@ internal class ChatUiBridge(private val web:WebView,private val onCommand:(JSONO
     private var peer:JavaScriptReplyProxy?=null
     val supported=WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)
     private val assets=setOf("/assets/chat/index.html","/assets/chat/style.css","/assets/chat/ui.js","/assets/chat/chat-host.js",
-        "/assets/chat/send-errors.js","/assets/chat/vendor/marked.umd.js","/assets/chat/vendor/purify.min.js")
+        "/assets/chat/send-errors.js","/assets/chat/usage-footer.js","/assets/chat/vendor/marked.umd.js","/assets/chat/vendor/purify.min.js")
     private val loader=WebViewAssetLoader.Builder().addPathHandler("/assets/",WebViewAssetLoader.AssetsPathHandler(web.context)).build()
     init {
         web.settings.apply {

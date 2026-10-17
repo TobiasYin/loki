@@ -69,6 +69,7 @@ class ProductHost private constructor(private val context: Context, private val 
     private var pendingPublish:Runnable?=null
     private var uiFactsAt=Long.MIN_VALUE
     private var uiFacts:JSONObject?=null
+    private val tokenPricing by lazy {context.assets.open("token-pricing.json").bufferedReader().use {JSONObject(it.readText())}}
     private var storageFailed = false
     @Volatile private var closing = false
     private var connection: String? = null
@@ -444,7 +445,7 @@ class ProductHost private constructor(private val context: Context, private val 
         val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } },durationMs=if(probe)180_000 else 0)
         bindings[b.runId]=b;scopes[b.runId]=RunScope(profile);runMetrics[b.runId]=java.util.concurrent.ConcurrentHashMap<String,Long>().apply {put("beginElapsedRealtime",began)};deviceAuthority.bind(b);if(probe)probeRun=b.runId
         val r = obj("id" to b.runId, "sessionId" to sid, "status" to "queued", "expanded" to false, "startedAt" to System.currentTimeMillis(), "probe" to probe,
-            "modelId" to profile.getString("modelId"),"thinkingEffort" to profile.getString("thinkingEffort"),"contextWindow" to profile.getInt("contextWindow"),"modelProfileRevision" to profile.getInt("revision"),"providerConfigId" to profile.getString("providerConfigId"),"providerName" to profile.getString("providerName"),"provider" to profile.getString("provider"), "capabilityEpoch" to b.capabilityEpoch, "contexts" to JSONArray())
+            "modelId" to profile.getString("modelId"),"protocol" to profile.getString("protocol"),"thinkingEffort" to profile.getString("thinkingEffort"),"contextWindow" to profile.getInt("contextWindow"),"modelProfileRevision" to profile.getInt("revision"),"providerConfigId" to profile.getString("providerConfigId"),"providerName" to profile.getString("providerName"),"provider" to profile.getString("provider"), "capabilityEpoch" to b.capabilityEpoch, "contexts" to JSONArray())
         state.getJSONArray("runs").put(r)
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "user", "text" to text, "attachments" to pendingImages, "status" to "complete"))
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "assistant", "text" to "", "attachments" to JSONArray(), "status" to "streaming"))
@@ -1164,6 +1165,7 @@ class ProductHost private constructor(private val context: Context, private val 
         v.put("activeRunId",selectedBinding?.runId ?: JSONObject.NULL)
         v.put("activeRuns",JSONArray(bindings.values.map {b->obj("id" to b.runId,"sessionId" to b.sessionId,"status" to run(b.runId).optString("status").let {if(it in terminal)"stopping" else it},"stopReason" to run(b.runId).optString("stopReason"))}))
         v.put("modelChoices",modelChoices()).put("modelSelection",selectedProfile(session(state.getString("selected")),false))
+        v.put("tokenPricing",tokenPricing)
         v.put("error", lastError ?: JSONObject.NULL)
         v.put("modelStatus", modelStatus())
         return v
