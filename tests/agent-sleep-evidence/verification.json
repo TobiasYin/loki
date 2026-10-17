@@ -1,0 +1,15 @@
+{
+  "androidUnitTests": 206,
+  "androidUnitFailures": 0,
+  "runtimeTests": 317,
+  "runtimeFailures": 0,
+  "webTests": 82,
+  "webFailures": 0,
+  "realModelAcceptance": [
+    "physical",
+    "emulator"
+  ],
+  "integrationTypeCheck": "passed",
+  "build": "passed",
+  "lintDebug": "passed"
+}

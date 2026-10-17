@@ -144,7 +144,8 @@ export class ThorRuntime {
     if (!t.requiredCapabilities.every(c => s.session.enabled[c])) fail('CAPABILITY_DISABLED');
     if (!a.effective.some(x => x.toolId === t.toolId)) fail('BACKEND_UNAVAILABLE');
     if (!this.registry.effective(s).some(x => x.toolId === t.toolId)) fail(unavailableToolReason(t, s));
-    if (s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
+    // Sleep has no screen target. A changing page must not invalidate its timer.
+    if (t.toolId !== 'agent.sleep' && s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
     if (a.observationRequired && dependsOnScreen(t)) fail('TARGET_CHANGED');
     return s;
   }
@@ -194,6 +195,10 @@ export class ThorRuntime {
           receipt = { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef };
           if (effect) Object.assign(effect, receipt);
           const outcomeError = toolOutcomeError(outcome.error);
+          // Native revokes the lease synchronously on Stop, before its UI state
+          // publication reaches JS. Preserve that terminal receipt immediately;
+          // another authority RPC would mask cancellation as a stale lease.
+          if (outcomeError === 'CANCELLED' || outcomeError === 'STALE_AUTHORIZATION') fail(outcomeError);
           const rejectedScreenRead = t.effectClass === 'read' && t.requiredCapabilities.includes('screen_perception') && outcomeError !== undefined;
           // A rejected read has no body to admit. Recheck authority/capabilities
           // first, then preserve Native's fixed refusal instead of masking it
@@ -236,6 +241,12 @@ export class ThorRuntime {
           const content = [{ type: 'text' as const, text: recovery ? JSON.stringify(result) : code }];
           if (recovery) a.resultRefs.set(callId, content);
           await this.event(a, 'tool_result', { toolId: t.toolId, ...result, ...(recovery ? { content } : {}) }, callId);
+          // Commit the final tool result before aborting Pi. A terminal Native
+          // rejection must never be fed into a new model round while we wait for
+          // a delayed chat/authority publication to call stop().
+          if (code === 'CANCELLED' || code === 'STALE_AUTHORIZATION') {
+            a.stopReason = code; a.controller.abort(); a.agent?.abort();
+          }
           return { content, details: result, isError: true, terminate: a.controller.signal.aborted || !!signal?.aborted };
         } finally { clearTimeout(timer); a.controller.signal.removeEventListener('abort', cancel); signal?.removeEventListener('abort', cancel); }
       } }));

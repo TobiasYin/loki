@@ -9,4 +9,6 @@ JS 内部 Runtime v0.1 信封在适配边界转换成 Native wire v1；不直接
 
 设备复杂 schema 由同一 bundled contract 在 Runtime 和 Native `InputSchemas` 双重校验。产品经过 `tools.Gateway` + `DeviceAuthority`，不绕过 scalar-only 的旧 bridge ToolGateway；该旧网关保留供 bridge 诊断宿主测试。
 
+`thor.agent` 内置包提供 `agent.sleep`（模型名 `agent_sleep`），参数只有整数 `durationMs: 1..60000`，用于等待加载或动画后再次观察。其描述符由 `runtime/src/agent-tools.ts` 定义，经 `integration/agent-tools.ts` 复用；注册器只允许这一精确契约免设备 capability，不接受改名、扩展参数或改用其他执行器/资源。Native 在支持工具的正常任务中发布 `agent.sleep` availability，配置探测不发布。执行仍经过正常的 prepare/execute 和 Session/Run/lease/epoch 校验，使用可取消的 Native 定时器，不借用屏幕、网络或 shell 权限。等待只暂停所属任务；停止立即取消。完成等待不是页面成功证据，也不会刷新截图或输入引用。
+
 手柄按钮与六轴采用固定 evdev 后端，核对真实 Odin Controller 节点、固件映射、初始未按下/中立状态和上屏物理焦点；不把 InputManager 注入返回的身份当作接收端事实。Shizuku 手柄调用分离 prepare/start/poll，短 start 在 Native 原子授权内提交，元数据查询与持有等待在锁外；服务检查 shell UID、caller、token、deadline 和 owner binder。终止直接子进程不证明所有后代已结束。真实 Thor 路由、清理边界和验收见 [0.6手柄说明](../docs/release-0.6-gamepad.md)。

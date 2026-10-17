@@ -1,5 +1,6 @@
 import { Value } from 'typebox/value';
 import { CAPABILITIES, RuntimeError, type AuthoritySnapshot, type ToolDescriptor, type ToolPack } from './contracts.js';
+import { isBuiltinAgentSleep } from './agent-tools.js';
 
 /** Only explicitly registered, audited build-time packs. No script/plugin loading. */
 export class ToolRegistry {
@@ -13,7 +14,9 @@ export class ToolRegistry {
       if (!/^[a-zA-Z0-9_-]{1,64}$/.test(t.modelName) || this.tools.has(t.modelName) || names.has(t.modelName) || ids.has(t.toolId) || [...this.tools.values()].some(x => x.toolId === t.toolId)) throw new RuntimeError('PROTOCOL_ERROR', 'Duplicate/invalid tool identity');
       const internalProbe = pack.packId === 'configuration-probe' && t.toolId === 'probe.picture' && t.executor === 'native-probe' && t.provenance === 'native-configuration-probe' && t.effectClass === 'read';
       const internalSkill = pack.packId === 'thor.skills' && ['skills.list','skills.read','skills.save','skills.enable','skills.delete'].includes(t.toolId) && t.executor === 'native-skills' && t.provenance === 'builtin' && t.resources.join() === 'local-skills' && ['read','write'].includes(t.effectClass);
-      if (!t.executor || !t.schemaVersion || !t.toolId || !t.concurrencyKey || !t.provenance || (!t.requiredCapabilities.length && !internalProbe && !internalSkill) || t.requiredCapabilities.some(c => !CAPABILITIES.includes(c))) throw new RuntimeError('UNSUPPORTED', 'Invalid tool contract/capability');
+      const internalSleep = isBuiltinAgentSleep(pack, t);
+      if ((pack.packId === 'thor.agent' || t.toolId === 'agent.sleep' || t.modelName === 'agent_sleep' || t.executor === 'native-agent') && !internalSleep) throw new RuntimeError('UNSUPPORTED', 'Invalid built-in agent tool');
+      if (!t.executor || !t.schemaVersion || !t.toolId || !t.concurrencyKey || !t.provenance || (!t.requiredCapabilities.length && !internalProbe && !internalSkill && !internalSleep) || t.requiredCapabilities.some(c => !CAPABILITIES.includes(c))) throw new RuntimeError('UNSUPPORTED', 'Invalid tool contract/capability');
       if (t.effectClass === 'arbitrary-shell' && !t.requiredCapabilities.includes('adb_debug')) throw new RuntimeError('UNSUPPORTED', 'Shell requires adb_debug');
       const schema = t.inputSchema as { type?: string; additionalProperties?: boolean };
       if (t.timeoutMs <= 0 || t.outputPolicy.maxTextBytes < 1 || t.outputPolicy.maxImageBytes < 0 || t.outputPolicy.maxImages < 0 || t.outputPolicy.imageTokenEstimate < 1 || schema.type !== 'object' || schema.additionalProperties !== false) throw new RuntimeError('UNSUPPORTED', 'Tool schema/budget unsupported');

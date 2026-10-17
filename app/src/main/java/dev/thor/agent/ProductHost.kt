@@ -128,8 +128,9 @@ class ProductHost private constructor(private val context: Context, private val 
     @Volatile private var modelStatusCache="模型未配置"
     @Volatile private var modelLabelCache="添加模型"
     private val prepared = PreparedTools<Prepared>()
+    private val agentSleep=AgentSleep({clock.now()})
     private data class Prepared(val e: Envelope, val args: Map<String, Any?>, val fingerprint: String,
-        val approvalId: String?, val approved: CompletableFuture<Boolean>, val approval: Approval?, val summary: String)
+        val approvalId: String?, val approved: CompletableFuture<Boolean>, val approval: Approval?, val summary: String, @Volatile var cancelled:Boolean=false)
     private var probeToken: String? = null
     private var probeTokenSession: String? = null
     private var probeTokenProfile: String? = null
@@ -319,7 +320,7 @@ class ProductHost private constructor(private val context: Context, private val 
     private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null, sessionsOnly:Boolean=false,changedSessionId:String?=null,newAttachment:JSONObject?=null,startupRecoveredRunIds:Set<String>?=null,deletedSessionIds:Set<String> = emptySet()) { try {
         val affected=changedSessionId ?: currentRun?.optString("sessionId") ?: newAttachment?.getString("sessionId")
         for(s in rows("sessions").filter {affected==null || it.getString("id")==affected}) {s.put("capabilityEpoch",authority.sessionEpoch(s.getString("id")));val granted=authority.sessionEnabled(s.getString("id"));for((name,cap) in capNames)s.getJSONObject("capabilities").put(name,cap in granted)}
-        if(startupRecoveredRunIds!=null)store.saveStartupRecovery(state,startupRecoveredRunIds) else if(newAttachment!=null)store.saveAttachment(newAttachment) else if(sessionsOnly)store.saveSessionUpdate(state,changedSessionId) else if(currentRun==null)store.savePartialSnapshot(state,deletedSessionIds) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.loadShell();eventIndex.clear();chatEvents.clear();throw PersistenceFailure(e) } }
+        if(startupRecoveredRunIds!=null)store.saveStartupRecovery(state,startupRecoveredRunIds) else if(newAttachment!=null)store.saveAttachment(newAttachment) else if(sessionsOnly)store.saveSessionUpdate(state,changedSessionId) else if(currentRun==null)store.savePartialSnapshot(state,deletedSessionIds) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop();agentSleep.cancelAll(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.loadShell();eventIndex.clear();chatEvents.clear();throw PersistenceFailure(e) } }
     private fun newSession(): String {
         val previous=rows("sessions").singleOrNull {it.getString("id")==state.optString("selected")}
         val caps=previous?.getJSONObject("capabilities")?.let {JSONObject(it.toString())} ?: obj("perception" to true,"search" to true,"screen_control" to false,"debug" to false)
@@ -375,7 +376,7 @@ class ProductHost private constructor(private val context: Context, private val 
                     "network.tool.begin" -> networkTool(c, data)
                     "tool.cancel" -> {
                         val b=bound(c,data);val request=data.getString("requestId");val p=prepared[request]
-                        if(p!=null) {require(p.e.runId==b.runId && p.e.toolCallId==data.getString("toolCallId"));p.approved.complete(false)}
+                        if(p!=null) {require(p.e.runId==b.runId && p.e.toolCallId==data.getString("toolCallId"));p.cancelled=true;p.approved.complete(false);agentSleep.cancel(b.runId,request)}
                         deviceAuthority.cancelTool(b.runId,request)
                         if(p?.approvalId!=null && run(b.runId).optJSONObject("approval")?.optString("id")==p.approvalId) {run(b.runId).getJSONObject("approval").put("status","cancelled");persist(run(b.runId));publish()}
                         obj()
@@ -396,7 +397,8 @@ class ProductHost private constructor(private val context: Context, private val 
                 val code=when(e) {is ToolFailure ->e.code.name;is dev.thor.bridge.BridgeFailure ->e.code.name;is IllegalArgumentException,is org.json.JSONException ->"INVALID_ARGUMENT";else ->"IO_ERROR"}
                 // Recoverable stale tool targets remain tool results; do not
                 // overwrite an unrelated page error while asking for a new observation.
-                if(!(request.optString("op")=="tool.prepare" && code=="TARGET_CHANGED"))
+                val quietCancellation=request.optString("op") in setOf("tool.cancel","authority") && code in setOf("STALE_AUTHORIZATION","CANCELLED")
+                if(!quietCancellation && !(request.optString("op")=="tool.prepare" && code=="TARGET_CHANGED"))
                     lastError = if(request.optString("op") == "begin") when {providerModels.isEmpty()->"模型未配置：请在设置填写 API Key 和服务地址。";storageFailed->"本地存储不可用，历史已保留。";else->"任务暂未启动：检查当前会话是否仍有任务，或查看模型设置中的具体错误。"} else "操作被拒绝：检查授权、活动运行或本地存储。"
                 val content=JSONArray()
                 if(code=="COMMAND_BLOCKED")content.put(obj("type" to "text","text" to obj("policyVersion" to ShellCommandPolicy.VERSION,"policyTier" to "black","executed" to false,"reason" to (e as ToolFailure).message).toString()))
@@ -407,7 +409,7 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     private fun begin(c: String, d: JSONObject): JSONObject {
         val began=clock.now()
-        require(prefs.getInt("revision",-1)==revision);lastError=null; val sid = d.getString("sessionId"); val s = session(sid); require(s.isNull("archivedAt"))
+        require(prefs.getInt("revision",0)==revision);lastError=null; val sid = d.getString("sessionId"); val s = session(sid); require(s.isNull("archivedAt"))
         val profile = selectedProfile(s)
         val probe = d.optString("probeToken").isNotEmpty() && d.optString("probeToken") == probeToken
         require(bindings.values.none {it.sessionId==sid} && bindings.size<8)
@@ -442,7 +444,7 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     private fun bindingJson(b: Binding) = obj("sessionId" to b.sessionId, "runId" to b.runId, "lease" to b.lease, "connectionId" to b.connectionId, "capabilityEpoch" to b.capabilityEpoch)
     private fun authoritySnapshot(b:Binding,refresh: Boolean): JSONObject {
-        val scope=scope(b);runMetrics[b.runId]?.let {it.putIfAbsent("firstAuthorityMs",clock.now()-it.getValue("beginElapsedRealtime"))};authority.validate(b);require(prefs.getInt("revision",-1)==revision)
+        val scope=scope(b);runMetrics[b.runId]?.let {it.putIfAbsent("firstAuthorityMs",clock.now()-it.getValue("beginElapsedRealtime"))};authority.validate(b);require(prefs.getInt("revision",0)==revision)
         val granted=authority.enabled(b)
         var snapshot=scope.snapshot;var pendingPerceptionSnapshot=scope.pendingPerceptionSnapshot
         val wantsScreen=dev.thor.bridge.Capability.screen_perception in granted || dev.thor.bridge.Capability.screen_control in granted
@@ -495,7 +497,8 @@ class ProductHost private constructor(private val context: Context, private val 
         var publishedTools = allowed.toSet() + if(b.runId == probeRun) setOf("probe.picture") else if(dev.thor.bridge.Capability.web_search in authority.enabled(b)) setOf("web.fetch") + if(searchConfigured)setOf("web.search") else emptySet() else emptySet()
         if(b.runId != probeRun) {
             for(tool in skillToolIds)available.put(tool,obj("status" to "ready"))
-            publishedTools=publishedTools+skillToolIds
+            available.put("agent.sleep",obj("status" to "ready","reason" to "可取消的异步等待，无需设备权限"))
+            publishedTools=publishedTools+skillToolIds+"agent.sleep"
         }
         if(b.runId!=probeRun && !profile.optBoolean("supportsTools",true))publishedTools=emptySet()
         scope.publishedTools=publishedTools
@@ -524,7 +527,8 @@ class ProductHost private constructor(private val context: Context, private val 
         if(j.getString("toolId") in setOf("web.search","web.fetch","web.request"))require(j.getJSONArray("resources").toString() == "[\"public-web\"]")
         if(j.getString("toolId") == "probe.picture")require(j.getJSONArray("resources").toString() == "[\"fixture\"]")
         if(j.getString("toolId") in skillToolIds)require(j.getJSONArray("resources").toString()=="[\"local-skills\"]")
-        val remaining = (j.getLong("deadline") - System.currentTimeMillis()).coerceAtMost(authority.remainingLeaseMs(b)).coerceAtMost(60000)
+        if(j.getString("toolId")=="agent.sleep")require(j.getJSONArray("resources").toString()=="[\"agent-runtime\"]")
+        val remaining = (j.getLong("deadline") - System.currentTimeMillis()).coerceAtMost(authority.remainingLeaseMs(b)).coerceAtMost(if(j.getString("toolId")=="agent.sleep")65000 else 60000)
         require(remaining > 0)
         return Envelope(b.sessionId, b.runId, j.getString("toolCallId"), j.getString("toolId"), b.capabilityEpoch, clock.now() + remaining,
             if(snapshot != null) j.getString("targetSnapshotId") else null, j.getString("schemaVersion").toInt(), j.getString("requestId"))
@@ -538,6 +542,12 @@ class ProductHost private constructor(private val context: Context, private val 
             require(j.getJSONArray("resources").toString() == contract.getValue(e.toolId).getJSONArray("resources").toString())
         }
         require(rows("events").any { it.getString("runId") == e.runId && it.optString("toolCallId") == e.toolCallId && it.getString("type") == "tool_intent" })
+        if(e.toolId=="agent.sleep") {
+            require(e.runId!=probeRun)
+            AgentSleep.duration(j.getJSONObject("arguments"))
+            prepared.prepare(e.runId,e.requestId,e.toolCallId,Prepared(e,args,hash(j.getJSONObject("arguments").toString().toByteArray()),null,CompletableFuture.completedFuture(true),null,""))
+            return obj()
+        }
         if(e.toolId == "probe.picture") {
             require(e.runId == probeRun && args.isEmpty())
             prepared.prepare(e.runId,e.requestId,e.toolCallId,Prepared(e,args,hash(j.getJSONObject("arguments").toString().toByteArray()),null,CompletableFuture.completedFuture(true),null,""))
@@ -626,6 +636,23 @@ class ProductHost private constructor(private val context: Context, private val 
         // Keep the record available to approval/cancel while executing, but claim
         // only once. Every completion path releases its payload, including errors.
         future.whenComplete {_,_->prepared.finish(e.requestId,p);deviceAuthority.finishTool(e.runId,e.requestId)}
+        if(e.toolId=="agent.sleep") {
+            fun rejected(code:String)=obj("error" to code,"content" to JSONArray(),"observedAt" to System.currentTimeMillis(),"source" to "agent-timer","truncated" to false,"outcome" to "observed")
+            if(p.cancelled) {future.complete(rejected("CANCELLED"));return}
+            val waiting=try {agentSleep.start(e.runId,e.requestId,AgentSleep.duration(j.getJSONObject("arguments")),e.deadline)}
+                catch(error:ToolFailure) {future.complete(rejected(error.code.name));return}
+            waiting.whenComplete {receipt,error->
+                val complete=Runnable {
+                    try {
+                        if(error!=null)throw error
+                        bound(c,j);requireTool(!p.cancelled,Code.CANCELLED,"Wait cancelled")
+                        future.complete(obj("content" to JSONArray().put(obj("type" to "text","text" to obj("durationMs" to receipt.durationMs,"elapsedMs" to receipt.elapsedMs).toString())),"observedAt" to System.currentTimeMillis(),"source" to "agent-timer","truncated" to false,"outcome" to "observed"))
+                    }catch(error:Throwable) {future.complete(obj("error" to ((error as? ToolFailure)?.code?.name ?: "CANCELLED"),"content" to JSONArray(),"observedAt" to System.currentTimeMillis(),"source" to "agent-timer","truncated" to false,"outcome" to "observed"))}
+                }
+                try {serial.execute(complete)}catch(_:java.util.concurrent.RejectedExecutionException) {future.complete(obj("error" to "CANCELLED","content" to JSONArray(),"source" to "agent-timer","truncated" to false,"outcome" to "observed","observedAt" to System.currentTimeMillis()))}
+            }
+            return
+        }
         if (e.toolId == "probe.picture") {
             require(e.runId == probeRun && j.getJSONObject("arguments").length() == 0); probeTools++
             val b=bindingFor(j);val content=if(supportsImages(scope(b).profile))obj("type" to "attachment","attachmentId" to addProbeImage(b)) else obj("type" to "text","text" to "PROBE_TEXT_OK")
@@ -755,7 +782,7 @@ class ProductHost private constructor(private val context: Context, private val 
             r.put("probePassed", passed)
             check(prefs.edit().putBoolean(probeKey(scope(b).profile),passed).commit())
         }
-        authority.stopRun(b.runId);deviceAuthority.stop(b.runId);backend.release(b.runId);prepared.values.filter {it.e.runId==b.runId}.forEach {it.approved.complete(false)};prepared.removeRun(b.runId);bindings.remove(b.runId);scopes.remove(b.runId);if(probeRun==b.runId)probeRun=null
+        agentSleep.cancel(b.runId);authority.stopRun(b.runId);deviceAuthority.stop(b.runId);backend.release(b.runId);prepared.values.filter {it.e.runId==b.runId}.forEach {it.approved.complete(false)};prepared.removeRun(b.runId);bindings.remove(b.runId);scopes.remove(b.runId);if(probeRun==b.runId)probeRun=null
         rows("messages").filter { it.getString("runId") == b.runId }.forEach { it.put("status", "complete") }
         runMetrics.remove(b.runId)?.let {r.put("timings",JSONObject(it.toMap()))}
         modelHttpReceipts.remove(b.runId)?.let {receipts->r.put("modelTransport",JSONArray(receipts.values.map {it.snapshot()}))}
@@ -864,6 +891,7 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     fun stop(reason:String,runId:String?=null) {
         authority.stopRun(runId);deviceAuthority.stop(runId)
+        if(runId==null)agentSleep.cancelAll() else agentSleep.cancel(runId)
         prepared.values.filter {runId==null || it.e.runId==runId}.forEach {it.approved.complete(false)}
         bindings.values.filter {runId==null || it.runId==runId}.forEach {b->backend.release(b.runId);run(b.runId).takeIf {it.optString("status") !in terminal}?.put("stopReason",reason)}
     }
@@ -875,7 +903,7 @@ class ProductHost private constructor(private val context: Context, private val 
         val affected=if(!sessionId.isNullOrBlank())authority.stopSessionRuns(sessionId,runId) else if(!runId.isNullOrBlank()) {
             authority.stopRun(runId);listOf(runId)
         } else emptyList()
-        affected.forEach {deviceAuthority.stop(it)}
+        affected.forEach {deviceAuthority.stop(it);agentSleep.cancel(it)}
         runCatching {serial.execute {
             if(closing)return@execute
             val existing=affected.filter {it in bindings}
@@ -887,7 +915,7 @@ class ProductHost private constructor(private val context: Context, private val 
      * even when no chat Activity or responsive renderer is available. */
     fun stopAllFromNotification() {
         if(closing)return
-        authority.stopRun();deviceAuthority.stop()
+        authority.stopRun();deviceAuthority.stop();agentSleep.cancelAll()
         runCatching {serial.execute {
             if(closing)return@execute
             val affected=bindings.values.map {it.runId}
@@ -1102,7 +1130,7 @@ class ProductHost private constructor(private val context: Context, private val 
         if(closing)return;closing=true
         publishHandler.removeCallbacksAndMessages(null)
         displayManager.unregisterDisplayListener(displayListener)
-        authority.stopRun(); prepared.values.forEach { it.approved.complete(false) }
+        authority.stopRun();agentSleep.close(); prepared.values.forEach { it.approved.complete(false) }
         ThorAccessibilityService.invalidated = null
         serial.execute {
             var failure:Throwable?=null
