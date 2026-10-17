@@ -10,14 +10,15 @@ import java.util.UUID
 /** Display-only document. It has neither the execution bridge nor a native
  * authority/network/tool endpoint. Every navigation rotates its private peer. */
 internal class ChatUiBridge(private val web:WebView,private val onCommand:(JSONObject)->Unit,
-    private val onHello:()->Unit,private val onRendererGone:()->Unit,private val onDocumentInvalidated:()->Unit,private val startupAttempt:Long=0):AutoCloseable {
-    private var closed=false
-    private var generation=""
-    private var committed=false
+    private val onHello:()->Unit,private val onRendererGone:()->Unit,private val onDocumentInvalidated:()->Unit,private val startupAttempt:Long=0,
+    private val readImage:(ChatImageRequest)->ChatImage?={null}):AutoCloseable {
+    @Volatile private var closed=false
+    @Volatile private var generation=""
+    @Volatile private var committed=false
     private var peer:JavaScriptReplyProxy?=null
     val supported=WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)
     private val assets=setOf("/assets/chat/index.html","/assets/chat/style.css","/assets/chat/ui.js","/assets/chat/chat-host.js",
-        "/assets/chat/send-errors.js","/assets/chat/usage-footer.js","/assets/chat/vendor/marked.umd.js","/assets/chat/vendor/purify.min.js")
+        "/assets/chat/send-errors.js","/assets/chat/usage-footer.js","/assets/chat/tool-presentation.js","/assets/chat/vendor/marked.umd.js","/assets/chat/vendor/purify.min.js")
     private val loader=WebViewAssetLoader.Builder().addPathHandler("/assets/",WebViewAssetLoader.AssetsPathHandler(web.context)).build()
     init {
         web.settings.apply {
@@ -42,9 +43,18 @@ internal class ChatUiBridge(private val web:WebView,private val onCommand:(JSONO
             }
             override fun shouldInterceptRequest(view:WebView,request:WebResourceRequest):WebResourceResponse {
                 val uri=request.url
+                if(!request.isForMainFrame && uri.scheme=="https" && uri.host=="appassets.androidplatform.net" && uri.port==-1 && uri.encodedQuery==null && uri.fragment==null && request.method=="GET") {
+                    val imageRequest=ChatImagePolicy.parse(uri.encodedPath.orEmpty())
+                    if(imageRequest!=null && !closed && committed) {
+                        val document=generation
+                        val image=runCatching {readImage(imageRequest)}.getOrNull()
+                        if(image!=null && !closed && committed && document==generation)return WebResourceResponse(image.mimeType,null,200,"OK",
+                            mapOf("Cache-Control" to "no-store","X-Content-Type-Options" to "nosniff"),ByteArrayInputStream(image.bytes))
+                    }
+                }
                 if(uri.scheme=="https" && uri.host=="appassets.androidplatform.net" && uri.port==-1 && uri.encodedQuery==null && uri.fragment==null && uri.path in assets) {
                     loader.shouldInterceptRequest(uri)?.let {response->
-                        response.responseHeaders=mapOf("Content-Security-Policy" to "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'","X-Content-Type-Options" to "nosniff","Cache-Control" to "no-store")
+                        response.responseHeaders=mapOf("Content-Security-Policy" to "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'","X-Content-Type-Options" to "nosniff","Cache-Control" to "no-store")
                         return response
                     }
                 }

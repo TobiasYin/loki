@@ -23,6 +23,34 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     private val main = Handler(Looper.getMainLooper())
     private val inputState=BoundedInputState()
     private val frames = java.util.concurrent.ConcurrentHashMap<String, InputFrameBinding>()
+    private data class PresentationFrame(val sessionId:String,val runId:String,val capabilityEpoch:Long,val snapshot:Snapshot,val transform:FrameTransform,val order:Long)
+    private val presentationFrames=java.util.concurrent.ConcurrentHashMap<String,PresentationFrame>()
+    private val presentationOrder=java.util.concurrent.atomic.AtomicLong()
+    /** Pure cached provenance only: a reference picture is never fresh input authority. */
+    private fun actionPresentation(e:Envelope,snapshot:Snapshot,points:List<Point>?=null,bounds:TouchableBounds?=null,exactFrameId:String?=null):Map<String,Any?> = runCatching {
+        val marker=points ?: bounds?.let {listOf(Point(it.left.toDouble(),it.top.toDouble()),Point(it.right.toDouble(),it.bottom.toDouble()))}.orEmpty()
+        val frameId=exactFrameId ?: presentationFrames.entries.asSequence().filter {(_,frame)->
+            val old=frame.snapshot;val t=frame.transform
+            frame.sessionId==e.sessionId && frame.runId==e.runId && frame.capabilityEpoch==e.capabilityEpoch &&
+                old.role==snapshot.role && old.display==snapshot.display && old.displayEpoch==snapshot.displayEpoch &&
+                old.target.sameInputTarget(snapshot.target) && old.target.touchableBounds==snapshot.target.touchableBounds &&
+                marker.all {it.x>=t.left && it.y>=t.top && it.x<=t.left+t.width && it.y<=t.top+t.height}
+        }.maxByOrNull {it.value.order}?.key
+        val visual=linkedMapOf<String,Any?>("kind" to e.toolId,"targetSnapshotId" to snapshot.id,
+            "displayRole" to snapshot.role,"displayId" to snapshot.display.id,"coordinateSpace" to "display_logical")
+        if(frameId!=null) {
+            val transform=presentationFrames[frameId]?.transform ?: frames[frameId]?.transform
+            if(transform!=null) {
+                visual["frameId"]=frameId
+                visual["transform"]=mapOf("left" to transform.left,"top" to transform.top,
+                    "displayWidth" to transform.width,"displayHeight" to transform.height,
+                    "imageWidth" to transform.imageWidth,"imageHeight" to transform.imageHeight)
+            }
+        }
+        if(points!=null)visual["points"]=points.map {mapOf("x" to it.x,"y" to it.y)}
+        if(bounds!=null)visual["bounds"]=mapOf("left" to bounds.left,"top" to bounds.top,"right" to bounds.right,"bottom" to bounds.bottom)
+        mapOf<String,Any?>("visual" to visual)
+    }.getOrDefault(emptyMap())
     var approval: Approval? = null
     var shellApproval: String? = null
     var installApproval: String? = null
@@ -435,6 +463,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val snapshot=snapshots.validateObservation(e.snapshotId)
         requireTool(snapshot.target.validity=="valid" && !snapshot.target.packageName.isNullOrBlank(),Code.TARGET_CHANGED,"Activation requires an unambiguous selected-screen app")
         val done=CountDownLatch(1);var accepted=false;var error:ToolFailure?=null
+        var presentation:Map<String,Any?> = emptyMap()
         main.post {
             val resolved=mutableListOf<AccessibilityNodeInfo>()
             try {
@@ -478,6 +507,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                         }
                         snapshots.validateObservation(e.snapshotId) // Recheck structure/clip after resolving the node.
                         cp.check()
+                        if(textCommand==null)presentation=actionPresentation(e,snapshot,bounds=actionBounds)
                         cp.submitted() // The action can reach the app even if its Binder reply fails.
                         accepted=if(textCommand==null)node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                             else node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,bundle)
@@ -497,7 +527,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val detail=if(textCommand==null)emptyMap() else mapOf("mode" to textCommand.mode,"characterCount" to textCommand.text.codePointCount(0,textCommand.text.length),"enterSubmitted" to false)
         return result(e,detail+mapOf("submitted" to true,"action" to if(textCommand==null)"click" else "set_text","actionAccepted" to accepted,"foregroundVerified" to false,
             "nodeRefsInvalidated" to true,"nextStep" to "Re-observe ui_tree or screenshot to verify the result before any next input"),outcome="submitted")
-            .copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected the Accessibility action; re-observe before another action")
+            .copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected the Accessibility action; re-observe before another action",presentation=presentation)
     }
     private val actionNames=mapOf(
         AccessibilityNodeInfo.ACTION_CLICK to "click",AccessibilityNodeInfo.ACTION_LONG_CLICK to "long_click",AccessibilityNodeInfo.ACTION_FOCUS to "focus",
@@ -699,6 +729,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 val frame = java.util.UUID.randomUUID().toString()
                 val output = File(attachments, "$frame.jpg"); output.writeBytes(encoded);storedImage=output
                 frames.entries.removeIf { !File(attachments, "${it.key}.jpg").exists() }
+                runCatching {presentationFrames.keys.retainAll(frames.keys)}
                 val transform = FrameTransform(rect.left, rect.top, rect.width(), rect.height(), scaled!!.width, scaled!!.height)
                 cp.check()
                 val completed=if(companionObservation!=null)snapshots.completeCompanion(companionObservation) else snapshots.captureReadCompletion(snap.id)
@@ -726,6 +757,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 // window, exact clipping and interaction layout still match.
                 // Scrolling/reflow cannot make an older image newly input-usable.
                 frames[frame] = InputFrameBinding(e.sessionId,e.runId,if(inputCompatible)completed.id else snap.id,transform)
+                // UI provenance retains the captured pixels, not a replacement observation.
+                runCatching {presentationFrames[frame]=PresentationFrame(e.sessionId,e.runId,e.capabilityEpoch,snap,transform,presentationOrder.incrementAndGet())}
                 return result(e.copy(snapshotId=completed.id), mapOf("displayRole" to snap.role, "displayId" to snap.display.id, "frameId" to frame, "attachmentRef" to output.absolutePath,
                     "requestSnapshotId" to e.snapshotId,"captureSnapshotId" to snap.id,"targetSnapshotId" to completed.id,"frameInputUsable" to inputCompatible,"contentChangedDuringCapture" to !contentUnchanged,
                     "inputTargetChangedDuringCapture" to !inputCompatible,"frameInputPolicy" to "same_window_geometry_and_interaction_layout","observedTargetPackage" to snap.target.packageName,
@@ -759,6 +792,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val path = Path().apply { moveTo(points[0].x.toFloat(), points[0].y.toFloat()); points.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) } }
         val gesture = GestureDescription.Builder().setDisplayId(snap.display.id).addStroke(GestureDescription.StrokeDescription(path, 0, duration)).build()
         val done = CountDownLatch(1); var completed = false; var accepted = false; var dispatchError: ToolFailure? = null
+        var presentation:Map<String,Any?> = emptyMap()
         main.post {
             try {
                 cp.check() // Final target/auth check immediately before the actual system dispatch.
@@ -768,6 +802,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                         requireTool(snapshots.validateInputFrame(frame,e.sessionId,e.runId,e.snapshotId,raw)==points,Code.TARGET_CHANGED,"Frame mapping changed before input submission")
                     }
                     snapshots.validateInputPoints(e.snapshotId,points)
+                    presentation=actionPresentation(e,snap,points=points,exactFrameId=frameId)
                     invalidateNodeRefs()
                     // Register before Binder submission so an early callback cannot be lost.
                     // A normally pending stroke is owned by the Gateway resource lock,
@@ -793,13 +828,14 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         dispatchError?.let { throw it }
         requireTool(accepted, Code.BACKEND_UNAVAILABLE, "System rejected gesture")
         return result(e, mapOf("submitted" to true, "systemCallback" to if (completed) "completed" else "cancelled", "gameEffectObserved" to false,
-            "displayId" to snap.display.id, "durationMs" to duration,"gestureKind" to if(e.toolId=="input.drag")"bounded-drag-down-move-up" else e.toolId,"nodeRefsInvalidated" to true), outcome = if (completed) "submitted" else "unknown")
+            "displayId" to snap.display.id, "durationMs" to duration,"gestureKind" to if(e.toolId=="input.drag")"bounded-drag-down-move-up" else e.toolId,"nodeRefsInvalidated" to true), outcome = if (completed) "submitted" else "unknown").copy(presentation=presentation)
     }
     private fun await(done: CountDownLatch, e: Envelope, cp: Checkpoint) {
         while (!done.await(50, TimeUnit.MILLISECONDS)) { cp.check(); requireTool(clock.now() < e.deadline, Code.TIMEOUT, "Android callback deadline expired") }
         cp.check()
     }
     override fun release(runId: String): String {
+        runCatching {presentationFrames.entries.removeIf {it.value.runId==runId}}
         synchronized(nodeLock){if(nodeRefs.values.any {it.runId==runId})invalidateNodeRefs()}
         val gamepad=shizuku.releaseRunInputs(runId)
         if (inputState.abandonRun(runId)) { return "unknown: Android has no public cancelGesture; already submitted bounded stroke may finish within 5s; further gestures blocked until callback" }

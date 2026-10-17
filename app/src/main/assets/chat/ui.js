@@ -190,6 +190,46 @@
     }
     return list;
   }
+  function renderToolPresentation(body,view,run,call) {
+    if(view.kind==='search') {
+      body.append(element('small','搜索关键词'));body.append(element('div',view.query||'尚未生成搜索关键词','tool-search-query'));return;
+    }
+    if(view.kind==='missing-image'){body.append(element('div',call.result?'本次未取得可显示的截图。':'正在获取截图…','timeline-note'));return;}
+    if(view.kind==='missing-action') {
+      const coords=Number.isFinite(view.x) && Number.isFinite(view.y)?`点击位置（${view.x}, ${view.y}）。`:'';
+      body.append(element('div',coords+'此记录未关联对应截图，无法回放操作位置。','timeline-note'));return;
+    }
+    if(!/^[A-Za-z0-9_-]{1,160}$/.test(run.id) || !/^[A-Za-z0-9_-]{1,160}$/.test(run.sessionId))return;
+    const figure=element('figure',undefined,'tool-figure'),picture=element('div',undefined,'tool-picture');
+    const loading=element('div','正在加载历史截图…','timeline-note tool-image-loading');
+    const image=document.createElement('img');image.className='tool-image';image.alt=view.image.role?.startsWith('lower')?'下屏截图':'上屏截图';
+    const width=view.marker?.width??view.image.width,height=view.marker?.height??view.image.height;
+    if(Number.isFinite(width) && Number.isFinite(height) && width>0 && height>0){image.width=width;image.height=height;picture.style.width=`${Math.min(width,320*width/height)}px`;}
+    let overlay=null;
+    if(view.marker) {
+      const ns='http://www.w3.org/2000/svg';
+      const svg=(tag,attrs)=>{const node=document.createElementNS(ns,tag);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,String(value));return node;};
+      overlay=svg('svg',{class:'tool-markers',viewBox:`0 0 ${width} ${height}`,'aria-hidden':'true',preserveAspectRatio:'none',hidden:''});
+      const marker=view.marker;
+      if(marker.bounds)overlay.append(svg('rect',{...marker.bounds,rx:4,class:'tool-marker-region','vector-effect':'non-scaling-stroke'}));
+      else {
+        if(marker.points.length>1)overlay.append(svg('polyline',{points:marker.points.map(p=>`${p.x},${p.y}`).join(' '),class:'tool-marker-path','vector-effect':'non-scaling-stroke'}));
+        const radius=Math.max(width,height)*.018;
+        for(const point of marker.points.length>2?[marker.points[0],marker.points.at(-1)]:marker.points) {
+          overlay.append(svg('circle',{cx:point.x,cy:point.y,r:radius,class:'tool-marker-halo','vector-effect':'non-scaling-stroke'}),svg('circle',{cx:point.x,cy:point.y,r:radius,class:'tool-marker-ring','vector-effect':'non-scaling-stroke'}),svg('circle',{cx:point.x,cy:point.y,r:Math.max(width,height)*.0035,class:'tool-marker-dot'}));
+        }
+      }
+      overlay.dataset.submission=call.result?.submission??call.outcome??'unknown';
+    }
+    image.addEventListener('load',()=>{loading.remove();overlay?.removeAttribute('hidden');});
+    image.addEventListener('error',()=>{picture.remove();loading.textContent='历史截图暂不可用，可能已被清理。';});
+    picture.append(image);if(overlay)picture.append(overlay);figure.append(loading,picture);
+    figure.append(element('figcaption',view.kind==='action'?(view.component?'控件区域 · 操作前截图':'操作位置 · 操作前截图'):(view.image.role?.startsWith('lower')?'下屏截图':'上屏截图'),'tool-image-caption'));
+    body.append(figure);
+    // Only this fixed same-origin route can read pixels. Markdown, search
+    // results and external text never supply an image URL or a file path.
+    image.src=`/chat-images/${encodeURIComponent(run.sessionId)}/${encodeURIComponent(run.id)}/${view.image.attachmentId}`;
+  }
   function runView(run,runEvents,message,nodeCache,textInTimeline) {
     const events=(runEvents??state.events.filter(e=>e.runId===run.id)).slice().sort((a,b)=>a.sequence-b.sequence);
     const container=element('div');
@@ -201,11 +241,11 @@
     for(const event of events) {
       if(!['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type) && !isToolDiagnostic(event))continue;
       const id=callId(event);
-      const current=calls.get(id)??{id};const data=event.data??{};
+      const current=calls.get(id)??{id,runId:run.id,sessionId:run.sessionId,firstSequence:event.sequence};const data=event.data??{};
       Object.assign(current,{toolId:data.toolId??event.toolId??current.toolId,toolName:data.toolName??current.toolName});
       if(event.type==='tool_call_update')current.arguments=data.arguments;
       if(event.type==='tool_started'){current.started=true;current.arguments=data.arguments??current.arguments;}
-      if(event.type==='tool_result'){current.result=data;current.outcome=data.outcome??event.outcome;current.error=data.error??event.error;}
+      if(event.type==='tool_result'){current.result=data;current.resultSequence=event.sequence;current.outcome=data.outcome??event.outcome;current.error=data.error??event.error;}
       if(event.type==='diagnostic' && data.code!=='TARGET_CHANGED')current.diagnostics=[...new Set([...(current.diagnostics??[]),data.code??'TOOL_FAILED'])];
       if(event.type!=='diagnostic' && !current.result)current.outcome=data.outcome??event.outcome??current.outcome;
       calls.set(id,current);
@@ -304,19 +344,25 @@
     function renderCallBody(card,call) {
       let body=null;
       rememberDisclosure(card,`${run.id}:tool:${call.id}`,false,open=>{
-        if(!open){body?.remove();body=null;return;}
+        if(!open){body?.querySelectorAll('img').forEach(image=>image.removeAttribute('src'));body?.remove();body=null;return;}
         if(body)return;
         body=element('div',undefined,'tool-body');
         // Parsing and recursive structured DOM construction happen only inside
         // the one tool the user actually opened, never for collapsed history.
         const brightnessCall=call.toolId==='debug.thor_brightness' || call.toolName==='debug_thor_brightness';
+        const visual=window.ThorToolPresentation?.describe(call,[...calls.values()]);
         const percentInput=brightnessCall && ((!call.result && !terminal.has(run.status)) || (call.result?.content??[]).some(c=>{if(c.type!=='text')return false;try{return JSON.parse(c.text)?.unit==='percent';}catch{return false;}}));
-        if(call.arguments && Object.keys(call.arguments).length){body.append(element('small','输入'));body.append(structured(call.arguments,0,percentInput));}
+        if(!visual && call.arguments && Object.keys(call.arguments).length){body.append(element('small','输入'));body.append(structured(call.arguments,0,percentInput));}
         if(call.outcome==='unknown' && call.error!=='TARGET_CHANGED' && (call.result || ['failed','cancelled','interrupted'].includes(run.status)))body.append(element('div','副作用未知，请检查目标状态。','attention'));
         for(const code of call.diagnostics??[])if(code!==call.error && !(code==='TOOL_FAILED' && call.error))body.append(element('div',code==='TOOL_FAILED'?'工具执行失败。':`工具提示：${code}`,'timeline-note'));
         if(call.result) {
           if(call.error)body.append(element('div',call.error==='TARGET_CHANGED'?(reobservedCalls.has(call.id)?'此操作当时遇到页面变化，随后已重新观察。':'此操作当时遇到页面变化，未直接重放旧动作。'):`失败原因：${call.error}`,call.error==='TARGET_CHANGED'?'timeline-note':'attention'));
           if(call.error==='TARGET_CHANGED' && recoveryFact(call))body.append(element('div',recoveryFact(call)+'。','timeline-note'));
+        }
+        if(visual) {
+          renderToolPresentation(body,visual,run,call);card.append(body);return;
+        }
+        if(call.result) {
           for(const content of call.result.content??[]) {
             if(content.type==='attachment')body.append(element('div','已返回本地图片附件','muted'));
             else if(content.type==='text') {
@@ -396,7 +442,10 @@
       const expanded=history.dataset.expanded==='true';
       historySummary.textContent=activeRun?(expanded?'收起执行过程':`正在运行 · 已完成 ${completedOperations} 项操作`):`用时 ${executionDuration(run,events)}`;
       historySummary.setAttribute('aria-label',`${historySummary.textContent}，${expanded?'收起':'展开'}完整过程`);
-      for(const node of operations)node.hidden=!open && !recent.has(node);
+      for(const node of operations) {
+        node.hidden=!open && !recent.has(node);
+        if(node.hidden && node.open && node.querySelector('.tool-figure')){node.open=false;node.dispatchEvent(new Event('toggle'));}
+      }
       activity.dataset.view=open?'full':'compact';
       // User-facing Markdown stays visible when the process folds. Reuse the
       // same ordered nodes, so expansion never duplicates text or tool bodies.

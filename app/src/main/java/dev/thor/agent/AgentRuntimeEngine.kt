@@ -122,7 +122,8 @@ internal class AgentRuntimeEngine(private val owner:AgentRuntimeService):AutoClo
         },{
             chatRendererGone=true
             ui.get()?.runtimeUnavailable("聊天显示进程已退出；执行状态由服务保留，请重新打开聊天。")
-        },{queuedCommands.clear();queuedBytes=0;pendingUiEvents.clear();RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.UI_DOCUMENT_INVALIDATED)},startupAttempt)
+        },{queuedCommands.clear();queuedBytes=0;pendingUiEvents.clear();RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.UI_DOCUMENT_INVALIDATED)},startupAttempt,
+            readImage={request->host.readChatImage(request).get(5,java.util.concurrent.TimeUnit.SECONDS)})
     }
     private fun relayUi(data:JSONObject) {
         if(data.keys().asSequence().toSet()!=setOf("name","payload"))return

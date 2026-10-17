@@ -64,7 +64,9 @@ data class Envelope(val sessionId: String, val runId: String, val toolCallId: St
     val requestId: String = UUID.randomUUID().toString())
 data class ToolResult(val observedAt: Long, val source: String, val availability: Availability,
     val data: Map<String, Any?> = emptyMap(), val error: Code? = null, val message: String? = null,
-    val truncated: Boolean = false, val outcome: String = "observed", val snapshotId: String? = null)
+    val truncated: Boolean = false, val outcome: String = "observed", val snapshotId: String? = null,
+    /** Native display-only evidence. Keep separate from data/model tool content. */
+    val presentation: Map<String, Any?> = emptyMap())
 class Cancellation {
     private val stopped = AtomicBoolean(false)
     private val callbacks = CopyOnWriteArrayList<() -> Unit>()

@@ -2,7 +2,7 @@ import {chromium} from '../runtime/node_modules/@playwright/test/index.mjs';
 import {createServer} from 'node:http';
 import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
-const base='app/src/main/assets/chat/',allowed=new Set(['index.html','style.css','usage-footer.js','ui.js','vendor/marked.umd.js','vendor/purify.min.js']);
+const base='app/src/main/assets/chat/',allowed=new Set(['index.html','style.css','usage-footer.js','tool-presentation.js','ui.js','vendor/marked.umd.js','vendor/purify.min.js']);
 const server=createServer((req,res)=>{const name=req.url==='/'?'index.html':req.url.slice(1);if(name==='runtime-host.js'){res.setHeader('content-type','text/javascript');res.end('');return;}if(!allowed.has(name)){res.writeHead(404);res.end();return;}res.setHeader('content-type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');res.end(readFileSync(base+name));});
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});

@@ -70,6 +70,8 @@ class ProductHost private constructor(private val context: Context, private val 
     private var uiFactsAt=Long.MIN_VALUE
     private var uiFacts:JSONObject?=null
     private val tokenPricing by lazy {context.assets.open("token-pricing.json").bufferedReader().use {JSONObject(it.readText())}}
+    private val imageFrames=linkedMapOf<String,String>()
+    private val toolVisuals=linkedMapOf<String,JSONObject>()
     private var storageFailed = false
     @Volatile private var closing = false
     private var connection: String? = null
@@ -741,7 +743,19 @@ class ProductHost private constructor(private val context: Context, private val 
                             val observedAt=System.currentTimeMillis()
                             val aid = id(); val a = obj("id" to aid, "attachmentId" to aid, "sessionId" to e.sessionId, "runId" to e.runId, "mimeType" to "image/jpeg", "data" to Base64.encodeToString(bytes, Base64.NO_WRAP), "observedAt" to observedAt, "expiresAt" to ScreenshotHistoryPolicy.captureExpiry(observedAt,e.runId==probeRun), "source" to JSONArray(listOf("screen_perception")), "size" to bytes.size, "hash" to hash(bytes))
                             persist(newAttachment=a); content.put(obj("type" to "attachment", "attachmentId" to aid))
+                            (data["frameId"] as? String)?.let {frame->
+                                imageFrames["${e.runId}:$frame"]=aid
+                                while(imageFrames.size>256)imageFrames.remove(imageFrames.keys.first())
+                            }
                         }
+                        // Backend-only presentation never enters result.data or
+                        // Pi's tool content. Bind it to this exact durable call.
+                        runCatching {(result.presentation["visual"] as? Map<*,*>)?.let {visual->
+                            val display=JSONObject(json(visual).toString())
+                            imageFrames["${e.runId}:${display.optString("frameId")}"]?.let {display.put("attachmentId",it)}
+                            toolVisuals["${e.runId}:${e.toolCallId}"]=display
+                            while(toolVisuals.size>128)toolVisuals.remove(toolVisuals.keys.first())
+                        }}
                         content.put(obj("type" to "text", "text" to redactor.redact(JSONObject(json(data + mapOf("message" to result.message)).toString()).toString())))
                         // The next model request receives this fresh observation;
                         // tools still in the old response retain their old target.
@@ -797,6 +811,7 @@ class ProductHost private constructor(private val context: Context, private val 
         when(kind) {
             "event", "commit" -> {
                 val event = if(kind == "commit") d.getJSONObject("event") else value
+                if(event.optString("type")=="tool_result")toolVisuals.remove("${b.runId}:${event.optString("toolCallId")}")?.let {event.getJSONObject("data").put("visual",it)}
                 val sequence = eventIndex.runEventCount(state.getJSONArray("events"),b.runId) + 1
                 appendedEvent=StreamDisplayProjection.append(state.getJSONArray("events"),rows("messages"),r,event,
                     b.sessionId,b.runId,sequence,eventSummary(event),if(kind=="commit")value else null)
@@ -840,6 +855,7 @@ class ProductHost private constructor(private val context: Context, private val 
             check(prefs.edit().putBoolean(probeKey(scope(b).profile),passed).commit())
         }
         agentSleep.cancel(b.runId);authority.stopRun(b.runId);deviceAuthority.stop(b.runId);backend.release(b.runId);prepared.values.filter {it.e.runId==b.runId}.forEach {it.approved.complete(false)};prepared.removeRun(b.runId);bindings.remove(b.runId);scopes.remove(b.runId);if(probeRun==b.runId)probeRun=null
+        imageFrames.keys.removeAll {it.startsWith("${b.runId}:")};toolVisuals.keys.removeAll {it.startsWith("${b.runId}:")}
         rows("messages").filter { it.getString("runId") == b.runId }.forEach { it.put("status", "complete") }
         runMetrics.remove(b.runId)?.let {r.put("timings",JSONObject(it.toMap()))}
         modelHttpReceipts.remove(b.runId)?.let {receipts->r.put("modelTransport",JSONArray(receipts.values.map {it.snapshot()}))}
@@ -1147,6 +1163,25 @@ class ProductHost private constructor(private val context: Context, private val 
         if(tool=="skills.delete")require(!item.getBoolean("builtin"))
         if(!preview) {if(tool=="skills.delete")skills.delete(name,hash) else skills.setEnabled(name,args.getBoolean("enabled"),hash)}
         return obj("action" to tool,"name" to name,"enabled" to args.optBoolean("enabled"),"expectedHash" to hash)
+    }
+    /** Called only by the display WebView's fixed same-origin image route.
+     * Historical pixels grant no input or model access and stay out of snapshots. */
+    internal fun readChatImage(request:ChatImageRequest):CompletableFuture<ChatImage?> {
+        val future=CompletableFuture<ChatImage?>()
+        if(closing){future.complete(null);return future}
+        try {serial.execute {
+            try {
+                if(closing || request.sessionId!=selectedSession()){future.complete(null);return@execute}
+                val owner=store.getRunIdentity(request.runId,request.sessionId)
+                val attachment=ScreenshotHistoryPolicy.replay(store.getAttachment(request.attachmentId,request.sessionId),request.sessionId) {runId->owner?.takeIf {it.optString("id")==runId}}
+                if(!ChatImagePolicy.permits(request,selectedSession(),attachment,owner,System.currentTimeMillis())){future.complete(null);return@execute}
+                val encoded=attachment!!.getString("data");require(encoded.length<=2_800_000)
+                val bytes=Base64.decode(encoded,Base64.NO_WRAP)
+                require(bytes.size==attachment.getLong("size").toInt() && hash(bytes)==attachment.getString("hash"))
+                future.complete(ChatImage(attachment.getString("mimeType"),bytes))
+            }catch(_:Exception){future.complete(null)}
+        }}catch(_:java.util.concurrent.RejectedExecutionException){future.complete(null)}
+        return future
     }
     fun view(): JSONObject {
         refreshModelSummary()
