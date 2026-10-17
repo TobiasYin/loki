@@ -30,6 +30,7 @@ interface Active {
   run: AgentRun; lease: RunLease; profile: ModelProfile; agent?: Agent; controller: AbortController;
   sequence: number; startMono: number; requests: number; requestSnapshot?: AuthoritySnapshot;
   effective: ToolDescriptor[]; seenCalls: Set<string>; source: Set<Capability>; stopReason?: ErrorCode;
+  toolSchemaId?: string;
   stream?: StreamEvents; persistenceFailed: boolean; resultRefs: Map<string, Content[]>;
   failure?: ErrorCode;
   observationRequired: boolean;
@@ -50,7 +51,22 @@ function toolOutcomeError(value: unknown): ErrorCode | undefined {
   if (value === undefined || value === null) return undefined;
   return isErrorCode(value) ? value : 'PROTOCOL_ERROR';
 }
+function toolSubmission(outcome: ToolOutcome): ToolOutcome['submission'] {
+  // Read this fixed bridge field only. An observed result (or a body claiming
+  // no dispatch) does not say whether Native crossed its effect checkpoint.
+  // A positive submitted receipt always outranks contradictory metadata.
+  if (outcome.submission !== 'not_dispatched' && outcome.submission !== 'submitted' && outcome.submission !== 'unknown') return undefined;
+  return outcome.outcome === 'submitted' ? 'submitted' : outcome.submission;
+}
+const targetChangedDiagnostics = new Set<NonNullable<ToolOutcome['targetChangedDiagnostic']>>([
+  'snapshot_missing', 'snapshot_expired_or_display_changed', 'input_layout_changed', 'frame_missing',
+  'frame_snapshot_mismatch', 'input_clip_changed', 'input_outside_clip', 'expected_package_mismatch',
+]);
 function fail(code: ErrorCode): never { throw new RuntimeError(code); }
+type PreflightDiagnostic = 'availability_target_changed' | 'request_snapshot_changed' | 'observation_required';
+class ToolPreflightError extends RuntimeError {
+  constructor(readonly diagnostic: PreflightDiagnostic) { super('TARGET_CHANGED'); }
+}
 export function assertRuntimeFeatures(): void {
   if (typeof AbortController === 'undefined' || typeof ReadableStream === 'undefined' || typeof TextEncoder === 'undefined' || typeof TextDecoder === 'undefined' || typeof Headers === 'undefined' || typeof Request === 'undefined' || typeof Response === 'undefined' || typeof structuredClone === 'undefined' || !globalThis.crypto?.subtle || !globalThis.crypto?.randomUUID || typeof globalThis.performance?.now !== 'function') throw new RuntimeError('UNSUPPORTED', 'Required browser streaming/crypto APIs unavailable');
 }
@@ -143,14 +159,27 @@ export class ThorRuntime {
     if (a.controller.signal.aborted) fail(a.stopReason ?? 'CANCELLED');
     return s;
   }
+  /** A temporarily stale target remains callable so Native can return its
+   * actionable recovery refusal. Genuine disabled/missing backends stay hidden.
+   * Only update this loadout at Pi's initial/between-turn boundary. */
+  private publishedTools(snapshot: AuthoritySnapshot, profile: ModelProfile): ToolDescriptor[] {
+    if(profile.supportsTools===false)return [];
+    const ready=new Set(this.registry.effective(snapshot).map(tool=>tool.toolId));
+    return this.registry.all().filter(tool=>tool.modelVisibility && tool.requiredCapabilities.every(cap=>snapshot.session.enabled[cap]) &&
+      (ready.has(tool.toolId) || unavailableToolReason(tool,snapshot)==='TARGET_CHANGED'));
+  }
   private async toolCheck(a: Active, t: ToolDescriptor): Promise<AuthoritySnapshot> {
     const s = await this.authority(a);
     if (!t.requiredCapabilities.every(c => s.session.enabled[c])) fail('CAPABILITY_DISABLED');
     if (!a.effective.some(x => x.toolId === t.toolId)) fail('BACKEND_UNAVAILABLE');
-    if (!this.registry.effective(s).some(x => x.toolId === t.toolId)) fail(unavailableToolReason(t, s));
+    if (!this.registry.effective(s).some(x => x.toolId === t.toolId)) {
+      const reason = unavailableToolReason(t, s);
+      if(reason === 'TARGET_CHANGED') throw new ToolPreflightError('availability_target_changed');
+      fail(reason);
+    }
     // Sleep has no screen target. A changing page must not invalidate its timer.
-    if (t.toolId !== 'agent.sleep' && s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
-    if (a.observationRequired && dependsOnScreen(t)) fail('TARGET_CHANGED');
+    if (t.toolId !== 'agent.sleep' && s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) throw new ToolPreflightError('request_snapshot_changed');
+    if (a.observationRequired && dependsOnScreen(t)) throw new ToolPreflightError('observation_required');
     return s;
   }
   private async toolResultCheck(a: Active, t: ToolDescriptor, checkReadSource = true): Promise<AuthoritySnapshot> {
@@ -173,8 +202,9 @@ export class ThorRuntime {
         if (a.controller.signal.aborted || signal?.aborted) controller.abort();
         let timedOut = false, dispatched = false;
         let effect: EffectRecord | undefined;
-        let receipt: { outcome: NonNullable<ToolOutcome['outcome']>; evidenceRef?: string } | undefined;
+        let receipt: { outcome: NonNullable<ToolOutcome['outcome']>; evidenceRef?: string; submission?: ToolOutcome['submission'] } | undefined;
         let targetChangedReason: 'input_focus_mismatch' | undefined;
+        let targetChangedDiagnostic: ToolOutcome['targetChangedDiagnostic'];
         const timer = setTimeout(() => { timedOut = true; controller.abort(); }, Math.max(0, deadline - Date.now()));
         try {
           // Preflight failures must return through the same durable tool-result
@@ -196,7 +226,8 @@ export class ThorRuntime {
           if (Date.now() >= deadline) fail('TIMEOUT');
           dispatched = true;
           const outcome = await abortable(this.ports.tools.execute(envelope, controller.signal, async waiting => { await this.state(a, waiting ? 'awaiting_user' : 'executing_tools'); }), controller.signal);
-          receipt = { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef };
+          const submission = toolSubmission(outcome);
+          receipt = { outcome: outcome.outcome ?? 'unknown', evidenceRef: outcome.evidenceRef, ...(submission ? { submission } : {}) };
           if (effect) Object.assign(effect, receipt);
           const outcomeError = toolOutcomeError(outcome.error);
           // Native revokes the lease synchronously on Stop, before its UI state
@@ -208,6 +239,7 @@ export class ThorRuntime {
           // first, then preserve Native's fixed refusal instead of masking it
           // with a source change. Successful reads keep both source checks.
           const current = await abortable(this.toolResultCheck(a, t, !rejectedScreenRead), controller.signal);
+          if (outcomeError === 'TARGET_CHANGED' && outcome.targetChangedDiagnostic && targetChangedDiagnostics.has(outcome.targetChangedDiagnostic)) targetChangedDiagnostic = outcome.targetChangedDiagnostic;
           if (rejectedScreenRead) fail(outcomeError!);
           if (outcomeError === 'TARGET_CHANGED') {
             if (outcome.targetChangedReason === 'input_focus_mismatch' &&
@@ -220,28 +252,32 @@ export class ThorRuntime {
           // unpacking must not admit its text/images into the transcript.
           await abortable(this.toolResultCheck(a, t), controller.signal);
           a.resultRefs.set(callId, bounded.domain);
-          await this.event(a, 'tool_result', { toolId: t.toolId, observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, error: outcomeError, outcome: outcome.outcome, evidenceRef: outcome.evidenceRef, content: bounded.domain }, callId);
+          await this.event(a, 'tool_result', { toolId: t.toolId, observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, error: outcomeError, outcome: outcome.outcome, evidenceRef: outcome.evidenceRef, ...(submission ? { submission } : {}), content: bounded.domain }, callId);
           if (outcomeError === undefined) {
             if (t.toolId === 'perception.select_screen') a.observationRequired = true;
             else if (isCurrentScreenRead(t)) a.observationRequired = false;
           }
-          return { content: bounded.content, details: { observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, outcome: outcome.outcome ?? 'observed' }, isError: outcomeError !== undefined };
+          return { content: bounded.content, details: { observedAt: outcome.observedAt, source: outcome.source, truncated: bounded.truncated, outcome: outcome.outcome ?? 'observed', ...(submission ? { submission } : {}) }, isError: outcomeError !== undefined };
         } catch (error) {
           const code = timedOut ? 'TIMEOUT' : a.controller.signal.aborted ? a.stopReason ?? 'CANCELLED' : error instanceof RuntimeError ? error.code : 'IO_ERROR';
           if (code === 'PERSISTENCE_ERROR') { a.stopReason = code; a.controller.abort(); }
           // Revocation withholds content, but cannot undo a submitted action.
           // Only a receipt already received before this rejection is retained;
           // uncooperative executors never write events after terminal state.
+          const submission = !dispatched ? 'not_dispatched' : receipt?.outcome === 'submitted' ? 'submitted' : receipt?.submission ?? 'unknown';
+          const preflightDiagnostic = code === 'TARGET_CHANGED' && error instanceof ToolPreflightError ? error.diagnostic : undefined;
           const recovery = code === 'TARGET_CHANGED' ? {
             kind: 'observe_again', continueRun: true, retryPreviousAction: false, discardPreviousTarget: true,
-            submission: !dispatched ? 'not_dispatched' : receipt?.outcome === 'submitted' ? 'submitted' : 'unknown',
-            sideEffectPossible: t.effectClass !== 'read' && t.effectClass !== 'network',
+            submission,
+            sideEffectPossible: submission !== 'not_dispatched' && t.effectClass !== 'read' && t.effectClass !== 'network',
             ...(targetChangedReason ? { reason: targetChangedReason } : {}),
+            ...(targetChangedDiagnostic ? { diagnostic: targetChangedDiagnostic } : {}),
+            ...(preflightDiagnostic ? { preflightDiagnostic } : {}),
             instruction: 'The page or target changed. Continue this Run by observing the current selected screen before deciding the next action. Discard old coordinates, frame IDs and node refs. Do not replay the previous action. Unknown submission is not proof it did not execute.' +
               (targetChangedReason ? ' The authorized target does not currently own the required input focus. Repeated screenshots alone do not restore input focus. First observe the current windows and focus; if still permitted by the task and current guards, use an existing legal app launch or a touch on the selected screen to restore focus, then observe again before deciding a new action. Do not change focus locks or permissions, auto-focus, or automatically retry the rejected input.' : ''),
           } : undefined;
           if (recovery) a.observationRequired = true;
-          const result = { error: code, outcome: receipt?.outcome ?? 'unknown', evidenceRef: receipt?.evidenceRef, contentDiscarded: receipt !== undefined, ...(recovery ? { recovery } : {}) };
+          const result = { error: code, outcome: receipt?.outcome ?? 'unknown', evidenceRef: receipt?.evidenceRef, ...(receipt?.submission ? { submission: receipt.submission } : {}), contentDiscarded: receipt !== undefined, ...(recovery ? { recovery, ...(targetChangedDiagnostic ? { diagnostic: targetChangedDiagnostic } : {}), ...(preflightDiagnostic ? { preflightDiagnostic } : {}) } : {}) };
           const content = [{ type: 'text' as const, text: recovery ? JSON.stringify(result) : code }];
           if (recovery) a.resultRefs.set(callId, content);
           await this.event(a, 'tool_result', { toolId: t.toolId, ...result, ...(recovery ? { content } : {}) }, callId);
@@ -381,15 +417,6 @@ export class ThorRuntime {
       await this.savePi(a);
       await this.saveTurn(a,false);
     }
-    if(e.type==='tool_execution_end' && !a.controller.signal.aborted && a.pi) {
-      const snapshot=await this.authority(a,true);
-      const observation=buildRuntimeObservation(snapshot);
-      if(observation!==a.lastObservation) {
-        a.lastObservation=observation;
-        if(hasPerceptionContext(snapshot))a.source.add('screen_perception');
-        await a.pi.session.sendCustomMessage({customType:'thor-runtime-context',content:observation,display:false},{triggerTurn:false});
-      }
-    }
     if (e.type === 'tool_execution_start' && !a.controller.signal.aborted) await this.state(a, 'executing_tools');
     // A tool-local timeout/rejection can finish while its Native approval RPC is
     // still unwinding. Leave awaiting_user before Pi starts its next model turn.
@@ -437,24 +464,43 @@ export class ThorRuntime {
       const agentOptions:AgentOptions={initialState:{model,thinkingLevel:profile.thinkingEffort??'off'},sessionId:lease.sessionId,toolExecution:'sequential',transport:'sse',
         // Native authorization/diagnostics only. Official AgentSession owns the
         // canonical transcript, projection, continuation and compaction hooks.
+        finishTurn:async({toolResults})=>{
+          if(!toolResults.length || active.controller.signal.aborted || !active.pi)return;
+          // Every call from this model response keeps its original target. Only
+          // after the whole batch completes may Native promote its fresh read.
+          // AgentSession wraps this hook and flushes this queued context at the
+          // following turn_end, before preparing the next provider request.
+          const snapshot=await this.authority(active,true);
+          active.effective=this.publishedTools(snapshot,profile);
+          active.toolSchemaId=snapshot.toolSchemaId;
+          active.pi.session.setActiveToolsByName(active.effective.map(tool=>tool.modelName));
+          const observation=buildRuntimeObservation(snapshot);
+          if(observation!==active.lastObservation) {
+            active.lastObservation=observation;
+            if(hasPerceptionContext(snapshot))active.source.add('screen_perception');
+            await active.pi.session.sendCustomMessage({customType:'thor-runtime-context',content:observation,display:false},{triggerTurn:false});
+          }
+        },
         prepareRequest:async request=>{
           try {
             const snapshot=await this.authority(active,true);
             active.requestSnapshot=snapshot;
-            active.effective=profile.supportsTools===false?[]:this.registry.effective(snapshot);
-            active.pi!.session.setActiveToolsByName(active.effective.map(t=>t.modelName));
             audit=new ProtocolAudit();
             await this.savePi(active);
             const usage=estimateProjectedContextTokens(active.pi!.manager.buildSessionProjection(),active.pi!.manager.getBranch());
             const manifest={snapshotId:crypto.randomUUID(),modelProfileRevision:profile.revision,capabilityEpoch:lease.capabilityEpoch,
               registryVersion:this.registry.version,l0SnapshotId:snapshot.l0.snapshotId,
-              includedMessageIds:active.pi!.manager.getBranch().map(e=>e.id),attachmentRefs:[],effectiveTools:active.effective.map(t=>t.toolId),
+              includedMessageIds:active.pi!.manager.getBranch().map(e=>e.id),attachmentRefs:[],
+              effectiveTools:active.agent!.state.tools.flatMap(tool=>this.registry.get(tool.name)?.toolId??[]),
+              ...(active.toolSchemaId ? {toolSchemaId:active.toolSchemaId} : {}),
               estimatedTokens:usage.tokens,estimated:true as const,compressionVersion:'pi-session-v1' as const,droppedTurnIds:[],contentHash:await hash(request.context.messages)};
             await this.persist(active,()=>this.ports.persistence.saveContext(manifest));
             await this.event(active,'context',{snapshotId:manifest.snapshotId,estimatedTokens:usage.tokens,droppedTurnIds:[],piSessionReused:!!piState || !!this.session?.piSnapshot,
               historyRestored:prepared.entries.length>0,restoredHistoryMessages:prepared.entries.filter(e=>e.type==='message').length,contextManager:'pi',compactionManager:'pi'});
             await this.state(active,'generating');
-            return {context:{...request.context,tools:active.agent!.state.tools.slice()}};
+            // The official Pi wrapper has already projected this request's tool
+            // declarations. Do not mutate its loadout after that snapshot.
+            return undefined;
           }catch(error){active.failure=error instanceof RuntimeError?error.code:'IO_ERROR';throw error;}
         },
         streamFn:(requestModel,context,options)=>{
@@ -501,7 +547,8 @@ export class ThorRuntime {
         },
       };
       const agent=new Agent(agentOptions);active.agent=agent;
-      active.effective=profile.supportsTools===false?[]:this.registry.effective(initial);
+      active.effective=this.publishedTools(initial,profile);
+      active.toolSchemaId=initial.toolSchemaId;
       active.pi=createPiSession({agent,sessionId:lease.sessionId,header:prepared.header,entries:prepared.entries,leafId:prepared.leafId,model,
         systemPrompt:buildProductPrompt(initial,active.effective),tools:allTools,
         settings:{...profile.piSettings}});

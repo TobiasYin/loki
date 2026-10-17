@@ -22,7 +22,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     private val schemas = InputSchemas(context)
     private val main = Handler(Looper.getMainLooper())
     private val inputState=BoundedInputState()
-    private val frames = java.util.concurrent.ConcurrentHashMap<String, Pair<String, FrameTransform>>()
+    private val frames = java.util.concurrent.ConcurrentHashMap<String, InputFrameBinding>()
     var approval: Approval? = null
     var shellApproval: String? = null
     var installApproval: String? = null
@@ -47,10 +47,28 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             node.isEditable,if(node.isPassword)null else node.textSelectionStart,if(node.isPassword)null else node.textSelectionEnd,
             if(node.isPassword)null else node.stateDescription,node.rangeInfo?.current,r.toShortString(),node.actionList.map {it.id}).joinToString("|").toByteArray())
     }
+    @Volatile private var accessibilitySettingCheckedAt=Long.MIN_VALUE
+    @Volatile private var accessibilitySettingEnabled=false
+    private fun accessibilityAvailability(backend:String):Availability {
+        if(ThorAccessibilityService.instance!=null)return AccessibilitySetup.availability(true,true,false,backend)
+        if(shizuku.accessibilityRestartRequired)return Availability(Status.TEMPORARILY_UNAVAILABLE,shizuku.accessibilityRestartMessage,backend)
+        val now=clock.now()
+        if(accessibilitySettingCheckedAt==Long.MIN_VALUE || now-accessibilitySettingCheckedAt>=500) {
+            try {
+                val own=android.content.ComponentName(context,ThorAccessibilityService::class.java)
+                val enabled=android.provider.Settings.Secure.getInt(context.contentResolver,android.provider.Settings.Secure.ACCESSIBILITY_ENABLED,0)==1
+                val services=android.provider.Settings.Secure.getString(context.contentResolver,android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES).orEmpty()
+                accessibilitySettingEnabled=enabled && services.split(':').any {android.content.ComponentName.unflattenFromString(it)==own}
+                accessibilitySettingCheckedAt=now
+            }catch(_:Exception){return Availability(Status.TEMPORARILY_UNAVAILABLE,"正在确认本应用无障碍的系统连接状态，请稍后重试",backend)}
+        }
+        return AccessibilitySetup.availability(accessibilitySettingEnabled,false,shizuku.accessibilityRecoveryPending,backend)
+    }
     override fun availability(toolId: String): Availability {
         if(toolId=="input.key_press") {
             val base=shizuku.availability().copy(backend="shizuku-inputmanager/virtual-keyboard")
-            return if(ThorAccessibilityService.instance==null)Availability(Status.PERMISSION_MISSING,"Keyboard requires Accessibility to resolve and guard the selected-screen app",base.backend)
+            val accessibility=accessibilityAvailability(base.backend)
+            return if(accessibility.status!=Status.READY)accessibility
                 else if(inputState.hasUnknown())Availability(Status.TEMPORARILY_UNAVAILABLE,"Previous submitted gesture has no completion/cancel callback; stop status unknown",base.backend)
                 else base.copy(reason=if(base.status==Status.READY)"Fixed keyboard keys/modifiers; selected-screen focus and display routing are verified before submission, receiver handling requires observation" else base.reason)
         }
@@ -78,14 +96,17 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         if (toolId == "debug.command_policy") return Availability(Status.READY,"Native command policy; no device mutation","native-command-policy")
         if (toolId in gestureTools && inputState.hasUnknown()) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
         if (toolId == "web.request" || toolId == "perception.device_info" || toolId.startsWith("files.") || toolId == "input.release_inputs") return Availability(Status.READY, "Manual diagnostics only", backend)
-        if (ThorAccessibilityService.instance == null) return Availability(Status.PERMISSION_MISSING, "Enable this diagnostic Accessibility service in Android settings", backend)
+        val accessibility=accessibilityAvailability(backend)
+        if(accessibility.status!=Status.READY)return accessibility
         if(toolId=="input.type_text")return Availability(Status.READY,"Unicode ACTION_SET_TEXT; each current nodeRef must resolve to a visible enabled non-password editable field advertising set_text",backend)
         return Availability(Status.READY, "Android API exists; delivery on Thor is unverified", backend)
     }
     override fun availability(toolId: String, args: Map<String, Any?>): Availability =
         if (toolId in setOf("files.list", "files.read") && args["backend"] == "shizuku")
             shizuku.availability().copy(backend = "shizuku-userservice/shared-root-read-only") else availability(toolId)
-    private fun service() = ThorAccessibilityService.instance ?: fail(Code.PERMISSION_MISSING, "Accessibility disconnected")
+    private fun service() = ThorAccessibilityService.instance ?: accessibilityAvailability("android-sdk/accessibility").let {
+        fail(if(it.status==Status.PERMISSION_MISSING)Code.PERMISSION_MISSING else Code.BACKEND_UNAVAILABLE,it.reason)
+    }
     private fun result(e: Envelope, data: Map<String, Any?>, truncated: Boolean = false, outcome: String = "observed", actualBackend: String? = null): ToolResult {
         val a = if (actualBackend == null) availability(e.toolId) else shizuku.availability().copy(backend = actualBackend)
         val target = if (ToolPack.descriptors[e.toolId]?.targetRequired == true) runCatching { snapshots.validateReadSource(e.snapshotId) }.getOrNull() else null
@@ -704,7 +725,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 // target: bind that frame to the completion observation only if
                 // window, exact clipping and interaction layout still match.
                 // Scrolling/reflow cannot make an older image newly input-usable.
-                frames[frame] = (if(inputCompatible)completed.id else snap.id) to transform
+                frames[frame] = InputFrameBinding(e.sessionId,e.runId,if(inputCompatible)completed.id else snap.id,transform)
                 return result(e.copy(snapshotId=completed.id), mapOf("displayRole" to snap.role, "displayId" to snap.display.id, "frameId" to frame, "attachmentRef" to output.absolutePath,
                     "requestSnapshotId" to e.snapshotId,"captureSnapshotId" to snap.id,"targetSnapshotId" to completed.id,"frameInputUsable" to inputCompatible,"contentChangedDuringCapture" to !contentUnchanged,
                     "inputTargetChangedDuringCapture" to !inputCompatible,"frameInputPolicy" to "same_window_geometry_and_interaction_layout","observedTargetPackage" to snap.target.packageName,
@@ -729,11 +750,9 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             requireTool(list.size in 2..32, Code.LIMIT_EXCEEDED, "Swipe needs 2..32 points")
             list.map { point -> val a = point as? List<*> ?: fail(Code.INVALID_ARGUMENT, "Point must be [x,y]"); requireTool(a.size == 2 && a.all { it is Number }, message = "Point must be [x,y]"); Point((a[0] as Number).toDouble(), (a[1] as Number).toDouble()) }
         } else listOf(Point(args.number("x", Double.NaN).toDouble(), args.number("y", Double.NaN).toDouble()))
-        val points = if (coordinateSpace == "frame_pixels") {
-            val frame = frames[args.string("frameId")] ?: fail(Code.TARGET_CHANGED, "Frame missing/evicted")
-            requireTool(frame.first == e.snapshotId, Code.TARGET_CHANGED, "Frame must belong to this current snapshot")
-            raw.map(frame.second::toDisplay)
-        } else raw
+        val frameId=if(coordinateSpace=="frame_pixels")args.string("frameId") else null
+        val frame=frameId?.let {frames[it] ?: fail(Code.TARGET_CHANGED,"Frame missing/evicted")}
+        val points = if(frame!=null)snapshots.validateInputFrame(frame,e.sessionId,e.runId,e.snapshotId,raw) else raw
         val duration = args.int("durationMs", when (e.toolId) { "input.tap" -> 80; "input.long_press" -> 700; else -> 500 }).toLong()
         val input = Gesture(points, duration); input.validate(snap.display)
         snapshots.validateInputPoints(e.snapshotId,points)
@@ -744,6 +763,10 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             try {
                 cp.check() // Final target/auth check immediately before the actual system dispatch.
                 cp.effect {
+                    if(frame!=null) {
+                        requireTool(frames[frameId]===frame,Code.TARGET_CHANGED,"Frame evicted before input submission")
+                        requireTool(snapshots.validateInputFrame(frame,e.sessionId,e.runId,e.snapshotId,raw)==points,Code.TARGET_CHANGED,"Frame mapping changed before input submission")
+                    }
                     snapshots.validateInputPoints(e.snapshotId,points)
                     invalidateNodeRefs()
                     // Register before Binder submission so an early callback cannot be lost.

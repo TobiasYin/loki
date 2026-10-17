@@ -12,17 +12,67 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     @Volatile private var service: IDebugService? = null
     @Volatile private var closed = false
     @Volatile private var bindingRequested = false
+    @Volatile private var bindingRequestedAt=0L
+    private enum class RecoveryPhase { WAITING_SHIZUKU, BIND_REQUESTED, BIND_TIMEOUT, BINDER_CALLBACK, UID_VERIFIED, ACCESSIBILITY_CONNECTED, RECOVERY_QUEUED, MUTATION_BUSY, LEASE_OPEN, SETTINGS_CALL, SETTINGS_ENABLED, RECOVERY_FAILED, WORKER_REJECTED, MONITOR_FAILED, BIND_FAILED, BINDER_DIED, DISCONNECTED, BINDING_DIED, NULL_BINDING, CLOSED }
+    @Volatile private var recoveryPhase=RecoveryPhase.WAITING_SHIZUKU
+    @Volatile private var recoveryError="NONE"
+    @Volatile private var recoveryQueuedAt=0L
+    @Volatile private var recoveryWorkerAt=0L
+    @Volatile private var frameworkPhase="NOT_CHECKED"
+    @Volatile private var frameworkState=JSONObject()
+    @Volatile private var frameworkBindingSince=0L
+    @Volatile var accessibilityRestartRequired=false
+        private set
+    val accessibilityRestartMessage:String get()="系统保留异常绑定，需重启本应用；会话已保存"
+    private val recoveryCounts=java.util.concurrent.ConcurrentHashMap<String,java.util.concurrent.atomic.AtomicInteger>()
+    private fun trace(phase:RecoveryPhase) {recoveryPhase=phase;recoveryCounts.getOrPut(phase.name){java.util.concurrent.atomic.AtomicInteger()}.incrementAndGet()}
+    private fun recordRecoveryError(error:Throwable) {recoveryError=when(error) {
+        is ToolFailure->error.code.name
+        is DeadObjectException->"BINDER_DIED"
+        is RemoteException->"REMOTE_ERROR"
+        is SecurityException->"SECURITY_ERROR"
+        is java.util.concurrent.RejectedExecutionException->"WORKER_CLOSED"
+        is InterruptedException->"INTERRUPTED"
+        is org.json.JSONException->"PROTOCOL_ERROR"
+        is IllegalStateException->"STATE_CHECK_FAILED"
+        else->"INTERNAL_ERROR"
+    }}
+    /** Fixed phases, counters and ages only. Never return a Binder token, raw
+     * exception, setting list, package inventory, model text or credential. */
+    fun accessibilityRecoveryDiagnostics():JSONObject {
+        val now=SystemClock.elapsedRealtime()
+        return JSONObject().put("phase",recoveryPhase.name).put("lastErrorCode",recoveryError).put("closed",closed)
+            .put("shizukuBound",service!=null).put("bindingRequested",bindingRequested)
+            .put("bindingAgeMs",if(bindingRequested)(now-bindingRequestedAt).coerceAtLeast(0) else 0)
+            .put("accessibilityConnected",ThorAccessibilityService.instance!=null).put("settingsReadbackEnabled",accessibilityPrepared)
+            .put("workerQueuedAgeMs",if(recoveryQueuedAt>recoveryWorkerAt)(now-recoveryQueuedAt).coerceAtLeast(0) else 0)
+            .put("workerRunningAgeMs",if(recoveryWorkerAt>0)(now-recoveryWorkerAt).coerceAtLeast(0) else 0)
+            .put("frameworkPhase",frameworkPhase).put("framework",frameworkState)
+            .put("restartRequired",accessibilityRestartRequired)
+            .put("frameworkBindingAgeMs",if(frameworkBindingSince>0)(now-frameworkBindingSince).coerceAtLeast(0) else 0)
+            .put("counters",JSONObject(recoveryCounts.mapValues {it.value.get()}))
+    }
     @Volatile private var accessibilityPrepared = false
     @Volatile private var setupMessage = "等待已授权的 Shizuku shell 服务"
     val accessibilitySetup: String get() = when {
-        accessibilityPrepared && ThorAccessibilityService.instance!=null -> "已通过 Shizuku 自动开启本应用无障碍"
+        ThorAccessibilityService.instance!=null && availability().status==Status.READY -> "已通过 Shizuku 授权校验，本应用无障碍已连接"
+        ThorAccessibilityService.instance!=null -> "本应用无障碍已连接"
+        accessibilityRestartRequired -> accessibilityRestartMessage
         accessibilityPrepared -> "Shizuku 已启用本应用无障碍，等待系统连接"
         else -> setupMessage
     }
+    val accessibilityRecoveryPending:Boolean get() = !closed && ThorAccessibilityService.instance==null && runCatching {
+        Shizuku.pingBinder() && Shizuku.getUid()==2000 && Shizuku.checkSelfPermission()==PackageManager.PERMISSION_GRANTED
+    }.getOrDefault(false)
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
+    private val accessibilityRecovery=AccessibilityRecovery(Clock {SystemClock.elapsedRealtime()})
+    private val recoveryMonitor=java.util.concurrent.Executors.newSingleThreadScheduledExecutor()
+    // Recovery must not open a short setup lease over an active input/install
+    // lease: the shell UserService owns only one mutation lease at a time.
+    private val mutation=java.util.concurrent.locks.ReentrantLock()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(15)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(21)
     private val presentationReader:(Int,IntArray)->List<PresentationWindowProof> = {display,ids->
         val remote=service ?: fail(Code.BACKEND_UNAVAILABLE,"Presentation metadata service is not bound")
         requireTool(!closed && availability().status==Status.READY,Code.PERMISSION_MISSING,"Presentation metadata backend is not authorized")
@@ -43,7 +93,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
                 TouchableBounds(f.getInt(0),f.getInt(1),f.getInt(2),f.getInt(3)),p.getInt("rawWindowType"))
         }
     }
-    private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null; ThorAccessibilityService.invalidatePresentationEvidence(); invalidated() }
+    private val dead = Shizuku.OnBinderDeadListener { bindingRequested=false; service = null;trace(RecoveryPhase.BINDER_DIED); ThorAccessibilityService.invalidatePresentationEvidence(); invalidated() }
     private val permission = Shizuku.OnRequestPermissionResultListener { requestCode, grant ->
         if(requestCode == 41 && grant == PackageManager.PERMISSION_GRANTED) runCatching {
             requireTool(Shizuku.getUid() == 2000,Code.UNSUPPORTED,"Root backend refused")
@@ -51,13 +101,105 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         }.onFailure { invalidated() }
     }
     private val received = Shizuku.OnBinderReceivedListener { bindGranted() }
-    init { ThorAccessibilityService.installPresentationReader(this,presentationReader); Shizuku.addRequestPermissionResultListener(permission); Shizuku.addBinderDeadListener(dead); Shizuku.addBinderReceivedListenerSticky(received) }
+    init {
+        ThorAccessibilityService.installPresentationReader(this,presentationReader)
+        Shizuku.addRequestPermissionResultListener(permission);Shizuku.addBinderDeadListener(dead);Shizuku.addBinderReceivedListenerSticky(received)
+        recoveryMonitor.scheduleWithFixedDelay({runCatching {recoverAccessibility()}.onFailure {recordRecoveryError(it);trace(RecoveryPhase.MONITOR_FAILED)}},500,1000,java.util.concurrent.TimeUnit.MILLISECONDS)
+    }
+    private fun recoverAccessibility() {
+        if(closed)return
+        bindGranted()
+        val actual=service
+        if(ThorAccessibilityService.instance!=null) {
+            frameworkBindingSince=0L;accessibilityRestartRequired=false
+            if(recoveryPhase!=RecoveryPhase.ACCESSIBILITY_CONNECTED)trace(RecoveryPhase.ACCESSIBILITY_CONNECTED)
+        }
+        val attempt=accessibilityRecovery.next(actual!=null && availability().status==Status.READY,ThorAccessibilityService.instance!=null) ?: return
+        recoveryQueuedAt=SystemClock.elapsedRealtime();trace(RecoveryPhase.RECOVERY_QUEUED)
+        runCatching {worker.execute {
+            recoveryWorkerAt=SystemClock.elapsedRealtime()
+            val token="accessibility:${UUID.randomUUID()}"
+            var locked=false
+            try {
+                if(closed || actual==null || actual!==service || ThorAccessibilityService.instance!=null)return@execute
+                locked=mutation.tryLock()
+                if(!locked){trace(RecoveryPhase.MUTATION_BUSY);return@execute} // never retire an active tool's lease
+                if(closed || actual!==service || availability().status!=Status.READY || ThorAccessibilityService.instance!=null)return@execute
+                trace(RecoveryPhase.LEASE_OPEN)
+                actual.openLease(token,SystemClock.elapsedRealtime()+15000,DebugUserService.ROOT,hostBinder)
+                val request=JSONObject().put("operation","accessibility.ensure").put("reconnect",true)
+                trace(RecoveryPhase.SETTINGS_CALL)
+                val result=JSONObject(actual.execute(token,request.toString()))
+                if(result.has("error"))fail(runCatching {Code.valueOf(result.getString("error"))}.getOrDefault(Code.IO_ERROR),"Accessibility recovery was rejected")
+                val data=result.getJSONObject("data")
+                frameworkPhase=data.optString("frameworkPhase").takeIf {it in setOf("OFF_ACK_UNAVAILABLE","FRAMEWORK_BINDING","FRAMEWORK_CRASHED","FRAMEWORK_ENABLED","FRAMEWORK_BOUND","OFF_ACKNOWLEDGED","NOT_REQUESTED")} ?: "UNKNOWN"
+                frameworkState=JSONObject().also {fixed->
+                    for(key in listOf("offAcknowledged","frameworkKnown","frameworkEnabled","frameworkBinding","frameworkCrashed","frameworkBound","dumpTimeoutMarker","dumpTruncated","dumpProcessExited","settingsRetainedForRestart")) {
+                        if(data.opt(key) is Boolean)fixed.put(key,data.getBoolean(key))
+                    }
+                    for(key in listOf("readerPhase","readerError","publicBoundPhase")) {
+                        val value=data.optString(key)
+                        if(value.matches(Regex("[A-Z_]{1,40}")))fixed.put(key,value)
+                    }
+                    if(data.has("dumpBytes"))fixed.put("dumpBytes",data.getInt("dumpBytes").coerceIn(0,512*1024))
+                    if(data.has("dumpExitCode"))fixed.put("dumpExitCode",data.getInt("dumpExitCode").coerceIn(-1,255))
+                }
+                if(frameworkPhase=="FRAMEWORK_BINDING") {
+                    val now=SystemClock.elapsedRealtime()
+                    if(frameworkBindingSince==0L)frameworkBindingSince=now
+                    if(now-frameworkBindingSince>=10000)accessibilityRestartRequired=true
+                }else if(frameworkPhase=="OFF_ACKNOWLEDGED") {
+                    frameworkBindingSince=0L;accessibilityRestartRequired=false
+                }
+                requireTool(data.getBoolean("enabled"),Code.BACKEND_UNAVAILABLE,"Accessibility framework has not acknowledged disconnect")
+                recoveryError="NONE";trace(RecoveryPhase.SETTINGS_ENABLED)
+                accessibilityPrepared=true
+                setupMessage="已启用本应用无障碍，等待系统连接；未连接时自动重试"
+                ThorAccessibilityService.invalidatePresentationEvidence()
+            }catch(error:Exception) {
+                recordRecoveryError(error);trace(RecoveryPhase.RECOVERY_FAILED)
+                accessibilityPrepared=false;setupMessage="正在通过已授权的 Shizuku 恢复本应用无障碍"
+            }finally {
+                if(locked){runCatching {actual?.cancel(token)};mutation.unlock()}
+                accessibilityRecovery.finished(attempt);recoveryWorkerAt=0L;recoveryQueuedAt=0L
+            }
+        }}.onFailure {recordRecoveryError(it);trace(RecoveryPhase.WORKER_REJECTED);accessibilityRecovery.finished(attempt);recoveryQueuedAt=0L}
+    }
+    /** Screen preflight only. Never waits on the main thread, grants permission,
+     * or adds a model deadline. Recovery itself stays on its single worker. */
+    fun awaitAccessibilityReady(maxWaitMs:Long=5000):Boolean {
+        requireTool(maxWaitMs in 0..5000,Code.INVALID_ARGUMENT,"Accessibility wait must be at most five seconds")
+        if(ThorAccessibilityService.instance!=null)return true
+        if(Looper.myLooper()==Looper.getMainLooper() || accessibilityRestartRequired || !accessibilityRecoveryPending || maxWaitMs==0L)return false
+        recoverAccessibility()
+        val deadline=SystemClock.elapsedRealtime()+maxWaitMs
+        var checkPermissionAt=SystemClock.elapsedRealtime()
+        while(!closed && SystemClock.elapsedRealtime()<deadline) {
+            if(ThorAccessibilityService.instance!=null)return true
+            val now=SystemClock.elapsedRealtime()
+            if(now>=checkPermissionAt) {
+                if(!accessibilityRecoveryPending)return false
+                checkPermissionAt=now+250
+            }
+            try {Thread.sleep(minOf(50,(deadline-now).coerceAtLeast(1)))}catch(_:InterruptedException){Thread.currentThread().interrupt();return false}
+        }
+        return ThorAccessibilityService.instance!=null
+    }
     @Synchronized private fun bindGranted() {
-        if(closed || bindingRequested || service!=null)return
+        if(closed || service!=null)return
+        if(bindingRequested) {
+            if(SystemClock.elapsedRealtime()-bindingRequestedAt<10000)return
+            // Shizuku posts callbacks on the main looper. Detach a lost/stale
+            // registration before retrying; do not destroy a running service.
+            trace(RecoveryPhase.BIND_TIMEOUT)
+            runCatching {Shizuku.unbindUserService(args,this,false)}.onFailure {recordRecoveryError(it)}
+            bindingRequested=false
+        }
         runCatching {
             if(!Shizuku.pingBinder() || Shizuku.getUid()!=2000 || Shizuku.checkSelfPermission()!=PackageManager.PERMISSION_GRANTED)return
-            bindingRequested=true;Shizuku.bindUserService(args,this)
-        }.onFailure {bindingRequested=false;setupMessage="Shizuku 绑定失败；可在设置中重试"}
+            bindingRequested=true;bindingRequestedAt=SystemClock.elapsedRealtime();trace(RecoveryPhase.BIND_REQUESTED)
+            Shizuku.bindUserService(args,this)
+        }.onFailure {recordRecoveryError(it);trace(RecoveryPhase.BIND_FAILED);bindingRequested=false;setupMessage="Shizuku 连接暂未就绪，正在自动重试"}
     }
     fun availability(): Availability = try {
         val backend = "shizuku-userservice/shell-uid-2000"
@@ -118,31 +260,45 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) Shizuku.requestPermission(41)
         else bindGranted()
     }
-    override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+    @Synchronized override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+        if(closed)return
+        trace(RecoveryPhase.BINDER_CALLBACK)
+        if(binder==null){onNullBinding(name);return}
         try {
             val actual = IDebugService.Stub.asInterface(binder)
             requireTool(actual.identity() == 2000, Code.UNSUPPORTED, "Actual UserService UID is not shell")
-            binder?.linkToDeath({ bindingRequested=false; service = null; ThorAccessibilityService.invalidatePresentationEvidence(); invalidated() }, 0)
-            worker.submit {
-                val token="accessibility:${UUID.randomUUID()}"
-                try {
-                    check(!closed)
-                    actual.openLease(token,SystemClock.elapsedRealtime()+15000,DebugUserService.ROOT,hostBinder)
-                    val request=JSONObject().put("operation","accessibility.ensure").put("reconnect",ThorAccessibilityService.instance==null)
-                    val result=JSONObject(actual.execute(token,request.toString()))
-                    check(!result.has("error") && result.getJSONObject("data").getBoolean("enabled"))
-                    accessibilityPrepared=true
-                } catch (_: Exception) {accessibilityPrepared=false;setupMessage="自动开启无障碍失败；可在系统设置中手动开启"}
-                finally {
-                    runCatching {actual.cancel(token)}
-                    if(!closed){service=actual;ThorAccessibilityService.invalidatePresentationEvidence()}
-                    bindingRequested=false
+            trace(RecoveryPhase.UID_VERIFIED)
+            binder.linkToDeath({synchronized(this) {
+                // A delayed death for the old connection cannot erase its replacement.
+                if(!closed && service===actual) {
+                    bindingRequested=false;service=null;trace(RecoveryPhase.BINDER_DIED)
+                    ThorAccessibilityService.invalidatePresentationEvidence();invalidated()
                 }
-            }
-        } catch (_: Exception) { bindingRequested=false;service = null; invalidated() }
+            }},0)
+            service=actual;bindingRequested=false
+            recoverAccessibility()
+        } catch (error:Exception) {recordRecoveryError(error);trace(RecoveryPhase.BIND_FAILED);bindingRequested=false;service=null;invalidated()}
     }
-    override fun onServiceDisconnected(name: ComponentName?) { bindingRequested=false;service = null;ThorAccessibilityService.invalidatePresentationEvidence(); invalidated() }
+    @Synchronized override fun onServiceDisconnected(name:ComponentName?) {
+        if(closed)return
+        bindingRequested=false;service=null;trace(RecoveryPhase.DISCONNECTED);ThorAccessibilityService.invalidatePresentationEvidence();invalidated()
+    }
+    @Synchronized override fun onBindingDied(name:ComponentName?) {
+        if(closed)return
+        bindingRequested=false;service=null;trace(RecoveryPhase.BINDING_DIED)
+        runCatching {Shizuku.unbindUserService(args,this,false)}.onFailure {recordRecoveryError(it)}
+        ThorAccessibilityService.invalidatePresentationEvidence();invalidated()
+    }
+    @Synchronized override fun onNullBinding(name:ComponentName?) {
+        if(closed)return
+        bindingRequested=false;service=null;trace(RecoveryPhase.NULL_BINDING)
+        runCatching {Shizuku.unbindUserService(args,this,false)}.onFailure {recordRecoveryError(it)}
+    }
     fun call(runId: String, request: Map<String, Any?>, cp: Checkpoint): Map<String, Any?> {
+        mutation.lock()
+        try {return callLocked(runId,request,cp)} finally {mutation.unlock()}
+    }
+    private fun callLocked(runId: String, request: Map<String, Any?>, cp: Checkpoint): Map<String, Any?> {
         val available = availability()
         requireTool(available.status == Status.READY, Code.BACKEND_UNAVAILABLE, available.reason)
         val remote = service ?: fail(Code.BACKEND_UNAVAILABLE, "UserService disappeared")
@@ -248,6 +404,10 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         } finally { runCatching { remote.cancel(token) } }
     }
     fun install(run:String,file:java.io.File,sha:String,approval:String?,cp:Checkpoint):Map<String,Any?> {
+        mutation.lock()
+        try {return installLocked(run,file,sha,approval,cp)} finally {mutation.unlock()}
+    }
+    private fun installLocked(run:String,file:java.io.File,sha:String,approval:String?,cp:Checkpoint):Map<String,Any?> {
         requireTool(approval==sha,Code.APPROVAL_REQUIRED,"This APK requires UI confirmation")
         requireTool(availability().status==Status.READY,Code.BACKEND_UNAVAILABLE,"ADB backend unavailable")
         val remote=service ?: fail(Code.BACKEND_UNAVAILABLE,"ADB backend disappeared")
@@ -264,5 +424,9 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         } finally {runCatching {remote.cancel(token)}}
     }
     fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint, approvalHash: String? = null) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max,"approvalHash" to approvalHash), cp)
-    fun close() { closed=true;ThorAccessibilityService.removePresentationReader(this);invalidated(); runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
+    fun close() { closed=true;trace(RecoveryPhase.CLOSED);accessibilityRecovery.close();recoveryMonitor.shutdownNow();ThorAccessibilityService.removePresentationReader(this);invalidated();
+        // remove=true does not clear SDK-local callbacks in Shizuku 13.1.5.
+        // Detach first so a late old Binder death cannot clear a new Host bind.
+        runCatching {Shizuku.unbindUserService(args,this,false)}
+        runCatching { Shizuku.unbindUserService(args, this, true) }; service = null; Shizuku.removeRequestPermissionResultListener(permission); Shizuku.removeBinderDeadListener(dead); Shizuku.removeBinderReceivedListener(received); worker.shutdownNow() }
 }

@@ -34,7 +34,7 @@ export interface L0 {
   upperAppObservation?: { status: 'observed' | 'unknown' | 'ambiguous' | 'unavailable'; displayId?: number };
   targetScreen?: 'upper'|'lower'; displaySnapshotId?: string;
 }
-export interface AuthoritySnapshot { session: SessionConfig; lease: RunLease; availability: Record<string, Availability>; l0: L0; skills?: { name: string; description: string; hash: string }[] }
+export interface AuthoritySnapshot { session: SessionConfig; lease: RunLease; availability: Record<string, Availability>; l0: L0; toolSchemaId?: string; skills?: { name: string; description: string; hash: string }[] }
 export interface AuthorityPort {
   /** Caller-owned mirror of Native's authority. No method here grants authority. */
   read(sessionId: string, runId: string, refresh?: boolean): Promise<AuthoritySnapshot>;
@@ -70,8 +70,12 @@ export interface ToolOutcome {
   content: Content[]; observedAt: number; source: string; truncated: boolean; evidenceRef?: string;
   /** Native JSON success commonly serializes error:null. */
   error?: ErrorCode | null; outcome?: 'submitted' | 'observed' | 'unknown';
+  /** Fixed Native dispatch receipt. Absence/unknown never proves no side effect. */
+  submission?: 'not_dispatched' | 'submitted' | 'unknown';
   /** Fixed Native control metadata, never parsed from an untrusted result body. */
   targetChangedReason?: 'input_focus_mismatch';
+  /** Fixed local Native guard classification, without arbitrary error text. */
+  targetChangedDiagnostic?: 'snapshot_missing' | 'snapshot_expired_or_display_changed' | 'input_layout_changed' | 'frame_missing' | 'frame_snapshot_mismatch' | 'input_clip_changed' | 'input_outside_clip' | 'expected_package_mismatch';
 }
 export interface ToolPort { execute(envelope: ToolEnvelope, signal: AbortSignal, awaiting?: (waiting: boolean) => Promise<void>): Promise<ToolOutcome> }
 export interface NetworkEnvelope {
@@ -93,7 +97,7 @@ export type DomainMessage =
       /** Exact SDK content blocks and source identity, retained on disk for stable replay. */
       replay?: Pick<AssistantMessage, 'api' | 'provider' | 'model' | 'content'> & { baseUrl?: string } }
   | { kind: 'tool_result'; toolCallId: string; toolName: string; content: Content[]; isError: boolean };
-export interface EffectRecord { toolCallId: string; toolId: string; effectClass: ToolDescriptor['effectClass']; outcome: 'submitted' | 'observed' | 'unknown'; evidenceRef?: string }
+export interface EffectRecord { toolCallId: string; toolId: string; effectClass: ToolDescriptor['effectClass']; outcome: 'submitted' | 'observed' | 'unknown'; evidenceRef?: string; submission?: ToolOutcome['submission'] }
 export interface HistoryTurn {
   turnId: string; runId: string; messages: DomainMessage[]; source: Capability[]; observedAt: number; complete: boolean;
   /** Caller-labelled explicit user constraints; bounded projection stops if these cannot fit. */
@@ -106,6 +110,8 @@ export interface HistoryTurn {
 export interface ContextSnapshot {
   snapshotId: string; modelProfileRevision: number; capabilityEpoch: number; registryVersion: string;
   l0SnapshotId: string; includedMessageIds: string[]; attachmentRefs: string[]; effectiveTools: string[];
+  /** Native-issued declaration set fixed when Pi's executable loadout changes. */
+  toolSchemaId?: string;
   estimatedTokens: number; estimated: true; compressionVersion: 'deterministic-v1' | 'pi-session-v1';
   droppedTurnIds: string[]; contentHash: string;
 }

@@ -52,6 +52,7 @@ class ProductHost private constructor(private val context: Context, private val 
         var pendingPerceptionSnapshot:Snapshot?=null
         var publishedTools=emptySet<String>()
         var publicationRejections=emptyMap<String,Code>()
+        val requestToolSchemas=RequestToolSchemas()
         val networkCalls=mutableSetOf<String>()
     }
     private val scopes=java.util.concurrent.ConcurrentHashMap<String,RunScope>()
@@ -371,6 +372,7 @@ class ProductHost private constructor(private val context: Context, private val 
                         // headers, URLs, credentials or approval/lease tokens.
                         obj("serialBarrierMs" to (clock.now()-enqueuedAt).coerceAtLeast(0),
                             "activeBindingCount" to bindings.size,"closing" to closing,"storageFailed" to storageFailed,
+                            "accessibilityRecovery" to debug.accessibilityRecoveryDiagnostics(),
                             "runs" to JSONArray(bindings.values.take(8).map {b->
                                 obj("runId" to b.runId,"stopRequested" to !run(b.runId).optString("stopReason").isNullOrBlank(),
                                     "modelTransport" to JSONArray(modelHttpReceipts[b.runId]?.values?.take(64)?.map {it.snapshot()}.orEmpty()))
@@ -412,6 +414,11 @@ class ProductHost private constructor(private val context: Context, private val 
                 future.complete(value)
             } catch (e: Exception) {
                 val code=when(e) {is ToolFailure ->e.code.name;is dev.thor.bridge.BridgeFailure ->e.code.name;is IllegalArgumentException,is org.json.JSONException ->"INVALID_ARGUMENT";else ->"IO_ERROR"}
+                if(BuildConfig.DEBUG) {
+                    // No exception message, arguments, model text or credentials.
+                    val origin=e.stackTrace.firstOrNull {it.className.startsWith("dev.thor.")}
+                    android.util.Log.w("ThorNativeRpc", "${request.optString("op").take(32)}:$code:${e.javaClass.simpleName}:${origin?.className}:${origin?.lineNumber}")
+                }
                 // Recoverable stale tool targets remain tool results; do not
                 // overwrite an unrelated page error while asking for a new observation.
                 val quietCancellation=request.optString("op") in setOf("tool.cancel","authority") && code in setOf("STALE_AUTHORIZATION","CANCELLED")
@@ -466,10 +473,15 @@ class ProductHost private constructor(private val context: Context, private val 
         var snapshot=scope.snapshot;var pendingPerceptionSnapshot=scope.pendingPerceptionSnapshot
         val wantsScreen=dev.thor.bridge.Capability.screen_perception in granted || dev.thor.bridge.Capability.screen_control in granted
         if(wantsScreen) {
+            check(!Thread.holdsLock(authority))
+            // An enabled service may still be rebinding after process/update
+            // death. Prepare screen tools before publishing the first model
+            // request; text-only tasks never wait for this backend.
+            debug.awaitAccessibilityReady()
+            authority.validate(b)
             updateDisplays()
             // Read-only classification may wait only here on the serial worker,
             // before snapshot/commit locks. Actual target checks use cached facts.
-            check(!Thread.holdsLock(authority))
             val calibrated=listOf("upper","lower").mapNotNull {role->runCatching {snapshots.selected(role).id}.getOrNull()}.toSet()
             ThorAccessibilityService.instance?.preparePresentationEvidence(calibrated)
         } else {snapshot=null;pendingPerceptionSnapshot=null}
@@ -495,6 +507,10 @@ class ProductHost private constructor(private val context: Context, private val 
                 !scope.profile.optBoolean("supportsTools",true)->Availability(Status.UNSUPPORTED,"所选模型未声明工具调用支持","not-probed")
                 else->backend.availability(t.toolId)}
             a=TargetObservationAvailability.project(a,t,snapshot,scope.selectedScreen) {snapshots.validateObservation(snapshot?.id)}
+            if(BuildConfig.DEBUG && t.toolId=="input.tap" && a.reasonCode==Code.TARGET_CHANGED) {
+                android.util.Log.w("ThorNativeRpc","input-target:${snapshot?.target?.validity}:${ToolSubmission.targetDiagnostic(a.reason) ?: if(a.reason=="目标屏幕应用无法唯一确定，请重新观察")"ambiguous_target" else "unclassified"}")
+                android.util.Log.w("ThorNativeRpc","input-target-comparison:${JSONObject(snapshots.observationDiagnostics(snapshot,scope.selectedScreen)).put("events",JSONArray(ThorAccessibilityService.instance?.targetEventDiagnostics().orEmpty()))}")
+            }
             val state=obj("status" to a.status.name.lowercase(), "reason" to a.reason)
             a.reasonCode?.let {state.put("reasonCode",it.name)}
             ToolPublication.projectedRejection(a,capability in granted,scope.profile.optBoolean("supportsTools",true) && b.runId!=probeRun)?.let {publicationRejections[t.toolId]=it}
@@ -521,6 +537,17 @@ class ProductHost private constructor(private val context: Context, private val 
         scope.publishedTools=publishedTools
         scope.publicationRejections=publicationRejections.toMap()
         deviceAuthority.publish(b,allowed.filter {it in publishedTools}.toSet())
+        // Pi fixes its request declarations at the initial/between-turn
+        // boundary. Later authority probes may change execution availability,
+        // but cannot retroactively change the schema already handed to Pi.
+        val targetInputs=contract.values.filter {tool->
+            tool.optBoolean("modelVisibility",true) && tool.optString("effectClass")=="input" &&
+                tool.getJSONArray("requiredCapabilities").let {a->(0 until a.length()).any {a.getString(it)=="screen_control"}} &&
+                tool.getJSONArray("resources").let {a->(0 until a.length()).any {a.getString(it) in setOf("selected-screen/snapshot","upper-display/snapshot")}}
+        }.map {it.getString("toolId")}.toSet()
+        val schemaTools=if(!profile.optBoolean("supportsTools",true))emptySet() else RequestToolSchemas.declarations(
+            publishedTools.filter {contract[it]?.optBoolean("modelVisibility",true)!=false}.toSet(),publicationRejections,targetInputs)
+        val toolSchemaId=scope.requestToolSchemas.issue(profile.getInt("revision"),b.capabilityEpoch,schemaTools)
         val l0 = obj("snapshotId" to (snapshot?.id ?: "no-target:${b.runId}"))
         if (dev.thor.bridge.Capability.screen_perception in authority.enabled(b)) {
             l0.put("device", "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
@@ -535,7 +562,7 @@ class ProductHost private constructor(private val context: Context, private val 
             if (dev.thor.bridge.Capability.screen_perception in authority.enabled(b))
                 for (key in foreground.keys()) l0.put(key, foreground.get(key))
         }
-        return obj("session" to obj("sessionId" to b.sessionId, "title" to session(b.sessionId).getString("title"), "model" to profile, "enabled" to enabled, "capabilityEpoch" to b.capabilityEpoch),
+        return obj("toolSchemaId" to toolSchemaId,"session" to obj("sessionId" to b.sessionId, "title" to session(b.sessionId).getString("title"), "model" to profile, "enabled" to enabled, "capabilityEpoch" to b.capabilityEpoch),
             "lease" to obj("sessionId" to b.sessionId, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to leaseWallDeadline(b)), "availability" to available, "l0" to l0, "skills" to if(b.runId == probeRun)JSONArray() else skillCatalog(session(b.sessionId),true))
     }
     private fun toolEnvelope(c: String, j: JSONObject): Envelope {
@@ -734,8 +761,10 @@ class ProductHost private constructor(private val context: Context, private val 
                             }
                         }
                         val reply=obj("content" to content, "observedAt" to (System.currentTimeMillis() - (clock.now()-result.observedAt).coerceAtLeast(0)), "source" to result.source, "truncated" to result.truncated,
-                            "evidenceRef" to (data["backupId"]?.let {"backup:$it"} ?: "native-event:${e.runId}:${e.requestId}"), "error" to result.error?.name, "outcome" to if(result.outcome == "not_submitted") "observed" else result.outcome)
+                            "evidenceRef" to (data["backupId"]?.let {"backup:$it"} ?: "native-event:${e.runId}:${e.requestId}"), "error" to result.error?.name, "outcome" to if(result.outcome == "not_submitted") "observed" else result.outcome,
+                            "submission" to ToolSubmission.fromGateway(result.outcome))
                         InputFocusFailure.classify(e.toolId,result.error,result.message)?.let {reply.put("targetChangedReason",it)}
+                        if(result.error==Code.TARGET_CHANGED)ToolSubmission.targetDiagnostic(result.message)?.let {reply.put("targetChangedDiagnostic",it)}
                         future.complete(reply)
                     } catch (error: Exception) { future.complete(obj("error" to ((error as? ToolFailure)?.code?.name ?: "STALE_AUTHORIZATION"), "content" to JSONArray(), "observedAt" to System.currentTimeMillis(), "source" to "native", "truncated" to false, "outcome" to "unknown")) }
                 }
@@ -774,7 +803,13 @@ class ProductHost private constructor(private val context: Context, private val 
                     b.sessionId,b.runId,sequence,eventSummary(event),if(kind=="commit")value else null)
             }
             "run" -> { require(value.getString("runId") == b.runId && value.getString("sessionId") == b.sessionId); r.put("runtime", value).put("status", value.getString("state")) }
-            "context" -> { require(value.getInt("modelProfileRevision") == scope(b).profile.getInt("revision") && value.getLong("capabilityEpoch") == b.capabilityEpoch); require(value.getJSONArray("effectiveTools").let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } == scope(b).publishedTools); r.getJSONArray("contexts").put(value) }
+            "context" -> {
+                authority.validate(b)
+                require(value.getInt("modelProfileRevision") == scope(b).profile.getInt("revision") && value.getLong("capabilityEpoch") == b.capabilityEpoch)
+                val declared=value.getJSONArray("effectiveTools").let {a -> (0 until a.length()).map {a.getString(it)}}
+                scope(b).requestToolSchemas.requireMatch(value.getString("toolSchemaId"),scope(b).profile.getInt("revision"),b.capabilityEpoch,declared)
+                r.getJSONArray("contexts").put(value)
+            }
             "turn" -> { require(value.getString("runId") == b.runId); r.put("turn", value) }
             "pi_session" -> {
                 // Configuration probes have isolated temporary Pi sessions.
@@ -977,6 +1012,7 @@ class ProductHost private constructor(private val context: Context, private val 
     fun bindDebug() = debug.requestAndBind()
     fun setBackgroundAgentAction(action:((Checkpoint)->Map<String,Any?>)?) {backend.backgroundAgentAction=action}
     fun accessibilitySetupStatus() = debug.accessibilitySetup
+    fun accessibilityRecoveryDiagnostics() = debug.accessibilityRecoveryDiagnostics()
     fun requestProbe(sid:String=selectedSession()): String {
         val profile=selectedProfile(session(sid))
         require(probeRun==null)

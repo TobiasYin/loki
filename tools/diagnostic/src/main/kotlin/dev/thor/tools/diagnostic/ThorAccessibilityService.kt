@@ -156,9 +156,9 @@ class ThorAccessibilityService : AccessibilityService() {
             val display=all.keyAt(index)
             // Only an exact system window is eligible for the content-only exclusion.
             // Never trust the event's package string without corroborating its root.
-            current[display]=all.valueAt(index).map {window->windowEvidence(window,kind==TargetEventKind.CONTENT && window.id==event.windowId && window.type==AccessibilityWindowInfo.TYPE_SYSTEM,readAppRoot=false)}
+            current[display]=all.valueAt(index).map {window->windowEvidence(window,kind!=TargetEventKind.STRUCTURE && window.id==event.windowId && window.type==AccessibilityWindowInfo.TYPE_SYSTEM,readAppRoot=false)}
         }
-        revisions.event(kind,event.windowId,event.packageName?.toString(),current)
+        revisions.event(kind,event.windowId,event.packageName?.toString(),current,event.eventType)
     }
     fun target(display:Int):Target {
         val fact=displayFacts(this).singleOrNull {it.id==display} ?: return Target(null,"unknown","display-missing")
@@ -185,9 +185,10 @@ class ThorAccessibilityService : AccessibilityService() {
         "eventType" to item.eventType,"windowId" to item.windowId,"reportedDisplayId" to item.reportedDisplayId,
         "remainingMs" to item.remainingMs,"durationMs" to item.durationMs,"candidateCount" to item.candidateCount,
         "expectedGeneration" to item.expectedGeneration,"errorCode" to item.errorCode?.name)}
+    fun targetEventDiagnostics():List<Map<String,Any>> = revisions.diagnostics()
     override fun onInterrupt() { proofs.invalidate(reason=PresentationCacheReason.SERVICE_INTERRUPT);invalidated?.invoke() }
-    override fun onUnbind(intent:android.content.Intent?):Boolean { proofs.invalidate(reason=PresentationCacheReason.SERVICE_UNBOUND);instance=null;invalidated?.invoke();return super.onUnbind(intent) }
-    override fun onDestroy() { closed=true;proofs.invalidate(reason=PresentationCacheReason.SERVICE_DESTROYED);proofWorker.shutdownNow();instance=null;invalidated?.invoke();super.onDestroy() }
+    override fun onUnbind(intent:android.content.Intent?):Boolean { proofs.invalidate(reason=PresentationCacheReason.SERVICE_UNBOUND);if(instance===this){instance=null;invalidated?.invoke()};return super.onUnbind(intent) }
+    override fun onDestroy() { closed=true;proofs.invalidate(reason=PresentationCacheReason.SERVICE_DESTROYED);proofWorker.shutdownNow();if(instance===this){instance=null;invalidated?.invoke()};super.onDestroy() }
     companion object {
         private data class PresentationReader(val owner:Any,val read:(Int,IntArray)->List<PresentationWindowProof>)
         @Volatile private var presentationReader:PresentationReader?=null

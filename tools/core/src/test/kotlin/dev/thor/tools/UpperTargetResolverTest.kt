@@ -52,27 +52,54 @@ class UpperTargetResolverTest {
             if(type==4096)rejected {snapshots.validate(original.id)} else assertEquals(original,snapshots.validate(original.id))
         }
     }
-    @Test fun onlyTrueWindowEventsAreStructuralAndSystemInteractionsCannotUseContentExclusion() {
+    @Test fun onlyTrueWindowEventsAreStructuralAndCorroboratedSystemNodeFeedbackDoesNotReplaceAppWindow() {
         for(type in listOf(0x20,0x400000)) {
             assertEquals(TargetEventKind.STRUCTURE,TargetEventKind.fromAndroidType(type))
             val revisions=TargetWindowRevisions();val windows=listOf(app(),bar());val before=UpperTargetResolver.resolve(upper,windows,revisions)
             revisions.event(TargetEventKind.fromAndroidType(type),10,"example.app",current(windows))
             assertFalse(before.sameStructure(UpperTargetResolver.resolve(upper,windows,revisions)))
         }
-        for(type in listOf(1,4096,8192)) {
-            val revisions=TargetWindowRevisions();val windows=listOf(app(),bar());val before=UpperTargetResolver.resolve(upper,windows,revisions)
-            revisions.event(TargetEventKind.fromAndroidType(type),20,"com.android.systemui",current(windows))
-            assertFalse("System interactions stay conservative: $type",before.sameStructure(UpperTargetResolver.resolve(upper,windows,revisions)))
-        }
-        for(type in listOf(16,2048)) {
+        for(type in listOf(1,4096,8192,16,2048)) {
             val revisions=TargetWindowRevisions();val windows=listOf(app(),bar());val before=UpperTargetResolver.resolve(upper,windows,revisions)
             revisions.event(TargetEventKind.fromAndroidType(type),20,"com.android.systemui",current(windows))
             assertTrue("Only corroborated SystemUI pure content may be ignored",before.sameLayout(UpperTargetResolver.resolve(upper,windows,revisions)))
         }
     }
+    @Test fun corroboratedSystemUiSubtreeCanRefreshNetworkTrafficWithoutExpiringAppInput() {
+        val windows=listOf(app(),bar());val revisions=TargetWindowRevisions()
+        var target=UpperTargetResolver.resolve(upper,windows,revisions)
+        val snapshots=Snapshots(Clock {1}) {target}.apply {update(listOf(upper,lower));calibrate(0,4)}
+        val original=snapshots.capture()
+        repeat(100) {revisions.event(TargetEventKind.fromAndroidType(0x800,0,1),20,"com.android.systemui",current(windows))}
+        target=UpperTargetResolver.resolve(upper,windows,revisions)
+        assertEquals(0L,revisions.structure(0));assertEquals(original,snapshots.validateObservation(original.id))
+        snapshots.validateInputPoints(original.id,listOf(Point(500.0,500.0)))
+        target=UpperTargetResolver.resolve(upper,listOf(app(),bar().copy(focused=true)),revisions)
+        rejected {snapshots.validateObservation(original.id)}
+        target=UpperTargetResolver.resolve(upper,listOf(app(),bar(bounds=TouchableBounds(0,0,1920,120))),revisions)
+        rejected {snapshots.validateObservation(original.id)}
+        revisions.event(TargetEventKind.STRUCTURE,20,"com.android.systemui",current(windows))
+        target=UpperTargetResolver.resolve(upper,windows,revisions)
+        rejected {snapshots.validateObservation(original.id)}
+    }
+    @Test fun boundedEventDiagnosticsDistinguishSystemFeedbackFromRealApplicationLayoutChanges() {
+        val revisions=TargetWindowRevisions();val windows=listOf(app(),bar())
+        repeat(30){revisions.event(TargetEventKind.INTERACTION_LAYOUT,20,"com.android.systemui",current(windows),0x800)}
+        val filtered=revisions.diagnostics()
+        assertEquals(16,filtered.size)
+        assertTrue(filtered.all {it["systemUiCorroborated"]==true && it["filteredSystemUi"]==true && it["structureChanged"]==false && it["interactionChanged"]==false})
+        revisions.event(TargetEventKind.INTERACTION_LAYOUT,10,"example.app",current(windows),0x1000)
+        val scrolled=revisions.diagnostics().last()
+        assertEquals(true,scrolled["isApplication"]);assertEquals(true,scrolled["interactionChanged"]);assertEquals(false,scrolled["structureChanged"])
+        revisions.event(TargetEventKind.STRUCTURE,20,"com.android.systemui",current(windows),0x20)
+        val replaced=revisions.diagnostics().last()
+        assertEquals(false,replaced["filteredSystemUi"]);assertEquals(true,replaced["structureChanged"])
+        assertTrue(revisions.diagnostics().all {row->row.keys.none {it.contains("package",true) || it.contains("windowId",true) || it.contains("text",true)}})
+        assertFalse(revisions.diagnostics().toString().contains("com.android.systemui"));assertFalse(revisions.diagnostics().toString().contains("example.app"))
+    }
     @Test fun structuralSystemEventsAndSpoofedOrUnknownSystemOwnersAreNeverFiltered() {
         val ordinary=listOf(app(),bar())
-        for((kind,rootPackage,eventPackage) in listOf(Triple(TargetEventKind.STRUCTURE,"com.android.systemui","com.android.systemui"),Triple(TargetEventKind.CONTENT,"evil.overlay","com.android.systemui"),Triple(TargetEventKind.CONTENT,null,"com.android.systemui"),Triple(TargetEventKind.CONTENT,"com.android.systemui","evil.overlay"))) {
+        for((kind,rootPackage,eventPackage) in listOf(Triple(TargetEventKind.STRUCTURE,"com.android.systemui","com.android.systemui"),Triple(TargetEventKind.CONTENT,"evil.overlay","com.android.systemui"),Triple(TargetEventKind.CONTENT,null,"com.android.systemui"),Triple(TargetEventKind.CONTENT,"com.android.systemui","evil.overlay"),Triple(TargetEventKind.INTERACTION_LAYOUT,null,"com.android.systemui"),Triple(TargetEventKind.INTERACTION_LAYOUT,"evil.overlay","com.android.systemui"),Triple(TargetEventKind.INTERACTION_LAYOUT,"com.android.systemui","evil.overlay"))) {
             val revisions=TargetWindowRevisions();val windows=listOf(app(),bar(pkg=rootPackage));val before=UpperTargetResolver.resolve(upper,windows,revisions)
             revisions.event(kind,20,eventPackage,current(windows));val after=UpperTargetResolver.resolve(upper,windows,revisions)
             assertFalse(before.sameStructure(after));assertFalse(before.sameLayout(after))

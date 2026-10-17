@@ -113,6 +113,52 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
             Code.TARGET_CHANGED,"Observed app/windows/geometry changed")
         return snap
     }
+    /** Local debug comparison only. Never exposes identifiers, target strings,
+     * package names, labels, coordinates or a capability/validation shortcut. */
+    @Synchronized fun observationDiagnostics(observed:Snapshot?,expectedRole:String):Map<String,Any> {
+        val out=linkedMapOf<String,Any>("snapshotPresent" to (observed!=null),"cachedSnapshotPresent" to (observed!=null && snapshots.containsKey(observed.id)))
+        if(observed==null)return out
+        out["cachedSnapshotSame"]=snapshots[observed.id]==observed
+        out["notExpired"]=clock.now()<observed.expires
+        out["epochSame"]=observed.displayEpoch==epoch
+        out["roleSame"]=observed.role==expectedRole
+        val selected=when(observed.role){"upper"->upper;"lower"->lower;else->null}
+        out["selectedDisplayPresent"]=selected!=null
+        out["displaySame"]=observed.display==selected
+        out["displayIdSame"]=observed.display.id==selected?.id
+        out["displayRotationSame"]=observed.display.rotation==selected?.rotation
+        out["displayGeometrySame"]=observed.display.width==selected?.width && observed.display.height==selected?.height
+        out["observedTargetValid"]=observed.target.validity=="valid"
+        try {
+            val current=currentTarget(observed.display.id)
+            out["currentTargetRead"]=true
+            out["currentTargetValid"]=current.validity=="valid"
+            out["targetValiditySame"]=observed.target.validity==current.validity
+            out["targetPackageSame"]=observed.target.packageName==current.packageName
+            out["sameStructure"]=observed.target.sameStructure(current)
+            out["sameLayout"]=observed.target.sameLayout(current)
+            out["sameInputTarget"]=observed.target.sameInputTarget(current)
+            out["clipSame"]=observed.target.touchableBounds==current.touchableBounds
+            out["clipPresenceSame"]=(observed.target.touchableBounds==null)==(current.touchableBounds==null)
+            val oldLayout=observed.target.layoutRevision ?: observed.target.revision
+            val newLayout=current.layoutRevision ?: current.revision
+            fun splitCounter(value:String):Pair<String,String?> {
+                val index=value.lastIndexOf(":structure:")
+                if(index<0)return value to null
+                val counter=value.substring(index+11)
+                return if(counter.isNotEmpty() && counter.all {it.isDigit()})value.substring(0,index) to counter else value to null
+            }
+            val oldParts=splitCounter(oldLayout);val newParts=splitCounter(newLayout)
+            out["structureCounterPresent"]=oldParts.second!=null && newParts.second!=null
+            out["structureCounterSame"]=oldParts.second==newParts.second
+            out["layoutWithoutCounterSame"]=oldParts.first==newParts.first
+            out["interactionRevisionSame"]=observed.target.interactionRevision==current.interactionRevision
+        }catch(error:Exception) {
+            out["currentTargetRead"]=false
+            out["currentTargetError"]=(error as? ToolFailure)?.code?.name ?: "UNAVAILABLE"
+        }
+        return out
+    }
     /** Sign a fresh identity at read completion. The caller must retain the
      * original capture identity for any pixels/refs recorded before this point. */
     @Synchronized fun captureReadCompletion(observationId:String?):Snapshot {
@@ -132,6 +178,26 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
             // Both clips are rectangles: a polyline with every vertex inside their
             // intersection remains inside it throughout each straight segment.
         }
+    }
+    /** A later read can sign a new snapshot without changing frame coordinates.
+     * Both independent observations must still authorize this exact input. */
+    @Synchronized fun validateInputFrame(frame:InputFrameBinding,sessionId:String,runId:String,authorizedSnapshotId:String?,raw:List<Point>):List<Point> {
+        requireTool(frame.sessionId==sessionId && frame.runId==runId,Code.STALE_AUTHORIZATION,"Frame belongs to another session or run")
+        val captured=validate(frame.snapshotId)
+        val authorized=validate(authorizedSnapshotId)
+        requireTool(captured.role==authorized.role && captured.displayEpoch==authorized.displayEpoch && captured.display==authorized.display,
+            Code.TARGET_CHANGED,"Frame display role/rotation/geometry differs from current authority")
+        requireTool(captured.target.validity=="valid" && !captured.target.packageName.isNullOrBlank() &&
+            captured.target.sameInputTarget(authorized.target) && captured.target.touchableBounds==authorized.target.touchableBounds,
+            Code.TARGET_CHANGED,"Frame target/input layout or visible geometry differs from current authority")
+        val transform=frame.transform
+        requireTool(transform.left>=0 && transform.top>=0 && transform.width>0 && transform.height>0 && transform.imageWidth>0 && transform.imageHeight>0 &&
+            transform.left.toLong()+transform.width<=captured.display.width && transform.top.toLong()+transform.height<=captured.display.height,
+            Code.TARGET_CHANGED,"Frame transform no longer fits the authorized display")
+        val points=raw.map(transform::toDisplay)
+        validateInputPoints(frame.snapshotId,points)
+        validateInputPoints(authorizedSnapshotId,points)
+        return points
     }
     /** A perception read may observe the current app, but only on the exact
      * display/role authorized by its request. Never use this for input. */
@@ -200,6 +266,7 @@ data class FrameTransform(val left: Int, val top: Int, val width: Int, val heigh
         return Point(left + point.x * width / imageWidth, top + point.y * height / imageHeight)
     }
 }
+data class InputFrameBinding(val sessionId:String,val runId:String,val snapshotId:String,val transform:FrameTransform)
 data class Gesture(val points: List<Point>, val durationMs: Long) {
     fun validate(display: DisplayFact) {
         requireTool(durationMs in 1..5000, message = "Gesture duration must be 1..5000 ms")

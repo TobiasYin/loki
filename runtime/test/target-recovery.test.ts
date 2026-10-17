@@ -125,6 +125,8 @@ for (const protocol of ['openai-responses', 'openai-completions', 'anthropic-mes
       const hint = rejected[0]!.data.recovery as any;
       assert.equal(hint.kind, 'observe_again'); assert.equal(hint.continueRun, true); assert.equal(hint.retryPreviousAction, false);
       assert.equal(hint.submission, rejection === 'native' ? 'unknown' : 'not_dispatched');
+      assert.equal(rejected[0]!.data.preflightDiagnostic, rejection === 'native' ? undefined : 'request_snapshot_changed');
+      assert.equal(hint.preflightDiagnostic, rejection === 'native' ? undefined : 'request_snapshot_changed');
       assert.ok(JSON.stringify(f.requests[1]!.body).includes('observe_again'));
       assert.ok(JSON.stringify(f.requests[2]!.body).includes(PNG), 'The actual Pi provider request must contain the newly read screenshot');
       assert.ok(!JSON.stringify([f.events, f.requests, f.turns]).includes('PRIVATE_STALE_BODY'));
@@ -146,6 +148,9 @@ test('observation gate follows actual screen resources: selection/companion cann
   });
   assert.equal((await runtime.run(f.lease, [{ type: 'text', text: '观察目标屏幕后继续。' }])).state, 'completed');
   assert.equal(actions, 1); assert.equal(recoveryEvents(f).length, 3);
+  const blocked = recoveryEvents(f).filter(e => (e.data.recovery as any).preflightDiagnostic === 'observation_required');
+  assert.equal(blocked.length, 2);
+  assert.ok(blocked.every(e => e.data.preflightDiagnostic === 'observation_required'));
   assert.deepEqual(f.executions.map(e => (e.arguments as any).text), ['stale', 'brightness', 'release', 'background', 'companion', 'select-lower', 'fresh-lower-tree', 'new-lower-action']);
 });
 
@@ -171,6 +176,90 @@ test('a submitted receipt stays submitted through TARGET_CHANGED recovery, never
   assert.equal(result.data.outcome, 'submitted'); assert.equal((result.data.recovery as any).submission, 'submitted');
   assert.equal(f.turns.at(-1)!.effects?.[0]?.outcome, 'submitted'); assert.equal(f.executions.filter(e => e.toolId === 'input.tap').length, 1);
 });
+
+for (const protocol of ['openai-responses', 'openai-completions', 'anthropic-messages'] as const) {
+  test(`${protocol}: a fixed Native not-dispatched receipt survives discarded target content and Pi observes before a separately chosen action`, async () => {
+    const f = fixture(protocol, [call('tap', 'refused'), call('tree', 'fresh-observation'), call('tap', 'new-action'), { text: '重新观察后完成。' }]); ready(f);
+    let effects = 0;
+    f.setTool(async e => {
+      const text = (e.arguments as any).text;
+      if (text === 'refused') return { ...observed('PRIVATE_REJECTED_NATIVE_BODY'), error: 'TARGET_CHANGED', submission: 'not_dispatched', evidenceRef: 'native-fixed-receipt' };
+      if (e.toolId === 'input.tap') { effects++; return submitted(); }
+      return observed('Fresh checked tree');
+    });
+    assert.equal((await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: '根据当前画面完成任务。' }])).state, 'completed');
+    const rejected = recoveryEvents(f)[0]!;
+    assert.equal(rejected.data.outcome, 'observed'); assert.equal(rejected.data.submission, 'not_dispatched');
+    assert.equal(rejected.data.evidenceRef, 'native-fixed-receipt'); assert.equal(rejected.data.contentDiscarded, true);
+    assert.equal((rejected.data.recovery as any).submission, 'not_dispatched');
+    assert.equal((rejected.data.recovery as any).sideEffectPossible, false);
+    assert.equal((rejected.data.recovery as any).retryPreviousAction, false);
+    assert.equal(f.turns.at(-1)!.effects?.[0]?.submission, 'not_dispatched');
+    assert.deepEqual(f.executions.map(e => (e.arguments as any).text), ['refused', 'fresh-observation', 'new-action']);
+    assert.equal(effects, 1);
+    assert.ok(JSON.stringify(f.requests[1]!.body).includes('not_dispatched'), 'Actual Pi continuation receives the fixed dispatch receipt');
+    assert.ok(!JSON.stringify([f.requests, f.events, f.turns]).includes('PRIVATE_REJECTED_NATIVE_BODY'));
+  });
+}
+
+for (const metadata of ['body-only', 'unknown-enum', 'contradictory-submitted'] as const) {
+  test(`a ${metadata} no-dispatch claim cannot turn an uncertain/submitted action into not dispatched`, async () => {
+    const f = fixture('openai-responses', [call('tap', 'refused'), { text: '检查操作结果，避免重复。' }]); ready(f);
+    f.setTool(async () => ({ ...observed(JSON.stringify({ submission: 'not_dispatched' })), error: 'TARGET_CHANGED',
+      ...(metadata === 'unknown-enum' ? { submission: 'PRIVATE_INVALID_SUBMISSION' } : metadata === 'contradictory-submitted' ? { outcome: 'submitted', submission: 'not_dispatched' } : {}) } as any));
+    await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: '保持准确的派发记录。' }]);
+    const rejected = recoveryEvents(f)[0]!;
+    assert.equal((rejected.data.recovery as any).submission, metadata === 'contradictory-submitted' ? 'submitted' : 'unknown');
+    assert.equal((rejected.data.recovery as any).sideEffectPossible, true);
+    assert.ok(!JSON.stringify([f.requests, f.events, f.turns]).includes('PRIVATE_INVALID_SUBMISSION'));
+  });
+}
+
+for (const diagnostic of ['snapshot_missing', 'snapshot_expired_or_display_changed', 'input_layout_changed', 'frame_missing', 'frame_snapshot_mismatch', 'input_clip_changed', 'input_outside_clip', 'expected_package_mismatch'] as const) {
+  test(`Native TARGET_CHANGED fixed ${diagnostic} diagnostic reaches the persisted event and actual Pi recovery`, async () => {
+    const f = fixture('openai-responses', [call('tap', 'refused'), { text: '重新观察目标。' }]); ready(f);
+    f.setTool(async () => ({ ...observed('PRIVATE_NATIVE_GUARD_MESSAGE'), error: 'TARGET_CHANGED', targetChangedDiagnostic: diagnostic, submission: 'not_dispatched' }));
+    await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: '保持目标守卫，诊断被拒绝的动作。' }]);
+    const event = recoveryEvents(f)[0]!;
+    assert.equal(event.data.diagnostic, diagnostic);
+    assert.equal((event.data.recovery as any).diagnostic, diagnostic);
+    assert.equal((event.data.recovery as any).retryPreviousAction, false);
+    assert.equal((event.data.recovery as any).submission, 'not_dispatched');
+    assert.ok(JSON.stringify(f.requests[1]!.body).includes(`\\"diagnostic\\":\\"${diagnostic}\\"`));
+    assert.ok(!JSON.stringify([f.requests, f.events, f.turns]).includes('PRIVATE_NATIVE_GUARD_MESSAGE'));
+  });
+}
+
+for (const source of ['body-only', 'unknown-enum', 'non-target-error'] as const) {
+  test(`Native guard diagnostics never trust ${source}`, async () => {
+    const f = fixture('openai-responses', [call('tap', 'refused'), { text: '遵守实际拒绝原因。' }]); ready(f);
+    f.setTool(async () => ({ ...observed(JSON.stringify({ targetChangedDiagnostic: 'input_layout_changed', diagnostic: 'PRIVATE_BODY_DIAGNOSTIC' })),
+      error: source === 'non-target-error' ? 'PERMISSION_MISSING' : 'TARGET_CHANGED',
+      ...(source === 'body-only' ? {} : { targetChangedDiagnostic: source === 'unknown-enum' ? 'PRIVATE_UNKNOWN_DIAGNOSTIC' : 'input_layout_changed' }) } as any));
+    await new ThorRuntime(f.ports, registry()).run(f.lease, [{ type: 'text', text: '只采信固定本地分类。' }]);
+    const event = f.events.find(e => e.type === 'tool_result')!;
+    assert.equal(event.data.diagnostic, undefined); assert.equal((event.data.recovery as any)?.diagnostic, undefined);
+    assert.ok(!JSON.stringify([f.requests, f.events, f.turns]).includes('PRIVATE_UNKNOWN_DIAGNOSTIC'));
+    if (source !== 'non-target-error') assert.ok(!JSON.stringify([f.requests, f.events, f.turns]).includes('PRIVATE_BODY_DIAGNOSTIC'));
+    else assert.equal(event.data.error, 'PERMISSION_MISSING');
+  });
+}
+
+for (const guard of ['permission', 'stop'] as const) {
+  test(`a ${guard} refusal outranks Native target diagnostics`, async () => {
+    const f = fixture('openai-responses', [call('tap', 'refused'), { text: '停止。' }]); ready(f);
+    const runtime = new ThorRuntime(f.ports, registry());
+    f.setTool(async () => {
+      if (guard === 'stop') runtime.stop(); else f.ports.authority.read = async () => { throw new RuntimeError('PERMISSION_MISSING'); };
+      return { ...observed('PRIVATE_DIAGNOSTIC_BODY'), error: 'TARGET_CHANGED', targetChangedDiagnostic: 'input_layout_changed' };
+    });
+    await runtime.run(f.lease, [{ type: 'text', text: '停止与权限检查优先。' }]);
+    const event = f.events.find(e => e.type === 'tool_result')!;
+    assert.equal(event.data.error, guard === 'stop' ? 'CANCELLED' : 'PERMISSION_MISSING');
+    assert.equal(event.data.diagnostic, undefined); assert.equal(event.data.recovery, undefined);
+    assert.ok(!JSON.stringify([f.requests, f.events, f.turns]).includes('PRIVATE_DIAGNOSTIC_BODY'));
+  });
+}
 
 test('a temporarily unavailable screen read does not clear recovery; selecting a legal screen and observing it continues the same Run', async () => {
   const f = fixture('openai-responses', [call('tap', 'stale'), call('capture', 'temporarily-unavailable'), call('tap', 'blocked'), call('select', 'select-legal-screen'), call('app', 'fresh-app'), call('tap', 'new-action'), { text: '完成。' }]); ready(f);

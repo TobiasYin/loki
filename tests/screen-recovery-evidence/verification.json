@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-17",
+  "appVersion": "0.8.0-integration",
+  "shizukuUserServiceVersion": 21,
+  "apkSha256": "a8728e24af16f536f037c36e6abd4db8c73c0b3c514fa03c55071909f350497f",
+  "runtime": {
+    "tests": 384,
+    "passed": 384,
+    "failed": 0
+  },
+  "integrationTypecheck": "passed",
+  "lintDebug": "passed",
+  "androidParserDeviceTests": {
+    "tests": 3,
+    "passed": 3
+  },
+  "normalStartup": {
+    "actualAccessibilityServiceRecord": true,
+    "ownBindingPending": false,
+    "ownCrashed": false,
+    "chatDisplay": 4,
+    "upperAppRestored": true
+  },
+  "deviceCore": {
+    "tests": 255,
+    "failures": 0,
+    "errors": 0
+  },
+  "app": {
+    "tests": 220,
+    "failures": 0,
+    "errors": 0
+  },
+  "nativeBridge": {
+    "tests": 48,
+    "failures": 0,
+    "errors": 0
+  }
+}

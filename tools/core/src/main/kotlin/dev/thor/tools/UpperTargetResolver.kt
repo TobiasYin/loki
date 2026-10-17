@@ -30,15 +30,34 @@ class TargetWindowRevisions {
     private val structure=LinkedHashMap<Int,Long>()
     private val interaction=LinkedHashMap<Int,Long>()
     private val displays=LinkedHashMap<Int,Int>()
+    private var eventSequence=0L
+    private val eventDiagnostics=java.util.ArrayDeque<Map<String,Any>>()
+    @Synchronized fun diagnostics():List<Map<String,Any>> = eventDiagnostics.toList()
     @Synchronized fun observe(display:Int,windows:List<TargetWindowEvidence>) {
         windows.forEach {displays[it.id]=display}
         while(displays.size>512){val id=displays.keys.first();displays.remove(id);content.remove(id);interaction.remove(id)}
     }
-    @Synchronized fun event(kind:TargetEventKind,windowId:Int,eventPackage:String?,current:Map<Int,List<TargetWindowEvidence>>) {
+    @Synchronized fun event(kind:TargetEventKind,windowId:Int,eventPackage:String?,current:Map<Int,List<TargetWindowEvidence>>,eventType:Int=0) {
         current.forEach { (display,windows)->observe(display,windows) }
-        val display=displays[windowId] ?: return
+        val display=displays[windowId]
         val window=current[display]?.singleOrNull {it.id==windowId}
-        if(kind==TargetEventKind.CONTENT && window?.type==TargetWindowEvidence.SYSTEM && window.packageName=="com.android.systemui" && eventPackage=="com.android.systemui")return
+        val corroborated=window?.type==TargetWindowEvidence.SYSTEM && window.packageName=="com.android.systemui" && eventPackage=="com.android.systemui"
+        val application=display!=null && window?.isApplicationOn(display)==true
+        val beforeStructure=structure[display] ?: 0L
+        val beforeInteraction=interaction[windowId] ?: 0L
+        fun record(filtered:Boolean) {
+            if(eventDiagnostics.size>=16)eventDiagnostics.removeFirst()
+            eventDiagnostics.addLast(mapOf("sequence" to ++eventSequence,"kind" to kind.name,"eventType" to eventType,
+                "scopeResolved" to (display!=null),"systemUiCorroborated" to corroborated,"isApplication" to application,
+                "filteredSystemUi" to filtered,"structureChanged" to ((structure[display] ?: 0L)!=beforeStructure),
+                "interactionChanged" to ((interaction[windowId] ?: 0L)!=beforeInteraction)))
+        }
+        if(display==null){record(false);return}
+        // Internal SystemUI node content/focus/scroll/subtree feedback is outside
+        // the application's input region. Only a unique exact SYSTEM window,
+        // corroborated root package and matching event package qualify. Real
+        // window events and live window/focus/geometry evidence remain strict.
+        if(kind!=TargetEventKind.STRUCTURE && corroborated){record(true);return}
         if(kind==TargetEventKind.INTERACTION_LAYOUT && window?.isApplicationOn(display)==true)
             interaction[windowId]=(interaction[windowId] ?: 0)+1
         // Public title/accessibility-focus-only window flags do not imply a
@@ -46,6 +65,7 @@ class TargetWindowRevisions {
         // Live evidence still carries actual window/focus/geometry/owner facts.
         if(kind==TargetEventKind.WINDOW_METADATA || (kind!=TargetEventKind.STRUCTURE && window?.isApplicationOn(display)==true))content[windowId]=(content[windowId] ?: 0)+1
         else structure[display]=(structure[display] ?: 0)+1
+        record(false)
     }
     @Synchronized fun content(window:Int)=content[window] ?: 0L
     @Synchronized fun structure(display:Int)=structure[display] ?: 0L

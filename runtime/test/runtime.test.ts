@@ -373,18 +373,21 @@ test('stopping while awaiting approval never resumes a model request',async()=>{
 });
 
 test('a timer-only merged-fragment persistence failure aborts an otherwise waiting model stream',{timeout:2000},async()=>{
-  const f=fixture();const original=f.ports.persistence.appendEvent;let deltas=0,aborts=0;
+  const f=fixture();const original=f.ports.persistence.appendEvent;let deltas=0,aborts=0;let transportSignal:AbortSignal|undefined;
   f.ports.persistence.appendEvent=async e=>{if(e.type==='text_delta' && ++deltas===2)throw new Error('synthetic disk failure');await original(e);};
   f.ports.network.fetch=async(input,init)=>{
-    const request=new Request(input,init);
+    // Observe the exact Native transport signal throughout its in-flight lifetime,
+    // rather than the follower owned by a temporary, otherwise unused Request.
+    transportSignal=init?.signal??(input instanceof Request?input.signal:undefined);
+    assert.ok(transportSignal);
     const body=new ReadableStream<Uint8Array>({start(controller){
       controller.enqueue(new TextEncoder().encode(protocolSse('openai-responses',{text:'firstlater',disconnect:true})));
-      request.signal.addEventListener('abort',()=>{aborts++;controller.error(new DOMException('Aborted','AbortError'));},{once:true});
+      transportSignal!.addEventListener('abort',()=>{aborts++;controller.error(new DOMException('Aborted','AbortError'));},{once:true});
     }});
     return new Response(body,{headers:{'content-type':'text/event-stream'}});
   };
   await assert.rejects(new ThorRuntime(f.ports,registry(),{runTimeoutMs:0}).run(f.lease,[{type:'text',text:'wait for response'}]),e=>e instanceof RuntimeError && e.code==='PERSISTENCE_ERROR');
-  assert.equal(deltas,2);assert.equal(aborts,1);assert.equal(f.executions.length,0);assert.ok(!f.runs.some(r=>r.state==='completed'));
+  assert.equal(deltas,2);assert.equal(transportSignal?.aborted,true,'Persistence failure must abort the exact Native transport signal before rejecting');assert.equal(aborts,1);assert.equal(f.executions.length,0);assert.ok(!f.runs.some(r=>r.state==='completed'));
   const count=f.events.length;await new Promise(r=>setTimeout(r,80));assert.equal(f.events.length,count,'no delayed persistence after disposed failure');
 });
 

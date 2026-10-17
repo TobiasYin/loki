@@ -186,7 +186,7 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
                     try {job.action.submit(guard::checkAlive) {submitted=true}}
                     finally {Binder.restoreCallingIdentity(identity)}
                 }
-                "accessibility.ensure" -> {
+                "accessibility.ensure" -> run accessibility@ {
                     args.only("operation","reconnect")
                     val reconnect=args["reconnect"] as? Boolean ?: false
                     val host=hostContext ?: fail(Code.UNSUPPORTED,"Shizuku v13 application context required")
@@ -209,21 +209,69 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
                     val merged=AccessibilitySetup.mergedServices(current,host.packageName)
                     // Refresh immediately before the read/merge/write; retain every observed service.
                     val latest=setting("get","enabled_accessibility_services")
-                    val desired=AccessibilitySetup.mergedServices(if(latest==current)current else latest,host.packageName)
+                    AccessibilitySetup.mergedServices(latest,host.packageName) // validate the current inventory before writing
                     val own="${host.packageName}/dev.thor.tools.diagnostic.ThorAccessibilityService"
+                    var inspectionEvidence:Map<String,Any?> = emptyMap()
                     // Android can retain the enabled setting while a crashed service
                     // is disconnected. Cycle only our component when Native detects it.
-                    if(reconnect && own in latest.split(':')) {
-                        setting("put","enabled_accessibility_services",desired.split(':').filter {it!=own}.joinToString(":"))
-                        // Let AccessibilityManager observe removal before re-adding;
-                        // adjacent settings writes can otherwise be coalesced.
-                        Thread.sleep(400);check(token)
+                    if(reconnect) {
+                        var inspection=NativeAccessibilityRecovery.inspect(host,user.toInt()) {check(token)}
+                        // A known orphan must remain visible to package restart
+                        // handling. Do not open an unnecessary OFF window on
+                        // every retry; unknown framework state is also read-only.
+                        if(inspection.state.known && !inspection.state.retainEnabledForRestart) {
+                            val beforeOff=setting("get","enabled_accessibility_services")
+                            AccessibilitySetup.mergedServices(beforeOff,host.packageName)
+                            if(own in beforeOff.split(':'))setting("put","enabled_accessibility_services",beforeOff.split(':').filter {it!=own}.joinToString(":"))
+                            inspection=NativeAccessibilityRecovery.inspect(host,user.toInt()) {check(token)}
+                        }
+                        // Settings readback is not framework acknowledgement. In
+                        // particular Android skips a component already in its
+                        // Binding set before examining the disabled setting.
+                        // Never immediately re-add an unacknowledged component.
+                        // A confirmed orphan below is retained as enabled only
+                        // so Android can clear it on an explicit app restart.
+                        var state=inspection.state
+                        val ackDeadline=SystemClock.elapsedRealtime()+1200
+                        while(!state.offAcknowledged && state.known && !state.retainEnabledForRestart && SystemClock.elapsedRealtime()<ackDeadline) {
+                            Thread.sleep(150);check(token)
+                            inspection=NativeAccessibilityRecovery.inspect(host,user.toInt()) {check(token)};state=inspection.state
+                        }
+                        inspectionEvidence=mapOf("readerPhase" to inspection.readerPhase,"readerError" to inspection.readerError,
+                            "dumpBytes" to inspection.dumpBytes,"publicBoundPhase" to inspection.publicBoundPhase,"dumpExitCode" to inspection.dumpExitCode,
+                            "dumpTimeoutMarker" to inspection.dumpTimeoutMarker,"dumpTruncated" to inspection.dumpTruncated,"dumpProcessExited" to inspection.dumpProcessExited)
+                        if(!state.offAcknowledged) {
+                            var retained=false
+                            if(state.retainEnabledForRestart) {
+                                // Removing an orphan from the enabled inventory
+                                // also hides it from Android's handleForceStop.
+                                // Its binding/crashed guard already prevents a
+                                // second bind; retain only our own entry using a
+                                // fresh merge so a complete app restart can clear
+                                // the stale framework state.
+                                val beforeRetain=setting("get","enabled_accessibility_services")
+                                val desiredRetain=AccessibilitySetup.mergedServices(beforeRetain,host.packageName)
+                                if(beforeRetain!=desiredRetain)setting("put","enabled_accessibility_services",desiredRetain)
+                                requireTool(own in setting("get","enabled_accessibility_services").split(':'),Code.IO_ERROR,"Accessibility restart eligibility readback differs")
+                                retained=true
+                            }
+                            return@accessibility mapOf("enabled" to false,"frameworkPhase" to state.phase,
+                                "offAcknowledged" to false,"frameworkKnown" to state.known,"frameworkEnabled" to state.enabled,
+                                "frameworkBinding" to state.binding,"frameworkCrashed" to state.crashed,"frameworkBound" to state.bound,
+                                "settingsRetainedForRestart" to retained)+inspectionEvidence
+                        }
                     }
-                    if(reconnect || latest!=desired)setting("put","enabled_accessibility_services",desired)
+                    // The system/user may change other enabled services while
+                    // our component is removed. Merge that fresh value rather
+                    // than replaying the pre-toggle inventory over their change.
+                    val beforeEnable=setting("get","enabled_accessibility_services")
+                    val finalDesired=AccessibilitySetup.mergedServices(beforeEnable,host.packageName)
+                    if(beforeEnable!=finalDesired)setting("put","enabled_accessibility_services",finalDesired)
                     setting("put","accessibility_enabled","1")
                     val actual=setting("get","enabled_accessibility_services")
-                    requireTool(actual.split(':').toSet().containsAll(desired.split(':')),Code.IO_ERROR,"Accessibility readback differs")
-                    mapOf("enabled" to true,"uid" to Process.myUid(),"component" to own,"changed" to (current!=merged),"reconnectRequested" to reconnect)
+                    requireTool(actual.split(':').toSet().containsAll(finalDesired.split(':')),Code.IO_ERROR,"Accessibility readback differs")
+                    mapOf("enabled" to true,"uid" to Process.myUid(),"component" to own,"changed" to (current!=merged),"reconnectRequested" to reconnect,
+                        "frameworkPhase" to if(reconnect)"OFF_ACKNOWLEDGED" else "NOT_REQUESTED","offAcknowledged" to reconnect)+inspectionEvidence
                 }
                 "shell" -> fail(Code.UNSUPPORTED, "Use guarded short shell submission")
                 "files.read", "files.list" -> {
