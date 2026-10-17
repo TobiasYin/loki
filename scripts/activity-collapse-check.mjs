@@ -62,7 +62,7 @@ try {
    fixture.tokenPricing=pricing;Object.assign(fixture.runs[0],{provider:'opencode-go',modelId:'gpt-6-luna',startedAt:Date.parse('2026-10-18T02:00:00Z')});
    fixture.events.push({runId:'tool-failure',sequence:4,type:'model_round',data:{modelRound:1,totalInputTokens:100000,cacheReadTokens:90000,outputTokens:1000}},{runId:'tool-failure',sequence:5,type:'model_round',data:{modelRound:2,totalInputTokens:100000,cacheReadTokens:95000,outputTokens:1000}});receiveNative(fixture);
   },JSON.parse(readFileSync('app/src/main/assets/token-pricing.json','utf8')));
-  assert.match(await page.locator('.run-usage-footer:visible').innerText(),/输入 200,000 · 缓存 185,000 · 输出 2,000 · 估算 US\$0.0044/);
+  assert.match(await page.locator('.run-usage-footer:visible').innerText(),/输入 200.0K · 输出 2.0K · 缓存命中率 92.5% · 估算 US\$0.0044/);
   assert.equal(await page.locator('.run-usage-footer:visible').evaluate(node=>!node.closest('details') && node===node.parentElement.lastElementChild),true);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   if(height===540)await page.screenshot({path:`${directory}/token-footer-completed.png`});

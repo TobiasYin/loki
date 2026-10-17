@@ -4,6 +4,9 @@
   const terminal=new Set(['completed','failed','cancelled','interrupted']);
   function summarize(run,events,pricing){
     if(!terminal.has(run.status) || run.probe)return null;
+    // Chat history is a bounded presentation window. Native supplies complete
+    // usage-only receipts separately, without loading older thought/tool bodies.
+    if(Array.isArray(run.usageRounds))events=run.usageRounds;
     const provider=pricing?.providers?.[run.provider],model=provider?.models?.[run.modelId];
     const rounds=new Map();
     for(const [index,event] of events.entries()) {
@@ -50,19 +53,28 @@
     }
     const input=total('input'),cache=total('read'),output=total('output');
     const amounts=rows.map(estimate),amount=amounts.length && [input,cache,output].every(metric=>metric.value!==undefined && !metric.partial) && amounts.every(n=>n!==undefined)?amounts.reduce((sum,n)=>sum+n,0):undefined;
+    const cacheHitRate=input.value>0 && !input.partial && !cache.partial && rows.every(row=>row.read!==undefined && row.input!==undefined && row.read<=row.input)?cache.value/input.value:undefined;
     return {input,cache,output,requests:rows.length,
-      amount:Number.isFinite(amount)?amount:undefined,currency:provider?.currency,priceKnown:!!model,provider:run.provider,updatedAt:pricing?.updatedAt};
+      cacheHitRate,amount:Number.isFinite(amount)?amount:undefined,currency:provider?.currency,priceKnown:!!model,provider:run.provider,updatedAt:pricing?.updatedAt};
   }
   function format(summary){
     if(!summary)return null;
-    const tokens=metric=>metric.value===undefined?'—':metric.value.toLocaleString('en-US')+(metric.partial?'+':'');
-    const parts=[`输入 ${tokens(summary.input)}`,`缓存 ${tokens(summary.cache)}`,`输出 ${tokens(summary.output)}`];
+    const tokens=metric=>{
+      if(metric.value===undefined)return '—';
+      const units=['','K','M','B','T'];let value=metric.value,unit=0;
+      while(value>=1000 && unit<units.length-1){value/=1000;unit++;}
+      if(unit && Number(value.toFixed(1))>=1000 && unit<units.length-1){value/=1000;unit++;}
+      return (unit?value.toFixed(1)+units[unit]:String(value))+(metric.partial?'+':'');
+    };
+    const hit=summary.cacheHitRate===undefined?'—':`${(summary.cacheHitRate*100).toFixed(1)}%`;
+    const parts=[`输入 ${tokens(summary.input)}`,`输出 ${tokens(summary.output)}`,`缓存命中率 ${hit}`];
     if(summary.amount!==undefined) {
       const symbol=summary.currency==='CNY'?'¥':'US$';
       const amount=summary.amount>0 && summary.amount<.0001?`< ${symbol}0.0001`:`${symbol}${summary.amount.toLocaleString('en-US',{minimumFractionDigits:summary.amount<1?4:2,maximumFractionDigits:4})}`;
       parts.push(`估算 ${amount}`);
     }else if(['opencode-go','deepseek'].includes(summary.provider))parts.push('费用未估算');
-    const detail=`本轮累计 ${summary.requests} 次模型请求；缓存命中包含在输入内；输出已包含供应商计入其中的思考 Token。— 表示未返回，+ 表示仅部分请求返回用量。`;
+    const exact=metric=>metric.value===undefined?'—':metric.value.toLocaleString('en-US')+(metric.partial?'+':'');
+    const detail=`本轮累计 ${summary.requests} 次模型请求；精确 Token：输入 ${exact(summary.input)}，输出 ${exact(summary.output)}，缓存命中 ${exact(summary.cache)}。缓存命中包含在输入内，命中率按累计 Token 加权；输出已包含供应商计入其中的思考 Token。— 表示未返回或无法计算，+ 表示仅部分请求返回用量。`;
     const price=summary.provider==='opencode-go'?'按内置 API 单价估算额度用量，不代表订阅之外的实际扣款。':summary.provider==='deepseek'?'按内置 API 单价估算。':'';
     return {text:parts.join(' · '),title:detail+(price?` ${price}价格快照 ${summary.updatedAt??'未知'}；峰谷按请求完成时间估算，未额外推断法定假日。`:'')};
   }

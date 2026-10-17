@@ -20,6 +20,9 @@ import javax.crypto.spec.GCMParameterSpec
 /** Versioned private DB. Changed rows and selection commit together; failed upgrade never wipes history. */
 class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteOpenHelper(context, name, null, 2), NativeStorePort {
     private val tables = listOf("sessions", "runs", "messages", "events", "attachments")
+    // Only small usage receipts for the visible completed runs, never old chat
+    // bodies/Pi entries. Leave in-flight runs on disk until a footer is needed.
+    private val usageRoundCache=linkedMapOf<String,List<JSONObject>>()
     override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("CREATE TABLE sessions(id TEXT PRIMARY KEY, payload TEXT NOT NULL)")
@@ -323,7 +326,7 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
 
     /** A bounded, temporary UI window. Heavy Pi turns and image bodies are
      * removed inside SQLite before any CursorWindow/Java object is allocated. */
-    fun loadChatPage(sessionId:String,runLimit:Int=12,eventLimit:Int=600):JSONObject {
+    @Synchronized fun loadChatPage(sessionId:String,runLimit:Int=12,eventLimit:Int=600):JSONObject {
         require(runLimit in 1..4096 && eventLimit in 0..2000)
         val state=sessionShell(sessionId)
         val total=readableDatabase.rawQuery("SELECT COUNT(*) FROM runs WHERE sessionId=?",arrayOf(sessionId)).use {c->check(c.moveToFirst());c.getInt(0)}
@@ -333,6 +336,31 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         val args=arrayOf(sessionId,sessionId,runLimit.toString())
         state.put("runs",JSONArray(projectedRows("runs","sessionId=?",arrayOf(sessionId),"ORDER BY rowid DESC LIMIT $runLimit",
             "json_remove(payload,'$.turn','$.contexts','$.runtime')") {row->row.remove("turn");row.remove("contexts");row.remove("runtime");row}.reversed()))
+        val visibleRuns=state.getJSONArray("runs").objects()
+        usageRoundCache.keys.retainAll(visibleRuns.map {it.getString("id")}.toSet())
+        for(run in visibleRuns) {
+            val runId=run.getString("id")
+            if(run.optString("status") in setOf("completed","failed","cancelled","interrupted")) {
+                val usage=usageRoundCache.getOrPut(runId) {
+                    val rows=mutableListOf<JSONObject>()
+                    // JSON1 is absent on some devices. The stored ledger is
+                    // compact JSONObject JSON; filter before allocating bodies.
+                    readableDatabase.rawQuery("SELECT payload FROM events WHERE sessionId=? AND runId=? AND payload LIKE ? ORDER BY sequence",
+                        arrayOf(sessionId,runId,"%\"type\":\"model_round\"%")).use {cursor->while(cursor.moveToNext()) {
+                        val event=JSONObject(cursor.getString(0))
+                        if(event.optString("type")=="model_round") {
+                            val receipt=JSONObject().put("type","model_round").put("runId",runId)
+                            for(key in listOf("sequence","wallTime","elapsedMs"))event.opt(key)?.let {receipt.put(key,it)}
+                            val counters=JSONObject();val data=event.optJSONObject("data")
+                            for(key in listOf("modelRound","inputTokens","totalInputTokens","cacheReadTokens","cacheWriteTokens","outputTokens"))data?.opt(key)?.let {counters.put(key,it)}
+                            rows.add(receipt.put("data",counters))
+                        }
+                    }}
+                    rows
+                }
+                run.put("usageRounds",JSONArray(usage.map {JSONObject(it.toString())}))
+            }else usageRoundCache.remove(runId)
+        }
         state.put("messages",JSONArray(projectedRows("messages",related,args,"ORDER BY rowid DESC LIMIT ${runLimit*4+32}",
             messageProjectionSql(),::stripMessageData).reversed()))
         state.put("events",JSONArray(projectedRows("events",related,args,"ORDER BY rowid DESC LIMIT $eventLimit","payload") {it}.reversed()))
@@ -489,7 +517,8 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
     /** Persist explicitly resident rows without treating missing disk history
      * as deletion. Destructive deletion requires an explicit session ID set.
      * Parent updates stay in place, preserving child rows and durable row IDs. */
-    fun savePartialSnapshot(state:JSONObject,deletedSessionIds:Set<String> = emptySet()) {
+    @Synchronized fun savePartialSnapshot(state:JSONObject,deletedSessionIds:Set<String> = emptySet()) {
+        usageRoundCache.clear()
         val sessions=state.getJSONArray("sessions").objects()
         val sessionIds=sessions.map {it.getString("id")}.toSet()
         val selected=state.getString("selected")
@@ -524,7 +553,8 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         }finally {db.endTransaction()}
     }
 
-    override fun save(state: JSONObject) {
+    @Synchronized override fun save(state: JSONObject) {
+        usageRoundCache.clear()
         val db = writableDatabase
         db.beginTransaction()
         try {
@@ -569,7 +599,8 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
     /** Startup modifies session metadata and explicitly recovered nonterminal
      * Runs only. Never reread/compare every old payload or rewrite/delete child
      * history merely to open the app. */
-    fun saveStartupRecovery(state:JSONObject,recoveredRunIds:Set<String>) {
+    @Synchronized fun saveStartupRecovery(state:JSONObject,recoveredRunIds:Set<String>) {
+        usageRoundCache.clear()
         val sessions=state.getJSONArray("sessions").objects()
         val recovered=state.getJSONArray("runs").objects().filter {it.getString("id") in recoveredRunIds}
         require(recovered.map {it.getString("id")}.toSet()==recoveredRunIds && recovered.size==recoveredRunIds.size)
@@ -632,8 +663,9 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
      * Updating parents in place preserves their existing children. Events only append;
      * a duplicate ID/sequence rolls back the run, message and selection together.
      */
-    fun saveRunUpdate(state: JSONObject, run: JSONObject, event: JSONObject?) {
+    @Synchronized fun saveRunUpdate(state: JSONObject, run: JSONObject, event: JSONObject?) {
         val rid=run.getString("id");val sid=run.getString("sessionId")
+        if(event?.optString("type")=="model_round" || run.optString("status") !in setOf("completed","failed","cancelled","interrupted"))usageRoundCache.remove(rid)
         require(event==null || event.getString("runId")==rid && event.getString("sessionId")==sid)
         val db=writableDatabase
         fun values(table:String,row:JSONObject)=ContentValues().apply {
