@@ -457,10 +457,13 @@
     if(focused)list.focus();
   }
   const modelChoiceValue=model=>model.providerConfigId?(model.choiceId??`${model.providerConfigId}::${model.id}`):model.id;
-  const modelProviderLabel=model=>model.providerName||model.provider||model.providerConfigId||'';
+  const modelDisplayName=model=>(model.provider==='custom' && (model.modelId||model.id))||model.label||model.name||model.modelId||model.id||'选择模型';
   function renderModelSummary(profile) {
-    const name=profile.label||profile.name||profile.modelId||'选择模型',provider=modelProviderLabel(profile);
-    $('model-picker').textContent=`${provider?provider+' · ':''}${name}${profile.configured===false?' · 不可用':''}${profile.thinkingEffort && profile.thinkingEffort!=='off'?' · '+(effortNames[profile.thinkingEffort]??profile.thinkingEffort):''} ⌄`;
+    const name=modelDisplayName(profile);
+    const detail=`${profile.configured===false?' · 不可用':''}${profile.thinkingEffort && profile.thinkingEffort!=='off'?' · '+(effortNames[profile.thinkingEffort]??profile.thinkingEffort):''}`;
+    const picker=$('model-picker');
+    picker.replaceChildren(element('span',name,'model-name'),element('span',detail,'model-detail'),element('span',' ⌄','model-chevron'));
+    picker.title=name+detail;picker.setAttribute('aria-label',`选择模型和思考强度：${name}${detail}`);
     $('model-context').textContent=profile.contextWindow?`上下文 ${Intl.NumberFormat('en',{notation:'compact'}).format(profile.contextWindow)} tokens`:'';
   }
   function renderModelEfforts(profile) {
@@ -473,7 +476,7 @@
     if(!changedSection('model',[state.modelSelection,state.modelChoices]))return;
     const profile=state.modelSelection??{},choices=state.modelChoices??[];
     const chosen=choices.find(model=>model.id===profile.modelId && (!profile.providerConfigId || model.providerConfigId===profile.providerConfigId));
-    fillPicker('model-select',choices.map(model=>({value:modelChoiceValue(model),label:`${modelProviderLabel(model)?modelProviderLabel(model)+' · ':''}${model.name??model.id}`})),chosen?modelChoiceValue(chosen):profile.modelId,value=>{
+    fillPicker('model-select',choices.map(model=>({value:modelChoiceValue(model),label:modelDisplayName(model)})),chosen?modelChoiceValue(chosen):profile.modelId,value=>{
       const model=choices.find(choice=>modelChoiceValue(choice)===value);if(!model)return;
       // Reflect a click immediately; ordinary streaming snapshots with unchanged
       // model metadata leave this choice intact until the host confirms it.
