@@ -266,10 +266,12 @@ class ProductHost private constructor(private val context: Context, private val 
         val options=(0 until efforts.length()).map {efforts.getString(it)}
         val effort=s.optString("thinkingEffort").takeIf {it in options} ?: chosen.optString("defaultEffort").takeIf {it in options} ?: if(providerId()!="custom" && "high" in options)"high" else options.first()
         val metadataKnown=OfficialProfilePolicy.metadataKnown(providerId(),prefs.getString("url","").orEmpty(),chosen.opt("providerMetadataKnown")==true)
+        val outputBudget=OutputBudgetPolicy.resolve(providerId(),chosen.getInt("contextWindow"),chosen.getInt("maxOutput"),
+            prefs.getString("maxOutputText",""),prefs.getInt("maxOutput",2048))
         profile.put("provider",providerId()).put("providerMetadataKnown",metadataKnown).put("probeRequired",!metadataKnown)
             .put("supportsTools",chosen.optBoolean("supportsTools",false)).put("metadataSource",chosen.optString("metadataSource"))
             .put("profileId","$ref:$protocol").put("revision",revision).put("modelId",chosen.getString("id")).put("label",chosen.getString("name"))
-            .put("protocol",protocol).put("contextWindow",chosen.getInt("contextWindow")).put("maxOutput",minOf(prefs.getInt("maxOutput",2048),chosen.getInt("maxOutput")))
+            .put("protocol",protocol).put("contextWindow",chosen.getInt("contextWindow")).put("maxOutput",outputBudget.tokens).put("outputBudgetAutomatic",outputBudget.automatic)
             .put("maxOutputLimit",chosen.getInt("maxOutput")).put("input",chosen.optJSONArray("input") ?: JSONArray(listOf("text"))).put("thinkingEffort",effort).put("efforts",efforts).put("reasoning",chosen.optBoolean("reasoning",effort!="off"))
             .put("thinkingLevelMap",chosen.optJSONObject("thinkingLevelMap")).put("compat",chosen.optJSONObject("compat"))
         if(profile.has("baseUrl"))profile.put("baseUrl",OfficialProfilePolicy.protocolBase(providerId(),protocol,profile.getString("baseUrl")))

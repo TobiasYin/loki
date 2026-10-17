@@ -98,7 +98,7 @@ export async function compileContext(options: {
   snapshot: AuthoritySnapshot; tools: ToolDescriptor[]; registryVersion: string; model: Model<any>;
   history: HistoryTurn[]; current: Message[]; attachments: AttachmentPort; imageTokens: number; maxHistoryTurns: number;
   currentRefs?: string[];
-}): Promise<{ messages: Message[]; manifest: ContextSnapshot }> {
+}): Promise<{ messages: Message[]; manifest: ContextSnapshot; maxOutput: number }> {
   const { snapshot: s, tools, model } = options;
   const unavailable = Object.entries(s.availability).filter(([, a]) => a.status !== 'ready').map(([p, a]) => [p, a.status] as const);
   const upperApp = !s.l0.upperAppObservation || s.l0.upperAppObservation.status === 'observed' ? appMetadata(s.l0.upperApp) : undefined;
@@ -146,14 +146,20 @@ export async function compileContext(options: {
     const messages = await projectHistory(domain, model, options.attachments, s);
     assertPaired(messages); units.push({ id: turn.turnId, messages });
   }
-  const budget = model.contextWindow - model.maxTokens;
+  const automatic = s.session.model.outputBudgetAutomatic === true;
+  // Automatic catalog ceilings are maxima, not a reservation that should erase
+  // useful history. Fit the bounded input first, keeping Pi's own safety margin
+  // and at least the Responses minimum output, then allocate this round's output.
+  const safetyTokens = 4096; const minimumOutput = 16;
+  const budget = automatic ? model.contextWindow - safetyTokens - minimumOutput : model.contextWindow - model.maxTokens;
   const assemble = () => [system, ...units.flatMap(u => u.messages), ...current];
   while (estimateTokens(assemble(), options.imageTokens) > budget && units.length) dropped.push(units.shift()!.id);
   const messages = assemble(); const estimatedTokens = estimateTokens(messages, options.imageTokens);
   if (estimatedTokens > budget) throw new RuntimeError('LIMIT_EXCEEDED', 'Current goal/tool round exceeds context budget; split the task');
+  const maxOutput = automatic ? Math.min(model.maxTokens, model.contextWindow - estimatedTokens - safetyTokens) : model.maxTokens;
   assertPaired(messages);
   const attachmentRefs = [...new Set([...(options.currentRefs ?? []), ...options.history.filter(t => units.some(u => u.id === t.turnId)).flatMap(t => t.messages.flatMap(m => m.kind === 'assistant' ? [] : m.content.filter(c => c.type === 'attachment').map(c => c.attachmentId)))])];
-  return { messages, manifest: { snapshotId: crypto.randomUUID(), modelProfileRevision: s.session.model.revision, capabilityEpoch: s.session.capabilityEpoch, registryVersion: options.registryVersion,
+  return { messages, maxOutput, manifest: { snapshotId: crypto.randomUUID(), modelProfileRevision: s.session.model.revision, capabilityEpoch: s.session.capabilityEpoch, registryVersion: options.registryVersion,
     l0SnapshotId: s.l0.snapshotId, includedMessageIds: [...units.map(u => u.id), `current:${s.lease.runId}`], attachmentRefs, effectiveTools: tools.map(t => t.toolId), estimatedTokens, estimated: true,
     compressionVersion: 'deterministic-v1', droppedTurnIds: dropped, contentHash: await hash(messages) } };
 }

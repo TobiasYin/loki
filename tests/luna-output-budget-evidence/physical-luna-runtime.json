@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "model": "gpt-6-luna",
+  "syntheticPrompt": true,
+  "normalProductRuntime": true,
+  "runs": [
+    {
+      "index": 0,
+      "status": "completed",
+      "toolCalls": 0,
+      "markerMatches": true,
+      "piSessionReused": false,
+      "rounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 128000,
+          "inputTokens": 2003,
+          "outputTokens": 10,
+          "reasoningTokens": 0,
+          "stopReason": "stop"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "status": "completed",
+      "toolCalls": 0,
+      "markerMatches": true,
+      "piSessionReused": true,
+      "rounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 128000,
+          "inputTokens": 2041,
+          "outputTokens": 10,
+          "reasoningTokens": 0,
+          "stopReason": "stop"
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": 0,
+  "configurationPreserved": true,
+  "historyPreserved": true
+}

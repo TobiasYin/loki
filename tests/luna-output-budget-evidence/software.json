@@ -1,0 +1,23 @@
+{
+  "runtime": {
+    "tests": 288,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "appJvm": {
+    "tests": 163,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "chatUi": {
+    "tests": 74,
+    "failures": 0,
+    "skipped": 0
+  },
+  "integrationTypeCheck": true,
+  "debugApkBuilt": true,
+  "androidTestApkBuilt": true,
+  "lintDebugPassed": true
+}

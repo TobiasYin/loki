@@ -20,7 +20,7 @@ export function checkProfile(p: ModelProfile): void {
   const reject = (): never => { throw new RuntimeError('UNSUPPORTED', 'Model profile metadata or custom connection test is incomplete'); };
   const u = (() => { try { return new URL(p.baseUrl); } catch { return reject(); } })();
   if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || u.search || u.hash) reject();
-  if (!['openai-responses', 'anthropic-messages', 'openai-completions'].includes(p.protocol) || !p.modelId || !p.credentialRef || p.contextWindow <= p.maxOutput || p.maxOutput < 16 || !Number.isSafeInteger(p.contextWindow) || !Number.isSafeInteger(p.maxOutput)) reject();
+  if (!['openai-responses', 'anthropic-messages', 'openai-completions'].includes(p.protocol) || !p.modelId || !p.credentialRef || p.contextWindow < p.maxOutput || p.contextWindow === p.maxOutput && p.outputBudgetAutomatic !== true || p.maxOutput < 16 || !Number.isSafeInteger(p.contextWindow) || !Number.isSafeInteger(p.maxOutput) || p.outputBudgetAutomatic !== undefined && typeof p.outputBudgetAutomatic !== 'boolean') reject();
   if (p.configurationProbe === true) {
     // Native only sets this on its dedicated explicit configuration-test lease.
     // The probe must run before it has a successful lastProbe observation.

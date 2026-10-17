@@ -302,7 +302,7 @@
         card.append(element('summary',`${title(call)} · ${status}`));
         renderCallBody(card,call);contents.append(card);
       }
-      if(last)contents.append(element('div',last.data?.code==='TARGET_CHANGED'?'页面已变化，需重新观察。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
+      if(last)contents.append(element('div',last.data?.code==='TARGET_CHANGED'?'页面已变化，需重新观察。':last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
       disclosure.append(contents);
     }
     // Native persists the outer choice. Keep an immediate local choice while

@@ -1,0 +1,58 @@
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalLunaBudgetTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.PhysicalLunaBudgetTest:
+INSTRUMENTATION_STATUS: test=syntheticLunaBudgetComparisonAndNativeProfilePreserveSavedHistory
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalLunaBudgetTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Service engine/WebView did not attach and initialize within 45 seconds
+	at org.junit.Assert.fail(Assert.java:89)
+	at dev.thor.agent.EmulatorRuntimeTestSupport.awaitReady(EmulatorRuntimeTestSupport.kt:63)
+	at dev.thor.agent.EmulatorRuntimeTestSupport.awaitReady$default(EmulatorRuntimeTestSupport.kt:21)
+	at dev.thor.agent.PhysicalLunaBudgetTest.syntheticLunaBudgetComparisonAndNativeProfilePreserveSavedHistory(PhysicalLunaBudgetTest.kt:207)
+
+INSTRUMENTATION_STATUS: stream=
+Error in syntheticLunaBudgetComparisonAndNativeProfilePreserveSavedHistory(dev.thor.agent.PhysicalLunaBudgetTest):
+java.lang.AssertionError: Service engine/WebView did not attach and initialize within 45 seconds
+	at org.junit.Assert.fail(Assert.java:89)
+	at dev.thor.agent.EmulatorRuntimeTestSupport.awaitReady(EmulatorRuntimeTestSupport.kt:63)
+	at dev.thor.agent.EmulatorRuntimeTestSupport.awaitReady$default(EmulatorRuntimeTestSupport.kt:21)
+	at dev.thor.agent.PhysicalLunaBudgetTest.syntheticLunaBudgetComparisonAndNativeProfilePreserveSavedHistory(PhysicalLunaBudgetTest.kt:207)
+
+INSTRUMENTATION_STATUS: test=syntheticLunaBudgetComparisonAndNativeProfilePreserveSavedHistory
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalLunaBudgetTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=normalLunaRuntimeAndFollowupUseAutomaticBudgetAndRetainSession
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.PhysicalLunaBudgetTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=normalLunaRuntimeAndFollowupUseAutomaticBudgetAndRetainSession
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 111.624
+There was 1 failure:
+1) syntheticLunaBudgetComparisonAndNativeProfilePreserveSavedHistory(dev.thor.agent.PhysicalLunaBudgetTest)
+java.lang.AssertionError: Service engine/WebView did not attach and initialize within 45 seconds
+	at org.junit.Assert.fail(Assert.java:89)
+	at dev.thor.agent.EmulatorRuntimeTestSupport.awaitReady(EmulatorRuntimeTestSupport.kt:63)
+	at dev.thor.agent.EmulatorRuntimeTestSupport.awaitReady$default(EmulatorRuntimeTestSupport.kt:21)
+	at dev.thor.agent.PhysicalLunaBudgetTest.syntheticLunaBudgetComparisonAndNativeProfilePreserveSavedHistory(PhysicalLunaBudgetTest.kt:207)
+
+FAILURES!!!
+Tests run: 2,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

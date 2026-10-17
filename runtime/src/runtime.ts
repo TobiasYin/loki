@@ -13,6 +13,7 @@ import { StreamEvents } from './stream-events.js';
 import { checkProfile } from './profile-validation.js';
 import { providerStopBoundary } from './provider-stop.js';
 import { unavailableToolReason } from './tool-availability.js';
+import { ModelRoundDiagnostics } from './model-round-diagnostics.js';
 type WaitPhase = 'agent_prompt' | 'provider_next' | 'provider_result' | 'request_body' | 'authority' | 'persist' | 'network_headers' | 'network_read';
 
 const terminal = new Set<RunState>(['completed', 'failed', 'cancelled', 'interrupted']);
@@ -32,6 +33,8 @@ interface Active {
   waits: Map<number, { phase: WaitPhase; since: number }>; waitSequence: number; lastProgress: number;
   effects: EffectRecord[];
   turnId: string; streamMessage: number; messageOffset: number; input: Content[];
+  modelDiagnostics?: ModelRoundDiagnostics;
+  requestMaxOutput?: number;
 }
 const currentScreenReads = new Set(['perception.app_info', 'perception.window_info', 'perception.ui_tree', 'perception.capture_screen']);
 const screenResources = new Set(['selected-screen/snapshot', 'upper-display/snapshot']);
@@ -331,7 +334,13 @@ export class ThorRuntime {
         if (call?.type === 'toolCall') await a.stream!.push({type:'tool_call_update',data:{ toolName: call.name, arguments: call.arguments, complete: delta.type === 'toolcall_end' },toolCallId:call.id});
       }
     }
-    if(e.type==='message_end' && !a.persistenceFailed)await this.saveTurn(a,false);
+    if(e.type==='message_end' && !a.persistenceFailed) {
+      if(e.message.role==='assistant' && a.modelDiagnostics) {
+        a.modelDiagnostics.finish(e.message.stopReason);
+        await this.event(a,'model_round',a.modelDiagnostics.snapshot());
+      }
+      await this.saveTurn(a,false);
+    }
     if (e.type === 'tool_execution_start' && !a.controller.signal.aborted) await this.state(a, 'executing_tools');
     // A tool-local timeout/rejection can finish while its Native approval RPC is
     // still unwinding. Leave awaiting_user before Pi starts its next model turn.
@@ -369,6 +378,9 @@ export class ThorRuntime {
       const restored=previous?[]:await projectHistory(history.slice(-this.limits.maxHistoryTurns).flatMap(t=>t.source.every(c=>initial.session.enabled[c])?closeInterruptedRound(t.messages):t.messages.filter(m=>m.kind==='user')),model,this.ports.attachments,initial);
       active.messageOffset=previous?.state.messages.filter(m=>m.role!=='system').length??restored.length;
       const agentOptions:AgentOptions={initialState:{model,thinkingLevel:profile.thinkingEffort??'off',messages:restored},sessionId:lease.sessionId,toolExecution:'sequential',transport:'sse',
+        // Pi rejects truncated tool calls but normally asks the model to retry them.
+        // End here so a token limit cannot silently replay a side-effecting round.
+        finishTurn: async ({message}) => message.stopReason==='length' ? {action:'end'} : undefined,
         beforeToolCall: async ({ toolCall }) => audit.permits(toolCall.id, toolCall.arguments) ? undefined : { block: true, reason: 'PROTOCOL_ERROR: incomplete or conflicting JSON', terminate: true },
         prepareRequest: async request => {
           try {
@@ -389,6 +401,7 @@ export class ThorRuntime {
           const compiled = await compileContext({ snapshot: { ...s, session: { ...s.session, model: profile } }, tools: active.effective, registryVersion: this.registry.version, model,
             history, current, currentRefs: [...input, ...[...active.resultRefs.values()].flat()].filter(c => c.type === 'attachment').map(c => c.attachmentId), attachments: this.ports.attachments, imageTokens: this.limits.imageTokenEstimate, maxHistoryTurns: this.limits.maxHistoryTurns });
           active.requestMessages = compiled.messages;
+          active.requestMaxOutput = compiled.maxOutput;
           await this.persist(active, () => this.ports.persistence.saveContext(compiled.manifest)); await this.event(active, 'context', { snapshotId: compiled.manifest.snapshotId, estimatedTokens: compiled.manifest.estimatedTokens, droppedTurnIds: compiled.manifest.droppedTurnIds, piSessionReused:!!previous });
           await this.state(active, 'generating');
           // Keep history out of Agent's evolving transcript; inject the bounded projection only at convertToLlm.
@@ -398,13 +411,14 @@ export class ThorRuntime {
         convertToLlm: () => active.requestMessages,
         streamFn: (_model, context, options) => {
           const fetcher=this.fetch(active);
-          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onProviderStreamEvent: (event: unknown) => audit.observe(profile.protocol, event), apiKey: 'sk-thor-native-placeholder', fetch: this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher), transport: 'sse' as const, maxTokens: profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
+          const diagnostics=active.modelDiagnostics=new ModelRoundDiagnostics(active.requests);
+          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onPayload:(payload:unknown)=>{diagnostics.payload(profile.protocol,payload);}, onProviderStreamEvent: (event: unknown) => { audit.observe(profile.protocol, event); diagnostics.observe(profile.protocol,event); }, apiKey: 'sk-thor-native-placeholder', fetch: this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher), transport: 'sse' as const, maxTokens: active.requestMaxOutput ?? profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
           const source = profile.protocol === 'openai-responses' ? responses(model, context, common) : profile.protocol==='openai-completions' ? completions(model,context,common) : anthropic(model, context, common);
           return providerStopBoundary(source, active.controller.signal, model, (phase, work) => this.watch(active, phase, work));
         },
       };
       const agent=previous??new Agent(agentOptions);
-      if(previous) {agent.state.model=model;agent.state.thinkingLevel=profile.thinkingEffort??'off';agent.beforeToolCall=agentOptions.beforeToolCall;agent.prepareRequest=agentOptions.prepareRequest;agent.convertToLlm=agentOptions.convertToLlm!;agent.streamFunction=agentOptions.streamFn;}
+      if(previous) {agent.state.model=model;agent.state.thinkingLevel=profile.thinkingEffort??'off';agent.beforeToolCall=agentOptions.beforeToolCall;agent.finishTurn=agentOptions.finishTurn;agent.prepareRequest=agentOptions.prepareRequest;agent.convertToLlm=agentOptions.convertToLlm!;agent.streamFunction=agentOptions.streamFn;}
       if(this.session)this.session.agent=agent;
       a.agent = agent;
       const abortAgent = () => agent.abort(); a.controller.signal.addEventListener('abort', abortAgent, { once: true });
@@ -424,7 +438,7 @@ export class ThorRuntime {
         // bodies or headers. A clean HTTP EOF can still be an output-token limit.
         const stopReason = !assistant || assistant.role !== 'assistant' ? 'missing' : assistant.stopReason === 'length' ? 'length' : assistant.stopReason === 'aborted' ? 'aborted' : 'error';
         a.run.error = stopReason === 'length' ? 'LIMIT_EXCEEDED' : a.failure ?? 'IO_ERROR';
-        await this.event(a,'diagnostic',{code:stopReason==='length'?'MODEL_OUTPUT_LIMIT':'MODEL_STREAM_FAILED',stopReason});
+        await this.event(a,'diagnostic',{code:stopReason==='length'?'MODEL_OUTPUT_LIMIT':'MODEL_STREAM_FAILED',...a.modelDiagnostics?.snapshot(),stopReason});
         await this.state(a, 'failed');
       } else {
         await this.saveTurn(active,true);

@@ -1,0 +1,12 @@
+{
+  "files": {
+    "initial-instrumentation.txt": "be3fd572ff99cf5454af10d14eeec4cb5b2ac96df3d3dbde09be52304e9845ee",
+    "physical-luna-runtime.json": "daf8a2a025288aca2fc8eb64197d80c15701e641305fbe3e2baf5dcb7314acaf",
+    "preservation.json": "7a4b898ec9bf2d5ae093d98f4a2936e06dc9a980670494ce32a1e15f8a5a3823",
+    "README.md": "9c1c3634e2c98b4c3c86edd13083accd5a8bea018e9c05a85d21ff0bcc33f054",
+    "physical-luna-budget.json": "8e46f35cc93724ad2d4712bc9a32d098ca23d8ef5248e1359673db7d8b339f07",
+    "software.json": "a7ccd0222c798aabda7cc6571d90ce76ce557c77aca54887d09c61c281d8e6b0",
+    "comparison-instrumentation.txt": "83995567b31f131f95d120a6652c1b3e841411efb128cb684ddb26a5e069c80e",
+    "apk-sha256.json": "230249afa55d66f49b41b797663c0ac1ff68e2427bfe835d6896e8b50709057e"
+  }
+}

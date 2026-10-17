@@ -262,7 +262,8 @@ class MainActivity : Activity() {
         val protocol = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, arrayOf("OpenAI Responses", "Anthropic Messages","OpenAI Chat Completions")); setSelection(prefs.getInt("protocol", 0)); content.addView(this) }
         val url = field("模型基础 URL（HTTP / HTTPS）", "url"); val model = field("模型 ID", "model")
         val contextBudget = field("自定义模型上下文上限（tokens）", "contextBudgetText")
-        val maxOutput = field("最大输出预算（默认 2048；按服务实际限制填写）", "maxOutputText")
+        val maxOutput = field("输出上限（tokens；留空跟随模型）", "maxOutputText").apply {inputType=InputType.TYPE_CLASS_NUMBER}
+        val outputHelp=TextView(this).apply {textSize=13f;setPadding(0,0,0,12);content.addView(this)}
         val imageSupport=CheckBox(this).apply {text="支持图片输入";isChecked=prefs.getBoolean("supportsImages",true);content.addView(this)}
         val catalog=ModelCatalog(this);val deepseek=DeepSeekCatalog(this)
         val modelPicker=Spinner(this).apply {tag="model-picker";contentDescription="选择模型"};content.addView(modelPicker)
@@ -274,10 +275,12 @@ class MainActivity : Activity() {
         val modelKey = field("API Key（留空保留）", "", true)
         val removeModel = CheckBox(this).apply { text = "删除已保存模型 Key"; content.addView(this) }
         var advancedExpanded=false
-        val advanced=listOf(contextBudget,maxOutput,imageSupport,headerName,headerTemplate)
+        val advanced=listOf(contextBudget,maxOutput,outputHelp,imageSupport,headerName,headerTemplate)
         fun renderAdvanced() {
-            advanced.forEach {it.visibility=if(advancedExpanded && (providerId()=="custom" || it==contextBudget || it==maxOutput || it==imageSupport))View.VISIBLE else View.GONE}
+            advanced.forEach {it.visibility=if(advancedExpanded && (providerId()=="custom" || it==contextBudget || it==maxOutput || it==outputHelp || it==imageSupport))View.VISIBLE else View.GONE}
             contextBudget.isEnabled=providerId()=="custom";imageSupport.isEnabled=providerId()=="custom"
+            maxOutput.hint=if(providerId()=="custom")"输出上限（tokens；留空默认 2048）" else "输出上限（tokens；留空跟随模型）"
+            outputHelp.text=if(providerId()=="custom")"留空使用 2048；填写整数，并小于上下文容量。" else "留空自动使用当前模型的输出容量；填写整数可限制输出，清空即可恢复自动。输出预算包含思考内容。"
         }
         renderAdvanced()
         content.addView(Button(this).apply {text="高级选项 ›";setOnClickListener {advancedExpanded=!advancedExpanded;renderAdvanced();text=if(advancedExpanded)"收起高级选项 ‹" else "高级选项 ›"}})
@@ -299,7 +302,7 @@ class MainActivity : Activity() {
                 val source=if(selectedProvider=="deepseek")deepseek.source() else catalog.source()
                 val labels=mapOf("off" to "关闭","low" to "低","high" to "高","max" to "最大")
                 val effort=if(selectedProvider=="deepseek")choice.getJSONArray("efforts").let {a->(0 until a.length()).joinToString(" / "){labels[a.getString(it)] ?: a.getString(it)}}+"（默认${labels[choice.optString("defaultEffort","high")] ?: "高"}）" else choice.getJSONArray("efforts").join(" / ")
-                catalogStatus.text="$source\n上下文 ${choice.getInt("contextWindow")} tokens · 思考强度 $effort\n"+if(imageSupport.isChecked)"支持文字和图片" else "仅支持文字"
+                catalogStatus.text="$source\n上下文 ${choice.getInt("contextWindow")} tokens · 输出容量 ${choice.getInt("maxOutput")} tokens\n思考强度 $effort\n"+if(imageSupport.isChecked)"支持文字和图片" else "仅支持文字"
             }
             modelPicker.setSelection(chosen);applyChoice(chosen)
             modelPicker.onItemSelectedListener=object:android.widget.AdapterView.OnItemSelectedListener {
@@ -331,15 +334,21 @@ class MainActivity : Activity() {
                 renderAdvanced()
             }
         }
+        fun currentOutputBudget():OutputBudgetPolicy.Budget {
+            val custom=providerId()=="custom"
+            val metadata=selectedMetadata()
+            val context=if(custom)contextBudget.text.toString().ifBlank {"32768"}.toInt() else requireNotNull(metadata).getInt("contextWindow")
+            return OutputBudgetPolicy.resolve(providerId(),context,if(custom)null else metadata!!.getInt("maxOutput"),maxOutput.text.toString(),rejectExcess=true)
+        }
         fun currentModelDraft():ModelConnectionTest.Draft {
             val custom=providerId()=="custom"
             return ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),
-                draftKey(),if(custom)headerName.text.toString() else "",if(custom)headerTemplate.text.toString() else "").withProfile(selectedMetadata())
+                draftKey(),if(custom)headerName.text.toString() else "",if(custom)headerTemplate.text.toString() else "",maxOutput=currentOutputBudget().tokens).withProfile(selectedMetadata(),maxOutput.text.toString())
         }
         val testStatus=TextView(this).apply {tag="model-test-status";text="测试当前页面填写的配置；同一服务的空白 Key 使用已保存 Key。草稿不会自动保存。";setPadding(0,12,0,12);content.addView(this)}
         val test=Button(this).apply {text="测试当前填写的连接";tag="model-test";content.addView(this)}
         test.setOnClickListener {
-            val draft=currentModelDraft()
+            val draft=runCatching {currentModelDraft()}.getOrElse {testStatus.text="输出上限需为不超过所选模型容量的整数，留空可恢复默认；草稿未保存";return@setOnClickListener}
             if(runCatching {draft.validate()}.isFailure){testStatus.text="请填写该服务有效的 API Key 和模型配置；草稿未保存";return@setOnClickListener}
             test.isEnabled=false;testStatus.text="正在测试当前填写的连接…（草稿未保存）"
             Thread {
@@ -363,9 +372,9 @@ class MainActivity : Activity() {
             try {
                 require(!host.hasActiveRuns())
                 currentModelDraft().let {if(removeModel.isChecked)it.copy(credential="removed") else it}.validate()
-                val budget=contextBudget.text.toString().ifBlank {"32768"}.toInt()
-                val outputBudget=maxOutput.text.toString().ifBlank {"2048"}.toInt()
-                require(budget in 4096..4000000 && outputBudget in 16..16384 && outputBudget<budget)
+                val budget=if(providerId()=="custom")contextBudget.text.toString().ifBlank {"32768"}.toInt() else requireNotNull(selectedMetadata()).getInt("contextWindow")
+                val outputBudget=currentOutputBudget().tokens
+                require(budget in 4096..4000000 && outputBudget<budget)
                 val nextRevision=prefs.getInt("revision",0)+1
                 check(prefs.edit().putInt("revision",nextRevision).putString("probe","untested").remove("probeRevision").commit())
                 if(removeModel.isChecked)vault.remove("model") else if(modelKey.length()>0)vault.put("model",modelKey.text.toString())

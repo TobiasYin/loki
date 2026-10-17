@@ -372,7 +372,7 @@ for(const protocol of ['openai-responses','openai-completions','anthropic-messag
     assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');
     assert.equal(session.agent!.state.messages.filter(m=>m.role==='assistant').at(-1)!.stopReason,'length');
     assert.equal(nativeEffects,1);assert.equal(first.executions.length,1);assert.equal(first.requests.length,2);
-    assert.deepEqual(first.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_OUTPUT_LIMIT').map(e=>e.data),[{code:'MODEL_OUTPUT_LIMIT',stopReason:'length'}]);
+    assert.deepEqual(first.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_OUTPUT_LIMIT').map(e=>e.data),[{code:'MODEL_OUTPUT_LIMIT',modelRound:2,requestedMaxOutputTokens:1024,...(protocol==='openai-completions'?{}:{inputTokens:10,outputTokens:4}),stopReason:'length',incompleteReason:protocol==='openai-responses'?'max_output_tokens':protocol==='openai-completions'?'length':'max_tokens'}]);
     assert.equal(first.events.filter(e=>e.type==='text_delta').map(e=>e.data.text).join(''),'已完成一次操作，后续正文未写完');
     const recorded=first.turns.at(-1)!;assert.equal(recorded.complete,false);
     assert.ok(JSON.stringify(recorded.messages).includes('已完成一次操作，后续正文未写完'));
@@ -398,7 +398,7 @@ test('provider error termination records only a fixed safe reason without persis
   const session=new RuntimeSession('session-test');
   const result=await new ThorRuntime(f.ports,registry(),{},session).run(f.lease,[{type:'text',text:'触发上游失败'}]);
   assert.equal(result.state,'failed');assert.equal(result.error,'IO_ERROR');
-  assert.deepEqual(f.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_STREAM_FAILED').map(e=>e.data),[{code:'MODEL_STREAM_FAILED',stopReason:'error'}]);
+  assert.deepEqual(f.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_STREAM_FAILED').map(e=>e.data),[{code:'MODEL_STREAM_FAILED',modelRound:1,requestedMaxOutputTokens:1024,stopReason:'error'}]);
   assert.ok(!JSON.stringify({events:f.events,runs:f.runs,turns:f.turns,contexts:f.contexts}).includes(privateUpstream));
   const next=fixture('openai-responses',[{text:'恢复'}]);
   assert.equal((await new ThorRuntime(next.ports,registry(),{},session).run(next.lease,[{type:'text',text:'继续'}],[f.turns.at(-1)!])).state,'completed');

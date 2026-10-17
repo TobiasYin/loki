@@ -7,6 +7,26 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class ModelConnectionTestTest {
+    @Test fun lunaDraftUsesAutomaticProfileCapacityOrAnExplicitCeiling() {
+        val profile=JSONObject("{\"id\":\"gpt-6-luna\",\"protocol\":\"openai-responses\",\"contextWindow\":1050000,\"maxOutput\":128000,\"reasoning\":true,\"efforts\":[\"off\",\"low\",\"high\"]}")
+        val original=ModelConnectionTest.Draft("https://opencode.ai/zen/go/v1","openai-responses","gpt-6-luna","fixture-not-a-key")
+        for((text,expected) in listOf(null to 128000,"" to 128000,"65536" to 65536,"2048" to 2048)) {
+            val draft=original.withProfile(profile,text)
+            val buffer=okio.Buffer();ModelConnectionTest.request(draft).body!!.writeTo(buffer)
+            val body=JSONObject(buffer.readUtf8())
+            assertEquals(expected,body.getInt("max_output_tokens"));assertEquals("low",body.getJSONObject("reasoning").getString("effort"))
+        }
+        assertTrue(runCatching {original.withProfile(profile,"128001")}.isFailure)
+        assertEquals(2048,original.withProfile(JSONObject(profile.toString()).put("id","other")).maxOutput)
+    }
+    @Test fun eachProtocolUsesTheResolvedDraftBudget() {
+        for(protocol in ModelCatalog.protocols) {
+            val draft=ModelConnectionTest.Draft("https://fixture.invalid/v1",protocol,"fixture-model","fixture-key",maxOutput=64000)
+            val buffer=okio.Buffer();ModelConnectionTest.request(draft).body!!.writeTo(buffer)
+            val body=JSONObject(buffer.readUtf8())
+            assertEquals(64000,body.getInt(if(protocol=="openai-responses")"max_output_tokens" else "max_tokens"))
+        }
+    }
     @Test fun officialDeepSeekDraftUsesNativeResponsesContractAndKnownLowEffort() {
         val profile=DeepSeekCatalog.bundled().getJSONObject(0)
         val draft=ModelConnectionTest.Draft(DeepSeekCatalog.BASE_URL,"openai-responses","deepseek-flash","fixture-key-not-a-cloud-key").withProfile(profile)

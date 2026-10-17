@@ -1,0 +1,44 @@
+{
+  "tables": {
+    "sessions": {
+      "before": 189,
+      "after": 189,
+      "sameAllColumns": true
+    },
+    "runs": {
+      "before": 200,
+      "after": 200,
+      "sameAllColumns": true
+    },
+    "messages": {
+      "before": 400,
+      "after": 400,
+      "sameAllColumns": true
+    },
+    "events": {
+      "before": 63499,
+      "after": 63499,
+      "sameAllColumns": true
+    },
+    "attachments": {
+      "before": 249,
+      "after": 249,
+      "sameAllColumns": true
+    },
+    "metadata": {
+      "before": 1,
+      "after": 1,
+      "sameAllColumns": true
+    }
+  },
+  "configurationBytesUnchanged": {
+    "profiles": true,
+    "voice": true,
+    "native-credentials": true,
+    "display-roles": true
+  },
+  "installedApkMatchesPins": {
+    "app": true,
+    "test": true
+  }
+}

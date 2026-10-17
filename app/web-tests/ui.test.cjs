@@ -3,6 +3,13 @@ function setup(beforeScript){const dom=new JSDOM(fs.readFileSync('src/main/asset
 function state(){return{selected:'a',sessions:[{id:'a',title:'会话 A',archivedAt:null,updatedAt:1,capabilities:{perception:true,search:true,screen_control:false,debug:false}}],messages:[],runs:[],events:[],availability:{perception:'模拟就绪',search:'真实服务未配置',screen_control:'待验证',debug:'高权限'}};}
 function disclose(window,node,open=true){assert.ok(node,'Disclosure must exist');if(node.open!==open)node.querySelector(':scope > summary').click();node.dispatchEvent(new window.Event('toggle'));return node;}
 function openOperations(window,doc){return disclose(window,doc.querySelector('details.run'));}
+test('model output limit explains continuation while ordinary model counters stay invisible',()=>{
+ const{window,doc}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'complete'}];
+ s.runs=[{id:'r',sessionId:'a',status:'completed',expanded:false}];s.events=[{runId:'r',sequence:1,type:'model_round',data:{modelRound:1,requestedMaxOutputTokens:128000,inputTokens:300,outputTokens:30,stopReason:'stop'}}];window.receiveNative(s);
+ assert.equal(doc.querySelector('details.run'),null);assert.equal(doc.querySelector('.attention'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/model_round|128000|inputTokens/);
+ s.runs[0].status='failed';s.events.push({runId:'r',sequence:2,type:'diagnostic',data:{code:'MODEL_OUTPUT_LIMIT',requestedMaxOutputTokens:2048,outputTokens:2048,reasoningTokens:2048}});window.receiveNative(s);
+ openOperations(window,doc);assert.match(doc.querySelector('.timeline-note').textContent,/达到模型输出上限.*保留上下文.*当前会话继续/);assert.doesNotMatch(doc.querySelector('#chat').textContent,/MODEL_OUTPUT_LIMIT|reasoningTokens/);
+});
 test('gray approval binds actual run and approval ID; black denial stays structured',()=>{
  const{window,doc,calls}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'streaming'}];
  s.runs=[{id:'r',sessionId:'a',status:'awaiting_user',approval:{id:'approval-1',summary:'灰名单 · 屏幕焦点锁 1'}}];window.receiveNative(s);

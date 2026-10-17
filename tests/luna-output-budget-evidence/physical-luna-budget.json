@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "model": "gpt-6-luna",
+  "syntheticPrompt": true,
+  "maximumRequests": 2,
+  "runCreated": false,
+  "toolExecutionCount": 0,
+  "requests": [
+    {
+      "requestedBudget": 2048,
+      "requestedEffort": "low",
+      "toolSchemaCount": 35,
+      "toolExecutionCount": 0,
+      "terminalReceived": true,
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteReason": "absent",
+      "echoBudget": 2048,
+      "echoEffort": "low",
+      "usage": {
+        "inputTokens": 4867,
+        "outputTokens": 21,
+        "totalTokens": 4888,
+        "reasoningTokens": 0
+      },
+      "elapsedMs": 2046,
+      "events": {
+        "response.created": 1,
+        "response.in_progress": 1,
+        "response.output_item.added": 1,
+        "response.function_call_arguments.delta": 6,
+        "response.function_call_arguments.done": 1,
+        "response.output_item.done": 1,
+        "response.completed": 1
+      },
+      "eventCount": 12,
+      "responseBytes": 82604,
+      "textChars": 0,
+      "completeToolCalls": 1
+    },
+    {
+      "requestedBudget": 128000,
+      "requestedEffort": "low",
+      "toolSchemaCount": 35,
+      "toolExecutionCount": 0,
+      "terminalReceived": true,
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteReason": "absent",
+      "echoBudget": 128000,
+      "echoEffort": "low",
+      "usage": {
+        "inputTokens": 4867,
+        "outputTokens": 21,
+        "totalTokens": 4888,
+        "reasoningTokens": 0
+      },
+      "elapsedMs": 1355,
+      "events": {
+        "response.created": 1,
+        "response.in_progress": 1,
+        "response.output_item.added": 1,
+        "response.function_call_arguments.delta": 6,
+        "response.function_call_arguments.done": 1,
+        "response.output_item.done": 1,
+        "response.completed": 1
+      },
+      "eventCount": 12,
+      "responseBytes": 82610,
+      "textChars": 0,
+      "completeToolCalls": 1
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": 0,
+  "nativeProfile": {
+    "maxOutput": 128000,
+    "modelCapacity": 128000,
+    "contextWindow": 1050000,
+    "effort": "low",
+    "validatedWithoutRun": true
+  },
+  "configurationPreserved": true,
+  "historyPreserved": true
+}

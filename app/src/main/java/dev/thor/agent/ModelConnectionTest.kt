@@ -12,11 +12,13 @@ import java.util.concurrent.TimeUnit
 /** Settings-only draft test. Credentials and response bodies never cross the WebView bridge. */
 object ModelConnectionTest {
     data class Draft(val baseUrl:String,val protocol:String,val model:String,val credential:String,
-                     val headerName:String="",val headerTemplate:String="",val reasoningEffort:String?=null) {
+                     val headerName:String="",val headerTemplate:String="",val reasoningEffort:String?=null,
+                     val maxOutput:Int=OutputBudgetPolicy.CUSTOM_DEFAULT) {
         fun validate() {
             val uri=URI(baseUrl)
             require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && uri.rawQuery==null && uri.fragment==null) {"请填写有效的模型服务地址"}
             require(reasoningEffort==null || reasoningEffort=="low") {"连接测试的思考配置无效"}
+            require(maxOutput in 16..3999999) {"连接测试的输出上限无效"}
             require(protocol in ModelCatalog.protocols && model.isNotBlank() && model.length<=200) {"请选择模型和接口类型"}
             require(credential.isNotBlank() && credential.length<=8192 && '\n' !in credential && '\r' !in credential) {"请填写 API Key，或保留已保存的 Key"}
             require(!isGoEndpoint(baseUrl) || !headerName.equals("x-opencode-session",true)) {"OpenCode 会话头由应用生成，不能作为凭据头"}
@@ -24,10 +26,13 @@ object ModelConnectionTest {
             require(headerTemplate.isBlank() || headerTemplate.split("{{credential}}").size==2 && '\r' !in headerTemplate && '\n' !in headerTemplate) {"凭据格式必须包含一次 {{credential}}"}
         }
         /** Only use a setting which this exact model/protocol profile explicitly supports. */
-        fun withProfile(profile:JSONObject?):Draft {
-            if(profile==null || profile.optString("id")!=model || profile.optString("protocol")!=protocol || !profile.optBoolean("reasoning"))return this
-            val efforts=profile.optJSONArray("efforts") ?: return this
-            return if((0 until efforts.length()).any {efforts.optString(it)=="low"})copy(reasoningEffort="low") else this
+        fun withProfile(profile:JSONObject?,outputBudgetText:String?=null):Draft {
+            if(profile==null || profile.optString("id")!=model || profile.optString("protocol")!=protocol)return this
+            val budget=if(profile.has("contextWindow") && profile.has("maxOutput"))OutputBudgetPolicy.resolve(
+                "opencode-go",profile.getInt("contextWindow"),profile.getInt("maxOutput"),outputBudgetText,rejectExcess=true).tokens else maxOutput
+            val efforts=profile.optJSONArray("efforts")
+            val low=profile.optBoolean("reasoning") && efforts!=null && (0 until efforts.length()).any {efforts.optString(it)=="low"}
+            return copy(maxOutput=budget,reasoningEffort=if(low)"low" else reasoningEffort)
         }
         fun endpoint():String {
             val uri=URI(baseUrl.trimEnd('/'))
@@ -89,9 +94,9 @@ object ModelConnectionTest {
         val messages=JSONArray().put(JSONObject().put("role","user").put("content","Reply only THOR_CONNECTION_OK."))
         val body=JSONObject().put("model",draft.model).put("stream",true)
         when(draft.protocol) {
-            "openai-responses"->body.put("store",false).put("input",JSONArray().put(JSONObject().put("role","user").put("content",JSONArray().put(JSONObject().put("type","input_text").put("text","Reply only THOR_CONNECTION_OK."))))).put("max_output_tokens",2048)
-            "anthropic-messages"->body.put("messages",messages).put("max_tokens",2048)
-            else->body.put("messages",messages).put("max_tokens",2048)
+            "openai-responses"->body.put("store",false).put("input",JSONArray().put(JSONObject().put("role","user").put("content",JSONArray().put(JSONObject().put("type","input_text").put("text","Reply only THOR_CONNECTION_OK."))))).put("max_output_tokens",draft.maxOutput)
+            "anthropic-messages"->body.put("messages",messages).put("max_tokens",draft.maxOutput)
+            else->body.put("messages",messages).put("max_tokens",draft.maxOutput)
         }
         if(draft.reasoningEffort!=null)when(draft.protocol) {
             "openai-responses"->{

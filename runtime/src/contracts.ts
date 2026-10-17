@@ -9,6 +9,8 @@ export interface ModelProfile {
   profileId: string; revision: number; label: string;
   protocol: 'openai-responses' | 'anthropic-messages' | 'openai-completions'; baseUrl: string; modelId: string;
   credentialRef: string; contextWindow: number; maxOutput: number;
+  /** Native marks only an implicit official-profile output ceiling as automatic. */
+  outputBudgetAutomatic?: boolean;
   input?: ('text'|'image')[];
   provider?: string;
   /** Native-normalized official catalog facts, not a fabricated successful probe. */
@@ -79,7 +81,7 @@ export type RunState = 'queued' | 'preparing' | 'generating' | 'executing_tools'
 export interface AgentRun { sessionId: string; runId: string; state: RunState; modelProfileRevision: number; capabilityEpoch: number; startedAt: number; error?: ErrorCode }
 export interface RunEvent {
   sessionId: string; runId: string; eventId: string; sequence: number; wallTime: number; elapsedMs: number;
-  type: 'state' | 'text_delta' | 'thinking_delta' | 'tool_call_update' | 'tool_intent' | 'tool_started' | 'tool_result' | 'authorization_changed' | 'context' | 'diagnostic';
+  type: 'state' | 'text_delta' | 'thinking_delta' | 'tool_call_update' | 'tool_intent' | 'tool_started' | 'tool_result' | 'authorization_changed' | 'context' | 'model_round' | 'diagnostic';
   toolCallId?: string; data: Record<string, unknown>;
 }
 export type DomainMessage =

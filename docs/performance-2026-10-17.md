@@ -29,6 +29,8 @@
 
 ## 最新失败的定性
 
+后续排查已确认旧隐式 2048 输出预算压低了 Luna 的 128000 目录容量，并完成自动预算修复、真实请求与同会话追问验收。历史缺失 usage，不能追溯其思考/正文分配，也未完整复现原失败。详见 [Luna 输出超限排查](gpt6-luna-output-limit.md)。
+
 索引 0 使用 gpt-6-luna / low，2.451 秒结束为 failed。HTTP 200、92,157 字节、正常 EOF，Runtime 持久化 MODEL_OUTPUT_LIMIT / stopReason=length / LIMIT_EXCEEDED，未收到任何思考、回答或工具事件。它是输出上限结束分类，**不是网络不可达**。没有保留原始 provider SSE，不能进一步判定该响应的上游细节或把原因武断归给某个固定 token 配置。应验证该模型的输出预算与 thinking 映射，并将“达到本轮输出上限，可在同一会话继续”准确呈现；不要据此重新配置网络或丢弃上下文。分类代码位于 runtime/src/runtime.ts:421–428。
 
 ## 每轮等待明细
