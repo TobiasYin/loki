@@ -80,6 +80,15 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     private val roles = DisplayRoles(context)
     private val snapshots = Snapshots(clock) { ThorAccessibilityService.instance?.target(it) ?: Target(null, "unknown", "no-accessibility") }
+    private val appMetadata = appContextMetadata(context)
+    private val upperAppContext = UpperAppContext(
+        upperDisplay = { snapshots.selected("upper").id },
+        currentTarget = { display -> ThorAccessibilityService.instance?.target(display)?.let {
+            AppContextTarget(it.packageName, it.validity, it.layoutRevision ?: it.revision,
+                it.touchableBounds?.let { bounds -> bounds.left < bounds.right && bounds.top < bounds.bottom } == true)
+        } },
+        metadata = appMetadata::get,
+    )
     private val displayManager=context.getSystemService(android.hardware.display.DisplayManager::class.java)
     private var displayState=displayFacts(context)
     private val displayListener=object:android.hardware.display.DisplayManager.DisplayListener {
@@ -466,7 +475,15 @@ class ProductHost private constructor(private val context: Context, private val 
         if (dev.thor.bridge.Capability.screen_perception in authority.enabled(b)) {
             l0.put("device", "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
             l0.put("targetScreen",scope.selectedScreen)
-            snapshot?.target?.packageName?.let { l0.put("upperApp", obj("packageName" to it, "label" to it)); l0.put("displaySnapshotId", snapshot!!.id) }
+            snapshot?.let { l0.put("displaySnapshotId", it.id) }
+            // Upper foreground context is independent of the Run's selected
+            // input screen and carries no input snapshot/authorization identity.
+            val foreground = upperAppContext.read(true, b.runId == probeRun)
+            // Recheck after PackageManager IPC; a revocation must not publish
+            // metadata collected while the capability was still enabled.
+            authority.validate(b)
+            if (dev.thor.bridge.Capability.screen_perception in authority.enabled(b))
+                for (key in foreground.keys()) l0.put(key, foreground.get(key))
         }
         return obj("session" to obj("sessionId" to b.sessionId, "title" to session(b.sessionId).getString("title"), "model" to profile, "enabled" to enabled, "capabilityEpoch" to b.capabilityEpoch),
             "lease" to obj("sessionId" to b.sessionId, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to leaseWallDeadline(b)), "availability" to available, "l0" to l0, "skills" to if(b.runId == probeRun)JSONArray() else skillCatalog(session(b.sessionId),true))

@@ -1,0 +1,52 @@
+{
+  "quickCheck": "ok",
+  "originalRows": {
+    "sessions": {
+      "count": 183,
+      "missing": 0,
+      "changed": 0
+    },
+    "runs": {
+      "count": 191,
+      "missing": 0,
+      "changed": 0
+    },
+    "messages": {
+      "count": 382,
+      "missing": 0,
+      "changed": 0
+    },
+    "events": {
+      "count": 62708,
+      "missing": 0,
+      "changed": 0
+    },
+    "attachments": {
+      "count": 244,
+      "missing": 0,
+      "changed": 0
+    }
+  },
+  "configuration": {
+    "profiles": {
+      "byteIdentical": true,
+      "sha256": "352787894c00befb0cd171557f31839b96331dd1829972a6f44053a191cc6e23"
+    },
+    "voice": {
+      "byteIdentical": true,
+      "sha256": "3f18947bfa66831e36312aa49941b04d1c845200eeaa9e853888db30c9b94b81"
+    },
+    "native-credentials": {
+      "byteIdentical": true,
+      "sha256": "026ef8926c398884e1a3604e6f3b71caa4c135d9ac6d5b9da350dccebab1bd06"
+    },
+    "display-roles": {
+      "byteIdentical": true,
+      "sha256": "70502759ec0b03976a8f99c5658edec45b52cf0e5f10c0f8df9baa58f1184c33"
+    }
+  },
+  "activeRunCount": 0,
+  "runCount": 193,
+  "selectedSessionPreserved": true,
+  "passed": true
+}

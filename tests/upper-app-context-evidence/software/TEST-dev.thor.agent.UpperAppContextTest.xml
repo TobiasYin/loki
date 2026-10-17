@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.agent.UpperAppContextTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-17T08:14:48.328Z" hostname="JGJHX5JPGF" time="0.004">
+  <properties/>
+  <testcase name="metadataCacheIsStaticBoundedAndExpiresIncludingFailures" classname="dev.thor.agent.UpperAppContextTest" time="0.001"/>
+  <testcase name="untrustedMetadataHasBoundedUnicodeAndNoControlCharacters" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <testcase name="windowChangeAndDisplayRecalibrationDiscardOldMetadata" classname="dev.thor.agent.UpperAppContextTest" time="0.001"/>
+  <testcase name="upperDisplayIsIndependentOfSelectedLowerInputScreen" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <testcase name="foregroundChangeDuringPackageLookupDiscardsOldMetadata" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <testcase name="packageReadFailureDoesNotForgeLabelFromPackageName" classname="dev.thor.agent.UpperAppContextTest" time="0.001"/>
+  <testcase name="hiddenWindowDoesNotPublishAppAsVisibleForeground" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <testcase name="invalidPackageIdentityIsNotTruncatedIntoAnotherIdentity" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <testcase name="eachRequestReadsFreshForegroundInsteadOfCachingIt" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <testcase name="unknownOrAmbiguousNeverLookUpMetadataOrReusePreviousApp" classname="dev.thor.agent.UpperAppContextTest" time="0.001"/>
+  <testcase name="disabledAndConfigurationProbeDoNotReadAnything" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <testcase name="missingAccessibilityAndDisplayAreUnavailable" classname="dev.thor.agent.UpperAppContextTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

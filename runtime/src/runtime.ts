@@ -3,7 +3,7 @@ import type { Message, Model } from '@earendil-works/pi-ai';
 import { streamSimple as responses } from '@earendil-works/pi-ai/api/openai-responses';
 import { streamSimple as completions } from '@earendil-works/pi-ai/api/openai-completions';
 import { streamSimple as anthropic } from '@earendil-works/pi-ai/api/anthropic-messages';
-import { compileContext, project, projectHistory, resolveContent } from './context.js';
+import { hasPerceptionContext, compileContext, project, projectHistory, resolveContent } from './context.js';
 import { DEFAULT_LIMITS, isErrorCode, RuntimeError, type AgentRun, type AuthoritySnapshot, type Content, type DomainMessage, type EffectRecord, type HistoryTurn, type ModelProfile, type RunEvent, type RunLease, type RunState, type RuntimeLimits, type RuntimePorts, type ToolDescriptor, type ToolEnvelope, type ToolOutcome, type ErrorCode, type Capability } from './contracts.js';
 import { ToolRegistry } from './registry.js';
 import { ProtocolAudit } from './protocol-audit.js';
@@ -358,7 +358,7 @@ export class ThorRuntime {
         lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], observationRequired:false, waits:new Map(),waitSequence:0,lastProgress:performance.now(), streamMessage: 0, messageOffset:0, input, turnId: crypto.randomUUID() };
       this.active = a; const active = a; const model = toModel(profile);
       active.stream=new StreamEvents(f=>this.writeEvent(active,f.type,f.data,f.toolCallId));
-      if(initial.session.enabled.screen_perception && (initial.l0.device || initial.l0.upperApp))a.source.add('screen_perception');
+      if(hasPerceptionContext(initial))a.source.add('screen_perception');
       await this.event(a, 'state', { state: 'queued' }, undefined, a.run); await this.state(a, 'preparing');
       await this.persist(a, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages: [{ kind: 'user', content: input }], source: [...active.source], observedAt: Date.now(), complete: false }));
       await this.authority(a);
@@ -375,7 +375,7 @@ export class ThorRuntime {
           const s = await this.authority(active, true);
           if (++active.requests > this.limits.maxRequests) fail('LIMIT_EXCEEDED');
           active.requestSnapshot = s; active.effective = profile.supportsTools === false ? [] : this.registry.effective(s);
-          if (s.session.enabled.screen_perception && (s.l0.device || s.l0.upperApp)) active.source.add('screen_perception');
+          if (hasPerceptionContext(s)) active.source.add('screen_perception');
           audit = new ProtocolAudit();
           const tools = this.tools(active, active.effective);
           // Refresh image references on every request; expired/deleted/disabled data never survives

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "scope": "Selected inventory: current task changed/new App production, Native metadata helper, Runtime production/unit tests, and final physical Android component declaration. This is not a full repository inventory; old evidence directories are excluded.",
+  "files": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/PhysicalKeyboardInputTest.kt",
+      "bytes": 26056,
+      "sha256": "7e3cf35f4210905dfbd49790670853026ed51dfd8c10ad10da99985650170b4b"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/AndroidAppContextMetadata.kt",
+      "bytes": 664,
+      "sha256": "8138cd19c5d266e3c166005c8e9b51f7877ef7c761d19fe9b3892b5bde41116c"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/ProductHost.kt",
+      "bytes": 86669,
+      "sha256": "b7ae3ce83e891851c84c39050e30ab25a889d6f860b284ca9d4300900e155933"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/UpperAppContext.kt",
+      "bytes": 4936,
+      "sha256": "597c3ddf09cb0e8e1c66c06867ff9c2871eb583b29b652840de67e2c64ae34bd"
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/UpperAppContextTest.kt",
+      "bytes": 6488,
+      "sha256": "884533d09175bf8f04d7396e83e09b11275d9429c1146ed2697947e6bea6bc08"
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "bytes": 18946,
+      "sha256": "a2f2c8e453c46a1f6dcce74175930d0210cf4aa8b918e863720a4599a19288e3"
+    },
+    {
+      "path": "runtime/src/contracts.ts",
+      "bytes": 8772,
+      "sha256": "9d9768e9ad7de8b610e0d70f17a421877cdb94e0fbc05b4aee90deb9fdbe78be"
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 39026,
+      "sha256": "6ae11e1eaba4654e3f405f14b5153d17bb281b16f7248e7a5ad7da40399db8d7"
+    },
+    {
+      "path": "runtime/test/upper-app-context.test.ts",
+      "bytes": 7067,
+      "sha256": "ca99b160ff276980fe054c065343d54b8fa542421cc2a84b47319fce00761ca9"
+    }
+  ]
+}

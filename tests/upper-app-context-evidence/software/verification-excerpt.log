@@ -1,0 +1,23 @@
+[fullGradle]
+> Task :core:test UP-TO-DATE
+> Task :device-core:test UP-TO-DATE
+> Task :device-authority:test UP-TO-DATE
+> Task :input-lab:testDebugUnitTest UP-TO-DATE
+> Task :app:testDebugUnitTest
+> Task :app:compileDebugAndroidTestKotlin
+> Task :app:assembleDebugAndroidTest
+BUILD SUCCESSFUL in 40s
+414 actionable tasks: 43 executed, 371 up-to-date
+[finalAndroidTestPackaging]
+> Task :app:compileDebugAndroidTestKotlin
+> Task :app:assembleDebugAndroidTest
+BUILD SUCCESSFUL in 9s
+144 actionable tasks: 8 executed, 136 up-to-date
+[runtime]
+✔ openai-responses: automatic upper metadata refreshes each request and follows the real upper app while lower is selected (74.004333ms)
+✔ openai-completions: automatic upper metadata refreshes each request and follows the real upper app while lower is selected (28.350291ms)
+✔ anthropic-messages: automatic upper metadata refreshes each request and follows the real upper app while lower is selected (25.286208ms)
+ℹ tests 263
+ℹ pass 263
+ℹ fail 0
+ℹ skipped 0

@@ -20,7 +20,15 @@ export interface ModelProfile {
 }
 export interface SessionConfig { sessionId: string; title: string; model: ModelProfile; enabled: Capabilities; capabilityEpoch: number }
 export interface RunLease { sessionId: string; runId: string; leaseId: string; capabilityEpoch: number; expiresAt: number }
-export interface L0 { snapshotId: string; device?: string; upperApp?: { packageName: string; label: string }; targetScreen?: 'upper'|'lower'; displaySnapshotId?: string }
+export interface AppMetadata {
+  packageName: string; label?: string; versionName?: string; versionCode?: string;
+  metadataStatus?: 'available' | 'unavailable';
+}
+export interface L0 {
+  snapshotId: string; device?: string; upperApp?: AppMetadata;
+  upperAppObservation?: { status: 'observed' | 'unknown' | 'ambiguous' | 'unavailable'; displayId?: number };
+  targetScreen?: 'upper'|'lower'; displaySnapshotId?: string;
+}
 export interface AuthoritySnapshot { session: SessionConfig; lease: RunLease; availability: Record<string, Availability>; l0: L0; skills?: { name: string; description: string; hash: string }[] }
 export interface AuthorityPort {
   /** Caller-owned mirror of Native's authority. No method here grants authority. */

@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-17T08:22:51.557998+00:00",
+  "status": "SOFTWARE_VERIFIED_PHYSICAL_ACCEPTANCE_SEPARATE",
+  "sourceInventory": "source-hashes.json",
+  "sourceFiles": 9,
+  "gradle": {
+    "fullBuild": {
+      "success": true,
+      "seconds": 40,
+      "actionableTasks": 414,
+      "executed": 43,
+      "upToDate": 371
+    },
+    "finalAndroidTestPackaging": {
+      "success": true,
+      "seconds": 9,
+      "actionableTasks": 144,
+      "executed": 8,
+      "upToDate": 136,
+      "scope": "Final PhysicalKeyboardInputTest declaration compilation, APK packaging, and lint; no instrumentation tests or JVM test tasks executed in this second build."
+    }
+  },
+  "jvm": {
+    "totals": {
+      "tests": 487,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 69
+    },
+    "modules": [
+      {
+        "module": "device-core",
+        "task": ":device-core:test",
+        "fullBuildStatus": "UP-TO-DATE",
+        "tests": 230,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 32,
+        "xmlInventoryCount": 32,
+        "xmlInventorySha256": "0b6fc5c2b77939f7da31580fa6df5d5b253c5c074587d8f7d4b9e3bfb8ab6b7f"
+      },
+      {
+        "module": "app",
+        "task": ":app:testDebugUnitTest",
+        "fullBuildStatus": "EXECUTED",
+        "tests": 129,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 25,
+        "xmlInventoryCount": 25,
+        "xmlInventorySha256": "948e1f56e140f3e7293c07c9cb896cef18b01884bf81606a50f6c73d70a3cf61"
+      },
+      {
+        "module": "bridge-core",
+        "task": ":core:test",
+        "fullBuildStatus": "UP-TO-DATE",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 3,
+        "xmlInventoryCount": 3,
+        "xmlInventorySha256": "90e98f5b33284e72f408b8658b5f619865d9c9edef6f32bd9a5086e548ee634a"
+      },
+      {
+        "module": "device-authority",
+        "task": ":device-authority:test",
+        "fullBuildStatus": "UP-TO-DATE",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 1,
+        "xmlInventoryCount": 1,
+        "xmlInventorySha256": "244bd6a05325bcda779b8d4084e41e209e2c4afe83ca042d0331a82dc0cff765"
+      },
+      {
+        "module": "input-lab",
+        "task": ":input-lab:testDebugUnitTest",
+        "fullBuildStatus": "UP-TO-DATE",
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suiteCount": 8,
+        "xmlInventoryCount": 8,
+        "xmlInventorySha256": "1f3a01c3f673f2018bde960c16ce3e7a23804402d3423a8dc04991d0539fe670"
+      }
+    ],
+    "freshExecutedTests": 129,
+    "retainedUpToDateTests": 358,
+    "newUpperAppContextTests": 12,
+    "newTestsIncludedInApp129AndTotal487": true,
+    "newSuite": {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.UpperAppContextTest.xml",
+      "bytes": 1905,
+      "sha256": "008fddc547eaaab306f4aa58e926ee46950afaaed0516da110b80a5cad54d7a1"
+    },
+    "accounting": "487 is the single current result inventory. It includes 12 new App tests; do not add the old 475 or new 12 again. Only App testDebugUnitTest actually executed in this full build; four other module test tasks were UP-TO-DATE."
+  },
+  "runtime": {
+    "executed": true,
+    "tests": 263,
+    "pass": 263,
+    "fail": 0,
+    "skipped": 0,
+    "newUpperAppContextTests": 9,
+    "newTestsIncludedIn263": true,
+    "coverage": [
+      "All three protocols include initial upper app metadata, refresh each request, and retain actual upper identity while targetScreen is lower.",
+      "Reused Pi follow-up replaces old metadata and omits a stale app on ambiguous observation.",
+      "Disabled perception and configuration probes omit all screen metadata and screen source.",
+      "Observation-only derived output is filtered after perception revocation.",
+      "Long Unicode metadata and unavailable tool inventories preserve package identity/capabilities and fit L0 <= 1024 bytes.",
+      "Metadata does not enable input tools or grant input authorization.",
+      "Existing deterministic history/context budget regression passes."
+    ]
+  },
+  "integrationTypes": {
+    "status": "ROOT_REPORTED_EXIT_0",
+    "logEmpty": true,
+    "independentlyRerunByCollector": false
+  },
+  "javascriptUi": {
+    "executedInThisTask": false,
+    "includedInTotals": false,
+    "note": "The earlier 73 UI tests were not rerun; no current UI pass is claimed here."
+  },
+  "lintReports": [
+    {
+      "path": "app/build/reports/lint-results-debug.xml",
+      "bytes": 42444,
+      "sha256": "ad47b92295d73e548d074977e92f1f44f10cf817be31817f97d80c60b5b638ab",
+      "severityCounts": {
+        "Warning": 30
+      }
+    },
+    {
+      "path": "tools/diagnostic/build/reports/lint-results-debug.xml",
+      "bytes": 16669,
+      "sha256": "516faad681a9a33f4958a27ed683953b96ce150b35046d9b7ce6b51da105d110",
+      "severityCounts": {
+        "Warning": 12
+      }
+    },
+    {
+      "path": "tests/input-lab-app/app/build/reports/lint-results-debug.xml",
+      "bytes": 94354,
+      "sha256": "a18b10bc18b8dcc31673164c58af22217592876158f69b37ca7ff4934ad38579",
+      "severityCounts": {
+        "Warning": 58
+      }
+    },
+    {
+      "path": "integration/device-android/build/reports/lint-results-debug.xml",
+      "bytes": 14710,
+      "sha256": "f38554be06ca85b839c4123b79afc46686a2ba0b50511d31c276ae88b95defff",
+      "severityCounts": {
+        "Warning": 11
+      }
+    }
+  ],
+  "artifacts": {
+    "pins": "pins.json",
+    "artifactCheck": "artifacts.json",
+    "threePinnedApksActualBytesVerified": true,
+    "fourArtifactReportApksActualBytesVerified": true
+  },
+  "logs": {
+    "fullGradle": {
+      "path": "build/upper-app-context-gradle.log",
+      "bytes": 27827,
+      "sha256": "e184a7900faea3c09814bef0ee8562e2f6c96f1dd531f7c8c3be4522f040febc"
+    },
+    "finalAndroidTestPackaging": {
+      "path": "build/upper-app-context-test-final-gradle.log",
+      "bytes": 10175,
+      "sha256": "0396d7ebee4084327c18906c532e677d89db59e1f843588297b4f7e683291323"
+    },
+    "runtime": {
+      "path": "build/upper-app-runtime-tests.log",
+      "bytes": 30791,
+      "sha256": "f9aa6ebb26971589e66e0cba983d16bce6eaa5ff53352d42f9a57280386f3e80"
+    },
+    "integrationTypes": {
+      "path": "build/upper-app-context-integration-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "limits": [
+    "Software evidence only: no physical Thor, emulator, live cloud/model, keyboard receiver or game completion is claimed in this supplement.",
+    "PhysicalKeyboardInputTest is compiled and packaged, not executed by these build results.",
+    "Collector read existing build reports and wrote only this software directory; no source changes, builds, device commands or commits.",
+    "Full logs/APKs remain in ignored build paths; this supplement retains bounded excerpts, actual byte hashes and focused Native XML."
+  ]
+}

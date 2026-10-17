@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-17",
+  "device": {
+    "model": "AYN Thor",
+    "android": 13,
+    "upperDisplayId": 0,
+    "lowerDisplayId": 4
+  },
+  "passed": true,
+  "component": {
+    "passed": true,
+    "durationSeconds": 27.664,
+    "nativeTextPassed": true,
+    "nativeKeysPassed": true,
+    "unicodeReplacementAndNoAutoSubmit": true,
+    "selectionInsert": true,
+    "emptyReplacementClears": true,
+    "keyEventDelta": 8,
+    "receiverEvents": {
+      "relativePath": "keyboard-reports/5c6487ee-dd00-461c-ba7f-b49b353f6d3d/events.jsonl",
+      "eventPrefixBytes": 3270,
+      "eventPrefixSha256": "4a7620d5afdb32e048027959fee6d3d5ce6e16eab894e15dae82517da55868d4",
+      "eventCount": 21,
+      "incomplete": false,
+      "droppedSamples": 0,
+      "sealed": true
+    },
+    "configurationPreserved": true,
+    "cleanupErrors": [],
+    "manualNativeRunTerminalStatus": "failed",
+    "manualNativeRunStatusExplanation": "The component manually invoked product Native RPC but intentionally did not run a model Runtime turn; normal end therefore records failed/Runtime 未完成；不重放. Component pass is independently determined by receiver callbacks and assertions; the separate real model turn completed."
+  },
+  "upperContext": {
+    "defaultAuthorityObserved": {
+      "packageName": "dev.thor.inputlab",
+      "metadataStatus": "available",
+      "label": "Thor Input Lab",
+      "versionName": "0.4.0",
+      "versionCode": "5"
+    },
+    "defaultObservation": {
+      "status": "observed",
+      "displayId": 0
+    },
+    "lowerSelectedObservation": {
+      "status": "observed",
+      "displayId": 0
+    },
+    "lowerSelectedTargetScreen": "lower",
+    "samePackageFixtureLimitation": "Upper KeyboardFixtureActivity and lower DynamicContentFixtureActivity are both dev.thor.inputlab. This physical case verifies upper display 0 remains the metadata source when selecting lower input, and equality to real PackageManager metadata. It does not by itself prove differing-package upper/lower classification.",
+    "lowerReceiver": {
+      "displayId": 4,
+      "sealed": true,
+      "touchCount": 0,
+      "clickCount": 0
+    }
+  },
+  "liveModel": {
+    "passed": true,
+    "modelId": "deepseek-v4.1-flash",
+    "thinkingEffort": "low",
+    "runStatus": "completed",
+    "toolCallCount": 0,
+    "matchesPackageManager": {
+      "label": true,
+      "packageName": true,
+      "versionName": true,
+      "versionCode": true
+    },
+    "httpStatus": 200,
+    "responseTerminal": "eof",
+    "responseBytes": 71718,
+    "contextCount": 1,
+    "timings": {
+      "firstVisibleTextMs": 4365,
+      "responseHeadersMs": 3736,
+      "firstResponseBytesMs": 3752,
+      "firstAuthorityMs": 85,
+      "nativePrepareMs": 14
+    },
+    "scope": "Real saved model provider/credential and product Runtime; response fields derived from default upper-app context with no tool calls. Response text and transport bodies are not published. This is model metadata acceptance, not model keyboard-input E2E."
+  },
+  "preservation": {
+    "originalRows": {
+      "sessions": {
+        "count": 183,
+        "missing": 0,
+        "changed": 0
+      },
+      "runs": {
+        "count": 191,
+        "missing": 0,
+        "changed": 0
+      },
+      "messages": {
+        "count": 382,
+        "missing": 0,
+        "changed": 0
+      },
+      "events": {
+        "count": 62708,
+        "missing": 0,
+        "changed": 0
+      },
+      "attachments": {
+        "count": 244,
+        "missing": 0,
+        "changed": 0
+      }
+    },
+    "originalRunCount": 191,
+    "finalRunCount": 193,
+    "activeRunCount": 0,
+    "selectedSessionPreserved": true,
+    "allConfigurationFilesByteIdentical": true,
+    "quickCheck": "ok",
+    "permissionGrantsAndFlagsPreserved": true,
+    "finalDeviceStatePassed": true
+  }
+}

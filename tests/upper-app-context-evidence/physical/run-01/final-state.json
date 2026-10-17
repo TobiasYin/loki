@@ -1,0 +1,21 @@
+{
+  "foreground": {
+    "4": "dev.thor.agent/.MainActivity",
+    "0": "rip.moth.cocoonshell/.MainActivity"
+  },
+  "checks": {
+    "mainDefaultLower": true,
+    "upperOriginalHomeRestored": true,
+    "noReceiverTaskRemaining": true,
+    "secureUnchanged:enabled_accessibility_services": true,
+    "secureUnchanged:accessibility_enabled": true,
+    "secureUnchanged:immersive_mode_confirmations": true,
+    "secureUnchanged:enabled_input_methods": true,
+    "secureUnchanged:default_input_method": true,
+    "globalUnchanged:window_animation_scale": true,
+    "globalUnchanged:transition_animation_scale": true,
+    "globalUnchanged:animator_duration_scale": true,
+    "notificationGrantAndFullFlagsUnchanged": true
+  },
+  "passed": true
+}

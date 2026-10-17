@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "scope": "All files recursively except this root manifest; child manifests included",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2438,
+      "sha256": "a78b7f6930ebdd561dbe0acc594d80b460877df0248f2ef277e8f0f9c9ea9292"
+    },
+    {
+      "path": "physical/run-01/README.md",
+      "bytes": 2745,
+      "sha256": "22b74baef9f97e040533f4691efc5f2d1c6532e2a6be1721565ea091eaf91162"
+    },
+    {
+      "path": "physical/run-01/component-report.json",
+      "bytes": 166089,
+      "sha256": "c58988ffb07154a23dee18721a3b8e0f392563663b29b9e0c5010badb738a893"
+    },
+    {
+      "path": "physical/run-01/final-state.json",
+      "bytes": 737,
+      "sha256": "27a1fe099d595f580d7ffa84111a180c60dc759dc38da0837f8ebc681eac8555"
+    },
+    {
+      "path": "physical/run-01/installation.json",
+      "bytes": 922,
+      "sha256": "084e530393815d8f078ed5b4b9fb6677613ca817387b0543d3a2692df3620994"
+    },
+    {
+      "path": "physical/run-01/instrumentation.log",
+      "bytes": 807,
+      "sha256": "0a80297e59b534a816d281db363739684b7eee7390a835c4deadb1c22933d250"
+    },
+    {
+      "path": "physical/run-01/manifest.json",
+      "bytes": 1545,
+      "sha256": "41f2ae581f5819f30abec1a0da95198bfeb8844e6a5eea8620c3eabb425df58d"
+    },
+    {
+      "path": "physical/run-01/permissions.json",
+      "bytes": 171,
+      "sha256": "bd4c6168c717d760152c8e7220308c8e36f4e0ebdaf1bda4e77c32ad25d735f4"
+    },
+    {
+      "path": "physical/run-01/pins.json",
+      "bytes": 555,
+      "sha256": "b37d5e8a34f73cc76a4acef8d24635546a216b30dae0deb3c4b385eb88c48571"
+    },
+    {
+      "path": "physical/run-01/preservation.json",
+      "bytes": 1148,
+      "sha256": "8650a81ba8b834ccad51b1b4137e61b20ecdfe0db7f95bc838e4f180cedda3a5"
+    },
+    {
+      "path": "physical/run-01/receiver-events.jsonl",
+      "bytes": 3270,
+      "sha256": "4a7620d5afdb32e048027959fee6d3d5ce6e16eab894e15dae82517da55868d4"
+    },
+    {
+      "path": "physical/run-01/summary.json",
+      "bytes": 3813,
+      "sha256": "64bee277db107dc6f38134867ce5b9b93b4f58f13e05fbbdd69bafb7a8d62ae5"
+    },
+    {
+      "path": "software/README.md",
+      "bytes": 2322,
+      "sha256": "0e4e6ed9aad904f90fbe9cf0890f7f58ef8ea38732b7e1a19c028cfca769caa0"
+    },
+    {
+      "path": "software/TEST-dev.thor.agent.UpperAppContextTest.xml",
+      "bytes": 1905,
+      "sha256": "008fddc547eaaab306f4aa58e926ee46950afaaed0516da110b80a5cad54d7a1"
+    },
+    {
+      "path": "software/artifacts.json",
+      "bytes": 1899,
+      "sha256": "d24eae9ef66399cdc0bcd6bf1146e9504d43d5044e8b838c21f060d41f36dcdf"
+    },
+    {
+      "path": "software/manifest.json",
+      "bytes": 1214,
+      "sha256": "6586e4f68ede5f6fb5d1514611d6b025b95fbe5c6997d55323adf650a38d1ca5"
+    },
+    {
+      "path": "software/pins.json",
+      "bytes": 555,
+      "sha256": "b37d5e8a34f73cc76a4acef8d24635546a216b30dae0deb3c4b385eb88c48571"
+    },
+    {
+      "path": "software/source-hashes.json",
+      "bytes": 1908,
+      "sha256": "2a2646792a57e7b0c417594f528a2878fafbf6735e7f5d60066b3f71ad60bee2"
+    },
+    {
+      "path": "software/summary.json",
+      "bytes": 7089,
+      "sha256": "9b10589b2072b66a97418413c2e6fbb15faeb2ff2da5bdd25d18b4f0fab39e8f"
+    },
+    {
+      "path": "software/verification-excerpt.log",
+      "bytes": 1011,
+      "sha256": "6e96092c06dc5a69dfc639f12af40ded24e87be4bca9714e1c2e1a0a2da146a5"
+    }
+  ]
+}
