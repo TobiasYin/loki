@@ -66,9 +66,31 @@ class TransportTest {
             Events().also {e->l.transport.start(l.request("parallel-$i").copy(envelope=l.request("parallel-$i").envelope.copy(binding=b)),e.sink())}
         }
         assertEquals(Code.LIMIT_EXCEEDED,assertThrows(BridgeFailure::class.java){l.transport.start(l.request("ninth"),Events().sink())}.code)
+        // No consumer has granted credit, so all bodies remain open. Every accepted
+        // request must nevertheless reach headers without waiting for another EOF.
+        for (event in events) assertTrue("accepted stream queued behind an open body", event.head.await(3, TimeUnit.SECONDS))
+        assertTrue(events.all { it.terminal.count == 1L && it.bytes().isEmpty() })
         l.authority.stopRun(bindings.first().runId);events.first().await()
         assertEquals(Code.STALE_AUTHORIZATION,(events.first().all.last() as HttpEvent.Error).code)
         for(i in 1 until 8){assertTrue(events[i].head.await(3,TimeUnit.SECONDS));l.transport.credit("parallel-$i",bindings[i],32);events[i].await();assertTrue(events[i].all.last() is HttpEvent.End)}
+    }
+    @Test fun cancellingABlockedStreamFreesCapacityWithoutEndingOtherStreams()=Lab().use {l->
+        val events=(0 until 8).map {i->
+            l.server.enqueue(MockResponse().setBody("waiting for credit"))
+            Events().also {e->l.transport.start(l.request("held-$i"),e.sink())}
+        }
+        for(e in events)assertTrue(e.head.await(3,TimeUnit.SECONDS))
+        l.transport.abort("held-0",l.binding);events.first().await()
+        assertEquals(Code.CANCELLED,(events.first().all.last() as HttpEvent.Error).code)
+        l.server.enqueue(MockResponse().setBody("replacement"))
+        val replacement=Events()
+        l.transport.start(l.request("replacement"),replacement.sink {if(it is HttpEvent.Head)l.transport.credit("replacement",l.binding,32)})
+        replacement.await();assertEquals("replacement",replacement.bytes().toString(Charsets.UTF_8))
+        assertTrue(replacement.all.last() is HttpEvent.End)
+        assertTrue(events.drop(1).all {it.terminal.count==1L && it.bytes().isEmpty()})
+        l.transport.close()
+        for(e in events){e.await();assertEquals(1,e.all.count {it is HttpEvent.End || it is HttpEvent.Error});assertEquals(Code.CANCELLED,(e.all.last() as HttpEvent.Error).code)}
+        assertEquals(Code.CANCELLED,assertThrows(BridgeFailure::class.java){l.transport.start(l.request("after-close"),Events().sink())}.code)
     }
     @Test fun selfSignedTlsIsRejectedWithoutLeakingExceptionDetails() = Lab(tls = true).use { l ->
         l.server.enqueue(MockResponse().setBody("untrusted")); val e = Events(); l.transport.start(l.request(), e.sink()); e.await()

@@ -7,7 +7,10 @@ import java.util.concurrent.*
 
 /** Byte transport only: no model payload/SSE parser, cookies, cache, automatic redirect or retry. */
 class HttpTransport(private val authority: Authority, private val policy: NetworkPolicy, val limits: Limits = Limits()): AutoCloseable {
-    private val workers = Executors.newFixedThreadPool(2)
+    private companion object { const val MAX_ACTIVE_STREAMS = 8 }
+    // Each accepted stream owns a worker until EOF (including consumer backpressure).
+    // Match admission capacity so one long generation cannot queue another accepted run.
+    private val workers = Executors.newFixedThreadPool(MAX_ACTIVE_STREAMS)
     private val timer = Executors.newSingleThreadScheduledExecutor()
     private val active = ConcurrentHashMap<String, Stream>()
     private val seen = mutableSetOf<String>()
@@ -52,7 +55,7 @@ class HttpTransport(private val authority: Authority, private val policy: Networ
         requireBridge(start.envelope.requestId.matches(Regex("[a-zA-Z0-9_-]{1,100}")), Code.INVALID_REQUEST)
         if (seenRun != start.envelope.binding.runId) { seen.clear(); seenRun = start.envelope.binding.runId }
         requireBridge(start.envelope.requestId !in seen, Code.DUPLICATE_CALL)
-        requireBridge(active.size < 8 && seen.size < 512, Code.LIMIT_EXCEEDED)
+        requireBridge(active.size < MAX_ACTIVE_STREAMS && seen.size < 512, Code.LIMIT_EXCEEDED)
         requireBridge((start.body?.size ?: 0) <= limits.requestBytes && start.method.matches(Regex("[A-Z]{1,12}")), Code.LIMIT_EXCEEDED)
         requireBridge(start.method !in setOf("GET", "HEAD") || start.body == null, Code.INVALID_REQUEST)
         val p = policy.prepare(start)
@@ -127,5 +130,5 @@ class HttpTransport(private val authority: Authority, private val policy: Networ
         requireBridge(s.start.envelope.binding == binding, Code.STALE_AUTHORIZATION)
         s.fail(Code.CANCELLED)
     }
-    override fun close() { closed = true; subscription.close(); active.values.toList().forEach { it.fail(Code.CANCELLED) }; workers.shutdownNow(); timer.shutdownNow() }
+    @Synchronized override fun close() { closed = true; subscription.close(); active.values.toList().forEach { it.fail(Code.CANCELLED) }; workers.shutdownNow(); timer.shutdownNow() }
 }
