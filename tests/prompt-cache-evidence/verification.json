@@ -1,0 +1,21 @@
+{
+  "runtimeTests": 331,
+  "runtimePassed": 331,
+  "appUnitTests": 212,
+  "appUnitPassed": 212,
+  "webTests": 82,
+  "webPassed": 82,
+  "integrationTypecheck": "passed",
+  "androidBuild": "passed",
+  "androidLint": "passed",
+  "physicalProviderAcceptance": {
+    "deepseek": "passed",
+    "opencode-go": "passed"
+  },
+  "physicalStorageTests": {
+    "expected": 15,
+    "passed": 15,
+    "status": "passed; includes probe after 3 MiB field, Thor without SQLite JSON1"
+  },
+  "historicalCacheCountersAvailable": false
+}

@@ -5,8 +5,8 @@ import { fixture, registry } from './fixtures.js';
 
 function l0(body: unknown): any {
   const strings = (value: unknown): string[] => typeof value === 'string' ? [value] : value && typeof value === 'object' ? Object.values(value).flatMap(strings) : [];
-  const content = strings(body).map(text => text.match(/<L0>(.*?)<\/L0>/s)?.[1]).find(Boolean);
-  assert.ok(content, 'exactly one current L0 must be sent');
+  const content = strings(body).map(text => text.match(/<L0>(.*?)<\/L0>/s)?.[1]).filter(Boolean).at(-1);
+  assert.ok(content, 'the latest chronological L0 must be sent');
   assert.equal(new TextEncoder().encode(content).byteLength <= 1024, true);
   return JSON.parse(content);
 }
@@ -28,7 +28,7 @@ for (const protocol of ['openai-responses', 'openai-completions', 'anthropic-mes
     assert.equal(first.targetScreen, 'lower');
     assert.deepEqual(first.upperAppObservation, { status: 'observed', displayId: 0 });
     assert.deepEqual(second.upperApp, app('upper.changed'));
-    assert.ok(!JSON.stringify(f.requests[1]!.body).includes('upper.initial'));
+    assert.ok(JSON.stringify(f.requests[1]!.body).includes('upper.initial'), 'earlier observations keep their original position');
   });
 }
 
@@ -43,7 +43,7 @@ test('a reused Pi session gets fresh app metadata on follow-up and does not carr
   assert.equal(session.agent, previousAgent);
   assert.equal(l0(next.requests[0]!.body).upperApp, undefined);
   assert.deepEqual(l0(next.requests[0]!.body).upperAppObservation, { status: 'ambiguous', displayId: 0 });
-  assert.ok(!JSON.stringify(next.requests).includes('upper.old'));
+  assert.ok(JSON.stringify(next.requests).includes('upper.old'), 'the old app remains a historical observation, not the current app');
   assert.ok(!JSON.stringify(next.requests).includes('upper.stale.must.not.leak'));
 });
 

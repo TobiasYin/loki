@@ -160,6 +160,45 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         return readPayload("runs",runId)
     }
 
+    /** Verify a screenshot owner without materializing its transcript or contexts. */
+    fun getRunIdentity(runId:String,sessionId:String):JSONObject? {
+        require(runId.isNotBlank() && sessionId.isNotBlank())
+        val args=arrayOf(runId,sessionId)
+        val exists=readableDatabase.rawQuery("SELECT id FROM runs WHERE id=? AND sessionId=?",args).use {it.moveToFirst()}
+        if(!exists)return null
+        // Thor's Android SQLite omits JSON1. Stream bounded SQL chunks instead
+        // of loading a complete (potentially multi-MiB) transcript to read probe.
+        val reader=object:java.io.Reader() {
+            var offset=1;var chunk="";var index=0;var ended=false
+            override fun read(target:CharArray,start:Int,length:Int):Int {
+                if(length==0)return 0
+                if(index>=chunk.length) {
+                    if(ended)return -1
+                    chunk=readableDatabase.rawQuery("SELECT substr(payload,?,65536) FROM runs WHERE id=? AND sessionId=?",arrayOf(offset.toString(),*args)).use {c->
+                        if(c.moveToFirst())c.getString(0) else ""
+                    }
+                    offset+=65536;index=0
+                    if(chunk.isEmpty()){ended=true;return -1}
+                }
+                val count=minOf(length,chunk.length-index)
+                chunk.toCharArray(target,start,index,index+count);index+=count;return count
+            }
+            override fun close(){ended=true;chunk="";index=0}
+        }
+        val probe=android.util.JsonReader(reader).use {json->
+            json.beginObject();var value=false
+            while(json.hasNext()) {
+                if(json.nextName()=="probe") {
+                    if(json.peek()==android.util.JsonToken.BOOLEAN)value=json.nextBoolean() else json.skipValue()
+                    break
+                }
+                json.skipValue()
+            }
+            value
+        }
+        return obj("id" to runId,"sessionId" to sessionId,"probe" to probe)
+    }
+
     /** Explicit, session-scoped image/content lookup. Chunked reads also work
      * for a single attachment larger than Android's ordinary CursorWindow. */
     fun getAttachment(attachmentId:String,sessionId:String):JSONObject? {

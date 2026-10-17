@@ -182,11 +182,11 @@ test('consumed leases do not run twice and a second Session cannot run concurren
   await assert.rejects(coordinator.run({ ...held.lease, sessionId: 'second', runId: 'second' }, [{ type: 'text', text: 'two' }]), (e: any) => e.code === 'BACKEND_UNAVAILABLE');
   coordinator.stop(); assert.equal((await first).state, 'cancelled');
 });
-test('expired images are reloaded before every request and L0 is replaced', async () => {
+test('expired images are reloaded before every request and new L0 is appended', async () => {
   const f = fixture('openai-responses', [{ call: { name: 'picture' } }, { text: 'expired image handled' }]); const r = new ThorRuntime(f.ports, registry());
   r.subscribe(e => { if (e.type === 'tool_result') { f.attachments.get('tool-image')!.expiresAt = 0; f.snapshot.l0.snapshotId = 'l0-2'; f.snapshot.l0.upperApp = { packageName: 'new.app', label: 'New app' }; } });
   assert.equal((await r.run(f.lease, [{ type: 'text', text: 'image' }])).state, 'completed');
-  const second = JSON.stringify(f.requests[1]!.body); assert.ok(!second.includes(PNG)); assert.ok(second.includes('Image unavailable')); assert.ok(!second.includes('local.test')); assert.ok(second.includes('new.app'));
+  const second = JSON.stringify(f.requests[1]!.body); assert.ok(!second.includes(PNG)); assert.ok(second.includes('Image unavailable')); assert.ok(second.includes('local.test')); assert.ok(second.includes('new.app'));
   assert.equal(f.contexts[1]!.l0SnapshotId, 'l0-2'); assert.ok(f.contexts[1]!.attachmentRefs.includes('tool-image'));
 });
 test('tool deadline stops waiting for an uncooperative executor; late data cannot re-enter', async () => {
@@ -200,7 +200,7 @@ test('tool deadline stops waiting for an uncooperative executor; late data canno
 });
 test('compression retains explicit constraints and side-effect ledger; oversized required memory stops', async () => {
   const f = fixture(); f.snapshot.session.enabled.adb_debug = true;
-  const p = f.snapshot.session.model; const model: Model<any> = { id: p.modelId, name: 'T', api: p.protocol, provider: 'openai', baseUrl: p.baseUrl, reasoning: false, input: ['text'], contextWindow: 8000, maxTokens: 1000, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
+  const p = f.snapshot.session.model; const model: Model<any> = { id: p.modelId, name: 'T', api: p.protocol, provider: 'openai', baseUrl: p.baseUrl, reasoning: false, input: ['text'], contextWindow: 9000, maxTokens: 1000, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
   const old: HistoryTurn = { turnId: 'old', runId: 'old', source: ['adb_debug'], observedAt: 1, complete: true, messages: [{ kind: 'user', content: [{ type: 'text', text: 'old request'.repeat(1000) }] }], constraints: ['Do not overwrite existing saves'], effects: [{ toolCallId: 'c', toolId: 'files.write', effectClass: 'write', outcome: 'observed', evidenceRef: 'backup-123' }] };
   const options = { snapshot: f.snapshot, tools: [], registryVersion: '1', model, history: [old], current: [{ role: 'user' as const, content: 'current', timestamp: 1 }], attachments: f.ports.attachments, imageTokens: 100, maxHistoryTurns: 1 };
   const compiled = await compileContext(options); assert.deepEqual(compiled.manifest.droppedTurnIds, ['old']); const text = JSON.stringify(compiled.messages); assert.ok(text.includes('backup-123')); assert.ok(text.includes('Do not overwrite existing saves'));
@@ -372,7 +372,7 @@ for(const protocol of ['openai-responses','openai-completions','anthropic-messag
     assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');
     assert.equal(session.agent!.state.messages.filter(m=>m.role==='assistant').at(-1)!.stopReason,'length');
     assert.equal(nativeEffects,1);assert.equal(first.executions.length,1);assert.equal(first.requests.length,2);
-    assert.deepEqual(first.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_OUTPUT_LIMIT').map(e=>e.data),[{code:'MODEL_OUTPUT_LIMIT',modelRound:2,requestedMaxOutputTokens:1024,...(protocol==='openai-completions'?{}:{inputTokens:10,outputTokens:4}),stopReason:'length',incompleteReason:protocol==='openai-responses'?'max_output_tokens':protocol==='openai-completions'?'length':'max_tokens'}]);
+    assert.deepEqual(first.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_OUTPUT_LIMIT').map(e=>e.data),[{code:'MODEL_OUTPUT_LIMIT',modelRound:2,requestedMaxOutputTokens:1024,...(protocol==='openai-completions'?{}:{inputTokens:10,totalInputTokens:10,outputTokens:4,...(protocol==='anthropic-messages'?{uncachedInputTokens:10}:{})}),stopReason:'length',incompleteReason:protocol==='openai-responses'?'max_output_tokens':protocol==='openai-completions'?'length':'max_tokens'}]);
     assert.equal(first.events.filter(e=>e.type==='text_delta').map(e=>e.data.text).join(''),'已完成一次操作，后续正文未写完');
     const recorded=first.turns.at(-1)!;assert.equal(recorded.complete,false);
     assert.ok(JSON.stringify(recorded.messages).includes('已完成一次操作，后续正文未写完'));

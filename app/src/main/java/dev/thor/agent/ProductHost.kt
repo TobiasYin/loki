@@ -383,7 +383,9 @@ class ProductHost private constructor(private val context: Context, private val 
                     }
                     "persist" -> save(c, data)
                     "attachment.get" -> {
-                        val b = bound(c, data); val a = store.getAttachment(data.getString("id"),b.sessionId)
+                        val b = bound(c, data); val a = ScreenshotHistoryPolicy.replay(store.getAttachment(data.getString("id"),b.sessionId),b.sessionId) {rid->
+                            rows("runs").firstOrNull {it.optString("id")==rid} ?: store.getRunIdentity(rid,b.sessionId)
+                        }
                         val available=a != null && a.getLong("expiresAt")>System.currentTimeMillis() && a.getJSONArray("source").let {src ->(0 until src.length()).all {dev.thor.bridge.Capability.valueOf(src.getString(it)) in authority.enabled(b)}}
                         if(available && b.runId==probeRun)probeImageReads++
                         if(available)a!! else obj()
@@ -695,7 +697,8 @@ class ProductHost private constructor(private val context: Context, private val 
                         if(path != null && result.error == null) {
                             val file = File(path); require(file.canonicalPath.startsWith(File(context.cacheDir, "tool-frames").canonicalPath + "/"))
                             val bytes = file.readBytes(); require(bytes.size <= 2097152)
-                            val aid = id(); val a = obj("id" to aid, "attachmentId" to aid, "sessionId" to e.sessionId, "runId" to e.runId, "mimeType" to "image/jpeg", "data" to Base64.encodeToString(bytes, Base64.NO_WRAP), "observedAt" to System.currentTimeMillis(), "expiresAt" to System.currentTimeMillis()+600000, "source" to JSONArray(listOf("screen_perception")), "size" to bytes.size, "hash" to hash(bytes))
+                            val observedAt=System.currentTimeMillis()
+                            val aid = id(); val a = obj("id" to aid, "attachmentId" to aid, "sessionId" to e.sessionId, "runId" to e.runId, "mimeType" to "image/jpeg", "data" to Base64.encodeToString(bytes, Base64.NO_WRAP), "observedAt" to observedAt, "expiresAt" to ScreenshotHistoryPolicy.captureExpiry(observedAt,e.runId==probeRun), "source" to JSONArray(listOf("screen_perception")), "size" to bytes.size, "hash" to hash(bytes))
                             persist(newAttachment=a); content.put(obj("type" to "attachment", "attachmentId" to aid))
                         }
                         content.put(obj("type" to "text", "text" to redactor.redact(JSONObject(json(data + mapOf("message" to result.message)).toString()).toString())))

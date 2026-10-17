@@ -1,4 +1,5 @@
 import type { TSchema } from 'typebox';
+import type { AssistantMessage } from '@earendil-works/pi-ai';
 
 export const CAPABILITIES = ['screen_perception', 'web_search', 'screen_control', 'adb_debug'] as const;
 export type Capability = typeof CAPABILITIES[number];
@@ -86,13 +87,17 @@ export interface RunEvent {
 }
 export type DomainMessage =
   | { kind: 'user'; content: Content[] }
-  | { kind: 'assistant'; text: string; calls: { id: string; name: string; arguments: Record<string, unknown> }[] }
+  | { kind: 'assistant'; text: string; calls: { id: string; name: string; arguments: Record<string, unknown> }[];
+      /** Exact SDK content blocks and source identity, retained on disk for stable replay. */
+      replay?: Pick<AssistantMessage, 'api' | 'provider' | 'model' | 'content'> & { baseUrl?: string } }
   | { kind: 'tool_result'; toolCallId: string; toolName: string; content: Content[]; isError: boolean };
 export interface EffectRecord { toolCallId: string; toolId: string; effectClass: ToolDescriptor['effectClass']; outcome: 'submitted' | 'observed' | 'unknown'; evidenceRef?: string }
 export interface HistoryTurn {
   turnId: string; runId: string; messages: DomainMessage[]; source: Capability[]; observedAt: number; complete: boolean;
   /** Caller-labelled explicit user constraints; bounded projection stops if these cannot fit. */
   constraints?: string[];
+  /** Chronological Native observation blocks, positioned among this turn’s original messages. */
+  contextUpdates?: { beforeMessage: number; text: string }[];
   /** Compact action ledger survives compression with the same provenance filter as raw results. */
   effects?: EffectRecord[];
 }

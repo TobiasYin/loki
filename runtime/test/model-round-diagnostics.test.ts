@@ -25,7 +25,7 @@ test('reasoning-only output exhaustion records actual requested budget and repor
   const result=await new ThorRuntime(f.ports,registry(),{},session).run(f.lease,[{type:'text',text:'保留任务继续'}]);
   assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');assert.equal(f.executions.length,0);assert.equal(f.requests.length,1);
   assert.equal(f.requests[0]!.body.max_output_tokens,2048);assert.equal(f.requests[0]!.body.reasoning.effort,'low');
-  const safe={modelRound:1,requestedMaxOutputTokens:2048,incompleteReason:'max_output_tokens',inputTokens:987,outputTokens:2048,reasoningTokens:2048,stopReason:'length'};
+  const safe={modelRound:1,requestedMaxOutputTokens:2048,incompleteReason:'max_output_tokens',inputTokens:987,totalInputTokens:987,outputTokens:2048,reasoningTokens:2048,stopReason:'length'};
   assert.deepEqual(f.events.find(e=>e.type==='model_round')!.data,safe);
   assert.deepEqual(f.events.find(e=>e.type==='diagnostic')!.data,{code:'MODEL_OUTPUT_LIMIT',...safe});
   assert.ok(!JSON.stringify(f.events).includes('synthetic-private-id'));assert.ok(!JSON.stringify(f.events).includes('must-not-persist'));
@@ -51,7 +51,7 @@ test('Completions content filtering remains an error and retains reported usage 
   replaceStream(f,`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`);
   const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'test'}]);
   assert.equal(result.state,'failed');assert.equal(result.error,'IO_ERROR');assert.equal(f.requests.length,1);assert.equal(f.executions.length,0);
-  assert.deepEqual(f.events.find(e=>e.type==='model_round')!.data,{modelRound:1,requestedMaxOutputTokens:1024,inputTokens:42,outputTokens:7,reasoningTokens:3,incompleteReason:'content_filter',stopReason:'error'});
+  assert.deepEqual(f.events.find(e=>e.type==='model_round')!.data,{modelRound:1,requestedMaxOutputTokens:1024,inputTokens:42,totalInputTokens:42,outputTokens:7,reasoningTokens:3,incompleteReason:'content_filter',stopReason:'error'});
   assert.ok(!JSON.stringify(f.events).includes('private-id'));assert.ok(!JSON.stringify(f.events).includes('private-model'));
 });
 
@@ -97,5 +97,47 @@ test('diagnostic observer drops unsafe counters, raw metadata and unrecognized r
   d.finish('private');assert.deepEqual(d.snapshot(),{modelRound:1,incompleteReason:'unknown',stopReason:'unknown'});
   d.payload('openai-completions',{max_tokens:0,max_completion_tokens:4096});
   d.observe('openai-completions',{usage:{prompt_tokens:0,completion_tokens:Number.MAX_SAFE_INTEGER+1,completion_tokens_details:{reasoning_tokens:0}}});
-  assert.deepEqual(d.snapshot(),{modelRound:1,incompleteReason:'unknown',stopReason:'unknown',requestedMaxOutputTokens:4096,inputTokens:0,reasoningTokens:0});
+  assert.deepEqual(d.snapshot(),{modelRound:1,incompleteReason:'unknown',stopReason:'unknown',requestedMaxOutputTokens:4096,inputTokens:0,totalInputTokens:0,reasoningTokens:0});
+});
+
+test('Responses persists cache accounting at the real streaming boundary without double-counting reasoning',async()=>{
+  const f=fixture();replaceStream(f,event('response.created',{id:'private',status:'in_progress'})+event('response.completed',{
+    id:'private',status:'completed',output:[{id:'m',type:'message',role:'assistant',status:'completed',content:[{type:'output_text',text:'done',annotations:[]}]}],
+    usage:{input_tokens:1000,input_tokens_details:{cached_tokens:800,cache_write_tokens:40},output_tokens:100,output_tokens_details:{reasoning_tokens:60},total_tokens:1100},
+  }));
+  assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'test'}])).state,'completed');
+  const round=f.events.find(e=>e.type==='model_round')!.data;
+  assert.deepEqual(round,{modelRound:1,requestedMaxOutputTokens:1024,inputTokens:1000,totalInputTokens:1000,outputTokens:100,reasoningTokens:60,cacheReadTokens:800,cacheWriteTokens:40,uncachedInputTokens:160,stopReason:'stop'});
+  assert.equal(Number(round.totalInputTokens)+Number(round.outputTokens),1100);
+});
+
+test('Completions accepts DeepSeek cache hit/miss and prefers standard detail counters',()=>{
+  const d=new ModelRoundDiagnostics(1);
+  d.observe('openai-completions',{usage:{prompt_tokens:1000,completion_tokens:90,prompt_cache_hit_tokens:750,prompt_cache_miss_tokens:250,completion_tokens_details:{reasoning_tokens:30}}});
+  assert.deepEqual(d.snapshot(),{modelRound:1,inputTokens:1000,totalInputTokens:1000,outputTokens:90,cacheReadTokens:750,uncachedInputTokens:250,reasoningTokens:30});
+  d.observe('openai-completions',{usage:{prompt_tokens:1000,prompt_tokens_details:{cached_tokens:800,cache_creation_tokens:10},prompt_cache_hit_tokens:750,prompt_cache_miss_tokens:190}});
+  assert.equal(d.snapshot().cacheReadTokens,800);assert.equal(d.snapshot().cacheWriteTokens,10);assert.equal(d.snapshot().uncachedInputTokens,190);
+});
+
+test('Anthropic start and cumulative delta counters merge without losing cache input or summing repeated totals',()=>{
+  const d=new ModelRoundDiagnostics(1);
+  d.observe('anthropic-messages',{type:'message_start',message:{usage:{input_tokens:100,output_tokens:1,cache_read_input_tokens:800,cache_creation_input_tokens:200}}});
+  d.observe('anthropic-messages',{type:'message_delta',usage:{output_tokens:40},delta:{stop_reason:'end_turn'}});
+  d.observe('anthropic-messages',{type:'message_delta',usage:{output_tokens:40}});
+  assert.deepEqual(d.snapshot(),{modelRound:1,inputTokens:100,totalInputTokens:1100,uncachedInputTokens:100,outputTokens:40,cacheReadTokens:800,cacheWriteTokens:200});
+});
+
+test('missing cache counters remain absent while an explicitly reported zero remains measurable',()=>{
+  const missing=new ModelRoundDiagnostics(1);missing.observe('openai-completions',{usage:{prompt_tokens:42,completion_tokens:7}});
+  assert.equal(missing.snapshot().cacheReadTokens,undefined);assert.equal(missing.snapshot().cacheWriteTokens,undefined);assert.equal(missing.snapshot().uncachedInputTokens,undefined);
+  const zero=new ModelRoundDiagnostics(1);zero.observe('openai-responses',{type:'response.completed',response:{usage:{input_tokens:42,input_tokens_details:{cached_tokens:0},output_tokens:7}}});
+  assert.equal(zero.snapshot().cacheReadTokens,0);assert.equal(zero.snapshot().uncachedInputTokens,42);
+});
+
+test('cache counters reject unsafe values, fall back to valid aliases, and omit impossible derived counts',()=>{
+  const d=new ModelRoundDiagnostics(1);
+  d.observe('openai-completions',{usage:{prompt_tokens:10,prompt_tokens_details:{cached_tokens:-1,cache_write_tokens:'2'},prompt_cache_hit_tokens:20,prompt_cache_miss_tokens:Infinity,private:'not-recorded'}});
+  assert.deepEqual(d.snapshot(),{modelRound:1,inputTokens:10,totalInputTokens:10,cacheReadTokens:20});
+  const overflow=new ModelRoundDiagnostics(1);overflow.observe('anthropic-messages',{type:'message_start',message:{usage:{input_tokens:Number.MAX_SAFE_INTEGER,cache_read_input_tokens:1}}});
+  assert.equal(overflow.snapshot().totalInputTokens,undefined);
 });

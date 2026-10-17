@@ -184,4 +184,14 @@ class OnDemandSessionStorageTest {
         assertEquals(0,runtime.getJSONArray("messages").length());assertEquals(0,runtime.getJSONArray("events").length());assertEquals(0,runtime.getJSONArray("attachments").length())
     }
 
+    @Test fun screenshotOwnerLookupProjectsOnlyIdentityAndRespectsSessionAndProbe()=isolated {store->
+        val state=fixture();state.getJSONArray("runs").getJSONObject(0).put("privateLargeField","x".repeat(3*1024*1024)).put("probe",true)
+        store.save(state)
+        val owner=store.getRunIdentity("ra","a")!!
+        assertEquals(setOf("id","sessionId","probe"),owner.keys().asSequence().toSet())
+        assertEquals("ra",owner.getString("id"));assertTrue(owner.getBoolean("probe"))
+        assertFalse(store.getRunIdentity("rb","b")!!.getBoolean("probe"))
+        assertNull(store.getRunIdentity("ra","b"));assertNull(store.getRunIdentity("missing","a"))
+    }
+
 }

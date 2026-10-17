@@ -35,6 +35,7 @@ interface Active {
   turnId: string; streamMessage: number; messageOffset: number; input: Content[];
   modelDiagnostics?: ModelRoundDiagnostics;
   requestMaxOutput?: number;
+  contextUpdates: NonNullable<HistoryTurn['contextUpdates']>;
 }
 const currentScreenReads = new Set(['perception.app_info', 'perception.window_info', 'perception.ui_tree', 'perception.capture_screen']);
 const screenResources = new Set(['selected-screen/snapshot', 'upper-display/snapshot']);
@@ -325,12 +326,14 @@ export class ThorRuntime {
         // Partial JSON is diagnostic data, never an executable historical tool call.
         const calls=m.content.filter(c=>c.type==='toolCall').filter(c=>m.stopReason==='toolUse' || a.seenCalls.has(c.id)).map(c=>({id:c.id,name:c.name,arguments:c.arguments}));
         const text=m.content.filter(c=>c.type==='text').map(c=>c.text).join('');
-        if(text || calls.length)messages.push({kind:'assistant',text,calls});
+        const allowedCalls=new Set(calls.map(c=>c.id));
+        const content=m.content.filter(c=>c.type!=='toolCall' || allowedCalls.has(c.id));
+        messages.push({kind:'assistant',text,calls,replay:{api:m.api,provider:m.provider,model:m.model,baseUrl:a.profile.baseUrl.replace(/\/+$/, ''),content:structuredClone(content)}});
       } else if(m.role==='toolResult')messages.push({kind:'tool_result',toolCallId:m.toolCallId,toolName:m.toolName,
         content:a.resultRefs.get(m.toolCallId)??m.content.filter(c=>c.type==='text').map(c=>({type:'text',text:c.text})),isError:m.isError});
     }
     if(!messages.some(m=>m.kind==='user'))messages.unshift({kind:'user',content:a.input});
-    await this.persist(a,()=>this.ports.persistence.saveTurn(a.run.sessionId,{turnId:a.turnId,runId:a.run.runId,messages:closeInterruptedRound(messages),source:[...a.source],observedAt:Date.now(),complete,effects:a.effects}));
+    await this.persist(a,()=>this.ports.persistence.saveTurn(a.run.sessionId,{turnId:a.turnId,runId:a.run.runId,messages:closeInterruptedRound(messages),source:[...a.source],observedAt:Date.now(),complete,effects:a.effects,contextUpdates:a.contextUpdates}));
   }
   private async onPi(a: Active, e: AgentEvent): Promise<void> {
     if (terminal.has(a.run.state)) return;
@@ -375,7 +378,7 @@ export class ThorRuntime {
       const initial = await abortable(this.ports.authority.read(lease.sessionId, lease.runId), pending.controller.signal);
       const profile = structuredClone(initial.session.model); checkProfile(profile);
       a = { run: { sessionId: lease.sessionId, runId: lease.runId, state: 'queued', modelProfileRevision: profile.revision, capabilityEpoch: lease.capabilityEpoch, startedAt: Date.now() },
-        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], observationRequired:false, waits:new Map(),waitSequence:0,lastProgress:performance.now(), streamMessage: 0, messageOffset:0, input, turnId: crypto.randomUUID() };
+        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], observationRequired:false, waits:new Map(),waitSequence:0,lastProgress:performance.now(), streamMessage: 0, messageOffset:0, input, contextUpdates: [], turnId: crypto.randomUUID() };
       this.active = a; const active = a; const model = toModel(profile);
       active.stream=new StreamEvents(f=>this.writeEvent(active,f.type,f.data,f.toolCallId));
       if(hasPerceptionContext(initial))a.source.add('screen_perception');
@@ -410,7 +413,14 @@ export class ThorRuntime {
             else current.push(m);
           }
           const compiled = await compileContext({ snapshot: { ...s, session: { ...s.session, model: profile } }, tools: active.effective, registryVersion: this.registry.version, model,
-            history, current, currentRefs: [...input, ...[...active.resultRefs.values()].flat()].filter(c => c.type === 'attachment').map(c => c.attachmentId), attachments: this.ports.attachments, imageTokens: this.limits.imageTokenEstimate, maxHistoryTurns: this.limits.maxHistoryTurns });
+            history, current, currentContextUpdates: active.contextUpdates, currentRefs: [...input, ...[...active.resultRefs.values()].flat()].filter(c => c.type === 'attachment').map(c => c.attachmentId), attachments: this.ports.attachments, imageTokens: this.limits.imageTokenEstimate, maxHistoryTurns: this.limits.maxHistoryTurns });
+          // The model's answer and the persisted context suffix can derive from
+          // prior tool observations even without using that capability this Run.
+          // Propagate only sources still permitted in the projected history so a
+          // later revocation also removes these indirect copies/derived answers.
+          for (const turn of history) if (turn.source.every(cap => s.session.enabled[cap]))
+            for (const cap of turn.source) active.source.add(cap);
+          active.contextUpdates = compiled.contextUpdates;
           active.requestMessages = compiled.messages;
           active.requestMaxOutput = compiled.maxOutput;
           await this.persist(active, () => this.ports.persistence.saveContext(compiled.manifest)); await this.event(active, 'context', { snapshotId: compiled.manifest.snapshotId, estimatedTokens: compiled.manifest.estimatedTokens, droppedTurnIds: compiled.manifest.droppedTurnIds, piSessionReused:!!previous, historyRestored:!previous && restored.length>0, restoredHistoryMessages:restored.length });
@@ -423,7 +433,7 @@ export class ThorRuntime {
         streamFn: (_model, context, options) => {
           const fetcher=this.fetch(active);
           const diagnostics=active.modelDiagnostics=new ModelRoundDiagnostics(active.requests);
-          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onPayload:(payload:unknown)=>{diagnostics.payload(profile.protocol,payload);}, onProviderStreamEvent: (event: unknown) => { audit.observe(profile.protocol, event); diagnostics.observe(profile.protocol,event); }, apiKey: 'sk-thor-native-placeholder', fetch: this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher), transport: 'sse' as const, maxTokens: active.requestMaxOutput ?? profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'none' as const, headers: profile.customHeaders, env: {} };
+          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onPayload:(payload:unknown)=>{diagnostics.payload(profile.protocol,payload);}, onProviderStreamEvent: (event: unknown) => { audit.observe(profile.protocol, event); diagnostics.observe(profile.protocol,event); }, apiKey: 'sk-thor-native-placeholder', fetch: this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher), transport: 'sse' as const, maxTokens: active.requestMaxOutput ?? profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'short' as const, headers: profile.customHeaders, env: {} };
           const source = profile.protocol === 'openai-responses' ? responses(model, context, common) : profile.protocol==='openai-completions' ? completions(model,context,common) : anthropic(model, context, common);
           return providerStopBoundary(source, active.controller.signal, model, (phase, work) => this.watch(active, phase, work));
         },
