@@ -2,7 +2,7 @@ const {test}=require('node:test');const assert=require('node:assert/strict');con
 function setup(beforeScript){const dom=new JSDOM(fs.readFileSync('src/main/assets/chat/index.html','utf8'),{runScripts:'outside-only',url:'https://appassets.androidplatform.net/assets/chat/index.html'});const calls=[];beforeScript?.(dom.window,dom.window.document);dom.window.ThorUI={postMessage:s=>calls.push(JSON.parse(s))};for(const name of ['vendor/marked.umd.js','vendor/purify.min.js','ui.js'])dom.window.eval(fs.readFileSync('src/main/assets/chat/'+name,'utf8'));dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(value=''){this.returnValue=value;this.open=false;this.dispatchEvent(new dom.window.Event('close'));};return{window:dom.window,doc:dom.window.document,calls};}
 function state(){return{selected:'a',sessions:[{id:'a',title:'会话 A',archivedAt:null,updatedAt:1,capabilities:{perception:true,search:true,screen_control:false,debug:false}}],messages:[],runs:[],events:[],availability:{perception:'模拟就绪',search:'真实服务未配置',screen_control:'待验证',debug:'高权限'}};}
 function disclose(window,node,open=true){assert.ok(node,'Disclosure must exist');if(node.open!==open)node.querySelector(':scope > summary').click();node.dispatchEvent(new window.Event('toggle'));return node;}
-function openOperations(window,doc){return disclose(window,doc.querySelector('details.run'));}
+function openOperations(window,doc){assert.ok(doc.querySelector('.activity-timeline'));return doc.querySelector('.activity-timeline');}
 test('model output limit explains continuation while ordinary model counters stay invisible',()=>{
  const{window,doc}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'complete'}];
  s.runs=[{id:'r',sessionId:'a',status:'completed',expanded:false}];s.events=[{runId:'r',sequence:1,type:'model_round',data:{modelRound:1,requestedMaxOutputTokens:128000,inputTokens:300,outputTokens:30,stopReason:'stop'}}];window.receiveNative(s);
@@ -15,7 +15,7 @@ test('gray approval binds actual run and approval ID; black denial stays structu
  s.runs=[{id:'r',sessionId:'a',status:'awaiting_user',approval:{id:'approval-1',summary:'灰名单 · 屏幕焦点锁 1'}}];window.receiveNative(s);
  doc.querySelector('.wait button').click();assert.deepEqual(calls.at(-1),{op:'approve',runId:'r',approvalId:'approval-1'});
  s.runs[0].status='completed';s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'c',data:{toolId:'debug.shell',error:'COMMAND_BLOCKED',outcome:'observed',content:[{type:'text',text:JSON.stringify({policyTier:'black',executed:false,reason:'禁止格式化'})}]}}];window.receiveNative(s);
- assert.equal(doc.querySelector('.wait'),null);assert.match(doc.querySelector('.attention').textContent,/已禁止/);assert.equal(doc.querySelector('.tool-card'),null);openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-card').textContent,/已禁止/);assert.match(doc.querySelector('.structured').textContent,/禁止格式化/);assert.doesNotMatch(doc.querySelector('.tool-card').textContent,/"executed"/);
+ assert.equal(doc.querySelector('.wait'),null);assert.match(doc.querySelector('.attention').textContent,/已禁止/);assert.equal(doc.querySelector('.tool-body'),null);openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-card').textContent,/已禁止/);assert.match(doc.querySelector('.structured').textContent,/禁止格式化/);assert.doesNotMatch(doc.querySelector('.tool-card').textContent,/"executed"/);
 });
 test('untrusted text never creates HTML, scripts, remote links or images',()=>{const{window,doc}=setup();const s=state();s.messages.push({id:'m',sessionId:'a',role:'assistant',text:'<img src="https://evil.invalid" onerror="alert(1)"><script>bad()</script>',status:'completed'});window.receiveNative(s);assert.equal(doc.querySelector('#chat img'),null);assert.equal(doc.querySelector('#chat script'),null);assert.match(doc.querySelector('#chat').textContent,/<img/);});
 test('failed and unknown remain visible outside collapsed disclosure',()=>{const{window,doc}=setup();const s=state();s.messages.push({id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'failed'});s.runs.push({id:'r',sessionId:'a',status:'failed',expanded:false,stopReason:'工具失败'});s.events.push({runId:'r',sequence:1,outcome:'unknown',summary:'提交结果未知',elapsedMs:100,type:'tool_result'});window.receiveNative(s);assert.ok(!doc.querySelector('details.run') || !doc.querySelector('details.run').open);const warnings=[...doc.querySelectorAll('.attention')];assert.equal(warnings.length,2);assert.ok(warnings.every(n=>n.parentElement.tagName!=='DETAILS'));});
@@ -23,8 +23,8 @@ test('page-change recovery stays neutral and visible while operation details rem
  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
  const recovery={kind:'observe_again',continueRun:true,retryPreviousAction:false,submission:'not_dispatched',sideEffectPossible:true};
  s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'old',data:{toolId:'input.tap',error:'TARGET_CHANGED',outcome:'unknown',recovery,content:[{type:'text',text:JSON.stringify({error:'TARGET_CHANGED',recovery})}]}}];window.receiveNative(s);
- assert.equal(doc.querySelector('.attention'),null);assert.equal(doc.querySelector('.tool-card'),null);assert.match(doc.querySelector('[role=status]').textContent,/页面已变化，正在重新观察/);assert.doesNotMatch(doc.querySelector('[role=status]').textContent,/提交状态尚未确认/);
- doc.querySelector('details.run > summary').click();assert.match(doc.querySelector('.tool-card summary').textContent,/需要重新观察/);doc.querySelector('.tool-card summary').click();assert.equal(doc.querySelector('.attention'),null);assert.doesNotMatch(doc.querySelector('.tool-body').textContent,/observe_again|retryPreviousAction/);
+ assert.equal(doc.querySelector('.attention'),null);assert.equal(doc.querySelector('.tool-body'),null);assert.match(doc.querySelector('[role=status]').textContent,/页面已变化，正在重新观察/);assert.doesNotMatch(doc.querySelector('[role=status]').textContent,/提交状态尚未确认/);
+ assert.match(doc.querySelector('.tool-card summary').textContent,/需要重新观察/);doc.querySelector('.tool-card summary').click();assert.equal(doc.querySelector('.attention'),null);assert.doesNotMatch(doc.querySelector('.tool-body').textContent,/observe_again|retryPreviousAction/);
 });
 test('neutral page recovery preserves unknown or submitted facts without claiming an action did not execute',()=>{
  for(const submission of ['unknown','submitted']){
@@ -38,7 +38,7 @@ function recoveryHistory(){
 }
 test('repeated target changes use one current recovery status and a validated new screen read removes it',()=>{
  const{window,doc}=setup();const s=recoveryHistory();window.receiveNative(s);
- assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);assert.equal(doc.querySelector('.tool-card'),null);
+ assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);assert.equal(doc.querySelector('.tool-body'),null);
  s.events.push({runId:'r',sequence:4,type:'tool_result',toolCallId:'fresh',data:{toolId:'perception.capture_screen',outcome:'observed',content:[{type:'attachment',attachmentId:'new-real-frame'}]}});window.receiveNative(s);
  assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/正在重新观察/);
  s.events.push({runId:'r',sequence:5,type:'tool_result',toolCallId:'next-stale',data:{toolId:'input.activate',error:'TARGET_CHANGED',outcome:'unknown',recovery:{kind:'observe_again',submission:'not_dispatched',sideEffectPossible:true}}});window.receiveNative(s);
@@ -56,7 +56,7 @@ test('failed discarded companion and other-run reads do not clear recovery, and 
 test('successful observation clears dynamic recovery but preserves historical unknown and submitted facts in lazy details',()=>{
  const{window,doc}=setup();const s=recoveryHistory();s.events[0].data.recovery.submission='unknown';s.events[1].data.recovery.submission='submitted';s.events[1].data.outcome='submitted';
  s.events.push({runId:'r',sequence:4,type:'tool_result',toolCallId:'fresh',data:{toolId:'perception.ui_tree',outcome:'observed'}});window.receiveNative(s);
- assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/提交状态尚未确认/);assert.doesNotMatch(doc.querySelector('.recovery-status').textContent,/正在重新观察|未执行|未提交/);assert.equal(doc.querySelector('.attention,.tool-card'),null);
+ assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/提交状态尚未确认/);assert.doesNotMatch(doc.querySelector('.recovery-status').textContent,/正在重新观察|未执行|未提交/);assert.equal(doc.querySelector('.attention,.tool-body'),null);
  openOperations(window,doc);const cards=doc.querySelectorAll('.tool-card');disclose(window,cards[0]);assert.match(cards[0].querySelector('.tool-body').textContent,/提交状态尚未确认/);disclose(window,cards[1]);assert.match(cards[1].querySelector('.tool-body').textContent,/先前操作已提交/);
  s.runs[0].status='completed';window.receiveNative(s);assert.doesNotMatch(doc.querySelector('#chat').textContent,/正在重新观察/);assert.match(doc.querySelector('.recovery-status').textContent,/提交状态尚未确认/);
 });
@@ -189,7 +189,7 @@ test('brightness percentages are scoped to current percent objects; legacy and u
  const pending=structuredClone(s);pending.runs[0].status='executing_tools';pending.events=[{runId:'r',sequence:1,type:'tool_started',toolCallId:'new',data:{toolId:'debug.thor_brightness',arguments:{action:'set',screen:'lower',value:37}}}];window.receiveNative(pending);disclose(window,doc.querySelector('.tool-card'));assert.ok(fields(doc.querySelector('.tool-card')).some(([k,v])=>k==='value'&&v==='37%'));
 });
 test('semantic tree, scrolling and dragging use readable operation labels',()=>{
- const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'完成'}];s.events=['perception.ui_tree','input.scroll','input.drag'].map((toolId,i)=>({runId:'r',sequence:i+1,type:'tool_started',toolCallId:String(i),data:{toolId,arguments:{}}}));window.receiveNative(s);assert.deepEqual([...doc.querySelectorAll('.tool-card summary')].map(n=>n.textContent),['读取组件树 · 执行中','滚动页面 · 执行中','拖动控件 · 执行中']);
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'完成'}];s.events=['perception.ui_tree','input.scroll','input.drag'].map((toolId,i)=>({runId:'r',sequence:i+1,type:'tool_started',toolCallId:String(i),data:{toolId,arguments:{}}}));window.receiveNative(s);assert.deepEqual([...doc.querySelectorAll('.tool-card summary')].map(n=>n.textContent),['读取组件树 · 未完成','滚动页面 · 未完成','拖动控件 · 未完成']);
 });
 test('Skill manager exposes metadata and explicit read, enable and import actions',()=>{
  const{window,doc,calls}=setup();const s=state();s.skills=[{name:'game-guide',description:'需要攻略时使用',hash:'version',enabled:true,builtin:false,fileCount:2}];window.receiveNative(s);
@@ -280,51 +280,44 @@ function treeHistory(callCount=20){
 }
 test('large collapsed operation histories construct bounded DOM across stream updates; opening each level reveals only its requested fields',()=>{
  const{window,doc}=setup();const s=treeHistory();let created=0;const create=doc.createElement.bind(doc);doc.createElement=(...args)=>{created++;return create(...args);};
- window.receiveNative(s);assert.ok(created<200,`Collapsed history created ${created} elements`);assert.ok(doc.querySelector('#chat').querySelectorAll('*').length<35);
- assert.match(doc.querySelector('details.run > summary').textContent,/20 项操作/);assert.equal(doc.querySelector('.tool-card,.tool-body,.structured'),null);assert.ok(doc.querySelector('.activity-label.shimmer'));
+ window.receiveNative(s);assert.ok(created<200,`Collapsed history created ${created} elements`);assert.ok(doc.querySelector('#chat').querySelectorAll('*').length<100);
+ assert.equal(doc.querySelector('details.run'),null);assert.equal(doc.querySelectorAll('.tool-card').length,20);assert.equal(doc.querySelector('.tool-body,.structured'),null);assert.ok(doc.querySelector('#chat .activity-label.shimmer'));
  const baseline=created;
  for(let i=0;i<8;i++){s.messages[0].text+='。';s.events.push({runId:'large',sequence:41+i,type:'text_delta',data:{text:'。'}});window.receiveNative(s);}
- assert.ok(created-baseline<200,`Collapsed streaming rebuilt ${created-baseline} elements`);assert.equal(doc.querySelector('.tool-card,.structured'),null);
+ assert.ok(created-baseline<200,`Collapsed streaming rebuilt ${created-baseline} elements`);assert.equal(doc.querySelector('.tool-body,.structured'),null);
  openOperations(window,doc);const cards=[...doc.querySelectorAll('.tool-card')];assert.equal(cards.length,20);assert.ok(cards.every(card=>card.children.length===1));assert.equal(doc.querySelector('.structured'),null);
  disclose(window,cards[7]);assert.match(cards[7].textContent,/tool-7-node-35/);assert.match(cards[7].textContent,/current-container-7/);assert.match(cards[7].textContent,/value-7-35-25/);
  assert.equal(doc.querySelectorAll('.tool-body').length,1);assert.ok(cards.filter(card=>card!==cards[7]).every(card=>card.children.length===1));
- disclose(window,cards[7],false);assert.equal(doc.querySelector('.tool-body,.structured'),null);disclose(window,doc.querySelector('details.run'),false);assert.equal(doc.querySelector('.tool-card'),null);
+ disclose(window,cards[7],false);assert.equal(doc.querySelector('.tool-body,.structured'),null);assert.equal(doc.querySelectorAll('.tool-card').length,20);
 });
-test('expanded tool content stays current across deltas and session switches, while collapsed siblings stay lazy',()=>{
+test('expanded timeline operations stay current through stream updates, session switches and task completion',()=>{
  const{window,doc,calls}=setup();const s=treeHistory(2);s.events.unshift({runId:'large',sequence:0,type:'thinking_delta',data:{text:'先检查'}});window.receiveNative(s);
- disclose(window,doc.querySelector('.thinking'));openOperations(window,doc);disclose(window,doc.querySelectorAll('.tool-card')[0]);
- assert.ok(calls.some(c=>c.op==='expanded' && c.runId==='large' && c.expanded));
- doc.querySelector('.tool-card > summary').focus();
- // Native has not acknowledged expanded yet. A simultaneous stream update must
- // retain the user's immediate disclosure choice instead of closing it.
+ disclose(window,doc.querySelector('.thinking'));disclose(window,doc.querySelectorAll('.tool-card')[0]);
+ assert.equal(calls.some(c=>c.op==='expanded'),false);doc.querySelector('.tool-card > summary').focus();
  const next=structuredClone(s);next.messages[0].text='读取到新结果';next.events.push({runId:'large',sequence:5,type:'tool_result',toolCallId:'call-0',data:{toolId:'perception.ui_tree',outcome:'observed',content:[{type:'text',text:JSON.stringify({nodes:[{text:'更新后的实际字段',visibleToUser:true}]})}]}});window.receiveNative(next);
- assert.equal(doc.activeElement,doc.querySelector('.tool-card > summary'));assert.ok(doc.querySelector('details.run').open);assert.ok(doc.querySelector('.thinking').open);let cards=doc.querySelectorAll('.tool-card');assert.ok(cards[0].open);assert.match(cards[0].textContent,/更新后的实际字段/);assert.equal(cards[1].open,false);assert.equal(cards[1].querySelector('.tool-body'),null);
- const away=structuredClone(next);away.sessions.push({...away.sessions[0],id:'b',title:'会话 B'});away.selected='b';window.receiveNative(away);assert.equal(doc.querySelector('details.run'),null);window.receiveNative(next);
- assert.ok(doc.querySelector('details.run').open);assert.ok(doc.querySelector('.tool-card').open);assert.match(doc.querySelector('.tool-body').textContent,/更新后的实际字段/);
- disclose(window,doc.querySelector('details.run'),false);assert.equal(doc.querySelector('.tool-card'),null);window.receiveNative({...next,messages:[{...next.messages[0],text:'再流入'}]});assert.equal(doc.querySelector('.tool-card'),null);
- openOperations(window,doc);assert.ok(doc.querySelector('.tool-card').open);assert.match(doc.querySelector('.tool-body').textContent,/更新后的实际字段/);
- const acknowledged=structuredClone(next);acknowledged.runs[0].expanded=true;window.receiveNative(acknowledged);assert.ok(doc.querySelector('details.run').open);
- const finished=structuredClone(acknowledged);finished.runs[0].status='completed';finished.runs[0].expanded=false;window.receiveNative(finished);assert.equal(doc.querySelector('details.run').open,false);assert.equal(doc.querySelector('.tool-card'),null);
+ assert.equal(doc.activeElement,doc.querySelector('.tool-card > summary'));assert.ok(doc.querySelector('.thinking').open);const cards=doc.querySelectorAll('.tool-card');assert.ok(cards[0].open);assert.match(cards[0].textContent,/更新后的实际字段/);assert.equal(cards[1].open,false);assert.equal(cards[1].querySelector('.tool-body'),null);
+ const away=structuredClone(next);away.sessions.push({...away.sessions[0],id:'b',title:'会话 B'});away.selected='b';window.receiveNative(away);assert.equal(doc.querySelector('.tool-card'),null);window.receiveNative(next);
+ assert.ok(doc.querySelector('.tool-card').open);assert.match(doc.querySelector('.tool-body').textContent,/更新后的实际字段/);
+ const finished=structuredClone(next);finished.runs[0].status='completed';finished.runs[0].expanded=false;window.receiveNative(finished);assert.ok(doc.querySelector('.tool-card').open);assert.equal(doc.querySelectorAll('#chat .activity-label.shimmer').length,0,[...doc.querySelectorAll('#chat .activity-label.shimmer')].map(n=>n.outerHTML).join(''));
 });
 test('collapsed operation history keeps nested unknown outcomes, failed tools and approval actions immediately visible',()=>{
  const{window,doc,calls}=setup();const s=treeHistory(2);s.runs[0].status='awaiting_user';s.runs[0].approval={id:'actual-approval',summary:'确认安装这个应用'};
  s.events[1].data.outcome='unknown';s.events[3].data.error='BACKEND_UNAVAILABLE';window.receiveNative(s);
- assert.equal(doc.querySelector('.tool-card,.structured'),null);const warnings=[...doc.querySelectorAll('.attention')];assert.ok(warnings.some(n=>n.textContent.includes('副作用未知')));assert.ok(warnings.some(n=>n.textContent.includes('执行失败')));assert.ok(warnings.every(n=>!n.closest('details')));
+ assert.equal(doc.querySelector('.tool-body,.structured'),null);const warnings=[...doc.querySelectorAll('.attention')];assert.ok(warnings.some(n=>n.textContent.includes('副作用未知')));assert.ok(warnings.some(n=>n.textContent.includes('执行失败')));assert.ok(warnings.every(n=>!n.closest('details')));
  assert.match(doc.querySelector('.wait').textContent,/确认安装这个应用/);doc.querySelector('.wait button').click();assert.deepEqual(calls.at(-1),{op:'approve',runId:'large',approvalId:'actual-approval'});
  openOperations(window,doc);disclose(window,doc.querySelectorAll('.tool-card')[1]);assert.match(doc.querySelectorAll('.tool-card')[1].textContent,/BACKEND_UNAVAILABLE/);
 });
 
-test('common input operations and streaming tool aliases have readable labels; child toggle never changes its parent disclosure',()=>{
+test('common input operations and streaming tool aliases remain readable; toggling one row never changes Native expansion state',()=>{
  const{window,doc,calls}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:true}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
  const names=[['input.tap','点击当前屏幕'],['input.long_press','长按当前屏幕'],['input.swipe','滑动当前屏幕'],['input.press_button','按手柄键'],['input.set_axes','移动摇杆与扳机'],['input.release_inputs','释放输入'],['perception.find_apps','查找应用'],['apps.launch','打开应用'],['input.activate','激活界面控件'],['input.navigate','当前屏幕返回'],['input.type_text','输入文字'],['input.key_press','按键盘键'],['perception.capture_companion','查看同应用下屏'],['perception.select_screen','选择操作屏幕']];
  s.events=names.map(([toolId],i)=>({runId:'r',sequence:i+1,type:'tool_started',toolCallId:'c'+i,data:{toolId,arguments:{target:'可读参数'}}}));
  s.events.push({runId:'r',sequence:names.length+1,type:'tool_call_update',toolCallId:'pending',data:{toolName:'input_tap',arguments:{x:30,y:40}}});window.receiveNative(s);
- const cards=doc.querySelectorAll('.tool-card');assert.deepEqual([...cards].slice(0,names.length).map(c=>c.querySelector('summary').textContent),names.map(([,label])=>label+' · 执行中'));assert.equal(doc.querySelector('.activity-label.shimmer').textContent,'点击当前屏幕');
- // Accessibility/keyboard/programmatic state changes use toggle too, without
- // depending on a mouse click. A bubbling child toggle must not notify Native
- // that the outer operation history was closed.
+ const cards=doc.querySelectorAll('.tool-card');assert.deepEqual([...cards].slice(0,names.length).map(c=>c.querySelector('summary').textContent),names.map(([,label])=>label+' · 待执行'));assert.equal(doc.querySelector('#chat .activity-label.shimmer').textContent,'点击当前屏幕 · 正在准备');
+ // Accessibility/keyboard/programmatic state changes use toggle too. A row
+ // toggle stays local and never changes Native run expansion settings.
  cards[0].open=true;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.ok(cards[0].querySelector('.structured'));
- cards[0].open=false;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.equal(cards[0].querySelector('.tool-body'),null);assert.ok(doc.querySelector('details.run').open);assert.equal(calls.filter(c=>c.op==='expanded').length,0);
+ cards[0].open=false;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.equal(cards[0].querySelector('.tool-body'),null);assert.equal(doc.querySelector('details.run'),null);assert.equal(calls.filter(c=>c.op==='expanded').length,0);
  window.receiveNative({...s,messages:[{...s.messages[0],text:'流式更新'}]});assert.equal(doc.querySelector('.tool-card').open,false);assert.equal(doc.querySelector('.tool-body'),null);
 });
 
@@ -343,7 +336,7 @@ test('unfinished legacy brightness histories never guess units while a current r
 test('normal pending input never flashes unknown-action warnings; explicit uncertain results and abnormal unfinished operations remain visible',()=>{
  const{window,doc}=setup();const s=state();s.messages=[{id:'m',runId:'r',sessionId:'a',role:'assistant',text:''}];s.runs=[{id:'r',sessionId:'a',status:'executing_tools',stopReason:'未校验动作',expanded:false}];
  s.events=[{runId:'r',sequence:1,type:'tool_intent',toolCallId:'c',outcome:'unknown',data:{toolId:'input.tap'}},{runId:'r',sequence:2,type:'tool_started',toolCallId:'c',outcome:'unknown',data:{toolId:'input.tap'}}];window.receiveNative(s);
- assert.equal(doc.querySelector('.attention'),null);assert.ok(doc.querySelector('.activity-label.shimmer'));
+ assert.equal(doc.querySelector('.attention'),null);assert.ok(doc.querySelector('#chat .activity-label.shimmer'));
  const done=structuredClone(s);done.runs[0].status='completed';done.events.push({runId:'r',sequence:3,type:'tool_result',toolCallId:'c',data:{toolId:'input.tap',outcome:'submitted'}});window.receiveNative(done);assert.equal(doc.querySelector('.attention'),null);
  const uncertain=structuredClone(s);uncertain.runs[0].stopReason='';uncertain.events.push({runId:'r',sequence:3,type:'tool_result',toolCallId:'c',data:{toolId:'input.tap',outcome:'unknown'}});window.receiveNative(uncertain);assert.match(doc.querySelector('.attention').textContent,/副作用未知/);
  s.runs[0].status='interrupted';s.runs[0].stopReason='';window.receiveNative(s);assert.ok([...doc.querySelectorAll('.attention')].some(n=>n.textContent.includes('检查目标状态')));
@@ -408,16 +401,16 @@ function animationFixture(reduce=false){
 }
 test('disclosure animation supports rapid reversal, retains content through close, resumes after streaming and releases lazy DOM only when settled',()=>{
  const{window,doc,animations}=animationFixture();const s=treeHistory(1);window.receiveNative(s);
- doc.querySelector('details.run > summary').click();assert.equal(doc.querySelector('details.run').dataset.disclosureAnimating,'true');animations.at(-1).onfinish();assert.equal(doc.querySelector('.structured'),null);
+ assert.equal(doc.querySelector('.structured'),null);
  doc.querySelector('.tool-card > summary').click();assert.ok(doc.querySelector('.tool-body'));animations.at(-1).onfinish();
  doc.querySelector('.tool-card > summary').click();const closing=animations.at(-1);assert.equal(doc.querySelector('.tool-card').dataset.expanded,'false');assert.ok(doc.querySelector('.tool-body'));assert.ok(doc.querySelector('.tool-card').open);
  doc.querySelector('.tool-card > summary').click();assert.equal(closing.cancelled,true);assert.equal(doc.querySelector('.tool-card').dataset.expanded,'true');
  const next=structuredClone(s);next.messages[0].text='新回复';next.events.push({runId:'large',sequence:3,type:'text_delta',data:{text:'新回复'}});window.receiveNative(next);assert.ok(doc.querySelector('.tool-card').open);assert.equal(doc.querySelector('.tool-card').dataset.disclosureAnimating,'true');assert.equal(animations.at(-1).frames[0].height,'65px');animations.at(-1).onfinish();
  doc.querySelector('.tool-card > summary').click();animations.at(-1).onfinish();assert.equal(doc.querySelector('.tool-body'),null);assert.equal(doc.querySelector('.tool-card').open,false);
- doc.querySelector('details.run > summary').click();assert.ok(doc.querySelector('.tool-card'));animations.at(-1).onfinish();assert.equal(doc.querySelector('.tool-card'),null);
+ assert.ok(doc.querySelector('.tool-card'));assert.equal(doc.querySelector('.tool-body'),null);
 });
 test('reduced-motion disclosure changes settle directly without animation or retaining collapsed content',()=>{
- const{window,doc,animations}=animationFixture(true);window.receiveNative(treeHistory(1));doc.querySelector('details.run > summary').click();doc.querySelector('.tool-card > summary').click();assert.ok(doc.querySelector('.structured'));doc.querySelector('.tool-card > summary').click();assert.equal(doc.querySelector('.tool-body'),null);doc.querySelector('details.run > summary').click();assert.equal(doc.querySelector('.tool-card'),null);assert.equal(animations.length,0);
+ const{window,doc,animations}=animationFixture(true);window.receiveNative(treeHistory(1));doc.querySelector('.tool-card > summary').click();assert.ok(doc.querySelector('.structured'));doc.querySelector('.tool-card > summary').click();assert.equal(doc.querySelector('.tool-body'),null);assert.ok(doc.querySelector('.tool-card'));assert.equal(animations.length,0);
 });
 test('topic text remains full length in DOM so available width, rather than a fixed character limit, controls ellipsis',()=>{
  const{window,doc}=setup();const s=state();const title='这是一条超过十个字符并且包含模型名称的完整会话标题';s.sessions[0].title=title;window.receiveNative(s);assert.equal(doc.querySelector('.session-select strong').textContent,title);assert.equal(doc.querySelector('.session-select').getAttribute('aria-label'),title);
@@ -433,4 +426,70 @@ test('bridge capability failures roll back only the matching pending mutation an
  // If Native eventually confirms that exact timed-out write, its newer revision
  // is authoritative and clears only the uncertainty attached to that mutation.
  const confirmed=structuredClone(s);confirmed.sessions[0].capabilityRevision=6;confirmed.sessions[0].capabilities.perception=false;confirmed.capabilityAcks=[{sessionId:'a',capability:'perception',clientMutationId:latest.clientMutationId,ok:true,enabled:false,capabilityRevision:6}];window.receiveNative(confirmed);assert.equal(doc.querySelector('input[aria-label="屏幕感知"]').checked,false);assert.equal(doc.querySelector('input[aria-label="屏幕感知"]').closest('.cap-row').querySelector('.cap-error'),null);
+});
+
+test('thoughts, tool operations and Markdown responses follow actual event order with only the current phase shining',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'generating'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'**正在继续**'}];
+ s.events=[
+  {type:'thinking_delta',data:{text:'先识别页面'}},
+  {type:'tool_call_update',toolCallId:'capture',data:{toolName:'perception_capture_screen',arguments:{}}},
+  {type:'tool_started',toolCallId:'capture',data:{toolId:'perception.capture_screen',arguments:{}}},
+  {type:'tool_result',toolCallId:'capture',data:{toolId:'perception.capture_screen',outcome:'observed'}},
+  {type:'thinking_delta',data:{text:'根据截图决定下一步'}},
+  {type:'tool_started',toolCallId:'tap',data:{toolId:'input.tap',arguments:{x:10,y:20}}},
+  {type:'tool_result',toolCallId:'tap',data:{toolId:'input.tap',outcome:'submitted'}},
+  {type:'text_delta',data:{text:'**正在继续**'}},
+  {type:'thinking_delta',data:{text:'检查新页面'}},
+ ].map((event,index)=>({...event,runId:'r',sequence:index+1}));window.receiveNative(s);
+ const items=[...doc.querySelector('.activity-timeline').children];assert.deepEqual(items.map(n=>n.dataset.activityKind),['thinking','tool','thinking','tool','text','thinking']);
+ assert.deepEqual([...doc.querySelectorAll('.thinking summary')].map(n=>n.textContent),['已思考','已思考','思考中']);
+ assert.equal(doc.querySelectorAll('#chat .shimmer').length,1);assert.equal(doc.querySelector('#chat .shimmer').closest('.thinking'),items[5]);
+ assert.equal(doc.querySelectorAll('#chat .markdown strong').length,1);assert.equal(doc.querySelector('#chat .markdown strong').textContent,'正在继续');
+ for(const thought of doc.querySelectorAll('.thinking'))disclose(window,thought);
+ assert.deepEqual([...doc.querySelectorAll('.thinking-body .text')].map(n=>n.textContent),['先识别页面','根据截图决定下一步','检查新页面']);
+ s.runs[0].status='completed';window.receiveNative(s);assert.equal(doc.querySelectorAll('#chat .shimmer').length,0);assert.deepEqual([...doc.querySelectorAll('.thinking summary')].map(n=>n.textContent),['已思考','已思考','已思考']);
+});
+
+test('a later Native tool argument update retains its original position before the following thought',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
+ s.events=[{runId:'r',sequence:1,lastSequence:5,type:'tool_call_update',toolCallId:'call',data:{toolName:'input_tap',arguments:{x:99,y:20}}},{runId:'r',sequence:2,type:'thinking_delta',presentationSegment:'thought-after-call',data:{text:'工具参数已生成'}}];
+ window.receiveNative(s);assert.deepEqual([...doc.querySelector('.activity-timeline').children].map(n=>n.dataset.activityKind),['tool','thinking']);
+ assert.equal(doc.querySelector('#chat .shimmer').closest('details'),doc.querySelector('.tool-card'));assert.equal(doc.querySelector('.thinking summary').textContent,'已思考');
+ disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-body').textContent,/99/);
+});
+
+test('explicit Native segment markers preserve separate collapsed thought history after an intermediate call was folded',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'generating'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
+ s.events=[{runId:'r',sequence:1,type:'thinking_delta',presentationSegment:'first',data:{text:'第一段'}},{runId:'r',sequence:3,type:'thinking_delta',presentationSegment:'second',data:{text:'第二段'}}];window.receiveNative(s);
+ assert.equal(doc.querySelectorAll('.thinking').length,2);assert.equal(doc.querySelector('.thinking-body'),null);assert.equal(doc.querySelectorAll('#chat .shimmer').length,1);
+ const old=doc.querySelector('.thinking');disclose(window,old);assert.equal(old.querySelector('.text').textContent,'第一段');
+ s.events[1].data.text+='更新';window.receiveNative(s);assert.equal(doc.querySelector('.thinking'),old);assert.ok(old.open);assert.equal(old.querySelector('.text').textContent,'第一段');
+});
+
+test('completed tool summaries remain visible and reused while a later thought streams, without eagerly building result trees',()=>{
+ const{window,doc}=setup();const s=treeHistory(20);s.runs[0].status='generating';s.events.push({runId:'large',sequence:41,type:'thinking_delta',data:{text:'继续思考'}});window.receiveNative(s);
+ const old=[...doc.querySelectorAll('.tool-card')];assert.equal(old.length,20);assert.ok(old.every(n=>n.dataset.activityState==='completed'));assert.equal(doc.querySelector('.structured'),null);
+ for(let i=0;i<5;i++){s.events.at(-1).data.text+='继续';window.receiveNative(s);assert.ok([...doc.querySelectorAll('.tool-card')].every((node,index)=>node===old[index]));}
+ assert.equal(doc.querySelector('.structured'),null);assert.equal(doc.querySelectorAll('#chat .shimmer').length,1);assert.ok(doc.querySelector('#chat .shimmer').closest('.thinking'));
+});
+
+test('a partially paged event window keeps the complete saved assistant answer rather than rendering only the last delta',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'completed'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'**完整开头**和最后一段'}];s.events=[{runId:'r',sequence:50,type:'text_delta',data:{text:'最后一段'}}];window.receiveNative(s);
+ assert.equal(doc.querySelector('.timeline-answer'),null);assert.equal(doc.querySelector('.markdown').textContent,'完整开头和最后一段\n');assert.equal(doc.querySelectorAll('.markdown').length,1);
+ const restored=structuredClone(s);restored.events.unshift({runId:'r',sequence:49,type:'text_delta',data:{text:'**完整开头**和'}});window.receiveNative(restored);assert.ok(doc.querySelector('.timeline-answer'));assert.equal(doc.querySelectorAll('.markdown').length,1);
+});
+
+test('Pi context compaction stays in chronological activity flow, shines while active, then becomes a successful expandable history row',()=>{
+ const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'generating'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
+ s.events=[{runId:'r',sequence:1,type:'thinking_delta',data:{text:'此前思考'}},{runId:'r',sequence:2,type:'diagnostic',data:{code:'CONTEXT_COMPACTION_STARTED',reason:'threshold'}}];window.receiveNative(s);
+ const row=doc.querySelector('.compaction');assert.ok(row);assert.deepEqual([...doc.querySelector('.activity-timeline').children].map(n=>n.dataset.activityKind),['thinking','compaction']);assert.equal(row.querySelector('summary').textContent,'正在整理较早的对话…');assert.equal(doc.querySelectorAll('#chat .shimmer').length,1);assert.equal(doc.querySelector('#chat .shimmer').closest('details'),row);assert.equal(doc.querySelector('.attention'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/CONTEXT_COMPACTION|threshold|运行提示/);
+ disclose(window,row);assert.match(row.textContent,/整理为摘要/);s.events.push({runId:'r',sequence:3,type:'diagnostic',data:{code:'CONTEXT_COMPACTION_FINISHED',reason:'threshold',compacted:true,aborted:false}},{runId:'r',sequence:4,type:'thinking_delta',data:{text:'继续当前任务'}});window.receiveNative(s);
+ assert.equal(doc.querySelectorAll('.compaction').length,1);const completed=doc.querySelector('.compaction');assert.equal(completed.querySelector('summary').textContent,'已整理较早的对话');assert.ok(completed.open);assert.equal(completed.dataset.activityState,'completed');assert.deepEqual([...doc.querySelector('.activity-timeline').children].map(n=>n.dataset.activityKind),['thinking','compaction','thinking']);assert.equal(doc.querySelectorAll('#chat .shimmer').length,1);assert.equal(doc.querySelector('#chat .shimmer').closest('details'),doc.querySelectorAll('.thinking:not(.compaction)')[1]);assert.doesNotMatch(doc.querySelector('#chat').textContent,/CONTEXT_COMPACTION|运行提示/);
+});
+
+test('failed or cancelled Pi compaction remains neutral, preserves context explanation and never claims successful compaction',()=>{
+ for(const outcome of [{compacted:false,aborted:false},{compacted:false,aborted:true},{compacted:true,aborted:true}]){
+  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'cancelled'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.events=[{runId:'r',sequence:1,type:'diagnostic',data:{code:'CONTEXT_COMPACTION_STARTED',reason:'overflow'}},{runId:'r',sequence:2,type:'diagnostic',data:{code:'CONTEXT_COMPACTION_FINISHED',reason:'overflow',...outcome}}];window.receiveNative(s);
+  const row=doc.querySelector('.compaction');assert.equal(row.querySelector('summary').textContent,'对话整理未完成');assert.equal(row.dataset.activityState,'incomplete');assert.equal(doc.querySelectorAll('#chat .shimmer').length,0);assert.equal(doc.querySelector('.attention'),null);disclose(window,row);assert.match(row.textContent,/原有对话仍然保留/);assert.doesNotMatch(doc.querySelector('#chat').textContent,/已整理较早|CONTEXT_COMPACTION|compacted|aborted|overflow|运行提示/);
+ }
 });

@@ -1,16 +1,19 @@
 import { Agent } from '@earendil-works/pi-agent-core';
+import type { PiHistoryState } from './pi-history.js';
 import type { DomainMessage } from './contracts.js';
 
-/** One Pi Agent per conversation. Each execution rebinds Native ports and authority;
- * the transcript survives failures and follow-ups, never crossing session IDs.
- * Native's persisted, budgeted projection remains authoritative after restart/revocation.
+/** Active Pi session holder. Each execution rebinds Native ports and authority;
+ * Pi's original entries survive failures and follow-ups, never crossing session IDs.
+ * Native stores those opaque entries; Pi owns their current context projection.
  */
 export class RuntimeSession {
   agent?: Agent;
+  /** Exact Pi snapshot; product hosts persist it and release the idle instance. */
+  piSnapshot?: PiHistoryState;
   constructor(readonly sessionId: string) {}
 }
 
-/** Close a recorded partial tool round as unknown; never replay pending calls on recovery. */
+/** Close the UI/audit projection of a partial round. Never used as Pi history. */
 export function closeInterruptedRound(messages: DomainMessage[]): DomainMessage[] {
   const result: DomainMessage[] = [];
   const pending = new Map<string, string>();

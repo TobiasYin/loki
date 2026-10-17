@@ -1,41 +1,36 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { RuntimeSession } from '../src/session.js';
 import { ThorRuntime } from '../src/runtime.js';
-import { projectHistory } from '../src/context.js';
+import { SessionManager } from '@thor-agent/pi-session-browser';
+import { piAssistant, nativePiState } from './pi-test-state.js';
 import { fixture, registry } from './fixtures.js';
 import type { DomainMessage } from '../src/contracts.js';
-import type { Model } from '@earendil-works/pi-ai';
 
-function model(f: ReturnType<typeof fixture>): Model<any> {
-  const p=f.snapshot.session.model;
-  return { id:p.modelId,name:p.label,api:p.protocol,provider:'openai',baseUrl:p.baseUrl,reasoning:true,input:['text','image'],contextWindow:p.contextWindow,maxTokens:p.maxOutput,cost:{input:0,output:0,cacheRead:0,cacheWrite:0} };
-}
-test('durable assistant replay preserves signed blocks, order, and original model identity',async()=>{
-  const f=fixture(); const content:NonNullable<Extract<DomainMessage,{kind:'assistant'}>['replay']>['content']=[
+test('official Pi records retain signed blocks, their exact order, usage and original model identity across disk serialization',()=>{
+  const f=fixture();const message=piAssistant(f,'');message.model='original-model';
+  message.usage={...message.usage,input:120,output:34,cacheRead:90,totalTokens:244};
+  message.content=[
     {type:'thinking',thinking:'synthetic reason',thinkingSignature:JSON.stringify({type:'reasoning',id:'rs_fixture',encrypted_content:'opaque-fixture'})},
     {type:'text',text:'first',textSignature:'msg_original_first'},
     {type:'text',text:'second',textSignature:'msg_original_second'},
     {type:'toolCall',id:'call_fixture|fc_fixture',name:'echo',arguments:{text:'exact'},namespace:'fixture'},
-  ];
-  const messages:DomainMessage[]=[{kind:'assistant',text:'firstsecond',calls:[{id:'call_fixture|fc_fixture',name:'echo',arguments:{text:'exact'}}],replay:{api:'openai-responses',provider:'openai',model:'original-model',baseUrl:f.snapshot.session.model.baseUrl,content}}];
-  const projected=await projectHistory(JSON.parse(JSON.stringify(messages)),model(f),f.ports.attachments,f.snapshot);
-  assert.equal(projected[0]!.role,'assistant');if(projected[0]!.role!=='assistant')return;
-  assert.deepEqual(projected[0]!.content,content);assert.equal(projected[0]!.model,'original-model');
-  projected[0]!.content.pop();assert.equal(messages[0]!.kind==='assistant' && messages[0]!.replay!.content.length,4);
-  const foreign=await projectHistory(messages,{...model(f),baseUrl:'https://another.invalid'},f.ports.attachments,f.snapshot);
-  assert.equal(foreign[0]!.role,'assistant');if(foreign[0]!.role!=='assistant')return;
-  assert.equal(foreign[0]!.content.some(c=>c.type==='thinking'),false);
-  assert.equal(JSON.stringify(foreign).includes('opaque-fixture'),false);
+  ];message.stopReason='toolUse';
+  const original=structuredClone(message);
+  const state=nativePiState(f,[message,{role:'toolResult',toolCallId:'call_fixture|fc_fixture',toolName:'echo',content:[{type:'text',text:'confirmed'}],isError:false,timestamp:2}]);
+  const restored=SessionManager.inMemory('/thor',undefined,JSON.parse(JSON.stringify([state.header,...state.entries])));
+  assert.deepEqual(restored.buildSessionProjection().messages[0],original);
+  assert.deepEqual(message,original,'serializing native records never rewrites the original signed content');
 });
-test('saveTurn stores exact SDK text signatures on disk and restores the same response items',async()=>{
-  const f=fixture('openai-responses',[{call:{name:'echo'}},{text:'signed-final'}]);
-  assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'synthetic task'}])).state,'completed');
+test('native Pi persistence stores exact SDK text signatures and restores the same provider response items',async()=>{
+  const f=fixture('openai-responses',[{call:{name:'echo'}},{text:'signed-final'}]);const logical=new RuntimeSession(f.lease.sessionId);
+  assert.equal((await new ThorRuntime(f.ports,registry(),{},logical).run(f.lease,[{type:'text',text:'synthetic task'}])).state,'completed');
   const turn=JSON.parse(JSON.stringify(f.turns.at(-1)!));
   const assistant=turn.messages.filter((m:DomainMessage)=>m.kind==='assistant');
   assert.ok(assistant.every((m:Extract<DomainMessage,{kind:'assistant'}>)=>m.replay?.api==='openai-responses'));
   assert.ok(assistant.at(-1).replay.content[0].textSignature,'original SDK message ID is retained');
   const second=fixture('openai-responses',[{text:'followup'}]);
-  assert.equal((await new ThorRuntime(second.ports,registry()).run(second.lease,[{type:'text',text:'continue'}],[turn])).state,'completed');
+  assert.equal((await new ThorRuntime(second.ports,registry()).run(second.lease,[{type:'text',text:'continue'}],JSON.parse(JSON.stringify(logical.piSnapshot)))).state,'completed');
   const last=assistant.at(-1).replay.content[0]; const signature=JSON.parse(last.textSignature);
   assert.ok(second.requests[0]!.body.input.some((item:any)=>item.id===signature.id && item.content?.[0]?.text==='signed-final'));
   assert.equal(second.requests[0]!.body.prompt_cache_key,f.lease.sessionId,'cache affinity is stable across Run reconstruction');
@@ -61,13 +56,14 @@ test('real Responses SSE reasoning blocks survive disk replay without moving or 
     }
     return new Response(output.map(e=>`event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`).join(''),{headers:{'content-type':'text/event-stream'}});
   };
-  assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'test reasoning'}])).state,'completed');
+  const logical=new RuntimeSession('session-test');
+  assert.equal((await new ThorRuntime(f.ports,registry(),{},logical).run(f.lease,[{type:'text',text:'test reasoning'}])).state,'completed');
   const turn=JSON.parse(JSON.stringify(f.turns.at(-1)!));
   const assistant=turn.messages.find((m:DomainMessage)=>m.kind==='assistant');
   assert.equal(assistant.replay.content[0].type,'thinking');
   assert.equal(JSON.parse(assistant.replay.content[0].thinkingSignature).id,'rs_durable');
   const next=fixture('openai-responses',[{text:'continued'}]);
-  assert.equal((await new ThorRuntime(next.ports,registry()).run(next.lease,[{type:'text',text:'next'}],[turn])).state,'completed');
+  assert.equal((await new ThorRuntime(next.ports,registry()).run(next.lease,[{type:'text',text:'next'}],structuredClone(logical.piSnapshot))).state,'completed');
   const previous=f.requests.at(-1)!.body.input;
   assert.deepEqual(next.requests[0]!.body.input.slice(0,previous.length),previous);
 });

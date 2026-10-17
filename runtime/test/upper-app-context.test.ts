@@ -32,15 +32,17 @@ for (const protocol of ['openai-responses', 'openai-completions', 'anthropic-mes
   });
 }
 
-test('a reused Pi session gets fresh app metadata on follow-up and does not carry a previous app into unknown observations', async () => {
+test('a restored logical Pi session gets fresh app metadata on follow-up and does not carry a previous app into unknown observations', async () => {
   const session = new RuntimeSession('session-test');
   const first = fixture(); first.snapshot.l0.upperApp = app('upper.old');
   assert.equal((await new ThorRuntime(first.ports, registry(), {}, session).run(first.lease, [{ type: 'text', text: 'first' }])).state, 'completed');
   const previousAgent = session.agent;
+  const previousEntries = structuredClone(session.piSnapshot!.entries);
   const next = fixture(); next.snapshot.l0.upperApp = app('upper.stale.must.not.leak');
   next.snapshot.l0.upperAppObservation = { status: 'ambiguous', displayId: 0 };
-  assert.equal((await new ThorRuntime(next.ports, registry(), {}, session).run(next.lease, [{ type: 'text', text: 'follow up' }], [first.turns.at(-1)!])).state, 'completed');
-  assert.equal(session.agent, previousAgent);
+  assert.equal((await new ThorRuntime(next.ports, registry(), {}, session).run(next.lease, [{ type: 'text', text: 'follow up' }])).state, 'completed');
+  assert.notEqual(session.agent, previousAgent);
+  assert.deepEqual(session.piSnapshot!.entries.slice(0,previousEntries.length),previousEntries);
   assert.equal(l0(next.requests[0]!.body).upperApp, undefined);
   assert.deepEqual(l0(next.requests[0]!.body).upperAppObservation, { status: 'ambiguous', displayId: 0 });
   assert.ok(JSON.stringify(next.requests).includes('upper.old'), 'the old app remains a historical observation, not the current app');
@@ -63,14 +65,14 @@ for (const mode of ['disabled', 'configuration-probe'] as const) {
 }
 
 test('an observation-only L0 taints derived output for future perception revocation without any tool use', async () => {
-  const first = fixture('openai-responses', [{ text: 'PRIVATE_DERIVED_OBSERVATION' }]);
+  const first = fixture('openai-responses', [{ text: 'PRIVATE_DERIVED_OBSERVATION' }]);const logical=new RuntimeSession(first.lease.sessionId);
   delete first.snapshot.l0.device; delete first.snapshot.l0.upperApp;
   first.snapshot.l0.upperAppObservation = { status: 'unknown', displayId: 0 };
-  assert.equal((await new ThorRuntime(first.ports, registry()).run(first.lease, [{ type: 'text', text: 'USER_AUTHORED_REQUEST' }])).state, 'completed');
+  assert.equal((await new ThorRuntime(first.ports, registry(),{},logical).run(first.lease, [{ type: 'text', text: 'USER_AUTHORED_REQUEST' }])).state, 'completed');
   const turn = first.turns.at(-1)!;
   assert.ok(turn.source.includes('screen_perception'));
   const next = fixture(); next.snapshot.session.enabled.screen_perception = false;
-  assert.equal((await new ThorRuntime(next.ports, registry()).run(next.lease, [{ type: 'text', text: 'next' }], [turn])).state, 'completed');
+  assert.equal((await new ThorRuntime(next.ports, registry()).run(next.lease, [{ type: 'text', text: 'next' }],structuredClone(logical.piSnapshot))).state, 'completed');
   const body = JSON.stringify(next.requests);
   assert.ok(body.includes('USER_AUTHORED_REQUEST')); assert.ok(!body.includes('PRIVATE_DERIVED_OBSERVATION'));
 });

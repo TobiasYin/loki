@@ -16,21 +16,24 @@ function configured(provider: 'opencode-go' | 'deepseek', text: string, sessionI
   return f;
 }
 
-test('saved Go → DeepSeek → Go configurations reuse the Pi chat with current credentials and retained domain history', async () => {
+test('saved Go → DeepSeek → Go configurations reuse the Pi chat with current credentials and retained native Pi entries', async () => {
   const session = new RuntimeSession('session-test');
   const first = configured('opencode-go', 'remembered-go-answer');
   assert.equal((await new ThorRuntime(first.ports, registry(), {}, session).run(first.lease, [{ type: 'text', text: 'remember original task' }])).state, 'completed');
   const agent = session.agent!;
-  const assistant = agent.state.messages.find(m => m.role === 'assistant');
+  const assistantEntry = session.piSnapshot!.entries.find(entry => entry.type === 'message' && entry.message.role === 'assistant');
+  const assistant = assistantEntry?.type === 'message' ? assistantEntry.message : undefined;
   assert.equal(assistant?.role, 'assistant');
   if (assistant?.role === 'assistant') {
-    assistant.content.push({ type: 'thinking', thinking: '', thinkingSignature: 'opaque-old-provider-signature', redacted: true });
+    assistant.content.push({ type: 'thinking', thinking: '', thinkingSignature: JSON.stringify({type:'reasoning',id:'rs_provider_fixture',encrypted_content:'opaque-old-provider-signature'}), redacted: true });
   }
+  const originalEntries = structuredClone(session.piSnapshot!.entries);
   const second = configured('deepseek', 'remembered-deepseek-answer');
-  assert.equal((await new ThorRuntime(second.ports, registry(), {}, session).run(second.lease, [{ type: 'text', text: 'continue with DeepSeek' }], [first.turns.at(-1)!])).state, 'completed');
-  assert.equal(session.agent, agent);
-  assert.equal(agent.state.model?.provider, 'deepseek');
-  assert.equal(agent.state.model?.api, 'openai-completions');
+  assert.equal((await new ThorRuntime(second.ports, registry(), {}, session).run(second.lease, [{ type: 'text', text: 'continue with DeepSeek' }])).state, 'completed');
+  assert.notEqual(session.agent, agent, 'Idle Agent instances can be released while the same logical Pi session resumes');
+  assert.equal(session.agent!.state.model?.provider, 'deepseek');
+  assert.equal(session.agent!.state.model?.api, 'openai-completions');
+  assert.deepEqual(session.piSnapshot!.entries.slice(0,originalEntries.length),originalEntries,'Provider adaptation must not rewrite raw Pi entries or usage');
   assert.equal(second.requests[0]!.url, 'https://api.deepseek.com/chat/completions');
   assert.equal(second.requests[0]!.envelope.credentialRef, 'deepseek-native-key');
   assert.equal(second.requests[0]!.envelope.profileRef, 'deepseek-saved-config:openai-completions');
@@ -38,14 +41,16 @@ test('saved Go → DeepSeek → Go configurations reuse the Pi chat with current
   for (const text of ['remember original task', 'remembered-go-answer', 'continue with DeepSeek']) assert.ok(deepseekBody.includes(text));
   assert.ok(!deepseekBody.includes('opaque-old-provider-signature'));
   assert.ok(second.events.some(e => e.type === 'context' && e.data.piSessionReused === true));
+  const deepseekEntries = structuredClone(session.piSnapshot!.entries);
   const third = configured('opencode-go', 'continued after switching back');
-  assert.equal((await new ThorRuntime(third.ports, registry(), {}, session).run(third.lease, [{ type: 'text', text: 'continue with Go again' }], [first.turns.at(-1)!, second.turns.at(-1)!])).state, 'completed');
-  assert.equal(session.agent, agent);
-  assert.equal(agent.state.model?.provider, 'opencode-go');
+  assert.equal((await new ThorRuntime(third.ports, registry(), {}, session).run(third.lease, [{ type: 'text', text: 'continue with Go again' }])).state, 'completed');
+  assert.notEqual(session.agent, agent);
+  assert.equal(session.agent!.state.model?.provider, 'opencode-go');
+  assert.deepEqual(session.piSnapshot!.entries.slice(0,deepseekEntries.length),deepseekEntries);
   assert.equal(third.requests[0]!.envelope.credentialRef, 'opencode-go-native-key');
   const goBody = JSON.stringify(third.requests[0]!.body);
   for (const text of ['remember original task', 'remembered-go-answer', 'remembered-deepseek-answer', 'continue with Go again']) assert.ok(goBody.includes(text));
-  assert.ok(!goBody.includes('opaque-old-provider-signature'));
+  assert.ok(goBody.includes('opaque-old-provider-signature'),'Returning to the original provider restores its compatible opaque reasoning item');
   assert.equal(first.executions.length + second.executions.length + third.executions.length, 0);
   assert.equal(first.contexts[0]!.modelProfileRevision, second.contexts[0]!.modelProfileRevision);
   assert.equal(first.contexts[0]!.capabilityEpoch, second.contexts[0]!.capabilityEpoch);

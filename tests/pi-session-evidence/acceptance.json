@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-17",
+  "runtimeTestsPassed": 350,
+  "webTestsPassed": 89,
+  "androidUnitTestsPassed": 214,
+  "androidBuildAndLint": "passed",
+  "integrationTypecheck": "passed",
+  "devices": {
+    "physical": {
+      "storageTestsPassed": 31,
+      "realModelTestsPassed": 2,
+      "emptyConversationStateVerified": {
+        "sessions": 1,
+        "runs": 0,
+        "messages": 0,
+        "events": 0,
+        "attachments": 0,
+        "pi_sessions": 0,
+        "pi_session_entries": 0
+      },
+      "originalConfigurationPreserved": true
+    },
+    "emulator": {
+      "storageTestsPassed": 31,
+      "realModelTestsPassed": 2,
+      "emptyConversationStateVerified": {
+        "sessions": 1,
+        "runs": 0,
+        "messages": 0,
+        "events": 0,
+        "attachments": 0,
+        "pi_sessions": 0,
+        "pi_session_entries": 0
+      },
+      "originalConfigurationPreserved": true
+    }
+  },
+  "apkSha256": "e07541b0c9f677d3cee6aa4df91385124b42b8e1a0f6687ca861feb3e00119ec"
+}

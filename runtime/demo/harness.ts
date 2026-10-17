@@ -1,4 +1,5 @@
-import { ThorRuntime, type HistoryTurn } from '../src/index.js';
+import { ThorRuntime, RuntimeSession } from '../src/index.js';
+import { nativePiState, piAssistant } from '../test/pi-test-state.js';
 import { fixture, registry } from '../test/fixtures.js';
 
 declare global { interface Window { harnessResult?: { ok: boolean; results: unknown[]; error?: string } } }
@@ -31,11 +32,25 @@ try {
   const failure = fixture('openai-responses', [{ status: 500 }]);
   if ((await new ThorRuntime(failure.ports, registry()).run(failure.lease, [{ type: 'text', text: 'HTTP failure' }])).state !== 'failed') throw new Error('Failure handling failed');
   results.push({ scenario: 'HTTP 500', state: 'failed', requests: failure.requests.length });
-  const compressed = fixture(); compressed.snapshot.session.model.contextWindow = 8000;
-  const history: HistoryTurn[] = Array.from({ length: 20 }, (_, i) => ({ turnId: `h${i}`, runId: `r${i}`, source: [], observedAt: 1, complete: true,
-    messages: [{ kind: 'user', content: [{ type: 'text', text: `old goal ${i}` }] }, { kind: 'assistant', text: 'x'.repeat(1000), calls: [] }] }));
-  if ((await new ThorRuntime(compressed.ports, registry()).run(compressed.lease, [{ type: 'text', text: 'Current goal' }], history)).state !== 'completed' || !compressed.contexts[0]?.droppedTurnIds.length) throw new Error('Compression failed');
-  results.push({ scenario: 'bounded compression', droppedTurns: compressed.contexts[0]!.droppedTurnIds.length, estimatedTokens: compressed.contexts[0]!.estimatedTokens });
+  const compressed=fixture('openai-responses',[
+    {text:'SUMMARY: Earlier work is complete; preserve the destination and current progress.'},
+    {text:'Current goal completed from the saved progress.'},
+  ]);
+  Object.assign(compressed.snapshot.session.model,{contextWindow:16000,maxOutput:1024,
+    piSettings:{compaction:{enabled:true,reserveTokens:500,keepRecentTokens:800},retry:{enabled:false}}});
+  const recent=piAssistant(compressed,'Recent confirmed checkpoint.');
+  recent.usage={...recent.usage,input:15600,output:10,totalTokens:15610};
+  const piState=nativePiState(compressed,[
+    {role:'user',content:'Old goal '+ 'older context '.repeat(1200),timestamp:1},
+    piAssistant(compressed,'Earlier stage complete.'),
+    {role:'user',content:'Recent task '+ 'recent context '.repeat(300),timestamp:1},recent,
+  ]);
+  const logical=new RuntimeSession(compressed.lease.sessionId);
+  const compressedRun=await new ThorRuntime(compressed.ports,registry(),{},logical).run(compressed.lease,[{type:'text',text:'Current goal'}],piState);
+  if(compressedRun.state!=='completed')throw new Error(`Pi compaction continuation failed: ${compressedRun.error}; HTTP=${compressed.requests.length}; estimate=${compressed.contexts.at(-1)?.estimatedTokens}; checkpoints=${logical.piSnapshot?.entries.filter(entry=>entry.type==='compaction').length}`);
+  const compaction=logical.piSnapshot!.entries.find(entry=>entry.type==='compaction');
+  if(compaction?.type!=='compaction' || compressed.requests.length!==2 || !JSON.stringify(compressed.requests[1]!.body).includes('SUMMARY:'))throw new Error('Pi compaction checkpoint failed');
+  results.push({scenario:'official Pi automatic compaction',requests:compressed.requests.length,tokensBefore:compaction.tokensBefore,summarySaved:true});
   window.harnessResult = { ok: true, results }; output.textContent = JSON.stringify(window.harnessResult, null, 2);
 } catch (error) {
   window.harnessResult = { ok: false, results, error: error instanceof Error ? error.message : String(error) };

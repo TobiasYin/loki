@@ -19,6 +19,8 @@ export interface ModelProfile {
   thinkingEffort?: 'off'|'minimal'|'low'|'medium'|'high'|'xhigh'|'max';
   reasoning?: boolean; thinkingLevelMap?: Record<string,string|null>; compat?: Record<string,unknown>;
   customHeaders?: Record<string, string>;
+  /** Optional official Pi session settings (tests/host configuration), never a second context policy. */
+  piSettings?: Record<string, unknown>;
   lastProbe: { revision: number; textStream: boolean; imageInput: boolean; toolCalling: boolean; imageToolRoundTrip: boolean };
 }
 export interface SessionConfig { sessionId: string; title: string; model: ModelProfile; enabled: Capabilities; capabilityEpoch: number }
@@ -104,7 +106,7 @@ export interface HistoryTurn {
 export interface ContextSnapshot {
   snapshotId: string; modelProfileRevision: number; capabilityEpoch: number; registryVersion: string;
   l0SnapshotId: string; includedMessageIds: string[]; attachmentRefs: string[]; effectiveTools: string[];
-  estimatedTokens: number; estimated: true; compressionVersion: 'deterministic-v1';
+  estimatedTokens: number; estimated: true; compressionVersion: 'deterministic-v1' | 'pi-session-v1';
   droppedTurnIds: string[]; contentHash: string;
 }
 export interface PersistencePort {
@@ -114,6 +116,8 @@ export interface PersistencePort {
   saveRun(run: AgentRun): Promise<void>;
   saveContext(snapshot: ContextSnapshot): Promise<void>;
   saveTurn(sessionId: string, turn: HistoryTurn): Promise<void>;
+  /** Native stores official Pi entries without interpreting the conversation. */
+  savePiSession?(sessionId: string, value: {header: unknown;entries: unknown[];leafId: string|null;source: Capability[];inputRunId?:string;inputRunIds?:Record<string,string>;entrySources?:Record<string,Capability[]>}): Promise<void>;
 }
 export interface RuntimePorts { authority: AuthorityPort; tools: ToolPort; network: FetchPort; persistence: PersistencePort; attachments: AttachmentPort }
 export interface RuntimeLimits { maxRequests: number; runTimeoutMs: number; maxRequestBytes: number; maxResponseBytes: number; maxHistoryTurns: number; imageTokenEstimate: number }

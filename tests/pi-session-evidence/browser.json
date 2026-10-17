@@ -1,0 +1,13 @@
+{
+  "upstream": "@earendil-works/pi-coding-agent@1.2.0",
+  "runtime": "Chrome browser, no Node process",
+  "requests": 2,
+  "summaryStored": true,
+  "tokensBefore": 7610,
+  "estimatedTokensAfter": 1141,
+  "inputImagesPreserved": 1,
+  "pageErrors": [],
+  "externalImports": [],
+  "bundleBytes": 2332924,
+  "result": "passed"
+}

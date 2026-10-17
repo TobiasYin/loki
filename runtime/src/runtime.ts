@@ -1,10 +1,10 @@
-import { Agent, type AgentEvent, type AgentTool, type AgentOptions } from '@earendil-works/pi-agent-core';
-import type { Message, Model } from '@earendil-works/pi-ai';
+import { Agent, type AgentEvent, type AgentTool, type AgentOptions, type AgentMessage } from '@earendil-works/pi-agent-core';
+import type { Message, Model, AssistantMessage } from '@earendil-works/pi-ai';
 import { streamSimple as responses } from '@earendil-works/pi-ai/api/openai-responses';
 import { streamSimple as completions } from '@earendil-works/pi-ai/api/openai-completions';
 import { streamSimple as anthropic } from '@earendil-works/pi-ai/api/anthropic-messages';
-import { hasPerceptionContext, compileContext, project, projectHistory, resolveContent } from './context.js';
-import { DEFAULT_LIMITS, isErrorCode, RuntimeError, type AgentRun, type AuthoritySnapshot, type Content, type DomainMessage, type EffectRecord, type HistoryTurn, type ModelProfile, type RunEvent, type RunLease, type RunState, type RuntimeLimits, type RuntimePorts, type ToolDescriptor, type ToolEnvelope, type ToolOutcome, type ErrorCode, type Capability } from './contracts.js';
+import { hasPerceptionContext, buildProductPrompt, buildRuntimeObservation, resolveContent, hash } from './context.js';
+import { DEFAULT_LIMITS, isErrorCode, RuntimeError, type AgentRun, type AuthoritySnapshot, type Content, type DomainMessage, type EffectRecord, type ModelProfile, type RunEvent, type RunLease, type RunState, type RuntimeLimits, type RuntimePorts, type ToolDescriptor, type ToolEnvelope, type ToolOutcome, type ErrorCode, type Capability } from './contracts.js';
 import { ToolRegistry } from './registry.js';
 import { ProtocolAudit } from './protocol-audit.js';
 import { RuntimeSession, closeInterruptedRound } from './session.js';
@@ -14,6 +14,9 @@ import { checkProfile } from './profile-validation.js';
 import { providerStopBoundary } from './provider-stop.js';
 import { unavailableToolReason } from './tool-availability.js';
 import { ModelRoundDiagnostics } from './model-round-diagnostics.js';
+import { createPiSession, estimateContextTokens, estimateProjectedContextTokens, type PiSessionHandle, type AgentSessionEvent } from '@thor-agent/pi-session-browser';
+import { AssistantMessageEventStream } from '@earendil-works/pi-ai/utils/event-stream';
+import { preparePiHistory, type PiHistoryState, type PendingPiInput } from './pi-history.js';
 type WaitPhase = 'agent_prompt' | 'provider_next' | 'provider_result' | 'request_body' | 'authority' | 'persist' | 'network_headers' | 'network_read';
 
 const terminal = new Set<RunState>(['completed', 'failed', 'cancelled', 'interrupted']);
@@ -27,15 +30,15 @@ interface Active {
   run: AgentRun; lease: RunLease; profile: ModelProfile; agent?: Agent; controller: AbortController;
   sequence: number; startMono: number; requests: number; requestSnapshot?: AuthoritySnapshot;
   effective: ToolDescriptor[]; seenCalls: Set<string>; source: Set<Capability>; stopReason?: ErrorCode;
-  stream?: StreamEvents; persistenceFailed: boolean; requestMessages: Message[]; resultRefs: Map<string, Content[]>;
+  stream?: StreamEvents; persistenceFailed: boolean; resultRefs: Map<string, Content[]>;
   failure?: ErrorCode;
   observationRequired: boolean;
   waits: Map<number, { phase: WaitPhase; since: number }>; waitSequence: number; lastProgress: number;
   effects: EffectRecord[];
-  turnId: string; streamMessage: number; messageOffset: number; input: Content[];
+  turnId: string; streamMessage: number; input: Content[];
   modelDiagnostics?: ModelRoundDiagnostics;
-  requestMaxOutput?: number;
-  contextUpdates: NonNullable<HistoryTurn['contextUpdates']>;
+  pi?: PiSessionHandle; persistedEntries: Set<string>; currentMessages: AgentMessage[]; lastObservation?: string;
+  provenance: Record<string, Capability[]>; userSources: Capability[]; inputRunIds: Record<string,string>; compacting: boolean;
 }
 const currentScreenReads = new Set(['perception.app_info', 'perception.window_info', 'perception.ui_tree', 'perception.capture_screen']);
 const screenResources = new Set(['selected-screen/snapshot', 'upper-display/snapshot']);
@@ -97,14 +100,14 @@ export class ThorRuntime {
   }
   stop(): void {
     if (this.pending) { this.pending.reason = 'CANCELLED'; this.pending.controller.abort(); }
-    if (this.active && !terminal.has(this.active.run.state)) { this.active.stopReason = 'CANCELLED'; this.active.controller.abort(); this.active.agent?.abort(); }
+    if (this.active && !terminal.has(this.active.run.state)) { this.active.stopReason = 'CANCELLED'; this.active.controller.abort(); this.active.agent?.abort(); void this.active.pi?.session.abort(); }
   }
   /** Call immediately when the Native capability mirror changes, even for OFF -> ON. */
   authorizationChanged(sessionId: string, capabilityEpoch: number): void {
     if (this.pending && this.pending.sessionId === sessionId && capabilityEpoch !== this.pending.epoch) { this.pending.reason = 'STALE_AUTHORIZATION'; this.pending.controller.abort(); }
     const a = this.active;
     if (a && a.run.sessionId === sessionId && capabilityEpoch !== a.lease.capabilityEpoch && !terminal.has(a.run.state)) {
-      a.stopReason = 'STALE_AUTHORIZATION'; a.controller.abort(); a.agent?.abort();
+      a.stopReason = 'STALE_AUTHORIZATION'; a.controller.abort(); a.agent?.abort(); void a.pi?.session.abort();
     }
   }
   /** Restore only state, never execute or continue an interrupted Run. */
@@ -317,10 +320,28 @@ export class ThorRuntime {
       } catch (e) { cleanup(); controller.abort(); throw e; }
     };
   }
+  private async savePi(a:Active):Promise<void> {
+    if(!a.pi || a.persistenceFailed)return;
+    const all=a.pi.snapshot();
+    const header=all.entries.find(entry=>entry.type==='session')!;
+    const entries=all.entries.filter(entry=>entry.type!=='session');
+    const appended=entries.filter(entry=>!a.persistedEntries.has(entry.id));
+    const entrySources:Record<string,Capability[]>={},inputRunIds:Record<string,string>={};
+    for(const entry of appended) {
+      const source=a.provenance[entry.id]??(entry.type==='message' && entry.message.role==='user'?[...a.userSources]:[...a.source]);
+      entrySources[entry.id]=source;
+      if(a.inputRunIds[entry.id])inputRunIds[entry.id]=a.inputRunIds[entry.id]!;
+    }
+    // A migration/branch may append many records at once. Commit its entire
+    // suffix, final leaf and input acknowledgements atomically, never a prefix.
+    if(this.ports.persistence.savePiSession)await this.persist(a,()=>this.ports.persistence.savePiSession!(a.run.sessionId,{header,entries:appended,leafId:all.leafId,source:[...a.source],entrySources,inputRunIds}));
+    for(const entry of appended){a.persistedEntries.add(entry.id);a.provenance[entry.id]=entrySources[entry.id]!;}
+    if(this.session)this.session.piSnapshot={header,entries,leafId:all.leafId,provenance:structuredClone(a.provenance)};
+  }
   private async saveTurn(a:Active,complete:boolean):Promise<void> {
     await a.stream?.flush();
     const messages:DomainMessage[]=[];
-    for(const m of a.agent?.state.messages.filter(m=>m.role!=='system').slice(a.messageOffset)??[]) {
+    for(const m of a.currentMessages) {
       if(m.role==='user')messages.push({kind:'user',content:a.input});
       else if(m.role==='assistant') {
         // Partial JSON is diagnostic data, never an executable historical tool call.
@@ -333,7 +354,7 @@ export class ThorRuntime {
         content:a.resultRefs.get(m.toolCallId)??m.content.filter(c=>c.type==='text').map(c=>({type:'text',text:c.text})),isError:m.isError});
     }
     if(!messages.some(m=>m.kind==='user'))messages.unshift({kind:'user',content:a.input});
-    await this.persist(a,()=>this.ports.persistence.saveTurn(a.run.sessionId,{turnId:a.turnId,runId:a.run.runId,messages:closeInterruptedRound(messages),source:[...a.source],observedAt:Date.now(),complete,effects:a.effects,contextUpdates:a.contextUpdates}));
+    await this.persist(a,()=>this.ports.persistence.saveTurn(a.run.sessionId,{turnId:a.turnId,runId:a.run.runId,messages:closeInterruptedRound(messages),source:[...a.source],observedAt:Date.now(),complete,effects:a.effects}));
   }
   private async onPi(a: Active, e: AgentEvent): Promise<void> {
     if (terminal.has(a.run.state)) return;
@@ -349,11 +370,25 @@ export class ThorRuntime {
       }
     }
     if(e.type==='message_end' && !a.persistenceFailed) {
-      if(e.message.role==='assistant' && a.modelDiagnostics) {
-        a.modelDiagnostics.finish(e.message.stopReason);
-        await this.event(a,'model_round',a.modelDiagnostics.snapshot());
+      a.currentMessages.push(structuredClone(e.message));
+      // The upstream Session listener appends this message before our listener.
+      // Only a real current prompt acknowledges the current input; restored
+      // user entries have their original Run IDs supplied by preparePiHistory.
+      if(e.message.role==='user' && a.pi) {
+        const entry=a.pi.manager.getEntries().slice().reverse().find(entry=>entry.type==='message' && entry.message.role==='user');
+        if(entry)a.inputRunIds[entry.id]=a.run.runId;
       }
+      await this.savePi(a);
       await this.saveTurn(a,false);
+    }
+    if(e.type==='tool_execution_end' && !a.controller.signal.aborted && a.pi) {
+      const snapshot=await this.authority(a,true);
+      const observation=buildRuntimeObservation(snapshot);
+      if(observation!==a.lastObservation) {
+        a.lastObservation=observation;
+        if(hasPerceptionContext(snapshot))a.source.add('screen_perception');
+        await a.pi.session.sendCustomMessage({customType:'thor-runtime-context',content:observation,display:false},{triggerTurn:false});
+      }
     }
     if (e.type === 'tool_execution_start' && !a.controller.signal.aborted) await this.state(a, 'executing_tools');
     // A tool-local timeout/rejection can finish while its Native approval RPC is
@@ -361,10 +396,10 @@ export class ThorRuntime {
     if(e.type==='tool_execution_end' && a.run.state==='awaiting_user' && !a.controller.signal.aborted)await this.state(a,'executing_tools');
     if (e.type === 'tool_execution_end' && e.isError) await this.event(a, 'diagnostic', { code: e.result.details?.recovery?.kind === 'observe_again' ? 'TARGET_CHANGED' : 'TOOL_FAILED', toolName: e.toolName }, e.toolCallId);
   }
-  async run(lease: RunLease, input: Content[], history: HistoryTurn[] = []): Promise<AgentRun> {
+  async run(lease: RunLease, input: Content[], piState?: PiHistoryState, pendingInputs: PendingPiInput[] = []): Promise<AgentRun> {
     assertRuntimeFeatures();
     if (this.reserved) fail('BACKEND_UNAVAILABLE');
-    lease = structuredClone(lease); input = structuredClone(input); history = structuredClone(history);
+    lease = structuredClone(lease); input = structuredClone(input);
     for (const [id, expiry] of this.consumedRuns) if (expiry <= Date.now()) this.consumedRuns.delete(id);
     if (lease.expiresAt <= Date.now()) fail('STALE_AUTHORIZATION');
     if (this.consumedRuns.has(lease.runId)) fail('STALE_AUTHORIZATION');
@@ -373,78 +408,121 @@ export class ThorRuntime {
     let a: Active | undefined; let timer: ReturnType<typeof setTimeout> | undefined;
     const pending = { sessionId: lease.sessionId, epoch: lease.capabilityEpoch, controller: new AbortController(), reason: undefined as ErrorCode | undefined };
     this.pending = pending;
-    if(this.limits.runTimeoutMs)timer = setTimeout(() => { pending.reason = 'TIMEOUT'; if (a) a.stopReason = 'TIMEOUT'; pending.controller.abort(); a?.agent?.abort(); }, Math.max(0, Math.min(this.limits.runTimeoutMs, lease.expiresAt - Date.now())));
+    if(this.limits.runTimeoutMs)timer = setTimeout(() => { pending.reason = 'TIMEOUT'; if (a) a.stopReason = 'TIMEOUT'; pending.controller.abort(); a?.agent?.abort(); void a?.pi?.session.abort(); }, Math.max(0, Math.min(this.limits.runTimeoutMs, lease.expiresAt - Date.now())));
     try {
       const initial = await abortable(this.ports.authority.read(lease.sessionId, lease.runId), pending.controller.signal);
       const profile = structuredClone(initial.session.model); checkProfile(profile);
       a = { run: { sessionId: lease.sessionId, runId: lease.runId, state: 'queued', modelProfileRevision: profile.revision, capabilityEpoch: lease.capabilityEpoch, startedAt: Date.now() },
-        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, requestMessages: [], resultRefs: new Map(), effects: [], observationRequired:false, waits:new Map(),waitSequence:0,lastProgress:performance.now(), streamMessage: 0, messageOffset:0, input, contextUpdates: [], turnId: crypto.randomUUID() };
+        lease: structuredClone(lease), profile, controller: pending.controller, sequence: 0, startMono: performance.now(), requests: 0, effective: [], seenCalls: new Set(), source: new Set(), persistenceFailed: false, resultRefs: new Map(), effects: [], observationRequired:false, waits:new Map(),waitSequence:0,lastProgress:performance.now(), streamMessage: 0, input, persistedEntries:new Set(), currentMessages:[], provenance:{}, userSources:[], inputRunIds:{}, compacting:false, turnId: crypto.randomUUID() };
       this.active = a; const active = a; const model = toModel(profile);
       active.stream=new StreamEvents(f=>this.writeEvent(active,f.type,f.data,f.toolCallId));
       if(hasPerceptionContext(initial))a.source.add('screen_perception');
       await this.event(a, 'state', { state: 'queued' }, undefined, a.run); await this.state(a, 'preparing');
       await this.persist(a, () => this.ports.persistence.saveTurn(lease.sessionId, { turnId: active.turnId, runId: lease.runId, messages: [{ kind: 'user', content: input }], source: [...active.source], observedAt: Date.now(), complete: false }));
       await this.authority(a);
-      const user = await project([{ kind: 'user', content: input }], model, this.ports.attachments, initial);
-      let audit = new ProtocolAudit();
-      if(this.session && this.session.sessionId!==lease.sessionId)fail('STALE_AUTHORIZATION');
-      const previous=this.session?.agent;
-      const restored=previous?[]:await projectHistory(history.slice(-this.limits.maxHistoryTurns).flatMap(t=>t.source.every(c=>initial.session.enabled[c])?closeInterruptedRound(t.messages):t.messages.filter(m=>m.kind==='user')),model,this.ports.attachments,initial);
-      active.messageOffset=previous?.state.messages.filter(m=>m.role!=='system').length??restored.length;
-      const agentOptions:AgentOptions={initialState:{model,thinkingLevel:profile.thinkingEffort??'off',messages:restored},sessionId:lease.sessionId,toolExecution:'sequential',transport:'sse',
-        // Pi rejects truncated tool calls but normally asks the model to retry them.
-        // End here so a token limit cannot silently replay a side-effecting round.
-        finishTurn: async ({message}) => message.stopReason==='length' ? {action:'end'} : undefined,
-        beforeToolCall: async ({ toolCall }) => audit.permits(toolCall.id, toolCall.arguments) ? undefined : { block: true, reason: 'PROTOCOL_ERROR: incomplete or conflicting JSON', terminate: true },
-        prepareRequest: async request => {
+      const prepared=await preparePiHistory(piState ?? this.session?.piSnapshot,initial,model,this.ports.attachments,pendingInputs);
+      active.provenance=prepared.provenance;
+      active.inputRunIds=prepared.inputRunIds;
+      for(const cap of prepared.source)active.source.add(cap);
+      if(piState)for(const entry of piState.entries)active.persistedEntries.add(entry.id);
+      for(const ref of input)if(ref.type==='attachment') {
+        const attachment=await this.ports.attachments.get(ref.attachmentId);
+        for(const cap of attachment?.source??[])if(!active.userSources.includes(cap))active.userSources.push(cap);
+      }
+      const content=await resolveContent(input,this.ports.attachments,initial.session.enabled);
+      const text=content.filter(c=>c.type==='text').map(c=>c.text).join('\n');
+      const images=content.filter(c=>c.type==='image');
+      let audit=new ProtocolAudit();
+      const allTools=this.tools(active,this.registry.all());
+      const agentOptions:AgentOptions={initialState:{model,thinkingLevel:profile.thinkingEffort??'off'},sessionId:lease.sessionId,toolExecution:'sequential',transport:'sse',
+        // Native authorization/diagnostics only. Official AgentSession owns the
+        // canonical transcript, projection, continuation and compaction hooks.
+        prepareRequest:async request=>{
           try {
-          const s = await this.authority(active, true);
-          if (++active.requests > this.limits.maxRequests) fail('LIMIT_EXCEEDED');
-          active.requestSnapshot = s; active.effective = profile.supportsTools === false ? [] : this.registry.effective(s);
-          if (hasPerceptionContext(s)) active.source.add('screen_perception');
-          audit = new ProtocolAudit();
-          const tools = this.tools(active, active.effective);
-          // Refresh image references on every request; expired/deleted/disabled data never survives
-          // merely because Pi still holds an earlier in-memory image block.
-          const current: Message[] = [];
-          for (const m of request.context.messages.filter(m=>m.role!=='system').slice(active.messageOffset)) {
-            if (m.role === 'user') current.push({ ...m, content: await resolveContent(input, this.ports.attachments, s.session.enabled) });
-            else if (m.role === 'toolResult' && active.resultRefs.has(m.toolCallId)) current.push({ ...m, content: await resolveContent(active.resultRefs.get(m.toolCallId)!, this.ports.attachments, s.session.enabled) });
-            else current.push(m);
-          }
-          const compiled = await compileContext({ snapshot: { ...s, session: { ...s.session, model: profile } }, tools: active.effective, registryVersion: this.registry.version, model,
-            history, current, currentContextUpdates: active.contextUpdates, currentRefs: [...input, ...[...active.resultRefs.values()].flat()].filter(c => c.type === 'attachment').map(c => c.attachmentId), attachments: this.ports.attachments, imageTokens: this.limits.imageTokenEstimate, maxHistoryTurns: this.limits.maxHistoryTurns });
-          // The model's answer and the persisted context suffix can derive from
-          // prior tool observations even without using that capability this Run.
-          // Propagate only sources still permitted in the projected history so a
-          // later revocation also removes these indirect copies/derived answers.
-          for (const turn of history) if (turn.source.every(cap => s.session.enabled[cap]))
-            for (const cap of turn.source) active.source.add(cap);
-          active.contextUpdates = compiled.contextUpdates;
-          active.requestMessages = compiled.messages;
-          active.requestMaxOutput = compiled.maxOutput;
-          await this.persist(active, () => this.ports.persistence.saveContext(compiled.manifest)); await this.event(active, 'context', { snapshotId: compiled.manifest.snapshotId, estimatedTokens: compiled.manifest.estimatedTokens, droppedTurnIds: compiled.manifest.droppedTurnIds, piSessionReused:!!previous, historyRestored:!previous && restored.length>0, restoredHistoryMessages:restored.length });
-          await this.state(active, 'generating');
-          // Keep history out of Agent's evolving transcript; inject the bounded projection only at convertToLlm.
-          return { context: { messages: request.context.messages.filter(m => m.role !== 'system'), tools } };
-          } catch (e) { active.failure = e instanceof RuntimeError ? e.code : 'IO_ERROR'; throw e; }
+            const snapshot=await this.authority(active,true);
+            active.requestSnapshot=snapshot;
+            active.effective=profile.supportsTools===false?[]:this.registry.effective(snapshot);
+            active.pi!.session.setActiveToolsByName(active.effective.map(t=>t.modelName));
+            audit=new ProtocolAudit();
+            await this.savePi(active);
+            const usage=estimateProjectedContextTokens(active.pi!.manager.buildSessionProjection(),active.pi!.manager.getBranch());
+            const manifest={snapshotId:crypto.randomUUID(),modelProfileRevision:profile.revision,capabilityEpoch:lease.capabilityEpoch,
+              registryVersion:this.registry.version,l0SnapshotId:snapshot.l0.snapshotId,
+              includedMessageIds:active.pi!.manager.getBranch().map(e=>e.id),attachmentRefs:[],effectiveTools:active.effective.map(t=>t.toolId),
+              estimatedTokens:usage.tokens,estimated:true as const,compressionVersion:'pi-session-v1' as const,droppedTurnIds:[],contentHash:await hash(request.context.messages)};
+            await this.persist(active,()=>this.ports.persistence.saveContext(manifest));
+            await this.event(active,'context',{snapshotId:manifest.snapshotId,estimatedTokens:usage.tokens,droppedTurnIds:[],piSessionReused:!!piState || !!this.session?.piSnapshot,
+              historyRestored:prepared.entries.length>0,restoredHistoryMessages:prepared.entries.filter(e=>e.type==='message').length,contextManager:'pi',compactionManager:'pi'});
+            await this.state(active,'generating');
+            return {context:{...request.context,tools:active.agent!.state.tools.slice()}};
+          }catch(error){active.failure=error instanceof RuntimeError?error.code:'IO_ERROR';throw error;}
         },
-        convertToLlm: () => active.requestMessages,
-        streamFn: (_model, context, options) => {
-          const fetcher=this.fetch(active);
-          const diagnostics=active.modelDiagnostics=new ModelRoundDiagnostics(active.requests);
-          const common = { ...options, reasoning:profile.thinkingEffort==='off'?undefined:profile.thinkingEffort, onPayload:(payload:unknown)=>{diagnostics.payload(profile.protocol,payload);}, onProviderStreamEvent: (event: unknown) => { audit.observe(profile.protocol, event); diagnostics.observe(profile.protocol,event); }, apiKey: 'sk-thor-native-placeholder', fetch: this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher), transport: 'sse' as const, maxTokens: active.requestMaxOutput ?? profile.maxOutput, maxRetries: 0, timeoutMs: this.limits.runTimeoutMs, cacheRetention: 'short' as const, headers: profile.customHeaders, env: {} };
-          const source = profile.protocol === 'openai-responses' ? responses(model, context, common) : profile.protocol==='openai-completions' ? completions(model,context,common) : anthropic(model, context, common);
-          return providerStopBoundary(source, active.controller.signal, model, (phase, work) => this.watch(active, phase, work));
+        streamFn:(requestModel,context,options)=>{
+          const output=new AssistantMessageEventStream();
+          void (async()=>{
+            if(active.controller.signal.aborted || options?.signal?.aborted) {
+              const message:AssistantMessage={role:'assistant',content:[],api:model.api,provider:model.provider,model:model.id,
+                usage:{input:0,output:0,cacheRead:0,cacheWrite:0,totalTokens:0,cost:{input:0,output:0,cacheRead:0,cacheWrite:0,total:0}},stopReason:'aborted',timestamp:Date.now()};
+              output.push({type:'error',reason:'aborted',error:message});output.end();return;
+            }
+            try {
+              if(++active.requests>this.limits.maxRequests)fail('LIMIT_EXCEEDED');
+              const diagnostics=active.modelDiagnostics=new ModelRoundDiagnostics(active.requests);
+              const fetcher=this.fetch(active);
+              // Pi invalidates old provider usage after compaction/context edits.
+              // Summary requests have their own context, ordinary requests use
+              // Pi's projection-aware estimate rather than stale raw usage.
+              const estimated=active.compacting?estimateContextTokens(context.messages).tokens:
+                estimateProjectedContextTokens(active.pi!.manager.buildSessionProjection(),active.pi!.manager.getBranch()).tokens;
+              const available=profile.contextWindow-estimated-(profile.outputBudgetAutomatic?4096:profile.maxOutput);
+              if(available<(profile.outputBudgetAutomatic?16:0))fail('LIMIT_EXCEEDED');
+              const maxTokens=profile.outputBudgetAutomatic?Math.min(options?.maxTokens??profile.maxOutput,available):(options?.maxTokens??profile.maxOutput);
+              const common={...options,onPayload:(payload:unknown)=>{diagnostics.payload(profile.protocol,payload);},
+                onProviderStreamEvent:(event:unknown)=>{audit.observe(profile.protocol,event);diagnostics.observe(profile.protocol,event);},
+                apiKey:'sk-thor-native-placeholder',fetch:this.limits.runTimeoutMs?fetcher:withoutProviderDeadline(fetcher),transport:'sse' as const,maxTokens,maxRetries:0,
+                timeoutMs:this.limits.runTimeoutMs,cacheRetention:options?.cacheRetention??'short' as const,headers:profile.customHeaders,env:{}};
+              const source=profile.protocol==='openai-responses'?responses(requestModel as Model<'openai-responses'>,context,common):profile.protocol==='openai-completions'?completions(requestModel as Model<'openai-completions'>,context,common):anthropic(requestModel as Model<'anthropic-messages'>,context,common);
+              for await(const event of providerStopBoundary(source,active.controller.signal,requestModel,(phase,work)=>this.watch(active,phase,work))) {
+                if(event.type==='done' || event.type==='error') {
+                  const message=event.type==='done'?event.message:event.error;diagnostics.finish(message.stopReason);
+                  await this.event(active,'model_round',diagnostics.snapshot());
+                }
+                output.push(event);
+              }
+              output.end();
+            }catch(error){
+              active.failure=error instanceof RuntimeError?error.code:'IO_ERROR';
+              const message:AssistantMessage={role:'assistant',content:[],api:model.api,provider:model.provider,model:model.id,
+                usage:{input:0,output:0,cacheRead:0,cacheWrite:0,totalTokens:0,cost:{input:0,output:0,cacheRead:0,cacheWrite:0,total:0}},stopReason:'error',timestamp:Date.now(),errorMessage:active.failure};
+              output.push({type:'error',reason:'error',error:message});output.end();
+            }
+          })();
+          return output;
         },
       };
-      const agent=previous??new Agent(agentOptions);
-      if(previous) {agent.state.model=model;agent.state.thinkingLevel=profile.thinkingEffort??'off';agent.beforeToolCall=agentOptions.beforeToolCall;agent.finishTurn=agentOptions.finishTurn;agent.prepareRequest=agentOptions.prepareRequest;agent.convertToLlm=agentOptions.convertToLlm!;agent.streamFunction=agentOptions.streamFn;}
+      const agent=new Agent(agentOptions);active.agent=agent;
+      active.effective=profile.supportsTools===false?[]:this.registry.effective(initial);
+      active.pi=createPiSession({agent,sessionId:lease.sessionId,header:prepared.header,entries:prepared.entries,leafId:prepared.leafId,model,
+        systemPrompt:buildProductPrompt(initial,active.effective),tools:allTools,
+        settings:{...profile.piSettings}});
+      active.pi.session.setActiveToolsByName(active.effective.map(t=>t.modelName));
       if(this.session)this.session.agent=agent;
-      a.agent = agent;
-      const abortAgent = () => agent.abort(); a.controller.signal.addEventListener('abort', abortAgent, { once: true });
-      const unsubscribe=agent.subscribe(e => this.onPi(active, e));
-      try {await this.watch(a, 'agent_prompt', () => agent.prompt(user));} finally {unsubscribe();a.controller.signal.removeEventListener('abort',abortAgent);}
+      const officialBefore=agent.beforeToolCall;
+      agent.beforeToolCall=async(call,signal)=>audit.permits(call.toolCall.id,call.toolCall.arguments)?officialBefore?.(call,signal):{block:true,reason:'PROTOCOL_ERROR: incomplete or conflicting JSON',terminate:true};
+      const abortSession=()=>{agent.abort();void active.pi?.session.abort();};active.controller.signal.addEventListener('abort',abortSession,{once:true});
+      const unsubscribe=agent.subscribe(e=>this.onPi(active,e));
+      const unsubscribeSession=active.pi.session.subscribe((event:AgentSessionEvent)=>{
+        if(event.type==='compaction_start' || event.type==='compaction_end') {
+          active.compacting=event.type==='compaction_start';
+          void this.event(active,'diagnostic',{code:event.type==='compaction_start'?'CONTEXT_COMPACTION_STARTED':'CONTEXT_COMPACTION_FINISHED',reason:event.reason,
+            ...(event.type==='compaction_end'?{aborted:event.aborted,compacted:!!event.result}:{} )}).catch(()=>{});
+        }
+      });
+      active.lastObservation=buildRuntimeObservation(initial);
+      await active.pi.session.sendCustomMessage({customType:'thor-runtime-context',content:active.lastObservation,display:false},{triggerTurn:false});
+      await this.savePi(active);
+      try {await this.watch(active,'agent_prompt',()=>active.pi!.session.prompt(text,{images,expandPromptTemplates:false}));}
+      finally {await this.savePi(active);unsubscribe();unsubscribeSession();active.controller.signal.removeEventListener('abort',abortSession);}
       if (a.persistenceFailed) fail('PERSISTENCE_ERROR');
       const assistant = agent.state.messages.filter(m => m.role === 'assistant').at(-1);
       const saveIncomplete = () => this.saveTurn(active,false);
@@ -478,6 +556,6 @@ export class ThorRuntime {
         await this.state(a, 'stopping'); await this.state(a, 'cancelled');
       } else await this.state(a, 'failed');
       return structuredClone(a.run);
-    } finally { a?.stream?.dispose();if (timer) clearTimeout(timer); this.active = undefined; this.pending = undefined; this.reserved = false; }
+    } finally { if(a?.pi){await this.savePi(a).catch(()=>{});a.pi.dispose();} a?.stream?.dispose();if (timer) clearTimeout(timer); this.active = undefined; this.pending = undefined; this.reserved = false; }
   }
 }

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "explicitlyAuthorized": true,
+  "deletedOriginalSessions": 51,
+  "before": {
+    "sessions": 51,
+    "runs": 126,
+    "messages": 252,
+    "events": 2806,
+    "attachments": 42,
+    "pi_sessions": 0,
+    "pi_session_entries": 0
+  },
+  "after": {
+    "sessions": 1,
+    "runs": 0,
+    "messages": 0,
+    "events": 0,
+    "attachments": 0,
+    "pi_sessions": 0,
+    "pi_session_entries": 0
+  },
+  "protectedConfigurationPreserved": true,
+  "removedDerivedFrameFiles": 8,
+  "passed": true
+}

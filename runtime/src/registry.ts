@@ -27,6 +27,7 @@ export class ToolRegistry {
     const copy = structuredClone(pack);
     this.packs.push(copy); for (const t of copy.tools) this.tools.set(t.modelName, t);
   }
+  all(): ToolDescriptor[] { return [...this.tools.values()].map(t => structuredClone(t)); }
   get(name: string): ToolDescriptor | undefined { const t = this.tools.get(name); return t && structuredClone(t); }
   effective(snapshot: AuthoritySnapshot): ToolDescriptor[] {
     return [...this.tools.values()].filter(t => t.modelVisibility && t.requiredCapabilities.every(c => snapshot.session.enabled[c]) &&

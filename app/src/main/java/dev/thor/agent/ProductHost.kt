@@ -317,10 +317,18 @@ class ProductHost private constructor(private val context: Context, private val 
         val remaining=authority.remainingLeaseMs(b)
         return if(remaining>9_007_199_254_740_991L-System.currentTimeMillis())9_007_199_254_740_991L else System.currentTimeMillis()+remaining
     }
-    private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null, sessionsOnly:Boolean=false,changedSessionId:String?=null,newAttachment:JSONObject?=null,startupRecoveredRunIds:Set<String>?=null,deletedSessionIds:Set<String> = emptySet()) { try {
+    private fun persist(currentRun: JSONObject?=null, appendedEvent: JSONObject?=null, sessionsOnly:Boolean=false,changedSessionId:String?=null,newAttachment:JSONObject?=null,startupRecoveredRunIds:Set<String>?=null,deletedSessionIds:Set<String> = emptySet(),piSession:JSONObject?=null) { try {
         val affected=changedSessionId ?: currentRun?.optString("sessionId") ?: newAttachment?.getString("sessionId")
         for(s in rows("sessions").filter {affected==null || it.getString("id")==affected}) {s.put("capabilityEpoch",authority.sessionEpoch(s.getString("id")));val granted=authority.sessionEnabled(s.getString("id"));for((name,cap) in capNames)s.getJSONObject("capabilities").put(name,cap in granted)}
-        if(startupRecoveredRunIds!=null)store.saveStartupRecovery(state,startupRecoveredRunIds) else if(newAttachment!=null)store.saveAttachment(newAttachment) else if(sessionsOnly)store.saveSessionUpdate(state,changedSessionId) else if(currentRun==null)store.savePartialSnapshot(state,deletedSessionIds) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop();agentSleep.cancelAll(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.loadShell();eventIndex.clear();chatEvents.clear();throw PersistenceFailure(e) } }
+        if(piSession!=null) {
+            store.savePiSession(requireNotNull(currentRun).getString("sessionId"),currentRun.getString("id"),piSession)
+            // Keep the resident Run in sync so a later status/event write cannot
+            // overwrite the marker committed atomically with its Pi user entry.
+            val committedRuns=mutableSetOf<String>()
+            piSession.optString("inputRunId").takeIf {it.isNotBlank() && it!="null"}?.let(committedRuns::add)
+            piSession.optJSONObject("inputRunIds")?.let {map->map.keys().forEach {committedRuns.add(map.getString(it))}}
+            rows("runs").filter {it.getString("id") in committedRuns}.forEach {it.put("piInputCommitted",true)}
+        } else if(startupRecoveredRunIds!=null)store.saveStartupRecovery(state,startupRecoveredRunIds) else if(newAttachment!=null)store.saveAttachment(newAttachment) else if(sessionsOnly)store.saveSessionUpdate(state,changedSessionId) else if(currentRun==null)store.savePartialSnapshot(state,deletedSessionIds) else store.saveRunUpdate(state,currentRun,appendedEvent) } catch (e: Exception) { authority.stopRun(); deviceAuthority.stop();agentSleep.cancelAll(); prepared.values.forEach { it.approved.complete(false) }; storageFailed=true;bindings.clear();scopes.clear();prepared.clear();state=store.loadShell();eventIndex.clear();chatEvents.clear();throw PersistenceFailure(e) } }
     private fun newSession(): String {
         val previous=rows("sessions").singleOrNull {it.getString("id")==state.optString("selected")}
         val caps=previous?.getJSONObject("capabilities")?.let {JSONObject(it.toString())} ?: obj("perception" to true,"search" to true,"screen_control" to false,"debug" to false)
@@ -344,8 +352,15 @@ class ProductHost private constructor(private val context: Context, private val 
         if(closing) {future.completeExceptionally(IllegalStateException("Closed host"));return future}
         serial.execute {
             try {
-                require(c == connection && request.toString().length <= 3 * 1024 * 1024)
-                val op = request.getString("op"); require(!storageFailed || op == "view" || BuildConfig.DEBUG && op == "runtime.diagnostics.native"); val data = request.optJSONObject("data") ?: JSONObject()
+                require(c == connection)
+                val op = request.getString("op")
+                val data = request.optJSONObject("data") ?: JSONObject()
+                // Pi records retain original image blocks. Only this persistence
+                // kind may use the framed bridge's 16 MiB UTF-8 body allowance;
+                // all existing operations keep their previous 3 MiB guard.
+                val requestLimit=if(op=="persist" && data.optString("kind")=="pi_session")16*1024*1024 else 3*1024*1024
+                require(request.toString().length<=requestLimit)
+                require(!storageFailed || op == "view" || BuildConfig.DEBUG && op == "runtime.diagnostics.native")
                 if (op == "tool.execute") { execute(c, data, future); return@execute }
                 val value = when (op) {
                     "view" -> view()
@@ -418,7 +433,7 @@ class ProductHost private constructor(private val context: Context, private val 
         requireTool(probe || !requiresProbe(profile) || profilePassed(profile),Code.UNSUPPORTED,"自定义模型需要先在设置完成连接测试")
         require(!probe || (probeRun==null && probeTokenSession==sid && probeTokenProfile==profile.getString("profileId")))
         if (probe) { probeToken = null; probeTools = 0; probeImageReads = 0;probeHeads.clear();probeCompleted.clear();probeBodies.clear();probeConsumerClosed.clear() }
-        val historyState=if(probe)null else store.loadRuntimeSession(sid)
+        val piSession=if(probe)null else store.loadPiSession(sid)
         val pendingImages=if(probe)JSONArray() else s.optJSONArray("pendingAttachments") ?: JSONArray()
         val text=if(probe && !supportsImages(profile))"Configuration probe: text-only model. Call probe_picture once, read its returned text, then answer PROBE_OK." else d.getString("text"); require(text.isNotBlank() && text.length <= 20000)
         val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } },durationMs=if(probe)180_000 else 0)
@@ -438,10 +453,10 @@ class ProductHost private constructor(private val context: Context, private val 
         r.put("turn",obj("turnId" to id(),"runId" to b.runId,"messages" to JSONArray().put(obj("kind" to "user","content" to input)),"source" to JSONArray(if(dev.thor.bridge.Capability.screen_perception in enabled(s))listOf("screen_perception") else emptyList<String>()),"observedAt" to System.currentTimeMillis(),"complete" to false));persist(r);publish()
         runMetrics[b.runId]?.put("nativePrepareMs",clock.now()-began)
         val ttl = authority.remainingLeaseMs(b)
-        val historyEvents=historyState?.getJSONArray("events")?.objects().orEmpty().groupBy {it.getString("runId")}
         return obj("runTimeoutMs" to if(probe)180_000 else 0,"lease" to obj("sessionId" to sid, "runId" to b.runId, "leaseId" to b.lease, "capabilityEpoch" to b.capabilityEpoch, "expiresAt" to leaseWallDeadline(b)),
             "network" to obj("binding" to bindingJson(b), "purpose" to if(probe) "configuration_test" else "model", "profileRef" to profile.getString("profileId"), "credentialRef" to profile.getString("credentialRef"), "deadlineMs" to if(probe)clock.now()+ttl else 9_007_199_254_740_991L, "timeoutMs" to if(probe)ttl else 0),
-            "history" to JSONArray(historyState?.getJSONArray("runs")?.objects().orEmpty().filter { it.has("turn") && !it.optBoolean("probe") }.map { previous -> recoverTurnHistory(previous.getJSONObject("turn"),historyEvents[previous.getString("id")].orEmpty()) }),
+            "piSession" to (piSession ?: JSONObject.NULL),
+            "pendingInputs" to if(piSession==null)JSONArray() else store.loadPendingPiInputs(sid),
             "input" to input)
     }
     private fun bindingJson(b: Binding) = obj("sessionId" to b.sessionId, "runId" to b.runId, "lease" to b.lease, "connectionId" to b.connectionId, "capabilityEpoch" to b.capabilityEpoch)
@@ -761,6 +776,11 @@ class ProductHost private constructor(private val context: Context, private val 
             "run" -> { require(value.getString("runId") == b.runId && value.getString("sessionId") == b.sessionId); r.put("runtime", value).put("status", value.getString("state")) }
             "context" -> { require(value.getInt("modelProfileRevision") == scope(b).profile.getInt("revision") && value.getLong("capabilityEpoch") == b.capabilityEpoch); require(value.getJSONArray("effectiveTools").let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } == scope(b).publishedTools); r.getJSONArray("contexts").put(value) }
             "turn" -> { require(value.getString("runId") == b.runId); r.put("turn", value) }
+            "pi_session" -> {
+                // Configuration probes have isolated temporary Pi sessions.
+                if(b.runId!=probeRun)persist(r,piSession=value)
+                return obj()
+            }
             else -> error("Unsupported persistence method")
         }
         runMetrics[b.runId]?.let {metrics ->

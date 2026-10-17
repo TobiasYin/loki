@@ -24,7 +24,7 @@ function noPrivateContent(f: ReturnType<typeof fixture>, marker: string) {
 }
 
 for (const protocol of ['openai-responses', 'openai-completions', 'anthropic-messages'] as const) {
-  test(`${protocol}: navigation receipts survive changed target/backend and same-Pi follow-ups never replay actions`, async () => {
+  test(`${protocol}: navigation receipts survive changed target/backend and restored Pi follow-ups never replay actions`, async () => {
     for (const name of ['launch', 'tap', 'activate']) {
       const f = setup(protocol, name); const session = new RuntimeSession(f.lease.sessionId);
       const toolId = name === 'launch' ? 'apps.launch' : `input.${name}`; const registry = tools(name, 'input', 'screen_control', toolId);
@@ -47,10 +47,12 @@ for (const protocol of ['openai-responses', 'openai-completions', 'anthropic-mes
       // Responses normalizes call_id plus item_id into Pi's composite ID.
       assert.equal(event.toolCallId, f.executions[0]!.toolCallId);
       assert.deepEqual(turn.effects, [{ toolCallId: f.executions[0]!.toolCallId, toolId, effectClass: 'input', outcome: 'submitted', evidenceRef: 'native-event:confirmed-once' }]);
-      const agent = session.agent; const next = fixture(protocol, [{ text: 'Continue from the confirmed progress.' }]);
+      const agent = session.agent; const priorEntries = structuredClone(session.piSnapshot!.entries); const next = fixture(protocol, [{ text: 'Continue from the confirmed progress.' }]);
       next.snapshot.session.enabled.screen_control = true;
-      assert.equal((await new ThorRuntime(next.ports, registry, {}, session).run(next.lease, [{ type: 'text', text: 'Continue without repeating the confirmed action.' }], [turn])).state, 'completed');
-      assert.equal(session.agent, agent); assert.equal(next.executions.length, 0); assert.equal(effects, 1);
+      assert.equal((await new ThorRuntime(next.ports, registry, {}, session).run(next.lease, [{ type: 'text', text: 'Continue without repeating the confirmed action.' }])).state, 'completed');
+      assert.notEqual(session.agent, agent);
+      assert.deepEqual(session.piSnapshot!.entries.slice(0,priorEntries.length),priorEntries);
+      assert.equal(next.executions.length, 0); assert.equal(effects, 1);
       assert.ok(JSON.stringify(next.requests[0]!.body).includes('NATIVE_SUCCESS_RECEIPT'));
       assert.ok(next.events.some(e => e.type === 'context' && e.data.piSessionReused === true));
     }

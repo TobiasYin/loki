@@ -34,13 +34,15 @@ class ChatSnapshotTest {
     }
     @Test fun thousandsOfStreamFragmentsProjectAsCompleteBlocksWithoutMutatingTheLedger() {
         val source=state();val events=source.getJSONArray("events")
-        repeat(2000) {n->
-            events.put(obj("sessionId" to "b","runId" to "run-b","sequence" to n*2,"type" to "thinking_delta","data" to obj("blockId" to "1:0","text" to "片")))
-            events.put(obj("sessionId" to "b","runId" to "run-b","sequence" to n*2+1,"type" to "tool_call_update","toolCallId" to "call","data" to obj("toolName" to "skills_save","arguments" to obj("content" to "v$n"))))
-        }
+        repeat(1000) {n->events.put(obj("sessionId" to "b","runId" to "run-b","sequence" to n+1,"type" to "thinking_delta","data" to obj("text" to "先")))}
+        repeat(1000) {n->events.put(obj("sessionId" to "b","runId" to "run-b","sequence" to n+1001,"type" to "tool_call_update","toolCallId" to "call","data" to obj("toolName" to "skills_save","arguments" to obj("content" to "v$n"))))}
+        repeat(1000) {n->events.put(obj("sessionId" to "b","runId" to "run-b","sequence" to n+2001,"type" to "thinking_delta","data" to obj("text" to "后")))}
         val before=source.toString();val result=chatSnapshot(source,null).getJSONArray("events").objects()
-        assertEquals(3,result.size);assertEquals("片".repeat(2000),result.single {it.optString("type")=="thinking_delta"}.getJSONObject("data").getString("text"))
-        assertEquals("v1999",result.single {it.optString("type")=="tool_call_update"}.getJSONObject("data").getJSONObject("arguments").getString("content"))
+        assertEquals(4,result.size)
+        assertEquals(listOf("先".repeat(1000),"后".repeat(1000)),result.filter {it.optString("type")=="thinking_delta"}.map {it.getJSONObject("data").getString("text")})
+        val call=result.single {it.optString("type")=="tool_call_update"}
+        assertEquals("v999",call.getJSONObject("data").getJSONObject("arguments").getString("content"))
+        assertEquals(1001,call.getInt("sequence"));assertEquals(2000,call.getInt("lastSequence"))
         assertEquals(before,source.toString())
     }
 

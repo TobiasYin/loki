@@ -1,75 +1,104 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import type { Model } from '@earendil-works/pi-ai';
-import type { HistoryTurn, ModelProfile } from '../src/contracts.js';
-import { compileContext } from '../src/context.js';
+import { convertToLlm, estimateContextTokens } from '@thor-agent/pi-session-browser';
+import type { Message } from '@earendil-works/pi-ai';
+import { nativePiState, piAssistant } from './pi-test-state.js';
 import { checkProfile } from '../src/profile-validation.js';
 import { ThorRuntime } from '../src/runtime.js';
+import { RuntimeSession } from '../src/session.js';
 import { fixture, registry, profile } from './fixtures.js';
 
-function turn(id:string,text:string):HistoryTurn {
-  return {turnId:id,runId:`run-${id}`,source:[],observedAt:1,complete:true,messages:[{kind:'user',content:[{type:'text',text}]},{kind:'assistant',text:`answer-${id}`,calls:[]}]};
+function turns(f:ReturnType<typeof fixture>,...values:[id:string,text:string][]) {
+  const messages:Message[]=values.flatMap(([id,text])=>[{role:'user' as const,content:text,timestamp:1},piAssistant(f,`answer-${id}`)]);
+  return nativePiState(f,messages);
 }
-function model(p:ModelProfile):Model<any> {
-  return {id:p.modelId,name:p.label,api:p.protocol,provider:'openai',baseUrl:p.baseUrl,reasoning:false,input:['text'],contextWindow:p.contextWindow,maxTokens:p.maxOutput,cost:{input:0,output:0,cacheRead:0,cacheWrite:0}};
+function automatic(f:ReturnType<typeof fixture>,maxOutput=32000,contextWindow=32000) {
+  Object.assign(f.snapshot.session.model,{contextWindow,maxOutput,outputBudgetAutomatic:true,
+    piSettings:{compaction:{enabled:false},retry:{enabled:false}}});
 }
-function options(f:ReturnType<typeof fixture>,history:HistoryTurn[]=[],text='current task') {
-  return {snapshot:f.snapshot,tools:registry().effective(f.snapshot),registryVersion:'1',model:model(f.snapshot.session.model),history,current:[{role:'user' as const,content:text,timestamp:1}],attachments:f.ports.attachments,imageTokens:0,maxHistoryTurns:32};
+async function execute(f:ReturnType<typeof fixture>,text:string,piState?:RuntimeSession['piSnapshot']) {
+  const session=new RuntimeSession(f.lease.sessionId);const estimates:number[]=[];const usageDetails:ReturnType<typeof estimateContextTokens>[]=[];
+  f.setOnRequest(()=>{
+    assert.ok(session.agent);
+    const estimate=estimateContextTokens(convertToLlm(session.agent.state.messages));usageDetails.push(estimate);estimates.push(estimate.tokens);
+  });
+  const result=await new ThorRuntime(f.ports,registry(),{},session).run(f.lease,[{type:'text',text}],piState);
+  return {result,estimates,session,usageDetails};
+}
+function assertAutomaticRequest(f:ReturnType<typeof fixture>,estimated:number,index=0) {
+  const p=f.snapshot.session.model;const actual=f.requests[index]!.body.max_output_tokens;
+  assert.equal(f.contexts[index]!.estimatedTokens,estimated,'context diagnostics use the official Pi estimate');
+  assert.ok(actual<=Math.min(p.maxOutput,p.contextWindow-estimated-4096),'Pi may choose a smaller per-request ceiling, but never exceed the available budget');
+  assert.ok(actual>=16);assert.ok(actual<=p.maxOutput);assert.ok(estimated+actual+4096<=p.contextWindow);
+  assert.equal(f.events.filter(e=>e.type==='model_round')[index]!.data.requestedMaxOutputTokens,actual);
 }
 
 for(const [modelId,contextWindow] of [['grok-4.20-beta',500000],['kimi-k2.6',262144]] as const) {
-  for(const gap of [0,1]) test(`${modelId} automatic catalog output=context-${gap} sends while retaining recent history`,async()=>{
-    const f=fixture();Object.assign(f.snapshot.session.model,{modelId,provider:'opencode-go',providerMetadataKnown:true,baseUrl:'https://opencode.ai/zen/go/v1',input:['text'],supportsTools:true,reasoning:false,contextWindow,maxOutput:contextWindow-gap,outputBudgetAutomatic:true});
-    const history=[turn('earlier','earlier task context'),turn('recent','recent game progress')];const saved=structuredClone(f.snapshot.session.model);
-    const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'continue from recent game progress'}],history);
+  for(const gap of [0,1]) test(`${modelId} automatic catalog output=context-${gap} uses Pi context usage while retaining history`,async()=>{
+    const f=fixture();automatic(f,contextWindow-gap,contextWindow);
+    Object.assign(f.snapshot.session.model,{modelId,provider:'opencode-go',providerMetadataKnown:true,baseUrl:'https://opencode.ai/zen/go/v1',input:['text'],supportsTools:true,reasoning:false});
+    const history=turns(f,['earlier','earlier task context'],['recent','recent game progress']);const saved=structuredClone(f.snapshot.session.model);
+    const {result,estimates}=await execute(f,'continue from recent game progress',history);
     assert.equal(result.state,'completed');assert.equal(f.requests.length,1);
-    assert.deepEqual(f.contexts[0]!.droppedTurnIds,[]);assert.ok(f.contexts[0]!.includedMessageIds.includes('recent'));
-    assert.ok(JSON.stringify(f.requests[0]!.body).includes('recent game progress'));
-    const actual=f.requests[0]!.body.max_output_tokens;assert.equal(actual,contextWindow-f.contexts[0]!.estimatedTokens-4096);assert.ok(actual>=16);assert.ok(actual<contextWindow-gap);
-    assert.equal(f.events.find(e=>e.type==='model_round')!.data.requestedMaxOutputTokens,actual);
-    assert.deepEqual(f.snapshot.session.model,saved,'effective per-round output never overwrites the saved profile');
+    const body=JSON.stringify(f.requests[0]!.body);for(const marker of ['earlier task context','recent game progress','answer-recent'])assert.ok(body.includes(marker));
+    assert.deepEqual(f.contexts[0]!.droppedTurnIds,[]);assertAutomaticRequest(f,estimates[0]!);
+    assert.deepEqual(f.snapshot.session.model,saved,'per-request output allocation never rewrites the saved model profile');
   });
 }
 
-test('automatic allocation shrinks output before discarding history and retains all bounded turns that fit',async()=>{
-  const f=fixture();Object.assign(f.snapshot.session.model,{contextWindow:32000,maxOutput:30000,outputBudgetAutomatic:true});
-  const history=[turn('old','old '.repeat(800)),turn('recent','recent '.repeat(600))];const c=await compileContext(options(f,history));
-  assert.deepEqual(c.manifest.droppedTurnIds,[]);assert.deepEqual(c.manifest.includedMessageIds.slice(0,2),['old','recent']);
-  assert.equal(c.maxOutput,32000-c.manifest.estimatedTokens-4096);assert.ok(c.maxOutput<30000);assert.ok(c.maxOutput>=16);
+test('automatic allocation reduces output using Pi estimates and retains both complete turns',async()=>{
+  const f=fixture();automatic(f,30000);
+  const history=turns(f,['old','old '.repeat(2400)],['recent','recent '.repeat(1600)]);
+  const {result,estimates}=await execute(f,'continue the same task',history);
+  assert.equal(result.state,'completed');assert.equal(f.requests.length,1);
+  const body=JSON.stringify(f.requests[0]!.body);assert.ok(body.includes('answer-old'));assert.ok(body.includes('answer-recent'));
+  assert.deepEqual(f.contexts[0]!.droppedTurnIds,[]);assertAutomaticRequest(f,estimates[0]!);assert.ok(f.requests[0]!.body.max_output_tokens<30000);
 });
 
-test('automatic input overflow drops only the oldest whole turn before allocating output',async()=>{
-  const f=fixture();Object.assign(f.snapshot.session.model,{contextWindow:32000,maxOutput:32000,outputBudgetAutomatic:true});
-  const history=[turn('old','old'.repeat(7000)),turn('recent','recent'.repeat(300))];const c=await compileContext(options(f,history));
-  assert.deepEqual(c.manifest.droppedTurnIds,['old']);assert.ok(c.manifest.includedMessageIds.includes('recent'));
-  assert.ok(JSON.stringify(c.messages).includes('answer-recent'));assert.ok(!JSON.stringify(c.messages).includes('answer-old'));
-  assert.equal(c.maxOutput,32000-c.manifest.estimatedTokens-4096);assert.ok(c.maxOutput>=16);
+test('restored Pi assistant usage drives allocation without recounting the whole saved transcript',async()=>{
+  const first=fixture();automatic(first);const initial=await execute(first,'retain this long material '.repeat(1000));
+  assert.equal(initial.result.state,'completed');assert.ok(initial.session.piSnapshot);
+  const next=fixture();automatic(next);const restored=await execute(next,'continue',structuredClone(initial.session.piSnapshot));
+  assert.equal(restored.result.state,'completed');assert.equal(restored.usageDetails[0]!.usageTokens,14);
+  assert.notEqual(restored.usageDetails[0]!.lastUsageIndex,null);
+  assert.ok(restored.estimates[0]!<initial.estimates[0]!, 'the official Pi estimator trusts preserved provider usage plus trailing messages');
+  assertAutomaticRequest(next,restored.estimates[0]!);
+  assert.ok(JSON.stringify(next.requests[0]!.body).includes('retain this long material'));
 });
 
-test('automatic Luna retains its complete 128000 ceiling whenever the input leaves room',async()=>{
-  const f=fixture();Object.assign(f.snapshot.session.model,{modelId:'gpt-6-luna',contextWindow:400000,maxOutput:128000,outputBudgetAutomatic:true});
-  const c=await compileContext(options(f,[turn('recent','preserve conversation')],'reason through this question'));
-  assert.equal(c.maxOutput,128000);assert.deepEqual(c.manifest.droppedTurnIds,[]);
-  const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'short request'}]);
-  assert.equal(result.state,'completed');assert.equal(f.requests[0]!.body.max_output_tokens,128000);
+test('automatic Luna preserves the full 128000 model ceiling when Pi estimates leave room',async()=>{
+  const f=fixture();automatic(f,128000,400000);f.snapshot.session.model.modelId='gpt-6-luna';
+  const {result,estimates}=await execute(f,'reason through this question',turns(f,['recent','preserve conversation']));
+  assert.equal(result.state,'completed');assert.equal(f.requests.length,1);assertAutomaticRequest(f,estimates[0]!);
+  assert.equal(f.requests[0]!.body.max_output_tokens,128000);assert.ok(JSON.stringify(f.requests[0]!.body).includes('preserve conversation'));
 });
 
-test('explicit and custom output budgets keep the previous reservation and compression behavior',async()=>{
-  const f=fixture();Object.assign(f.snapshot.session.model,{contextWindow:32000,maxOutput:24000});
-  const history=[turn('old','old'.repeat(7000)),turn('recent','recent'.repeat(100))];
-  const explicit=await compileContext(options(f,history));f.snapshot.session.model.outputBudgetAutomatic=false;
-  const explicitlyFalse=await compileContext(options(f,history));
-  assert.equal(explicit.maxOutput,24000);assert.equal(explicitlyFalse.maxOutput,24000);
-  assert.deepEqual(explicit.manifest.droppedTurnIds,explicitlyFalse.manifest.droppedTurnIds);assert.ok(explicit.manifest.droppedTurnIds.includes('old'));
-  assert.deepEqual(explicit.messages.map(m=>({...m,timestamp:0})),explicitlyFalse.messages.map(m=>({...m,timestamp:0})));assert.ok(explicit.manifest.estimatedTokens<=8000);
+test('explicit output settings retain their selected ceiling without a second history eviction policy',async()=>{
+  for(const automaticMarker of [undefined,false]) {
+    const f=fixture();Object.assign(f.snapshot.session.model,{contextWindow:32000,maxOutput:24000,outputBudgetAutomatic:automaticMarker,piSettings:{compaction:{enabled:false}}});
+    const {result}=await execute(f,'continue',turns(f,['old','older '.repeat(150)],['recent','recent '.repeat(150)]));
+    assert.equal(result.state,'completed');assert.equal(f.requests[0]!.body.max_output_tokens,24000);
+    const body=JSON.stringify(f.requests[0]!.body);assert.ok(body.includes('answer-old'));assert.ok(body.includes('answer-recent'));
+    assert.deepEqual(f.contexts[0]!.droppedTurnIds,[]);
+  }
 });
 
-test('automatic output leaves exactly the minimum sixteen tokens and rejects oversized current input without network',async()=>{
-  const f=fixture();Object.assign(f.snapshot.session.model,{contextWindow:32000,maxOutput:32000,outputBudgetAutomatic:true});
-  const initial=await compileContext(options(f,[],''));const filler='x'.repeat(32000-initial.manifest.estimatedTokens-4096-16);
-  const edge=await compileContext(options(f,[],filler));assert.equal(edge.maxOutput,16);assert.equal(edge.manifest.estimatedTokens+4096+16,32000);
-  await assert.rejects(compileContext(options(f,[],filler+'x')),{code:'LIMIT_EXCEEDED'});
-  const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'x'.repeat(32000)}]);
+test('official Pi estimates leave exactly sixteen output tokens at the context safety boundary',async()=>{
+  const baseline=fixture();automatic(baseline);const initial=await execute(baseline,'x');assert.equal(initial.result.state,'completed');
+  // Pi estimates user text in ceil(chars / 4). Other Native facts and tools are
+  // identical, so replacing the one-token baseline makes this exact boundary.
+  const targetInput=32000-4096-16;
+  const text='x'.repeat((targetInput-initial.estimates[0]!+1)*4);
+  const edge=fixture();automatic(edge);const {result,estimates}=await execute(edge,text);
+  assert.equal(result.state,'completed');assert.equal(estimates[0],targetInput);assertAutomaticRequest(edge,estimates[0]!);
+  assert.equal(edge.requests[0]!.body.max_output_tokens,16);
+});
+
+test('oversized current context cannot bypass the minimum-output safety margin or silently evict history',async()=>{
+  const baseline=fixture();automatic(baseline);const initial=await execute(baseline,'x');
+  const targetInput=32000-4096-16;
+  const text='x'.repeat((targetInput-initial.estimates[0]!+1)*4+4);
+  const f=fixture();automatic(f);const {result}=await execute(f,text);
   assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');assert.equal(f.requests.length,0);
 });
 
@@ -78,4 +107,28 @@ test('equal context/output is valid only with a boolean automatic marker; larger
   p.outputBudgetAutomatic=false;assert.throws(()=>checkProfile(p),{code:'UNSUPPORTED'});
   p.outputBudgetAutomatic=true;assert.doesNotThrow(()=>checkProfile(p));p.maxOutput++;assert.throws(()=>checkProfile(p),{code:'UNSUPPORTED'});
   for(const marker of ['true',1,null]) assert.throws(()=>checkProfile({...profile(),outputBudgetAutomatic:marker as unknown as boolean}),{code:'UNSUPPORTED'});
+});
+
+test('product continuation after official Pi compaction discards pre-compaction usage when allocating the next request',async()=>{
+  const f=fixture('openai-responses',[
+    {text:'SUMMARY: preserve the destination and current progress.'},
+    {text:'Continued correctly after compaction.'},
+  ]);
+  Object.assign(f.snapshot.session.model,{contextWindow:16000,maxOutput:1024,
+    piSettings:{compaction:{enabled:true,reserveTokens:500,keepRecentTokens:800},retry:{enabled:false}}});
+  const recent=piAssistant(f,'Recent checkpoint.');recent.usage={...recent.usage,input:15600,output:10,totalTokens:15610};
+  const state=nativePiState(f,[
+    {role:'user',content:'Old goal '+ 'older context '.repeat(1200),timestamp:1},piAssistant(f,'Earlier stage complete.'),
+    {role:'user',content:'Recent task '+ 'recent context '.repeat(300),timestamp:1},recent,
+  ]);
+  const logical=new RuntimeSession(f.lease.sessionId);
+  const result=await new ThorRuntime(f.ports,registry(),{},logical).run(f.lease,[{type:'text',text:'Current goal'}],state);
+  assert.equal(result.state,'completed','retained raw usage from before the compaction must not reject the new smaller request');
+  assert.equal(f.requests.length,2,'one real summary request and one continued response');
+  assert.equal(logical.piSnapshot!.entries.filter(entry=>entry.type==='compaction').length,1);
+  assert.ok(f.contexts.at(-1)!.estimatedTokens<8000);
+  const continuation=JSON.stringify(f.requests[1]!.body);
+  assert.ok(continuation.includes('SUMMARY: preserve the destination'));assert.ok(continuation.includes('Current goal'));
+  assert.ok(!continuation.includes('older context older context'));
+  assert.ok(f.events.some(event=>event.type==='diagnostic' && event.data.code==='CONTEXT_COMPACTION_FINISHED' && event.data.compacted===true));
 });

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "scope": "real-model agent sleep acceptance",
+  "deviceKind": "emulator",
+  "syntheticPromptsOnly": true,
+  "runs": [
+    {
+      "kind": "normal",
+      "status": "completed",
+      "toolCalls": 1,
+      "nativeTimerSource": true,
+      "durationMs": 200,
+      "elapsedMs": 200,
+      "completionMarkerMatches": true,
+      "pendingTimersAfter": 0
+    },
+    {
+      "kind": "stop",
+      "status": "cancelled",
+      "toolCalls": 1,
+      "stopElapsedMs": 91,
+      "pendingTimersAfter": 0
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": 0,
+  "allDeviceCapabilitiesDisabled": true,
+  "currentProviderUnchanged": true,
+  "phase": "cleanup",
+  "pendingTimersBeforeStop": 1,
+  "originalConfigurationPreserved": true,
+  "originalHistoryPreserved": true
+}

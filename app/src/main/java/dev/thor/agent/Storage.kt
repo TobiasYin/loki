@@ -18,7 +18,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /** Versioned private DB. Changed rows and selection commit together; failed upgrade never wipes history. */
-class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteOpenHelper(context, name, null, 1), NativeStorePort {
+class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteOpenHelper(context, name, null, 2), NativeStorePort {
     private val tables = listOf("sessions", "runs", "messages", "events", "attachments")
     override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
     override fun onCreate(db: SQLiteDatabase) {
@@ -29,8 +29,218 @@ class SqliteStore(context: Context, name: String = "conversations.db") : SQLiteO
         db.execSQL("CREATE TABLE attachments(id TEXT PRIMARY KEY, sessionId TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE, runId TEXT REFERENCES runs(id) ON DELETE CASCADE, payload TEXT NOT NULL)")
         db.execSQL("CREATE TABLE metadata(name TEXT PRIMARY KEY, value TEXT NOT NULL)")
         for (table in tables.drop(1)) db.execSQL("CREATE INDEX ${table}_session ON $table(sessionId)")
+        createPiSessionTables(db)
     }
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) { error("不支持的数据库迁移；保留历史并停止升级") }
+    private fun createPiSessionTables(db:SQLiteDatabase) {
+        db.execSQL("CREATE TABLE pi_sessions(sessionId TEXT PRIMARY KEY REFERENCES sessions(id) ON DELETE CASCADE, header TEXT NOT NULL, leafId TEXT)")
+        db.execSQL("CREATE TABLE pi_session_entries(sessionId TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE, id TEXT NOT NULL, parentId TEXT, sequence INTEGER NOT NULL, payload TEXT NOT NULL, source TEXT NOT NULL, runId TEXT NOT NULL, PRIMARY KEY(sessionId,id), UNIQUE(sessionId,sequence))")
+    }
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        require(oldVersion==1 && newVersion==2) {"不支持的数据库迁移；保留历史并停止升级"}
+        // Additive migration: never read, rewrite or reconstruct a legacy turn.
+        createPiSessionTables(db)
+    }
+
+    /** Opaque upstream Pi entries, loaded for one running conversation only.
+     * The shell and chat projection deliberately never include this journal. */
+    fun loadPiSession(sessionId:String):JSONObject? {
+        require(sessionId.isNotBlank())
+        val db=readableDatabase
+        db.beginTransactionNonExclusive()
+        try {
+            val state=db.rawQuery("SELECT header,leafId FROM pi_sessions WHERE sessionId=?",arrayOf(sessionId)).use {c->
+                if(!c.moveToFirst())return null
+                JSONObject().put("header",JSONObject(c.getString(0))).put("leafId",if(c.isNull(1))JSONObject.NULL else c.getString(1))
+            }
+            val entries=JSONArray();val provenance=JSONObject()
+            db.rawQuery("SELECT id,source FROM pi_session_entries WHERE sessionId=? ORDER BY sequence",arrayOf(sessionId)).use {c->
+                while(c.moveToNext()) {
+                    val entryId=c.getString(0)
+                    entries.put(JSONObject(readPiEntry(sessionId,entryId)))
+                    provenance.put(entryId,JSONArray(c.getString(1)))
+                }
+            }
+            state.put("entries",entries).put("provenance",provenance)
+            db.setTransactionSuccessful()
+            return state
+        }finally {db.endTransaction()}
+    }
+
+    /** Append Pi's own records and move its selected leaf atomically. Branching,
+     * compression and message interpretation remain exclusively upstream Pi's.
+     * Repeat delivery is idempotent; existing records can never be rewritten. */
+    fun savePiSession(sessionId:String,runId:String,value:JSONObject) {
+        require(sessionId.isNotBlank() && runId.isNotBlank())
+        val header=value.getJSONObject("header")
+        require(header.getString("type")=="session" && header.getString("id").isNotBlank() && header.getInt("version")>0)
+        val entries=value.getJSONArray("entries").objects()
+        val source=value.optJSONArray("source") ?: JSONArray()
+        val sources=(0 until source.length()).map {source.getString(it)}.toSet()
+        val capabilities=setOf("screen_perception","web_search","screen_control","adb_debug")
+        require(sources.all {it in capabilities})
+        val byId=entries.associateBy {it.getString("id")}
+        require(byId.size==entries.size)
+        val inputRuns=linkedSetOf<String>()
+        val inputRunId=if(!value.has("inputRunId") || value.isNull("inputRunId"))null else value.getString("inputRunId").also {require(it.isNotBlank())}
+        require(inputRunId==null || entries.any {it.optString("type")=="message" && it.optJSONObject("message")?.optString("role")=="user"}) {"Input commit requires an original Pi user entry"}
+        if(inputRunId!=null)inputRuns.add(inputRunId)
+        val inputRunIds=if(!value.has("inputRunIds") || value.isNull("inputRunIds"))JSONObject() else value.getJSONObject("inputRunIds")
+        for(entryId in inputRunIds.keys()) {
+            val entry=byId[entryId]
+            require(entry!=null && entry.optString("type")=="message" && entry.optJSONObject("message")?.optString("role")=="user") {"Input commit map must reference a user entry in this batch"}
+            inputRuns.add(inputRunIds.getString(entryId).also {require(it.isNotBlank())})
+        }
+        val sourceMap=if(!value.has("entrySources") || value.isNull("entrySources"))JSONObject() else value.getJSONObject("entrySources")
+        val entrySources=mutableMapOf<String,Set<String>>()
+        for(entryId in sourceMap.keys()) {
+            require(entryId in byId) {"Entry source map must reference this batch"}
+            val array=sourceMap.getJSONArray(entryId)
+            entrySources[entryId]=(0 until array.length()).map {array.getString(it)}.toSet().also {require(it.all {cap->cap in capabilities})}
+        }
+        require(value.has("leafId"))
+        val leafId=if(value.isNull("leafId"))null else value.getString("leafId").also {require(it.isNotBlank())}
+        require(entries.map {it.getString("id")}.toSet().size==entries.size)
+        val db=writableDatabase
+        db.beginTransaction()
+        try {
+            db.rawQuery("SELECT sessionId FROM runs WHERE id=?",arrayOf(runId)).use {c->require(c.moveToFirst() && c.getString(0)==sessionId) {"Pi Session/Run mismatch"}}
+            val existingHeader=db.rawQuery("SELECT header FROM pi_sessions WHERE sessionId=?",arrayOf(sessionId)).use {c->if(c.moveToFirst())JSONObject(c.getString(0)) else null}
+            require(existingHeader==null || sameJson(existingHeader,header)) {"Pi Session header cannot change"}
+            var sequence=db.rawQuery("SELECT COALESCE(MAX(sequence),0) FROM pi_session_entries WHERE sessionId=?",arrayOf(sessionId)).use {c->check(c.moveToFirst());c.getLong(0)}
+            for(entry in entries) {
+                val entryId=entry.getString("id");val ownSources=entrySources[entryId] ?: sources;require(entryId.isNotBlank() && entry.getString("type").isNotBlank() && entry.has("parentId"))
+                val parent=if(entry.isNull("parentId"))null else entry.getString("parentId").also {require(it.isNotBlank() && it!=entryId)}
+                if(parent!=null)db.rawQuery("SELECT 1 FROM pi_session_entries WHERE sessionId=? AND id=?",arrayOf(sessionId,parent)).use {require(it.moveToFirst()) {"Unknown Pi parent entry"}}
+                val oldSource=db.rawQuery("SELECT source FROM pi_session_entries WHERE sessionId=? AND id=?",arrayOf(sessionId,entryId)).use {c->if(c.moveToFirst())JSONArray(c.getString(0)) else null}
+                if(oldSource!=null) {
+                    require(sameJson(JSONObject(readPiEntry(sessionId,entryId)),entry)) {"Pi entries are immutable"}
+                    // A retry cannot narrow the provenance recorded earlier.
+                    val combined=((0 until oldSource.length()).map {oldSource.getString(it)}+ownSources).toSet()
+                    if(combined.size!=oldSource.length())db.update("pi_session_entries",ContentValues().apply {put("source",JSONArray(combined.toList()).toString())},"sessionId=? AND id=?",arrayOf(sessionId,entryId))
+                }else {
+                    db.insertOrThrow("pi_session_entries",null,ContentValues().apply {
+                        put("sessionId",sessionId);put("id",entryId);put("sequence",++sequence);put("payload",entry.toString());put("source",JSONArray(ownSources.toList()).toString());put("runId",runId)
+                        if(parent==null)putNull("parentId") else put("parentId",parent)
+                    })
+                }
+            }
+            if(leafId!=null)db.rawQuery("SELECT 1 FROM pi_session_entries WHERE sessionId=? AND id=?",arrayOf(sessionId,leafId)).use {require(it.moveToFirst()) {"Unknown Pi leaf entry"}}
+            val values=ContentValues().apply {put("sessionId",sessionId);put("header",header.toString());if(leafId==null)putNull("leafId") else put("leafId",leafId)}
+            if(existingHeader==null)db.insertOrThrow("pi_sessions",null,values) else {
+                // Preserve the original header bytes, including metadata ordering.
+                values.remove("header");db.update("pi_sessions",values,"sessionId=?",arrayOf(sessionId))
+            }
+            for(committedRunId in inputRuns) {
+                val inputRun=requireNotNull(readPayload("runs",committedRunId,sessionId)) {"Pi input belongs to another session or missing Run"}
+                inputRun.put("piInputCommitted",true)
+                check(db.update("runs",ContentValues().apply {put("payload",inputRun.toString())},"id=? AND sessionId=?",arrayOf(committedRunId,sessionId))==1)
+            }
+            db.setTransactionSuccessful()
+        }finally {db.endTransaction()}
+    }
+
+    /** Recover only a submitted user input that died before its Pi user entry
+     * committed. No assistant history, tool events or side effects enter this path. */
+    fun loadPendingPiInputs(sessionId:String):JSONArray {
+        require(sessionId.isNotBlank())
+        val result=JSONArray()
+        readableDatabase.rawQuery("SELECT id FROM runs WHERE sessionId=? ORDER BY rowid",arrayOf(sessionId)).use {c->
+            while(c.moveToNext())readPendingPiInput(sessionId,c.getString(0))?.let(result::put)
+        }
+        return result
+    }
+    private fun readPendingPiInput(sessionId:String,runId:String):JSONObject? {
+        // Thor SQLite has no JSON1. Stream selected fields and stop as soon as a
+        // status/probe/commit/non-user message excludes the row. Large unrelated
+        // assistant content is skipped without materializing a DomainTurn.
+        val reader=object:java.io.Reader() {
+            var offset=1;var chunk="";var index=0;var ended=false
+            override fun read(target:CharArray,start:Int,length:Int):Int {
+                if(length==0)return 0
+                if(index>=chunk.length) {
+                    if(ended)return -1
+                    chunk=readableDatabase.rawQuery("SELECT substr(payload,?,65536) FROM runs WHERE id=? AND sessionId=?",arrayOf(offset.toString(),runId,sessionId)).use {c->if(c.moveToFirst())c.getString(0) else ""}
+                    offset+=65536;index=0
+                    if(chunk.isEmpty()){ended=true;return -1}
+                }
+                val count=minOf(length,chunk.length-index);chunk.toCharArray(target,start,index,index+count);index+=count;return count
+            }
+            override fun close(){ended=true;chunk="";index=0}
+        }
+        return android.util.JsonReader(reader).use {json->
+            var eligible=false;var count=0;val content=JSONArray()
+            json.beginObject()
+            while(json.hasNext())when(json.nextName()) {
+                "status" -> {eligible=json.nextString() in setOf("failed","interrupted","cancelled");if(!eligible)return@use null}
+                "probe","piInputCommitted" -> if(json.peek()==android.util.JsonToken.BOOLEAN) {if(json.nextBoolean())return@use null} else json.skipValue()
+                "turn" -> {
+                    if(json.peek()!=android.util.JsonToken.BEGIN_OBJECT){json.skipValue();continue}
+                    json.beginObject()
+                    while(json.hasNext())if(json.nextName()=="messages") {
+                        if(json.peek()!=android.util.JsonToken.BEGIN_ARRAY)return@use null
+                        json.beginArray()
+                        while(json.hasNext()) {
+                            if(json.peek()!=android.util.JsonToken.BEGIN_OBJECT)return@use null
+                            var user=false;var items:JSONArray?=null
+                            json.beginObject()
+                            while(json.hasNext())when(json.nextName()) {
+                                "kind" -> {user=json.nextString()=="user";if(!user)return@use null}
+                                "content" -> items=readPendingContent(json) ?: return@use null
+                                else -> json.skipValue()
+                            }
+                            json.endObject();if(!user || items==null)return@use null
+                            for(i in 0 until items.length())content.put(items.get(i));count++
+                        }
+                        json.endArray()
+                    } else json.skipValue()
+                    json.endObject()
+                }
+                else -> json.skipValue()
+            }
+            json.endObject()
+            if(!eligible || count==0 || content.length()==0)null else obj("runId" to runId,"content" to content,"source" to JSONArray())
+        }
+    }
+    private fun readPendingContent(json:android.util.JsonReader):JSONArray? {
+        if(json.peek()!=android.util.JsonToken.BEGIN_ARRAY)return null
+        val result=JSONArray();json.beginArray()
+        while(json.hasNext()) {
+            if(json.peek()!=android.util.JsonToken.BEGIN_OBJECT)return null
+            val item=JSONObject();json.beginObject()
+            while(json.hasNext()) {
+                val name=json.nextName()
+                if(name in setOf("type","text","attachmentId")) {
+                    if(json.peek()!=android.util.JsonToken.STRING)return null
+                    item.put(name,json.nextString())
+                }else json.skipValue()
+            }
+            json.endObject()
+            when(item.optString("type")) {
+                "text" -> if(!item.has("text"))return null
+                "attachment" -> if(item.optString("attachmentId").isBlank())return null
+                else -> return null
+            }
+            result.put(item)
+        }
+        json.endArray();return result
+    }
+    private fun readPiEntry(sessionId:String,entryId:String):String {
+        val db=readableDatabase
+        val args=arrayOf(sessionId,entryId)
+        val length=db.rawQuery("SELECT length(payload) FROM pi_session_entries WHERE sessionId=? AND id=?",args).use {c->check(c.moveToFirst());c.getInt(0)}
+        val result=StringBuilder(length);var offset=1
+        while(offset<=length) {
+            db.rawQuery("SELECT substr(payload,?,65536) FROM pi_session_entries WHERE sessionId=? AND id=?",arrayOf(offset.toString(),*args)).use {c->check(c.moveToFirst());result.append(c.getString(0))}
+            offset+=65536
+        }
+        return result.toString()
+    }
+    private fun sameJson(left:Any?,right:Any?):Boolean = when {
+        left is JSONObject && right is JSONObject -> left.keys().asSequence().toSet()==right.keys().asSequence().toSet() && left.keys().asSequence().all {sameJson(left.get(it),right.get(it))}
+        left is JSONArray && right is JSONArray -> left.length()==right.length() && (0 until left.length()).all {sameJson(left.get(it),right.get(it))}
+        else -> left==right
+    }
+
     override fun load(): JSONObject {
         val state = JSONObject()
         for (table in tables) {

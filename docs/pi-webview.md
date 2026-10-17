@@ -1,5 +1,7 @@
 # Pi Agent Core 与 pi-ai 在 Android WebView 的接入
 
+> **2026-10-17 当前实现更新：** WebView 已接入正式 `pi-coding-agent@1.2.0` 的 `AgentSession`、`SessionManager` 与完整 compaction 流程，详见 [Pi 会话与上下文职责](pi-session-ownership.md)。下文“Runtime 生成规范模型投影”、自行预算裁剪、重建唯一动态系统段及“当前全未执行”等为早期设计/考察状态，已不再代表当前实现。平台适配保留 Pi 算法正文，Native 只承担工具、网络、安全和原生 entries 持久化等边界。
+
 > 2026-10-13 状态更新：五模块已开发并进入正式软件整合。本文早期“仅规划/未授权/无 APK”等叙述保留其历史背景；当前实现、实际测试与尚未完成的 Thor 验收，以 [中文集成报告](integration-report.md) 为准。来源模块旧测试不等于本次集成结果。
 ## 已核对的官方基线
 

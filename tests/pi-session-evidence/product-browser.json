@@ -1,0 +1,51 @@
+{
+  "browser": "155.0.8059.80",
+  "csp": "self scripts / no unsafe-eval / no connections",
+  "networkRequests": [
+    "http://127.0.0.1:49531/",
+    "http://127.0.0.1:49531/harness.js"
+  ],
+  "ok": true,
+  "results": [
+    {
+      "protocol": "openai-responses",
+      "state": "completed",
+      "requests": 2,
+      "tools": 1,
+      "text": "浏览器图片工具回传完成中文",
+      "epoch": 1,
+      "snapshots": 2
+    },
+    {
+      "protocol": "anthropic-messages",
+      "state": "completed",
+      "requests": 2,
+      "tools": 1,
+      "text": "浏览器图片工具回传完成中文",
+      "epoch": 1,
+      "snapshots": 2
+    },
+    {
+      "scenario": "revoke/off/on",
+      "state": "cancelled",
+      "oldEpochExecutions": 0
+    },
+    {
+      "scenario": "cancel",
+      "state": "cancelled"
+    },
+    {
+      "scenario": "HTTP 500",
+      "state": "failed",
+      "requests": 1
+    },
+    {
+      "scenario": "official Pi automatic compaction",
+      "requests": 2,
+      "tokensBefore": 15695,
+      "summarySaved": true
+    }
+  ],
+  "upstream": "@earendil-works/pi-coding-agent@1.2.0",
+  "scope": "Real ThorRuntime browser harness with synthetic Native port HTTP responses; official Pi session automatic compaction and continuation"
+}

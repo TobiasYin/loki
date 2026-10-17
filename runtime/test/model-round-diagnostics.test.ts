@@ -30,7 +30,9 @@ test('reasoning-only output exhaustion records actual requested budget and repor
   assert.deepEqual(f.events.find(e=>e.type==='diagnostic')!.data,{code:'MODEL_OUTPUT_LIMIT',...safe});
   assert.ok(!JSON.stringify(f.events).includes('synthetic-private-id'));assert.ok(!JSON.stringify(f.events).includes('must-not-persist'));
   const agent=session.agent;assert.ok(agent);assert.equal(f.turns.at(-1)!.complete,false);
-  const next=fixture();assert.equal((await new ThorRuntime(next.ports,registry(),{},session).run(next.lease,[{type:'text',text:'继续'}],[f.turns.at(-1)!])).state,'completed');assert.equal(session.agent,agent);
+  const priorEntries=structuredClone(session.piSnapshot!.entries);
+  const next=fixture();assert.equal((await new ThorRuntime(next.ports,registry(),{},session).run(next.lease,[{type:'text',text:'继续'}])).state,'completed');assert.notEqual(session.agent,agent);
+  assert.deepEqual(session.piSnapshot!.entries.slice(0,priorEntries.length),priorEntries);
   assert.ok(JSON.stringify(next.requests[0]!.body).includes('保留任务继续'));
 });
 
@@ -55,13 +57,16 @@ test('Completions content filtering remains an error and retains reported usage 
   assert.ok(!JSON.stringify(f.events).includes('private-id'));assert.ok(!JSON.stringify(f.events).includes('private-model'));
 });
 
-for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) test(`${protocol} truncated partial tool arguments execute zero tools`,async()=>{
-  const reply:Reply={call:{name:'echo',args:'{"text":"unfinished'},stopReason:'length'};const f=fixture(protocol,[reply]);
+for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) test(`${protocol} bounded Pi continuation never executes truncated partial tool arguments`,async()=>{
+  const reply:Reply={call:{name:'echo',args:'{"text":"unfinished'},stopReason:'length'};const f=fixture(protocol,[reply,reply]);
+  f.snapshot.session.model.piSettings={compaction:{enabled:false},retry:{enabled:false}};
   if(protocol==='openai-responses') {
     const raw=protocolSse(protocol,reply).split('\n\n').filter(frame=>!frame.startsWith('event: response.output_item.done')).join('\n\n');replaceStream(f,raw+'\n\n');
   }
-  const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'one incomplete action'}]);
-  assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');assert.equal(f.executions.length,0);assert.equal(f.requests.length,1);
+  // Pi owns incomplete-tool continuation. Bound this deliberately repeated provider
+  // fixture to two requests; neither salvaged partial may reach Native.
+  const result=await new ThorRuntime(f.ports,registry(),{maxRequests:2}).run(f.lease,[{type:'text',text:'one incomplete action'}]);
+  assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');assert.equal(f.executions.length,0);assert.equal(f.requests.length,2);
   assert.ok(!f.events.some(e=>e.type==='tool_started'));assert.ok(!f.turns.at(-1)!.messages.some(m=>m.kind==='assistant'&&m.calls.length));
 });
 
@@ -78,16 +83,21 @@ for(const protocol of ['openai-responses','openai-completions','anthropic-messag
   assert.ok(!f.events.some(e=>e.type==='diagnostic'));
 });
 
-for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) test(`${protocol} reused Pi session rebinds the truncated-round stop hook and explicit follow-up still works`,async()=>{
+for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) test(`${protocol} restored Pi session retains bounded truncated rounds and explicit follow-up never replays Native work`,async()=>{
   const session=new RuntimeSession('session-test');const first=fixture(protocol,[{call:{name:'echo'}},{text:'first task completed'}]);
   assert.equal((await new ThorRuntime(first.ports,registry(),{},session).run(first.lease,[{type:'text',text:'first task'}])).state,'completed');assert.equal(first.executions.length,1);
-  const agent=session.agent;
+  const agent=session.agent; const firstEntries=structuredClone(session.piSnapshot!.entries);
   const second=fixture(protocol,[{call:{name:'echo',args:'{"text":"partial'},stopReason:'length'},{call:{name:'echo',args:'{"text":"must not retry"}'}}]);
-  const failed=await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'second task'}],[first.turns.at(-1)!]);
-  assert.equal(failed.state,'failed');assert.equal(failed.error,'LIMIT_EXCEEDED');assert.equal(second.requests.length,1);assert.equal(second.executions.length,0);assert.equal(session.agent,agent);
+  second.snapshot.session.model.piSettings={compaction:{enabled:false},retry:{enabled:false}};
+  const failed=await new ThorRuntime(second.ports,registry(),{maxRequests:1},session).run(second.lease,[{type:'text',text:'second task'}]);
+  assert.equal(failed.state,'failed');assert.equal(failed.error,'LIMIT_EXCEEDED');assert.equal(second.requests.length,1);assert.equal(second.executions.length,0);assert.notEqual(session.agent,agent);
+  assert.deepEqual(session.piSnapshot!.entries.slice(0,firstEntries.length),firstEntries);
+  const truncatedEntries=structuredClone(session.piSnapshot!.entries);
+  assert.ok(truncatedEntries.some(entry=>entry.type==='message' && entry.message.role==='assistant' && entry.message.stopReason==='length'));
+  assert.ok(!second.events.some(event=>event.type==='tool_started' || event.type==='tool_intent'));
   const followup=fixture(protocol,[{text:'explicitly continued'}]);
-  assert.equal((await new ThorRuntime(followup.ports,registry(),{},session).run(followup.lease,[{type:'text',text:'continue manually'}],[first.turns.at(-1)!,second.turns.at(-1)!])).state,'completed');
-  assert.equal(session.agent,agent);assert.equal(followup.executions.length,0);assert.equal(followup.requests.length,1);
+  assert.equal((await new ThorRuntime(followup.ports,registry(),{},session).run(followup.lease,[{type:'text',text:'continue manually'}])).state,'completed');
+  assert.notEqual(session.agent,agent);assert.deepEqual(session.piSnapshot!.entries.slice(0,truncatedEntries.length),truncatedEntries);assert.equal(followup.executions.length,0);assert.equal(followup.requests.length,1);
   assert.ok(JSON.stringify(followup.requests[0]!.body).includes('first task'));assert.ok(JSON.stringify(followup.requests[0]!.body).includes('second task'));
 });
 

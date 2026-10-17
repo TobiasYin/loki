@@ -1,0 +1,319 @@
+{
+  "package": "@earendil-works/pi-coding-agent",
+  "version": "1.2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/earendil-works/pi.git",
+    "directory": "packages/coding-agent"
+  },
+  "npmArchive": "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-1.2.0.tgz",
+  "npmIntegrity": "sha512-h/4WaVWv1VlCaY8x8qEN5U+7jbF/e7+Ck6moPeEOFn5juMTWwNAXjwgYM7gRgbBYh8Zppwt6qWvJDzNTf4GNEQ==",
+  "transformations": "Import specifiers only, plus a local Buffer byte adapter import in agent-session.js. Algorithm bodies unchanged.",
+  "modules": {
+    "core/agent-session.js": {
+      "upstreamSha256": "a5c9ff22e42215405804dc0c850e98aff424a1262829161155132a3da020b693",
+      "browserSha256": "5f2b027fdc543410309185e2dade80e6f4aea0172d2fdf54925013d1ef1ca357",
+      "importRewrites": [
+        [
+          "node:fs",
+          "../platform.js"
+        ],
+        [
+          "node:path",
+          "../platform.js"
+        ],
+        [
+          "../modes/interactive/theme/theme.js",
+          "../platform.js"
+        ],
+        [
+          "../utils/image-process.js",
+          "../platform.js"
+        ],
+        [
+          "../utils/tool-result-images.js",
+          "../platform.js"
+        ],
+        [
+          "./bash-executor.js",
+          "../platform.js"
+        ],
+        [
+          "./bug-report.js",
+          "../platform.js"
+        ],
+        [
+          "./export-html/index.js",
+          "../platform.js"
+        ],
+        [
+          "./export-html/tool-renderer.js",
+          "../platform.js"
+        ],
+        [
+          "./extensions/index.js",
+          "./extensions/browser-index.js"
+        ],
+        [
+          "./tools/bash.js",
+          "../platform.js"
+        ],
+        [
+          "./tools/index.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/session-manager.js": {
+      "upstreamSha256": "046b6a1109ac3f0ed893bb85bf0648709362fa926a5da75761216cf2fcf9d926",
+      "browserSha256": "304eec0a75bca0aee4dd03696c1faece4deaeb105adf75bf6d6387fbca895800",
+      "importRewrites": [
+        [
+          "crypto",
+          "../platform.js"
+        ],
+        [
+          "fs",
+          "../platform.js"
+        ],
+        [
+          "fs/promises",
+          "../platform.js"
+        ],
+        [
+          "path",
+          "../platform.js"
+        ],
+        [
+          "readline",
+          "../platform.js"
+        ],
+        [
+          "string_decoder",
+          "../platform.js"
+        ],
+        [
+          "../config.js",
+          "../platform.js"
+        ],
+        [
+          "../utils/paths.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/messages.js": {
+      "upstreamSha256": "8688b3f6eb28865f779cac998bd4754d1a4f08703200dfe0dd5a799aa0d42ef6",
+      "browserSha256": "8688b3f6eb28865f779cac998bd4754d1a4f08703200dfe0dd5a799aa0d42ef6",
+      "importRewrites": []
+    },
+    "core/settings-manager.js": {
+      "upstreamSha256": "4c6c9023a6178588e29545f3bc8d52ceb65ed44b58ce8dd72c9ef38f040e745f",
+      "browserSha256": "c6251a91aa3b0e84062107e5adec717986b4b6918527d2d5fc5d6fe487ca6cc0",
+      "importRewrites": [
+        [
+          "crypto",
+          "../platform.js"
+        ],
+        [
+          "fs",
+          "../platform.js"
+        ],
+        [
+          "path",
+          "../platform.js"
+        ],
+        [
+          "proper-lockfile",
+          "../platform.js"
+        ],
+        [
+          "../config.js",
+          "../platform.js"
+        ],
+        [
+          "../utils/paths.js",
+          "../platform.js"
+        ],
+        [
+          "./http-dispatcher.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/settings-defaults.js": {
+      "upstreamSha256": "46357571b2d99c0b9f1afc6e83ac6268dd71552151a3df9e24eb5d7feae3daaa",
+      "browserSha256": "46357571b2d99c0b9f1afc6e83ac6268dd71552151a3df9e24eb5d7feae3daaa",
+      "importRewrites": []
+    },
+    "core/nested-tool-calls.js": {
+      "upstreamSha256": "62a69500b63b1967e350305aa5f6762345ceb397fe5c5e7f6e6ca6c8fc16c034",
+      "browserSha256": "62a69500b63b1967e350305aa5f6762345ceb397fe5c5e7f6e6ca6c8fc16c034",
+      "importRewrites": []
+    },
+    "core/system-prompt.js": {
+      "upstreamSha256": "ab02924fa078eef81addcf39bc0e43d3663f06d627cb42ead403662a004a9e5c",
+      "browserSha256": "0ef9a1fd9f9c1f7a6c2640f32ecaac2cc47d6147784c0b514e1bead78a8e6c51",
+      "importRewrites": [
+        [
+          "../config.js",
+          "../platform.js"
+        ],
+        [
+          "./skills.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/usage-totals.js": {
+      "upstreamSha256": "aa324545a6bdc16293380b8b0d09dd960356b99c2f5d4870f1bc2046e590c465",
+      "browserSha256": "aa324545a6bdc16293380b8b0d09dd960356b99c2f5d4870f1bc2046e590c465",
+      "importRewrites": []
+    },
+    "core/virtual-models.js": {
+      "upstreamSha256": "83f1a9caa7bcd4cbf1ac84c157b0eeb2d5009f85a7f6f4265383b5e2edc323a5",
+      "browserSha256": "83f1a9caa7bcd4cbf1ac84c157b0eeb2d5009f85a7f6f4265383b5e2edc323a5",
+      "importRewrites": []
+    },
+    "core/defaults.js": {
+      "upstreamSha256": "13196dce2ddb143f6f4c28af2e34374f84004e50c7b71ba7b900e1acf84479b6",
+      "browserSha256": "13196dce2ddb143f6f4c28af2e34374f84004e50c7b71ba7b900e1acf84479b6",
+      "importRewrites": []
+    },
+    "core/source-info.js": {
+      "upstreamSha256": "67562eea112e99f4a7880913143730bd90e3655381c0f353e3dd18c5e9f1ef07",
+      "browserSha256": "67562eea112e99f4a7880913143730bd90e3655381c0f353e3dd18c5e9f1ef07",
+      "importRewrites": []
+    },
+    "core/prompt-templates.js": {
+      "upstreamSha256": "f378bb43f6a5ee8e7a2e1b53fe8d91a6e0504d96d3a724a97a58c3bd9b647555",
+      "browserSha256": "422fb7a64701b737dfb3421e9ce5be643e6302b38a262a4e16c52f50ba39001b",
+      "importRewrites": [
+        [
+          "fs",
+          "../platform.js"
+        ],
+        [
+          "path",
+          "../platform.js"
+        ],
+        [
+          "../config.js",
+          "../platform.js"
+        ],
+        [
+          "../utils/paths.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/auth-guidance.js": {
+      "upstreamSha256": "990e8295236ab4c87763b8e47e0ffa20c2958fd1827d17caf5ddf36d601e5fb4",
+      "browserSha256": "9e9d4893950351ff30cbe6cc9b1de9a87f58e35b62b3fd6d0e94fd7d984e36bf",
+      "importRewrites": [
+        [
+          "node:path",
+          "../platform.js"
+        ],
+        [
+          "../config.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/model-registry.js": {
+      "upstreamSha256": "588fa2d8df563fe0f41c99e54ecad1473cd325937b208cc1c3e103a8a032d0a1",
+      "browserSha256": "1e8c474518daf6a9400c3b2d4041426e8ca55b1dcebea1545e453e5c5072ef07",
+      "importRewrites": [
+        [
+          "./provider-composer.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/session-export.js": {
+      "upstreamSha256": "cb5debe26dbad9fb650bffc70e2c5fb81fb773ae5e8d6ac5bb6a3d2179c6b47d",
+      "browserSha256": "6a3e459df32780c67a2d2e42adb80fe2e28008b1bbc695327b8fb68e0ec47677",
+      "importRewrites": [
+        [
+          "node:fs",
+          "../platform.js"
+        ],
+        [
+          "node:path",
+          "../platform.js"
+        ],
+        [
+          "../utils/paths.js",
+          "../platform.js"
+        ]
+      ]
+    },
+    "core/extensions/runner.js": {
+      "upstreamSha256": "0e659fb4338069d91c4d0a3b032b51bf8d179a99e6417bc3e39e59b672aaec76",
+      "browserSha256": "be2a543443cf48b465dbb5dac3308ed396aa8df72c87470efb98b73c1f521c37",
+      "importRewrites": [
+        [
+          "../../modes/interactive/theme/theme.js",
+          "../../platform.js"
+        ]
+      ]
+    },
+    "core/extensions/wrapper.js": {
+      "upstreamSha256": "ea82999a05ca0af25ed31e76aaaba6e5ce6b99b5fcde3681f0d74766e4935247",
+      "browserSha256": "ea82999a05ca0af25ed31e76aaaba6e5ce6b99b5fcde3681f0d74766e4935247",
+      "importRewrites": []
+    },
+    "core/tools/tool-definition-wrapper.js": {
+      "upstreamSha256": "02fe785c52294d14216605d40d5592ac2accd1a3125891523e2a6c87feb5810c",
+      "browserSha256": "02fe785c52294d14216605d40d5592ac2accd1a3125891523e2a6c87feb5810c",
+      "importRewrites": []
+    },
+    "core/compaction/index.js": {
+      "upstreamSha256": "2ab40284c2650bf3c3f195442be00497f0ee3cb726ac47c29bfa4b3ae209697e",
+      "browserSha256": "2ab40284c2650bf3c3f195442be00497f0ee3cb726ac47c29bfa4b3ae209697e",
+      "importRewrites": []
+    },
+    "core/compaction/compaction.js": {
+      "upstreamSha256": "573f0321e9a93a4e8dca8c327f6459082ac438d1bc8b6c3c171d90894dd1543c",
+      "browserSha256": "573f0321e9a93a4e8dca8c327f6459082ac438d1bc8b6c3c171d90894dd1543c",
+      "importRewrites": []
+    },
+    "core/compaction/branch-summarization.js": {
+      "upstreamSha256": "0327aead9ce78dab3c3c7e54779b5974ec41bcb769dd3024f0c61edcd9ebea7e",
+      "browserSha256": "0327aead9ce78dab3c3c7e54779b5974ec41bcb769dd3024f0c61edcd9ebea7e",
+      "importRewrites": []
+    },
+    "core/compaction/utils.js": {
+      "upstreamSha256": "c7e234cf33528670658080b0c2f599f40a70459565c6c2a71d4a27cb0e4c5cfb",
+      "browserSha256": "c7e234cf33528670658080b0c2f599f40a70459565c6c2a71d4a27cb0e4c5cfb",
+      "importRewrites": []
+    },
+    "core/mcp-servers.js": {
+      "upstreamSha256": "b099709521b4c4aa118704762b807247ebccfc0ba4962f3a06055b17bb72d3ea",
+      "browserSha256": "b099709521b4c4aa118704762b807247ebccfc0ba4962f3a06055b17bb72d3ea",
+      "importRewrites": []
+    },
+    "utils/sleep.js": {
+      "upstreamSha256": "927f6c162c69ca902c8ab3d35b96f8cef831448de364cf4d8054d32fec310de4",
+      "browserSha256": "927f6c162c69ca902c8ab3d35b96f8cef831448de364cf4d8054d32fec310de4",
+      "importRewrites": []
+    },
+    "utils/text.js": {
+      "upstreamSha256": "e5520be5740ddb7d67ebd09ef33ea2aee2e360925593ad3a7842b6534304a0f3",
+      "browserSha256": "e5520be5740ddb7d67ebd09ef33ea2aee2e360925593ad3a7842b6534304a0f3",
+      "importRewrites": []
+    },
+    "utils/frontmatter.js": {
+      "upstreamSha256": "3e1a0e99ecc419748d87202a342dd315160764cf8588551cefcf780208165da5",
+      "browserSha256": "3e1a0e99ecc419748d87202a342dd315160764cf8588551cefcf780208165da5",
+      "importRewrites": []
+    },
+    "core/extensions/browser-runtime.js": {
+      "upstreamModule": "core/extensions/loader.js",
+      "upstreamModuleSha256": "44a356da552c9cf2ea619c61944cfb28f81b45f09b325f152c91a914bfce1bc0",
+      "extractedFunctionSha256": "358285a6de1bdd4b5cf333cd2b6b084fe26c8545df6890fd25c17592e971e2aa",
+      "browserSha256": "a8d6f4a9c672c67341fcd87939324c474b9af9326862f27eb0943e9d8b62f705"
+    }
+  }
+}

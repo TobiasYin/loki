@@ -1,0 +1,29 @@
+{
+  "result": "passed",
+  "pageErrors": [],
+  "sequence": [
+    "thinking",
+    "tool",
+    "thinking",
+    "tool",
+    "thinking"
+  ],
+  "oneCurrentShimmer": true,
+  "noCompletedShimmer": true,
+  "historyToolExpanded": true,
+  "markdownReply": true,
+  "toolBorder": "0px",
+  "toolShadow": "none",
+  "viewports": [
+    "800x480",
+    "390x540"
+  ],
+  "webTests": {
+    "passed": 89,
+    "failed": 0
+  },
+  "nativeTests": {
+    "suitePassed": 214,
+    "failed": 0
+  }
+}

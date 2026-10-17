@@ -2,3 +2,5 @@
 app/src/main/assets/chat/vendor/dompurify.LICENSE whitespace=-blank-at-eof
 tools/core/src/test/resources/thor-odin-keylayout.kl whitespace=-blank-at-eof
 tools/core/src/test/resources/thor-odin-getevent-lp.txt whitespace=-blank-at-eol
+# Preserve the pinned upstream declaration bytes and provenance hash.
+runtime/vendor/pi-session-browser/core/session-manager.d.ts whitespace=-blank-at-eol

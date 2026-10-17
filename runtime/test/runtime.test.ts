@@ -1,9 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { Model } from '@earendil-works/pi-ai';
-import { ThorRuntime, RuntimeSession, defaultCapabilities, RuntimeError, ToolRegistry, compileContext, assertPaired, type HistoryTurn, type ToolOutcome } from '../src/index.js';
+import { SessionManager } from '@thor-agent/pi-session-browser';
+import { ThorRuntime, RuntimeSession, defaultCapabilities, RuntimeError, ToolRegistry, assertPaired, type ToolOutcome } from '../src/index.js';
 import { fixture, registry, descriptor, PNG, protocolSse } from './fixtures.js';
 import { ProtocolAudit } from '../src/protocol-audit.js';
+import { nativePiState, piAssistant } from './pi-test-state.js';
+import type { Message } from '@earendil-works/pi-ai';
 
 for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) {
   test(`${protocol}: unbounded model waits for delayed headers and still stops explicitly`,async()=>{
@@ -22,18 +24,18 @@ for(const protocol of ['openai-responses','openai-completions','anthropic-messag
     const recorded=first.turns.at(-1)!;assert.equal(recorded.complete,false);
     assert.ok(JSON.stringify(recorded.messages).includes('echo-result'));
     assert.ok(first.turns.some(t=>!t.complete && t.messages.some(m=>m.kind==='tool_result')),'research must checkpoint before the later HTTP failure');
-    const agent=session.agent;const previousMessages=agent!.state.messages.length;
+    const originalEntries=structuredClone(session.piSnapshot!.entries);
     const second=fixture(protocol,[{text:'continued with research'}]);
-    assert.equal((await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'continue from there'}],[recorded])).state,'completed');
-    assert.equal(session.agent,agent);assert.ok(agent!.state.messages.length>previousMessages);
+    assert.equal((await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'continue from there'}])).state,'completed');
+    assert.deepEqual(session.piSnapshot!.entries.slice(0,originalEntries.length),originalEntries);
     const body=JSON.stringify(second.requests[0]!.body);
-    assert.ok(body.includes('remember research goal'));assert.ok(body.includes('echo-result'));assert.ok(body.includes('interrupted'));
+    assert.ok(body.includes('remember research goal'));assert.ok(body.includes('echo-result'));assert.ok(session.piSnapshot!.entries.some(e=>e.type==='message' && e.message.role==='assistant' && e.message.stopReason==='error'));
     assert.equal(body.split('continue from there').length-1,1,'new user input must not be sliced away by Pi system records');
     assert.equal(second.turns.at(-1)!.messages.filter(m=>m.kind==='user').length,1);
     assert.ok(JSON.stringify(second.turns.at(-1)!.messages[0]).includes('continue from there'));
     assert.equal(second.executions.length,0,'history must not replay an observed tool');
     const third=fixture(protocol,[{text:'after restart'}]);
-    assert.equal((await new ThorRuntime(third.ports,registry(),{},new RuntimeSession('session-test')).run(third.lease,[{type:'text',text:'continue after restart'}],[recorded,second.turns.at(-1)!])).state,'completed');
+    assert.equal((await new ThorRuntime(third.ports,registry(),{},new RuntimeSession('session-test')).run(third.lease,[{type:'text',text:'continue after restart'}],structuredClone(session.piSnapshot))).state,'completed');
     assert.ok(JSON.stringify(third.requests[0]!.body).includes('echo-result'));
   });
 }
@@ -159,14 +161,26 @@ test('tool failures are error tool results, text truncates at valid UTF-8 bounda
   await new ThorRuntime(t.ports, registry()).run(t.lease, [{ type: 'text', text: 'long' }]);
   const result = t.events.find(e => e.type === 'tool_result')!; assert.equal(result.data.truncated, true); assert.ok(!JSON.stringify(result).includes('�'));
 });
-test('bounded deterministic compression drops whole pairs; revoked derived history is filtered', async () => {
-  const f = fixture(); const m: Model<any> = { id: 'fixture-model', name: 'Test', provider: 'openai', api: 'openai-responses', baseUrl: f.snapshot.session.model.baseUrl, reasoning: false, input: ['text', 'image'], contextWindow: 8000, maxTokens: 100, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
-  const history: HistoryTurn[] = Array.from({ length: 10 }, (_, i) => ({ turnId: `t${i}`, runId: `r${i}`, source: ['screen_perception'], observedAt: Date.now(), complete: true,
-    messages: [{ kind: 'user', content: [{ type: 'text', text: `goal-${i}` }] }, { kind: 'assistant', text: '', calls: [{ id: `c${i}`, name: 'echo', arguments: { text: 'test' } }] }, { kind: 'tool_result', toolCallId: `c${i}`, toolName: 'echo', content: [{ type: 'text', text: `PRIVATE-${i}` + 'x'.repeat(800) }], isError: false }, { kind: 'assistant', text: `Derived PRIVATE-${i}`, calls: [] }] }));
-  const compile = () => compileContext({ snapshot: f.snapshot, tools: registry().effective(f.snapshot), registryVersion: '1', model: m, history, current: [{ role: 'user', content: 'CURRENT GOAL', timestamp: 1 }], attachments: f.ports.attachments, imageTokens: 100, maxHistoryTurns: 50 });
-  const before = await compile(); assert.ok(before.manifest.droppedTurnIds.length > 0); assert.ok(before.manifest.estimatedTokens <= m.contextWindow-m.maxTokens); assertPaired(before.messages); assert.ok(JSON.stringify(before.messages).includes('CURRENT GOAL')); assert.equal(history.length, 10);
-  f.snapshot.session.enabled.screen_perception = false;
-  const after = await compile(); assert.ok(!JSON.stringify(after.messages).includes('PRIVATE')); assert.ok(JSON.stringify(after.messages).includes('goal-0')); assert.equal(after.messages.filter(m => m.role === 'system').length, 1); assert.ok(!JSON.stringify(after.messages).includes('local.test'));
+test('native Pi tool rounds restore completely and revocation withholds derived history without erasing user goals', async () => {
+  const f=fixture();const logical=new RuntimeSession('session-test');
+  const messages:Message[]=[];
+  for(let i=0;i<10;i++)messages.push({role:'user',content:`goal-${i}`,timestamp:1},
+    piAssistant(f,'',[{type:'toolCall',id:`c${i}`,name:'echo',arguments:{text:'test'}}]),
+    {role:'toolResult',toolCallId:`c${i}`,toolName:'echo',content:[{type:'text',text:`PRIVATE-${i}`+'x'.repeat(800)}],isError:false,timestamp:1},
+    piAssistant(f,`Derived PRIVATE-${i}`));
+  const initial=nativePiState(f,messages,['screen_perception']),original=structuredClone(initial);
+  const run=await new ThorRuntime(f.ports,registry(),{maxHistoryTurns:1},logical).run(f.lease,[{type:'text',text:'CURRENT GOAL'}],initial);
+  assert.equal(run.state,'completed');assert.equal(f.executions.length,0,'restoring confirmed tool results never replays operations');
+  for(let i=0;i<10;i++)assert.ok(JSON.stringify(f.requests[0]!.body).includes(`goal-${i}`),'all native turns remain despite a retired compiler limit of one');
+  const state=logical.piSnapshot!;
+  const manager=SessionManager.inMemory('/thor',{id:state.header.id},[state.header,...state.entries]);
+  assertPaired(manager.buildSessionProjection().messages);assert.ok(JSON.stringify(f.requests[0]!.body).includes('CURRENT GOAL'));
+  assert.deepEqual(initial,original);
+  const revoked=fixture();revoked.snapshot.session.enabled.screen_perception=false;
+  await new ThorRuntime(revoked.ports,registry()).run(revoked.lease,[{type:'text',text:'continue without screen data'}],structuredClone(state));
+  const body=JSON.stringify(revoked.requests[0]!.body);
+  assert.ok(!body.includes('PRIVATE'));assert.ok(!body.includes('local.test'));assert.ok(body.includes('CURRENT GOAL'));
+  for(let i=0;i<10;i++)assert.ok(body.includes(`goal-${i}`));assert.equal(revoked.executions.length,0);
 });
 test('required current content cannot fit: stops without a request', async () => {
   const f = fixture(); f.snapshot.session.model.contextWindow = 2000; f.snapshot.session.model.maxOutput = 1000;
@@ -182,12 +196,12 @@ test('consumed leases do not run twice and a second Session cannot run concurren
   await assert.rejects(coordinator.run({ ...held.lease, sessionId: 'second', runId: 'second' }, [{ type: 'text', text: 'two' }]), (e: any) => e.code === 'BACKEND_UNAVAILABLE');
   coordinator.stop(); assert.equal((await first).state, 'cancelled');
 });
-test('expired images are reloaded before every request and new L0 is appended', async () => {
+test('Pi retains historical tool images while new L0 is appended without changing earlier messages', async () => {
   const f = fixture('openai-responses', [{ call: { name: 'picture' } }, { text: 'expired image handled' }]); const r = new ThorRuntime(f.ports, registry());
   r.subscribe(e => { if (e.type === 'tool_result') { f.attachments.get('tool-image')!.expiresAt = 0; f.snapshot.l0.snapshotId = 'l0-2'; f.snapshot.l0.upperApp = { packageName: 'new.app', label: 'New app' }; } });
   assert.equal((await r.run(f.lease, [{ type: 'text', text: 'image' }])).state, 'completed');
-  const second = JSON.stringify(f.requests[1]!.body); assert.ok(!second.includes(PNG)); assert.ok(second.includes('Image unavailable')); assert.ok(second.includes('local.test')); assert.ok(second.includes('new.app'));
-  assert.equal(f.contexts[1]!.l0SnapshotId, 'l0-2'); assert.ok(f.contexts[1]!.attachmentRefs.includes('tool-image'));
+  const second = JSON.stringify(f.requests[1]!.body); assert.ok(second.includes(PNG),'historical image bytes remain owned by the canonical Pi message'); assert.ok(second.includes('local.test')); assert.ok(second.includes('new.app'));
+  assert.equal(f.contexts[1]!.l0SnapshotId, 'l0-2'); assert.equal(f.contexts[1]!.compressionVersion,'pi-session-v1');
 });
 test('tool deadline stops waiting for an uncooperative executor; late data cannot re-enter', async () => {
   const f = fixture('openai-responses', [{ call: { name: 'echo' } }, { text: 'timeout handled' }]); const reg = new ToolRegistry(); reg.register({ packId: 'short', packVersion: '1', tools: [{ ...descriptor(), timeoutMs: 10 }] });
@@ -198,14 +212,21 @@ test('tool deadline stops waiting for an uncooperative executor; late data canno
   const count = f.events.length; deliver({ content: [{ type: 'text', text: 'LATE PRIVATE RESULT' }], source: 'fake', observedAt: Date.now(), truncated: false }); await Promise.resolve();
   assert.equal(f.events.length, count); assert.ok(!JSON.stringify(f.requests).includes('LATE PRIVATE RESULT'));
 });
-test('compression retains explicit constraints and side-effect ledger; oversized required memory stops', async () => {
-  const f = fixture(); f.snapshot.session.enabled.adb_debug = true;
-  const p = f.snapshot.session.model; const model: Model<any> = { id: p.modelId, name: 'T', api: p.protocol, provider: 'openai', baseUrl: p.baseUrl, reasoning: false, input: ['text'], contextWindow: 9000, maxTokens: 1000, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
-  const old: HistoryTurn = { turnId: 'old', runId: 'old', source: ['adb_debug'], observedAt: 1, complete: true, messages: [{ kind: 'user', content: [{ type: 'text', text: 'old request'.repeat(1000) }] }], constraints: ['Do not overwrite existing saves'], effects: [{ toolCallId: 'c', toolId: 'files.write', effectClass: 'write', outcome: 'observed', evidenceRef: 'backup-123' }] };
-  const options = { snapshot: f.snapshot, tools: [], registryVersion: '1', model, history: [old], current: [{ role: 'user' as const, content: 'current', timestamp: 1 }], attachments: f.ports.attachments, imageTokens: 100, maxHistoryTurns: 1 };
-  const compiled = await compileContext(options); assert.deepEqual(compiled.manifest.droppedTurnIds, ['old']); const text = JSON.stringify(compiled.messages); assert.ok(text.includes('backup-123')); assert.ok(text.includes('Do not overwrite existing saves'));
-  f.snapshot.session.enabled.adb_debug = false; assert.ok(!JSON.stringify((await compileContext(options)).messages).includes('backup-123'));
-  old.constraints = ['x'.repeat(10_000)]; await assert.rejects(compileContext(options), (e: any) => e.code === 'LIMIT_EXCEEDED');
+test('native Pi preserves user constraints while revocation removes private tool evidence and derived answers', async () => {
+  const f=fixture();f.snapshot.session.enabled.adb_debug=true;
+  const initial=nativePiState(f,[{role:'user',content:'Do not overwrite existing saves. Continue the task.',timestamp:1},
+    piAssistant(f,'',[{type:'toolCall',id:'confirmed',name:'shell',arguments:{text:'read'}}]),
+    {role:'toolResult',toolCallId:'confirmed',toolName:'shell',content:[{type:'text',text:'backup-123'}],isError:false,timestamp:1},
+    piAssistant(f,'PRIVATE_DERIVED_BACKUP_ANSWER')],['adb_debug']);
+  const logical=new RuntimeSession('session-test');
+  assert.equal((await new ThorRuntime(f.ports,registry(),{},logical).run(f.lease,[{type:'text',text:'current goal'}],initial)).state,'completed');
+  const wire=JSON.stringify(f.requests[0]!.body);assert.ok(wire.includes('backup-123'));assert.ok(wire.includes('Do not overwrite existing saves'));
+  assert.ok(!JSON.stringify(f.requests[0]!.body.input[0]).includes('backup-123'),'tool evidence never becomes a system-prompt rewrite');
+  const restored=fixture();restored.snapshot.session.enabled.adb_debug=false;
+  await new ThorRuntime(restored.ports,registry()).run(restored.lease,[{type:'text',text:'continue'}],structuredClone(logical.piSnapshot));
+  const after=JSON.stringify(restored.requests[0]!.body);
+  assert.ok(!after.includes('backup-123'));assert.ok(!after.includes('PRIVATE_DERIVED_BACKUP_ANSWER'));
+  assert.ok(after.includes('Do not overwrite existing saves. Continue the task.'));assert.ok(after.includes('current goal'));
 });
 test('authority bootstrap can be cancelled and configuration changes affect only new Runs', async () => {
   const f = fixture(); f.ports.authority.read = async () => new Promise(() => {}); const r = new ThorRuntime(f.ports, registry());
@@ -318,7 +339,14 @@ test('selected reasoning effort reaches Responses payload and uses model context
 });
 test('Completions strict audit rejects truncated and conflicting argument streams',()=>{const a=new ProtocolAudit();a.observe('openai-completions',{choices:[{index:0,delta:{tool_calls:[{index:0,id:'c',function:{arguments:'{"text":'}}]},finish_reason:null}]});a.observe('openai-completions',{choices:[{index:0,delta:{},finish_reason:'tool_calls'}]});assert.equal(a.permits('c',{}),false);const truncated=new ProtocolAudit();truncated.observe('openai-completions',{choices:[{index:0,delta:{tool_calls:[{index:0,id:'t',function:{arguments:'{}'}}]},finish_reason:'length'}]});assert.equal(truncated.permits('t',{}),false);});
 
-test('one-million-token model budget is used without an extra fixed percentage cutoff',async()=>{const f=fixture();const p=f.snapshot.session.model;const model:Model<any>={id:p.modelId,name:'1M',provider:'openai',api:p.protocol,reasoning:false,input:['text'],baseUrl:p.baseUrl,contextWindow:1000000,maxTokens:2048,cost:{input:0,output:0,cacheRead:0,cacheWrite:0}};const c=await compileContext({snapshot:f.snapshot,tools:[],registryVersion:'1',model,history:[],current:[{role:'user',content:'x'.repeat(850000),timestamp:1}],attachments:f.ports.attachments,imageTokens:0,maxHistoryTurns:1});assert.ok(c.manifest.estimatedTokens>850000);assert.ok(c.manifest.estimatedTokens<=997952);});
+test('a one-million-token profile sends large user input through Pi without the retired character-count cutoff',async()=>{
+  const f=fixture();f.snapshot.session.model.contextWindow=1000000;f.snapshot.session.model.maxOutput=2048;
+  const input='LARGE_USER_GOAL '+ 'x'.repeat(850000);
+  assert.equal((await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:input}])).state,'completed');
+  assert.equal(f.requests.length,1);assert.ok(JSON.stringify(f.requests[0]!.body).includes(input));
+  assert.equal(f.contexts[0]!.compressionVersion,'pi-session-v1');assert.ok(f.contexts[0]!.estimatedTokens>0);
+  assert.ok(f.contexts[0]!.estimatedTokens<400000,'Pi uses its own message/token estimate rather than one token per UTF16 character');
+});
 test('text-only model probe flags and image placeholders are respected',async()=>{const f=fixture('openai-completions',[{call:{name:'picture'}},{text:'文字模型继续'}]);f.snapshot.session.model.input=['text'];f.snapshot.session.model.lastProbe.imageInput=false;f.snapshot.session.model.lastProbe.imageToolRoundTrip=false;const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'read'}]);assert.equal(result.state,'completed');assert.ok(!JSON.stringify(f.requests).includes(PNG));assert.match(JSON.stringify(f.requests),/supports text only|does not support images/);});
 
 test('invalid Skill resource nesting stays blocked and returns a safe actionable schema hint',()=>{
@@ -378,10 +406,10 @@ for(const protocol of ['openai-responses','openai-completions','anthropic-messag
     assert.ok(JSON.stringify(recorded.messages).includes('已完成一次操作，后续正文未写完'));
     assert.ok(JSON.stringify(recorded.messages).includes('operation-confirmed-once'));
     assert.equal(recorded.effects?.filter(effect=>effect.outcome==='submitted').length,1);
-    const agent=session.agent;
+    const originalEntries=structuredClone(session.piSnapshot!.entries);
     const followup=fixture(protocol,[{text:'继续原进度完成，未重复已确认操作'}]);followup.snapshot.session.enabled.screen_control=true;
-    const continued=await new ThorRuntime(followup.ports,tools,{},session).run(followup.lease,[{type:'text',text:'继续刚才被截断的任务'}],[recorded]);
-    assert.equal(continued.state,'completed');assert.equal(session.agent,agent);assert.equal(followup.executions.length,0);assert.equal(nativeEffects,1);
+    const continued=await new ThorRuntime(followup.ports,tools,{},session).run(followup.lease,[{type:'text',text:'继续刚才被截断的任务'}]);
+    assert.equal(continued.state,'completed');assert.deepEqual(session.piSnapshot!.entries.slice(0,originalEntries.length),originalEntries);assert.equal(followup.executions.length,0);assert.equal(nativeEffects,1);
     const request=JSON.stringify(followup.requests[0]!.body);
     for(const retained of ['保留原目标直到完成','operation-confirmed-once','已完成一次操作，后续正文未写完','继续刚才被截断的任务'])assert.ok(request.includes(retained));
     assert.equal(followup.contexts[0]!.modelProfileRevision,first.contexts[0]!.modelProfileRevision);
@@ -401,7 +429,7 @@ test('provider error termination records only a fixed safe reason without persis
   assert.deepEqual(f.events.filter(e=>e.type==='diagnostic' && e.data.code==='MODEL_STREAM_FAILED').map(e=>e.data),[{code:'MODEL_STREAM_FAILED',modelRound:1,requestedMaxOutputTokens:1024,stopReason:'error'}]);
   assert.ok(!JSON.stringify({events:f.events,runs:f.runs,turns:f.turns,contexts:f.contexts}).includes(privateUpstream));
   const next=fixture('openai-responses',[{text:'恢复'}]);
-  assert.equal((await new ThorRuntime(next.ports,registry(),{},session).run(next.lease,[{type:'text',text:'继续'}],[f.turns.at(-1)!])).state,'completed');
+  assert.equal((await new ThorRuntime(next.ports,registry(),{},session).run(next.lease,[{type:'text',text:'继续'}])).state,'completed');
   assert.ok(!JSON.stringify(next.requests).includes(privateUpstream));
 });
 

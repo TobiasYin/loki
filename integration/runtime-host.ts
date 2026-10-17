@@ -53,7 +53,7 @@ const rpc = (op: string, data: any = {}, timeout = 185000): Promise<any> => new 
 });
 if (__THOR_DEBUG__) {
   const safeOps=new Set(['view','authority','persist','tool.prepare','tool.execute','tool.cancel','network.tool.begin','begin','end','runtime.work.begin','runtime.work.end','runtime.diagnostics.native']);
-  const safeKinds=new Set(['run','event','commit','turn','context']);
+  const safeKinds=new Set(['run','event','commit','turn','context','pi_session']);
   (window as any).__thorRuntimeDiagnostics = () => ({
     connected:!!connectionId, executionCount:executions.size, preparationCount:preparations.size, startingCount:starting.size,
     pendingRpcCount:pending.size, residentSessionCount:[...executions.values()].filter(e=>e.modelSession).length,
@@ -161,17 +161,17 @@ const ports: RuntimePorts = {
     if(response.status >= 300 && response.status < 400) { await response.body?.cancel(); throw new RuntimeError('IO_ERROR'); }
     return response;
   } },
-  persistence: { appendEvent: e => persist('event', e), commitRun: (r,e) => persist('commit',r,e), saveRun: r => persist('run',r), saveContext: s => persist('context',s), saveTurn: (_sid,t) => persist('turn',t) },
+  persistence: { appendEvent: e => persist('event', e), commitRun: (r,e) => persist('commit',r,e), saveRun: r => persist('run',r), saveContext: s => persist('context',s), saveTurn: (_sid,t) => persist('turn',t), savePiSession:(_sid,value)=>persist('pi_session',value) },
   attachments: { put: a => rpc('attachment.put', bound({ value: a })).then(() => undefined), get: async id => { const a = await rpc('attachment.get', bound({ id })); return a.attachmentId ? a : undefined; } }
 };
-// Native's durable domain history owns idle conversations. A Pi Agent lives only
-// for this execution; the same conversation ID is reconstructed on the next send.
+// Native stores opaque Pi entries for idle conversations. An official Pi session
+// lives only for this execution and restores the same entry tree on the next send.
 const session=networkContext.purpose==='model'?new RuntimeSession(activeLease.sessionId):undefined;
 const runtime=new ThorRuntime(ports,registry,{runTimeoutMs:begun.runTimeoutMs??0},session);
-let input=begun.input, history=begun.history;
+let input=begun.input, piState=begun.piSession, pendingInputs=begun.pendingInputs??[];
 return {runtime,lease:activeLease,modelSession:!!session,
-  receive:(raw:any)=>{fetchBridge.receive(raw);toolFetchBridge.receive(raw);},run:()=>runtime.run(activeLease,input,history),
-  dispose:()=>{if(session)session.agent=undefined;input=[];history=[];toolNetworkContext=undefined;
+  receive:(raw:any)=>{fetchBridge.receive(raw);toolFetchBridge.receive(raw);},run:()=>runtime.run(activeLease,input,piState,pendingInputs),
+  dispose:()=>{if(session){session.agent=undefined;session.piSnapshot=undefined;}input=[];piState=undefined;pendingInputs=[];toolNetworkContext=undefined;
     try {fetchBridge.close();}finally {toolFetchBridge.close();}}};
 }
 async function start(sessionId:string,text:string,probeToken?:string) {

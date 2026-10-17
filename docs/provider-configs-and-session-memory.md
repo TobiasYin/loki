@@ -1,5 +1,7 @@
 # Provider 配置与会话按需加载
 
+> **2026-10-17 当前实现更新：** Provider 的保存与切换行为继续适用；会话上下文已改为正式 Pi entries、leafId 和压缩状态按需落盘/恢复，详见 [Pi 会话与上下文职责](pi-session-ownership.md)。下文从“持久化 Pi turn”或 DomainTurn 重建新模型历史、以 `piSessionReused=false` 判断空闲实例释放等旧上下文实现说明已被替代。仅运行中保留 Pi 实例、闲置保存在磁盘的要求继续执行。下方真机验收记录属于此前 Provider 版本，不是本轮架构调整的真机证据。
+
 2026-10-17
 
 ## 产品行为

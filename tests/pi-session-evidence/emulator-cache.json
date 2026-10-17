@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "scope": "real-provider stable prompt cache acceptance",
+  "deviceKind": "emulator",
+  "providerKind": "deepseek",
+  "syntheticPromptsOnly": true,
+  "syntheticPrefixCharacters": 12032,
+  "cacheBuildDelayMs": 3000,
+  "cacheHitRateAsserted": false,
+  "missingCacheCountersAreZero": false,
+  "runs": [
+    {
+      "turn": 1,
+      "status": "completed",
+      "elapsedMs": 2874,
+      "contextEvents": 2,
+      "historyRestored": false,
+      "historyClipped": false,
+      "toolCalls": 1,
+      "completionMarkerMatches": true,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 393216,
+          "inputTokens": 8643,
+          "totalInputTokens": 8643,
+          "outputTokens": 39,
+          "reasoningTokens": 0,
+          "cacheReadTokens": 2432,
+          "cacheWriteTokens": null,
+          "uncachedInputTokens": 6211,
+          "cacheReadReported": true,
+          "cacheWriteReported": false,
+          "stopReason": "toolUse"
+        },
+        {
+          "modelRound": 2,
+          "requestedMaxOutputTokens": 393216,
+          "inputTokens": 8705,
+          "totalInputTokens": 8705,
+          "outputTokens": 7,
+          "reasoningTokens": 0,
+          "cacheReadTokens": 8448,
+          "cacheWriteTokens": null,
+          "uncachedInputTokens": 257,
+          "cacheReadReported": true,
+          "cacheWriteReported": false,
+          "stopReason": "stop"
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "status": "completed",
+      "elapsedMs": 3093,
+      "contextEvents": 1,
+      "historyRestored": true,
+      "historyClipped": false,
+      "toolCalls": 0,
+      "completionMarkerMatches": true,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 393216,
+          "inputTokens": 9017,
+          "totalInputTokens": 9017,
+          "outputTokens": 7,
+          "reasoningTokens": 0,
+          "cacheReadTokens": 8704,
+          "cacheWriteTokens": null,
+          "uncachedInputTokens": 313,
+          "cacheReadReported": true,
+          "cacheWriteReported": false,
+          "stopReason": "stop"
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "status": "completed",
+      "elapsedMs": 3027,
+      "contextEvents": 1,
+      "historyRestored": true,
+      "historyClipped": false,
+      "toolCalls": 0,
+      "completionMarkerMatches": true,
+      "modelRounds": [
+        {
+          "modelRound": 1,
+          "requestedMaxOutputTokens": 393216,
+          "inputTokens": 9331,
+          "totalInputTokens": 9331,
+          "outputTokens": 7,
+          "reasoningTokens": 0,
+          "cacheReadTokens": 8960,
+          "cacheWriteTokens": null,
+          "uncachedInputTokens": 371,
+          "cacheReadReported": true,
+          "cacheWriteReported": false,
+          "stopReason": "stop"
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": 0,
+  "allDeviceCapabilitiesDisabled": true,
+  "currentProviderUnchanged": true,
+  "phase": "cleanup",
+  "originalConfigurationPreserved": true,
+  "originalHistoryPreserved": true
+}

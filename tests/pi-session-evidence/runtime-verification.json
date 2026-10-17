@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-17",
+  "upstream": "@earendil-works/pi-coding-agent@1.2.0",
+  "runtime": {
+    "passed": 350,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "passed": true,
+    "scenarios": 6,
+    "version": "155.0.8059.80",
+    "csp": "self scripts / no unsafe-eval / no connections"
+  },
+  "regressions": [
+    "Official Pi auto-compaction saves the native checkpoint then continues the actual product request without trusting pre-compaction usage",
+    "Native Pi raw message ordering, signatures, usage and tool pairs survive restore",
+    "Capability revocation removes private derived evidence while preserving user goals",
+    "Malformed current content fails before transport or leaks; stop and cancelled stream boundaries remain enforced",
+    "Legacy DomainTurn conversion, self-written context compiler and run history argument are removed"
+  ],
+  "network": "Browser harness only loads local fixture assets; synthetic transport through Native ports; direct browser networking disabled",
+  "deviceChanges": false
+}

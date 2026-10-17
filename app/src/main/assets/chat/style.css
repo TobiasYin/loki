@@ -60,3 +60,14 @@ button:active{opacity:.72}button:disabled:active{opacity:.55}
 .picker-option:focus-visible,.picker-listbox:focus-visible .picker-active{outline:none;background:var(--wash);color:var(--accent)}#effort-select{display:flex;flex-wrap:wrap;gap:3px}#effort-select .picker-option{width:auto;flex:1;min-width:45px;justify-content:center;padding:7px}#effort-select .picker-option::after{display:none}
 #model-context{padding:8px 8px 3px;font-size:11px}.cap-pending{color:var(--muted)}.cap-error{color:var(--danger)}
 @media(prefers-reduced-motion:reduce){button,.run>summary::before,.tool-card>summary::before,.thinking>summary::before{transition:none}[data-disclosure-animating=true]{will-change:auto}}
+.activity-timeline{display:flex;flex-direction:column;gap:1px;padding:2px 0}
+.activity-item{margin:0;padding:0;border:0;background:transparent}
+.activity-item>summary,.activity-item>summary:hover,.activity-item>summary:active{background:transparent;border:0;box-shadow:none}
+.activity-item>summary{min-height:28px;padding:2px 0}
+.activity-item>summary .activity-label{padding:0;line-height:1.6}
+.activity-item>summary:focus-visible{outline:none;color:var(--accent)}
+.activity-item>summary:focus-visible .activity-label{color:var(--accent)}
+.activity-item[data-activity-state=completed]>summary{opacity:.82}
+.activity-item .tool-body,.activity-item .thinking-body{padding:5px 0 9px 14px}
+.timeline-answer{margin:6px 0 10px}.timeline-answer:last-child{margin-bottom:0}
+.activity-pending{min-height:28px;display:flex;align-items:center}

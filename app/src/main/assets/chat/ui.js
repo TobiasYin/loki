@@ -120,7 +120,7 @@
     panel.append(button('打开设置',()=>{cancelVoice();refreshVoice();command({op:'settings'});},'wide'));
     if(focus)[...panel.querySelectorAll('input')].find(node=>node.getAttribute('aria-label')===focus)?.focus();
   }
-  const disclosures=new Map(),runDisclosures=new Map(),disclosureControllers=new WeakMap(),movingDisclosures=new Set();
+  const disclosures=new Map(),disclosureControllers=new WeakMap(),movingDisclosures=new Set();
   const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
   // Keep a visible middle phase when frames are sparse, without delaying input
   // reversal or the reduced-motion path.
@@ -183,7 +183,7 @@
     }
     return list;
   }
-  function runView(run,runEvents,message) {
+  function runView(run,runEvents,message,nodeCache,textInTimeline) {
     const events=(runEvents??state.events.filter(e=>e.runId===run.id)).slice().sort((a,b)=>a.sequence-b.sequence);
     const container=element('div');
     const toolLabels={'web.request':'网络请求 · curl','files.download':'下载文件','files.download_info':'查看下载','apps.install':'安装应用','apps.launch':'打开应用','agent.background':'聊天转入后台','agent.sleep':'等待','apps.package_info':'核验应用安装','skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看当前屏幕','perception.select_screen':'选择操作屏幕','perception.capture_companion':'查看同应用下屏','perception.find_apps':'查找应用','perception.read_ui':'读取界面','perception.ui_tree':'读取组件树','input.scroll':'滚动页面','input.drag':'拖动控件','input.tap':'点击当前屏幕','input.long_press':'长按当前屏幕','input.swipe':'滑动当前屏幕','input.activate':'激活界面控件','input.navigate':'当前屏幕返回','input.type_text':'输入文字','input.key_press':'按键盘键','input.press_button':'按手柄键','input.set_axes':'移动摇杆与扳机','input.release_inputs':'释放输入','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
@@ -232,38 +232,40 @@
       const card=element('div',run.approval?.summary??waiting?.summary??'等待用户','wait');
       card.append(document.createElement('br'),button('批准此操作',()=>command({op:'approve',runId:run.id,approvalId:run.approval?.id}),'primary'),button('拒绝',()=>command({op:'reject',runId:run.id,approvalId:run.approval?.id})));container.append(card);
     }
-    const thinkingLimit=65536;
-    let thinkingLength=0,thinkingTruncated=message?.thinkingTruncated===true;
-    for(const event of events)if(event.type==='thinking_delta') {
-      if(typeof event.data?.text==='string')thinkingLength+=event.data.text.length;
-      if(event.data?.textTruncated===true)thinkingTruncated=true;
-    }
-    thinkingTruncated ||= thinkingLength>thinkingLimit;
-    if(thinkingLength) {
-      const thought=element('details',undefined,'thinking');
-      thought.append(element('summary',terminal.has(run.status)?'思考过程':'思考中','activity-label'+(!terminal.has(run.status)?' shimmer':'')));
-      let body=null;
-      rememberDisclosure(thought,`${run.id}:thinking`,false,open=>{
-        if(!open){body?.remove();body=null;return;}
-        if(body)return;
-        // Fold only the visible tail and only when opened. Collapsed history
-        // never concatenates the complete ledger or builds hidden text nodes.
-        const parts=[];let remaining=thinkingLimit;
-        for(let i=events.length-1;i>=0 && remaining>0;i--)if(events[i].type==='thinking_delta' && typeof events[i].data?.text==='string') {
-          const part=events[i].data.text.slice(-remaining);parts.push(part);remaining-=part.length;
+    const compactionCodes=new Set(['CONTEXT_COMPACTION_STARTED','CONTEXT_COMPACTION_FINISHED']);
+    const timeline=[],byCall=new Map();let stream=null,latest=null,compaction=null;
+    for(const [index,event] of events.entries()) {
+      const sequence=event.sequence??index,data=event.data??{},order=event.lastSequence??sequence;
+      if(event.type==='thinking_delta' || event.type==='text_delta') {
+        const kind=event.type==='thinking_delta'?'thinking':'text',explicit=event.presentationSegment;
+        if(!stream || stream.kind!==kind || (explicit && explicit!==stream.segment)) {
+          stream={kind,key:`${run.id}:${kind}:${explicit??sequence}`,segment:explicit,parts:[],truncated:false};timeline.push(stream);
         }
-        let text=parts.reverse().join('');
-        if(thinkingTruncated && text.charCodeAt(0)>=0xdc00 && text.charCodeAt(0)<=0xdfff)text=text.slice(1);
-        body=element('div',undefined,'thinking-body');
-        if(thinkingTruncated)body.append(element('small','仅显示最近的思考内容','muted thinking-truncation'));
-        body.append(element('div',text,'text'));thought.append(body);
-      });
-      container.append(thought);
+        if(typeof data.text==='string')stream.parts.push(data.text);
+        stream.truncated ||= data.textTruncated===true;
+        if(!latest || order>=latest.order)latest={kind,key:stream.key,order};
+      }else if(['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type)) {
+        stream=null;
+        const id=event.toolCallId??`event:${sequence}`;
+        if(!byCall.has(id)){const item={kind:'tool',key:`${run.id}:tool:${id}`,call:calls.get(id)};byCall.set(id,item);timeline.push(item);}
+        if(!latest || order>=latest.order)latest={kind:event.type==='tool_result'?'completed':'tool',key:byCall.get(id).key,order};
+      }else if(event.type==='diagnostic' && compactionCodes.has(data.code)) {
+        stream=null;
+        if(data.code==='CONTEXT_COMPACTION_STARTED' || !compaction || compaction.finished) {
+          compaction={kind:'compaction',key:`${run.id}:compaction:${sequence}`,reason:data.reason};timeline.push(compaction);
+        }
+        if(data.code==='CONTEXT_COMPACTION_FINISHED')compaction.finished={compacted:data.compacted===true,aborted:data.aborted===true};
+        if(!latest || order>=latest.order)latest={kind:compaction.finished?'completed':'compaction',key:compaction.key,order};
+      }
     }
-    const disclosure=element('details',undefined,'run');
-    disclosure.append(element('summary',`查看 ${calls.size} 项操作`));
-    const last=events.findLast(e=>e.type==='diagnostic');
-    let contents=null;
+    const thinkingLimit=65536,activeRun=!terminal.has(run.status),used=new Set();
+    const thinkingCount=timeline.filter(item=>item.kind==='thinking').length;
+    const activity=element('div',undefined,'activity-timeline');
+    function cached(key,signature,create) {
+      used.add(key);let entry=nodeCache.get(key);
+      if(!entry || entry.signature!==signature){entry={signature,node:create()};nodeCache.set(key,entry);}
+      return entry.node;
+    }
     function renderCallBody(card,call) {
       let body=null;
       rememberDisclosure(card,`${run.id}:tool:${call.id}`,false,open=>{
@@ -292,37 +294,61 @@
         card.append(body);
       });
     }
-    function renderOperations(open) {
-      if(!open){contents?.remove();contents=null;return;}
-      if(contents)return;
-      contents=element('div',undefined,'tool-list');
-      for(const call of calls.values()) {
-        const card=element('details',undefined,'tool-card');
-        const status=call.error==='TARGET_CHANGED'?'需要重新观察':call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):call.started?'执行中':'正在准备';
-        card.append(element('summary',`${title(call)} · ${status}`));
-        renderCallBody(card,call);contents.append(card);
+    for(const item of timeline) {
+      const isCurrent=activeRun && latest?.key===item.key && latest.kind===item.kind && run.status!=='awaiting_user';
+      if(item.kind==='thinking') {
+        const truncated=item.truncated || (thinkingCount===1 && message?.thinkingTruncated===true);
+        const node=cached(item.key,JSON.stringify([item.parts,truncated,isCurrent]),()=>{
+          const thought=element('details',undefined,'thinking activity-item');
+          thought.dataset.activityKind='thinking';thought.dataset.activityState=isCurrent?'active':'completed';thought.dataset.activityKey=item.key;
+          const summary=element('summary');summary.append(element('span',isCurrent?'思考中':'已思考','activity-label'+(isCurrent?' shimmer':'')));thought.append(summary);
+          let body=null;
+          rememberDisclosure(thought,item.key,false,open=>{
+            if(!open){body?.remove();body=null;return;}if(body)return;
+            const parts=[];let remaining=thinkingLimit,total=0;
+            for(const part of item.parts)total+=part.length;
+            for(let i=item.parts.length-1;i>=0 && remaining>0;i--){const part=item.parts[i].slice(-remaining);parts.push(part);remaining-=part.length;}
+            let text=parts.reverse().join('');
+            if(text.charCodeAt(0)>=0xdc00 && text.charCodeAt(0)<=0xdfff)text=text.slice(1);
+            body=element('div',undefined,'thinking-body');
+            if(truncated || total>thinkingLimit)body.append(element('small','仅显示最近的思考内容','muted thinking-truncation'));
+            body.append(element('div',text,'text'));thought.append(body);
+          });return thought;
+        });activity.append(node);
+      }else if(item.kind==='tool' && item.call) {
+        const call=item.call;
+        const status=call.error==='TARGET_CHANGED'?'需要重新观察':call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):terminal.has(run.status)?'未完成':isCurrent?(call.started?'执行中':'正在准备'):'待执行';
+        const node=cached(item.key,JSON.stringify([call,status,isCurrent,terminal.has(run.status)]),()=>{
+          const card=element('details',undefined,'tool-card activity-item');card.dataset.activityKind='tool';card.dataset.activityState=isCurrent?'active':call.result?'completed':'pending';card.dataset.activityKey=item.key;
+          const summary=element('summary');summary.append(element('span',`${title(call)} · ${status}`,'activity-label'+(isCurrent?' shimmer':'')));card.append(summary);
+          renderCallBody(card,call);return card;
+        });activity.append(node);
+      }else if(item.kind==='compaction') {
+        const finished=item.finished,completed=finished?.compacted===true && !finished.aborted;
+        const status=completed?'已整理较早的对话':isCurrent && !finished?'正在整理较早的对话…':'对话整理未完成';
+        const node=cached(item.key,JSON.stringify([status,finished,item.reason]),()=>{
+          const card=element('details',undefined,'thinking compaction activity-item');
+          card.dataset.activityKind='compaction';card.dataset.activityState=isCurrent && !finished?'active':completed?'completed':'incomplete';card.dataset.activityKey=item.key;
+          const summary=element('summary');summary.append(element('span',status,'activity-label'+(isCurrent && !finished?' shimmer':'')));card.append(summary);
+          let body=null;
+          rememberDisclosure(card,item.key,false,open=>{
+            if(!open){body?.remove();body=null;return;}if(body)return;
+            const explanation=completed?'较早的对话已整理为摘要，后续任务会继续使用摘要和最近的对话。':finished?.aborted?'本次对话整理已停止，原有对话仍然保留。':finished || !isCurrent?'本次整理未能完成，原有对话仍然保留，可在当前会话继续。':item.reason==='overflow'?'当前对话接近模型可用上下文，正在整理较早的内容，以便继续当前任务。':'正在将较早的对话整理为摘要，以便继续当前任务。';
+            body=element('div',explanation,'thinking-body muted');card.append(body);
+          });return card;
+        });activity.append(node);
+      }else if(item.kind==='text' && textInTimeline) {
+        const node=cached(item.key,JSON.stringify(item.parts),()=>{const block=element('div',undefined,'timeline-answer');block.dataset.activityKind='text';block.dataset.activityKey=item.key;block.append(markdown(item.parts.join('')));if(item.truncated)block.append(element('small','消息内容较长，仅显示最近一段。','muted message-truncation'));return block;});activity.append(node);
       }
-      if(last)contents.append(element('div',last.data?.code==='TARGET_CHANGED'?'页面已变化，需重新观察。':last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
-      disclosure.append(contents);
     }
-    // Native persists the outer choice. Keep an immediate local choice while
-    // awaiting its acknowledgement; a changed Native value or terminal transition
-    // still applies its explicit history-collapse policy.
-    const nativeExpanded=!!run.expanded;
-    let remembered=runDisclosures.get(run.id);
-    if(!remembered || remembered.nativeExpanded!==nativeExpanded || (!terminal.has(remembered.status)&&terminal.has(run.status))) {
-      remembered={open:nativeExpanded,nativeExpanded,status:run.status};runDisclosures.set(run.id,remembered);
-    }else remembered.status=run.status;
-    bindDisclosure(disclosure,`${run.id}:run`,remembered.open,renderOperations,open=>{
-      remembered.open=open;
-      const current=state?.runs.find(r=>r.id===run.id)??run;
-      if(open!==!!current.expanded)command({op:'expanded',runId:run.id,expanded:open});
-    });
-    if(!terminal.has(run.status) && run.status!=='awaiting_user') {
-      const latest=[...calls.values()].at(-1);
-      container.append(element('div',latest?title(latest):'正在处理','activity-label shimmer'));
+    for(const key of nodeCache.keys())if(!used.has(key))nodeCache.delete(key);
+    if(activeRun && run.status!=='awaiting_user' && (!latest || latest.kind==='completed')) {
+      const pending=element('div',run.status==='generating'?'思考中':'正在处理','activity-label shimmer activity-pending');pending.dataset.activityState='active';activity.append(pending);
     }
-    if(calls.size || last)container.append(disclosure);return container;
+    container.append(activity);
+    const last=events.findLast(e=>e.type==='diagnostic' && !compactionCodes.has(e.data?.code));
+    if(last)container.append(element('div',last.data?.code==='TARGET_CHANGED'?'页面已变化，需重新观察。':last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
+    return container;
   }
   // HTML from messages is treated as text. Markdown images remain text too:
   // simply reading a message must never trigger an external image request.
@@ -374,20 +400,23 @@
     let previous=historyMore.parentElement===chat?historyMore:null;
     for(const message of messages) {
       let entry=messageNodes.get(message.id);
-      if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments);entry={card,runSlot,textSlot,attachments};messageNodes.set(message.id,entry);}
-      const run=runs.get(message.runId),runSignature=message.role==='assistant'&&run?JSON.stringify([run,events.get(run.id),message.thinkingTruncated===true]):'';
+      if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments);entry={card,runSlot,textSlot,attachments,activityNodes:new Map()};messageNodes.set(message.id,entry);}
+      const run=runs.get(message.runId),runEvents=events.get(run?.id)??[];
+      const streamedText=runEvents.slice().sort((a,b)=>a.sequence-b.sequence).filter(event=>event.type==='text_delta').map(event=>event.data?.text??'').join('');
+      const textInTimeline=message.role==='assistant' && streamedText.length>0 && (!message.text || streamedText===message.text);
+      const runSignature=message.role==='assistant'&&run?JSON.stringify([run,runEvents,message.thinkingTruncated===true,textInTimeline]):'';
       if(entry.runSignature!==runSignature){
         const focused=document.activeElement;
         const focusKey=entry.runSlot.contains(focused) && focused.tagName==='SUMMARY'?focused.parentElement.dataset.disclosureKey:null;
         const transitions=pauseDisclosures(entry.runSlot);entry.runSlot.replaceChildren();
-        if(runSignature)entry.runSlot.append(runView(run,events.get(run.id),message));resumeDisclosures(entry.runSlot,transitions);
+        if(runSignature)entry.runSlot.append(runView(run,events.get(run.id),message,entry.activityNodes,textInTimeline));resumeDisclosures(entry.runSlot,transitions);
         if(focusKey){const target=[...entry.runSlot.querySelectorAll('details[data-disclosure-key]')].find(node=>node.dataset.disclosureKey===focusKey);(target?.querySelector('summary')??entry.runSlot.querySelector('details.run > summary'))?.focus({preventScroll:true});}
         entry.runSignature=runSignature;
       }
-      if(entry.text!==message.text || entry.textTruncated!==(message.textTruncated===true)){
-        entry.textSlot.replaceChildren(message.role==='assistant'?markdown(message.text||''):element('div',message.text||'','text'));
-        if(message.textTruncated===true)entry.textSlot.append(element('small','消息内容较长，仅显示最近一段。','muted message-truncation'));
-        entry.text=message.text;entry.textTruncated=message.textTruncated===true;
+      if(entry.text!==message.text || entry.textTruncated!==(message.textTruncated===true) || entry.textInTimeline!==textInTimeline){
+        entry.textSlot.replaceChildren(...(textInTimeline?[]:[message.role==='assistant'?markdown(message.text||''):element('div',message.text||'','text')]));
+        if(message.textTruncated===true && !textInTimeline)entry.textSlot.append(element('small','消息内容较长，仅显示最近一段。','muted message-truncation'));
+        entry.text=message.text;entry.textTruncated=message.textTruncated===true;entry.textInTimeline=textInTimeline;
       }
       const attachmentsSignature=JSON.stringify((message.attachments??[]).map(id=>state.attachments?.find(a=>a.id===id)??id));
       if(entry.attachmentsSignature!==attachmentsSignature){entry.attachments.replaceChildren();for(const aid of message.attachments??[]){const a=state.attachments?.find(a=>a.id===aid);entry.attachments.append(element('small',a?`本地附件 · ${a.size} 字节 · ${Date.now()>a.expiresAt?'已过期':'本地保存'} · SHA-256 ${a.hash.slice(0,12)}`:'附件引用不可用'));}entry.attachmentsSignature=attachmentsSignature;}

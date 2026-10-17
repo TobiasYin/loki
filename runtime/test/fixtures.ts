@@ -4,7 +4,7 @@ import { ToolRegistry } from '../src/registry.js';
 
 export const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS1cAAAAASUVORK5CYII=';
 export function profile(protocol: ModelProfile['protocol'] = 'openai-responses'): ModelProfile {
-  return { profileId: 'local-fixture', revision: 1, label: 'Fixture', protocol, baseUrl: protocol === 'openai-responses' ? 'https://fixture.invalid/v1' : 'https://fixture.invalid', modelId: 'fixture-model', credentialRef: 'credential-local-test', contextWindow: 32_000, maxOutput: 1024,
+  return { piSettings: {retry:{enabled:false},compaction:{enabled:false}}, profileId: 'local-fixture', revision: 1, label: 'Fixture', protocol, baseUrl: protocol === 'openai-responses' ? 'https://fixture.invalid/v1' : 'https://fixture.invalid', modelId: 'fixture-model', credentialRef: 'credential-local-test', contextWindow: 32_000, maxOutput: 1024,
     lastProbe: { revision: 1, textStream: true, imageInput: true, toolCalling: true, imageToolRoundTrip: true } };
 }
 export const descriptor = (modelName = 'echo', caps: ToolDescriptor['requiredCapabilities'] = ['screen_perception']): ToolDescriptor => ({

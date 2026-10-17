@@ -37,7 +37,7 @@ for(const stuck of ['next','result'] as const) test(`actual Pi cancellation term
 });
 
 for(const protocol of ['openai-responses','openai-completions','anthropic-messages'] as const) {
- test(`${protocol}: UI stop terminates real SDK partial SSE with uncooperative reader and preserves the same Pi session`,{timeout:5000},async()=>{
+ test(`${protocol}: UI stop terminates real SDK partial SSE with uncooperative reader and preserves the logical Pi session`,{timeout:5000},async()=>{
   const f=fixture(protocol,[{call:{name:'echo',id:'completed_before_stop'}}]),session=new RuntimeSession(f.lease.sessionId),runtime=new ThorRuntime(f.ports,registry(),{},session);
   const originalFetch=f.ports.network.fetch;let requests=0;
   let stream!:ReadableStreamDefaultController<Uint8Array>;let cancelled=0;const entered=deferred();
@@ -52,11 +52,15 @@ for(const protocol of ['openai-responses','openai-completions','anthropic-messag
   assert.ok(JSON.stringify(f.turns.at(-1)).includes('partial screen evidence'));assert.equal(f.runs.filter(r=>r.state==='cancelled').length,1);
   const events=f.events.length;try{stream.enqueue(new TextEncoder().encode(protocolSse(protocol,{text:'late sentinel'})));}catch{}
   await new Promise(r=>setImmediate(r));assert.equal(f.events.length,events);
-  const prior=session.agent,second=fixture(protocol,[{text:'resumed'}]);
-  assert.equal((await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'continue'}],[f.turns.at(-1)!])).state,'completed');
-  assert.equal(session.agent,prior);assert.equal(second.executions.length,0);
+  const prior=session.agent,priorEntries=structuredClone(session.piSnapshot!.entries),second=fixture(protocol,[{text:'resumed'}]);
+  assert.equal((await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'continue'}])).state,'completed');
+  assert.notEqual(session.agent,prior);assert.deepEqual(session.piSnapshot!.entries.slice(0,priorEntries.length),priorEntries);assert.equal(second.executions.length,0);
   assert.ok(JSON.stringify(second.requests[0]!.body).includes('remember stop context'));
-  assert.ok(JSON.stringify(second.requests[0]!.body).includes('partial screen evidence'));
+  assert.ok(JSON.stringify(session.piSnapshot!.entries).includes('partial screen evidence'), 'Raw Pi entries retain the stopped partial response');
+  assert.ok(session.piSnapshot!.entries.some(entry=>entry.type==='message' && entry.message.role==='assistant' && entry.message.stopReason==='aborted'));
+  // Pi deliberately excludes aborted/incomplete assistant blocks at the provider boundary.
+  // Confirmed results still enter the resumed request and must never be replayed.
+  assert.ok(JSON.stringify(second.requests[0]!.body).includes('echo-result'));
   assert.equal(cancelled,1);assert.equal(runtime.diagnostics().reserved,false);
  });
 }
@@ -71,5 +75,5 @@ test('stop during request body serialization cancels actual SDK before Native tr
   runtime.stop();assert.equal((await running).state,'cancelled');assert.equal(session.agent!.state.isStreaming,false);assert.equal(f.requests.length,0);
   const count=f.events.length;release.resolve(new ArrayBuffer(0));await new Promise(r=>setImmediate(r));assert.equal(f.events.length,count);assert.equal(f.requests.length,0);
  } finally {Request.prototype.clone=clone;release.resolve(new ArrayBuffer(0));}
- const agent=session.agent,second=fixture();assert.equal((await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'continue'}],[f.turns.at(-1)!])).state,'completed');assert.equal(session.agent,agent);assert.equal(second.executions.length,0);
+ const agent=session.agent,priorEntries=structuredClone(session.piSnapshot!.entries),second=fixture();assert.equal((await new ThorRuntime(second.ports,registry(),{},session).run(second.lease,[{type:'text',text:'continue'}])).state,'completed');assert.notEqual(session.agent,agent);assert.deepEqual(session.piSnapshot!.entries.slice(0,priorEntries.length),priorEntries);assert.equal(second.executions.length,0);
 });
