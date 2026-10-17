@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "gitHead": "9c5be3049b262ab5b79b0f38ec60bddd9d2d3a07",
+  "scope": "All current modified/untracked source, test and contract files in the keyboard task source roots, plus docs/keyboard-input.md; public evidence excluded. A selected changed-file inventory rather than a full atomic source snapshot.",
+  "baselineInventories": [
+    {
+      "path": "tests/keyboard-input-evidence/software/source-hashes.json",
+      "bytes": 6308,
+      "sha256": "79333ab2d0689aabecabde3bbcf18fd5dfdc9788701c04014e7b58ec6c2635fd"
+    },
+    {
+      "path": "tests/keyboard-input-evidence/software-fixture-fix/source-hashes.json",
+      "bytes": 983,
+      "sha256": "6b8cbedbd105f4e6915ba63608c6c044ad717ca705c4aaf532436c9d82918b52"
+    }
+  ],
+  "files": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorKeyboardInputTest.kt",
+      "bytes": 25419,
+      "sha256": "c76ee097b245b671ee1ade2431eb976bde300933f51f5cd5f2ae030c28102546"
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "bytes": 53237,
+      "sha256": "5ffabf61edeaa3f259d5fed10cf7a437eb6a604a1381c4ca3bb1097dc1945434"
+    },
+    {
+      "path": "app/src/main/assets/skills/adb-operations/SKILL.md",
+      "bytes": 4165,
+      "sha256": "2e273a142c1aed8e26563d786147d7f0d6ba032718cb9a7c9ef7322e26ab55ef"
+    },
+    {
+      "path": "app/src/main/assets/skills/adb-operations/references/keyboard-input.md",
+      "bytes": 3281,
+      "sha256": "5e282cd824829aa9dac4bb26440e9ef55fa6df19df9259f95df30ff354770501"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/InputFocusFailure.kt",
+      "bytes": 1031,
+      "sha256": "2c1b605bbdd2a8545e6a13c89f7b901289fe5c5057665400cb69f0a3a1b8c9ca"
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/InputFocusFailureTest.kt",
+      "bytes": 2677,
+      "sha256": "edfcc306ea50fbb8e63e2aa03e91edd41e590780783aec1b1ba1eb728198719f"
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "bytes": 66529,
+      "sha256": "8676afe2dc09becca8bf9d7b573e5ab7c091d11b216891cd3972a68d15dac0dc"
+    },
+    {
+      "path": "docs/keyboard-input.md",
+      "bytes": 3102,
+      "sha256": "6944f71e808d64955eea4641713e779dcaf9909ef45598444c21d6549a1b362d"
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "bytes": 16583,
+      "sha256": "7426a113cf5617bf03225e2ff788dacb235272bd1ee5183d98fd4421029221f1"
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "bytes": 39108,
+      "sha256": "ceb3a3a972d1a095af97ed00d67ff640985eedec95136a0275f7b4e1c57e95ea"
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "bytes": 21376,
+      "sha256": "62d1214dba7c579486afdb221f9b125fe4a92a24e9d8864447532582ffc25580"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/AndroidManifest.xml",
+      "bytes": 1689,
+      "sha256": "4283c39ba62823116e10e062bfb3b0385f47fdb49f0d9a602bcd5ef63453b4c0"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureActivity.kt",
+      "bytes": 6916,
+      "sha256": "73fa6c54d224b60460788f07d504c806183ba0306d83552f3adcfe17f0d17a74"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureProvider.kt",
+      "bytes": 2674,
+      "sha256": "9f994fa73392920284ee31ceedba27e602e58144591d15d369a88df33f814d42"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/res/values/keyboard_ids.xml",
+      "bytes": 230,
+      "sha256": "5345c21618c5b3975c67e3289fa94b277085efee7a230aeffd9c1eba0d677af2"
+    },
+    {
+      "path": "tools/contracts/toolpack-v1.json",
+      "bytes": 54192,
+      "sha256": "657b96c6d9869a4beaa4f857861281288ebc1a82972729509796fb57446296be"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Authorization.kt",
+      "bytes": 7452,
+      "sha256": "c4132eea4b103ea6fc8c8f5f84be50b2b72897f0e6a043bc8e1505ee3c7bae2b"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt",
+      "bytes": 8379,
+      "sha256": "29cf1963ad454e46ca1e41b945f9a1c8ef3d8fbf3a8d89f95ed86d3c49ada3a3"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/KeyboardCommand.kt",
+      "bytes": 3292,
+      "sha256": "7f05713a6f99de9831948865a0ef8888adba1ca07e1076b8f59fcfb18677d0b0"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/SemanticTree.kt",
+      "bytes": 7880,
+      "sha256": "0b812f6cb7f2362f239723a4b27c9591a0ba43adb74a1d08c5ccca99cc65ab23"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/TextInputCommand.kt",
+      "bytes": 3461,
+      "sha256": "9dbbb996a92ce96845ffa34064bfbbf1dd17e1f4219fae8cd94e3d57e06ba476"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/UiActivation.kt",
+      "bytes": 2255,
+      "sha256": "c8b97d5435632d8b1c3c2784921a0ab840556eee4d9791ae020cc0f390ad731f"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GatewayKeyboardTargetTest.kt",
+      "bytes": 5481,
+      "sha256": "1ce5a5f1ec15e318c5fb011515eb60881210e948c73a4a8b16c1e9b5bfef855c"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/KeyboardCommandTest.kt",
+      "bytes": 5919,
+      "sha256": "7c0269c7f64caad019e97a5dd4668a9b1c40dd87b16d5be67a2be183d7f4db0f"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/SemanticTreeTest.kt",
+      "bytes": 9560,
+      "sha256": "ac0eda2ae7d738f476c20679de6e9f478ded6e5c489b260f47b66676167f6263"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/TextInputCommandTest.kt",
+      "bytes": 5174,
+      "sha256": "3a335f68b8b1018aa4e06b3050db2899818d2da6ef584db9e6a30bd769836ca9"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt",
+      "bytes": 69586,
+      "sha256": "9e83559ba4b69136b5ffb27bf184c1214c20c7a602e926b6bc86f7cb13e23770"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugConnection.kt",
+      "bytes": 20105,
+      "sha256": "3e34562d9963cf54f19f939cf24446743630cdf44a04b13c13e527d9a40514ed"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugUserService.kt",
+      "bytes": 26263,
+      "sha256": "70ebe8a42242359254e0697d895f8e6056414ed22e6677edce2b918b10fe8fc5"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/InputSchemas.kt",
+      "bytes": 4339,
+      "sha256": "a61d61f457b2727a62fd242f1be97d5b5b7ce94dfe531cb8a92008474d5d98e8"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/NativeKeyboard.kt",
+      "bytes": 3941,
+      "sha256": "497e2802d6386d161974f19ebb50b40b64de969eabab0dcd0b1b42c6a70e058e"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/NativeNavigation.kt",
+      "bytes": 4319,
+      "sha256": "bb41da959e8b0c5598eb03ed3a90d664e5878651e2d503a8dc20604d4ae03747"
+    }
+  ],
+  "comparisons": [
+    {
+      "path": "app/src/androidTest/java/dev/thor/agent/EmulatorKeyboardInputTest.kt",
+      "versusInitialSoftware": "CHANGED",
+      "versusFixtureFix": "CHANGED"
+    },
+    {
+      "path": "app/src/main/assets/chat/ui.js",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "app/src/main/assets/skills/adb-operations/SKILL.md",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "app/src/main/assets/skills/adb-operations/references/keyboard-input.md",
+      "versusInitialSoftware": "CHANGED",
+      "versusFixtureFix": "CHANGED"
+    },
+    {
+      "path": "app/src/main/java/dev/thor/agent/InputFocusFailure.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "app/src/test/java/dev/thor/agent/InputFocusFailureTest.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "app/web-tests/ui.test.cjs",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "docs/keyboard-input.md",
+      "versusInitialSoftware": "ADDED",
+      "versusFixtureFix": "ADDED"
+    },
+    {
+      "path": "runtime/src/context.ts",
+      "versusInitialSoftware": "CHANGED",
+      "versusFixtureFix": "CHANGED"
+    },
+    {
+      "path": "runtime/src/runtime.ts",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "runtime/test/target-recovery.test.ts",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/AndroidManifest.xml",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureActivity.kt",
+      "versusInitialSoftware": "CHANGED",
+      "versusFixtureFix": "CHANGED"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureProvider.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tests/input-lab-app/app/src/debug/res/values/keyboard_ids.xml",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/contracts/toolpack-v1.json",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Authorization.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/Contracts.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/KeyboardCommand.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/SemanticTree.kt",
+      "versusInitialSoftware": "CHANGED",
+      "versusFixtureFix": "CHANGED"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/TextInputCommand.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/main/kotlin/dev/thor/tools/UiActivation.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/GatewayKeyboardTargetTest.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/KeyboardCommandTest.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/SemanticTreeTest.kt",
+      "versusInitialSoftware": "CHANGED",
+      "versusFixtureFix": "CHANGED"
+    },
+    {
+      "path": "tools/core/src/test/kotlin/dev/thor/tools/TextInputCommandTest.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt",
+      "versusInitialSoftware": "CHANGED",
+      "versusFixtureFix": "CHANGED"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugConnection.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/DebugUserService.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/InputSchemas.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/NativeKeyboard.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    },
+    {
+      "path": "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/NativeNavigation.kt",
+      "versusInitialSoftware": "UNCHANGED",
+      "versusFixtureFix": "UNCHANGED"
+    }
+  ]
+}

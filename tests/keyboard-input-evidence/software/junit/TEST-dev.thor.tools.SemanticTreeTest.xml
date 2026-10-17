@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.SemanticTreeTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-17T04:30:22.314Z" hostname="JGJHX5JPGF" time="0.015">
+  <properties/>
+  <testcase name="removesWrappersButPreservesSemanticParentsAndScrollContainers" classname="dev.thor.tools.SemanticTreeTest" time="0.002"/>
+  <testcase name="platformTextWindowKeepsOriginalOffsetAndLengthForVeryLongExposedText" classname="dev.thor.tools.SemanticTreeTest" time="0.0"/>
+  <testcase name="editableEmojiSelectionKeepsOriginalUtf16OffsetsEvenWhenTextIsSliced" classname="dev.thor.tools.SemanticTreeTest" time="0.0"/>
+  <testcase name="offscreenIsReadEvidenceAndPasswordCannotBeSearchedThroughAnyField" classname="dev.thor.tools.SemanticTreeTest" time="0.001"/>
+  <testcase name="scrollOwnContentUpdateMayFinishButOldObservationCannotAuthorizeAnotherInput" classname="dev.thor.tools.SemanticTreeTest" time="0.003"/>
+  <testcase name="passwordsAndNonEditableNodesNeverExposeSelectionMetadata" classname="dev.thor.tools.SemanticTreeTest" time="0.0"/>
+  <testcase name="tooSmallAncestorBudgetStopsPagingInsteadOfReturningSameOffsetForever" classname="dev.thor.tools.SemanticTreeTest" time="0.0"/>
+  <testcase name="paginationReportsNodeCharacterAndTotalWireByteLimits" classname="dev.thor.tools.SemanticTreeTest" time="0.004"/>
+  <testcase name="refsRejectSamePathWithWrongSnapshotWindowPackageOrRefreshedIdentityAndExpiry" classname="dev.thor.tools.SemanticTreeTest" time="0.0"/>
+  <testcase name="longTextSearchFindsTailBeforeClippingAndTextOffsetCanReadLater" classname="dev.thor.tools.SemanticTreeTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

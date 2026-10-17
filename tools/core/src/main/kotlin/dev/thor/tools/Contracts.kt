@@ -34,6 +34,8 @@ object ToolPack {
         Descriptor("agent.background", Capability.SCREEN_CONTROL, Effect.INPUT, false,timeoutMs=15000),
         Descriptor("input.navigate", Capability.SCREEN_CONTROL, Effect.INPUT, true,timeoutMs=15000),
         Descriptor("input.activate", Capability.SCREEN_CONTROL, Effect.INPUT, true,timeoutMs=15000),
+        Descriptor("input.type_text", Capability.SCREEN_CONTROL, Effect.INPUT, true,timeoutMs=15000),
+        Descriptor("input.key_press", Capability.SCREEN_CONTROL, Effect.INPUT, true,timeoutMs=15000),
         Descriptor("input.tap", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.long_press", Capability.SCREEN_CONTROL, Effect.INPUT, true),
         Descriptor("input.swipe", Capability.SCREEN_CONTROL, Effect.INPUT, true),

@@ -1,0 +1,52 @@
+{
+  "sealedByRelease": true,
+  "eventCount": 16,
+  "eventSha256": "1e0c0932f167135cd23384d31b69e5988f001e5d1731c508a764ee9168ada539",
+  "eventBytes": 2366,
+  "observedRawKeys": [
+    {
+      "action": 0,
+      "keyCode": 66,
+      "metaState": 0,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 1,
+      "keyCode": 66,
+      "metaState": 0,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 0,
+      "keyCode": 113,
+      "metaState": 4096,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 0,
+      "keyCode": 29,
+      "metaState": 4096,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 1,
+      "keyCode": 29,
+      "metaState": 4096,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 1,
+      "keyCode": 113,
+      "metaState": 0,
+      "source": 257,
+      "deviceId": -1
+    }
+  ],
+  "backspaceExecuted": false,
+  "wholeKeyboardAcceptancePassed": false
+}

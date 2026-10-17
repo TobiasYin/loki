@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "directory": "attempt-01",
+      "keyboardPassed": false,
+      "textPassed": false,
+      "keysPassed": false,
+      "durationSeconds": 43.002,
+      "dynamicPassed": null
+    },
+    {
+      "attempt": 2,
+      "directory": "attempt-02",
+      "keyboardPassed": false,
+      "textPassed": true,
+      "keysPassed": false,
+      "durationSeconds": 163.053,
+      "dynamicPassed": null
+    },
+    {
+      "attempt": 3,
+      "directory": "attempt-03",
+      "keyboardPassed": true,
+      "textPassed": true,
+      "keysPassed": true,
+      "durationSeconds": 149.781,
+      "dynamicPassed": true
+    }
+  ],
+  "finalAllOriginalHistoryPreserved": true,
+  "finalRunsAllTerminal": 126,
+  "originalRuns": 120,
+  "cloudCalls": 0,
+  "physicalDeviceActions": 0,
+  "testsWereNotRepeatedWithoutAChangeOrFailure": true
+}

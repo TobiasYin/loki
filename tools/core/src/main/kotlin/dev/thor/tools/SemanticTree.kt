@@ -5,9 +5,11 @@ data class UiElement(val path:String,val parentPath:String?,val role:String?,val
     val password:Boolean,val clickable:Boolean,val checkable:Boolean,val checked:Boolean,val selected:Boolean,val enabled:Boolean,
     val visible:Boolean,val scrollable:Boolean,val editable:Boolean,val bounds:List<Int>,val actions:List<String>,
     val collection:Map<String,Any?>?=null,val collectionItem:Map<String,Any?>?=null,val range:Map<String,Any?>?=null,
-    val textSourceStart:Int=0,val textSourceLength:Int?=null,val descriptionSourceStart:Int=0,val descriptionSourceLength:Int?=null,val valueSourceStart:Int=0) {
+    val textSourceStart:Int=0,val textSourceLength:Int?=null,val descriptionSourceStart:Int=0,val descriptionSourceLength:Int?=null,val valueSourceStart:Int=0,
+    // Android selection indexes refer to the original full text in UTF-16 units, never the projected text slice.
+    val selectionStart:Int?=null,val selectionEnd:Int?=null,val focused:Boolean=false) {
     fun semantic()=parentPath==null || !id.isNullOrBlank() || (!password && listOf(text,description,value).any {!it.isNullOrBlank()}) || password || clickable || checkable || selected || scrollable || editable || actions.isNotEmpty() || collection!=null || collectionItem!=null || range!=null
-    fun safe()=if(password)copy(id=null,text="[password hidden]",description=null,value=null,textSourceStart=0,textSourceLength=null,descriptionSourceStart=0,descriptionSourceLength=null,valueSourceStart=0) else this
+    fun safe()=if(password)copy(id=null,text="[password hidden]",description=null,value=null,textSourceStart=0,textSourceLength=null,descriptionSourceStart=0,descriptionSourceLength=null,valueSourceStart=0,selectionStart=null,selectionEnd=null,focused=false) else this
 }
 data class UiTreePage(val nodes:List<Map<String,Any?>>,val paths:List<String>,val nextOffset:Int?,val matched:Int,val reasons:Set<String>,val visible:Int,val offscreen:Int,val blocked:Boolean=false)
 object SemanticTree {
@@ -46,9 +48,11 @@ object SemanticTree {
                 "role" to role,"id" to id,"text" to text,"description" to desc,"value" to value,"matchesQuery" to matchedHere,
                 "textStart" to textSlice.first,"textLength" to (n.textSourceLength ?: n.text?.length),"textTruncated" to (n.text!=null && (textSlice.first>0 || text?.length!=(n.textSourceLength ?: n.text.length))),
                 "descriptionStart" to descSlice.first,"descriptionLength" to (n.descriptionSourceLength ?: n.description?.length),
-                "password" to n.password,"clickable" to n.clickable,"checkable" to n.checkable,"checked" to n.checked,"selected" to n.selected,"enabled" to n.enabled,
+                "password" to n.password,"clickable" to n.clickable,"checkable" to n.checkable,"checked" to n.checked,"selected" to n.selected,"enabled" to n.enabled,"focused" to n.focused,
                 "visibleToUser" to n.visible,"scrollable" to n.scrollable,"editable" to n.editable,"actions" to n.actions,"bounds" to n.bounds,
                 "collection" to n.collection,"collectionItem" to n.collectionItem,"range" to n.range)
+            if(n.editable && !n.password && n.selectionStart!=null && n.selectionEnd!=null)
+                output["textSelection"]=mapOf("start" to n.selectionStart,"end" to n.selectionEnd,"unit" to "utf16")
             val encodedBytes=jsonBytes(output)
             if(wireBytes+encodedBytes>45000){reasons.add("maxOutputBytes");return false}
             wireBytes+=encodedBytes+1;page.add(output)

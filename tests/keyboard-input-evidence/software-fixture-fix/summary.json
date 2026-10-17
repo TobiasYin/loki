@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "status": "FIXTURE_CORRECTED_DEVICE_RERUN_PENDING",
+  "change": "DEBUG read-only receiver changes from an EditText with keyListener=null to an ordinary TextView. Android had continued to advertise the original EditText as editable with ACTION_SET_TEXT; source retains the same resource id and receiver report. No test assertion or platform capability metadata is forged.",
+  "baseline": "../software/",
+  "gradle": {
+    "log": {
+      "path": "build/keyboard-fixture-fix-gradle.log",
+      "bytes": 18852,
+      "sha256": "2e3c2ad7383a133fada14ad655ea450b370e927e8c3e9ce9d32a2ffeec1ec60c"
+    },
+    "success": true,
+    "seconds": 5,
+    "tasks": 281,
+    "executed": 18,
+    "upToDate": 263,
+    "relevantTaskExcerpts": [
+      "> Task :input-lab:assembleDebug",
+      "> Task :input-lab:testDebugUnitTest",
+      "> Task :app:assembleDebug UP-TO-DATE",
+      "> Task :app:assembleDebugAndroidTest UP-TO-DATE",
+      "> Task :input-lab:lintDebug"
+    ]
+  },
+  "tests": {
+    "inputLab74TaskStatus": "EXECUTED",
+    "jvmInventoryTotalRemains": 474,
+    "jvmFailures": 0,
+    "runtime254Rerun": false,
+    "chat73Rerun": false,
+    "counting": "Input Lab 74 reran in this fixture rebuild; it remains the same 74-test component of the earlier 474-test inventory and is not added again. Runtime254 and chat73 results are retained from the original software bundle.",
+    "inputLabLatestXml": {
+      "totals": {
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AttemptTest.xml",
+          "bytes": 4206,
+          "sha256": "cf8024f4c16b5961a4eac72e30a529bdca97919ceda0554495ff21c9f41045ef"
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AxisProfileTest.xml",
+          "bytes": 1009,
+          "sha256": "2495feb06b304cf96aebb46e1d29a722c86318fa0f58ad5aea11e1c39b5e1166"
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.DeviceContinuityTest.xml",
+          "bytes": 1321,
+          "sha256": "d196457bcba7c40864ad9fafffc0c21c384d767aa5e68d7c5254d3f2b0b34737"
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.JournalTest.xml",
+          "bytes": 1090,
+          "sha256": "249b1eb73580630ff34cfcca4b282bd10ccffeb006d59ec130e6c03c8a3ae9bf"
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerEvidenceModeTest.xml",
+          "bytes": 889,
+          "sha256": "106b96da9a15afdd804025ccadab16ba9b95ac95eba245ae99d53e5debdd4027"
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerWindowTest.xml",
+          "bytes": 905,
+          "sha256": "c734908a5d98494c7a158d64269a8efe45390f089f07d13282060383647a22ca"
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioModelTest.xml",
+          "bytes": 1032,
+          "sha256": "0b7ee3f0179c924d5920881ab5fcb0179887f35bc97b44d7314d04d3355d5bdf"
+        },
+        {
+          "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioSessionTest.xml",
+          "bytes": 1042,
+          "sha256": "98b70e6a68fce87140ebdbacfce9a4d08f9bc6a7f44912f2986d0fb008bf1498"
+        }
+      ]
+    }
+  },
+  "pins": {
+    "actualBytesVerified": true,
+    "appAndAndroidTestUnchanged": true,
+    "onlyChangedPinnedArtifact": "input-lab-debug.apk",
+    "inputLabDebugSha256": "b8c2944f9e73b131d0da2a7e34f01758305fd12ac8000a8bc5c1caa395549f34"
+  },
+  "artifacts": {
+    "source": {
+      "path": "build/keyboard-fixture-fix-artifacts.json",
+      "bytes": 1899,
+      "sha256": "4a54884bdcdfc64aa81c82574d8d457fc4ad5e9f50adad5265980fa9df931b34"
+    },
+    "allFourActualBytesVerified": true,
+    "onlyChangedArtifactEntry": "input-lab-debug"
+  },
+  "sourceHashes": "source-hashes.json",
+  "firstAttempt": {
+    "fullPrivateReport": {
+      "path": "build/emulator/keyboard-input-2026-10-17/run-01/keyboard-final.json",
+      "bytes": 95488,
+      "sha256": "369e3919e64b02dcfe47e135b689baabd8803d5cd4c610ffc05c7ca9c813f9fc"
+    },
+    "result": {
+      "passed": false,
+      "textPassed": false,
+      "keysPassed": false,
+      "failureType": "AssertionError",
+      "unicodeReplacementAndNoAutoSubmit": true,
+      "selectionInsert": true,
+      "emptyReplacementClears": true,
+      "cloudCalled": false,
+      "modelExecutionProven": false,
+      "systemInjectionProven": false,
+      "cleanupErrors": []
+    },
+    "keyPressToolWasNotExecuted": true,
+    "cause": "The fixture labelled read-only was a real Android EditText that still advertised editable=true and set_text. Input text was accepted and the receiver assertion failed; this is retained as a failed attempt, not a pass.",
+    "positivePartialResults": "Unicode replacement without implicit submit, selection replacement and empty replacement had passed before the fixture assertion. Text suite overall and keyboard-key suite did not pass."
+  },
+  "limits": [
+    "This supplement contains no new emulator/device acceptance pass, cloud/model claim, physical Thor claim or game result.",
+    "The first failed attempt remains failed and real keyboard key submission was not reached.",
+    "The earlier software evidence remains frozen; this supplement records only the one DEBUG fixture change and associated rebuild.",
+    "Collector performed read-only inspection and wrote only this sibling directory; no source edit, Gradle run or device action was performed."
+  ]
+}

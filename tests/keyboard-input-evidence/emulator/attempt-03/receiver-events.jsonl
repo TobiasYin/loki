@@ -1,0 +1,21 @@
+{"sequence":1,"eventKind":"prepared","recordOrigin":"fixture_setup","uptimeMs":819477,"data":{}}
+{"sequence":2,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":823239,"data":{"field":"Normal editor","length":4,"start":0,"before":4,"count":4}}
+{"sequence":3,"eventKind":"configure","recordOrigin":"fixture_setup","uptimeMs":823595,"data":{"change":"select_emoji"}}
+{"sequence":4,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":828786,"data":{"field":"Normal editor","length":4,"start":0,"before":4,"count":4}}
+{"sequence":5,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":834841,"data":{"field":"Normal editor","length":0,"start":0,"before":4,"count":0}}
+{"sequence":6,"eventKind":"configure","recordOrigin":"fixture_setup","uptimeMs":849773,"data":{"change":"move"}}
+{"sequence":7,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":921492,"data":{"field":"Normal editor","length":15,"start":0,"before":0,"count":15}}
+{"sequence":8,"eventKind":"configure","recordOrigin":"fixture_setup","uptimeMs":921591,"data":{"change":"focus_normal"}}
+{"sequence":9,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":924864,"data":{"action":0,"keyCode":66,"metaState":0,"source":257,"deviceId":-1}}
+{"sequence":10,"eventKind":"editor_action","recordOrigin":"android_editor","uptimeMs":924865,"data":{"actionId":6,"keyCode":66}}
+{"sequence":11,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":924871,"data":{"action":1,"keyCode":66,"metaState":0,"source":257,"deviceId":-1}}
+{"sequence":12,"eventKind":"focus","recordOrigin":"android_focus_callback","uptimeMs":924884,"data":{"field":"Normal editor","focused":false}}
+{"sequence":13,"eventKind":"focus","recordOrigin":"android_focus_callback","uptimeMs":924886,"data":{"field":"Password editor","focused":true}}
+{"sequence":14,"eventKind":"focus","recordOrigin":"android_focus_callback","uptimeMs":926886,"data":{"field":"Password editor","focused":false}}
+{"sequence":15,"eventKind":"focus","recordOrigin":"android_focus_callback","uptimeMs":926889,"data":{"field":"Normal editor","focused":true}}
+{"sequence":16,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":931971,"data":{"action":0,"keyCode":113,"metaState":4096,"source":257,"deviceId":-1}}
+{"sequence":17,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":932088,"data":{"action":0,"keyCode":29,"metaState":4096,"source":257,"deviceId":-1}}
+{"sequence":18,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":932146,"data":{"action":1,"keyCode":29,"metaState":4096,"source":257,"deviceId":-1}}
+{"sequence":19,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":932178,"data":{"action":1,"keyCode":113,"metaState":0,"source":257,"deviceId":-1}}
+{"sequence":20,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":936185,"data":{"field":"Normal editor","length":0,"start":0,"before":15,"count":0}}
+{"sequence":21,"eventKind":"release","recordOrigin":"fixture_setup","uptimeMs":936454,"data":{}}

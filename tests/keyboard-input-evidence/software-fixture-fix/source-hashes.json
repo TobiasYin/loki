@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "changedSource": {
+    "before": {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureActivity.kt",
+      "bytes": 6358,
+      "sha256": "73447533e449996bbec84868f026f6fc748a55039d2b901a6c04638d8b7dec2c"
+    },
+    "after": {
+      "path": "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureActivity.kt",
+      "bytes": 6616,
+      "sha256": "b85014b90fe0029ba3dd423efadb23cbde8cf4bd4a1a9c5e2b8acad36b27b53c"
+    }
+  },
+  "baselineInventory": {
+    "path": "tests/keyboard-input-evidence/software/source-hashes.json",
+    "bytes": 6308,
+    "sha256": "79333ab2d0689aabecabde3bbcf18fd5dfdc9788701c04014e7b58ec6c2635fd"
+  },
+  "remainingSourceFiles": 30,
+  "remainingSourceFilesActualBytesMatchBaseline": true,
+  "meaning": "Only the DEBUG fixture source changed from the earlier 31-file selected inventory. Production, contracts, Runtime, chat and Android test source hashes match that inventory."
+}

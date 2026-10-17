@@ -472,6 +472,151 @@
       ]
     },
     {
+      "toolId": "input.type_text",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "nodeRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "insert",
+              "replace"
+            ],
+            "default": "insert"
+          }
+        },
+        "required": [
+          "nodeRef",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 15000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "selected-screen/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Accessibility on the selected screen; current ui_tree nodeRef of a visible enabled non-password editable field with ACTION_SET_TEXT"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Enter real Unicode text (including Chinese, emoji and newlines) into one current selected-screen editable field through ACTION_SET_TEXT. nodeRef must come from a fresh ui_tree and retains Run/session/window/app/node identity and visible bounds checks. Default insert replaces the current selection, inserts at a cursor, or appends when both selection endpoints are unavailable; replace replaces the full field and empty text clears it. text is at most 4096 Unicode code points; insert result is at most 65536 UTF-16 units, invalid or split-surrogate selections are rejected. This changes the field only: no automatic Enter, IME action or submission. Observe the screen/UI again before the next action. Password fields and hidden/offscreen fields are not supported."
+    },
+    {
+      "toolId": "input.key_press",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "screen_control"
+      ],
+      "effectClass": "input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "G",
+              "H",
+              "I",
+              "J",
+              "K",
+              "L",
+              "M",
+              "N",
+              "O",
+              "P",
+              "Q",
+              "R",
+              "S",
+              "T",
+              "U",
+              "V",
+              "W",
+              "X",
+              "Y",
+              "Z",
+              "0",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "ENTER",
+              "TAB",
+              "BACKSPACE",
+              "DELETE",
+              "ESCAPE",
+              "SPACE",
+              "UP",
+              "DOWN",
+              "LEFT",
+              "RIGHT",
+              "HOME",
+              "END",
+              "PAGE_UP",
+              "PAGE_DOWN"
+            ]
+          },
+          "modifiers": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "CTRL",
+                "ALT",
+                "SHIFT",
+                "META"
+              ]
+            }
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 15000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "selected-screen/snapshot"
+      ],
+      "platformPrerequisites": [
+        "Shizuku shell UID 2000 grant; verified selected-screen application keyboard focus; fixed Android keyboard injection backend"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Send one bounded keyboard DOWN/UP pair with optional distinct CTRL, ALT, SHIFT and META modifiers to the verified focused application on the selected screen. Fixed allowlist only: A-Z, 0-9, ENTER, TAB, BACKSPACE, DELETE, ESCAPE, SPACE, UP/DOWN/LEFT/RIGHT, HOME/END and PAGE_UP/PAGE_DOWN. HOME/END move within text; no Android system HOME, arbitrary numeric keycodes, shell commands, power/volume keys, repeat or holds. All attempted keys and modifiers receive UP cleanup even after cancellation. Keyboard events are not gamepad events and do not type arbitrary Unicode: use input.type_text for Chinese/emoji or multi-character text. Enter is sent only when explicitly requested, so observe the result before using it to submit. Observe screen/UI again after each action."
+    },
+    {
       "toolId": "input.navigate",
       "schemaVersion": 1,
       "requiredCapabilities": [

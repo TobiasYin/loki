@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "scope": "emulator real Native RPC keyboard-input component; ordinary Activity; no model execution",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "cleanupErrors": [],
+  "textPassed": false,
+  "keysPassed": false,
+  "passed": false,
+  "nativeRunId": "58715813-6d9f-48da-b52f-498f4685e5f4",
+  "setupPermissionsDroppedBeforeTools": true,
+  "unicodeReplacementAndNoAutoSubmit": true,
+  "selectionInsert": true,
+  "emptyReplacementClears": true,
+  "failureType": "AssertionError",
+  "profilesRestored": true,
+  "credentialsRestored": true,
+  "rolesRestored": true,
+  "durationSeconds": 43.002,
+  "causeOrOutcome": "Fixture 的 EditText.keyListener=null 仍由 Android 暴露 editable=true 和 set_text；其真实可写状态与测试只读假设不符。改为真正普通 TextView，未伪造 Accessibility 信息。",
+  "toolOutcomes": [
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1583
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 958
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 834
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 381
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1755
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 251
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1071
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 329
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 759
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 447
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 519
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 342
+    }
+  ]
+}

@@ -199,7 +199,7 @@ export class ThorRuntime {
           if (rejectedScreenRead) fail(outcomeError!);
           if (outcomeError === 'TARGET_CHANGED') {
             if (outcome.targetChangedReason === 'input_focus_mismatch' &&
-                ['input.press_button', 'input.set_axes', 'input.navigate'].includes(t.toolId) && t.effectClass === 'input') targetChangedReason = 'input_focus_mismatch';
+                ['input.press_button', 'input.set_axes', 'input.navigate', 'input.key_press'].includes(t.toolId) && t.effectClass === 'input') targetChangedReason = 'input_focus_mismatch';
             fail('TARGET_CHANGED');
           }
           if (outcomeError === 'PROTOCOL_ERROR' && outcome.error !== 'PROTOCOL_ERROR') fail('PROTOCOL_ERROR');

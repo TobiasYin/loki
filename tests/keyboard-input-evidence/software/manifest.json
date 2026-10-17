@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "scope": "Every file under this software directory except manifest.json",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2212,
+      "sha256": "fbcf7605389a2f0b71310d3f36e2610651aebfb129879636b72eb520b2622a06"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "885ebf156981138e7b26459cbd152925964513e92d357afa097c650421946089"
+    },
+    {
+      "path": "junit/TEST-dev.thor.tools.GatewayKeyboardTargetTest.xml",
+      "bytes": 1106,
+      "sha256": "115973c6f65cbc009ff1c73f1ceb8833c47e74ec8b420ba30c98e0b7934c5d47"
+    },
+    {
+      "path": "junit/TEST-dev.thor.tools.KeyboardCommandTest.xml",
+      "bytes": 1826,
+      "sha256": "47dbfe4094109a3e9eeba1e75df30af935545309ce705968eafd69f0eb511af7"
+    },
+    {
+      "path": "junit/TEST-dev.thor.tools.SemanticTreeTest.xml",
+      "bytes": 1748,
+      "sha256": "e8bc36a17101de233579f8788b3fcdf23c50c5e28d76c1f7574337a7f82f3b0e"
+    },
+    {
+      "path": "junit/TEST-dev.thor.tools.TextInputCommandTest.xml",
+      "bytes": 1662,
+      "sha256": "8d5db96a0c40052f2cba5fb4ce763c2cfc74b6e9dd329c9f8ba7a2323c0beb64"
+    },
+    {
+      "path": "junit-xml-hashes.json",
+      "bytes": 26011,
+      "sha256": "4ad63889f260a2d34d7910867309e6653f33a1975a702dce80a2fd9e2507ad31"
+    },
+    {
+      "path": "lint-report-hashes.json",
+      "bytes": 1014,
+      "sha256": "44755727dd6421031705931e5d9e967c2331b56ed334c937e5516f2eaf41c1e4"
+    },
+    {
+      "path": "log-excerpts.txt",
+      "bytes": 2510,
+      "sha256": "516031da5ac9a75929096c8e784678bf37569054937fa72e6ed5d2bc73401ae4"
+    },
+    {
+      "path": "pins.json",
+      "bytes": 528,
+      "sha256": "7297a26f9645ec6a5fdbfd65395b93789df8ec15d6ac6cf5da6ac4ad4125d0ae"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 6308,
+      "sha256": "79333ab2d0689aabecabde3bbcf18fd5dfdc9788701c04014e7b58ec6c2635fd"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 6855,
+      "sha256": "af3672f90219437d284daaf67b9dca4f3df1429976608be9658d21778394c56a"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "files": {
+    "README.md": {
+      "sha256": "a156930ccdd6f4ed5c658665b35049992ea5746c8727936dd1648c339116d6a7",
+      "bytes": 1233
+    },
+    "component-summary.json": {
+      "sha256": "144106e561786c80bf664cc8b6c08db310cafb5a97374f388a27b226888fb3e1",
+      "bytes": 2461
+    },
+    "keyboard-explicit.log": {
+      "sha256": "f314cf92746b1786cd3a9a9c056a4fd99e6f0ff8c93e1bee008f7ceb8b195705",
+      "bytes": 1959
+    },
+    "pins.json": {
+      "sha256": "3f1fbc26576782f893e0e6a2aa8595ab7fb16dfadab96cbcba8cecd5aa0a5610",
+      "bytes": 527
+    },
+    "preservation-summary.json": {
+      "sha256": "3462375e7d9ada2765bd3b48e730edd0993e09ebe3c24c9b6bdfb1d12287e04e",
+      "bytes": 1439
+    },
+    "receiver-events.jsonl": {
+      "sha256": "f878e49d7cd20b46afe253c4c106cf970863090030cde03074e280dd38b5bc2a",
+      "bytes": 1012
+    },
+    "receiver-summary.json": {
+      "sha256": "03dbbbff0ffd8485a70ef922f026e349434f35107715d4c37296308a4f45418e",
+      "bytes": 543
+    }
+  }
+}

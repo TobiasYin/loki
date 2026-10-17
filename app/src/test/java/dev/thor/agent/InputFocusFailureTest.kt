@@ -11,7 +11,7 @@ class InputFocusFailureTest {
     @Test fun onlyAuditedToolAndExactLocalMismatchPairsReceiveFixedReason() {
         for(tool in listOf("input.press_button","input.set_axes"))assertEquals("input_focus_mismatch",InputFocusFailure.classify(tool,Code.TARGET_CHANGED,physical))
         for(tool in listOf("input.press_button","input.set_axes"))assertEquals("input_focus_mismatch",InputFocusFailure.classify(tool,Code.TARGET_CHANGED,"Physical controller requires the observed selected-screen app to have window focus"))
-        navigation.forEach {assertEquals("input_focus_mismatch",InputFocusFailure.classify("input.navigate",Code.TARGET_CHANGED,it))}
+        for(tool in listOf("input.navigate","input.key_press"))navigation.forEach {assertEquals("input_focus_mismatch",InputFocusFailure.classify(tool,Code.TARGET_CHANGED,it))}
         assertNull(InputFocusFailure.classify("input.navigate",Code.TARGET_CHANGED,physical))
         assertNull(InputFocusFailure.classify("input.press_button",Code.TARGET_CHANGED,navigation.first()))
     }
@@ -20,7 +20,7 @@ class InputFocusFailureTest {
         assertNull(InputFocusFailure.classify("input.press_button",null,physical))
         for(message in listOf(null,"No focused task for physical controller routing","Physical controller was rebuilt during gamepad action",
             "Navigation focus section is absent or ambiguous","Current per-display navigation focus could not be read","Upper windows/app/layout changed"))
-            for(tool in listOf("input.press_button","input.set_axes","input.navigate"))assertNull(InputFocusFailure.classify(tool,Code.TARGET_CHANGED,message))
+            for(tool in listOf("input.press_button","input.set_axes","input.navigate","input.key_press"))assertNull(InputFocusFailure.classify(tool,Code.TARGET_CHANGED,message))
     }
     @Test fun UntrustedBodiesAndMessageSubstringsCannotBecomeHintsOrLeakTheirContent() {
         for(message in listOf(physical+" private.package",physical+"\n",physical.lowercase(),"prefix $physical","{\"message\":\"$physical\"}","https://private.invalid/$physical"))

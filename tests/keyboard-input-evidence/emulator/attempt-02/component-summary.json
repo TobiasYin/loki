@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "scope": "emulator real Native RPC keyboard-input component; ordinary Activity; no model execution",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "cleanupErrors": [],
+  "textPassed": true,
+  "keysPassed": false,
+  "passed": false,
+  "nativeRunId": "28b6b99d-55ec-44fb-b287-51f2904f9aab",
+  "setupPermissionsDroppedBeforeTools": true,
+  "unicodeReplacementAndNoAutoSubmit": true,
+  "selectionInsert": true,
+  "emptyReplacementClears": true,
+  "unsafeEditorsRejectedWithoutWrite": true,
+  "movedEditorRejectedWithoutWrite": true,
+  "realExpiredRefRejectedWithoutWrite": {
+    "elapsedMs": 62412,
+    "passed": true
+  },
+  "secondNativeRunId": "becc0809-9de9-4b82-9493-2674f367fc03",
+  "crossRunRefRejectedWithoutWrite": true,
+  "failureType": "AssertionError",
+  "profilesRestored": true,
+  "credentialsRestored": true,
+  "rolesRestored": true,
+  "durationSeconds": 163.053,
+  "causeOrOutcome": "文字阶段全部通过；ENTER 和 CTRL+A 原始键事件到达，但 CTRL+A 未选中预期 normal 字段，整体失败。后续第三轮独立焦点记录确认 ENTER 会将焦点移到 password 字段，随后改用正式观察和激活流程重新聚焦。",
+  "toolOutcomes": [
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 2312
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 825
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 994
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 385
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 710
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 311
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 736
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 200
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 634
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 417
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 661
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 362
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 490
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "elapsedMs": 407
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 889
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "elapsedMs": 944
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1104
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "elapsedMs": 438
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1873
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 703
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1198
+    },
+    {
+      "toolId": "input.key_press",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 1816
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1704
+    },
+    {
+      "toolId": "input.key_press",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 1367
+    }
+  ]
+}

@@ -48,7 +48,7 @@ internal class NativeNavigation private constructor(private val displayId:Int,pr
             checkAlive()
             return NativeNavigation(displayId,expectedPackage!!,manager,inject,down,up)
         }
-        private fun verifyFocus(displayId:Int,expectedPackage:String?,checkAlive:()->Unit) {
+        internal fun verifyFocus(displayId:Int,expectedPackage:String?,checkAlive:()->Unit) {
             // A fixed per-display BACK can safely target the upper app while a
             // lower Presentation owns global focus. Physical gamepad stays stricter.
             val process=ProcessBuilder("/system/bin/dumpsys","-t","2","input").redirectErrorStream(true).start()

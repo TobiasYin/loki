@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "sealed": true,
+  "eventCount": 21,
+  "eventBytes": 3115,
+  "eventSha256": "4bd35be910b42e5935decd49e9524757cf19f3a68042adf37a53c5540b9b1014",
+  "observedKeyboardSource": 257,
+  "observedKeyboardDeviceId": -1,
+  "observedRawKeyEventCount": 6,
+  "rawKeys": [
+    {
+      "action": 0,
+      "keyCode": 66,
+      "metaState": 0,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 1,
+      "keyCode": 66,
+      "metaState": 0,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 0,
+      "keyCode": 113,
+      "metaState": 4096,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 0,
+      "keyCode": 29,
+      "metaState": 4096,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 1,
+      "keyCode": 29,
+      "metaState": 4096,
+      "source": 257,
+      "deviceId": -1
+    },
+    {
+      "action": 1,
+      "keyCode": 113,
+      "metaState": 0,
+      "source": 257,
+      "deviceId": -1
+    }
+  ],
+  "enterDownUpObserved": true,
+  "ctrlADownUpAndModifierReleaseObserved": true,
+  "ctrlFinalUpMetaState": 0,
+  "backspaceActivityRawDownUpObserved": false,
+  "backspaceIndependentTextDeletionObserved": true,
+  "backspaceDeletedSyntheticUtf16Units": 15,
+  "backspaceNote": "Native tool submitted BACKSPACE and independent real TextWatcher observed selected 15-character text become empty. Activity dispatchKeyEvent did not receive keyCode 67; an IME/InputConnection transformation is plausible but not separately proven. Do not claim raw BACKSPACE down/up observation.",
+  "editorActions": [
+    {
+      "actionId": 6,
+      "keyCode": 66
+    }
+  ],
+  "focusCallbacks": [
+    {
+      "field": "Normal editor",
+      "focused": false
+    },
+    {
+      "field": "Password editor",
+      "focused": true
+    },
+    {
+      "field": "Password editor",
+      "focused": false
+    },
+    {
+      "field": "Normal editor",
+      "focused": true
+    }
+  ],
+  "textMutations": [
+    {
+      "field": "Normal editor",
+      "length": 4,
+      "start": 0,
+      "before": 4,
+      "count": 4
+    },
+    {
+      "field": "Normal editor",
+      "length": 4,
+      "start": 0,
+      "before": 4,
+      "count": 4
+    },
+    {
+      "field": "Normal editor",
+      "length": 0,
+      "start": 0,
+      "before": 4,
+      "count": 0
+    },
+    {
+      "field": "Normal editor",
+      "length": 15,
+      "start": 0,
+      "before": 0,
+      "count": 15
+    },
+    {
+      "field": "Normal editor",
+      "length": 0,
+      "start": 0,
+      "before": 15,
+      "count": 0
+    }
+  ],
+  "droppedSamples": 0,
+  "incomplete": false
+}

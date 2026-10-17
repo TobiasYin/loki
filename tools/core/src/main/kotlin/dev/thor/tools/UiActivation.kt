@@ -19,6 +19,9 @@ data class UiActivationGuard(val runId:String,val sessionId:String,val snapshotI
             bounds:TouchableBounds,display:DisplayFact,clip:TouchableBounds?) {
             requireTool(!password && visible && enabled && clickable && hasClickAction,Code.INVALID_ARGUMENT,
                 "Activation requires a visible enabled non-password clickable node; choose a clickable ancestor if needed")
+            requireVisibleBounds(bounds,display,clip)
+        }
+        fun requireVisibleBounds(bounds:TouchableBounds,display:DisplayFact,clip:TouchableBounds?) {
             val viewport=clip ?: TouchableBounds(0,0,display.width,display.height)
             requireTool(bounds.left>=0 && bounds.top>=0 && bounds.right<=display.width && bounds.bottom<=display.height &&
                 bounds.left<bounds.right && bounds.top<bounds.bottom && bounds.left>=viewport.left && bounds.top>=viewport.top &&

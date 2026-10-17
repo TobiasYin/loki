@@ -65,9 +65,9 @@ class Gateway(private val authority: AuthorizationPort, private val backend: Dev
                 val descriptor = ToolPack.descriptors.getValue(e.toolId)
                 if (descriptor.targetRequired && !(descriptor.effect == Effect.INPUT && cp?.submitted == true)) {
                     if(e.toolId in ToolPack.freshReads)snapshots.validateReadSource(e.snapshotId)
-                    // Fixed BACK has no coordinates; activate re-resolves and checks
-                    // its exact semantic node in Native before ACTION_CLICK.
-                    else if(e.toolId in setOf("input.navigate","input.activate"))snapshots.validateObservation(e.snapshotId)
+                    // Keyboard/navigation have no coordinates and recheck focus;
+                    // semantic actions re-resolve their exact node in Native.
+                    else if(e.toolId in setOf("input.navigate","input.activate","input.type_text","input.key_press"))snapshots.validateObservation(e.snapshotId)
                     else snapshots.validate(e.snapshotId)
                 }
                 val a = backend.availability(e.toolId, args)

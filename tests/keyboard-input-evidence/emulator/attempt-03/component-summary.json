@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "scope": "emulator real Native RPC keyboard-input component; ordinary Activity; no model execution",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "cleanupErrors": [],
+  "textPassed": true,
+  "keysPassed": true,
+  "passed": true,
+  "nativeRunId": "19947edc-2838-408c-bd05-c4fa669296c6",
+  "setupPermissionsDroppedBeforeTools": true,
+  "unicodeReplacementAndNoAutoSubmit": true,
+  "selectionInsert": true,
+  "emptyReplacementClears": true,
+  "unsafeEditorsRejectedWithoutWrite": true,
+  "movedEditorRejectedWithoutWrite": true,
+  "realExpiredRefRejectedWithoutWrite": {
+    "elapsedMs": 61034,
+    "passed": true
+  },
+  "secondNativeRunId": "ed70bbc5-430d-424e-a972-6a26f9af9cf1",
+  "crossRunRefRejectedWithoutWrite": true,
+  "focusAfterEnter": {
+    "normalFocused": false,
+    "passwordFocused": true,
+    "readOnlyFocused": false
+  },
+  "keyboardFieldRefocusedWithOfficialTool": true,
+  "selectionReadableInAgentUiTree": true,
+  "keyboardKeyBackend": {
+    "status": "submitted_and_receiver_observed",
+    "keyEventDelta": 6,
+    "ctrlASelectionObserved": true,
+    "backspaceClearObserved": true
+  },
+  "profilesRestored": true,
+  "credentialsRestored": true,
+  "rolesRestored": true,
+  "durationSeconds": 149.781,
+  "causeOrOutcome": "文字和键盘两个阶段全部通过。ENTER 后正式观察、激活 normal 字段并核对 Agent 可读 focused；CTRL+A 独立选区与 ui_tree textSelection 一致，BACKSPACE 实际删除选区。",
+  "toolOutcomes": [
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1504
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 602
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1738
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 1305
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 2172
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 554
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 2084
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 983
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1221
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 843
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1649
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "INVALID_ARGUMENT",
+      "outcome": "observed",
+      "elapsedMs": 907
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 867
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "elapsedMs": 1081
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1993
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "elapsedMs": 415
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 701
+    },
+    {
+      "toolId": "input.type_text",
+      "error": "TARGET_CHANGED",
+      "outcome": "observed",
+      "elapsedMs": 227
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 805
+    },
+    {
+      "toolId": "input.type_text",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 318
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 556
+    },
+    {
+      "toolId": "input.key_press",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 1188
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 420
+    },
+    {
+      "toolId": "input.activate",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 566
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 518
+    },
+    {
+      "toolId": "input.key_press",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 704
+    },
+    {
+      "toolId": "perception.ui_tree",
+      "error": null,
+      "outcome": "observed",
+      "elapsedMs": 1429
+    },
+    {
+      "toolId": "input.key_press",
+      "error": null,
+      "outcome": "submitted",
+      "elapsedMs": 555
+    }
+  ],
+  "independentReceiverFinal": {
+    "attemptId": "0cda3098-7b32-4453-9bb0-8e8fe7a63c00",
+    "testRunId": "keyboard-30ed800d-037d-49db-bca2-849cc21dda2c",
+    "evidenceMode": "manual_platform_api",
+    "agentRunId": "no-agent:keyboard-30ed800d-037d-49db-bca2-849cc21dda2c",
+    "agentAnswerVerified": false,
+    "displayId": 0,
+    "windowType": 1,
+    "normalFocused": true,
+    "passwordFocused": false,
+    "disabledFocused": false,
+    "readOnlyFocused": false,
+    "normalText": "",
+    "selectionStart": 0,
+    "selectionEnd": 0,
+    "passwordLength": 0,
+    "disabledText": "disabled sentinel",
+    "readOnlyText": "read only sentinel",
+    "textChangeCount": 5,
+    "editorActionCount": 1,
+    "submissionCount": 0,
+    "keyEventCount": 6,
+    "sealed": true,
+    "evidence": {
+      "relativePath": "keyboard-reports/0cda3098-7b32-4453-9bb0-8e8fe7a63c00/events.jsonl",
+      "eventPrefixBytes": 3115,
+      "eventPrefixSha256": "4bd35be910b42e5935decd49e9524757cf19f3a68042adf37a53c5540b9b1014",
+      "eventCount": 21,
+      "incomplete": false,
+      "droppedSamples": 0,
+      "sealed": true
+    }
+  }
+}

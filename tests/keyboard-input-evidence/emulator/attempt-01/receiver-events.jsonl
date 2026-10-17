@@ -1,0 +1,7 @@
+{"sequence":1,"eventKind":"prepared","recordOrigin":"fixture_setup","uptimeMs":316491,"data":{}}
+{"sequence":2,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":321319,"data":{"field":"Normal editor","length":4,"start":0,"before":4,"count":4}}
+{"sequence":3,"eventKind":"configure","recordOrigin":"fixture_setup","uptimeMs":321709,"data":{"change":"select_emoji"}}
+{"sequence":4,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":323993,"data":{"field":"Normal editor","length":4,"start":0,"before":4,"count":4}}
+{"sequence":5,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":327523,"data":{"field":"Normal editor","length":0,"start":0,"before":4,"count":0}}
+{"sequence":6,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":334266,"data":{"field":"Read only editor","length":17,"start":0,"before":18,"count":17}}
+{"sequence":7,"eventKind":"release","recordOrigin":"fixture_setup","uptimeMs":334420,"data":{}}

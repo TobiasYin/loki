@@ -1,0 +1,17 @@
+[
+  {
+    "path": "build/keyboard/pinned-fixture-fix/app-debug.apk",
+    "sha256": "5d5d10fdc0fc3f742c9c1db5a393bc1382d0f28b7ec2aafdad80e403dd1a3fb7",
+    "bytes": 7117860
+  },
+  {
+    "path": "build/keyboard/pinned-fixture-fix/app-debug-androidTest.apk",
+    "sha256": "198b6735eeba8ee79b8697d5df9cec4082a7267cac1591b18aa9b547da173971",
+    "bytes": 3537194
+  },
+  {
+    "path": "build/keyboard/pinned-fixture-fix/input-lab-debug.apk",
+    "sha256": "b8c2944f9e73b131d0da2a7e34f01758305fd12ac8000a8bc5c1caa395549f34",
+    "bytes": 2966235
+  }
+]

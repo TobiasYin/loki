@@ -1,0 +1,41 @@
+INSTRUMENTATION_STATUS: class=dev.thor.agent.EmulatorKeyboardInputTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+dev.thor.agent.EmulatorKeyboardInputTest:
+INSTRUMENTATION_STATUS: test=unicodeTextSelectionClearingAndKeyboardGuardsUseRealNativeRpc
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=dev.thor.agent.EmulatorKeyboardInputTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Unsafe editor must reject
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at dev.thor.agent.EmulatorKeyboardInputTest.unicodeTextSelectionClearingAndKeyboardGuardsUseRealNativeRpc(EmulatorKeyboardInputTest.kt:199)
+
+INSTRUMENTATION_STATUS: stream=
+Error in unicodeTextSelectionClearingAndKeyboardGuardsUseRealNativeRpc(dev.thor.agent.EmulatorKeyboardInputTest):
+java.lang.AssertionError: Unsafe editor must reject
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at dev.thor.agent.EmulatorKeyboardInputTest.unicodeTextSelectionClearingAndKeyboardGuardsUseRealNativeRpc(EmulatorKeyboardInputTest.kt:199)
+
+INSTRUMENTATION_STATUS: test=unicodeTextSelectionClearingAndKeyboardGuardsUseRealNativeRpc
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 43.002
+There was 1 failure:
+1) unicodeTextSelectionClearingAndKeyboardGuardsUseRealNativeRpc(dev.thor.agent.EmulatorKeyboardInputTest)
+java.lang.AssertionError: Unsafe editor must reject
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at dev.thor.agent.EmulatorKeyboardInputTest.unicodeTextSelectionClearingAndKeyboardGuardsUseRealNativeRpc(EmulatorKeyboardInputTest.kt:199)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

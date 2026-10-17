@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.TextInputCommandTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-17T04:30:22.385Z" hostname="JGJHX5JPGF" time="0.016">
+  <properties/>
+  <testcase name="selectionCannotSplitSurrogatePairsButCanReplaceWholeEmoji" classname="dev.thor.tools.TextInputCommandTest" time="0.005"/>
+  <testcase name="unicodeInsertionPreservesChineseEmojiAndNewlines" classname="dev.thor.tools.TextInputCommandTest" time="0.0"/>
+  <testcase name="textUsesTheSameOwnerWindowAndNodeIdentityAsActivation" classname="dev.thor.tools.TextInputCommandTest" time="0.0"/>
+  <testcase name="budgetCountsUnicodeCodePointsAndBoundsResultingUtf16Length" classname="dev.thor.tools.TextInputCommandTest" time="0.003"/>
+  <testcase name="descriptorRequiresSelectedScreenControlAndFreshTarget" classname="dev.thor.tools.TextInputCommandTest" time="0.0"/>
+  <testcase name="forwardAndReversedSelectionsReplaceTheSameRange" classname="dev.thor.tools.TextInputCommandTest" time="0.0"/>
+  <testcase name="selectionMustBeBothUnavailableOrWithinCurrentText" classname="dev.thor.tools.TextInputCommandTest" time="0.001"/>
+  <testcase name="replaceDoesNotDependOnSelectionAndEmptyReplaceClears" classname="dev.thor.tools.TextInputCommandTest" time="0.0"/>
+  <testcase name="onlyVisibleEnabledEditableNonPasswordSetTextNodesAreEligible" classname="dev.thor.tools.TextInputCommandTest" time="0.007"/>
+  <testcase name="malformedUnicodeAndSchemaOverridesAreRejected" classname="dev.thor.tools.TextInputCommandTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

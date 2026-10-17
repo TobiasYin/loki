@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.GatewayKeyboardTargetTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-17T04:30:22.149Z" hostname="JGJHX5JPGF" time="0.008">
+  <properties/>
+  <testcase name="realWindowAppAndVisibleRegionChangesStillStopBeforeAnyBackend" classname="dev.thor.tools.GatewayKeyboardTargetTest" time="0.003"/>
+  <testcase name="calibrationRoleSwapAndDisplayEpochChangesInvalidateOldKeyboardObservations" classname="dev.thor.tools.GatewayKeyboardTargetTest" time="0.001"/>
+  <testcase name="unrelatedInteractionChangesReachNonCoordinateBackendsButNeverCoordinateInputs" classname="dev.thor.tools.GatewayKeyboardTargetTest" time="0.001"/>
+  <testcase name="runSelectedRoleAuthorizationIsStillCheckedBeforeSemanticDispatch" classname="dev.thor.tools.GatewayKeyboardTargetTest" time="0.002"/>
+  <testcase name="aRealWindowChangeAfterDispatchStillFailsTheFinalCommitCheckpoint" classname="dev.thor.tools.GatewayKeyboardTargetTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

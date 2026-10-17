@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "scope": "Every file in this supplement except manifest.json",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3224,
+      "sha256": "402707ede7cad3913ccf53b7f95be72748935d10754513e7264d5be339c02957"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 1899,
+      "sha256": "ef8cea33cb0b037ee127199be898b211fd2cdaeffd9ff0c4334d005577a8ab21"
+    },
+    {
+      "path": "pins.json",
+      "bytes": 528,
+      "sha256": "e765cdef457d897e2c5e528da7ea26aeffc7733c4d3c083918578f127399bedc"
+    },
+    {
+      "path": "source-hashes.json",
+      "bytes": 12367,
+      "sha256": "89afafdf0b93874a5d51eeada7a6ce7d12a5b86c76fda2a838020bb438441e9d"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 38921,
+      "sha256": "4275333fe4ec9444b4ff77343ce1671f1e3781f159dbfe0034eabe68508793f8"
+    }
+  ]
+}

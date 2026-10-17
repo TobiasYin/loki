@@ -1,0 +1,1088 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-17T04:40:47.427356+00:00",
+  "status": "KEYBOARD_FOCUS_SOFTWARE_VERIFIED_DEVICE_ACCEPTANCE_SEPARATE",
+  "change": "Expose actual Accessibility input focus, preserve guarded keyboard and text backends, and instruct Agent to activate/re-observe the intended field before editor shortcuts. DEBUG receiver logs focus and component test restores focus through real input.activate after ENTER.",
+  "sourceInventory": "source-hashes.json",
+  "sourceFiles": 32,
+  "sourceChangesFromInitial": [
+    "app/src/androidTest/java/dev/thor/agent/EmulatorKeyboardInputTest.kt",
+    "app/src/main/assets/skills/adb-operations/references/keyboard-input.md",
+    "runtime/src/context.ts",
+    "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureActivity.kt",
+    "tools/core/src/main/kotlin/dev/thor/tools/SemanticTree.kt",
+    "tools/core/src/test/kotlin/dev/thor/tools/SemanticTreeTest.kt",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt"
+  ],
+  "sourceAddedFromInitial": [
+    "docs/keyboard-input.md"
+  ],
+  "sourceChangesFromFixtureFix": [
+    "app/src/androidTest/java/dev/thor/agent/EmulatorKeyboardInputTest.kt",
+    "app/src/main/assets/skills/adb-operations/references/keyboard-input.md",
+    "runtime/src/context.ts",
+    "tests/input-lab-app/app/src/debug/java/dev/thor/inputlab/KeyboardFixtureActivity.kt",
+    "tools/core/src/main/kotlin/dev/thor/tools/SemanticTree.kt",
+    "tools/core/src/test/kotlin/dev/thor/tools/SemanticTreeTest.kt",
+    "tools/diagnostic/src/main/kotlin/dev/thor/tools/diagnostic/AndroidBackend.kt"
+  ],
+  "gradle": {
+    "focusBuild": {
+      "success": true,
+      "seconds": 22,
+      "tasks": 414,
+      "executed": 92,
+      "upToDate": 322
+    },
+    "promptPackagingBuild": {
+      "success": true,
+      "seconds": 5,
+      "tasks": 274,
+      "executed": 13,
+      "upToDate": 261
+    },
+    "taskStatus": [
+      {
+        "task": ":device-core:test",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":core:test",
+        "focusBuild": "UP-TO-DATE",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":device-authority:test",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":app:testDebugUnitTest",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":input-lab:testDebugUnitTest",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":app:assembleDebug",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "EXECUTED"
+      },
+      {
+        "task": ":app:assembleDebugAndroidTest",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "UP-TO-DATE"
+      },
+      {
+        "task": ":input-lab:assembleDebug",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":app:assembleRelease",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "EXECUTED"
+      },
+      {
+        "task": ":input-lab:assembleRelease",
+        "focusBuild": "UP-TO-DATE",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":app:lintDebug",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "EXECUTED"
+      },
+      {
+        "task": ":diagnostic:lintDebug",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":input-lab:lintDebug",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      },
+      {
+        "task": ":device-android:lintDebug",
+        "focusBuild": "EXECUTED",
+        "promptBuild": "NOT_REQUESTED"
+      }
+    ],
+    "meaning": "The 5-second build repackages the shortened Runtime prompt/App; it does not run additional JVM test tasks."
+  },
+  "jvm": {
+    "totals": {
+      "tests": 475,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 68
+    },
+    "modules": [
+      {
+        "module": "device-core",
+        "task": ":device-core:test",
+        "focusBuildStatus": "EXECUTED",
+        "promptBuildStatus": "NOT_REQUESTED",
+        "suiteCount": 32,
+        "tests": 230,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "bridge-core",
+        "task": ":core:test",
+        "focusBuildStatus": "UP-TO-DATE",
+        "promptBuildStatus": "NOT_REQUESTED",
+        "suiteCount": 3,
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "device-authority",
+        "task": ":device-authority:test",
+        "focusBuildStatus": "EXECUTED",
+        "promptBuildStatus": "NOT_REQUESTED",
+        "suiteCount": 1,
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "app",
+        "task": ":app:testDebugUnitTest",
+        "focusBuildStatus": "EXECUTED",
+        "promptBuildStatus": "NOT_REQUESTED",
+        "suiteCount": 24,
+        "tests": 117,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "input-lab",
+        "task": ":input-lab:testDebugUnitTest",
+        "focusBuildStatus": "EXECUTED",
+        "promptBuildStatus": "NOT_REQUESTED",
+        "suiteCount": 8,
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "xmlHashes": [
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AccessibilitySetupTest.xml",
+        "bytes": 738,
+        "sha256": "be7dc54c49c3a59bc85db572f3a85dd9b7a683db8700913b1dfe8afd32118b3e",
+        "suite": "dev.thor.tools.AccessibilitySetupTest",
+        "module": "device-core",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.AgentBackgroundTest.xml",
+        "bytes": 1041,
+        "sha256": "5a1e43fdffe811084e9c333d13875df4ee52c9b6a6d381f9f38bca3a1f33b9b6",
+        "suite": "dev.thor.tools.AgentBackgroundTest",
+        "module": "device-core",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.BoundedInputStateTest.xml",
+        "bytes": 1326,
+        "sha256": "6504c520ade224f812dd04ea81701e99e0e1239e33cc2267b5fc7084bc27982a",
+        "suite": "dev.thor.tools.BoundedInputStateTest",
+        "module": "device-core",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CompanionObservationTest.xml",
+        "bytes": 1056,
+        "sha256": "eccac91a3b9c02bddc9d653739f81290d9598248ba94f942af736f32538b4071",
+        "suite": "dev.thor.tools.CompanionObservationTest",
+        "module": "device-core",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.CoreTest.xml",
+        "bytes": 5124,
+        "sha256": "1557d6f2da13db3f800110e7479666aa534dcb5ffe5dc1fa6706c153823b441c",
+        "suite": "dev.thor.tools.CoreTest",
+        "module": "device-core",
+        "tests": 39,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayRolePolicyTest.xml",
+        "bytes": 740,
+        "sha256": "6a0a780cba8f4bf81da593bb53fb5b4094fd8f8f128be24a0ab6b687a8ed24d6",
+        "suite": "dev.thor.tools.DisplayRolePolicyTest",
+        "module": "device-core",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.DisplayVisibilityTest.xml",
+        "bytes": 1049,
+        "sha256": "d6190ff72000019fe8f625c7339f659f2a927d176d2f73f07774312e5696acb8",
+        "suite": "dev.thor.tools.DisplayVisibilityTest",
+        "module": "device-core",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevAxesTest.xml",
+        "bytes": 1122,
+        "sha256": "0d1763368d733d9d95738413c3c51d729647df68b6033c97d3b50df1b9de8d5f",
+        "suite": "dev.thor.tools.EvdevAxesTest",
+        "module": "device-core",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.EvdevButtonsTest.xml",
+        "bytes": 896,
+        "sha256": "66b7a090eda2eb8b8ec2d5ea1c60fe626e3afa4fa1f88b895c2c9dbb114d7746",
+        "suite": "dev.thor.tools.EvdevButtonsTest",
+        "module": "device-core",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCleanupTest.xml",
+        "bytes": 871,
+        "sha256": "53c533dd66b85a34c12dbd0ddb98b902ea8b2034be7dde1130a6575f5f5c15e6",
+        "suite": "dev.thor.tools.GamepadCleanupTest",
+        "module": "device-core",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadCommandTest.xml",
+        "bytes": 701,
+        "sha256": "b187ceae3c7d798326671971c5738b3a083de94712ca01a22ec2d24a74881fae",
+        "suite": "dev.thor.tools.GamepadCommandTest",
+        "module": "device-core",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadHoldTargetTest.xml",
+        "bytes": 907,
+        "sha256": "c76f263d531eccb1a585379513097aa50cc2bb391a128296636f88bf7e94ad6a",
+        "suite": "dev.thor.tools.GamepadHoldTargetTest",
+        "module": "device-core",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GamepadLeaseGuardTest.xml",
+        "bytes": 725,
+        "sha256": "ff755f9dafb380419f902e469f67b00c548087b76828ee63650e553cc179116b",
+        "suite": "dev.thor.tools.GamepadLeaseGuardTest",
+        "module": "device-core",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.GatewayKeyboardTargetTest.xml",
+        "bytes": 1104,
+        "sha256": "53175afa32343fb05887bdda6148cb49088c044d5c22ea99e9065c44b97a4311",
+        "suite": "dev.thor.tools.GatewayKeyboardTargetTest",
+        "module": "device-core",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.InputTargetPolicyTest.xml",
+        "bytes": 626,
+        "sha256": "84cf471d8f86c9101a82538ef383b5d31bee92c9ba4175ddb43c0a470a6e4ba2",
+        "suite": "dev.thor.tools.InputTargetPolicyTest",
+        "module": "device-core",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.KeyboardCommandTest.xml",
+        "bytes": 1822,
+        "sha256": "4e5a135bdad4c82cc83196ffcbf5e7efafaf398970038bd8506068e23298c29b",
+        "suite": "dev.thor.tools.KeyboardCommandTest",
+        "module": "device-core",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.LauncherAppsTest.xml",
+        "bytes": 899,
+        "sha256": "d9f7670bab5d88bdaaa553d16a0b4770e02bb6306bb90519d2d91b50e31269b6",
+        "suite": "dev.thor.tools.LauncherAppsTest",
+        "module": "device-core",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationCommandTest.xml",
+        "bytes": 999,
+        "sha256": "00524c9a892247a658f5632f1e25d17c665f10c049cce886f0206a6f70222b00",
+        "suite": "dev.thor.tools.NavigationCommandTest",
+        "module": "device-core",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.NavigationFocusTest.xml",
+        "bytes": 857,
+        "sha256": "eece5bb6c240b66dd3607f60f3cab952806c870cda19c010c549055bfb574363",
+        "suite": "dev.thor.tools.NavigationFocusTest",
+        "module": "device-core",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationCacheInvalidationTest.xml",
+        "bytes": 1543,
+        "sha256": "2dcf4e3f5695197f14830275435bccefe8647d8bf0a53093a70e46913e96987e",
+        "suite": "dev.thor.tools.PresentationCacheInvalidationTest",
+        "module": "device-core",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationProofRefreshTest.xml",
+        "bytes": 1807,
+        "sha256": "3cc12a07adf60d7389b6c36ec079c80385204188077df09fab2a03c10f98789a",
+        "suite": "dev.thor.tools.PresentationProofRefreshTest",
+        "module": "device-core",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.PresentationWindowEvidenceTest.xml",
+        "bytes": 2306,
+        "sha256": "5e68f5a1753c93db9b15803d6cdd314ac75611e4f5abde01d7e1e0a76322241f",
+        "suite": "dev.thor.tools.PresentationWindowEvidenceTest",
+        "module": "device-core",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ReadObservationTest.xml",
+        "bytes": 1370,
+        "sha256": "5ac4cada4515005562510e7230d315beba277188b352525d00f6096a79519a1f",
+        "suite": "dev.thor.tools.ReadObservationTest",
+        "module": "device-core",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ScreenSelectionTest.xml",
+        "bytes": 1308,
+        "sha256": "2d637680dffa7df71f09e0e1a73288b7920e3850f40b998bd8e12fc3df3939a5",
+        "suite": "dev.thor.tools.ScreenSelectionTest",
+        "module": "device-core",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.SemanticTreeTest.xml",
+        "bytes": 1882,
+        "sha256": "73efd43855d4fddb27702e2437a7f646da3781089147461640403406e0f5c28c",
+        "suite": "dev.thor.tools.SemanticTreeTest",
+        "module": "device-core",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ShellCommandPolicyTest.xml",
+        "bytes": 1348,
+        "sha256": "26b420a47637ecfee3441c13468d93164cccbb376383b952209325de52d41885",
+        "suite": "dev.thor.tools.ShellCommandPolicyTest",
+        "module": "device-core",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.TargetObservationAvailabilityTest.xml",
+        "bytes": 1319,
+        "sha256": "57343a660a6559eecf4778806ff11c20494fb580380324cad1ae350b4872c515",
+        "suite": "dev.thor.tools.TargetObservationAvailabilityTest",
+        "module": "device-core",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.TextInputCommandTest.xml",
+        "bytes": 1666,
+        "sha256": "86a864ee3a7dd8b8bd6b0c92e5870866153687ccd324598c4d1f28b21f0f0789",
+        "suite": "dev.thor.tools.TextInputCommandTest",
+        "module": "device-core",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.ThorBrightnessCommandTest.xml",
+        "bytes": 881,
+        "sha256": "287ebc7cac4702e3826522c5335c3189849a05fe9da556de967ebe3d85026992",
+        "suite": "dev.thor.tools.ThorBrightnessCommandTest",
+        "module": "device-core",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActionWindowTest.xml",
+        "bytes": 1170,
+        "sha256": "397cbe22cd8bf1655c8d85872422e5c1d1d4cf5e5ba2acffc43ece0654a149ff",
+        "suite": "dev.thor.tools.UiActionWindowTest",
+        "module": "device-core",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UiActivationTest.xml",
+        "bytes": 1000,
+        "sha256": "f03629aa3c2a9d9c51d36f23cccb15abf9617a462c57ed7905bdccbcd90fedf6",
+        "suite": "dev.thor.tools.UiActivationTest",
+        "module": "device-core",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tools/core/build/test-results/test/TEST-dev.thor.tools.UpperTargetResolverTest.xml",
+        "bytes": 2355,
+        "sha256": "829266e9c95adba8baf2a2992c17bd45c11b34006f9968e1ff2f987443c6884f",
+        "suite": "dev.thor.tools.UpperTargetResolverTest",
+        "module": "device-core",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.AuthorityBudgetTest.xml",
+        "bytes": 901,
+        "sha256": "b903a9a455769e8d1cad3cef5531b8c2f59e8e46de11128b7a3b51ca06d6c007",
+        "suite": "dev.thor.bridge.AuthorityBudgetTest",
+        "module": "bridge-core",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.GatewayTest.xml",
+        "bytes": 2404,
+        "sha256": "eab28ebdaeb7b3a24d2763e414da699829caf204188b7d0d0b1b94211e87a357",
+        "suite": "dev.thor.bridge.GatewayTest",
+        "module": "bridge-core",
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "native-bridge/core/build/test-results/test/TEST-dev.thor.bridge.TransportTest.xml",
+        "bytes": 2776,
+        "sha256": "f186b50dbca0aba678a8979c82990f09b8d3776555dcff94a745516726e9b055",
+        "suite": "dev.thor.bridge.TransportTest",
+        "module": "bridge-core",
+        "tests": 20,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "integration/device-authority/build/test-results/test/TEST-dev.thor.integration.DeviceAuthorityTest.xml",
+        "bytes": 2170,
+        "sha256": "746da4a5839d7be5b1b578c0714d894c22173b56deaac9886512307ecdc347eb",
+        "suite": "dev.thor.integration.DeviceAuthorityTest",
+        "module": "device-authority",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatBridgePolicyTest.xml",
+        "bytes": 901,
+        "sha256": "24c05a1bc7462834338401ef2edaa425a87c1a8ca1854411fa26d67dc103ef7e",
+        "suite": "dev.thor.agent.ChatBridgePolicyTest",
+        "module": "app",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatEventProjectionTest.xml",
+        "bytes": 935,
+        "sha256": "8714b9d8776b23aa014f5889dc391859e77c0a1b555e1ec438e591c18cdeebcc",
+        "suite": "dev.thor.agent.ChatEventProjectionTest",
+        "module": "app",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ChatSnapshotTest.xml",
+        "bytes": 741,
+        "sha256": "82a6d3b030c60126c80877e4ef4e886704da12fed5c40660147c68b80c085bf3",
+        "suite": "dev.thor.agent.ChatSnapshotTest",
+        "module": "app",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.CoordinatorTest.xml",
+        "bytes": 2402,
+        "sha256": "98dab29809abdf89d2ab643b5cd118a3ea9e30e50ed490e7ed879b0a15fefb40",
+        "suite": "dev.thor.agent.CoordinatorTest",
+        "module": "app",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.DeepSeekCatalogTest.xml",
+        "bytes": 860,
+        "sha256": "2851a5760c997d49d56387a26749d92c20a8941038208f66364de089d13fac49",
+        "suite": "dev.thor.agent.DeepSeekCatalogTest",
+        "module": "app",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.EventIndexIsolationTest.xml",
+        "bytes": 469,
+        "sha256": "8e45090eac5bd75dd6729a428b260a1d2eb5eab147bdad1091c8a5de87378a25",
+        "suite": "dev.thor.agent.EventIndexIsolationTest",
+        "module": "app",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ExecutionStateProjectionTest.xml",
+        "bytes": 1059,
+        "sha256": "4a6dc317c28fa19afb637aecd9d1f4acb27428d7b3d8dc84af02beb7c13e705d",
+        "suite": "dev.thor.agent.ExecutionStateProjectionTest",
+        "module": "app",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.HostRpcPayloadTest.xml",
+        "bytes": 1129,
+        "sha256": "f9c2f5964887aaebfc38637ad999237f903e0064732c7b6012e06dde2d15ae55",
+        "suite": "dev.thor.agent.HostRpcPayloadTest",
+        "module": "app",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.InputFocusFailureTest.xml",
+        "bytes": 758,
+        "sha256": "0149819a1357188758afce563929770cdcef65c32fc960c90afa140438606c98",
+        "suite": "dev.thor.agent.InputFocusFailureTest",
+        "module": "app",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.LatestValueTest.xml",
+        "bytes": 798,
+        "sha256": "8fa7ad84fd472695a4a1cf321ce7b25ee75108ccb77db72c6df1c5211aa95b78",
+        "suite": "dev.thor.agent.LatestValueTest",
+        "module": "app",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelCatalogTest.xml",
+        "bytes": 1306,
+        "sha256": "a47c18327c460a6c614012e58f38e0f8ed7f5254f4a8c292d5e387e8ccb8f2a7",
+        "suite": "dev.thor.agent.ModelCatalogTest",
+        "module": "app",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ModelConnectionTestTest.xml",
+        "bytes": 1574,
+        "sha256": "ef95003e381862ec570196334dfe307e9c14f7a4b45c69328fe3107dcad4217c",
+        "suite": "dev.thor.agent.ModelConnectionTestTest",
+        "module": "app",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.OfficialProfilePolicyTest.xml",
+        "bytes": 769,
+        "sha256": "fe51eba2274ce234150dda7a2af080a1c8cfb3f3daf53bc14c5db14ecb6a35ad",
+        "suite": "dev.thor.agent.OfficialProfilePolicyTest",
+        "module": "app",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.PreparedToolsTest.xml",
+        "bytes": 1041,
+        "sha256": "3ce70c585a85a929bff83aaf2d9840365f60d34b3acc235da287a15bce5b8436",
+        "suite": "dev.thor.agent.PreparedToolsTest",
+        "module": "app",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RecoveryHistoryTest.xml",
+        "bytes": 468,
+        "sha256": "31ee9d69774b1312c985d61a36b90439865d9887dad9798d175f6d5510f487a8",
+        "suite": "dev.thor.agent.RecoveryHistoryTest",
+        "module": "app",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.RuntimeStartupDiagnosticsTest.xml",
+        "bytes": 645,
+        "sha256": "6ff8737556465a9396c98232c02be7333832cc2c91266bd8ca820a1d5cec1a06",
+        "suite": "dev.thor.agent.RuntimeStartupDiagnosticsTest",
+        "module": "app",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SearchConnectionTestTest.xml",
+        "bytes": 579,
+        "sha256": "5a099e33b197f9d5037ad77a387f1d59fcc7544fe16c3316c391a4f1ab2aac09",
+        "suite": "dev.thor.agent.SearchConnectionTestTest",
+        "module": "app",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillStoreTest.xml",
+        "bytes": 1201,
+        "sha256": "bc82ec19515995db5eed2d3555318cf13620e37e469b815ce388ae4dd7cceaf4",
+        "suite": "dev.thor.agent.SkillStoreTest",
+        "module": "app",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.SkillTextResourcesTest.xml",
+        "bytes": 462,
+        "sha256": "33205162d3d7614e7935927e0bc25b62d9d82fa5f945ee1aa61589b20df37396",
+        "suite": "dev.thor.agent.SkillTextResourcesTest",
+        "module": "app",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StartupRegressionTest.xml",
+        "bytes": 606,
+        "sha256": "88f022199a07add7e0071e72175bf9400571dd1a0cb4e40a60e83f2f6a690c08",
+        "suite": "dev.thor.agent.StartupRegressionTest",
+        "module": "app",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.StreamDisplayProjectionTest.xml",
+        "bytes": 983,
+        "sha256": "be428bd5f308867ed67300083b772b571ac7e965dfec2a46454a8d16da0db66f",
+        "suite": "dev.thor.agent.StreamDisplayProjectionTest",
+        "module": "app",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.ToolPublicationTest.xml",
+        "bytes": 1077,
+        "sha256": "b72a6e5ed512b64590099841cc1e4c4335a96c47e406e9c56c092c55e8b3822e",
+        "suite": "dev.thor.agent.ToolPublicationTest",
+        "module": "app",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VoiceTransportTest.xml",
+        "bytes": 1511,
+        "sha256": "ad800e47040eb3e52d187121401194b9e71047249be19f3d08d26773950334f9",
+        "suite": "dev.thor.agent.VoiceTransportTest",
+        "module": "app",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "app/build/test-results/testDebugUnitTest/TEST-dev.thor.agent.VolcAsrProtocolTest.xml",
+        "bytes": 1803,
+        "sha256": "db08d7df7e6732930c704abba952d3409bfcdc773315ffa80e3d5240ec6b0d05",
+        "suite": "dev.thor.agent.VolcAsrProtocolTest",
+        "module": "app",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AttemptTest.xml",
+        "bytes": 4207,
+        "sha256": "f1f7947699eae77c5eb9dcf64c4236fde0a87e572670697d6748019466ce2735",
+        "suite": "dev.thor.inputlab.AttemptTest",
+        "module": "input-lab",
+        "tests": 37,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.AxisProfileTest.xml",
+        "bytes": 1009,
+        "sha256": "ae28781b0d5a395fad665c9e1e5d187112dbb5763f9c16352a722d034d6c14b2",
+        "suite": "dev.thor.inputlab.AxisProfileTest",
+        "module": "input-lab",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.DeviceContinuityTest.xml",
+        "bytes": 1319,
+        "sha256": "603d4803e2d304ad6b7cdc5a4d4da52577b5fbc59163c1cdfce349330bf235a5",
+        "suite": "dev.thor.inputlab.DeviceContinuityTest",
+        "module": "input-lab",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.JournalTest.xml",
+        "bytes": 1090,
+        "sha256": "abdb40f70917a52f52c09d55e9314c0437da195ae3d7f1588cc858f5373c5436",
+        "suite": "dev.thor.inputlab.JournalTest",
+        "module": "input-lab",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerEvidenceModeTest.xml",
+        "bytes": 891,
+        "sha256": "aa2240e7514f643b6fab621eaca7d2e819df5f4e6b182f34482fb91cec3f35a3",
+        "suite": "dev.thor.inputlab.RunnerEvidenceModeTest",
+        "module": "input-lab",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.RunnerWindowTest.xml",
+        "bytes": 907,
+        "sha256": "61dcf4b3b08a6e69cabe7ad7a3ec8c762ce8000d82bf18e5289ca4f99b2a940c",
+        "suite": "dev.thor.inputlab.RunnerWindowTest",
+        "module": "input-lab",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioModelTest.xml",
+        "bytes": 1034,
+        "sha256": "2f7003d6796ffc3543058482e32dd676d47c110af0d8a3325abcb4b690cb0e25",
+        "suite": "dev.thor.inputlab.ScenarioModelTest",
+        "module": "input-lab",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "path": "tests/input-lab-app/app/build/test-results/testDebugUnitTest/TEST-dev.thor.inputlab.ScenarioSessionTest.xml",
+        "bytes": 1044,
+        "sha256": "9dff83fafdcf2055d49ea6b1e318fcd78f1e7d8a4cfb536f692aac1a59810e55",
+        "suite": "dev.thor.inputlab.ScenarioSessionTest",
+        "module": "input-lab",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "counting": "475 is one final XML inventory, including the 41-test UP-TO-DATE bridge-core result; no initial/final rebuild totals are added together. Focus adds one meaningful semantic focus test, raising device-core229 to230 and JVM474 to475."
+  },
+  "runtime": {
+    "firstFocusRun": {
+      "tests": 254,
+      "pass": 253,
+      "fail": 1,
+      "cancelled": 0,
+      "skipped": 0,
+      "failureTest": "compression retains explicit constraints and side-effect ledger; oversized required memory stops",
+      "error": "LIMIT_EXCEEDED: Current goal/tool round exceeds context budget; split the task",
+      "rootReportedCause": "The longer newly added keyboard system-prompt instructions exceeded the pre-existing bounded history/compression test budget.",
+      "log": {
+        "path": "build/keyboard-focus-runtime-tests.log",
+        "bytes": 30343,
+        "sha256": "faf8d33388e45c78acf2f93a226de116ce3035a3674e9f43ff56a26478853f5c"
+      }
+    },
+    "fix": "Shorten the newly added keyboard instruction paragraph while retaining typing, focus, key/modifier, screen, safety and re-observation rules. No context budget or test assertion was increased or loosened.",
+    "finalRun": {
+      "tests": 254,
+      "pass": 254,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "log": {
+        "path": "build/keyboard-focus-runtime-final-tests.log",
+        "bytes": 29664,
+        "sha256": "03c60693384453eb9f8df9f179b32deac3d25c2a5b3eb16e345c239547d67b04"
+      }
+    },
+    "invariantChecks": {
+      "compressionTestFileUnchangedFromGitHEAD": true,
+      "compressionTestFile": {
+        "path": "runtime/test/runtime.test.ts",
+        "bytes": 42418,
+        "sha256": "192e8ebf8de5db855546e0cdea0169c74461e1e0edd666e4f0b9f8e8abc43ffb"
+      },
+      "contextSourceOutsideSystemPromptLineUnchangedFromGitHEAD": true
+    },
+    "counting": "The failed 254-test attempt is retained as a failed run, not represented as success or added to the final254."
+  },
+  "chat": {
+    "tests": 73,
+    "pass": 73,
+    "fail": 0,
+    "rerunAfterFocusChanges": false,
+    "retainedCurrentTaskResult": true,
+    "uiAndUiTestActualHashesMatchInitialSoftware": true,
+    "log": {
+      "path": "build/keyboard-ui-tests.log",
+      "bytes": 8002,
+      "sha256": "9381c40235901273eb1c26383eaec405099e8ac70183b053a3735d5770db6671"
+    }
+  },
+  "lintReports": [
+    {
+      "path": "app/build/reports/lint-results-debug.xml",
+      "bytes": 42444,
+      "sha256": "ad47b92295d73e548d074977e92f1f44f10cf817be31817f97d80c60b5b638ab",
+      "severityCounts": {
+        "Warning": 30
+      }
+    },
+    {
+      "path": "tools/diagnostic/build/reports/lint-results-debug.xml",
+      "bytes": 16669,
+      "sha256": "516faad681a9a33f4958a27ed683953b96ce150b35046d9b7ce6b51da105d110",
+      "severityCounts": {
+        "Warning": 12
+      }
+    },
+    {
+      "path": "tests/input-lab-app/app/build/reports/lint-results-debug.xml",
+      "bytes": 94354,
+      "sha256": "a18b10bc18b8dcc31673164c58af22217592876158f69b37ca7ff4934ad38579",
+      "severityCounts": {
+        "Warning": 58
+      }
+    },
+    {
+      "path": "integration/device-android/build/reports/lint-results-debug.xml",
+      "bytes": 14710,
+      "sha256": "f38554be06ca85b839c4123b79afc46686a2ba0b50511d31c276ae88b95defff",
+      "severityCounts": {
+        "Warning": 11
+      }
+    }
+  ],
+  "artifactCheck": {
+    "source": {
+      "path": "build/keyboard-focus-artifacts.json",
+      "bytes": 1899,
+      "sha256": "ef8cea33cb0b037ee127199be898b211fd2cdaeffd9ff0c4334d005577a8ab21"
+    },
+    "allFourActualBytesVerified": true,
+    "pinsActualBytesVerified": true,
+    "pins": "pins.json",
+    "artifacts": "artifacts.json"
+  },
+  "logs": {
+    "focusGradle": {
+      "path": "build/keyboard-focus-final-gradle.log",
+      "bytes": 47547,
+      "sha256": "12f0c6006b25a758b61ecfa9e81acc27425dd705b78e1a52bb830a836054e3b0"
+    },
+    "promptGradle": {
+      "path": "build/keyboard-focus-prompt-gradle.log",
+      "bytes": 18038,
+      "sha256": "7f140fe6613bc22490bf6828df80cc9086febf5a1c60439590a2a16cadb2299a"
+    },
+    "runtimeFailed": {
+      "path": "build/keyboard-focus-runtime-tests.log",
+      "bytes": 30343,
+      "sha256": "faf8d33388e45c78acf2f93a226de116ce3035a3674e9f43ff56a26478853f5c"
+    },
+    "runtimeFinal": {
+      "path": "build/keyboard-focus-runtime-final-tests.log",
+      "bytes": 29664,
+      "sha256": "03c60693384453eb9f8df9f179b32deac3d25c2a5b3eb16e345c239547d67b04"
+    },
+    "chatRetained": {
+      "path": "build/keyboard-ui-tests.log",
+      "bytes": 8002,
+      "sha256": "9381c40235901273eb1c26383eaec405099e8ac70183b053a3735d5770db6671"
+    }
+  },
+  "logExcerpts": {
+    "focusGradle": [
+      "BUILD SUCCESSFUL in 22s",
+      "414 actionable tasks: 92 executed, 322 up-to-date"
+    ],
+    "promptGradle": [
+      "BUILD SUCCESSFUL in 5s",
+      "274 actionable tasks: 13 executed, 261 up-to-date"
+    ],
+    "runtimeFailure": [
+      "tests254/pass253/fail1",
+      "LIMIT_EXCEEDED: Current goal/tool round exceeds context budget; split the task"
+    ],
+    "runtimeFinal": [
+      "tests254/pass254/fail0"
+    ],
+    "chatRetained": [
+      "tests73/pass73/fail0"
+    ]
+  },
+  "limits": [
+    "This software bundle does not claim a new Android/emulator acceptance pass, physical Thor result, cloud/model execution or game completion.",
+    "DEBUG receiver/test changes are test support and are not production input-delivery proof here.",
+    "The earlier component attempt received ENTER and CTRL+A but failed to select the intended editor after ENTER changed focus; Native injection success alone was never considered receiver success.",
+    "Full logs, APKs and full test outputs remain in ignored build directories; hashes and bounded facts are retained here.",
+    "The original software and software-fixture-fix bundles remain frozen, including failed-attempt facts.",
+    "Collector inspected existing files and wrote only this new sibling directory; no source edits, Gradle runs or device operations were performed."
+  ]
+}

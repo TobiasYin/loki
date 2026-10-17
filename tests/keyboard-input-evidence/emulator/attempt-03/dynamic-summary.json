@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "evidenceMode": "manual_platform_api",
+  "scope": "emulator real Native RPC dynamic-content component; ordinary Activity; no model execution",
+  "cloudCalled": false,
+  "modelExecutionProven": false,
+  "systemInjectionProven": false,
+  "cleanupErrors": [],
+  "passed": true,
+  "nativeRunId": "040bcc62-c5a9-4f59-92ce-74f45fe2d38d",
+  "setupPermissionsDroppedBeforeTools": true,
+  "upperImage": {
+    "bytes": 17827,
+    "sha256": "76684e489e5baecc6c0f5781f5c72e00a14f0897e85b0951152f892c2c15eb87",
+    "displayId": 0
+  },
+  "dynamicImageComparison": {
+    "beforeSha256": "e94bf24730a1db72fb3a282a042c99b2b479ffbd420fcf00453bd099ccd2d5f6",
+    "afterSha256": "1b242e6a822b5a980fa4111cecbe4b029601d37e32de56276494060f25b0b2c9",
+    "ticksAdvanced": 30
+  },
+  "dynamicOldFramePositive": {
+    "ticksAdvanced": 28,
+    "imageHashesDiffer": true,
+    "geometryUnchanged": true,
+    "clickCount": 1
+  },
+  "movedNodeRejected": true,
+  "realDialogRejectedWithoutDispatch": true,
+  "scrollFixtureGeometry": {
+    "viewportHeight": 2400,
+    "contentHeight": 3776,
+    "scrollRange": 1376,
+    "canScrollDown": true
+  },
+  "committedSwipeSurvivedFeedback": true,
+  "oldFrameAfterScrollRejectedWithoutDispatch": true,
+  "receiver": {
+    "attemptId": "73c30b81-f1a4-4593-ab97-1465bb7e48a1",
+    "testRunId": "dynamic-576f81c4-3fe7-450b-ab7e-f2b1da85cdfd",
+    "evidenceMode": "manual_platform_api",
+    "agentRunId": "no-agent:dynamic-576f81c4-3fe7-450b-ab7e-f2b1da85cdfd",
+    "agentAnswerVerified": false,
+    "systemInjectionProven": false,
+    "displayId": 0,
+    "windowType": 1,
+    "ticks": 340,
+    "frames": 1279,
+    "clickCount": 3,
+    "touchCount": 23,
+    "scrollCount": 27,
+    "scrollY": 1376,
+    "buttonBounds": [
+      24,
+      -1102,
+      1056,
+      -1038
+    ],
+    "scrollBounds": [
+      0,
+      0,
+      1080,
+      2400
+    ],
+    "dialogShowing": false,
+    "sealed": true,
+    "viewportHeight": 2400,
+    "contentHeight": 3776,
+    "scrollRange": 1376,
+    "canScrollDown": false,
+    "evidence": {
+      "relativePath": "dynamic-reports/73c30b81-f1a4-4593-ab97-1465bb7e48a1/events.jsonl",
+      "eventPrefixBytes": 8880,
+      "eventPrefixSha256": "d624bab8cdda748cd088fac1416b6bd87947315f6fda9a4b26663f3946c1ce34",
+      "eventCount": 58,
+      "incomplete": false,
+      "droppedSamples": 0,
+      "sealed": true
+    }
+  },
+  "profilesRestored": true,
+  "credentialsRestored": true,
+  "rolesRestored": true,
+  "durationSeconds": 62.867
+}

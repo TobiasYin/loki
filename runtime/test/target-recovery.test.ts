@@ -11,7 +11,7 @@ function registry() {
   const r = new ToolRegistry();
   r.register({ packId: 'recovery-fixture', packVersion: '1', tools: [
     tool('tap', 'input.tap', 'input'), tool('launch', 'apps.launch', 'input'),
-    tool('button', 'input.press_button', 'input'), tool('axes', 'input.set_axes', 'input'), tool('back', 'input.navigate', 'input'),
+    tool('button', 'input.press_button', 'input'), tool('axes', 'input.set_axes', 'input'), tool('back', 'input.navigate', 'input'), tool('keyboard', 'input.key_press', 'input'),
     tool('capture', 'perception.capture_screen'), tool('tree', 'perception.ui_tree'),
     tool('app', 'perception.app_info'), tool('window', 'perception.window_info'),
     tool('select', 'perception.select_screen', 'read', ['this-run/target-snapshot']),
@@ -29,7 +29,7 @@ function ready(f: ReturnType<typeof fixture>) { f.snapshot.session.enabled.scree
 function recoveryEvents(f: ReturnType<typeof fixture>) { return f.events.filter(e => e.type === 'tool_result' && e.data.error === 'TARGET_CHANGED'); }
 
 for (const protocol of ['openai-responses', 'openai-completions', 'anthropic-messages'] as const) {
-  for (const [name, toolId, outcome] of [['button', 'input.press_button', 'observed'], ['axes', 'input.set_axes', 'submitted'], ['back', 'input.navigate', 'unknown']] as const) {
+  for (const [name, toolId, outcome] of [['button', 'input.press_button', 'observed'], ['axes', 'input.set_axes', 'submitted'], ['back', 'input.navigate', 'unknown'], ['keyboard', 'input.key_press', 'observed']] as const) {
     test(`${protocol} ${name}: checked Native focus refusal gives a fixed recovery hint, same Pi/Run observes, launches legally and decides a new input`, async () => {
       const f = fixture(protocol, [call(name, 'focus-refused'), call('window', 'current-focus'), call('launch', 'legal-launch'), call('capture', 'fresh-after-launch'), call(name, 'new-input'), { text: '已重新观察并继续。' }]); ready(f);
       const session = new RuntimeSession(f.lease.sessionId), agents: unknown[] = [];

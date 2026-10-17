@@ -1,0 +1,64 @@
+[build/keyboard-gradle.log; full log SHA-256 in summary.json]
+> Task :core:test UP-TO-DATE
+> Task :device-authority:test
+> Task :device-core:test
+> Task :input-lab:testDebugUnitTest
+> Task :app:testDebugUnitTest
+> Task :app:assembleDebug
+> Task :diagnostic:lintDebug
+> Task :app:lintDebug
+> Task :device-android:lintDebug
+> Task :input-lab:assembleRelease
+> Task :input-lab:assembleDebug
+> Task :input-lab:lintDebug
+> Task :app:assembleRelease
+> Task :app:assembleDebugAndroidTest
+BUILD SUCCESSFUL in 26s
+414 actionable tasks: 112 executed, 302 up-to-date
+
+[build/keyboard-final-gradle.log; full log SHA-256 in summary.json]
+> Task :core:test UP-TO-DATE
+> Task :input-lab:testDebugUnitTest UP-TO-DATE
+> Task :device-authority:test
+> Task :device-core:test
+> Task :app:testDebugUnitTest
+> Task :app:assembleDebug
+> Task :input-lab:assembleDebug UP-TO-DATE
+> Task :app:assembleDebugAndroidTest
+> Task :input-lab:lintDebug
+> Task :device-android:lintDebug
+> Task :diagnostic:lintDebug
+> Task :input-lab:assembleRelease UP-TO-DATE
+> Task :app:lintDebug
+> Task :app:assembleRelease
+BUILD SUCCESSFUL in 20s
+414 actionable tasks: 77 executed, 337 up-to-date
+
+[build/keyboard-runtime-tests.log; full log SHA-256 in summary.json]
+ℹ {"protocol":"openai-responses","missing":false,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+ℹ {"protocol":"openai-responses","missing":true,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+ℹ {"protocol":"openai-completions","missing":false,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+ℹ {"protocol":"openai-completions","missing":true,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+ℹ {"protocol":"anthropic-messages","missing":false,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+ℹ {"protocol":"anthropic-messages","missing":true,"state":"completed","httpRequests":1,"nativeExecutions":0,"diagnostics":[],"sdkErrors":[]}
+ℹ tests 254
+ℹ suites 0
+ℹ pass 254
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2024.251792
+
+[build/keyboard-ui-tests.log; full log SHA-256 in summary.json]
+ℹ tests 73
+ℹ suites 0
+ℹ pass 73
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3060.997166
+
+[build/keyboard-integration-types.log]
+0 output bytes; Root confirmed process exit 0 (log bytes alone are not execution proof).

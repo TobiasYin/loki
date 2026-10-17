@@ -1,0 +1,18 @@
+{
+  "debug": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk",
+    "sha256": "51f70471feaeaaf2300d9c9959a797eddc62c941d84586c218f33f246b38cebd",
+    "fixtureClasses": {
+      "dev.thor.inputlab.KeyboardFixtureActivity": true,
+      "dev.thor.inputlab.KeyboardFixtureProvider": true
+    }
+  },
+  "release": {
+    "path": "tests/input-lab-app/app/build/outputs/apk/release/input-lab-release-unsigned.apk",
+    "sha256": "e3b9c6ede37e6bf04a12755ca498c57470699ae25f6b3ddc39168bc528e850c3",
+    "fixtureClasses": {
+      "dev.thor.inputlab.KeyboardFixtureActivity": false,
+      "dev.thor.inputlab.KeyboardFixtureProvider": false
+    }
+  }
+}

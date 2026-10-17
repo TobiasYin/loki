@@ -37,8 +37,9 @@ class InputSchemas(context: Context) {
             }
             "string" -> {
                 val s = value as? String ?: fail(Code.INVALID_ARGUMENT, "$field must be a string")
-                requireTool(s.length >= schema.optInt("minLength", 0), message = "$field is too short")
-                requireTool(s.length <= schema.optInt("maxLength", Budgets.CONFIG), Code.LIMIT_EXCEEDED, "$field exceeds string budget")
+                val characters=s.codePointCount(0,s.length)
+                requireTool(characters >= schema.optInt("minLength", 0), message = "$field is too short")
+                requireTool(characters <= schema.optInt("maxLength", Budgets.CONFIG), Code.LIMIT_EXCEEDED, "$field exceeds string budget")
                 schema.optJSONArray("enum")?.let { values -> requireTool((0 until values.length()).any { values.getString(it) == s }, message = "Unknown $field value") }
                 if (schema.has("pattern")) requireTool(s.matches(Regex(schema.getString("pattern"))), message = "Invalid $field format")
                 if (schema.optString("format") == "uuid") requireTool(runCatching { java.util.UUID.fromString(s).toString() == s }.getOrDefault(false), message = "Invalid $field UUID")

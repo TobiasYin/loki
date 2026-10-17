@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "scope": "All files recursively except this root manifest; frozen child manifests included",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3540,
+      "sha256": "ea16491140940c55cb7d397f2a56142ec80cf1a4c509b1f3a6cfc431de488ab0"
+    },
+    {
+      "path": "debug-fixture-boundary.json",
+      "bytes": 672,
+      "sha256": "8aec780b92f23965b2f3203e8ea2e69032d82efa9d58d98ae28f5796d08190e0"
+    },
+    {
+      "path": "emulator/README.md",
+      "bytes": 1654,
+      "sha256": "e0a8628808a681412d7323aa279fe17ea1a5303becbcc7cae932335d42933229"
+    },
+    {
+      "path": "emulator/attempt-01/README.md",
+      "bytes": 1233,
+      "sha256": "a156930ccdd6f4ed5c658665b35049992ea5746c8727936dd1648c339116d6a7"
+    },
+    {
+      "path": "emulator/attempt-01/component-summary.json",
+      "bytes": 2461,
+      "sha256": "144106e561786c80bf664cc8b6c08db310cafb5a97374f388a27b226888fb3e1"
+    },
+    {
+      "path": "emulator/attempt-01/keyboard-explicit.log",
+      "bytes": 1959,
+      "sha256": "f314cf92746b1786cd3a9a9c056a4fd99e6f0ff8c93e1bee008f7ceb8b195705"
+    },
+    {
+      "path": "emulator/attempt-01/manifest.json",
+      "bytes": 1015,
+      "sha256": "7af99563dd8c8ae6d9e7b0a67749874ceca6c9d0628e65639d358df841b5d1be"
+    },
+    {
+      "path": "emulator/attempt-01/pins.json",
+      "bytes": 527,
+      "sha256": "3f1fbc26576782f893e0e6a2aa8595ab7fb16dfadab96cbcba8cecd5aa0a5610"
+    },
+    {
+      "path": "emulator/attempt-01/preservation-summary.json",
+      "bytes": 1439,
+      "sha256": "3462375e7d9ada2765bd3b48e730edd0993e09ebe3c24c9b6bdfb1d12287e04e"
+    },
+    {
+      "path": "emulator/attempt-01/receiver-events.jsonl",
+      "bytes": 1012,
+      "sha256": "f878e49d7cd20b46afe253c4c106cf970863090030cde03074e280dd38b5bc2a"
+    },
+    {
+      "path": "emulator/attempt-01/receiver-summary.json",
+      "bytes": 543,
+      "sha256": "03dbbbff0ffd8485a70ef922f026e349434f35107715d4c37296308a4f45418e"
+    },
+    {
+      "path": "emulator/attempt-02/README.md",
+      "bytes": 1294,
+      "sha256": "3f620e5aee86125eb433f1afa4a9b8ff59ec8c7cdbe3af72f84d403000a5cd37"
+    },
+    {
+      "path": "emulator/attempt-02/component-summary.json",
+      "bytes": 4331,
+      "sha256": "6c1b2d1561f25333031dd0b03fc58974c05c171a2273812e350f58140feb8f89"
+    },
+    {
+      "path": "emulator/attempt-02/keyboard-explicit.log",
+      "bytes": 2407,
+      "sha256": "a93b7c33dcf3a4ab380370baf7d2caae40a63cf3c51e9a814b747c5d1a960e61"
+    },
+    {
+      "path": "emulator/attempt-02/manifest.json",
+      "bytes": 1015,
+      "sha256": "18afd8358bd93edd935a5cf381958049af4f5575ae400d411dbfbbe42294097c"
+    },
+    {
+      "path": "emulator/attempt-02/pins.json",
+      "bytes": 545,
+      "sha256": "2fdd26cdecd2d82181301aed82ae14c36a41d7ba5f0a37bf1854918983895863"
+    },
+    {
+      "path": "emulator/attempt-02/preservation-summary.json",
+      "bytes": 1439,
+      "sha256": "06a61173ff3b3ea990420cb8022d139e0ccf4cf532dccd2547f4a89b07c24219"
+    },
+    {
+      "path": "emulator/attempt-02/receiver-events.jsonl",
+      "bytes": 2366,
+      "sha256": "1e0c0932f167135cd23384d31b69e5988f001e5d1731c508a764ee9168ada539"
+    },
+    {
+      "path": "emulator/attempt-02/receiver-summary.json",
+      "bytes": 969,
+      "sha256": "b43685f575b71354fec1a3db6520bcd197f4ccd034235337b8ffa2d243a6c383"
+    },
+    {
+      "path": "emulator/attempt-03/README.md",
+      "bytes": 2164,
+      "sha256": "ed62510e01686a20038915186f812287c67f4567535b2b3185ee4dd081e2ae4d"
+    },
+    {
+      "path": "emulator/attempt-03/component-summary.json",
+      "bytes": 6226,
+      "sha256": "2432c01a0fc12a0c2b16e9dda18b902cb05495508881324e88e9234a2d808122"
+    },
+    {
+      "path": "emulator/attempt-03/dynamic-explicit.log",
+      "bytes": 844,
+      "sha256": "f948b6b95b3c0896ea06de6214da39e3aa57bc0d1e0629e640d55990dc952a78"
+    },
+    {
+      "path": "emulator/attempt-03/dynamic-receiver-events.jsonl",
+      "bytes": 8880,
+      "sha256": "d624bab8cdda748cd088fac1416b6bd87947315f6fda9a4b26663f3946c1ce34"
+    },
+    {
+      "path": "emulator/attempt-03/dynamic-summary.json",
+      "bytes": 2489,
+      "sha256": "4252d078264803d19fb21bbfd75fb7d583c9e9bbffb96c9b7363faf86e868ddb"
+    },
+    {
+      "path": "emulator/attempt-03/installed-after.json",
+      "bytes": 274,
+      "sha256": "7e80690f5d63b2363adb9b86349d5ad48b595df0fb28cebec638aead13dfc610"
+    },
+    {
+      "path": "emulator/attempt-03/installed-before.json",
+      "bytes": 274,
+      "sha256": "7e80690f5d63b2363adb9b86349d5ad48b595df0fb28cebec638aead13dfc610"
+    },
+    {
+      "path": "emulator/attempt-03/keyboard-explicit.log",
+      "bytes": 810,
+      "sha256": "a7cace4cf8a364fa5ce1e04f5de5b3292a6df274048f9d020eef9d803a502b99"
+    },
+    {
+      "path": "emulator/attempt-03/manifest.json",
+      "bytes": 2027,
+      "sha256": "396433d43ec560ba7746e4c8fb394e1afb4fc1ecec8bdb055a64eed8671d3884"
+    },
+    {
+      "path": "emulator/attempt-03/permission-preservation.json",
+      "bytes": 117,
+      "sha256": "7bb923b5d28ca40af2ba5cfa7bac15cdceef0fabdc8edcde2f479cb5628b8070"
+    },
+    {
+      "path": "emulator/attempt-03/pins.json",
+      "bytes": 527,
+      "sha256": "6fd9f49a4e6fdd8e570c1b939545245d9e792b31995d6017b375c470168edf06"
+    },
+    {
+      "path": "emulator/attempt-03/preservation-summary.json",
+      "bytes": 1440,
+      "sha256": "961b5d1d2b74441b756192deffdc08c42f7f6ab756da3e2aa639cfd3f4a1f5d6"
+    },
+    {
+      "path": "emulator/attempt-03/receiver-events.jsonl",
+      "bytes": 3115,
+      "sha256": "4bd35be910b42e5935decd49e9524757cf19f3a68042adf37a53c5540b9b1014"
+    },
+    {
+      "path": "emulator/attempt-03/receiver-summary.json",
+      "bytes": 2614,
+      "sha256": "00c37e75b6cfb525433f0bed03970a04aee8d6e8c54fdd6017f6f700596e0076"
+    },
+    {
+      "path": "emulator/attempt-03/skills-preservation-summary.json",
+      "bytes": 586,
+      "sha256": "e44693371a1e5f3bf2b95b8325c1e3dbf2ef531ff42c14ecf9fc774afefe1bd1"
+    },
+    {
+      "path": "emulator/index.json",
+      "bytes": 881,
+      "sha256": "0610260e0b11c61e0aeb48ccfa5fa8e4de739bcb64ac8aed6d148a2a73debc02"
+    },
+    {
+      "path": "emulator/manifest.json",
+      "bytes": 4976,
+      "sha256": "d84a62d5129976403227351631969ddc239624b11b64c680f129e13bb035ea01"
+    },
+    {
+      "path": "software/README.md",
+      "bytes": 2212,
+      "sha256": "fbcf7605389a2f0b71310d3f36e2610651aebfb129879636b72eb520b2622a06"
+    },
+    {
+      "path": "software/artifacts.json",
+      "bytes": 1899,
+      "sha256": "885ebf156981138e7b26459cbd152925964513e92d357afa097c650421946089"
+    },
+    {
+      "path": "software/junit/TEST-dev.thor.tools.GatewayKeyboardTargetTest.xml",
+      "bytes": 1106,
+      "sha256": "115973c6f65cbc009ff1c73f1ceb8833c47e74ec8b420ba30c98e0b7934c5d47"
+    },
+    {
+      "path": "software/junit/TEST-dev.thor.tools.KeyboardCommandTest.xml",
+      "bytes": 1826,
+      "sha256": "47dbfe4094109a3e9eeba1e75df30af935545309ce705968eafd69f0eb511af7"
+    },
+    {
+      "path": "software/junit/TEST-dev.thor.tools.SemanticTreeTest.xml",
+      "bytes": 1748,
+      "sha256": "e8bc36a17101de233579f8788b3fcdf23c50c5e28d76c1f7574337a7f82f3b0e"
+    },
+    {
+      "path": "software/junit/TEST-dev.thor.tools.TextInputCommandTest.xml",
+      "bytes": 1662,
+      "sha256": "8d5db96a0c40052f2cba5fb4ce763c2cfc74b6e9dd329c9f8ba7a2323c0beb64"
+    },
+    {
+      "path": "software/junit-xml-hashes.json",
+      "bytes": 26011,
+      "sha256": "4ad63889f260a2d34d7910867309e6653f33a1975a702dce80a2fd9e2507ad31"
+    },
+    {
+      "path": "software/lint-report-hashes.json",
+      "bytes": 1014,
+      "sha256": "44755727dd6421031705931e5d9e967c2331b56ed334c937e5516f2eaf41c1e4"
+    },
+    {
+      "path": "software/log-excerpts.txt",
+      "bytes": 2510,
+      "sha256": "516031da5ac9a75929096c8e784678bf37569054937fa72e6ed5d2bc73401ae4"
+    },
+    {
+      "path": "software/manifest.json",
+      "bytes": 2085,
+      "sha256": "d67197d290402c962f0d94f5429274d847c9ba9d5cc22f83e077eaeda359c7e4"
+    },
+    {
+      "path": "software/pins.json",
+      "bytes": 528,
+      "sha256": "7297a26f9645ec6a5fdbfd65395b93789df8ec15d6ac6cf5da6ac4ad4125d0ae"
+    },
+    {
+      "path": "software/source-hashes.json",
+      "bytes": 6308,
+      "sha256": "79333ab2d0689aabecabde3bbcf18fd5dfdc9788701c04014e7b58ec6c2635fd"
+    },
+    {
+      "path": "software/summary.json",
+      "bytes": 6855,
+      "sha256": "af3672f90219437d284daaf67b9dca4f3df1429976608be9658d21778394c56a"
+    },
+    {
+      "path": "software-fixture-fix/README.md",
+      "bytes": 1870,
+      "sha256": "dcfd8c4ba91cb0e225a802a078c1ca187d81d3efd9d5a9d94f35cbf85ebc5a81"
+    },
+    {
+      "path": "software-fixture-fix/artifacts.json",
+      "bytes": 1899,
+      "sha256": "4a54884bdcdfc64aa81c82574d8d457fc4ad5e9f50adad5265980fa9df931b34"
+    },
+    {
+      "path": "software-fixture-fix/manifest.json",
+      "bytes": 869,
+      "sha256": "ebd26df1769a77d13404e0d92d45557ee135480eca3fd7b32a04f249e44fb0ba"
+    },
+    {
+      "path": "software-fixture-fix/pins.json",
+      "bytes": 546,
+      "sha256": "2940dce046986c7cf9d8a3f3a8923859334530c8efb73cd79a99a4d1c84c1a07"
+    },
+    {
+      "path": "software-fixture-fix/source-hashes.json",
+      "bytes": 983,
+      "sha256": "6b8cbedbd105f4e6915ba63608c6c044ad717ca705c4aaf532436c9d82918b52"
+    },
+    {
+      "path": "software-fixture-fix/summary.json",
+      "bytes": 5869,
+      "sha256": "62ead197043f40b82caa2ab7fec83b19160637048ec76a77b9f3b6266f77d5d6"
+    },
+    {
+      "path": "software-focus/README.md",
+      "bytes": 3224,
+      "sha256": "402707ede7cad3913ccf53b7f95be72748935d10754513e7264d5be339c02957"
+    },
+    {
+      "path": "software-focus/artifacts.json",
+      "bytes": 1899,
+      "sha256": "ef8cea33cb0b037ee127199be898b211fd2cdaeffd9ff0c4334d005577a8ab21"
+    },
+    {
+      "path": "software-focus/manifest.json",
+      "bytes": 870,
+      "sha256": "2a506e8cb3a8d57b2bb364720c1e803b8355679194bcb37aca47c20ddf530770"
+    },
+    {
+      "path": "software-focus/pins.json",
+      "bytes": 528,
+      "sha256": "e765cdef457d897e2c5e528da7ea26aeffc7733c4d3c083918578f127399bedc"
+    },
+    {
+      "path": "software-focus/source-hashes.json",
+      "bytes": 12367,
+      "sha256": "89afafdf0b93874a5d51eeada7a6ce7d12a5b86c76fda2a838020bb438441e9d"
+    },
+    {
+      "path": "software-focus/summary.json",
+      "bytes": 38921,
+      "sha256": "4275333fe4ec9444b4ff77343ce1671f1e3781f159dbfe0034eabe68508793f8"
+    }
+  ]
+}

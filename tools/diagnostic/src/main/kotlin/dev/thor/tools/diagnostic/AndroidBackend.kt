@@ -33,7 +33,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     @Volatile private var lowerSafetyCache:LowerSafety?=null
     @Volatile private var lastScreenshotAttempt=Long.MIN_VALUE
     init {snapshots.installLowerGuard {display,target->lowerSafety(display,target)}}
-    private val gestureTools = setOf("input.tap", "input.long_press", "input.swipe", "input.drag", "input.scroll", "input.activate")
+    private val gestureTools = setOf("input.tap", "input.long_press", "input.swipe", "input.drag", "input.scroll", "input.activate", "input.type_text", "input.key_press")
     private data class NodeBinding(val snapshotId:String,val windowId:Int,val packageName:String?,val node:AccessibilityNodeInfo,val signature:String,val expires:Long,val runId:String,val sessionId:String,val path:String,val uniqueIdentity:Boolean)
     private val nodeRefs=LinkedHashMap<String,NodeBinding>()
     private val nodeLock=Any()
@@ -44,9 +44,16 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         return hash(listOf(node.windowId,node.packageName,node.className,node.viewIdResourceName,node.isPassword,
             if(node.isPassword)null else node.text,if(node.isPassword)null else node.contentDescription,node.isEnabled,node.isVisibleToUser,node.isScrollable,node.isClickable,node.childCount,
             node.collectionInfo?.rowCount,node.collectionInfo?.columnCount,node.collectionItemInfo?.rowIndex,node.collectionItemInfo?.columnIndex,node.isChecked,node.isSelected,
+            node.isEditable,if(node.isPassword)null else node.textSelectionStart,if(node.isPassword)null else node.textSelectionEnd,
             if(node.isPassword)null else node.stateDescription,node.rangeInfo?.current,r.toShortString(),node.actionList.map {it.id}).joinToString("|").toByteArray())
     }
     override fun availability(toolId: String): Availability {
+        if(toolId=="input.key_press") {
+            val base=shizuku.availability().copy(backend="shizuku-inputmanager/virtual-keyboard")
+            return if(ThorAccessibilityService.instance==null)Availability(Status.PERMISSION_MISSING,"Keyboard requires Accessibility to resolve and guard the selected-screen app",base.backend)
+                else if(inputState.hasUnknown())Availability(Status.TEMPORARILY_UNAVAILABLE,"Previous submitted gesture has no completion/cancel callback; stop status unknown",base.backend)
+                else base.copy(reason=if(base.status==Status.READY)"Fixed keyboard keys/modifiers; selected-screen focus and display routing are verified before submission, receiver handling requires observation" else base.reason)
+        }
         if(toolId=="agent.background")return if(backgroundAgentAction!=null)
             Availability(Status.READY,"Fixed assistant chat-task background action; no arbitrary app/task routing","android-sdk/assistant-background")
             else Availability(Status.BACKEND_MISSING,"Assistant background host callback is not installed","android-sdk/assistant-background")
@@ -61,6 +68,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             toolId.startsWith("perception.") -> "android-sdk/accessibility"
             toolId=="input.scroll" -> "accessibility-node-scroll"
             toolId=="input.activate" -> "accessibility-node-activate"
+            toolId=="input.type_text" -> "accessibility-node-set-text"
             toolId.startsWith("input.") -> "accessibility-dispatchGesture"
             toolId.startsWith("debug.") -> "shizuku-userservice"
             else -> "synthetic-config/android-app-owned-root"
@@ -71,6 +79,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         if (toolId in gestureTools && inputState.hasUnknown()) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
         if (toolId == "web.request" || toolId == "perception.device_info" || toolId.startsWith("files.") || toolId == "input.release_inputs") return Availability(Status.READY, "Manual diagnostics only", backend)
         if (ThorAccessibilityService.instance == null) return Availability(Status.PERMISSION_MISSING, "Enable this diagnostic Accessibility service in Android settings", backend)
+        if(toolId=="input.type_text")return Availability(Status.READY,"Unicode ACTION_SET_TEXT; each current nodeRef must resolve to a visible enabled non-password editable field advertising set_text",backend)
         return Availability(Status.READY, "Android API exists; delivery on Thor is unverified", backend)
     }
     override fun availability(toolId: String, args: Map<String, Any?>): Availability =
@@ -127,6 +136,16 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                     "nextStep" to "Only this Run selected the calibrated screen. Re-observe its current UI/screenshot before input; prior role frames/refs remain invalid for this target."))
             }
             "input.activate" -> activate(e,args,cp)
+            "input.type_text" -> activate(e,args,cp,TextInputCommand.parse(args))
+            "input.key_press" -> {
+                KeyboardCommand.parse(args)
+                requireTool(!inputState.hasPending(),Code.BACKEND_UNAVAILABLE,"Previous gesture has not finished")
+                val snap=snapshots.validateObservation(e.snapshotId)
+                cp.check();invalidateNodeRefs()
+                val data=shizuku.keyboard(e.runId,args,snap.display.id,snap.target.packageName,cp)
+                cp.check();snapshots.validateReadSource(snap.id)
+                result(e,data,outcome="submitted")
+            }
             "input.navigate" -> {
                 NavigationCommand.parse(args)
                 val snap=snapshots.validateObservation(e.snapshotId)
@@ -348,7 +367,9 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             val value=if(secret)Triple(null,0,null) else textSlice(node.stateDescription ?: if(node.isEditable)node.text else null,true)
             return UiElement(path,parent,text(node.className),if(secret)null else text(node.viewIdResourceName),body.first,description.first,
                 value.first,secret,node.isClickable,node.isCheckable,node.isChecked,node.isSelected,node.isEnabled,node.isVisibleToUser,node.isScrollable,node.isEditable,
-                listOf(bounds.left,bounds.top,bounds.right,bounds.bottom),actions,collection,item,range,body.second,body.third,description.second,description.third,value.second)
+                listOf(bounds.left,bounds.top,bounds.right,bounds.bottom),actions,collection,item,range,body.second,body.third,description.second,description.third,value.second,
+                selectionStart=if(!secret && node.isEditable)node.textSelectionStart else null,
+                selectionEnd=if(!secret && node.isEditable)node.textSelectionEnd else null,focused=!secret && node.isFocused)
         }
         fun visit(node:AccessibilityNodeInfo,depth:Int,path:String,parent:String?) {
             try {
@@ -387,8 +408,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 "truncationReasons" to reasons.toList(),"emptyReason" to if(page.nodes.isEmpty())"no_matching_exposed_semantics_or_budget" else null),reasons.isNotEmpty())
         } finally {if(!rootHandedOff){@Suppress("DEPRECATION") root.recycle()};handles.values.forEach {@Suppress("DEPRECATION") it.recycle()}}
     }
-    private fun activate(e:Envelope,args:Map<String,Any?>,cp:Checkpoint):ToolResult {
-        val reference=UiActivationGuard.parse(args)
+    private fun activate(e:Envelope,args:Map<String,Any?>,cp:Checkpoint,textCommand:TextInputCommand?=null):ToolResult {
+        val reference=textCommand?.nodeRef ?: UiActivationGuard.parse(args)
         requireTool(!inputState.hasPending(),Code.BACKEND_UNAVAILABLE,"Previous gesture has not finished")
         val snapshot=snapshots.validateObservation(e.snapshotId)
         requireTool(snapshot.target.validity=="valid" && !snapshot.target.packageName.isNullOrBlank(),Code.TARGET_CHANGED,"Activation requires an unambiguous selected-screen app")
@@ -425,17 +446,25 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                         guard.check(e.runId,e.sessionId,e.snapshotId,node.windowId,node.packageName?.toString(),binding.path,
                             node==binding.node,nodeSignature(node),clock.now())
                         val bounds=Rect();node.getBoundsInScreen(bounds)
-                        UiActivationGuard.requireClickable(node.isVisibleToUser,node.isEnabled,node.isClickable,node.isPassword,
-                            node.actionList.any {it.id==AccessibilityNodeInfo.ACTION_CLICK},TouchableBounds(bounds.left,bounds.top,bounds.right,bounds.bottom),snapshot.display,snapshot.target.touchableBounds)
+                        val actionBounds=TouchableBounds(bounds.left,bounds.top,bounds.right,bounds.bottom)
+                        if(textCommand==null)UiActivationGuard.requireClickable(node.isVisibleToUser,node.isEnabled,node.isClickable,node.isPassword,
+                            node.actionList.any {it.id==AccessibilityNodeInfo.ACTION_CLICK},actionBounds,snapshot.display,snapshot.target.touchableBounds)
+                        else UiTextInputGuard.requireEditable(node.isVisibleToUser,node.isEnabled,node.isEditable,node.isPassword,
+                            node.actionList.any {it.id==AccessibilityNodeInfo.ACTION_SET_TEXT},actionBounds,snapshot.display,snapshot.target.touchableBounds)
+                        val bundle=if(textCommand==null)null else Bundle().apply {
+                            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                                textCommand.updatedText(node.text?.toString().orEmpty(),node.textSelectionStart,node.textSelectionEnd))
+                        }
                         snapshots.validateObservation(e.snapshotId) // Recheck structure/clip after resolving the node.
                         cp.check()
-                        cp.submitted() // ACTION_CLICK can have reached the app even if the Binder reply fails.
-                        accepted=node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        cp.submitted() // The action can reach the app even if its Binder reply fails.
+                        accepted=if(textCommand==null)node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            else node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,bundle)
                     }
                     invalidateNodeRefs()
                 }
             } catch(t:ToolFailure){error=t}
-              catch(t:Exception){error=ToolFailure(if(t is SecurityException)Code.PERMISSION_MISSING else Code.IO_ERROR,"Accessibility activation failed: ${t.javaClass.simpleName}")}
+              catch(t:Exception){error=ToolFailure(if(t is SecurityException)Code.PERMISSION_MISSING else Code.IO_ERROR,"Accessibility node action failed: ${t.javaClass.simpleName}")}
             finally {
                 resolved.forEach {@Suppress("DEPRECATION") it.recycle()}
                 if(cp.submitted)invalidateNodeRefs()
@@ -444,9 +473,10 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         }
         await(done,e,cp);error?.let {throw it}
         snapshots.validateReadSource(snapshot.id)
-        return result(e,mapOf("submitted" to true,"action" to "click","actionAccepted" to accepted,"foregroundVerified" to false,
+        val detail=if(textCommand==null)emptyMap() else mapOf("mode" to textCommand.mode,"characterCount" to textCommand.text.codePointCount(0,textCommand.text.length),"enterSubmitted" to false)
+        return result(e,detail+mapOf("submitted" to true,"action" to if(textCommand==null)"click" else "set_text","actionAccepted" to accepted,"foregroundVerified" to false,
             "nodeRefsInvalidated" to true,"nextStep" to "Re-observe ui_tree or screenshot to verify the result before any next input"),outcome="submitted")
-            .copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected ACTION_CLICK; re-observe before another action")
+            .copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected the Accessibility action; re-observe before another action")
     }
     private val actionNames=mapOf(
         AccessibilityNodeInfo.ACTION_CLICK to "click",AccessibilityNodeInfo.ACTION_LONG_CLICK to "long_click",AccessibilityNodeInfo.ACTION_FOCUS to "focus",

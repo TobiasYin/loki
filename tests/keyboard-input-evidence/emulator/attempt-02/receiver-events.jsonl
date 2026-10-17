@@ -1,0 +1,16 @@
+{"sequence":1,"eventKind":"prepared","recordOrigin":"fixture_setup","uptimeMs":450164,"data":{}}
+{"sequence":2,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":455359,"data":{"field":"Normal editor","length":4,"start":0,"before":4,"count":4}}
+{"sequence":3,"eventKind":"configure","recordOrigin":"fixture_setup","uptimeMs":455556,"data":{"change":"select_emoji"}}
+{"sequence":4,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":458100,"data":{"field":"Normal editor","length":4,"start":0,"before":4,"count":4}}
+{"sequence":5,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":460147,"data":{"field":"Normal editor","length":0,"start":0,"before":4,"count":0}}
+{"sequence":6,"eventKind":"configure","recordOrigin":"fixture_setup","uptimeMs":466308,"data":{"change":"move"}}
+{"sequence":7,"eventKind":"text_changed","recordOrigin":"android_text_watcher","uptimeMs":540524,"data":{"field":"Normal editor","length":15,"start":0,"before":0,"count":15}}
+{"sequence":8,"eventKind":"configure","recordOrigin":"fixture_setup","uptimeMs":540714,"data":{"change":"focus_normal"}}
+{"sequence":9,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":546487,"data":{"action":0,"keyCode":66,"metaState":0,"source":257,"deviceId":-1}}
+{"sequence":10,"eventKind":"editor_action","recordOrigin":"android_editor","uptimeMs":546495,"data":{"actionId":6,"keyCode":66}}
+{"sequence":11,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":546507,"data":{"action":1,"keyCode":66,"metaState":0,"source":257,"deviceId":-1}}
+{"sequence":12,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":553432,"data":{"action":0,"keyCode":113,"metaState":4096,"source":257,"deviceId":-1}}
+{"sequence":13,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":553622,"data":{"action":0,"keyCode":29,"metaState":4096,"source":257,"deviceId":-1}}
+{"sequence":14,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":553629,"data":{"action":1,"keyCode":29,"metaState":4096,"source":257,"deviceId":-1}}
+{"sequence":15,"eventKind":"key","recordOrigin":"android_key_dispatch","uptimeMs":553629,"data":{"action":1,"keyCode":113,"metaState":0,"source":257,"deviceId":-1}}
+{"sequence":16,"eventKind":"release","recordOrigin":"fixture_setup","uptimeMs":592468,"data":{}}

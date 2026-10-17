@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "passed": false,
+  "cause": "Fixture EditText keyListener=null was still declared editable and advertised SET_TEXT by Android",
+  "nativeProductionFailureProven": false,
+  "keysExecuted": false,
+  "receiverSealedByRelease": true,
+  "eventCount": 7,
+  "eventBytes": 1012,
+  "eventSha256": "f878e49d7cd20b46afe253c4c106cf970863090030cde03074e280dd38b5bc2a",
+  "readonlyMutationCallbacks": [
+    {
+      "field": "Read only editor",
+      "length": 17,
+      "start": 0,
+      "before": 18,
+      "count": 17
+    }
+  ]
+}

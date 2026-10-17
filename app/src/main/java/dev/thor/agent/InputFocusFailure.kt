@@ -12,7 +12,7 @@ internal object InputFocusFailure {
         "Focused selected-screen window is not the authorized navigation target")
     fun classify(toolId:String,error:Code?,message:String?):String? {
         if(error!=Code.TARGET_CHANGED)return null
-        val approved=when(toolId){"input.press_button","input.set_axes"->physical;"input.navigate"->navigation;else->emptySet()}
+        val approved=when(toolId){"input.press_button","input.set_axes"->physical;"input.navigate","input.key_press"->navigation;else->emptySet()}
         return if(message in approved)REASON else null
     }
 }

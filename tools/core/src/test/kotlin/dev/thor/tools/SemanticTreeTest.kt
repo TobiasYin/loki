@@ -55,6 +55,34 @@ class SemanticTreeTest {
         val offset=SemanticTree.project(listOf(node("root"),chunk),{it},textOffset=350008)
         assertEquals(350008,offset.nodes.last()["textStart"]);assertTrue((offset.nodes.last()["text"] as String).startsWith("TAIL"))
     }
+    @Test fun editableEmojiSelectionKeepsOriginalUtf16OffsetsEvenWhenTextIsSliced() {
+        val text="a🙂中文b"
+        val field=node("field","root",text=text).copy(editable=true,selectionStart=1,selectionEnd=5)
+        val page=SemanticTree.project(listOf(node("root"),field),{it},textOffset=3)
+        val projected=page.nodes.last()
+        assertEquals("中文b",projected["text"]);assertEquals(3,projected["textStart"])
+        assertEquals(mapOf("start" to 1,"end" to 5,"unit" to "utf16"),projected["textSelection"])
+        // The emoji occupies UTF-16 positions 1..3, but only one Unicode code point.
+        assertEquals(6,text.length);assertEquals(5,text.codePointCount(0,text.length))
+    }
+    @Test fun passwordsAndNonEditableNodesNeverExposeSelectionMetadata() {
+        val secret=node("secret","root",text="hidden🙂",password=true).copy(editable=true,selectionStart=0,selectionEnd=8)
+        val label=node("label","root",text="selectable text").copy(selectionStart=0,selectionEnd=15)
+        val unknown=node("field","root",text="field").copy(editable=true,selectionStart=-1,selectionEnd=null)
+        val page=SemanticTree.project(listOf(node("root"),secret,label,unknown),{it})
+        assertTrue(page.nodes.none {it.containsKey("textSelection")})
+        assertNull(secret.safe().selectionStart);assertNull(secret.safe().selectionEnd)
+        assertEquals("[password hidden]",page.nodes.single {it["nodeRef"]=="secret"}["text"])
+    }
+    @Test fun actualInputFocusIsVisibleWithoutExposingPasswordFocus() {
+        val focused=node("field","root",text="typing").copy(editable=true,focused=true)
+        val other=node("other","root",text="other").copy(editable=true)
+        val secret=node("secret","root",text="secret",password=true).copy(editable=true,focused=true)
+        val page=SemanticTree.project(listOf(node("root"),focused,other,secret),{it})
+        assertEquals(true,page.nodes.single {it["nodeRef"]=="field"}["focused"])
+        assertEquals(false,page.nodes.single {it["nodeRef"]=="other"}["focused"])
+        assertEquals(false,page.nodes.single {it["nodeRef"]=="secret"}["focused"])
+    }
     @Test fun refsRejectSamePathWithWrongSnapshotWindowPackageOrRefreshedIdentityAndExpiry() {
         val ref=UiNodeRefGuard("snapshot",7,"app","same-node",100)
         ref.check("snapshot",7,"app","same-node",99)

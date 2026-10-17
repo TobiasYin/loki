@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.thor.tools.KeyboardCommandTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-17T04:30:22.165Z" hostname="JGJHX5JPGF" time="0.017">
+  <properties/>
+  <testcase name="rejectsSystemKeysShellNumericCodesHoldsRepeatAndCallerRouting" classname="dev.thor.tools.KeyboardCommandTest" time="0.002"/>
+  <testcase name="cancellationAfterFirstModifierReleasesOnlyThatAttemptedKey" classname="dev.thor.tools.KeyboardCommandTest" time="0.005"/>
+  <testcase name="mapsOnlyFixedKeyboardCodesIncludingTextHomeRatherThanSystemHome" classname="dev.thor.tools.KeyboardCommandTest" time="0.001"/>
+  <testcase name="cancelledBeforeSubmissionDoesNotEmitEvents" classname="dev.thor.tools.KeyboardCommandTest" time="0.001"/>
+  <testcase name="cancellationAfterPrimaryDownReleasesPrimaryAndAllModifiers" classname="dev.thor.tools.KeyboardCommandTest" time="0.002"/>
+  <testcase name="descriptorRequiresSelectedScreenControlAndFreshTarget" classname="dev.thor.tools.KeyboardCommandTest" time="0.0"/>
+  <testcase name="failedCleanupIsAttachedWithoutReplacingOriginalCancellation" classname="dev.thor.tools.KeyboardCommandTest" time="0.003"/>
+  <testcase name="rejectedAndThrowingDownStillReceiveUpWithoutUnattemptedKeys" classname="dev.thor.tools.KeyboardCommandTest" time="0.001"/>
+  <testcase name="cleanupFailureStillReleasesOtherModifiersAndDoesNotClaimSuccess" classname="dev.thor.tools.KeyboardCommandTest" time="0.001"/>
+  <testcase name="orderedChordHasOnePairPerKeyAndClearsModifierMetaState" classname="dev.thor.tools.KeyboardCommandTest" time="0.0"/>
+  <testcase name="modifiersAreDistinctTypedAndAllowlisted" classname="dev.thor.tools.KeyboardCommandTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

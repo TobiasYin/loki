@@ -1,0 +1,19 @@
+{
+  "baselineSource": "last confirmed dynamic attempt03 final snapshot; not a contemporaneous keyboard-preflight skills copy",
+  "userSkillsBefore": 0,
+  "userSkillsAfter": 0,
+  "unchangedBuiltinCatalogEntriesAndFileBytes": [
+    "skill-creator",
+    "skill-manager"
+  ],
+  "expectedBuiltinChanges": [
+    {
+      "name": "adb-operations",
+      "oldRevision": "74ea2f78-d104-47e0-bc81-c14b5602144e",
+      "newRevision": "a18513b1-c489-49f5-b31e-e81eda22e3fa",
+      "expectedBuiltinUpdate": true
+    }
+  ],
+  "oldBuiltinBytesWereNotRestored": true,
+  "wholeFilesTreeCompared": false
+}

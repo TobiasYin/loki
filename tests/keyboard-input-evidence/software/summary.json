@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "collectedUtc": "2026-10-17T04:32:27.396472+00:00",
+  "status": "KEYBOARD_SOFTWARE_VERIFIED_DEVICE_ACCEPTANCE_SEPARATE",
+  "scope": "Unicode guarded node editing, fixed keyboard key/modifier submission, Agent contract/context and structured UI integration; DEBUG fixture provides separate component-test support.",
+  "gradle": {
+    "initial": {
+      "success": true,
+      "seconds": 26,
+      "tasks": 414,
+      "executed": 112,
+      "upToDate": 302
+    },
+    "final": {
+      "success": true,
+      "seconds": 20,
+      "tasks": 414,
+      "executed": 77,
+      "upToDate": 337
+    },
+    "tasks": [
+      {
+        "task": ":device-core:test",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":core:test",
+        "initial": "UP-TO-DATE",
+        "final": "UP-TO-DATE"
+      },
+      {
+        "task": ":device-authority:test",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":app:testDebugUnitTest",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":input-lab:testDebugUnitTest",
+        "initial": "EXECUTED",
+        "final": "UP-TO-DATE"
+      },
+      {
+        "task": ":app:lintDebug",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":diagnostic:lintDebug",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":input-lab:lintDebug",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":device-android:lintDebug",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":app:assembleDebug",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":app:assembleRelease",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      },
+      {
+        "task": ":input-lab:assembleDebug",
+        "initial": "EXECUTED",
+        "final": "UP-TO-DATE"
+      },
+      {
+        "task": ":input-lab:assembleRelease",
+        "initial": "EXECUTED",
+        "final": "UP-TO-DATE"
+      },
+      {
+        "task": ":app:assembleDebugAndroidTest",
+        "initial": "EXECUTED",
+        "final": "EXECUTED"
+      }
+    ]
+  },
+  "jvm": {
+    "totals": {
+      "tests": 474,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suiteCount": 68
+    },
+    "modules": [
+      {
+        "module": "device-core",
+        "gradleTask": ":device-core:test",
+        "finalTaskStatus": "EXECUTED",
+        "initialTaskStatus": "EXECUTED",
+        "suiteCount": 32,
+        "tests": 229,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "bridge-core",
+        "gradleTask": ":core:test",
+        "finalTaskStatus": "UP-TO-DATE",
+        "initialTaskStatus": "UP-TO-DATE",
+        "suiteCount": 3,
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "device-authority",
+        "gradleTask": ":device-authority:test",
+        "finalTaskStatus": "EXECUTED",
+        "initialTaskStatus": "EXECUTED",
+        "suiteCount": 1,
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "app",
+        "gradleTask": ":app:testDebugUnitTest",
+        "finalTaskStatus": "EXECUTED",
+        "initialTaskStatus": "EXECUTED",
+        "suiteCount": 24,
+        "tests": 117,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "input-lab",
+        "gradleTask": ":input-lab:testDebugUnitTest",
+        "finalTaskStatus": "UP-TO-DATE",
+        "initialTaskStatus": "EXECUTED",
+        "suiteCount": 8,
+        "tests": 74,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "xmlHashes": "junit-xml-hashes.json",
+    "publishedSelectedXml": [
+      "junit/TEST-dev.thor.tools.GatewayKeyboardTargetTest.xml",
+      "junit/TEST-dev.thor.tools.KeyboardCommandTest.xml",
+      "junit/TEST-dev.thor.tools.SemanticTreeTest.xml",
+      "junit/TEST-dev.thor.tools.TextInputCommandTest.xml"
+    ],
+    "counting": "474 is the single final XML inventory including UP-TO-DATE results; initial/final executions and earlier core runs are not added again."
+  },
+  "runtime": {
+    "tests": 254,
+    "pass": 254,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "rerun": true
+  },
+  "chat": {
+    "tests": 73,
+    "pass": 73,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "rerun": true
+  },
+  "integrationTypes": {
+    "stdoutBytes": 0,
+    "exitCode": 0,
+    "basis": "Empty captured output and Root agent execution-confirmed exit 0; an empty log alone cannot prove process success."
+  },
+  "sourceHashes": "source-hashes.json",
+  "sourceFileCount": 31,
+  "logs": {
+    "initialGradle": {
+      "path": "build/keyboard-gradle.log",
+      "bytes": 49774,
+      "sha256": "48402460092a8d8a39988c44c57327c439938833af2185c432b50ba9bf2a6c8e"
+    },
+    "finalGradle": {
+      "path": "build/keyboard-final-gradle.log",
+      "bytes": 47302,
+      "sha256": "9ecc43cb1be82b21738fc865b8ec216cf9c575e0b97a49bfd44690d3a8424381"
+    },
+    "runtime": {
+      "path": "build/keyboard-runtime-tests.log",
+      "bytes": 29687,
+      "sha256": "6fbd6586fc5960720b1cb95f10e7d13eb94789471e6f0039b75e04b18ac15869"
+    },
+    "chat": {
+      "path": "build/keyboard-ui-tests.log",
+      "bytes": 8002,
+      "sha256": "9381c40235901273eb1c26383eaec405099e8ac70183b053a3735d5770db6671"
+    },
+    "integrationTypes": {
+      "path": "build/keyboard-integration-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "pins": "pins.json",
+  "pinsVerifiedActualBytes": true,
+  "artifactCheck": {
+    "file": "artifacts.json",
+    "allFourActualFilesVerified": true,
+    "threePinnedArtifactsVerified": true
+  },
+  "lint": "lint-report-hashes.json",
+  "limits": [
+    "No cloud/model request, physical-device result, emulator instrumentation result or game completion is implied by this software bundle.",
+    "The DEBUG-only fixture and Android component test are support sources, not a device acceptance result here.",
+    "Final bridge-core41 and input-lab74 are UP-TO-DATE results, not freshly rerun in the final Gradle invocation.",
+    "Runtime254 and chat73 are separate suites and are not included in the JVM474 total.",
+    "The initial successful build is provenance only and its tests are not counted a second time.",
+    "Source hashes are a selected current changed-file inventory, not an atomic full repository snapshot.",
+    "Collector performed read-only inspection and wrote only this software evidence directory; no build or device action was performed."
+  ]
+}

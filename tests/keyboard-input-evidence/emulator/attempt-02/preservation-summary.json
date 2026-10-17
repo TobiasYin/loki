@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "runs": {
+    "cancelled": 13,
+    "completed": 56,
+    "failed": 54
+  },
+  "originalDatabaseRows": {
+    "sessions": {
+      "originalCount": 47,
+      "afterCount": 49,
+      "missingOriginal": 0,
+      "changedOriginalPayload": 0,
+      "newCount": 2
+    },
+    "runs": {
+      "originalCount": 120,
+      "afterCount": 123,
+      "missingOriginal": 0,
+      "changedOriginalPayload": 0,
+      "newCount": 3
+    },
+    "messages": {
+      "originalCount": 240,
+      "afterCount": 246,
+      "missingOriginal": 0,
+      "changedOriginalPayload": 0,
+      "newCount": 6
+    },
+    "events": {
+      "originalCount": 2728,
+      "afterCount": 2764,
+      "missingOriginal": 0,
+      "changedOriginalPayload": 0,
+      "newCount": 36
+    },
+    "attachments": {
+      "originalCount": 37,
+      "afterCount": 37,
+      "missingOriginal": 0,
+      "changedOriginalPayload": 0,
+      "newCount": 0
+    }
+  },
+  "originalMetadataPreserved": {
+    "selected": true
+  },
+  "exactRawPreferencesRestored": {
+    "profiles": true,
+    "voice": true,
+    "native-credentials": true,
+    "display-roles": true
+  },
+  "settingsRestored": true,
+  "shizukuServerRestoredStopped": true,
+  "shizukuGrantRestored": true,
+  "runtimeIdle": true,
+  "quickCheck": "ok",
+  "skillsBaselineSource": "dynamic-input attempt03 final private snapshot; original keyboard preflight did not capture skills",
+  "wholeFilesTreeCompared": false
+}

@@ -19,6 +19,8 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     @Volatile private var gamepadJob: GamepadJob?=null
     private data class NavigationJob(val token:String,val action:NativeNavigation)
     private var navigationJob:NavigationJob?=null
+    private data class KeyboardJob(val token:String,val action:NativeKeyboard)
+    private var keyboardJob:KeyboardJob?=null
     private var gamepad: NativeGamepad?=null
     private var staged: File? = null
     private var stagedHash: String? = null
@@ -136,6 +138,30 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
             requireTool(request.toByteArray().size <= 16 * 1024, Code.LIMIT_EXCEEDED, "Binder request too large")
             val obj = JSONObject(request); val args = obj.args()
             val data: Map<String, Any?> = when (args.string("operation")) {
+                "keyboard.prepare" -> synchronized(this) {
+                    check(token);args.only("operation","args","displayId","expectedPackage")
+                    @Suppress("UNCHECKED_CAST")
+                    val command=KeyboardCommand.parse(args["args"] as? Map<String,Any?> ?: fail(Code.INVALID_ARGUMENT,"Keyboard arguments required"))
+                    val guard=GamepadLeaseGuard(l.caller,l.deadline,clock,l.cancel) {lease===l}
+                    guard.checkCaller(Binder.getCallingUid())
+                    requireTool(keyboardJob==null,Code.BACKEND_UNAVAILABLE,"Keyboard is already prepared")
+                    val identity=Binder.clearCallingIdentity()
+                    try {
+                        keyboardJob=KeyboardJob(token,NativeKeyboard.prepare(command,args.int("displayId",-1),args["expectedPackage"] as? String,guard::checkAlive))
+                        mapOf("prepared" to true)
+                    } finally {Binder.restoreCallingIdentity(identity)}
+                }
+                "keyboard.start" -> synchronized(this) {
+                    check(token);args.only("operation")
+                    val job=keyboardJob ?: fail(Code.STALE_AUTHORIZATION,"Keyboard was not prepared")
+                    requireTool(job.token==token,Code.STALE_AUTHORIZATION,"Keyboard token differs")
+                    keyboardJob=null
+                    val guard=GamepadLeaseGuard(l.caller,l.deadline,clock,l.cancel) {lease===l}
+                    guard.checkCaller(Binder.getCallingUid())
+                    val identity=Binder.clearCallingIdentity()
+                    try {job.action.submit(guard::checkAlive) {submitted=true}}
+                    finally {Binder.restoreCallingIdentity(identity)}
+                }
                 "navigation.prepare" -> synchronized(this) {
                     check(token)
                     args.only("operation","action","displayId","expectedPackage")
@@ -294,6 +320,7 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
         } catch(t:Exception){JSONObject().put("error",(t as? ToolFailure)?.code?.name ?: Code.IO_ERROR.name).toString()}
     }
     @Synchronized private fun retire(l: Lease) {
+        if(keyboardJob?.token==l.token)keyboardJob=null
         l.cancel.cancel()
         if(navigationJob?.token==l.token)navigationJob=null
         gamepadJob?.takeIf {it.token==l.token}?.let {
