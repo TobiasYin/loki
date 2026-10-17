@@ -2,11 +2,11 @@ const {test}=require('node:test');const assert=require('node:assert/strict');con
 function setup(beforeScript){const dom=new JSDOM(fs.readFileSync('src/main/assets/chat/index.html','utf8'),{runScripts:'outside-only',url:'https://appassets.androidplatform.net/assets/chat/index.html'});const calls=[];beforeScript?.(dom.window,dom.window.document);dom.window.ThorUI={postMessage:s=>calls.push(JSON.parse(s))};for(const name of ['vendor/marked.umd.js','vendor/purify.min.js','ui.js'])dom.window.eval(fs.readFileSync('src/main/assets/chat/'+name,'utf8'));dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(value=''){this.returnValue=value;this.open=false;this.dispatchEvent(new dom.window.Event('close'));};return{window:dom.window,doc:dom.window.document,calls};}
 function state(){return{selected:'a',sessions:[{id:'a',title:'会话 A',archivedAt:null,updatedAt:1,capabilities:{perception:true,search:true,screen_control:false,debug:false}}],messages:[],runs:[],events:[],availability:{perception:'模拟就绪',search:'真实服务未配置',screen_control:'待验证',debug:'高权限'}};}
 function disclose(window,node,open=true){assert.ok(node,'Disclosure must exist');if(node.open!==open)node.querySelector(':scope > summary').click();node.dispatchEvent(new window.Event('toggle'));return node;}
-function openOperations(window,doc){assert.ok(doc.querySelector('.activity-timeline'));return doc.querySelector('.activity-timeline');}
+function openOperations(window,doc){disclose(window,doc.querySelector('.execution-history'));return doc.querySelector('.activity-timeline');}
 test('model output limit explains continuation while ordinary model counters stay invisible',()=>{
  const{window,doc}=setup();const s=state();s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'',status:'complete'}];
  s.runs=[{id:'r',sessionId:'a',status:'completed',expanded:false}];s.events=[{runId:'r',sequence:1,type:'model_round',data:{modelRound:1,requestedMaxOutputTokens:128000,inputTokens:300,outputTokens:30,stopReason:'stop'}}];window.receiveNative(s);
- assert.equal(doc.querySelector('details.run'),null);assert.equal(doc.querySelector('.attention'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/model_round|128000|inputTokens/);
+ assert.equal(doc.querySelector('details.run').open,false);assert.equal(doc.querySelector('.attention'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/model_round|128000|inputTokens/);
  s.runs[0].status='failed';s.events.push({runId:'r',sequence:2,type:'diagnostic',data:{code:'MODEL_OUTPUT_LIMIT',requestedMaxOutputTokens:2048,outputTokens:2048,reasoningTokens:2048}});window.receiveNative(s);
  openOperations(window,doc);assert.match(doc.querySelector('.timeline-note').textContent,/达到模型输出上限.*保留上下文.*当前会话继续/);assert.doesNotMatch(doc.querySelector('#chat').textContent,/MODEL_OUTPUT_LIMIT|reasoningTokens/);
 });
@@ -281,7 +281,7 @@ function treeHistory(callCount=20){
 test('large collapsed operation histories construct bounded DOM across stream updates; opening each level reveals only its requested fields',()=>{
  const{window,doc}=setup();const s=treeHistory();let created=0;const create=doc.createElement.bind(doc);doc.createElement=(...args)=>{created++;return create(...args);};
  window.receiveNative(s);assert.ok(created<200,`Collapsed history created ${created} elements`);assert.ok(doc.querySelector('#chat').querySelectorAll('*').length<100);
- assert.equal(doc.querySelector('details.run'),null);assert.equal(doc.querySelectorAll('.tool-card').length,20);assert.equal(doc.querySelector('.tool-body,.structured'),null);assert.ok(doc.querySelector('#chat .activity-label.shimmer'));
+ assert.equal(doc.querySelector('details.run').open,false);assert.equal(doc.querySelectorAll('.tool-card').length,20);assert.equal(doc.querySelector('.tool-body,.structured'),null);assert.ok(doc.querySelector('#chat .activity-label.shimmer'));
  const baseline=created;
  for(let i=0;i<8;i++){s.messages[0].text+='。';s.events.push({runId:'large',sequence:41+i,type:'text_delta',data:{text:'。'}});window.receiveNative(s);}
  assert.ok(created-baseline<200,`Collapsed streaming rebuilt ${created-baseline} elements`);assert.equal(doc.querySelector('.tool-body,.structured'),null);
@@ -317,7 +317,7 @@ test('common input operations and streaming tool aliases remain readable; toggli
  // Accessibility/keyboard/programmatic state changes use toggle too. A row
  // toggle stays local and never changes Native run expansion settings.
  cards[0].open=true;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.ok(cards[0].querySelector('.structured'));
- cards[0].open=false;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.equal(cards[0].querySelector('.tool-body'),null);assert.equal(doc.querySelector('details.run'),null);assert.equal(calls.filter(c=>c.op==='expanded').length,0);
+ cards[0].open=false;cards[0].dispatchEvent(new window.Event('toggle',{bubbles:true}));assert.equal(cards[0].querySelector('.tool-body'),null);assert.equal(doc.querySelector('details.run').open,false);assert.equal(calls.filter(c=>c.op==='expanded').length,0);
  window.receiveNative({...s,messages:[{...s.messages[0],text:'流式更新'}]});assert.equal(doc.querySelector('.tool-card').open,false);assert.equal(doc.querySelector('.tool-body'),null);
 });
 
@@ -492,4 +492,59 @@ test('failed or cancelled Pi compaction remains neutral, preserves context expla
   const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'cancelled'}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.events=[{runId:'r',sequence:1,type:'diagnostic',data:{code:'CONTEXT_COMPACTION_STARTED',reason:'overflow'}},{runId:'r',sequence:2,type:'diagnostic',data:{code:'CONTEXT_COMPACTION_FINISHED',reason:'overflow',...outcome}}];window.receiveNative(s);
   const row=doc.querySelector('.compaction');assert.equal(row.querySelector('summary').textContent,'对话整理未完成');assert.equal(row.dataset.activityState,'incomplete');assert.equal(doc.querySelectorAll('#chat .shimmer').length,0);assert.equal(doc.querySelector('.attention'),null);disclose(window,row);assert.match(row.textContent,/原有对话仍然保留/);assert.doesNotMatch(doc.querySelector('#chat').textContent,/已整理较早|CONTEXT_COMPACTION|compacted|aborted|overflow|运行提示/);
  }
+});
+
+function visibleOperations(doc){return [...doc.querySelectorAll('.activity-item,.activity-pending')].filter(node=>!node.hidden);}
+test('compact running process shows only its two newest activities and advances with the live thought',()=>{
+ const{window,doc}=setup();const s=treeHistory(20);s.runs[0].status='generating';
+ s.events.push({runId:'large',sequence:41,type:'thinking_delta',data:{text:'继续思考'}});window.receiveNative(s);
+ assert.equal(doc.querySelector('.execution-history').open,false);
+ assert.deepEqual(visibleOperations(doc).map(node=>node.dataset.activityKind),['tool','thinking']);
+ assert.match(visibleOperations(doc)[0].dataset.activityKey,/call-19$/);assert.equal(doc.querySelector('.structured,.thinking-body'),null);
+ const visible=visibleOperations(doc);s.events.at(-1).data.text+='，正在核对';window.receiveNative(s);
+ assert.equal(visibleOperations(doc).length,2);assert.equal(visibleOperations(doc)[0],visible[0]);
+ openOperations(window,doc);assert.equal(visibleOperations(doc).length,21);
+ assert.equal(doc.querySelector('.structured,.thinking-body'),null);
+ disclose(window,doc.querySelector('.execution-history'),false);assert.equal(visibleOperations(doc).length,2);
+});
+test('pending phase counts toward the two compact rows, and updated old calls keep their chronological position',()=>{
+ const{window,doc}=setup();const s=treeHistory(4);window.receiveNative(s);
+ assert.equal(visibleOperations(doc).length,2);assert.ok(visibleOperations(doc)[1].classList.contains('activity-pending'));
+ s.events.push({runId:'large',sequence:9,type:'thinking_delta',data:{text:'新观察'}});
+ s.events[0]={...s.events[0],lastSequence:10,type:'tool_call_update',data:{toolName:'input_tap',arguments:{x:10,y:20}}};window.receiveNative(s);
+ assert.equal(visibleOperations(doc).length,2);
+ assert.deepEqual(visibleOperations(doc).map(node=>node.dataset.activityKey),['large:tool:call-0','large:thinking:9']);
+});
+test('completed process defaults to a saved duration alone and expanding never duplicates or hides Markdown answers',()=>{
+ const{window,doc}=setup();const s=treeHistory(4);s.runs[0].status='completed';s.runs[0].expanded=true;
+ s.messages[0].text='**操作已完成**';s.events.push({runId:'large',sequence:9,type:'text_delta',elapsedMs:79000,data:{text:'**操作已完成**'}},
+  {runId:'large',sequence:10,type:'state',elapsedMs:80000,data:{state:'completed'}});window.receiveNative(s);
+ const history=doc.querySelector('.execution-history');assert.equal(history.open,false);assert.equal(history.querySelector('summary').textContent,'用时 1分钟 20秒');
+ assert.equal(visibleOperations(doc).length,0);assert.equal(doc.querySelector('.markdown strong').textContent,'操作已完成');
+ assert.equal(doc.querySelector('.markdown').closest('details'),null);assert.equal(doc.querySelector('.tool-body'),null);
+ const answer=doc.querySelector('.markdown');openOperations(window,doc);assert.equal(visibleOperations(doc).length,4);
+ assert.equal(doc.querySelectorAll('.markdown').length,1);assert.equal(doc.querySelector('.markdown'),answer);assert.ok(history.contains(answer));
+ disclose(window,history,false);assert.equal(visibleOperations(doc).length,0);assert.equal(doc.querySelector('.markdown').closest('details'),null);
+ const now=window.Date.now;window.Date.now=()=>now()+86400000;window.receiveNative({...s,messages:[{...s.messages[0],thinkingTruncated:true}]});
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'用时 1分钟 20秒');
+});
+test('completion folds an inspected live process, while explicit finished expansion survives refresh and stays scoped to that run',()=>{
+ const{window,doc,calls}=setup();const s=treeHistory(3);window.receiveNative(s);openOperations(window,doc);
+ disclose(window,doc.querySelector('.tool-card'));assert.equal(doc.querySelector('.execution-history').open,true);
+ const done=structuredClone(s);done.runs[0].status='completed';window.receiveNative(done);
+ assert.equal(doc.querySelector('.execution-history').open,false);assert.equal(visibleOperations(doc).length,0);
+ openOperations(window,doc);window.receiveNative({...done,messages:[{...done.messages[0],text:'已完成全部操作'}]});
+ assert.equal(doc.querySelector('.execution-history').open,true);
+ const next=structuredClone(done);next.runs.push({id:'new',sessionId:'a',status:'generating'});next.messages.push({id:'new-message',runId:'new',sessionId:'a',role:'assistant',text:''});
+ next.events.push({runId:'new',sequence:1,type:'thinking_delta',data:{text:'另一个任务'}});window.receiveNative(next);
+ assert.equal(doc.querySelector('.execution-history[data-run-id=large]').open,true);assert.equal(doc.querySelector('.execution-history[data-run-id=new]').open,false);
+ assert.equal(calls.some(call=>['stop','new','expanded'].includes(call.op)),false);
+});
+test('whole-process disclosure animates both ways and keeps the answer visible after closing settles',()=>{
+ const{window,doc,animations}=animationFixture();const s=treeHistory(3);s.runs[0].status='completed';
+ s.messages[0].text='最终回答';s.events.push({runId:'large',sequence:7,type:'text_delta',elapsedMs:2400,data:{text:'最终回答'}});window.receiveNative(s);
+ const history=doc.querySelector('.execution-history');history.querySelector('summary').click();assert.equal(history.dataset.expanded,'true');assert.ok(animations.length);animations.at(-1).onfinish();
+ history.querySelector('summary').click();assert.equal(history.dataset.expanded,'false');assert.equal(history.open,true);assert.ok(history.querySelector('.activity-timeline'));
+ animations.at(-1).onfinish();assert.equal(history.open,false);assert.equal(visibleOperations(doc).length,0);
+ assert.equal(doc.querySelectorAll('.markdown').length,1);assert.equal(doc.querySelector('.markdown').closest('details'),null);
 });

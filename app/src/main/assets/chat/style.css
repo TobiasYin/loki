@@ -71,3 +71,10 @@ button:active{opacity:.72}button:disabled:active{opacity:.55}
 .activity-item .tool-body,.activity-item .thinking-body{padding:5px 0 9px 14px}
 .timeline-answer{margin:6px 0 10px}.timeline-answer:last-child{margin-bottom:0}
 .activity-pending{min-height:28px;display:flex;align-items:center}
+.execution-history{margin:3px 0;background:transparent;border:0}
+.execution-history>summary{font-size:12px;min-height:32px;padding:4px 0;color:var(--muted);background:transparent}
+.execution-history>summary:hover,.execution-history>summary:active{background:transparent;box-shadow:none}
+.execution-history>summary::before{display:none}
+.execution-history>summary::after{content:'';width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .18s ease}
+.execution-history[data-expanded=true]>summary::after{transform:rotate(45deg)}
+@media(prefers-reduced-motion:reduce){.execution-history>summary::after{transition:none}}

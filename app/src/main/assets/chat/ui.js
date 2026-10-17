@@ -164,6 +164,13 @@
   function rememberDisclosure(node,key,initial,renderOpen) {
     return bindDisclosure(node,key,disclosures.has(key)?disclosures.get(key):initial,renderOpen,open=>disclosures.set(key,open));
   }
+  function executionDuration(run,events) {
+    // Terminal durations come from the saved execution clock, never the time
+    // at which an old conversation happens to be opened.
+    const elapsed=events.reduce((value,event)=>Number.isFinite(event.elapsedMs)?Math.max(value,event.elapsedMs):value,0);
+    const seconds=Math.floor(Math.max(0,elapsed)/1000),minutes=Math.floor(seconds/60),hours=Math.floor(minutes/60);
+    return hours?`${hours}小时 ${minutes%60}分钟 ${seconds%60}秒`:minutes?`${minutes}分钟 ${seconds%60}秒`:`${seconds}秒`;
+  }
   const fieldNames={durationMs:'等待时长（毫秒）',elapsedMs:'实际等待（毫秒）',downloadId:'下载文件编号',filename:'文件名',sha256:'SHA-256 校验值',size:'字节数',finalUrl:'下载地址',mime:'文件类型',apk:'应用信息',packageName:'应用包名',versionName:'版本',versionCode:'版本编号',signerSha256:'签名指纹',requestedPermissions:'声明权限',downloadedAt:'下载时间',downloads:'下载记录',installed:'已安装',apkPath:'安装路径',headers:'响应头',method:'请求方法',screen:'目标屏幕',selectedScreen:'当前屏幕',displayRole:'屏幕角色',displayId:'显示编号',displayName:'显示名称',brightness:'亮度',before:'修改前',requested:'请求值',quantizationTolerance:'量化容差',unit:'单位',verified:'回读一致',policyVersion:'策略版本',policyTier:'安全等级',reason:'原因',requiresApproval:'需要确认',allowed:'允许提交',executed:'已执行',white:'白名单示例',gray:'灰名单示例',black:'禁止执行',execution:'执行规则',stdout:'输出',stderr:'错误输出',exitCode:'退出码',uid:'执行身份',command:'具体命令',query:'搜索词',url:'网址',name:'名称',path:'路径',text:'内容',content:'正文',message:'说明',results:'结果',title:'标题',summary:'摘要',arguments:'参数',enabled:'启用',expectedHash:'预期版本',hash:'版本',resources:'附带资料',source:'来源',observedAt:'观测时间',fetchedAt:'读取时间',error:'错误',untrusted:'外部资料',status:'状态',description:'简介',skills:'技能',builtin:'内置',fileCount:'文件数'};
   function structured(value,depth=0,brightnessInput=false) {
     if(value===null || value===undefined)return element('span','无','muted');
@@ -243,11 +250,13 @@
         }
         if(typeof data.text==='string')stream.parts.push(data.text);
         stream.truncated ||= data.textTruncated===true;
+        stream.order=Math.max(stream.order??order,order);
         if(!latest || order>=latest.order)latest={kind,key:stream.key,order};
       }else if(['tool_call_update','tool_intent','tool_started','tool_result'].includes(event.type)) {
         stream=null;
         const id=event.toolCallId??`event:${sequence}`;
         if(!byCall.has(id)){const item={kind:'tool',key:`${run.id}:tool:${id}`,call:calls.get(id)};byCall.set(id,item);timeline.push(item);}
+        byCall.get(id).order=Math.max(byCall.get(id).order??order,order);
         if(!latest || order>=latest.order)latest={kind:event.type==='tool_result'?'completed':'tool',key:byCall.get(id).key,order};
       }else if(event.type==='diagnostic' && compactionCodes.has(data.code)) {
         stream=null;
@@ -255,6 +264,7 @@
           compaction={kind:'compaction',key:`${run.id}:compaction:${sequence}`,reason:data.reason};timeline.push(compaction);
         }
         if(data.code==='CONTEXT_COMPACTION_FINISHED')compaction.finished={compacted:data.compacted===true,aborted:data.aborted===true};
+        compaction.order=Math.max(compaction.order??order,order);
         if(!latest || order>=latest.order)latest={kind:compaction.finished?'completed':'compaction',key:compaction.key,order};
       }
     }
@@ -345,7 +355,26 @@
     if(activeRun && run.status!=='awaiting_user' && (!latest || latest.kind==='completed')) {
       const pending=element('div',run.status==='generating'?'思考中':'正在处理','activity-label shimmer activity-pending');pending.dataset.activityState='active';activity.append(pending);
     }
-    container.append(activity);
+    const history=element('details',undefined,'run execution-history');
+    history.dataset.runId=run.id;
+    const historySummary=element('summary');history.append(historySummary);
+    container.append(history,activity);
+    const orderByKey=new Map(timeline.map(item=>[item.key,item.order]));
+    const operations=[...activity.children].filter(node=>node.classList.contains('activity-item') || node.classList.contains('activity-pending'));
+    const recent=new Set(activeRun?operations.slice().sort((a,b)=>(orderByKey.get(b.dataset.activityKey)??Infinity)-(orderByKey.get(a.dataset.activityKey)??Infinity)).slice(0,2):[]);
+    // Completion always starts folded, even if the user inspected the running
+    // task. A later explicit expansion remains local to this completed run.
+    rememberDisclosure(history,`${run.id}:history:${activeRun?'running':'finished'}`,false,open=>{
+      const expanded=history.dataset.expanded==='true';
+      historySummary.textContent=activeRun?(expanded?'收起执行过程':'展开执行过程'):`用时 ${executionDuration(run,events)}`;
+      historySummary.setAttribute('aria-label',`${historySummary.textContent}，${expanded?'收起':'展开'}完整过程`);
+      for(const node of operations)node.hidden=!open && !recent.has(node);
+      activity.dataset.view=open?'full':'compact';
+      // User-facing Markdown stays visible when the process folds. Reuse the
+      // same ordered nodes, so expansion never duplicates text or tool bodies.
+      if(open)history.append(activity);
+      else container.insertBefore(activity,history.nextSibling);
+    });
     const last=events.findLast(e=>e.type==='diagnostic' && !compactionCodes.has(e.data?.code));
     if(last)container.append(element('div',last.data?.code==='TARGET_CHANGED'?'页面已变化，需重新观察。':last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
     return container;
