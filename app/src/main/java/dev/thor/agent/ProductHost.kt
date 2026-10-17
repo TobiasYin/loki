@@ -886,6 +886,64 @@ class ProductHost private constructor(private val context: Context, private val 
         persist(); return aid
     }
     fun requestVoiceSession(sid:String) {require(bindings.values.none {it.sessionId==sid} && sid==selectedSession() && session(sid).isNull("archivedAt"))}
+    /** Resolve hints on the state owner, after recording has already begun.
+     * This is not a Run and reads neither Skill bodies nor screenshot/tree data. */
+    fun requestVoiceRecognitionContext(sid:String):CompletableFuture<VoiceRecognitionContext?> {
+        val future=CompletableFuture<VoiceRecognitionContext?>()
+        val cancellation=Cancellation()
+        future.whenComplete {_,_->if(future.isCancelled)cancellation.cancel()}
+        try {serial.execute {
+            if(future.isCancelled)return@execute
+            try {
+                check(!closing);requestVoiceSession(sid)
+                val perception=dev.thor.bridge.Capability.screen_perception
+                val allowed=perception in authority.sessionEnabled(sid)
+                val knownSecrets=listOfNotNull(secret,searchSecret,
+                    runCatching {nativeVault.readNative("voice.api")}.getOrNull(),
+                    runCatching {nativeVault.readNative("voice.access")}.getOrNull()).filter {it.isNotBlank()}
+                val messages=state.getJSONArray("messages")
+                val recent=buildList {
+                    for(index in messages.length()-1 downTo 0) {
+                        val message=messages.getJSONObject(index)
+                        if(message.optString("sessionId")!=sid || message.optString("role") !in setOf("user","assistant"))continue
+                        if(message.optString("status")=="streaming")continue
+                        val text=message.optString("text")
+                        if(text.isBlank() || knownSecrets.any {text.contains(it)})continue
+                        // Do not re-export screen-derived assistant observations
+                        // when their source capability has been revoked.
+                        if(!allowed && message.optString("role")=="assistant") {
+                            val source=rows("runs").find {it.optString("id")==message.optString("runId")}
+                                ?.optJSONObject("turn")?.optJSONArray("source")
+                            if(source!=null && (0 until source.length()).any {source.optString(it)=="screen_perception"})continue
+                        }
+                        add(VoiceRecognitionContext.Message(message.getString("role"),redactor.redact(text)))
+                        if(size>=24)break
+                    }
+                }
+                if(future.isCancelled)return@execute
+                if(allowed && perception in authority.sessionEnabled(sid))runCatching {
+                    // Presentation-type game/launcher windows need fresh read-only
+                    // evidence even when no Agent Run has recently observed them.
+                    // Audio is already recording; keep this hint within its budget.
+                    ThorAccessibilityService.instance?.preparePresentationEvidence(setOf(snapshots.selected("upper").id),cancellation,100)
+                }
+                if(future.isCancelled)return@execute
+                val foreground=upperAppContext.read(allowed && perception in authority.sessionEnabled(sid),false).optJSONObject("upperApp")
+                if(future.isCancelled)return@execute
+                val title=foreground?.let {app->runCatching {
+                    if(perception !in authority.sessionEnabled(sid))return@runCatching null
+                    ThorAccessibilityService.instance?.foregroundWindowTitle(snapshots.selected("upper").id,app.getString("packageName"))
+                }.getOrNull()}
+                if(future.isCancelled)return@execute
+                requestVoiceSession(sid)
+                val app=foreground?.takeIf {perception in authority.sessionEnabled(sid)}?.let {
+                    VoiceRecognitionContext.App(it.optString("label").takeIf(String::isNotBlank),it.getString("packageName"),title)
+                }
+                future.complete(VoiceRecognitionContext.build(recent,app))
+            }catch(error:Exception){future.completeExceptionally(error)}
+        }}catch(error:Exception){future.completeExceptionally(error)}
+        return future
+    }
     fun importSkill(uri:android.net.Uri):CompletableFuture<JSONObject> {
         val future=CompletableFuture<JSONObject>()
         serial.execute {try {

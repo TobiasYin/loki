@@ -12,6 +12,7 @@ fun showVoiceSettings(activity:Activity,present:(android.view.View,()->Unit)->Un
     fun label(text:String) {content.addView(TextView(activity).apply {this.text=text;setPadding(0,12,0,6)})}
     fun secret(hint:String)=EditText(activity).apply {this.hint=hint;setSingleLine();inputType=InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD;importantForAutofill=View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS;isSaveEnabled=false;content.addView(this)}
     label("火山 / 豆包双向流式语音识别\n按住说话，松手等待最终结果后发送。录音仅在前台进行，不保存音频文件。")
+    label("识别时会附带当前会话最近几轮消息作为提示；开启屏幕感知后，还会附带上屏应用和可用的窗口标题，帮助识别游戏名、应用名等词汇。")
     label("固定端点：${VolcAsrProtocol.ENDPOINT}\n需开通流式识别资源；模型 API Key 不能用于此服务。")
     val auth=Spinner(activity).apply {adapter=ArrayAdapter(activity,android.R.layout.simple_spinner_dropdown_item,arrayOf("新版控制台 · X-Api-Key","旧版控制台 · App ID + Access Token"));setSelection(prefs.getInt("auth",0));content.addView(this)}
     label("新版语音 Key：${vault.status("voice.api")}；留空保留")

@@ -91,8 +91,9 @@ class ThorAccessibilityService : AccessibilityService() {
     }
     /** Explicit read-only entry, invoked before Native commit/resource locks.
      * target()/main/checkpoint never wait for shell IPC. No arbitrary displays. */
-    fun preparePresentationEvidence(displayIds:Set<Int>,cancellation:Cancellation?=null) {
+    fun preparePresentationEvidence(displayIds:Set<Int>,cancellation:Cancellation?=null,maxWaitMs:Long=1500) {
         requireTool(displayIds.size<=2 && displayIds.all {it>=0},Code.INVALID_ARGUMENT,"Only calibrated screen ids may be prepared")
+        requireTool(maxWaitMs in 0..1500,Code.INVALID_ARGUMENT,"Invalid presentation wait budget")
         cancellation?.check()
         val identity=displayFacts(this).sortedBy {it.id}.joinToString(";")
         if(identity!=displayIdentity){displayIdentity=identity;proofs.invalidate(reason=PresentationCacheReason.DISPLAY_CONFIGURATION)}
@@ -101,7 +102,7 @@ class ThorAccessibilityService : AccessibilityService() {
             work.forEach {(display,_)->proofs.note(display,PresentationCacheReason.MAIN_NO_WAIT)}
             return
         }
-        val waitStarted=proofClock.now();val deadline=waitStarted+1500
+        val waitStarted=proofClock.now();val deadline=waitStarted+maxWaitMs
         try {
             for((_,job) in work)while(!job.isDone && proofClock.now()<deadline) {
                 cancellation?.check()
@@ -163,6 +164,19 @@ class ThorAccessibilityService : AccessibilityService() {
         val fact=displayFacts(this).singleOrNull {it.id==display} ?: return Target(null,"unknown","display-missing")
         // Cache-only: explicit read-only preflight is the sole metadata I/O entry.
         return UpperTargetResolver.resolve(fact,windowsOnAllDisplays[display].orEmpty().map {windowEvidence(it)},revisions)
+    }
+    /** Optional ASR scene hint, never input authority. Only the unique verified
+     * application window is eligible; no tree traversal, screenshot or shell I/O. */
+    fun foregroundWindowTitle(display:Int,packageName:String):String? {
+        val before=target(display)
+        if(before.validity!="valid" || before.packageName!=packageName)return null
+        val window=windowsOnAllDisplays[display].orEmpty().filter {window->
+            val evidence=windowEvidence(window)
+            evidence.isApplicationOn(display) && evidence.packageName==packageName
+        }.singleOrNull() ?: return null
+        val title=window.title?.take(256)?.toString() ?: return null
+        val after=target(display)
+        return title.takeIf {before.sameStructure(after) && before.touchableBounds==after.touchableBounds}
     }
     /** Bounded local diagnostic facts only: no window title, text, package, token or dumps. */
     fun presentationDiagnostics():List<Map<String,Any?>> = proofs.diagnostics().map {item->mapOf(

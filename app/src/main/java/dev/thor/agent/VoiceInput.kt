@@ -44,7 +44,9 @@ data class VoiceConfig(val apiKey:String?,val appId:String?,val accessKey:String
 /** Owns a single foreground hold. No audio files, JS audio buffers, credentials, or retries. */
 class VoiceInput(private val config:VoiceConfig,private val inputFactory:()->PcmInput,private val emit:(JSONObject)->Unit,
     private val client:OkHttpClient=OkHttpClient.Builder().connectTimeout(10,TimeUnit.SECONDS).readTimeout(0,TimeUnit.MILLISECONDS).followRedirects(false).followSslRedirects(false).build(),
-    private val endpoint:String=VolcAsrProtocol.ENDPOINT):AutoCloseable {
+    private val endpoint:String=VolcAsrProtocol.ENDPOINT,
+    private val recognitionContext:VoiceRecognitionContext?=null,
+    private val recognitionContextProvider:(()->VoiceRecognitionContext?)?=null):AutoCloseable {
     private val worker=Executors.newSingleThreadExecutor()
     private val timer=Executors.newSingleThreadScheduledExecutor()
     private val draft=VoiceDraft()
@@ -94,12 +96,21 @@ class VoiceInput(private val config:VoiceConfig,private val inputFactory:()->Pcm
             override fun onOpen(webSocket:WebSocket,response:Response) {
                 if(cancelled || closed){webSocket.cancel();return}
                 socket=webSocket
-                if(!webSocket.send(VolcAsrProtocol.config(UUID.randomUUID().toString()).toByteString())) {fail("语音连接未就绪");return}
-                try { synchronized(sendLock) {
-                    opened=true
-                    while(buffered.isNotEmpty())check(webSocket.send(VolcAsrProtocol.audio(buffered.removeFirst(),false).toByteString()))
-                    if(captureDone)check(webSocket.send(VolcAsrProtocol.audio(ByteArray(0),true).toByteString()))
-                } } catch(_:Exception) {fail("语音传输失败，请重试")}
+                // Microphone capture has already started on its own worker. A
+                // bounded, caller-owned lookup may overlap the socket handshake;
+                // missing hints must never turn a valid recording into an error.
+                val context=try {recognitionContextProvider?.invoke() ?: recognitionContext} catch(_:Exception) {recognitionContext}
+                synchronized(this@VoiceInput) {
+                    // The lookup runs outside this lock so close/cancel remains
+                    // immediate. Recheck after it returns before sending any frame.
+                    if(cancelled || closed){webSocket.cancel();return}
+                    if(!webSocket.send(VolcAsrProtocol.config(UUID.randomUUID().toString(),context).toByteString())) {fail("语音连接未就绪");return}
+                    try { synchronized(sendLock) {
+                        opened=true
+                        while(buffered.isNotEmpty())check(webSocket.send(VolcAsrProtocol.audio(buffered.removeFirst(),false).toByteString()))
+                        if(captureDone)check(webSocket.send(VolcAsrProtocol.audio(ByteArray(0),true).toByteString()))
+                    } } catch(_:Exception) {fail("语音传输失败，请重试")}
+                }
             }
             override fun onMessage(webSocket:WebSocket,bytes:ByteString) {
                 if(cancelled || closed || finalSeen)return

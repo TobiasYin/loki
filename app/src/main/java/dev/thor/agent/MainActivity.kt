@@ -185,7 +185,15 @@ class MainActivity : Activity() {
                     voice?.close();voiceId=id
                     val prefs=getSharedPreferences("voice",MODE_PRIVATE);val vault=CredentialVault(this)
                     val config=VoiceConfig(if(prefs.getInt("auth",0)==0)vault.readNative("voice.api") else null,prefs.getString("appId",null),if(prefs.getInt("auth",0)==1)vault.readNative("voice.access") else null,prefs.getString("resource","volc.bigasr.sauc.duration")!!)
-                    voice=VoiceInput(config,{MicrophoneInput(this)},{event->runOnUiThread {if(voiceId==id)sendVoice(event,id,sid)}})
+                    // Capture audio immediately. Resolve a small, live scene on
+                    // the host worker before the first ASR frame; slow
+                    // or unavailable hints must not block ordinary voice input.
+                    voice=VoiceInput(config,{MicrophoneInput(this)},{event->runOnUiThread {if(voiceId==id)sendVoice(event,id,sid)}},
+                        recognitionContextProvider={
+                            val contextFuture=host.requestVoiceRecognitionContext(sid)
+                            try {contextFuture.get(250,java.util.concurrent.TimeUnit.MILLISECONDS)}
+                            catch(_:Exception){contextFuture.cancel(false);null}
+                        })
                     voice!!.start()
                 } catch(_:Exception) {voiceId=null;val failed=voice;voice=null;failed?.close();sendVoice(obj("phase" to "error","error" to "语音不可用：请在语音设置配置火山凭据，并允许麦克风权限；活动回答需先停止。"),id,sid)}
             }

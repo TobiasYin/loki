@@ -17,8 +17,11 @@ object VolcAsrProtocol {
         val compressed=gzip(payload)
         return ByteBuffer.allocate(8+compressed.size).put(0x11.toByte()).put(((type shl 4) or flags).toByte()).put(((serialization shl 4) or 1).toByte()).put(0).putInt(compressed.size).put(compressed).array()
     }
-    fun config(uid:String):ByteArray=packet(1,0,1,obj("user" to obj("uid" to uid),"audio" to obj("format" to "pcm","codec" to "raw","rate" to 16000,"bits" to 16,"channel" to 1),
-        "request" to obj("model_name" to "bigmodel","enable_itn" to true,"enable_punc" to true,"show_utterances" to true,"enable_nonstream" to true,"result_type" to "full")).toString().toByteArray())
+    fun config(uid:String,context:VoiceRecognitionContext?=null):ByteArray {
+        val request=obj("model_name" to "bigmodel","enable_itn" to true,"enable_punc" to true,"show_utterances" to true,"enable_nonstream" to true,"result_type" to "full")
+        context?.let { request.put("corpus",obj("context" to it.serialize())) }
+        return packet(1,0,1,obj("user" to obj("uid" to uid),"audio" to obj("format" to "pcm","codec" to "raw","rate" to 16000,"bits" to 16,"channel" to 1),"request" to request).toString().toByteArray(Charsets.UTF_8))
+    }
     fun audio(bytes:ByteArray,final:Boolean)=packet(2,if(final)2 else 0,0,bytes)
     private val noSpeechCodes=setOf(20000003,1013)
     private fun payload(bytes:ByteArray,compression:Int,serialization:Int):String {

@@ -47,6 +47,100 @@ class VoiceTransportTest {
             assertFalse(events.toString().contains("local-test"))
         } finally {voice.close();server.shutdown()}
     }
+    @Test fun dynamicContextIsSentOnceInTheFirstConfigurationFrameWithoutChangingTranscriptSemantics() {
+        val server=MockWebServer();val interim=CountDownLatch(1);val done=CountDownLatch(1)
+        val configuration=java.util.concurrent.atomic.AtomicReference<JSONObject>()
+        val configCount=AtomicInteger();val audioBeforeConfig=AtomicInteger();val sent=java.util.concurrent.atomic.AtomicBoolean()
+        server.enqueue(MockResponse().withWebSocketUpgrade(object:WebSocketListener(){
+            override fun onMessage(webSocket:WebSocket,bytes:ByteString) {
+                when(bytes[1].toInt() and 255) {
+                    0x10->{
+                        configCount.incrementAndGet()
+                        val json=java.util.zip.GZIPInputStream(bytes.toByteArray().copyOfRange(8,bytes.size).inputStream()).use {it.readBytes().toString(Charsets.UTF_8)}
+                        configuration.set(JSONObject(json))
+                    }
+                    0x20->{if(configuration.get()==null)audioBeforeConfig.incrementAndGet();if(sent.compareAndSet(false,true))webSocket.send(reply("打开西塔"))}
+                    0x22->webSocket.send(reply("打开 Citra。",true))
+                }
+            }
+        }));server.start()
+        val events=CopyOnWriteArrayList<JSONObject>()
+        val context=VoiceRecognitionContext.build(listOf(VoiceRecognitionContext.Message("user","继续上个任务")),VoiceRecognitionContext.App("Citra","org.citra.citra_emu"),"塞尔达")!!
+        val voice=VoiceInput(VoiceConfig("local-test",null,null,"volc.bigasr.sauc.duration"),{Input()},{event->events.add(event);if(event.optString("text")=="打开西塔")interim.countDown();if(event.optString("phase")=="complete")done.countDown()},endpoint=server.url("/").toString().replace("http:","ws:"),recognitionContext=context)
+        try {
+            voice.start();assertTrue(interim.await(5,TimeUnit.SECONDS));assertFalse(events.any {it.optString("phase")=="complete"})
+            voice.finish();assertTrue(done.await(5,TimeUnit.SECONDS));assertEquals(1,configCount.get());assertEquals(0,audioBeforeConfig.get())
+            val value=configuration.get().getJSONObject("request").getJSONObject("corpus").get("context");assertTrue(value is String)
+            assertTrue(JSONObject(value as String).getJSONArray("context_data").getJSONObject(0).getString("text").contains("塞尔达"))
+            assertEquals("打开 Citra。",events.single {it.optString("phase")=="complete"}.getString("submit"))
+            assertFalse(events.toString().contains("塞尔达"));assertFalse(events.toString().contains("继续上个任务"))
+        }finally {voice.close();server.shutdown()}
+    }
+    @Test fun contextProviderFailureFallsBackWithoutFailingRecognition() {
+        for (hasFallback in listOf(false,true)) {
+            val server=MockWebServer();val interim=CountDownLatch(1);val done=CountDownLatch(1)
+            val configuration=java.util.concurrent.atomic.AtomicReference<JSONObject>();val sent=java.util.concurrent.atomic.AtomicBoolean()
+            server.enqueue(MockResponse().withWebSocketUpgrade(object:WebSocketListener(){
+                override fun onMessage(webSocket:WebSocket,bytes:ByteString) {
+                    when(bytes[1].toInt() and 255) {
+                        0x10->configuration.set(java.util.zip.GZIPInputStream(bytes.toByteArray().copyOfRange(8,bytes.size).inputStream()).use {JSONObject(it.readBytes().toString(Charsets.UTF_8))})
+                        0x20->if(sent.compareAndSet(false,true))webSocket.send(reply("继续"))
+                        0x22->webSocket.send(reply("继续。",true))
+                    }
+                }
+            }));server.start()
+            val events=CopyOnWriteArrayList<JSONObject>();val calls=AtomicInteger()
+            val fallback=if(hasFallback)VoiceRecognitionContext.build(listOf(VoiceRecognitionContext.Message("user","上个任务"))) else null
+            val voice=VoiceInput(VoiceConfig("local-test",null,null,"volc.bigasr.sauc.duration"),{Input()},{event->events.add(event);if(event.optString("text")=="继续")interim.countDown();if(event.optString("phase")=="complete")done.countDown()},endpoint=server.url("/").toString().replace("http:","ws:"),recognitionContext=fallback,recognitionContextProvider={calls.incrementAndGet();throw IllegalStateException("private-lookup-error")})
+            try {
+                voice.start();assertTrue(interim.await(5,TimeUnit.SECONDS));voice.finish();assertTrue(done.await(5,TimeUnit.SECONDS))
+                assertEquals(1,calls.get());assertEquals(hasFallback,configuration.get().getJSONObject("request").has("corpus"))
+                assertFalse(events.any {it.optString("phase")=="error"});assertFalse(events.toString().contains("private-lookup-error"))
+                assertEquals("继续。",events.single {it.optString("phase")=="complete"}.getString("submit"))
+            }finally {voice.close();server.shutdown()}
+        }
+    }
+    @Test fun microphoneStartsAndCapturesWhileContextLookupIsStillPending() {
+        val server=MockWebServer();val lookupEntered=CountDownLatch(1);val allowLookup=CountDownLatch(1);val micStarted=CountDownLatch(1);val micRead=CountDownLatch(1);val done=CountDownLatch(1)
+        val configuration=java.util.concurrent.atomic.AtomicReference<JSONObject>();val packets=AtomicInteger()
+        server.enqueue(MockResponse().withWebSocketUpgrade(object:WebSocketListener(){
+            override fun onMessage(webSocket:WebSocket,bytes:ByteString) {
+                packets.incrementAndGet()
+                if((bytes[1].toInt() and 255)==0x10)configuration.set(java.util.zip.GZIPInputStream(bytes.toByteArray().copyOfRange(8,bytes.size).inputStream()).use {JSONObject(it.readBytes().toString(Charsets.UTF_8))})
+                if((bytes[1].toInt() and 255)==0x22)webSocket.send(reply("开始。",true))
+            }
+        }));server.start()
+        val input=object:PcmInput {
+            @Volatile var stopped=false
+            override fun start(){micStarted.countDown()}
+            override fun read(bytes:ByteArray):Int {micRead.countDown();Thread.sleep(20);bytes.fill(0);return if(stopped)-1 else bytes.size}
+            override fun stop(){stopped=true}
+            override fun close(){stopped=true}
+        }
+        val context=VoiceRecognitionContext.build(emptyList(),VoiceRecognitionContext.App("Citra",null,"塞尔达"))!!
+        val events=CopyOnWriteArrayList<JSONObject>()
+        val voice=VoiceInput(VoiceConfig("local-test",null,null,"volc.bigasr.sauc.duration"),{input},{event->events.add(event);if(event.optString("phase")=="complete")done.countDown()},endpoint=server.url("/").toString().replace("http:","ws:"),recognitionContextProvider={lookupEntered.countDown();check(allowLookup.await(5,TimeUnit.SECONDS));context})
+        try {
+            voice.start();assertTrue(lookupEntered.await(5,TimeUnit.SECONDS));assertTrue(micStarted.await(1,TimeUnit.SECONDS));assertTrue(micRead.await(1,TimeUnit.SECONDS))
+            assertEquals(1L,allowLookup.count);assertEquals(0,packets.get())
+            voice.finish();allowLookup.countDown();assertTrue(done.await(5,TimeUnit.SECONDS))
+            val actual=JSONObject(configuration.get().getJSONObject("request").getJSONObject("corpus").getString("context"))
+            assertTrue(actual.toString().contains("上屏窗口标题"));assertFalse(events.any {it.optString("phase")=="error"})
+        }finally {allowLookup.countDown();voice.close();server.shutdown()}
+    }
+    @Test fun cancellationWhileContextLookupWaitsPreventsEveryConfigurationAndAudioFrame() {
+        val server=MockWebServer();val lookupEntered=CountDownLatch(1);val allowLookup=CountDownLatch(1);val lookupReturned=CountDownLatch(1);val packets=AtomicInteger()
+        server.enqueue(MockResponse().withWebSocketUpgrade(object:WebSocketListener(){override fun onMessage(webSocket:WebSocket,bytes:ByteString){packets.incrementAndGet()}}));server.start()
+        val client=OkHttpClient();val events=CopyOnWriteArrayList<JSONObject>();val input=Input()
+        val context=VoiceRecognitionContext.build(listOf(VoiceRecognitionContext.Message("user","不应发送")))!!
+        val voice=VoiceInput(VoiceConfig("local-test",null,null,"volc.bigasr.sauc.duration"),{input},{events.add(it)},client=client,endpoint=server.url("/").toString().replace("http:","ws:"),recognitionContextProvider={lookupEntered.countDown();try {check(allowLookup.await(5,TimeUnit.SECONDS));context}finally {lookupReturned.countDown()}})
+        try {
+            voice.start();assertTrue(lookupEntered.await(5,TimeUnit.SECONDS));voice.close()
+            assertEquals(1,events.count {it.optString("phase")=="cancelled"});assertEquals(1L,allowLookup.count)
+            allowLookup.countDown();assertTrue(lookupReturned.await(5,TimeUnit.SECONDS));assertTrue(client.dispatcher.executorService.awaitTermination(5,TimeUnit.SECONDS))
+            assertEquals(0,packets.get());assertTrue(input.stopped);assertFalse(events.any {it.optString("phase") in setOf("complete","error","empty")})
+        }finally {allowLookup.countDown();voice.close();server.shutdown()}
+    }
     @Test fun cancellationAndSocketFailureNeverSubmitDrafts() {
         for(cancel in listOf(false,true)) {
             val server=MockWebServer();val interim=CountDownLatch(1);val failed=CountDownLatch(1)

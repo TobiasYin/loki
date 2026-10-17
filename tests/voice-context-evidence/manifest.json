@@ -1,0 +1,10 @@
+{
+  "files": {
+    "preservation.json": "52a7f37f729d82b81b197d7e6172b9fa4849299c2a765511b362ebccbf4f9e59",
+    "README.md": "bc8cc6a505283354f47532e5fd8bf61b58ea4b0225c2a2fab609efd6a83d199b",
+    "physical.json": "39e1be904513038e8543d8a359ddb21210ed30ae3a93c2e57d12303f7e707ec9",
+    "software.json": "2fb17fe52a948dc4c6244da29e0cbedb8b9e4811f463332547e3027e51f25367",
+    "apk-sha256.json": "c12c6b0519307d7b1e4a72300e1bf8efdf075859aa5852209095bd0ab4ebde36",
+    "instrumentation.txt": "6f60d35d96bb4251c0a735deb2da5f7ff7e8821712e34be6f61ab0aeb12b1d21"
+  }
+}

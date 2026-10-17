@@ -1,0 +1,35 @@
+{
+  "voice": [
+    {
+      "name": "VoiceRecognitionContextTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "VoiceTransportTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "VolcAsrProtocolTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "voiceTotal": 38,
+  "bridge": {
+    "tests": 42,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "debugApkBuilt": true,
+  "androidTestApkBuilt": true,
+  "lintDebugPassed": true
+}
