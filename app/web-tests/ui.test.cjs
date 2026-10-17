@@ -44,6 +44,40 @@ test('repeated target changes use one current recovery status and a validated ne
  s.events.push({runId:'r',sequence:5,type:'tool_result',toolCallId:'next-stale',data:{toolId:'input.activate',error:'TARGET_CHANGED',outcome:'unknown',recovery:{kind:'observe_again',submission:'not_dispatched',sideEffectPossible:true}}});window.receiveNative(s);
  assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);
 });
+test('the actual result plus Pi diagnostic does not leave a stale reminder after A input and a validated screenshot',()=>{
+ const{window,doc,calls}=setup();const s=recoveryHistory();
+ s.events.push({runId:'r',sequence:4,type:'diagnostic',toolCallId:'stale-3',data:{code:'TARGET_CHANGED'}});window.receiveNative(s);
+ assert.equal(doc.querySelectorAll('.recovery-status').length,1);
+ assert.equal([...doc.querySelectorAll('.timeline-note')].filter(node=>/页面已变化/.test(node.textContent)).length,1);
+ s.events.push({runId:'r',sequence:5,type:'tool_result',toolCallId:'controller-a',data:{toolId:'input.press_button',outcome:'submitted'}});window.receiveNative(s);
+ assert.ok(doc.querySelector('.recovery-status'),'A key submission is not itself a validated observation');
+ s.events.push({runId:'r',sequence:6,type:'tool_result',toolCallId:'fresh-screen',data:{toolId:'perception.capture_screen',outcome:'observed',error:null}});window.receiveNative(s);
+ assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/页面已变化|正在重新观察|需重新观察|需要重新观察/);
+ openOperations(window,doc);const old=doc.querySelector('.tool-card');assert.match(old.querySelector('summary').textContent,/已重新观察/);disclose(window,old);
+ assert.match(old.querySelector('.tool-body').textContent,/随后已重新观察/);assert.doesNotMatch(old.textContent,/后续需依据新观察|需要重新观察/);
+ assert.equal(calls.some(call=>['send','stop','new'].includes(call.op)),false);
+});
+test('a late duplicate diagnostic cannot reactivate resolved recovery, while an unmatched new change still requires observation',()=>{
+ const{window,doc}=setup();const s=recoveryHistory();
+ s.events.push({runId:'r',sequence:4,type:'tool_result',toolCallId:'fresh',data:{toolId:'perception.ui_tree',outcome:'observed'}},
+  {runId:'r',sequence:5,type:'diagnostic',toolCallId:'stale-3',data:{code:'TARGET_CHANGED'}});window.receiveNative(s);
+ assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/需重新观察|需要重新观察/);
+ s.events.push({runId:'r',sequence:6,type:'diagnostic',toolCallId:'new-change',data:{code:'TARGET_CHANGED'}});window.receiveNative(s);
+ assert.equal(doc.querySelectorAll('.recovery-status').length,1);
+ s.events.push({runId:'r',sequence:7,type:'tool_result',toolCallId:'new-screen',data:{toolId:'perception.capture_screen',outcome:'observed'}});window.receiveNative(s);
+ assert.equal(doc.querySelector('.recovery-status'),null);
+});
+test('diagnostic-only history clears on real observation and finished runs do not retain a current page-change banner',()=>{
+ const{window,doc}=setup();const s=recoveryHistory();
+ s.events=[{runId:'r',sequence:1,type:'diagnostic',data:{code:'TARGET_CHANGED'}}];window.receiveNative(s);assert.equal(doc.querySelectorAll('.recovery-status').length,1);
+ s.events.push({runId:'r',sequence:2,type:'tool_result',toolCallId:'observed',data:{toolId:'perception.window_info',outcome:'observed'}});window.receiveNative(s);
+ assert.equal(doc.querySelector('.recovery-status'),null);
+ for(const status of ['completed','cancelled','failed','interrupted']) {
+  const finished=recoveryHistory();finished.runs[0].status=status;finished.events.push({runId:'r',sequence:4,type:'diagnostic',toolCallId:'stale-3',data:{code:'TARGET_CHANGED'}});window.receiveNative(finished);
+  assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/正在重新观察|需重新观察|需要重新观察|需以新观察/);
+  assert.equal(doc.querySelector('.execution-history').open,false);
+ }
+});
 test('failed discarded companion and other-run reads do not clear recovery, and selecting another screen needs new observation',()=>{
  const{window,doc}=setup();const s=recoveryHistory();
  const results=[{toolId:'perception.ui_tree',outcome:'observed',error:'IO_ERROR'},{toolId:'perception.capture_screen',outcome:'observed',contentDiscarded:true},{toolId:'perception.capture_companion',outcome:'observed'},{toolId:'perception.device_info',outcome:'observed'},{toolId:'perception.app_info',outcome:'unknown'}];
@@ -499,6 +533,7 @@ test('compact running process shows only its two newest activities and advances 
  const{window,doc}=setup();const s=treeHistory(20);s.runs[0].status='generating';
  s.events.push({runId:'large',sequence:41,type:'thinking_delta',data:{text:'继续思考'}});window.receiveNative(s);
  assert.equal(doc.querySelector('.execution-history').open,false);
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 20 项操作');
  assert.deepEqual(visibleOperations(doc).map(node=>node.dataset.activityKind),['tool','thinking']);
  assert.match(visibleOperations(doc)[0].dataset.activityKey,/call-19$/);assert.equal(doc.querySelector('.structured,.thinking-body'),null);
  const visible=visibleOperations(doc);s.events.at(-1).data.text+='，正在核对';window.receiveNative(s);
@@ -506,6 +541,20 @@ test('compact running process shows only its two newest activities and advances 
  openOperations(window,doc);assert.equal(visibleOperations(doc).length,21);
  assert.equal(doc.querySelector('.structured,.thinking-body'),null);
  disclose(window,doc.querySelector('.execution-history'),false);assert.equal(visibleOperations(doc).length,2);
+});
+test('running operation totals count successful calls once and exclude thoughts, pending, rejected and uncertain results',()=>{
+ const{window,doc}=setup();const s=treeHistory(2);window.receiveNative(s);
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 2 项操作');
+ s.events.push({runId:'large',sequence:5,type:'thinking_delta',data:{text:'继续核对'}},
+  {runId:'large',sequence:6,type:'tool_started',toolCallId:'pending',data:{toolId:'input.tap'}},
+  {runId:'large',sequence:7,type:'tool_result',toolCallId:'blocked',data:{toolId:'debug.shell',error:'COMMAND_BLOCKED',outcome:'observed'}},
+  {runId:'large',sequence:8,type:'tool_result',toolCallId:'unknown',data:{toolId:'input.tap',outcome:'unknown'}},
+  {runId:'large',sequence:9,type:'tool_result',toolCallId:'call-0',data:{toolId:'perception.ui_tree',outcome:'observed'}});window.receiveNative(s);
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 2 项操作');
+ s.events.push({runId:'large',sequence:10,type:'tool_result',toolCallId:'pending',data:{toolId:'input.tap',error:null,outcome:'submitted'}});window.receiveNative(s);
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 3 项操作');
+ const next=structuredClone(s);next.runs=[{id:'new',sessionId:'a',status:'generating'}];next.messages=[{id:'new-message',runId:'new',sessionId:'a',role:'assistant',text:''}];next.events=[];window.receiveNative(next);
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 0 项操作');
 });
 test('pending phase counts toward the two compact rows, and updated old calls keep their chronological position',()=>{
  const{window,doc}=setup();const s=treeHistory(4);window.receiveNative(s);

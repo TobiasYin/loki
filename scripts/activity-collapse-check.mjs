@@ -22,6 +22,7 @@ try {
     availability:{perception:'已连接',search:'已配置',screen_control:'已连接',debug:'已授权'},modelChoices:[{id:'deepseek-flash',name:'DeepSeek Flash'}],modelSelection:{modelId:'deepseek-flash',label:'DeepSeek Flash',thinkingEffort:'high',efforts:['off','high']},skills:[]};receiveNative(fixture);
   });
   assert.equal(await page.locator('.activity-item:visible').count(),2);assert.equal(await page.locator('.execution-history').getAttribute('open'),null);
+  assert.equal(await page.locator('.execution-history > summary').textContent(),'正在运行 · 已完成 2 项操作');
   assert.deepEqual(await page.locator('.activity-item:visible').evaluateAll(nodes=>nodes.map(n=>n.dataset.activityKind)),['tool','thinking']);
   assert.equal(await page.locator('#chat .shimmer:visible').count(),1);
   if(height===540)await page.screenshot({path:`${directory}/running-compact.png`});
@@ -39,7 +40,20 @@ try {
   assert.equal(await page.locator('.activity-item:visible').count(),0);assert.equal(await page.locator('.markdown:visible').count(),1);
   const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,send:document.querySelector('#send').getBoundingClientRect().toJSON(),mutatingCommands:uiCommands.filter(command=>command.op!=='ready').length}));
   assert.equal(layout.overflow,false);assert.equal(layout.mutatingCommands,0);assert.ok(layout.send.bottom<=height);assert.deepEqual(errors,[]);
-  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',answerAlwaysVisible:true,animationVerified:true,...layout});await page.close();
+  await page.evaluate(()=>{
+   fixture.runs=[{id:'recovery',sessionId:'a',status:'executing_tools'}];fixture.messages=[{id:'m',sessionId:'a',runId:'recovery',role:'assistant',text:''}];
+   fixture.events=[{runId:'recovery',sequence:1,type:'tool_result',toolCallId:'old-tap',data:{toolId:'input.tap',error:'TARGET_CHANGED',outcome:'observed',recovery:{submission:'not_dispatched',sideEffectPossible:false}}},
+    {runId:'recovery',sequence:2,type:'diagnostic',toolCallId:'old-tap',data:{code:'TARGET_CHANGED'}}];receiveNative(fixture);
+  });
+  assert.equal(await page.locator('.recovery-status:visible').count(),1);assert.equal(await page.locator('.execution-history > summary').textContent(),'正在运行 · 已完成 0 项操作');
+  await page.evaluate(()=>{fixture.events.push({runId:'recovery',sequence:3,type:'tool_result',toolCallId:'controller-a',data:{toolId:'input.press_button',outcome:'submitted'}});receiveNative(fixture);});
+  assert.equal(await page.locator('.recovery-status:visible').count(),1);
+  await page.evaluate(()=>{fixture.events.push({runId:'recovery',sequence:4,type:'tool_result',toolCallId:'fresh-screen',data:{toolId:'perception.capture_screen',outcome:'observed'}});receiveNative(fixture);});
+  assert.equal(await page.locator('.recovery-status').count(),0);assert.doesNotMatch(await page.locator('#chat').innerText(),/页面已变化|需重新观察|需要重新观察/);
+  assert.equal(await page.locator('.execution-history > summary').textContent(),'正在运行 · 已完成 2 项操作');
+  await page.evaluate(()=>{fixture.events.push({runId:'recovery',sequence:5,type:'diagnostic',toolCallId:'old-tap',data:{code:'TARGET_CHANGED'}});receiveNative(fixture);});
+  assert.equal(await page.locator('.recovery-status').count(),0);assert.doesNotMatch(await page.locator('#chat').innerText(),/页面已变化|需重新观察|需要重新观察/);assert.deepEqual(errors,[]);
+  report.layouts.push({width,height,latestActivities:2,expandedActivities:5,completedActivities:0,duration:'1分钟 20秒',answerAlwaysVisible:true,animationVerified:true,completedOperationCountVerified:true,recoveryClearedAfterObservation:true,duplicateDiagnosticIgnored:true,...layout});await page.close();
  }
  report.passed=true;
 } finally {writeFileSync(`${directory}/browser-check.json`,JSON.stringify(report,null,2)+'\n');await browser.close();await new Promise(resolve=>server.close(resolve));}

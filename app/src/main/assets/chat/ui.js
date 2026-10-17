@@ -217,18 +217,30 @@
     // A result event exists only after Runtime's post-authority checks. Companion
     // reads/selection/discarded or failed reads cannot qualify a fresh target.
     const currentScreenReads=new Set(['perception.app_info','perception.window_info','perception.ui_tree','perception.capture_screen']);
+    const targetResultCalls=new Set(events.filter(event=>event.type==='tool_result' && (event.data?.error??event.error)==='TARGET_CHANGED' && event.toolCallId).map(event=>event.toolCallId));
+    const pendingRecoveryCalls=new Set(),reobservedCalls=new Set();
     let recoverySeen=false,needsObservation=false;
-    for(const event of events)if(event.type==='tool_result') {
+    for(const event of events) {
       const data=event.data??{},error=data.error??event.error,toolId=data.toolId??event.toolId??calls.get(event.toolCallId)?.toolId;
-      if(error==='TARGET_CHANGED'){recoverySeen=true;needsObservation=true;}
-      else if(recoverySeen && !error && !data.contentDiscarded && (data.outcome??event.outcome)==='observed') {
-        if(currentScreenReads.has(toolId))needsObservation=false;
+      // Pi emits a diagnostic for the same rejected call as well. It is a
+      // historical receipt, not another page change (even if delivered late).
+      if(event.type==='diagnostic' && data.code==='TARGET_CHANGED') {
+        if(!event.toolCallId || !targetResultCalls.has(event.toolCallId)){recoverySeen=true;needsObservation=true;}
+      }else if(event.type==='tool_result' && error==='TARGET_CHANGED') {
+        recoverySeen=true;needsObservation=true;
+        if(event.toolCallId)pendingRecoveryCalls.add(event.toolCallId);
+      }else if(event.type==='tool_result' && recoverySeen && !error && !data.contentDiscarded && (data.outcome??event.outcome)==='observed') {
+        if(currentScreenReads.has(toolId)) {
+          needsObservation=false;
+          for(const id of pendingRecoveryCalls)reobservedCalls.add(id);
+          pendingRecoveryCalls.clear();
+        }
         else if(toolId==='perception.select_screen')needsObservation=true;
       }
     }
     const recoveryCalls=[...calls.values()].filter(call=>call.error==='TARGET_CHANGED');
     const uncertainRecovery=recoveryCalls.find(call=>call.outcome==='unknown' && recoveryFact(call));
-    const recoveryStatus=needsObservation?(terminal.has(run.status)?'此前页面发生变化，需以新观察决定后续操作':run.status==='awaiting_user'?'页面已变化，需重新观察':'页面已变化，正在重新观察'):'';
+    const recoveryStatus=needsObservation && !terminal.has(run.status)?(run.status==='awaiting_user'?'页面已变化，需重新观察':'页面已变化，正在重新观察'):'';
     const fact=uncertainRecovery?recoveryFact(uncertainRecovery):needsObservation?recoveryFact(recoveryCalls.at(-1)??{}):'';
     if(recoveryStatus || fact) {
       const note=element('div',[recoveryStatus,fact].filter(Boolean).join('；')+'。','timeline-note recovery-status');note.setAttribute('role','status');container.append(note);
@@ -288,7 +300,7 @@
         const percentInput=brightnessCall && ((!call.result && !terminal.has(run.status)) || (call.result?.content??[]).some(c=>{if(c.type!=='text')return false;try{return JSON.parse(c.text)?.unit==='percent';}catch{return false;}}));
         if(call.arguments && Object.keys(call.arguments).length){body.append(element('small','输入'));body.append(structured(call.arguments,0,percentInput));}
         if(call.result) {
-          if(call.error)body.append(element('div',call.error==='TARGET_CHANGED'?'此操作因页面变化被拒绝，后续需依据新观察。':`失败原因：${call.error}`,call.error==='TARGET_CHANGED'?'timeline-note':'attention'));
+          if(call.error)body.append(element('div',call.error==='TARGET_CHANGED'?(reobservedCalls.has(call.id)?'此操作当时遇到页面变化，随后已重新观察。':'此操作当时遇到页面变化，未直接重放旧动作。'):`失败原因：${call.error}`,call.error==='TARGET_CHANGED'?'timeline-note':'attention'));
           if(call.error==='TARGET_CHANGED' && recoveryFact(call))body.append(element('div',recoveryFact(call)+'。','timeline-note'));
           for(const content of call.result.content??[]) {
             if(content.type==='attachment')body.append(element('div','已返回本地图片附件','muted'));
@@ -327,7 +339,7 @@
         });activity.append(node);
       }else if(item.kind==='tool' && item.call) {
         const call=item.call;
-        const status=call.error==='TARGET_CHANGED'?'需要重新观察':call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):terminal.has(run.status)?'未完成':isCurrent?(call.started?'执行中':'正在准备'):'待执行';
+        const status=call.error==='TARGET_CHANGED'?(reobservedCalls.has(call.id)?'已重新观察':terminal.has(run.status)?'页面发生变化':'需要重新观察'):call.error==='COMMAND_BLOCKED'?'已禁止':call.error?'执行失败':call.result?(outcomeLabels[call.outcome]??'已完成'):terminal.has(run.status)?'未完成':isCurrent?(call.started?'执行中':'正在准备'):'待执行';
         const node=cached(item.key,JSON.stringify([call,status,isCurrent,terminal.has(run.status)]),()=>{
           const card=element('details',undefined,'tool-card activity-item');card.dataset.activityKind='tool';card.dataset.activityState=isCurrent?'active':call.result?'completed':'pending';card.dataset.activityKey=item.key;
           const summary=element('summary');summary.append(element('span',`${title(call)} · ${status}`,'activity-label'+(isCurrent?' shimmer':'')));card.append(summary);
@@ -359,6 +371,7 @@
     history.dataset.runId=run.id;
     const historySummary=element('summary');history.append(historySummary);
     container.append(history,activity);
+    const completedOperations=[...calls.values()].filter(call=>call.result && !call.error && ['observed','submitted'].includes(call.outcome)).length;
     const orderByKey=new Map(timeline.map(item=>[item.key,item.order]));
     const operations=[...activity.children].filter(node=>node.classList.contains('activity-item') || node.classList.contains('activity-pending'));
     const recent=new Set(activeRun?operations.slice().sort((a,b)=>(orderByKey.get(b.dataset.activityKey)??Infinity)-(orderByKey.get(a.dataset.activityKey)??Infinity)).slice(0,2):[]);
@@ -366,7 +379,7 @@
     // task. A later explicit expansion remains local to this completed run.
     rememberDisclosure(history,`${run.id}:history:${activeRun?'running':'finished'}`,false,open=>{
       const expanded=history.dataset.expanded==='true';
-      historySummary.textContent=activeRun?(expanded?'收起执行过程':'展开执行过程'):`用时 ${executionDuration(run,events)}`;
+      historySummary.textContent=activeRun?(expanded?'收起执行过程':`正在运行 · 已完成 ${completedOperations} 项操作`):`用时 ${executionDuration(run,events)}`;
       historySummary.setAttribute('aria-label',`${historySummary.textContent}，${expanded?'收起':'展开'}完整过程`);
       for(const node of operations)node.hidden=!open && !recent.has(node);
       activity.dataset.view=open?'full':'compact';
@@ -376,7 +389,7 @@
       else container.insertBefore(activity,history.nextSibling);
     });
     const last=events.findLast(e=>e.type==='diagnostic' && !compactionCodes.has(e.data?.code));
-    if(last)container.append(element('div',last.data?.code==='TARGET_CHANGED'?'页面已变化，需重新观察。':last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
+    if(last && last.data?.code!=='TARGET_CHANGED')container.append(element('div',last.data?.code==='MODEL_OUTPUT_LIMIT'?'本轮达到模型输出上限，已保留上下文，可在当前会话继续。':`运行提示：${last.data?.code??'工具需要检查'}`,'timeline-note'));
     return container;
   }
   // HTML from messages is treated as text. Markdown images remain text too:
