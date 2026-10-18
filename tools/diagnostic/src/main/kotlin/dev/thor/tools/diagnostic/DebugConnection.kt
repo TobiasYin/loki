@@ -72,7 +72,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     // lease: the shell UserService owns only one mutation lease at a time.
     private val mutation=java.util.concurrent.locks.ReentrantLock()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(21)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(22)
     private val presentationReader:(Int,IntArray)->List<PresentationWindowProof> = {display,ids->
         val remote=service ?: fail(Code.BACKEND_UNAVAILABLE,"Presentation metadata service is not bound")
         requireTool(!closed && availability().status==Status.READY,Code.PERMISSION_MISSING,"Presentation metadata backend is not authorized")

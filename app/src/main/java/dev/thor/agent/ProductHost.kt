@@ -1191,7 +1191,7 @@ class ProductHost private constructor(private val context: Context, private val 
         val v = chatSnapshot(page,selectedBinding?.runId)
         if(storageFailed)v.put("fatal","本地存储失败；已停止网络和设备执行。历史保留；失败的变更未保存，重新打开将恢复上次已保存的开关。修复存储后重开，不会重放副作用。")
         if(uiFacts==null || clock.now()-uiFactsAt>=1000) {uiFactsAt=clock.now();uiFacts=obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else if(runCatching {snapshots.selected()}.isSuccess)"上屏已识别；按工具检查" else "请在设备设置确认上下屏",
-            "search" to if(searchConfigured) "Brave 搜索已配置；HTTP/HTTPS 网页读取可用" else "搜索未配置；HTTP/HTTPS 网页读取可用", "screen_control" to "按任务选择上屏或下屏；触摸需无障碍，手柄需 Shizuku 与兼容控制器", "debug" to "Shell: ${debug.availability().reason}；白名单常用调整直接执行，灰名单逐项确认；文件仅合成目录")
+            "search" to if(searchConfigured) "Brave 搜索已配置；HTTP/HTTPS 网页读取可用" else "搜索未配置；HTTP/HTTPS 网页读取可用", "screen_control" to "按任务选择上屏或下屏；触摸需无障碍，手柄需 Shizuku 与兼容控制器", "debug" to "Shell: ${debug.availability().reason}；共享存储与应用日志只读；配置写入仅合成目录；灰名单逐项确认")
         }
         v.put("availability",uiFacts)
         for(s in v.getJSONArray("sessions").objects())s.put("capabilityRevision",s.optLong("capabilityEpoch",1))

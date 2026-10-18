@@ -13,11 +13,11 @@ class ToolFailure(val code: Code, override val message: String) : RuntimeExcepti
 fun fail(code: Code, message: String): Nothing = throw ToolFailure(code, message)
 fun requireTool(condition: Boolean, code: Code = Code.INVALID_ARGUMENT, message: String) { if (!condition) fail(code, message) }
 enum class Effect { READ, INPUT, WRITE, ARBITRARY_SHELL }
-data class Descriptor(val toolId: String, val capability: Capability, val effect: Effect, val targetRequired: Boolean = false, val schemaVersion: Int = 1, val packId: String = "thor.device", val packVersion: String = "0.1.0",
+data class Descriptor(val toolId: String, val capability: Capability, val effect: Effect, val targetRequired: Boolean = false, val schemaVersion: Int = 1, val packId: String = "thor.device", val packVersion: String = "0.2.0",
     val timeoutMs: Int = 60000, val cancellable: Boolean = true, val concurrencyKey: String = "device",
     val provenance: String = "builtin", val modelVisibility: Boolean = true)
 object ToolPack {
-    const val VERSION = "0.1.0"
+    const val VERSION = "0.2.0"
     /** These tools observe the Run-selected calibrated screen. Old observations remain
      * invalid for input; no other READ tool implicitly receives this exception. */
     val freshReads=setOf("perception.app_info","perception.window_info","perception.ui_tree","perception.capture_screen","perception.capture_companion","perception.select_screen")
@@ -54,6 +54,9 @@ object ToolPack {
         Descriptor("apps.package_info", Capability.ADB_DEBUG, Effect.READ),
         Descriptor("files.list", Capability.ADB_DEBUG, Effect.READ),
         Descriptor("files.read", Capability.ADB_DEBUG, Effect.READ),
+        Descriptor("files.stat", Capability.ADB_DEBUG, Effect.READ),
+        Descriptor("files.find", Capability.ADB_DEBUG, Effect.READ),
+        Descriptor("debug.app_logs", Capability.ADB_DEBUG, Effect.READ),
         Descriptor("files.backup", Capability.ADB_DEBUG, Effect.READ),
         Descriptor("files.write", Capability.ADB_DEBUG, Effect.WRITE),
         Descriptor("files.restore", Capability.ADB_DEBUG, Effect.WRITE)

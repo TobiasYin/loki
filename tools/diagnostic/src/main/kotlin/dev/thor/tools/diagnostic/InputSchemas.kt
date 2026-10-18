@@ -44,6 +44,7 @@ class InputSchemas(context: Context) {
                 if (schema.has("pattern")) requireTool(s.matches(Regex(schema.getString("pattern"))), message = "Invalid $field format")
                 if (schema.optString("format") == "uuid") requireTool(runCatching { java.util.UUID.fromString(s).toString() == s }.getOrDefault(false), message = "Invalid $field UUID")
             }
+            "boolean" -> requireTool(value is Boolean, message = "$field must be a boolean")
             "number", "integer" -> {
                 val n = (value as? Number)?.toDouble() ?: fail(Code.INVALID_ARGUMENT, "$field must be numeric")
                 requireTool(n.isFinite(), message = "$field must be finite")

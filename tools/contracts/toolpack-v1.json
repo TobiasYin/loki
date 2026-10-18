@@ -1,7 +1,7 @@
 {
   "contractVersion": 1,
   "packId": "thor.device",
-  "packVersion": "0.1.0",
+  "packVersion": "0.2.0",
   "status": "independent manual diagnostic module; integration unverified",
   "authorization": "Native port; ManualTestAuthority is the local TEST implementation only",
   "outputPolicy": {
@@ -1275,7 +1275,9 @@
         "properties": {
           "path": {
             "type": "string",
-            "default": "."
+            "default": ".",
+            "description": "Shared storage path such as /sdcard or /storage/emulated/<current-user>/...; accessible removable volumes may also be read. Relative paths use the synthetic root unless backend=shizuku.",
+            "maxLength": 4096
           },
           "limit": {
             "type": "integer",
@@ -1286,10 +1288,19 @@
           "backend": {
             "type": "string",
             "enum": [
+              "auto",
               "synthetic",
               "shizuku"
             ],
-            "default": "synthetic"
+            "default": "auto",
+            "description": "auto routes absolute /sdcard or /storage shared-storage paths to Shizuku; relative paths retain synthetic-root compatibility. Explicit shizuku resolves relative paths and . under current-user shared storage. synthetic never reads outside the host synthetic root."
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "default": 0,
+            "description": "Directory-entry offset for bounded pagination. Use returned pagination metadata to continue."
           }
         },
         "required": [],
@@ -1299,14 +1310,16 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
+        "shared-storage-read",
         "explicit-debug-root"
       ],
       "platformPrerequisites": [
-        "Explicit synthetic root only for transactions; Shizuku shell UID 2000 plus shared root for optional read/list"
+        "Authorized Shizuku UserService running as shell UID 2000; actual Android filesystem permissions apply",
+        "Relative paths default to the synthetic configuration root; explicit shizuku uses current-user shared storage"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "List within explicit synthetic config root, or opt into Shizuku shared read-only root."
+      "description": "Read-only bounded directory listing with pagination. auto routes absolute shared-storage paths to Shizuku and relative paths to the synthetic config root; no diagnostic test directory is required. Shared reads cover /sdcard, /storage/emulated/<current-user> and accessible removable volumes, subject to actual OS permissions. Report missing/denied paths accurately; shell identity does not imply /data or other apps private files are readable. No per-read UI approval once adb_debug is enabled. Use path=/storage to discover accessible configured primary/removable roots; this is a virtual listing, not a scan of other users storage."
     },
     {
       "toolId": "files.read",
@@ -1319,7 +1332,9 @@
         "type": "object",
         "properties": {
           "path": {
-            "type": "string"
+            "type": "string",
+            "description": "Shared storage path such as /sdcard or /storage/emulated/<current-user>/...; accessible removable volumes may also be read. Relative paths use the synthetic root unless backend=shizuku.",
+            "maxLength": 4096
           },
           "offset": {
             "type": "integer",
@@ -1336,10 +1351,17 @@
           "backend": {
             "type": "string",
             "enum": [
+              "auto",
               "synthetic",
               "shizuku"
             ],
-            "default": "synthetic"
+            "default": "auto",
+            "description": "auto routes absolute /sdcard or /storage shared-storage paths to Shizuku; relative paths retain synthetic-root compatibility. Explicit shizuku resolves relative paths and . under current-user shared storage. synthetic never reads outside the host synthetic root."
+          },
+          "tail": {
+            "type": "boolean",
+            "default": false,
+            "description": "Read at most maxBytes from the file end. With tail=true, offset must be 0. The result identifies the actual byte range; a tail is not the complete log."
           }
         },
         "required": [
@@ -1351,14 +1373,158 @@
       "cancellable": true,
       "concurrencyKey": "device",
       "resources": [
+        "shared-storage-read",
         "explicit-debug-root"
       ],
       "platformPrerequisites": [
-        "Explicit synthetic root only for transactions; Shizuku shell UID 2000 plus shared root for optional read/list"
+        "Authorized Shizuku UserService running as shell UID 2000; actual Android filesystem permissions apply",
+        "Relative paths default to the synthetic configuration root; explicit shizuku uses current-user shared storage"
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Read bounded text/metadata within approved roots; requires adb_debug even for synthetic files."
+      "description": "Read bounded file text/metadata, optionally a tail or a byte segment, without writing. auto routes absolute shared-storage paths to Shizuku and relative paths to the synthetic config root. No diagnostic test directory is required. Reads remain subject to OS permissions; never infer app-private /data access. maxBytes is at most 64 KiB; use reported ranges/truncation before claiming complete evidence. No per-read UI approval once adb_debug is enabled."
+    },
+    {
+      "toolId": "files.stat",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Shared storage file or directory; /sdcard, current-user emulated storage, or an accessible removable volume.",
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "shared-storage-read"
+      ],
+      "platformPrerequisites": [
+        "Authorized Shizuku UserService running as shell UID 2000; actual Android filesystem permissions apply"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read filesystem metadata for one shared-storage file or directory through Shizuku, without reading its full content or changing it. Useful for existence, type and size before reading a log. Return actual permission/missing errors; do not infer private /data access. No per-read UI approval once adb_debug is enabled."
+    },
+    {
+      "toolId": "files.find",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "default": ".",
+            "description": "Shared-storage search root; . means current-user shared-storage root.",
+            "maxLength": 4096
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Case-insensitive filename substring to match, not a glob, shell expression or regular expression.",
+            "maxLength": 256
+          },
+          "maxDepth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8,
+            "default": 4
+          },
+          "maxEntries": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 2000
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "shared-storage-read"
+      ],
+      "platformPrerequisites": [
+        "Authorized Shizuku UserService running as shell UID 2000; actual Android filesystem permissions apply"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read-only bounded search by filename substring under a shared-storage directory through Shizuku. Search only a relevant directory; maxDepth, maxEntries and result limit bound work. Inspect truncation/limits/errors before claiming no matching file exists. Does not search app-private /data or grant access to denied directories. No per-read UI approval once adb_debug is enabled."
+    },
+    {
+      "toolId": "debug.app_logs",
+      "schemaVersion": 1,
+      "requiredCapabilities": [
+        "adb_debug"
+      ],
+      "effectClass": "read",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "packageName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255,
+            "description": "Exact installed Android package name whose current PID logs are requested.",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+$"
+          },
+          "maxLines": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2000,
+            "default": 300
+          },
+          "maxBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65536,
+            "default": 65536
+          }
+        },
+        "required": [
+          "packageName"
+        ],
+        "additionalProperties": false
+      },
+      "timeoutMs": 60000,
+      "cancellable": true,
+      "concurrencyKey": "device",
+      "resources": [
+        "app-pid-logcat"
+      ],
+      "platformPrerequisites": [
+        "Authorized Shizuku UserService running as shell UID 2000; actual Android filesystem permissions apply"
+      ],
+      "modelVisibility": true,
+      "provenance": "builtin",
+      "description": "Read a bounded logcat snapshot filtered to the specified app current PID through Shizuku. Does not launch/restart the app, clear logs, upload logs or accept shell flags. Report app-not-running and no-matching-logs honestly; never fall back to unrelated device-wide logs. A bounded empty snapshot does not prove no historical errors. No per-read UI approval once adb_debug is enabled."
     },
     {
       "toolId": "files.backup",

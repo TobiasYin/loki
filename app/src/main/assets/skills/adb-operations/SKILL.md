@@ -1,6 +1,6 @@
 ---
 name: adb-operations
-description: 在用户要求读取 Thor 系统状态、读取组件树、输入文字或键盘快捷键、滚动列表、拖动滑块、控制上屏或手柄、调整双屏亮度、风扇、刷新率、用 curl 请求网络、下载和安装应用或复现设备配置时使用。包含白灰黑名单与操作手册。
+description: 在用户要求排查应用或 SMAPI 日志、读取共享存储文件、读取 Thor 系统状态、读取组件树、输入文字或键盘快捷键、滚动列表、拖动滑块、控制上屏或手柄、调整双屏亮度、风扇、刷新率、用 curl 请求网络、下载和安装应用或复现设备配置时使用。包含白灰黑名单与操作手册。
 ---
 # Thor 设备操作手册
 
@@ -17,6 +17,7 @@ debug_shell 的 command 是单条设备命令，兼容开头 adb shell。直接�
 - 上屏应用导航、精简组件树、屏幕外文字、列表滚动及拖动滑块：[references/screen-navigation.md](references/screen-navigation.md)。这些结构化操作只依赖感知／屏幕操作能力，不需要 ADB 调试；不要因为手册名称而请求无关权限。
 - 表单填字、中文／Emoji、光标处插入、清空、Enter／Tab／方向键及组合快捷键：[references/keyboard-input.md](references/keyboard-input.md)。文字编辑使用无障碍，键盘按键使用已授权 Shizuku；都属于屏幕操作能力，按需读取，不使用 Shell 绕过目标校验。
 
+- 共享存储文件、目录分页、日志尾部与按应用 PID 获取 logcat：[references/files-and-logs.md](references/files-and-logs.md)。这些只读结构化工具要求已启用 ADB 调试，无需逐次批准；不需要创建测试目录，不上传日志。读日志前按需读取该参考。
 - curl 网络请求、GitHub 发布查询、下载 APK、ADB 安装与回验：[references/download-install.md](references/download-install.md)。安装需要本次 UI 确认，普通请求和下载无需批准。
 - 上/下屏分别调亮度：[references/thor-brightness.md](references/thor-brightness.md)。常规调整使用 debug_thor_brightness，value 和回读亮度均为 0–100 整数百分比。不要把存储设置项冒充实际副屏控制；底层命令原生单位只用于明确需要的诊断。
 - 查找指定应用并在上屏打开：[references/thor-apps.md](references/thor-apps.md)。用 perception_find_apps 按名称／包名／launcher 类名匹配，再用 apps_launch 启动；不要为找一个应用读取完整安装清单。启动后必须重新观察前台与画面。

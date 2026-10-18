@@ -26,14 +26,18 @@
 | 工具 | 关键参数 | 结果与限制 |
 |---|---|---|
 | debug.shell | command（Native 已审查单条设备命令）、timeout 默认 15s/最大 60s | stdout/stderr、exitCode/signal、duration、truncated；合计输出默认 64 KiB；不支持永久 daemon |
-| debug.logs | package/process 过滤、since/duration、maxBytes | 有限日志与来源；默认脱敏，权限不足明确返回 |
-| files.list | 已授权根范围、path、limit 默认 100 | 条目、类型、大小、分页标识；不递归无限遍历 |
-| files.read | path 或 grantRef、offset、maxBytes 默认 64 KiB | 文本编码、内容/hash/截断；二进制首版只返回元数据 |
+| debug.app_logs | 确切 packageName、maxLines 默认 300/最大 2000、maxBytes 最大 64 KiB | 指定应用当前 PID 的有界 logcat；未运行与无日志如实返回；不清日志、不启动应用，不支持任意 flags |
+| files.list | path、backend=auto、limit 默认 100、offset 0–10000 | 类型、大小、mtime、分页标识；`/storage` 虚拟列表发现当前用户与外置卷；扫描及结果预算有界 |
+| files.stat | 共享存储 path | 当前路径类型、大小、mtime；系统拒绝与路径不存在分别报告 |
+| files.find | path、文件名子串 name、maxDepth/maxEntries/limit | 忽略大小写的有界查找，返回截断/深度/不可读标记，不执行 glob 或 Shell |
+| files.read | path、backend=auto、offset、tail、maxBytes 最大 64 KiB | 共享存储 UTF-8 安全分页/尾部、实际字节范围与片段 hash；不把片段称完整文件；synthetic 保留配置兼容 |
 | files.backup | 目标、expectedHash | backupId、路径/Uri引用、原 hash、大小、时间、权限元信息 |
 | files.write | 目标、expectedHash、backupId、完整内容或经审查变更 | 已校验的新 hash、恢复信息、atomic 标志；初值最大 1 MiB |
 | files.restore | backupId、expectedCurrentHash | 恢复前副本、新 hash、可验证状态；冲突则停 |
 
 上述模型文件工具全部依赖 adb_debug（即使物理读取可通过 SAF），普通聊天附件存储属于应用内部功能，不以此绕过调试开关。
+
+当前实现使用已授权 Shizuku UID 2000 读取当前 Android 用户的共享存储与系统实际可访问的外置卷，支持 `/sdcard` 等可信别名；不再要求创建固定的 Download/ThorToolPack 测试目录。`auto` 将绝对共享路径路由至 Shizuku，相对路径仍指向宿主合成配置根；真实设备文件优先使用绝对路径。配置写入、备份和恢复仍只允许合成根，不把共享读取能力扩展成任意文件写入。详见 [共享文件与应用日志验收](shared-files-log-acceptance.md)。
 
 ## 配置变更事务
 

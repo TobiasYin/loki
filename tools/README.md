@@ -2,7 +2,7 @@
 
 # Android Device ToolPack 与手动诊断宿主
 
-`tools/` 是独立 Kotlin/Android 工程，版本 `0.1.0`，包名 `dev.thor.tools.diagnostic`。可在本目录安装依赖、构建、执行 JVM 测试并安装诊断 APK；不依赖仓库其他模块、Pi、模型服务或 Input Lab。
+`tools/` 是独立 Kotlin/Android 工程，诊断 APK 版本 `0.1.0`、工具契约版本 `0.2.0`，包名 `dev.thor.tools.diagnostic`。可在本目录安装依赖、构建、执行 JVM 测试并安装诊断 APK；不依赖仓库其他模块、Pi、模型服务或 Input Lab。
 
 本版提供真实 Android API 执行器和明确标识的本地 **TEST 授权端口**。独立验收不等于产品 Native 网关、Runtime 或 Thor 固件的跨模块集成已经完成。已验证范围与待验范围见 [verification.md](verification.md)，对接差异见 [integration-notes.md](integration-notes.md)。
 
@@ -60,7 +60,8 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 | `input.release_inputs` | 清理本 Run 的有界手柄资源，返回实际 releaseAcknowledged/cleanupComplete；归零失败不能报已释放。已提交 Accessibility 手势没有公开即时取消 API，未收到回调则返回 unknown 并阻止继续触摸 |
 | `input.press_button/set_axes` | 固定 Odin Controller evdev 按钮/六轴后端，Shizuku UID 2000、真实节点/布局与物理上屏焦点校验；持有≤5秒并自动释放。真实身份与接收验收见 [0.6手柄说明](../docs/release-0.6-gamepad.md)，没有键盘、触摸、MotionEvent替代成功路径 |
 | `debug.shell` | 真正 Shizuku UserService、实际 UID 2000；默认 15s、最多 60s，stdout/stderr 合计最多 64 KiB；每次审批确切命令；非零退出码为错误 |
-| `files.list/read` | 默认明确批准的宿主 `synthetic-config/`；显式 `backend=shizuku` 可通过 UserService 读取固定 `/storage/emulated/0/Download/ThorToolPack`，先由用户建立该目录；不推断 Android/data 或应用私有目录可达 |
+| `files.list/read/stat/find` | 共享存储结构化只读访问；list/read 默认 auto，绝对 `/sdcard`、`/storage` 路径走 Shizuku，相对路径保留 synthetic 兼容；支持目录分页、元数据、有界文件名子串搜索、尾部/字节分段读取；无需测试目录，实际系统拒绝如实返回 |
+| `debug.app_logs` | 按确切包名的当前 PID 读取有界 logcat；不启动/重启应用、不清空日志，不回退全设备日志；未运行、空日志与截断均如实返回 |
 | `files.backup/write/restore` | 仅合成 JSON 配置目录；hash/CAS、具体差异审批、加密备份、同目录临时写/flush/原子替换、读回校验；恢复先备份当前版本 |
 
 静态工具描述和输入 schema 在 [contracts/toolpack-v1.json](contracts/toolpack-v1.json)，打包进 APK，原生入口真正执行类型、枚举、字段及数量校验。每次结果含时间、source/实际后端、availability、truncated、outcome 和相关 snapshotId/display 信息。

@@ -120,7 +120,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             else -> "synthetic-config/android-app-owned-root"
         }
         if (toolId in setOf("input.press_button", "input.set_axes")) return shizuku.gamepadAvailability(toolId)
-        if (toolId in setOf("debug.shell","debug.thor_brightness","apps.install","apps.package_info")) return shizuku.availability()
+        if (toolId in setOf("debug.shell","debug.thor_brightness","apps.install","apps.package_info","debug.app_logs","files.stat","files.find")) return shizuku.availability()
         if (toolId == "debug.command_policy") return Availability(Status.READY,"Native command policy; no device mutation","native-command-policy")
         if (toolId in gestureTools && inputState.hasUnknown()) return Availability(Status.TEMPORARILY_UNAVAILABLE, "Previous submitted gesture has no completion/cancel callback; stop status unknown", backend)
         if (toolId == "web.request" || toolId == "perception.device_info" || toolId.startsWith("files.") || toolId == "input.release_inputs") return Availability(Status.READY, "Manual diagnostics only", backend)
@@ -130,8 +130,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         return Availability(Status.READY, "Android API exists; delivery on Thor is unverified", backend)
     }
     override fun availability(toolId: String, args: Map<String, Any?>): Availability =
-        if (toolId in setOf("files.list", "files.read") && args["backend"] == "shizuku")
-            shizuku.availability().copy(backend = "shizuku-userservice/shared-root-read-only") else availability(toolId)
+        if (toolId in setOf("files.list", "files.read") && FileBackendSelection.choose(args) == "shizuku")
+            shizuku.availability().copy(backend = "shizuku-userservice/shared-storage-read-only") else availability(toolId)
     private fun service() = ThorAccessibilityService.instance ?: accessibilityAvailability("android-sdk/accessibility").let {
         fail(if(it.status==Status.PERMISSION_MISSING)Code.PERMISSION_MISSING else Code.BACKEND_UNAVAILABLE,it.reason)
     }
@@ -299,28 +299,39 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 val data=shizuku.call(e.runId,args+mapOf("operation" to "thor.brightness"),cp)
                 result(e,data,outcome=if(command.mutates)"submitted" else "observed").copy(error=if(data["verified"]==true)null else Code.IO_ERROR)
             }
+            "debug.app_logs" -> {
+                args.only("packageName","maxLines","maxBytes")
+                val data=shizuku.call(e.runId,args+mapOf("operation" to "app.logs"),cp)
+                result(e,data,data["truncated"]==true,actualBackend="shizuku-userservice/application-logcat-read-only")
+            }
+            "files.stat", "files.find" -> {
+                val data=shizuku.call(e.runId,args+mapOf("operation" to e.toolId),cp)
+                result(e,data,data["truncated"]==true,actualBackend="shizuku-userservice/shared-storage-read-only")
+            }
             "files.list" -> {
-                args.only("path", "limit", "backend")
-                if (args.string("backend", "synthetic") == "shizuku") { val data = shizuku.call(e.runId, mapOf("operation" to "files.list", "path" to args.string("path", "."), "limit" to args.int("limit", 100)), cp); return result(e, data, data["truncated"] == true, actualBackend = "shizuku-userservice/shared-root-read-only") }
-                requireTool(args.string("backend", "synthetic") == "synthetic", message = "Unknown file backend")
-                val (entries, truncated) = files.list(args.string("path", "."), args.int("limit", 100))
-                result(e, mapOf("entries" to entries, "root" to files.root.toString()), truncated)
+                args.only("path", "limit", "offset", "backend")
+                if (FileBackendSelection.choose(args) == "shizuku") { val data = shizuku.call(e.runId, args.filterKeys {it!="backend"}+mapOf("operation" to "files.list"), cp); return result(e, data, data["truncated"] == true, actualBackend = "shizuku-userservice/shared-storage-read-only") }
+                val offset=args.int("offset",0);requireTool(offset in 0..10000,message="Directory offset must be 0..10000")
+                val (names, truncated) = files.list(args.string("path", "."), 100)
+                val entries=names.drop(offset).take(args.int("limit",100))
+                val more=offset+entries.size<names.size
+                result(e, mapOf("entries" to entries, "root" to files.root.toString(),"offset" to offset,"nextOffset" to if(more)offset+entries.size else null,"scanTruncated" to truncated), truncated || more)
             }
             "files.read" -> {
-                args.only("path", "maxBytes", "offset", "backend")
-                if (args.string("backend", "synthetic") == "shizuku") {
-                    requireTool(args.int("offset", 0) == 0, Code.UNSUPPORTED, "Shizuku read supports offset 0 only")
-                    val data = shizuku.call(e.runId, mapOf("operation" to "files.read", "path" to args.string("path"), "maxBytes" to args.int("maxBytes", Budgets.TEXT)), cp); return result(e, data, data["truncated"] == true, actualBackend = "shizuku-userservice/shared-root-read-only")
+                args.only("path", "maxBytes", "offset", "tail", "backend")
+                if (FileBackendSelection.choose(args) == "shizuku") {
+                    val data = shizuku.call(e.runId,args.filterKeys {it!="backend"}+mapOf("operation" to "files.read"), cp); return result(e, data, data["truncated"] == true, actualBackend = "shizuku-userservice/shared-storage-read-only")
                 }
-                requireTool(args.string("backend", "synthetic") == "synthetic", message = "Unknown file backend")
-                val offset = args.int("offset", 0); requireTool(offset >= 0, message = "Offset must be nonnegative")
+                val requestedOffset = args.int("offset", 0); requireTool(requestedOffset >= 0, message = "Offset must be nonnegative")
+                val tail=args["tail"]==true;requireTool(!tail || requestedOffset==0,message="tail and a nonzero offset are mutually exclusive")
                 val max = args.int("maxBytes", Budgets.TEXT); requireTool(max in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Read budget is 1..64KiB")
                 val content = files.read(args.string("path"))
+                val offset=if(tail)(content.size-max).coerceAtLeast(0) else requestedOffset
                 val end = minOf(content.size.toLong(), offset.toLong() + max).toInt()
                 requireTool(offset <= content.size, message = "Offset past EOF")
                 val slice = content.copyOfRange(offset, end)
                 val text = runCatching { Charsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(slice)).toString() }.getOrNull()
-                result(e, mapOf("content" to text?.let { Budgets.safeText(it) }, "encoding" to if (text == null) "binary/metadata-only" else "utf-8", "hash" to hash(content), "size" to content.size, "offset" to offset), end < content.size)
+                result(e, mapOf("content" to text?.let { Budgets.safeText(it) }, "encoding" to if (text == null) "binary/metadata-only" else "utf-8", "hash" to hash(content), "size" to content.size, "offset" to offset,"nextOffset" to if(end<content.size)end else null,"eof" to (end==content.size)), offset>0 || end < content.size)
             }
             "files.backup" -> {
                 args.only("path", "expectedHash")

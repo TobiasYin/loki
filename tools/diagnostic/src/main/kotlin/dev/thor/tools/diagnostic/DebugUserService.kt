@@ -112,7 +112,7 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
     @Synchronized override fun openLease(token: String, deadlineElapsed: Long, root: String, owner: IBinder) {
         requireTool(Process.myUid() == 2000, Code.PERMISSION_MISSING, "Only shell UID 2000 allowed; Root is refused")
         requireTool(deadlineElapsed > clock.now() && deadlineElapsed - clock.now() <= 60_000 && token.length in 16..128, message = "Invalid short lease")
-        requireTool(root == ROOT, Code.PERMISSION_MISSING, "Only explicit shared diagnostic root allowed")
+        requireTool(root == ROOT, Code.PERMISSION_MISSING, "Shared-storage lease scope/version differs")
         lease?.let(::retire)
         val cancellation = Cancellation()
         val death = IBinder.DeathRecipient {
@@ -274,25 +274,19 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
                         "frameworkPhase" to if(reconnect)"OFF_ACKNOWLEDGED" else "NOT_REQUESTED","offAcknowledged" to reconnect)+inspectionEvidence
                 }
                 "shell" -> fail(Code.UNSUPPORTED, "Use guarded short shell submission")
-                "files.read", "files.list" -> {
-                    args.only("operation", "path", "maxBytes", "limit")
-                    // Do not create the directory or infer shell access from its name. User must provision it.
-                    val root = File(l.root)
-                    requireTool(root.isDirectory, Code.PERMISSION_MISSING, "Create/grant diagnostic directory first")
-                    val local = LocalFiles(Paths.get(l.root))
-                    if (args.string("operation") == "files.list") {
-                        val (names, truncated) = local.list(args.string("path", "."), args.int("limit", 100))
-                        mapOf("entries" to names, "truncated" to truncated, "root" to l.root, "uid" to Process.myUid())
-                    } else {
-                        val max = args.int("maxBytes", Budgets.TEXT); requireTool(max in 1..Budgets.TEXT, Code.LIMIT_EXCEEDED, "Read max 64KiB")
-                        val path = local.path(args.string("path"))
-                        val read = java.nio.file.Files.newInputStream(path, java.nio.file.StandardOpenOption.READ, java.nio.file.LinkOption.NOFOLLOW_LINKS).use { Budgets.read(it, max) { check(token) } }
-                        val text = runCatching { Charsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(read.bytes)).toString() }.getOrNull()
-                        mapOf("content" to text?.let { Budgets.safeText(it) }, "encoding" to if (text == null) "binary/metadata-only" else "utf-8", "truncated" to read.truncated,
-                            "prefixHash" to hash(read.bytes), "size" to java.nio.file.Files.size(path), "uid" to Process.myUid())
-                    }
+                "files.read", "files.list", "files.stat", "files.find" -> {
+                    // The scope is derived from the actual bound app's Android
+                    // user, never from model-provided roots or a test directory.
+                    val primary=Paths.get("/storage/emulated/${l.caller/100000}")
+                    val volume=Regex("(?:[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}|[A-Fa-f0-9]{8}(?:-[A-Fa-f0-9]{4}){3}-[A-Fa-f0-9]{12})")
+                    val removable=File("/storage").listFiles().orEmpty().filter {it.name.matches(volume) && it.isDirectory}.map {it.toPath()}
+                    val data=SharedReadFiles(primary,removable).execute(args.string("operation"),args.filterKeys {it!="operation"}) {check(token)}
+                    data+mapOf("uid" to Process.myUid(),"source" to "shared-storage-read-only")
                 }
-                else -> fail(Code.UNSUPPORTED, "UserService only offers explicit debug shell/shared file reads")
+                "app.logs" -> {
+                    NativeAppLogs.read(args.filterKeys {it!="operation"}) {check(token)}+mapOf("uid" to Process.myUid())
+                }
+                else -> fail(Code.UNSUPPORTED, "Unknown reviewed UserService operation")
             }
             check(token)
             (json(mapOf("data" to data)) as JSONObject).toString()
@@ -385,5 +379,7 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
         lease?.takeIf { token == it.token && Binder.getCallingUid() == it.caller }?.let(::retire)
     }
     override fun destroy() { synchronized(this) { lease?.let(::retire);runCatching {gamepad?.close()} }; watchdog.shutdownNow(); kotlin.system.exitProcess(0) }
-    companion object { const val ROOT = "/storage/emulated/0/Download/ThorToolPack" }
+    // Legacy AIDL parameter is named root; it now identifies the fixed scope
+    // version. Real filesystem roots always come from the verified caller user.
+    companion object { const val ROOT = "shared-storage-readonly-v1" }
 }

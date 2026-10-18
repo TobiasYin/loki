@@ -14,7 +14,8 @@
 
 1. 未安装/未启动/未授权/未绑定分别显示真实 availability。以 ADB 启动并绑定后，审批 `id`，核对 UserService UID 2000；Root UID 0 被拒绝，解绑/服务死亡结束 lease。
 2. `printf` 与 stderr、非零 exit、输出截断、timeout、STOP、关闭调试/再开启旧 epoch、host 被杀全部检查。输出含合成敏感 token 时显示脱敏。没有进程组终止保证，检查已脱离子进程并将结果标 unknown，必要时人工停止 Shizuku。
-3. 只在用户创建的 `/storage/emulated/0/Download/ThorToolPack` 做 Shizuku list/read。路径越界、符号链接、目录不存在/无权限、UTF-8/二进制、64KiB 截断都不能误报成功或完整 hash。其他应用私有路径应被拒绝。
+3. 共享存储只读：在独立无害测试目录验证 auto 的绝对 `/sdcard`、`/storage/emulated/<当前用户>` 路由、相对 synthetic 兼容、显式 shizuku 的共享根；测试可访问可移除卷。验证 list offset/limit 分页、stat 文件/目录/缺失、find 子串与深度/遍历/结果限制、read 非零字节偏移与 tail。tail+非零 offset、路径越界、符号链接、目录不存在/无权限、UTF-8/二进制、64KiB 截断均不能误报成功或完整 hash。`/data` 等其他应用私有路径应被拒绝。此测试不要求先创建固定 ThorToolPack 根，真实应用 Android/data 可达性须按固件单独证明。
+   按包名验证 debug.app_logs 的当前 PID 隔离、未运行、无匹配日志、行数/字节截断与权限撤销，不得启动应用、清空日志或回退设备全量日志。SMAPI 已采集证据只证明当时 shell 可读指定日志；重接设备后必须验证更新后的 UserService/产品工具链，不能用宿主 adb 成功替代工具链验收。
 4. 先在 `synthetic-config/sample.json` 验证 read→backup→批准无害变更→write→readback→批准restore，保留每个 hash、backupId 和恢复前副本。制造并发 hash 冲突、修改备份字节、审批内容变化、权限撤销、存储不足、quota 满额；不得写入错误目标或撤销后自动恢复。
 5. Android Keystore 与真实文件系统路径可先用 Debug `run-smoke.sh SERIAL` 做 7 项通用检查。合成目录通过仍不证明真实模拟器路径/权限；SAF 和跨 UID 事务写入此版保持 unsupported。
 

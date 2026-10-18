@@ -27,9 +27,11 @@
 
 Shizuku API/provider 固定 13.1.5，使用 UserService，而非旧 newProcess。连接同时检查 Shizuku 授权、binder 和 UID，绑定回调再检查实际 UserService UID；服务每次执行检查自身 UID 2000、绑定调用者 UID、随机 token 和 lease。Root 被拒绝，binder 死亡和 host binder 失联执行取消，独立看门狗不依赖 WebView。
 
-任意 Shell 只能走 adb_debug 的独立方法。审批绑定确切命令 UTF-8 hash；命令最长 8192 UTF-8 字节、timeout 默认 15s/最多 60s，输出合计最多 64KiB。cwd、Unix signal 识别、process group 终止和 debug.logs/device_diagnostics 本版未实现。非零退出返回错误和退出码；取消/超时返回错误与 unknown，不伪报整个进程树结束。stdout/stderr 非零结果保留；已撤销 lease 的迟到输出丢弃。
+任意 Shell 只能走 adb_debug 的独立方法。审批绑定确切命令 UTF-8 hash；命令最长 8192 UTF-8 字节、timeout 默认 15s/最多 60s，输出合计最多 64KiB。cwd、Unix signal 识别、process group 终止和完整 device_diagnostics 本版未实现。非零退出返回错误和退出码；取消/超时返回错误与 unknown，不伪报整个进程树结束。stdout/stderr 非零结果保留；已撤销 lease 的迟到输出丢弃。
 
-files.list/read 可显式选 `synthetic` 或 `shizuku`；Shizuku 路径固定共享 diagnostic 根，只 read/list，offset 首版仅 0，结果 source 明确反映真正后端。目录必须已存在；访问失败如实返回，不能从 Shell 身份推出其他应用私有目录可读。
+文件只读契约 0.2.0：files.list/read 默认 `backend=auto`，绝对 `/sdcard`、`/storage` 共享路径走 Shizuku，相对路径保留 `synthetic` 兼容；显式 `backend=shizuku` 的 `.` 和相对路径以当前用户共享根解析。files.stat/find 固定使用 Shizuku。支持当前用户 emulated 存储和可访问的可移除卷，所有访问遵守实际系统权限，不要求固定 diagnostic 测试目录，不从 shell 身份推断 `/data` 私有目录可读。list 有 offset/limit；read 有 offset/maxBytes 与 tail（tail=true 时 offset 必须为 0）；find 仅文件名子串匹配，有深度/遍历条目/结果上限。路径规范化、符号链接检查及实际权限失败须由后端如实报告，任何限额截断都不能宣称遍历完整。
+
+debug.app_logs 只接受确切 packageName 和 maxLines/maxBytes，通过当前 PID 读取有界 logcat，不接受自由 shell 参数、不启动应用、不清空日志、不回退全设备日志。应用未运行与无匹配日志为诊断事实，不能冒充日志读取失败，也不能据此排除历史错误。上述结构化只读工具依赖 ADB_DEBUG，无逐次 UI 审批；任意 shell 策略保持原样。Skill 仅在任务匹配后主动读取 references/files-and-logs.md，完整日志不自动注入提示或上传。
 
 结构化事务只针对 **宿主自身明确批准的合成配置目录**，不开放会话数据库、凭据、截图、备份 vault 或其他应用私有目录。`ConfigFilePort` 预留以后经验证的 SAF/受限服务适配。没有把共享目录检查包装成“安全远程事务写入”。
 
