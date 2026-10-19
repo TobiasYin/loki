@@ -216,9 +216,9 @@ class DebugUserService @JvmOverloads constructor(private val hostContext: androi
                     // is disconnected. Cycle only our component when Native detects it.
                     if(reconnect) {
                         var inspection=NativeAccessibilityRecovery.inspect(host,user.toInt()) {check(token)}
-                        // A known orphan must remain visible to package restart
-                        // handling. Do not open an unnecessary OFF window on
-                        // every retry; unknown framework state is also read-only.
+                        // Only an outstanding Binding guard needs package restart.
+                        // Removing our enabled entry clears Android's Crashed
+                        // guard; wait for OFF acknowledgement before re-enabling.
                         if(inspection.state.known && !inspection.state.retainEnabledForRestart) {
                             val beforeOff=setting("get","enabled_accessibility_services")
                             AccessibilitySetup.mergedServices(beforeOff,host.packageName)

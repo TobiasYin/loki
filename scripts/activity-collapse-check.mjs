@@ -45,9 +45,9 @@ try {
    fixture.events=[{runId:'recovery',sequence:1,type:'tool_result',toolCallId:'old-tap',data:{toolId:'input.tap',error:'TARGET_CHANGED',outcome:'observed',recovery:{submission:'not_dispatched',sideEffectPossible:false}}},
     {runId:'recovery',sequence:2,type:'diagnostic',toolCallId:'old-tap',data:{code:'TARGET_CHANGED'}}];receiveNative(fixture);
   });
-  assert.equal(await page.locator('.recovery-status:visible').count(),1);assert.equal(await page.locator('.execution-history > summary').textContent(),'正在运行 · 已完成 0 项操作');
+  assert.equal(await page.locator('.recovery-status').count(),0);assert.match(await page.locator('.tool-card').first().textContent(),/需要重新观察/);assert.equal(await page.locator('.execution-history:visible').count(),0);
   await page.evaluate(()=>{fixture.events.push({runId:'recovery',sequence:3,type:'tool_result',toolCallId:'controller-a',data:{toolId:'input.press_button',outcome:'submitted'}});receiveNative(fixture);});
-  assert.equal(await page.locator('.recovery-status:visible').count(),1);
+  assert.equal(await page.locator('.recovery-status').count(),0);assert.match(await page.locator('.tool-card').first().textContent(),/需要重新观察/);
   await page.evaluate(()=>{fixture.events.push({runId:'recovery',sequence:4,type:'tool_result',toolCallId:'fresh-screen',data:{toolId:'perception.capture_screen',outcome:'observed'}});receiveNative(fixture);});
   assert.equal(await page.locator('.recovery-status').count(),0);assert.doesNotMatch(await page.locator('#chat').innerText(),/页面已变化|需重新观察|需要重新观察/);
   assert.equal(await page.locator('.execution-history > summary').textContent(),'正在运行 · 已完成 2 项操作');

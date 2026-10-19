@@ -114,7 +114,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Launch one discovered package using only its enabled exported MAIN/CATEGORY_LAUNCHER activity onto the currently resolved selected screen display. No arbitrary component, URI, extras, shell, data/task clearing or launching the assistant itself. Requires screen_control and fresh target authorization; no ADB permission or gray-shell approval is needed. A submitted launch is not foreground proof: immediately observe app/window/UI or capture a fresh screen before the next input."
+      "description": "Launch one discovered package using only its enabled exported MAIN/CATEGORY_LAUNCHER activity onto the currently resolved selected screen display. No arbitrary component, URI, extras, shell, data/task clearing or launching the assistant itself. Requires screen_control and fresh target authorization; no ADB permission or gray-shell approval is needed. A submitted launch is not foreground proof: immediately observe app/window/UI or capture a fresh screen before the next input. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "agent.background",
@@ -464,7 +464,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Activate a current ui_tree clickable node using its advertised ACTION_CLICK, without guessing coordinates. Only nodeRef is accepted. Native resolves the same unique tree path and node identity again and requires its own signature, bounds, app/window, display/epoch and visible region unchanged. Unrelated content updates such as a sibling RAM counter may change; target changes, stale refs, other runs/sessions, new screen observations or prior input invalidate the ref. Never activates offscreen/password/disabled/nonclickable nodes; choose a visible clickable ancestor if needed. No arbitrary accessibility actions, coordinates, text or value injection. Submission is not proof of app effect; re-observe afterward.",
+      "description": "Activate a current ui_tree clickable node using its advertised ACTION_CLICK, without guessing coordinates. Only nodeRef is accepted. Native resolves the same unique tree path and node identity again and requires its own signature, bounds, app/window, display/epoch and visible region unchanged. Unrelated content updates such as a sibling RAM counter may change; target changes, stale refs, other runs/sessions, new screen observations or prior input invalidate the ref. Never activates offscreen/password/disabled/nonclickable nodes; choose a visible clickable ancestor if needed. No arbitrary accessibility actions, coordinates, text or value injection. Submission is not proof of app effect; re-observe afterward. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action.",
       "platformPrerequisites": [
         "Current run/session latest ui_tree ref",
         "Same selected screen display, app, window, layout and visible region",
@@ -516,7 +516,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Enter real Unicode text (including Chinese, emoji and newlines) into one current selected-screen editable field through ACTION_SET_TEXT. nodeRef must come from a fresh ui_tree and retains Run/session/window/app/node identity and visible bounds checks. Default insert replaces the current selection, inserts at a cursor, or appends when both selection endpoints are unavailable; replace replaces the full field and empty text clears it. text is at most 4096 Unicode code points; insert result is at most 65536 UTF-16 units, invalid or split-surrogate selections are rejected. This changes the field only: no automatic Enter, IME action or submission. Observe the screen/UI again before the next action. Password fields and hidden/offscreen fields are not supported."
+      "description": "Enter real Unicode text (including Chinese, emoji and newlines) into one current selected-screen editable field through ACTION_SET_TEXT. nodeRef must come from a fresh ui_tree and retains Run/session/window/app/node identity and visible bounds checks. Default insert replaces the current selection, inserts at a cursor, or appends when both selection endpoints are unavailable; replace replaces the full field and empty text clears it. text is at most 4096 Unicode code points; insert result is at most 65536 UTF-16 units, invalid or split-surrogate selections are rejected. This changes the field only: no automatic Enter, IME action or submission. Observe the screen/UI again before the next action. Password fields and hidden/offscreen fields are not supported. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "input.key_press",
@@ -614,7 +614,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Send one bounded keyboard DOWN/UP pair with optional distinct CTRL, ALT, SHIFT and META modifiers to the verified focused application on the selected screen. Fixed allowlist only: A-Z, 0-9, ENTER, TAB, BACKSPACE, DELETE, ESCAPE, SPACE, UP/DOWN/LEFT/RIGHT, HOME/END and PAGE_UP/PAGE_DOWN. HOME/END move within text; no Android system HOME, arbitrary numeric keycodes, shell commands, power/volume keys, repeat or holds. All attempted keys and modifiers receive UP cleanup even after cancellation. Keyboard events are not gamepad events and do not type arbitrary Unicode: use input.type_text for Chinese/emoji or multi-character text. Enter is sent only when explicitly requested, so observe the result before using it to submit. Observe screen/UI again after each action."
+      "description": "Send one bounded keyboard DOWN/UP pair with optional distinct CTRL, ALT, SHIFT and META modifiers to the verified focused application on the selected screen. Fixed allowlist only: A-Z, 0-9, ENTER, TAB, BACKSPACE, DELETE, ESCAPE, SPACE, UP/DOWN/LEFT/RIGHT, HOME/END and PAGE_UP/PAGE_DOWN. HOME/END move within text; no Android system HOME, arbitrary numeric keycodes, shell commands, power/volume keys, repeat or holds. All attempted keys and modifiers receive UP cleanup even after cancellation. Keyboard events are not gamepad events and do not type arbitrary Unicode: use input.type_text for Chinese/emoji or multi-character text. Enter is sent only when explicitly requested, so observe the result before using it to submit. Observe screen/UI again after each action. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "input.navigate",
@@ -646,7 +646,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Send one fixed Android BACK down/up pair to the currently authorized selected screen display and that display’s focused target app/window (global focus may belong to the lower display). Use for Android back navigation or an app menu implemented by onBackPressed; an edge swipe or gamepad BUTTON_MODE is not equivalent. No arbitrary keycode, HOME, shell, display override, hold, repeat, URI or extras. This is virtual-keyboard Android navigation, never physical gamepad identity. Returns submitted but foregroundVerified=false; re-observe after navigation. Requires normal screen_control, not a separate adb_debug capability; bound shell backend still needs its actual Shizuku grant.",
+      "description": "Send one fixed Android BACK down/up pair to the currently authorized selected screen display and that display’s focused target app/window (global focus may belong to the lower display). Use for Android back navigation or an app menu implemented by onBackPressed; an edge swipe or gamepad BUTTON_MODE is not equivalent. No arbitrary keycode, HOME, shell, display override, hold, repeat, URI or extras. This is virtual-keyboard Android navigation, never physical gamepad identity. Returns submitted but foregroundVerified=false; re-observe after navigation. Requires normal screen_control, not a separate adb_debug capability; bound shell backend still needs its actual Shizuku grant. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action.",
       "platformPrerequisites": [
         "Bound Shizuku shell UID 2000",
         "Current selected screen snapshot with matching per-display focused application and window",
@@ -720,7 +720,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Submit a bounded single-finger tap to the calibrated selected screen display."
+      "description": "Submit a bounded single-finger tap to the calibrated selected screen display. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "input.long_press",
@@ -789,7 +789,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Submit a bounded single-finger long press to the calibrated selected screen display."
+      "description": "Submit a bounded single-finger long press to the calibrated selected screen display. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "input.swipe",
@@ -857,7 +857,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Submit a bounded single-finger swipe to the calibrated selected screen display."
+      "description": "Submit a bounded single-finger swipe to the calibrated selected screen display. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "input.scroll",
@@ -918,7 +918,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Perform one supported Accessibility scroll action on a nodeRef returned by the current ui_tree snapshot. Use scrollable container nodeRef (or scrollAncestorRef), never an old ref. forward/backward/up/down/left/right use advertised actions; to_position requires known collection row/column bounds and supported action. Does not read or reveal unloaded content. All tree refs invalid after submission: observe ui_tree/screenshot again and verify actual movement."
+      "description": "Perform one supported Accessibility scroll action on a nodeRef returned by the current ui_tree snapshot. Use scrollable container nodeRef (or scrollAncestorRef), never an old ref. forward/backward/up/down/left/right use advertised actions; to_position requires known collection row/column bounds and supported action. Does not read or reveal unloaded content. All tree refs invalid after submission: verify actual movement using the returned screenshot; read ui_tree for new nodeRefs. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "input.drag",
@@ -980,7 +980,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Drag a native slider/scrollbar/object with one bounded down-move-up gesture along points (durationMs default 500, max 5000). Explicit display_logical or fresh frame_pixels as for swipe. Re-observe afterwards. Does not guarantee drag-and-drop controls needing an initial long press; no continued or indefinite stroke."
+      "description": "Drag a native slider/scrollbar/object with one bounded down-move-up gesture along points (durationMs default 500, max 5000). Explicit display_logical or fresh frame_pixels as for swipe. Verify the returned screenshot afterwards. Does not guarantee drag-and-drop controls needing an initial long press; no continued or indefinite stroke. After successful submission, automatically returns a fresh screenshot and frameId when screen perception is enabled and capture is available. Use that image for the next action; an extra capture_screen call is unnecessary. If postActionScreenshot=false, inspect screenshotError and observe again without blindly replaying the action."
     },
     {
       "toolId": "input.press_button",

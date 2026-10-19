@@ -26,8 +26,9 @@ class AccessibilityFrameworkStateTest {
         assertEquals("$other:dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService",retained)
         assertEquals(retained,AccessibilitySetup.mergedServices(retained,"dev.thor.agent"))
     }
-    @Test fun onlyConfirmedBindingOrCrashRestoresOwnEntryForExplicitRestartEligibility() {
-        assertTrue(inspect(user(crashed=own)).retainEnabledForRestart)
+    @Test fun onlyOutstandingBindingRequiresRestartWhileCrashCanBeCycled() {
+        assertFalse(inspect(user(crashed=own)).retainEnabledForRestart)
+        assertTrue(inspect(user(binding=own,crashed=own)).retainEnabledForRestart)
         assertFalse(inspect(user()).retainEnabledForRestart)
         assertFalse(inspect(user(enabled=own)).retainEnabledForRestart)
         assertFalse(inspect(user(bound="Service[label=Thor Agent]"),true).retainEnabledForRestart)

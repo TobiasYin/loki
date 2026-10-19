@@ -7,8 +7,9 @@ object AccessibilityFrameworkState {
         val crashed:Boolean=false, val bound:Boolean?=null) {
         val offAcknowledged:Boolean get()=known && !enabled && !binding && !crashed && bound==false
         /** Android's package force-stop callback only clears binding/crashed
-         * entries that are still present in its enabled-service inventory. */
-        val retainEnabledForRestart:Boolean get()=known && (binding || crashed)
+         * entries that are still present in its enabled-service inventory. A crashed
+         * service without an outstanding bind can be cycled normally. */
+        val retainEnabledForRestart:Boolean get()=known && binding
         val phase:String get()=when {
             !known -> "OFF_ACK_UNAVAILABLE"
             binding -> "FRAMEWORK_BINDING"

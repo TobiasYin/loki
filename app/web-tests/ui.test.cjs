@@ -61,73 +61,48 @@ test('run failure stays visible while uncertain tool details belong to their own
  assert.equal(doc.querySelector('.execution-history').open,false);assert.equal(doc.querySelectorAll('.attention').length,1);assert.equal(doc.querySelector('.attention').textContent,'任务中断');
  openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-body .attention').textContent,/副作用未知/);
 });
-test('page-change recovery stays neutral and visible while operation details remain lazy',()=>{
- const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
- const recovery={kind:'observe_again',continueRun:true,retryPreviousAction:false,submission:'not_dispatched',sideEffectPossible:true};
- s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'old',data:{toolId:'input.tap',error:'TARGET_CHANGED',outcome:'unknown',recovery,content:[{type:'text',text:JSON.stringify({error:'TARGET_CHANGED',recovery})}]}}];window.receiveNative(s);
- assert.equal(doc.querySelector('.attention'),null);assert.equal(doc.querySelector('.tool-body'),null);assert.match(doc.querySelector('[role=status]').textContent,/页面已变化，正在重新观察/);assert.doesNotMatch(doc.querySelector('[role=status]').textContent,/提交状态尚未确认/);
- assert.match(doc.querySelector('.tool-card summary').textContent,/需要重新观察/);doc.querySelector('.tool-card summary').click();assert.equal(doc.querySelector('.attention'),null);assert.doesNotMatch(doc.querySelector('.tool-body').textContent,/observe_again|retryPreviousAction/);
+test('page changes appear only on their operation and keep details lazy',()=>{
+ const{window,doc}=setup();const s=recoveryHistory();window.receiveNative(s);
+ assert.equal(doc.querySelector('#chat .recovery-status,#chat [role=status]'),null);
+ assert.equal(doc.querySelector('.tool-body'),null);assert.equal(doc.querySelector('.attention'),null);
+ assert.equal([...doc.querySelectorAll('.tool-card summary')].filter(node=>/需要重新观察/.test(node.textContent)).length,3);
+ for(const note of doc.querySelectorAll('.timeline-note'))assert.ok(note.closest('.tool-card'));
+ openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));
+ assert.match(doc.querySelector('.tool-body').textContent,/此操作当时遇到页面变化/);
+ assert.doesNotMatch(doc.querySelector('.tool-body').textContent,/observe_again|retryPreviousAction|提交状态尚未确认/);
 });
-test('neutral page recovery preserves unknown or submitted facts without claiming an action did not execute',()=>{
+test('page-change submission facts stay inside the corresponding operation',()=>{
  for(const submission of ['unknown','submitted']){
-  const{window,doc}=setup();const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];s.events=[{runId:'r',sequence:1,type:'tool_result',toolCallId:'old',data:{toolId:'input.tap',error:'TARGET_CHANGED',outcome:submission,recovery:{kind:'observe_again',submission,sideEffectPossible:true}}}];window.receiveNative(s);
-  assert.equal(doc.querySelector('.attention'),null);const text=doc.querySelector('[role=status]').textContent;assert.match(text,submission==='unknown'?/提交状态尚未确认/:/先前操作已提交/);assert.doesNotMatch(text,/未执行|未提交/);
+  const{window,doc}=setup();const s=recoveryHistory();s.events=s.events.slice(0,1);s.events[0].data.outcome=submission;s.events[0].data.recovery.submission=submission;window.receiveNative(s);
+  assert.equal(doc.querySelector('#chat .recovery-status,#chat [role=status]'),null);assert.equal(doc.querySelector('.tool-body'),null);
+  disclose(window,doc.querySelector('.tool-card'));const text=doc.querySelector('.tool-body').textContent;
+  assert.match(text,submission==='unknown'?/提交状态尚未确认/:/先前操作已提交/);assert.doesNotMatch(text,/未执行|未提交/);
  }
 });
 function recoveryHistory(){
  const s=state();s.runs=[{id:'r',sessionId:'a',status:'executing_tools',expanded:false}];s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:''}];
  s.events=[1,2,3].map(sequence=>({runId:'r',sequence,type:'tool_result',toolCallId:'stale-'+sequence,data:{toolId:'input.tap',error:'TARGET_CHANGED',outcome:'unknown',recovery:{kind:'observe_again',submission:'not_dispatched',sideEffectPossible:true}}}));return s;
 }
-test('repeated target changes use one current recovery status and a validated new screen read removes it',()=>{
- const{window,doc}=setup();const s=recoveryHistory();window.receiveNative(s);
- assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);assert.equal(doc.querySelector('.tool-body'),null);
- s.events.push({runId:'r',sequence:4,type:'tool_result',toolCallId:'fresh',data:{toolId:'perception.capture_screen',outcome:'observed',content:[{type:'attachment',attachmentId:'new-real-frame'}]}});window.receiveNative(s);
- assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/正在重新观察/);
- s.events.push({runId:'r',sequence:5,type:'tool_result',toolCallId:'next-stale',data:{toolId:'input.activate',error:'TARGET_CHANGED',outcome:'unknown',recovery:{kind:'observe_again',submission:'not_dispatched',sideEffectPossible:true}}});window.receiveNative(s);
- assert.equal(doc.querySelectorAll('.recovery-status').length,1);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);
-});
-test('the actual result plus Pi diagnostic does not leave a stale reminder after A input and a validated screenshot',()=>{
- const{window,doc,calls}=setup();const s=recoveryHistory();
- s.events.push({runId:'r',sequence:4,type:'diagnostic',toolCallId:'stale-3',data:{code:'TARGET_CHANGED'}});window.receiveNative(s);
- assert.equal(doc.querySelectorAll('.recovery-status').length,1);
- assert.equal([...doc.querySelectorAll('.timeline-note')].filter(node=>/页面已变化/.test(node.textContent)).length,1);
- s.events.push({runId:'r',sequence:5,type:'tool_result',toolCallId:'controller-a',data:{toolId:'input.press_button',outcome:'submitted'}});window.receiveNative(s);
- assert.ok(doc.querySelector('.recovery-status'),'A key submission is not itself a validated observation');
- s.events.push({runId:'r',sequence:6,type:'tool_result',toolCallId:'fresh-screen',data:{toolId:'perception.capture_screen',outcome:'observed',error:null}});window.receiveNative(s);
- assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/页面已变化|正在重新观察|需重新观察|需要重新观察/);
- openOperations(window,doc);const old=doc.querySelector('.tool-card');assert.match(old.querySelector('summary').textContent,/已重新观察/);disclose(window,old);
- assert.match(old.querySelector('.tool-body').textContent,/随后已重新观察/);assert.doesNotMatch(old.textContent,/后续需依据新观察|需要重新观察/);
- assert.equal(calls.some(call=>['send','stop','new'].includes(call.op)),false);
-});
-test('a late duplicate diagnostic cannot reactivate resolved recovery, while an unmatched new change still requires observation',()=>{
+test('only validated selected-screen observations resolve the affected operation status',()=>{
  const{window,doc}=setup();const s=recoveryHistory();
- s.events.push({runId:'r',sequence:4,type:'tool_result',toolCallId:'fresh',data:{toolId:'perception.ui_tree',outcome:'observed'}},
-  {runId:'r',sequence:5,type:'diagnostic',toolCallId:'stale-3',data:{code:'TARGET_CHANGED'}});window.receiveNative(s);
- assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/需重新观察|需要重新观察/);
- s.events.push({runId:'r',sequence:6,type:'diagnostic',toolCallId:'new-change',data:{code:'TARGET_CHANGED'}});window.receiveNative(s);
- assert.equal(doc.querySelectorAll('.recovery-status').length,1);
- s.events.push({runId:'r',sequence:7,type:'tool_result',toolCallId:'new-screen',data:{toolId:'perception.capture_screen',outcome:'observed'}});window.receiveNative(s);
- assert.equal(doc.querySelector('.recovery-status'),null);
+ const results=[{toolId:'perception.ui_tree',outcome:'observed',error:'IO_ERROR'},{toolId:'perception.capture_screen',outcome:'observed',contentDiscarded:true},{toolId:'perception.capture_companion',outcome:'observed'},{toolId:'perception.device_info',outcome:'observed'},{toolId:'perception.app_info',outcome:'unknown'},{toolId:'perception.select_screen',outcome:'observed'},{toolId:'input.press_button',outcome:'submitted'}];
+ for(const data of results){s.events.push({runId:'r',sequence:s.events.length+1,type:'tool_result',toolCallId:'read-'+s.events.length,data});window.receiveNative(s);assert.match(doc.querySelector('.tool-card summary').textContent,/需要重新观察/);assert.equal(doc.querySelector('.recovery-status'),null);}
+ s.events.push({runId:'other-run',sequence:100,type:'tool_result',toolCallId:'other-fresh',data:{toolId:'perception.ui_tree',outcome:'observed'}});window.receiveNative(s);assert.match(doc.querySelector('.tool-card summary').textContent,/需要重新观察/);
+ s.events.push({runId:'r',sequence:11,type:'tool_result',toolCallId:'fresh',data:{toolId:'perception.capture_screen',outcome:'observed'}});window.receiveNative(s);
+ assert.match(doc.querySelector('.tool-card summary').textContent,/已重新观察/);
+ s.events.push({runId:'r',sequence:12,type:'diagnostic',toolCallId:'stale-3',data:{code:'TARGET_CHANGED'}});window.receiveNative(s);assert.match(doc.querySelector('.tool-card summary').textContent,/已重新观察/);
+ s.events.push({runId:'r',sequence:13,type:'tool_result',toolCallId:'next-stale',data:{toolId:'input.activate',error:'TARGET_CHANGED',outcome:'unknown'}});window.receiveNative(s);
+ const summaries=[...doc.querySelectorAll('.tool-card summary')];assert.match(summaries[0].textContent,/已重新观察/);assert.match(summaries.at(-1).textContent,/需要重新观察/);
+ openOperations(window,doc);disclose(window,doc.querySelector('.tool-card'));assert.match(doc.querySelector('.tool-body').textContent,/随后已重新观察/);
 });
-test('diagnostic-only history clears on real observation and finished runs do not retain a current page-change banner',()=>{
- const{window,doc}=setup();const s=recoveryHistory();
- s.events=[{runId:'r',sequence:1,type:'diagnostic',data:{code:'TARGET_CHANGED'}}];window.receiveNative(s);assert.equal(doc.querySelectorAll('.recovery-status').length,1);
- s.events.push({runId:'r',sequence:2,type:'tool_result',toolCallId:'observed',data:{toolId:'perception.window_info',outcome:'observed'}});window.receiveNative(s);
- assert.equal(doc.querySelector('.recovery-status'),null);
- for(const status of ['completed','cancelled','failed','interrupted']) {
-  const finished=recoveryHistory();finished.runs[0].status=status;finished.events.push({runId:'r',sequence:4,type:'diagnostic',toolCallId:'stale-3',data:{code:'TARGET_CHANGED'}});window.receiveNative(finished);
-  assert.equal(doc.querySelector('.recovery-status'),null);assert.doesNotMatch(doc.querySelector('#chat').textContent,/正在重新观察|需重新观察|需要重新观察|需以新观察/);
-  assert.equal(doc.querySelector('.execution-history').open,false);
+test('diagnostic-only changes and finished runs never add a global page-change reminder',()=>{
+ const{window,doc}=setup();const s=recoveryHistory();s.events=[{runId:'r',sequence:1,type:'diagnostic',data:{code:'TARGET_CHANGED'}}];window.receiveNative(s);
+ assert.equal(doc.querySelector('#chat .recovery-status,#chat [role=status]'),null);assert.equal(doc.querySelector('.tool-card'),null);
+ for(const status of ['awaiting_user','completed','cancelled','failed','interrupted']){
+  const finished=recoveryHistory();finished.runs[0].status=status;window.receiveNative(finished);
+  assert.equal(doc.querySelector('#chat .recovery-status,#chat [role=status]'),null);
+  assert.match(doc.querySelector('.tool-card summary').textContent,status==='awaiting_user'?/需要重新观察/:/页面发生变化/);
  }
-});
-test('failed discarded companion and other-run reads do not clear recovery, and selecting another screen needs new observation',()=>{
- const{window,doc}=setup();const s=recoveryHistory();
- const results=[{toolId:'perception.ui_tree',outcome:'observed',error:'IO_ERROR'},{toolId:'perception.capture_screen',outcome:'observed',contentDiscarded:true},{toolId:'perception.capture_companion',outcome:'observed'},{toolId:'perception.device_info',outcome:'observed'},{toolId:'perception.app_info',outcome:'unknown'}];
- for(const data of results){s.events.push({runId:'r',sequence:s.events.length+1,type:'tool_result',toolCallId:'read-'+s.events.length,data});window.receiveNative(s);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);}
- s.events.push({runId:'other-run',sequence:100,type:'tool_result',toolCallId:'other-fresh',data:{toolId:'perception.ui_tree',outcome:'observed'}});window.receiveNative(s);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);
- s.events.push({runId:'r',sequence:10,type:'tool_result',toolCallId:'current-fresh',data:{toolId:'perception.app_info',outcome:'observed'}});window.receiveNative(s);assert.equal(doc.querySelector('.recovery-status'),null);
- s.events.push({runId:'r',sequence:11,type:'tool_result',toolCallId:'switch',data:{toolId:'perception.select_screen',outcome:'observed'}});window.receiveNative(s);assert.match(doc.querySelector('.recovery-status').textContent,/正在重新观察/);
- s.events.push({runId:'r',sequence:12,type:'tool_result',toolCallId:'new-screen',data:{toolId:'perception.window_info',outcome:'observed'}});window.receiveNative(s);assert.equal(doc.querySelector('.recovery-status'),null);
 });
 test('successful observation clears dynamic recovery but preserves historical unknown and submitted facts in lazy details',()=>{
  const{window,doc}=setup();const s=recoveryHistory();s.events[0].data.recovery.submission='unknown';s.events[1].data.recovery.submission='submitted';s.events[1].data.outcome='submitted';
@@ -487,7 +462,7 @@ test('switching provider immediately uses its model default effort rather than c
  doc.querySelector('#model-select [data-value="second::shared"]').click();assert.match(doc.querySelector('#model-picker').textContent,/模型 · 高/);assert.equal(doc.querySelector('#effort-select [data-value=high]').getAttribute('aria-selected'),'true');doc.querySelector('#effort-select [data-value=max]').click();assert.deepEqual(calls.at(-1),{op:'sessionOptions',sessionId:'a',thinkingEffort:'max'});
 });
 test('unconfigured startup remains usable and a disabled selected provider is identified without silently selecting another',()=>{
- const{window,doc,calls}=setup();const s=state();s.modelChoices=[];s.modelSelection={providerName:'未配置',provider:'custom',configured:false,modelId:'',label:'添加模型',efforts:['off'],thinkingEffort:'off',contextWindow:32768};window.receiveNative(s);assert.match(doc.querySelector('#model-picker').textContent,/添加模型/);assert.equal(doc.querySelector('#model-select').getAttribute('aria-disabled'),'true');assert.equal(doc.querySelector('#notice').hidden,true);assert.equal(doc.querySelector('#settings').disabled,false);
+ const{window,doc,calls}=setup();const s=state();s.modelChoices=[];s.modelSelection={providerName:'未配置',provider:'custom',configured:false,modelId:'',label:'添加模型',efforts:['off'],thinkingEffort:'off',contextWindow:32768};window.receiveNative(s);assert.match(doc.querySelector('#model-picker').textContent,/添加模型/);assert.equal(doc.querySelector('#model-select').getAttribute('aria-disabled'),'true');assert.equal(doc.querySelector('#notice').hidden,true);assert.equal(doc.querySelector('#drawer-settings').disabled,false);
  s.modelChoices=[{id:'shared',name:'模型',providerConfigId:'enabled',providerName:'可用配置',provider:'deepseek',efforts:['low','high'],defaultEffort:'high'}];s.modelSelection={providerName:'停用配置',providerConfigId:'disabled',provider:'deepseek',configured:false,modelId:'shared',label:'模型',efforts:['low','high'],thinkingEffort:'low'};window.receiveNative(s);assert.match(doc.querySelector('#model-picker').textContent,/模型 · 不可用/);assert.equal(doc.querySelectorAll('#model-select [aria-selected=true]').length,0);assert.equal(calls.some(command=>command.op==='sessionOptions'),false);
  doc.querySelector('#model-select [role=option]').click();assert.deepEqual(calls.at(-1),{op:'sessionOptions',sessionId:'a',providerConfigId:'enabled',modelId:'shared'});assert.match(doc.querySelector('#model-picker').textContent,/模型/);assert.doesNotMatch(doc.querySelector('#model-picker').textContent,/可用配置|停用配置/);assert.doesNotMatch(doc.querySelector('#model-picker').textContent,/不可用/);
 });
@@ -730,7 +705,15 @@ test('running operation totals count successful calls once and exclude thoughts,
  s.events.push({runId:'large',sequence:10,type:'tool_result',toolCallId:'pending',data:{toolId:'input.tap',error:null,outcome:'submitted'}});window.receiveNative(s);
  assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 3 项操作');
  const next=structuredClone(s);next.runs=[{id:'new',sessionId:'a',status:'generating'}];next.messages=[{id:'new-message',runId:'new',sessionId:'a',role:'assistant',text:''}];next.events=[];window.receiveNative(next);
- assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 0 项操作');
+ assert.equal(doc.querySelector('.execution-history').hidden,true);
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'');
+ assert.ok(visibleOperations(doc).length>0);
+ next.events=[{runId:'new',sequence:1,type:'tool_result',toolCallId:'first',data:{toolId:'perception.ui_tree',outcome:'observed'}}];window.receiveNative(next);
+ assert.equal(doc.querySelector('.execution-history').hidden,false);
+ assert.equal(doc.querySelector('.execution-history > summary').textContent,'正在运行 · 已完成 1 项操作');
+ next.events=[];next.runs[0].status='completed';window.receiveNative(next);
+ assert.equal(doc.querySelector('.execution-history').hidden,false);
+ assert.match(doc.querySelector('.execution-history > summary').textContent,/^用时 /);
 });
 test('pending phase counts toward the two compact rows, and updated old calls keep their chronological position',()=>{
  const{window,doc}=setup();const s=treeHistory(4);window.receiveNative(s);
@@ -772,4 +755,18 @@ test('whole-process disclosure animates both ways and keeps the answer visible a
  history.querySelector('summary').click();assert.equal(history.dataset.expanded,'false');assert.equal(history.open,true);assert.ok(history.querySelector('.activity-timeline'));
  animations.at(-1).onfinish();assert.equal(history.open,false);assert.equal(visibleOperations(doc).length,0);
  assert.equal(doc.querySelectorAll('.markdown').length,1);assert.equal(doc.querySelector('.markdown').closest('details'),null);
+});
+
+test('service recovery history explains repair and manual action without creating tool failures',()=>{
+ const {window,doc}=setup();const s=state();
+ s.messages=[{id:'m',sessionId:'a',runId:'r',role:'assistant',text:'正在处理'}];
+ s.runs=[{id:'r',sessionId:'a',status:'generating',serviceRecoveryEvents:[{id:1,phase:'recovering'},{id:2,phase:'failed',errorCode:'IO_ERROR'},{id:3,phase:'timed_out'}]}];
+ window.receiveNative(s);openOperations(window,doc);
+ assert.equal(doc.querySelectorAll('.service-recovery').length,1);
+ assert.match(doc.querySelector('.service-recovery').textContent,/正在通过 Shizuku 自动恢复/);
+ assert.match(doc.querySelector('.service-recovery').textContent,/自动恢复超时/);
+ assert.doesNotMatch(doc.querySelector('.service-recovery').textContent,/IO_ERROR/);
+ s.runs[0].serviceRecoveryEvents.push({id:4,phase:'connected'});window.receiveNative(s);openOperations(window,doc);
+ assert.equal(doc.querySelectorAll('.service-recovery').length,1);
+ assert.match(doc.querySelector('.service-recovery').textContent,/已连接，可继续使用屏幕工具/);
 });

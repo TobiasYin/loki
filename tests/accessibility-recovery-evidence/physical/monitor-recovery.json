@@ -1,0 +1,214 @@
+{
+  "passed": true,
+  "otherServicesPreserved": true,
+  "disconnectedLaunchStatus": "TEMPORARILY_UNAVAILABLE",
+  "disconnectedLaunchReasonCode": null,
+  "recovery": {
+    "phase": "SETTINGS_ENABLED",
+    "lastErrorCode": "NONE",
+    "closed": false,
+    "shizukuBound": true,
+    "bindingRequested": false,
+    "bindingAgeMs": 0,
+    "accessibilityConnected": true,
+    "settingsReadbackEnabled": true,
+    "workerQueuedAgeMs": 0,
+    "workerRunningAgeMs": 0,
+    "frameworkPhase": "OFF_ACKNOWLEDGED",
+    "framework": {
+      "offAcknowledged": true,
+      "dumpTimeoutMarker": false,
+      "dumpTruncated": false,
+      "dumpProcessExited": false,
+      "readerPhase": "PARSED_PREFIX",
+      "readerError": "NONE",
+      "publicBoundPhase": "OTHER_BOUND",
+      "dumpBytes": 7097,
+      "dumpExitCode": -1
+    },
+    "restartRequired": false,
+    "recoveryTimedOut": false,
+    "events": [
+      {
+        "id": 1,
+        "wallTime": 1792402144074,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 2,
+        "wallTime": 1792402267297,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 3,
+        "wallTime": 1792402271306,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 4,
+        "wallTime": 1792402271494,
+        "phase": "failed",
+        "errorCode": "IO_ERROR",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 5,
+        "wallTime": 1792402272313,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 6,
+        "wallTime": 1792402275326,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 7,
+        "wallTime": 1792402275334,
+        "phase": "waiting_connection",
+        "errorCode": "NONE",
+        "frameworkPhase": "OFF_ACKNOWLEDGED"
+      },
+      {
+        "id": 8,
+        "wallTime": 1792402276335,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "OFF_ACKNOWLEDGED"
+      },
+      {
+        "id": 9,
+        "wallTime": 1792402300713,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 10,
+        "wallTime": 1792402303720,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 11,
+        "wallTime": 1792402303914,
+        "phase": "waiting_connection",
+        "errorCode": "NONE",
+        "frameworkPhase": "OFF_ACKNOWLEDGED"
+      },
+      {
+        "id": 12,
+        "wallTime": 1792402304729,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "OFF_ACKNOWLEDGED"
+      },
+      {
+        "id": 13,
+        "wallTime": 1792402347273,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 14,
+        "wallTime": 1792402351291,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 15,
+        "wallTime": 1792402351479,
+        "phase": "failed",
+        "errorCode": "IO_ERROR",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 16,
+        "wallTime": 1792402352297,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 17,
+        "wallTime": 1792402355304,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 18,
+        "wallTime": 1792402398256,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 19,
+        "wallTime": 1792402401288,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 20,
+        "wallTime": 1792402403208,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 21,
+        "wallTime": 1792402415596,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 22,
+        "wallTime": 1792402419792,
+        "phase": "failed",
+        "errorCode": "IO_ERROR",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 23,
+        "wallTime": 1792402420609,
+        "phase": "recovering",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      },
+      {
+        "id": 24,
+        "wallTime": 1792402423623,
+        "phase": "connected",
+        "errorCode": "NONE",
+        "frameworkPhase": "NOT_CHECKED"
+      }
+    ],
+    "frameworkBindingAgeMs": 0,
+    "counters": {
+      "LEASE_OPEN": 2,
+      "ACCESSIBILITY_CONNECTED": 1,
+      "BINDER_CALLBACK": 1,
+      "UID_VERIFIED": 1,
+      "SETTINGS_ENABLED": 1,
+      "RECOVERY_QUEUED": 2,
+      "BIND_REQUESTED": 1,
+      "SETTINGS_CALL": 2,
+      "RECOVERY_FAILED": 1
+    }
+  }
+}

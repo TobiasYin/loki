@@ -106,7 +106,12 @@ class ProductHost private constructor(private val context: Context, private val 
     private val local = LocalFiles(File(context.filesDir, "approved-synthetic-config").toPath())
     private val backups = EncryptedVault(File(context.filesDir, "config-backups").toPath(), backupKey(), Clock { System.currentTimeMillis() })
     private val tx = ConfigTransactions(local, backups) { bytes -> JSONObject(bytes.toString(Charsets.UTF_8)); Unit }
-    private val backend = AndroidBackend(context, clock, snapshots, debug, local, tx)
+    private val backend = AndroidBackend(context, clock, snapshots, debug, local, tx).apply {
+        postActionCaptureCheck = { e ->
+            deviceAuthority.validate(e)
+            deviceAuthority.validate(e.copy(toolId = "perception.capture_screen"))
+        }
+    }
     private val schemas = InputSchemas(context)
     private val contract = context.assets.open("toolpack-v1.json").bufferedReader().use { JSONObject(it.readText()).getJSONArray("tools").objects().associateBy { t -> t.getString("toolId") } }
     private val gateway = Gateway(deviceAuthority, backend, snapshots, clock)
@@ -122,10 +127,12 @@ class ProductHost private constructor(private val context: Context, private val 
     private var searchUrl: String? = null
     private var searchConfigured = false
     private val secret = runCatching { nativeVault.readNative("model") }.getOrNull()
-    private val searchSecret = runCatching { nativeVault.readNative("search") }.getOrNull()
+    private val searchService = SearchServices.resolve(context)
+    private val searchSecret = searchService?.key
     private val redactor = dev.thor.bridge.CredentialVault(buildMap {
         secret?.let {put("legacy-model",it)}
         for((key,value) in providerSecrets)put(providerCredentialRef(providerConfigs.getValue(key)),value)
+        SearchServices.available(context).forEach {put("search-redact-${it.backend}",it.key)}
         searchSecret?.let { put("search@$revision",it) }
     })
     val policy: NetworkPolicy
@@ -234,15 +241,33 @@ class ProductHost private constructor(private val context: Context, private val 
         }catch(_:Exception) {providerModels.remove(configId)}
         profiles.add(NetworkProfile("public-web", null, emptySet(), setOf("GET"), setOf(Purpose.web_fetch)))
         try {
-            require(prefs.getString("searchBackend", "")?.lowercase() == "brave" && searchSecret != null)
-            val raw = prefs.getString("searchUrl", "")!!.trimEnd('/'); val u = URI(raw)
-            require(u.scheme in setOf("http", "https") && u.userInfo == null && u.query == null && u.fragment == null)
-            require(u.path.endsWith("/res/v1/web/search"))
-            profiles.add(NetworkProfile("search@$revision", "${u.scheme}://${u.rawAuthority}", setOf(u.rawPath), setOf("GET"), setOf(Purpose.web_search), "search@$revision", mapOf("X-Subscription-Token" to "{{credential}}")))
+            val service=requireNotNull(searchService)
+            val raw=service.url.trimEnd('/');val u=URI(raw)
+            require(u.scheme in setOf("http","https") && !u.host.isNullOrBlank() && u.userInfo==null && u.rawQuery==null && u.fragment==null)
+            val deepseek=service.backend=="DeepSeek"
+            profiles.add(NetworkProfile("search@$revision", "${u.scheme}://${u.rawAuthority}",
+                if(deepseek)setOf("/v1/tools/search","/v1/tools/fetch") else setOf(u.rawPath),
+                setOf(if(service.backend=="Brave")"GET" else "POST"),
+                if(deepseek)setOf(Purpose.web_search,Purpose.web_fetch) else setOf(Purpose.web_search),
+                "search@$revision",if(service.backend=="Brave")mapOf("X-Subscription-Token" to "{{credential}}") else mapOf("Authorization" to "Bearer {{credential}}")))
             searchConfigured = true; searchUrl = raw
         } catch(_: Exception) { searchConfigured = false }
         policy = NetworkPolicy(profiles, redactor)
         ThorAccessibilityService.invalidated = { revokeResources() }
+        debug.recoveryListener={event->
+            if(!closing)runCatching {serial.execute {
+                if(!closing && !storageFailed) {
+                    for(binding in bindings.values.toList()) {
+                        val capabilities=authority.enabled(binding)
+                        if(binding.runId!=probeRun && (dev.thor.bridge.Capability.screen_perception in capabilities || dev.thor.bridge.Capability.screen_control in capabilities)) {
+                            val current=run(binding.runId)
+                            if(AccessibilityRecoveryHistory.append(current,event))persist(current)
+                        }
+                    }
+                    publish()
+                }
+            }}
+        }
         displayManager.registerDisplayListener(displayListener,android.os.Handler(android.os.Looper.getMainLooper()))
         refreshModelSummary()
     }
@@ -444,10 +469,13 @@ class ProductHost private constructor(private val context: Context, private val 
         val piSession=if(probe)null else store.loadPiSession(sid)
         val pendingImages=if(probe)JSONArray() else s.optJSONArray("pendingAttachments") ?: JSONArray()
         val text=if(probe && !supportsImages(profile))"Configuration probe: text-only model. Call probe_picture once, read its returned text, then answer PROBE_OK." else d.getString("text"); require(text.isNotBlank() && text.length <= 20000)
-        val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } },durationMs=if(probe)180_000 else 0)
+        val b = authority.beginRun(sid, c, buildMap { put(if(probe) Purpose.configuration_test else Purpose.model,setOf(profile.getString("profileId"))); if(!probe) { put(Purpose.web_fetch,if(searchConfigured && searchService?.backend=="DeepSeek")setOf("public-web","search@$revision") else setOf("public-web")); if(searchConfigured)put(Purpose.web_search,setOf("search@$revision")) } },durationMs=if(probe)180_000 else 0)
         bindings[b.runId]=b;scopes[b.runId]=RunScope(profile);runMetrics[b.runId]=java.util.concurrent.ConcurrentHashMap<String,Long>().apply {put("beginElapsedRealtime",began)};deviceAuthority.bind(b);if(probe)probeRun=b.runId
         val r = obj("id" to b.runId, "sessionId" to sid, "status" to "queued", "expanded" to false, "startedAt" to System.currentTimeMillis(), "probe" to probe,
             "modelId" to profile.getString("modelId"),"protocol" to profile.getString("protocol"),"thinkingEffort" to profile.getString("thinkingEffort"),"contextWindow" to profile.getInt("contextWindow"),"modelProfileRevision" to profile.getInt("revision"),"providerConfigId" to profile.getString("providerConfigId"),"providerName" to profile.getString("providerName"),"provider" to profile.getString("provider"), "capabilityEpoch" to b.capabilityEpoch, "contexts" to JSONArray())
+        if(!probe)debug.accessibilityRecoveryEvents().lastOrNull()
+            ?.takeIf {it.optString("phase")!="connected" && System.currentTimeMillis()-it.optLong("wallTime") in 0..60000 && ThorAccessibilityService.instance==null}
+            ?.let {AccessibilityRecoveryHistory.append(r,it)}
         state.getJSONArray("runs").put(r)
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "user", "text" to text, "attachments" to pendingImages, "status" to "complete"))
         state.getJSONArray("messages").put(obj("id" to id(), "sessionId" to sid, "runId" to b.runId, "role" to "assistant", "text" to "", "attachments" to JSONArray(), "status" to "streaming"))
@@ -518,7 +546,7 @@ class ProductHost private constructor(private val context: Context, private val 
             available.put(t.toolId,state)
             if (a.status == Status.READY && capability in granted) allowed.add(t.toolId)
         }
-        available.put("web.search", obj("status" to if(searchConfigured && b.runId != probeRun) "ready" else "backend_missing", "reason" to "Brave 搜索需独立配置/key"))
+        available.put("web.search", obj("status" to if(searchConfigured && b.runId != probeRun) "ready" else "backend_missing", "reason" to "请配置 DeepSeek 官方模型 Key 或 Tavily / Brave 搜索 Key"))
         available.put("web.fetch", obj("status" to if(b.runId != probeRun) "ready" else "backend_missing", "reason" to "通过系统网络读取 HTTP/HTTPS，支持内网与代理 DNS"))
         val enabled = JSONObject(); for(cap in dev.thor.bridge.Capability.entries) enabled.put(cap.name, cap in authority.enabled(b))
         val profile=JSONObject(scope.profile.toString())
@@ -666,8 +694,15 @@ class ProductHost private constructor(private val context: Context, private val 
         val p = claimPrepared(e,j)
         val search = e.toolId == "web.search"
         prepared.finish(e.requestId,p)
-        return obj("url" to if(search) searchUrl else p.args.getValue("url"), "context" to obj("binding" to bindingJson(b), "purpose" to if(search) "web_search" else "web_fetch",
-            "profileRef" to if(search) "search@$revision" else "public-web", "credentialRef" to if(search) "search@$revision" else null,
+        val remoteFetch=!search && searchConfigured && searchService?.backend=="DeepSeek"
+        if(remoteFetch) {
+            val target=p.args.getValue("url") as String;val uri=URI(target)
+            require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && uri.fragment==null && target.length<=8192)
+            require(redactor.redact(target)==target)
+        }
+        val authenticated=search || remoteFetch
+        return obj("backend" to searchService?.backend,"url" to if(search) searchUrl else if(remoteFetch)"https://api.deepseek.com/v1/tools/fetch" else p.args.getValue("url"), "context" to obj("binding" to bindingJson(b), "purpose" to if(search) "web_search" else "web_fetch",
+            "profileRef" to if(authenticated) "search@$revision" else "public-web", "credentialRef" to if(authenticated) "search@$revision" else null,
             "deadlineMs" to p.e.deadline, "timeoutMs" to (p.e.deadline-clock.now()).coerceAtLeast(1)))
     }
     private fun claimPrepared(e:Envelope,j:JSONObject)=prepared.claim(e.requestId) {p->
@@ -734,7 +769,7 @@ class ProductHost private constructor(private val context: Context, private val 
                 serial.execute {
                     try {
                         bound(c, j)
-                        val freshObservation=if(e.toolId in ToolPack.freshReads && result.error==null)snapshots.validateObservation(result.snapshotId) else null
+                        val freshObservation=if((e.toolId in ToolPack.freshReads || result.data["postActionScreenshot"]==true) && result.error==null)snapshots.validateObservation(result.snapshotId) else null
                         val data = result.data.toMutableMap(); val content = JSONArray()
                         val path = data.remove("attachmentRef") as? String
                         if(path != null && result.error == null) {
@@ -1028,6 +1063,18 @@ class ProductHost private constructor(private val context: Context, private val 
     }
     fun bindDebug() = debug.requestAndBind()
     fun setBackgroundAgentAction(action:((Checkpoint)->Map<String,Any?>)?) {backend.backgroundAgentAction=action}
+    fun onboardingModelReady()=providerStore.defaultId() in providerModels
+    fun onboardingSearchReady()=searchConfigured
+    fun shizukuSetupStatus():String=when(debug.availability().status.name) {
+        "READY"->"Shizuku 已授权并绑定（shell）"
+        "BACKEND_MISSING"->"Shizuku 未安装或尚未启动"
+        "PERMISSION_MISSING"->"Shizuku 已启动，等待你授权"
+        "UNSUPPORTED"->"当前 Shizuku 身份不受支持，请使用无线调试 / ADB 启动"
+        else->"Shizuku 尚未绑定，点击授权并绑定后重试"
+    }
+    fun accessibilityStatus() = backend.availability("perception.observe")
+    fun accessibilityRecoveryPending() = debug.accessibilityRecoveryPending
+    fun accessibilityRestartRequired() = debug.accessibilityRestartRequired
     fun accessibilitySetupStatus() = debug.accessibilitySetup
     fun accessibilityRecoveryDiagnostics() = debug.accessibilityRecoveryDiagnostics()
     fun requestProbe(sid:String=selectedSession()): String {
@@ -1073,6 +1120,16 @@ class ProductHost private constructor(private val context: Context, private val 
     fun requestVoiceSession(sid:String) {require(bindings.values.none {it.sessionId==sid} && sid==selectedSession() && session(sid).isNull("archivedAt"))}
     /** Resolve hints on the state owner, after recording has already begun.
      * This is not a Run and reads neither Skill bodies nor screenshot/tree data. */
+    /** Local appearance selection, independent of model context and input authorization. */
+    internal fun backgroundUpperPackage(): CompletableFuture<String?> {
+        val future = CompletableFuture<String?>()
+        try { serial.execute {
+            try { future.complete(if (closing) null else upperAppContext.read(true, false).optJSONObject("upperApp")?.optString("packageName")) }
+            catch (_: Exception) { future.complete(null) }
+        } } catch (_: java.util.concurrent.RejectedExecutionException) { future.complete(null) }
+        return future
+    }
+
     fun requestVoiceRecognitionContext(sid:String):CompletableFuture<VoiceRecognitionContext?> {
         val future=CompletableFuture<VoiceRecognitionContext?>()
         val cancellation=Cancellation()
@@ -1190,8 +1247,8 @@ class ProductHost private constructor(private val context: Context, private val 
         page.put("sessions",state.getJSONArray("sessions")).put("selected",selectedSession())
         val v = chatSnapshot(page,selectedBinding?.runId)
         if(storageFailed)v.put("fatal","本地存储失败；已停止网络和设备执行。历史保留；失败的变更未保存，重新打开将恢复上次已保存的开关。修复存储后重开，不会重放副作用。")
-        if(uiFacts==null || clock.now()-uiFactsAt>=1000) {uiFactsAt=clock.now();uiFacts=obj("perception" to if(ThorAccessibilityService.instance == null) "无障碍未授权；设备信息可用" else if(runCatching {snapshots.selected()}.isSuccess)"上屏已识别；按工具检查" else "请在设备设置确认上下屏",
-            "search" to if(searchConfigured) "Brave 搜索已配置；HTTP/HTTPS 网页读取可用" else "搜索未配置；HTTP/HTTPS 网页读取可用", "screen_control" to "按任务选择上屏或下屏；触摸需无障碍，手柄需 Shizuku 与兼容控制器", "debug" to "Shell: ${debug.availability().reason}；共享存储与应用日志只读；配置写入仅合成目录；灰名单逐项确认")
+        if(uiFacts==null || clock.now()-uiFactsAt>=1000) {uiFactsAt=clock.now();uiFacts=obj("perception" to if(ThorAccessibilityService.instance == null) "${accessibilityStatus().reason}；设备信息可用" else if(runCatching {snapshots.selected()}.isSuccess)"上屏已识别；按工具检查" else "请在设备设置确认上下屏",
+            "search" to if(searchConfigured) "${searchService?.backend} 搜索已配置；网页读取可用" else "搜索未配置；HTTP/HTTPS 网页读取可用", "screen_control" to "按任务选择上屏或下屏；触摸需无障碍，手柄需 Shizuku 与兼容控制器", "debug" to "Shell: ${debug.availability().reason}；共享存储与应用日志只读；配置写入仅合成目录；灰名单逐项确认")
         }
         v.put("availability",uiFacts)
         for(s in v.getJSONArray("sessions").objects())s.put("capabilityRevision",s.optLong("capabilityEpoch",1))

@@ -13,6 +13,15 @@ class AccessibilityRecoveryTest {
         recovery.finished(attempt);time.time=3999;assertNull(recovery.next(true,false))
         time.time=4000;assertNotNull(recovery.next(true,false))
     }
+    @Test fun connectionLossWithoutShizukuWaitsUntilAuthorizedBackendReturns() {
+        val time=Time();val recovery=AccessibilityRecovery(time)
+        assertNull(recovery.next(false,true))
+        time.time=1000;assertNull(recovery.next(false,false))
+        time.time=60000;assertNull(recovery.next(false,false))
+        assertNull(recovery.next(true,false))
+        time.time+=1999;assertNull(recovery.next(true,false))
+        time.time++;assertNotNull(recovery.next(true,false))
+    }
     @Test fun oneRecoveryStaysInFlightAndRepeatedMissingCallbacksBackOff() {
         val time=Time();val recovery=AccessibilityRecovery(time)
         recovery.next(true,false);time.time=2000

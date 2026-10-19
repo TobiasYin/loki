@@ -28,6 +28,7 @@ internal class ChatUiBridge(private val web:WebView,private val onCommand:(JSONO
             mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW
             javaScriptCanOpenWindowsAutomatically=false;setSupportMultipleWindows(false);mediaPlaybackRequiresUserGesture=true
         }
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) WebSettingsCompat.setAlgorithmicDarkeningAllowed(web.settings, false)
         CookieManager.getInstance().setAcceptThirdPartyCookies(web,false)
         web.webViewClient=object:WebViewClient() {
             override fun onPageStarted(view:WebView,url:String,favicon:android.graphics.Bitmap?) {invalidate()}
@@ -35,7 +36,7 @@ internal class ChatUiBridge(private val web:WebView,private val onCommand:(JSONO
                 if(closed || view!==web || url!=BridgePolicy.PAGE || web.url!=BridgePolicy.PAGE)return
                 committed=true
                 RuntimeStartupDiagnostics.mark(startupAttempt,RuntimeStartupPhase.CHAT_PAGE_FINISHED)
-                web.evaluateJavascript("window.receiveChatBootstrap?.(${JSONObject().put("generation",generation)})",null)
+                web.evaluateJavascript(Appearance.webScript(web.context) + ChatBackgroundStore(web.context).get(ChatBackgroundStore.GLOBAL).webStyleScript() + "window.receiveChatBootstrap?.(${JSONObject().put("generation",generation)})",null)
             }
             override fun shouldOverrideUrlLoading(view:WebView,request:WebResourceRequest):Boolean {
                 if(view!==web || !request.isForMainFrame || request.url.toString()!=BridgePolicy.PAGE){invalidate();return true}

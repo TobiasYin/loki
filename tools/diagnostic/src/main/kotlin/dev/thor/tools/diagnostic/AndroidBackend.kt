@@ -19,6 +19,12 @@ import kotlin.math.roundToInt
 
 class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snapshots, val shizuku: DebugConnection,
     val files: LocalFiles, val transactions: ConfigTransactions) : DeviceBackend {
+    companion object {
+        // Shared across backend instances; large hardware-buffer copies must not block UI animations.
+        private val screenshotExecutor = java.util.concurrent.Executors.newSingleThreadExecutor { task ->
+            Thread(task, "thor-screenshot-copy").apply { isDaemon = true }
+        }
+    }
     private val schemas = InputSchemas(context)
     private val main = Handler(Looper.getMainLooper())
     private val inputState=BoundedInputState()
@@ -51,6 +57,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         if(bounds!=null)visual["bounds"]=mapOf("left" to bounds.left,"top" to bounds.top,"right" to bounds.right,"bottom" to bounds.bottom)
         mapOf<String,Any?>("visual" to visual)
     }.getOrDefault(emptyMap())
+    /** Product authority is checked again throughout automatic capture. Null disables it. */
+    var postActionCaptureCheck: ((Envelope) -> Unit)? = null
     var approval: Approval? = null
     var shellApproval: String? = null
     var installApproval: String? = null
@@ -79,7 +87,9 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     @Volatile private var accessibilitySettingEnabled=false
     private fun accessibilityAvailability(backend:String):Availability {
         if(ThorAccessibilityService.instance!=null)return AccessibilitySetup.availability(true,true,false,backend)
-        if(shizuku.accessibilityRestartRequired)return Availability(Status.TEMPORARILY_UNAVAILABLE,shizuku.accessibilityRestartMessage,backend)
+        if(shizuku.accessibilityRestartRequired)return Availability(Status.TEMPORARILY_UNAVAILABLE,shizuku.accessibilityRestartMessage,backend,Code.BACKEND_UNAVAILABLE)
+        if(shizuku.accessibilityRecoveryNeedsManualAction)
+            return Availability(Status.TEMPORARILY_UNAVAILABLE,shizuku.accessibilitySetup,backend,Code.BACKEND_UNAVAILABLE)
         val now=clock.now()
         if(accessibilitySettingCheckedAt==Long.MIN_VALUE || now-accessibilitySettingCheckedAt>=500) {
             try {
@@ -103,6 +113,10 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         if(toolId=="agent.background")return if(backgroundAgentAction!=null)
             Availability(Status.READY,"Fixed assistant chat-task background action; no arbitrary app/task routing","android-sdk/assistant-background")
             else Availability(Status.BACKEND_MISSING,"Assistant background host callback is not installed","android-sdk/assistant-background")
+        if(toolId=="apps.launch") {
+            val accessibility=accessibilityAvailability("android-sdk/launcher")
+            if(accessibility.status!=Status.READY)return accessibility
+        }
         if(toolId in setOf("perception.find_apps","apps.launch"))return Availability(Status.READY,"Fixed public MAIN/LAUNCHER PackageManager API; actual foreground requires observation","android-sdk/launcher")
         if(toolId=="input.navigate") {
             val base=shizuku.availability()
@@ -263,7 +277,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             "input.press_button", "input.set_axes" -> {
                 val snap=snapshots.validate(e.snapshotId);cp.check();invalidateNodeRefs()
                 if(e.toolId in setOf("input.press_button","input.set_axes")) {
-                    val window=service().windowsOnAllDisplays[snap.display.id].orEmpty().singleOrNull {it.isFocused && service().isApplicationWindow(it)}
+                    val window=service().observableWindows[snap.display.id].orEmpty().singleOrNull {it.isFocused && service().isApplicationWindow(it)}
                     val root=window?.root
                     val focusedPackage=try {root?.packageName?.toString()} finally {if(root!=null) {@Suppress("DEPRECATION") root.recycle()}}
                     requireTool(focusedPackage==snap.target.packageName && focusedPackage!=null,Code.TARGET_CHANGED,"Physical controller requires the observed selected-screen app to have window focus")
@@ -356,6 +370,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
             val completed=if(envelope.toolId=="perception.ui_tree")observation else snapshots.captureReadCompletion(observation.id)
             return output.copy(snapshotId=completed.id,data=output.data+mapOf("requestSnapshotId" to envelope.snapshotId,"captureSnapshotId" to observation.id,"targetSnapshotId" to completed.id,"observedTargetPackage" to observation.target.packageName))
         }
+        if (e.toolId in postActionTools && output.error == null && output.outcome == "submitted" &&
+            output.data["systemCallback"] != "cancelled") return captureAfterAction(e, output, cp)
         return output
     }
     private fun backgroundAgent(e:Envelope,args:Map<String,Any?>,cp:Checkpoint):ToolResult {
@@ -386,7 +402,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         args.only("maxWindows")
         val limit = args.int("maxWindows", 16); requireTool(limit in 1..16, Code.LIMIT_EXCEEDED, "Window limit is 1..16")
         val snap = snapshots.validateObservation(e.snapshotId)
-        val windows = service().windowsOnAllDisplays[snap.display.id].orEmpty()
+        val windows = service().observableWindows[snap.display.id].orEmpty()
         return result(e, mapOf("displayRole" to snap.role, "displayId" to snap.display.id, "activity" to null, "completeSystemTaskList" to false,
             "windows" to windows.take(limit).map { w -> val r = Rect(); w.getBoundsInScreen(r); mapOf("windowId" to w.id, "type" to w.type, "layer" to w.layer, "focused" to w.isFocused, "active" to w.isActive, "bounds" to listOf(r.left, r.top, r.right, r.bottom)) }), windows.size > limit)
     }
@@ -396,7 +412,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val visitLimit=args.int("maxVisited",1024)
         requireTool(depthLimit in 0..20 && nodeLimit in 1..128 && charLimit in 1..12000 && visitLimit in 1..2048,Code.LIMIT_EXCEEDED,"UI tree budget exceeded")
         val snap=snapshots.validateObservation(e.snapshotId)
-        val windows=service().windowsOnAllDisplays[snap.display.id].orEmpty().filter {service().isApplicationWindow(it)}
+        val windows=service().observableWindows[snap.display.id].orEmpty().filter {service().isApplicationWindow(it)}
         val window=if(args.containsKey("windowId"))windows.singleOrNull {it.id==args.int("windowId",-1)} else windows.singleOrNull()
         if(window==null)return result(e,mapOf("nodes" to emptyList<Any>(),"emptyReason" to "no_unique_application_window","coverage" to "Accessibility-exposed nodes only"))
         val root=window.root ?: return result(e,mapOf("nodes" to emptyList<Any>(),"emptyReason" to "null_root_or_surface_content","coverage" to "No exposed Accessibility tree; use screenshot for visual evidence"))
@@ -485,7 +501,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                     val guard=UiActivationGuard(binding.runId,binding.sessionId,binding.snapshotId,binding.windowId,binding.packageName,binding.path,binding.signature,binding.expires)
                     cp.effect {
                         snapshots.validateObservation(e.snapshotId)
-                        val windows=service().windowsOnAllDisplays[snapshot.display.id].orEmpty()
+                        val windows=service().observableWindows[snapshot.display.id].orEmpty()
                         val windowId=UiActionWindow.select(snapshot.display,snapshot.target,binding.windowId,binding.packageName,
                             companionWindows(snapshot.display.id,windows))
                         val window=windows.singleOrNull {it.id==windowId && service().isApplicationWindow(it)}
@@ -519,6 +535,8 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                         snapshots.validateObservation(e.snapshotId) // Recheck structure/clip after resolving the node.
                         cp.check()
                         if(textCommand==null)presentation=actionPresentation(e,snapshot,bounds=actionBounds)
+                        service().actionOverlay.show(snapshot.display.id,
+                            listOf(Point((bounds.left + bounds.right) / 2.0, (bounds.top + bounds.bottom) / 2.0)), e.toolId, 240)
                         cp.submitted() // The action can reach the app even if its Binder reply fails.
                         accepted=if(textCommand==null)node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                             else node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT,bundle)
@@ -533,7 +551,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 done.countDown()
             }
         }
-        await(done,e,cp);error?.let {throw it}
+        try { await(done,e,cp); holdActionFeedback(cp) } finally { clearActionOverlay(e,cp) };error?.let {throw it}
         snapshots.validateReadSource(snapshot.id)
         val detail=if(textCommand==null)emptyMap() else mapOf("mode" to textCommand.mode,"characterCount" to textCommand.text.codePointCount(0,textCommand.text.length),"enterSubmitted" to false)
         return result(e,detail+mapOf("submitted" to true,"action" to if(textCommand==null)"click" else "set_text","actionAccepted" to accepted,"foregroundVerified" to false,
@@ -580,6 +598,16 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                         snapshots.validate(e.snapshotId)
                         requireTool(node.refresh(),Code.TARGET_CHANGED,"Node disappeared immediately before scroll")
                         refGuard.check(e.snapshotId,node.windowId,node.packageName?.toString(),nodeSignature(node),clock.now())
+                        val bounds = Rect(); node.getBoundsInScreen(bounds)
+                        val center = Point((bounds.left + bounds.right) / 2.0, (bounds.top + bounds.bottom) / 2.0)
+                        val dx = bounds.width() * 0.25; val dy = bounds.height() * 0.25
+                        val end = when (direction) {
+                            "left" -> Point(center.x + dx, center.y)
+                            "right" -> Point(center.x - dx, center.y)
+                            "up", "backward" -> Point(center.x, center.y + dy)
+                            else -> Point(center.x, center.y - dy)
+                        }
+                        service().actionOverlay.show(snapshot.display.id, listOf(center, end), e.toolId, 240)
                         cp.submitted() // The IPC may have reached the app even if its reply throws.
                         accepted=node.performAction(action.key,bundle)
                     }
@@ -589,7 +617,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
               catch(t:Exception){error=ToolFailure(if(t is SecurityException)Code.PERMISSION_MISSING else Code.IO_ERROR,"Accessibility scroll failed: ${t.javaClass.simpleName}")}
             finally {if(cp.submitted)invalidateNodeRefs();done.countDown()}
         }
-        await(done,e,cp)
+        try { await(done,e,cp); holdActionFeedback(cp) } finally { clearActionOverlay(e,cp) }
         error?.let {throw it}
         snapshots.validateHeld(e.snapshotId) // Own scroll/content callbacks may update revision; target structure must remain.
         return result(e,mapOf("submitted" to true,"action" to actionName,"actionAccepted" to accepted,"movementObserved" to false,"nodeRefsInvalidated" to true,"nextStep" to "Read ui_tree or screenshot again to verify position and obtain fresh refs"),outcome="submitted").copy(error=if(accepted)null else Code.BACKEND_UNAVAILABLE,message=if(accepted)null else "App rejected scroll or reached boundary; re-observe before choosing another action")
@@ -599,7 +627,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         val key=lowerKey(display,target)
         lowerSafetyCache?.takeIf {it.key==key && clock.now()-it.at<100}?.let {return it.state}
         val state=CompanionWindows.verify(display,target.packageName,companionWindows(display.id),setOf(context.packageName,"dev.thor.agent"))
-        val window=service().windowsOnAllDisplays[display.id].orEmpty().singleOrNull {it.id==state.windowId}
+        val window=service().observableWindows[display.id].orEmpty().singleOrNull {it.id==state.windowId}
             ?: fail(Code.TARGET_CHANGED,"Lower application window disappeared")
         val root=window.root ?: fail(Code.SECURE_CONTENT,"Lower application exposes no safe window identity")
         var visited=0
@@ -646,9 +674,11 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         }
         cp.check();lastScreenshotAttempt=clock.now()
     }
-    private fun companionWindows(display:Int,windows:List<AccessibilityWindowInfo> = service().windowsOnAllDisplays[display].orEmpty()):List<TargetWindowEvidence> =
+    private fun companionWindows(display:Int,windows:List<AccessibilityWindowInfo> = service().observableWindows[display].orEmpty()):List<TargetWindowEvidence> =
         windows.map {service().windowEvidence(it)}
     private fun screenshot(e: Envelope, args: Map<String, Any?>, requestCheckpoint: Checkpoint,companion:Boolean=false): ToolResult {
+        val captureStarted = SystemClock.elapsedRealtimeNanos()
+        fun elapsedMs(since: Long) = (SystemClock.elapsedRealtimeNanos() - since) / 1_000_000.0
         if(companion)args.only("maxEdge","quality","format") else args.only("maxEdge", "quality", "region", "format")
         requireTool(args.string("format", "jpeg") == "jpeg", Code.UNSUPPORTED, "Only JPEG implemented")
         val edge = args.int("maxEdge", 1280); val quality = args.int("quality", 80)
@@ -688,18 +718,28 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         var conversionError: ToolFailure? = null
         cp.cancellation.register { abandoned.set(true); bitmap.getAndSet(null)?.recycle() }
         cp.check()
+        val preparationMs = elapsedMs(captureStarted)
+        val intervalStarted = SystemClock.elapsedRealtimeNanos()
         awaitScreenshotInterval(e,cp)
-        service().takeScreenshot(captureDisplay.id, context.mainExecutor, object : AccessibilityService.TakeScreenshotCallback {
+        val intervalWaitMs = elapsedMs(intervalStarted)
+        val acquisitionStarted = SystemClock.elapsedRealtimeNanos()
+        var acquisitionMs = 0.0
+        var bitmapCopyMs = 0.0
+        var copyOnMainThread = false
+        service().takeScreenshot(captureDisplay.id, screenshotExecutor, object : AccessibilityService.TakeScreenshotCallback {
             override fun onSuccess(screenshot: AccessibilityService.ScreenshotResult) {
+                acquisitionMs = elapsedMs(acquisitionStarted)
                 try {
                     if (!cp.cancellation.cancelled && !abandoned.get()) {
                         cp.check()
+                        val copyStarted = SystemClock.elapsedRealtimeNanos()
+                        copyOnMainThread = Looper.myLooper() == Looper.getMainLooper()
                         val hw = Bitmap.wrapHardwareBuffer(screenshot.hardwareBuffer, screenshot.colorSpace)
                         try {
                             val copy = hw?.copy(Bitmap.Config.ARGB_8888, false)
                             bitmap.set(copy)
                             if (abandoned.get()) bitmap.getAndSet(null)?.recycle()
-                        } finally { hw?.recycle() }
+                        } finally { hw?.recycle(); bitmapCopyMs = elapsedMs(copyStarted) }
                     }
                 } catch(t:ToolFailure) {conversionError=t
                 } catch (_: OutOfMemoryError) {
@@ -725,25 +765,44 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         try {
             cp.check()
             requireTool(original.width == captureDisplay.width && original.height == captureDisplay.height, Code.TARGET_CHANGED, "Screenshot/display geometry mismatch; recalibrate")
+            val scaleStarted = SystemClock.elapsedRealtimeNanos()
             val crop = Bitmap.createBitmap(original, rect.left, rect.top, rect.width(), rect.height())
             var scaled: Bitmap? = null
             try {
                 val ratio = minOf(1.0, edge.toDouble() / maxOf(crop.width, crop.height))
                 scaled = Bitmap.createScaledBitmap(crop, maxOf(1, (crop.width * ratio).roundToInt()), maxOf(1, (crop.height * ratio).roundToInt()), true)
-                var encoded = ByteArray(0); var q = quality
+                val cropScaleMs = elapsedMs(scaleStarted)
+                val encodeStarted = SystemClock.elapsedRealtimeNanos()
+                var encoded = ByteArray(0); var q = quality; var encodedQuality = quality; var encodeAttempts = 0
                 repeat(4) {
-                    if (encoded.size > Budgets.IMAGE || encoded.isEmpty()) { cp.check(); encoded = ByteArrayOutputStream().also { scaled!!.compress(Bitmap.CompressFormat.JPEG, q, it) }.toByteArray(); q = maxOf(30, q - 15) }
+                    if (encoded.size > Budgets.IMAGE || encoded.isEmpty()) {
+                        cp.check(); encodedQuality = q; encodeAttempts++
+                        encoded = ByteArrayOutputStream().also {
+                            requireTool(scaled!!.compress(Bitmap.CompressFormat.JPEG, q, it), Code.IO_ERROR, "JPEG encoding failed")
+                        }.toByteArray()
+                        q = maxOf(30, q - 15)
+                    }
                 }
+                val jpegEncodeMs = elapsedMs(encodeStarted)
                 requireTool(encoded.size <= Budgets.IMAGE, Code.LIMIT_EXCEEDED, "Compressed image exceeds 2MiB; choose a smaller maxEdge")
+                val storageStarted = SystemClock.elapsedRealtimeNanos()
                 val attachments = File(context.cacheDir, "tool-frames").apply { mkdirs() }
                 attachments.listFiles()?.sortedBy { it.lastModified() }?.dropLast(7)?.forEach { it.delete() }
                 val frame = java.util.UUID.randomUUID().toString()
                 val output = File(attachments, "$frame.jpg"); output.writeBytes(encoded);storedImage=output
                 frames.entries.removeIf { !File(attachments, "${it.key}.jpg").exists() }
                 runCatching {presentationFrames.keys.retainAll(frames.keys)}
+                val storageMs = elapsedMs(storageStarted)
+                val validationStarted = SystemClock.elapsedRealtimeNanos()
                 val transform = FrameTransform(rect.left, rect.top, rect.width(), rect.height(), scaled!!.width, scaled!!.height)
                 cp.check()
                 val completed=if(companionObservation!=null)snapshots.completeCompanion(companionObservation) else snapshots.captureReadCompletion(snap.id)
+                val timing = mapOf("preparationMs" to preparationMs, "intervalWaitMs" to intervalWaitMs,
+                    "acquisitionMs" to acquisitionMs, "bitmapCopyMs" to bitmapCopyMs, "cropScaleMs" to cropScaleMs,
+                    "jpegEncodeMs" to jpegEncodeMs, "storageMs" to storageMs, "validationMs" to elapsedMs(validationStarted),
+                    "totalMs" to elapsedMs(captureStarted), "copyOnMainThread" to copyOnMainThread,
+                    "encodeAttempts" to encodeAttempts, "quality" to encodedQuality, "bytes" to encoded.size,
+                    "width" to scaled!!.width, "height" to scaled!!.height)
                 if(companionObservation!=null) {
                     cp.check()
                     val metadata=mapOf("displayRole" to "lower-companion-read-only","displayId" to captureDisplay.id,
@@ -752,13 +811,13 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                         "requestSnapshotId" to e.snapshotId,"captureUpperSnapshotId" to snap.id,"targetSnapshotId" to completed.id,
                         "observedTargetPackage" to snap.target.packageName,"sameAppCompanion" to true,
                         "mime" to "image/jpeg","bytes" to encoded.size,"width" to scaled!!.width,"height" to scaled!!.height,
-                        "quality" to maxOf(30,q+15),"rotation" to captureDisplay.rotation,
+                        "quality" to encodedQuality,"rotation" to captureDisplay.rotation,
                         "companionImageTransform" to mapOf("identity" to companionObservation.id,"left" to rect.left,"top" to rect.top,
                             "displayWidth" to rect.width(),"displayHeight" to rect.height(),"imageWidth" to scaled!!.width,"imageHeight" to scaled!!.height),
                         "nextStep" to "Read-only same-app companion pixels. No frameId or lower input authority exists; never reuse these image coordinates for upper input. Re-observe the upper screen before input.")
                     // Keep the tool envelope on an UPPER snapshot. The companion
                     // image identity is deliberately absent from the input frames map.
-                    return result(e.copy(snapshotId=completed.id),emptyMap()).copy(data=metadata)
+                    return result(e.copy(snapshotId=completed.id),emptyMap()).copy(data=metadata, presentation=mapOf("screenshotTiming" to timing))
                 }
                 val contentUnchanged=snap.target.sameLayout(completed.target)
                 val inputCompatible=snap.target.sameInputTarget(completed.target)
@@ -774,12 +833,46 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                     "requestSnapshotId" to e.snapshotId,"captureSnapshotId" to snap.id,"targetSnapshotId" to completed.id,"frameInputUsable" to inputCompatible,"contentChangedDuringCapture" to !contentUnchanged,
                     "inputTargetChangedDuringCapture" to !inputCompatible,"frameInputPolicy" to "same_window_geometry_and_interaction_layout","observedTargetPackage" to snap.target.packageName,
                     "touchableWindowBounds" to snap.target.touchableBounds?.let {mapOf("left" to it.left,"top" to it.top,"right" to it.right,"bottom" to it.bottom)},
-                    "mime" to "image/jpeg", "bytes" to encoded.size, "width" to scaled!!.width, "height" to scaled!!.height, "quality" to maxOf(30, q + 15), "rotation" to snap.display.rotation,
-                    "transform" to mapOf("left" to rect.left, "top" to rect.top, "displayWidth" to rect.width(), "displayHeight" to rect.height(), "imageWidth" to scaled!!.width, "imageHeight" to scaled!!.height)))
+                    "mime" to "image/jpeg", "bytes" to encoded.size, "width" to scaled!!.width, "height" to scaled!!.height, "quality" to encodedQuality, "rotation" to snap.display.rotation,
+                    "transform" to mapOf("left" to rect.left, "top" to rect.top, "displayWidth" to rect.width(), "displayHeight" to rect.height(), "imageWidth" to scaled!!.width, "imageHeight" to scaled!!.height))).copy(presentation=mapOf("screenshotTiming" to timing))
             } finally { if (scaled !== crop) scaled?.recycle(); if (crop !== original) crop.recycle() }
         } catch (_: OutOfMemoryError) { if(companion)storedImage?.delete();fail(Code.LIMIT_EXCEEDED, "Screenshot processing exceeded memory budget") }
         catch(t:Exception) {if(companion)storedImage?.delete();throw t}
         finally { original.recycle() }
+    }
+    private val postActionTools = setOf("input.tap", "input.long_press", "input.swipe", "input.drag", "input.scroll",
+        "input.activate", "input.type_text", "input.key_press", "input.navigate", "apps.launch")
+    private fun captureAfterAction(e: Envelope, action: ToolResult, cp: Checkpoint): ToolResult {
+        val permission = postActionCaptureCheck ?: return action
+        return try {
+            val captureCheckpoint = Checkpoint({ cp.check(); permission(e) }, cp.cancellation)
+            captureCheckpoint.check()
+            // Allow the app's next frame to draw, after feedback has been removed.
+            val until = clock.now() + 180
+            while (clock.now() < until) { captureCheckpoint.check(); Thread.sleep(20) }
+            val source = snapshots.validateReadSource(e.snapshotId)
+            service().preparePresentationEvidence(setOf(source.display.id), cp.cancellation)
+            val image = screenshot(e, emptyMap(), captureCheckpoint)
+            action.copy(observedAt = image.observedAt, snapshotId = image.snapshotId,
+                presentation = action.presentation + image.presentation, data = action.data + image.data + mapOf(
+                "postActionScreenshot" to true,
+                "nextStep" to "Use the attached post-action screenshot and fresh frameId for the next action; read ui_tree only if fresh nodeRefs are needed."))
+        } catch (t: Exception) {
+            // Screenshot failure must never encourage replaying an already submitted action.
+            action.copy(data = action.data + mapOf("postActionScreenshot" to false,
+                "screenshotError" to ((t as? ToolFailure)?.code?.name ?: "IO_ERROR"),
+                "nextStep" to "The action was submitted; screenshot unavailable. Observe the current page before another action; do not replay blindly."))
+        }
+    }
+    private fun holdActionFeedback(cp: Checkpoint) {
+        if (!AgentActionFeedback.enabled(context)) return
+        val until = clock.now() + 240
+        while (clock.now() < until && AgentActionFeedback.enabled(context)) { cp.check(); Thread.sleep(20) }
+    }
+    private fun clearActionOverlay(e: Envelope, cp: Checkpoint) {
+        val done = CountDownLatch(1)
+        main.post { try { ThorAccessibilityService.instance?.actionOverlay?.clear() } finally { done.countDown() } }
+        await(done, e, cp)
     }
     private fun gesture(e: Envelope, args: Map<String, Any?>, cp: Checkpoint): ToolResult {
         args.only("x", "y", "points", "durationMs", "coordinateSpace", "frameId", "expectedPackage")
@@ -820,6 +913,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                     // not an unknown input: its own checkpoint must remain available.
                     inputState.register(e.runId,e.requestId)
                     cp.submitted() // A throwing Binder call may still have submitted this bounded stroke.
+                    service().actionOverlay.show(snap.display.id, points, e.toolId, duration)
                     accepted = service().dispatchGesture(gesture, object : AccessibilityService.GestureResultCallback() {
                     override fun onCompleted(g: GestureDescription?) { completed = true; inputState.complete(e.runId,e.requestId); done.countDown() }
                     override fun onCancelled(g: GestureDescription?) { inputState.complete(e.runId,e.requestId); done.countDown() }
@@ -835,7 +929,11 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
                 done.countDown()
             }
         }
-        try {await(done,e,cp)}catch(t:Exception){inputState.abandon(e.runId,e.requestId);throw t}
+        try {
+            await(done,e,cp)
+            holdActionFeedback(cp)
+        } catch(t:Exception){inputState.abandon(e.runId,e.requestId);throw t}
+        finally { clearActionOverlay(e,cp) }
         dispatchError?.let { throw it }
         requireTool(accepted, Code.BACKEND_UNAVAILABLE, "System rejected gesture")
         return result(e, mapOf("submitted" to true, "systemCallback" to if (completed) "completed" else "cancelled", "gameEffectObserved" to false,
@@ -846,6 +944,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         cp.check()
     }
     override fun release(runId: String): String {
+        main.post { ThorAccessibilityService.instance?.actionOverlay?.clear() }
         runCatching {presentationFrames.entries.removeIf {it.value.runId==runId}}
         synchronized(nodeLock){if(nodeRefs.values.any {it.runId==runId})invalidateNodeRefs()}
         val gamepad=shizuku.releaseRunInputs(runId)

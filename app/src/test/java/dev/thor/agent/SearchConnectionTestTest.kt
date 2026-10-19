@@ -15,6 +15,15 @@ class SearchConnectionTestTest {
             assertFalse(result.message.contains("draft-search-secret"))
         }
     }
+    @Test fun postProvidersUseBearerAndTheirOwnRequestFields() {
+        for(backend in listOf("Tavily","DeepSeek"))MockWebServer().use {server->
+            server.enqueue(MockResponse().setBody("{\"results\":[{\"title\":\"Android\",\"url\":\"https://example.com\"}]}"));server.start()
+            val result=SearchConnectionTest.run(server.url("/search").toString(),"draft-secret",backend)
+            assertTrue(result.message,result.success)
+            val request=server.takeRequest();assertEquals("POST",request.method);assertEquals("Bearer draft-secret",request.getHeader("Authorization"))
+            val body=org.json.JSONObject(request.body.readUtf8());assertEquals("Android",body.getString("query"));assertEquals(1,body.getInt(if(backend=="Tavily")"max_results" else "count"))
+        }
+    }
     @Test fun redirectsAndWrongResponseCannotPass() {
         MockWebServer().use {server->
             server.start();val url=server.url("/res/v1/web/search").toString()

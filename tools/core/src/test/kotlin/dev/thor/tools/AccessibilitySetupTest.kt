@@ -7,7 +7,8 @@ class AccessibilitySetupTest {
     @Test fun savedEnabledOrAuthorizedRecoveryIsTemporaryUntilTheActualServiceConnects() {
         for(recovery in listOf(false,true)) {
             val pending=AccessibilitySetup.availability(true,false,recovery,"fixture")
-            assertEquals(Status.TEMPORARILY_UNAVAILABLE,pending.status);assertTrue(pending.reason.contains("无需重复授权"))
+            assertEquals(Status.TEMPORARILY_UNAVAILABLE,pending.status)
+            assertTrue(pending.reason.contains(if(recovery)"自动恢复" else "关闭后重新开启"))
         }
         assertEquals(Status.TEMPORARILY_UNAVAILABLE,AccessibilitySetup.availability(false,false,true,"fixture").status)
         assertEquals(Status.PERMISSION_MISSING,AccessibilitySetup.availability(false,false,false,"fixture").status)

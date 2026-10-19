@@ -53,7 +53,7 @@ adb -s DEVICE_SERIAL shell am start -n dev.thor.tools.diagnostic/.DiagnosticsAct
 | `perception.window_info` | Accessibility 按选定 display 枚举可观察窗口，有界 16 个；Activity 返回 null，不用事件 className 推断 |
 | `perception.ui_tree` | 上屏语义组件树，默认深度 5、80 节点、12000 字符；支持 query、节点分页和长文本偏移，保留暴露的非可见节点；密码字段从查询语料剔除，覆盖与裁剪限制见 [语义组件树与滚动](semantic-ui.md) |
 | `perception.device_info` | 普通 SDK 的 system/displays/resources，默认 system；不调用 Shell，无序列号或账号枚举 |
-| `perception.capture_screen` | Accessibility `takeScreenshot(displayId)`；可裁剪，JPEG，最长边 1280，压缩后最多 2 MiB；安全窗口/限频/显示失效分别报错，不回退 Shell |
+| `perception.capture_screen` | Accessibility `takeScreenshot(displayId)`；可裁剪，JPEG 默认质量 80，最长边 1280，压缩后最多 2 MiB；安全窗口/限频/显示失效分别报错，不回退 Shell |
 | `input.scroll` | 使用当前树快照中的受控 nodeRef，执行节点公开的方向滚动或有已知行列边界的定位动作；提交后引用失效，必须再次观察验证实际位置 |
 | `input.drag` | 一次有界 down→move→up，拖动原生滑块/滚动条；同 swipe 的坐标与 5s 上限，不保证需长按启动的拖放 |
 | `input.tap/long_press/swipe` | Accessibility `dispatchGesture`、指定 display，单指、1–32 点、最长 5s；`display_logical` 或绑定 `frameId` 的 `frame_pixels` |

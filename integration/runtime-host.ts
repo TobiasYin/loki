@@ -1,3 +1,4 @@
+import { webRequest, searchResults } from './web-services.js';
 import { ThorRuntime } from '../runtime/src/runtime.js';
 import { RuntimeSession } from '../runtime/src/session.js';
 import { ToolRegistry } from '../runtime/src/registry.js';
@@ -108,7 +109,7 @@ const tools = (contract.tools as any[]).map(t => ({ ...t,
 const probe: ToolDescriptor = { toolId: 'probe.picture', modelName: 'probe_picture', schemaVersion: '1', description: 'Configuration probe only: return a small red test image. Call once, describe both input and returned image, then answer PROBE_OK.',
   inputSchema: { type: 'object', properties: {}, additionalProperties: false }, requiredCapabilities: [], platformPrerequisites: ['probe.picture'], executor: 'native-probe', resources: ['fixture'], effectClass: 'read', timeoutMs: 60000, cancellable: true, concurrencyKey: 'device', provenance: 'native-configuration-probe', modelVisibility: true,
   outputPolicy: { maxTextBytes: 1024, maxImageBytes: 2097152, maxImages: 1, imageTokenEstimate: 4096 } };
-const webTools: ToolDescriptor[] = ['search','fetch'].map(name=>({toolId:`web.${name}`,modelName:`web_${name}`,schemaVersion:'1',description:name==='search'?'Search Brave and return source titles, URLs, snippets and source time when present.':'Read an HTTP/HTTPS page as bounded untrusted text over the system network. LAN, loopback and proxy DNS are supported.',
+const webTools: ToolDescriptor[] = ['search','fetch'].map(name=>({toolId:`web.${name}`,modelName:`web_${name}`,schemaVersion:'1',description:name==='search'?'Search the configured DeepSeek, Tavily or Brave service and return source titles, URLs, snippets and source time when present. DeepSeek queries must be at most 128 Unicode characters.':'Read an HTTP/HTTPS page as bounded untrusted text over the system network. LAN, loopback and proxy DNS are supported.',
     inputSchema:{type:'object',properties:{[name==='search'?'query':'url']:{type:'string',minLength:1,maxLength:name==='search'?400:8192}},required:[name==='search'?'query':'url'],additionalProperties:false},requiredCapabilities:['web_search'],platformPrerequisites:[`web.${name}`],executor:'native-fetch',resources:['public-web'],effectClass:'network',timeoutMs:30000,cancellable:true,concurrencyKey:'network',provenance:'builtin',modelVisibility:true,outputPolicy:{maxTextBytes:65536,maxImageBytes:0,maxImages:0,imageTokenEstimate:4096}}));
 const registry = new ToolRegistry(); registry.register({packId:'thor.agent',packVersion:'1',tools:[agentSleepTool]}); registry.register({packId:'thor.skills',packVersion:'1',tools:skillTools}); registry.register({packId:'thor.web',packVersion:'1',tools:webTools}); registry.register({ packId: contract.packId, packVersion: contract.packVersion, tools }); registry.register({ packId: 'configuration-probe', packVersion: '1', tools: [probe] });
 function createExecution(begun:any) {
@@ -130,15 +131,19 @@ const ports: RuntimePorts = {
       if(envelope.toolId==='web.search'||envelope.toolId==='web.fetch') {
         const native = await rpc('network.tool.begin',envelope);toolNetworkContext=native.context;
         const search=envelope.toolId==='web.search';const args=envelope.arguments as any;
-        const url=search ? `${native.url}?q=${encodeURIComponent(args.query)}&count=5` : native.url;
-        const response=await toolFetchBridge.fetch(url,{method:'GET',signal,headers:{accept:search?'application/json':'text/html,text/plain'}});
+        const backend=native.backend ?? 'Brave';
+        const request=webRequest(backend,search,native.url,args);
+        const response=await toolFetchBridge.fetch(request.url,{...request.init,signal});
         let bytes=0;const parts:Uint8Array[]=[];const reader=response.body?.getReader();
         if(reader) while(true){const next=await reader.read();if(next.done)break;bytes+=next.value.byteLength;if(bytes>2097152){await reader.cancel();throw new RuntimeError('LIMIT_EXCEEDED');}parts.push(next.value);}
         const payload=new Uint8Array(bytes);let offset=0;for(const p of parts){payload.set(p,offset);offset+=p.byteLength;}const text=new TextDecoder().decode(payload);
-        if(!response.ok) return {content:[{type:'text',text:`HTTP_${response.status}`}],observedAt:Date.now(),source:search?'BraveSearch':'web-page',truncated:false,error:'IO_ERROR',outcome:'observed'};
+        if(!response.ok) return {content:[{type:'text',text:`HTTP_${response.status}`}],observedAt:Date.now(),source:search?`${backend}Search`:'web-page',truncated:false,error:'IO_ERROR',outcome:'observed'};
         const plain=(v:unknown)=>readableText(v).text;const page=readableText(text);
-        const result=search?{query:args.query,fetchedAt:new Date().toISOString(),results:(JSON.parse(text).web?.results??[]).slice(0,5).map((r:any)=>({title:plain(r.title),url:r.url,summary:plain(r.description),sourceTime:r.page_age??null}))}:{url:response.url,text:page.text,fetchedAt:new Date().toISOString()};
-        return {content:[{type:'text',text:JSON.stringify(result)}],observedAt:Date.now(),source:search?'BraveSearch':'web-page',truncated:!search&&page.truncated,outcome:'observed'};
+        const fetched= !search && backend==='DeepSeek' ? JSON.parse(text) : null;
+        if(fetched && typeof fetched.content!=='string')throw new RuntimeError('IO_ERROR');
+        const fetchedPage=fetched?readableText(fetched.content):page;
+        const result=search?{query:args.query,fetchedAt:new Date().toISOString(),results:searchResults(backend,text).map(r=>({...r,title:plain(r.title),summary:plain(r.summary)}))}:{url:args.url,title:fetched?.title,text:fetchedPage.text,fetchedAt:new Date().toISOString()};
+        return {content:[{type:'text',text:JSON.stringify(result)}],observedAt:Date.now(),source:search?`${backend}Search`:'web-page',truncated:!search&&fetchedPage.truncated,outcome:'observed'};
       }
       if (prepared.awaiting) await awaiting?.(true);
       const result = await rpc('tool.execute', envelope);

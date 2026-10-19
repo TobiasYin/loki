@@ -23,7 +23,41 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     @Volatile private var frameworkBindingSince=0L
     @Volatile var accessibilityRestartRequired=false
         private set
-    val accessibilityRestartMessage:String get()="系统保留异常绑定，需重启本应用；会话已保存"
+    @Volatile private var accessibilityRecoveryTimedOut=false
+    private val recoveryWindow=AccessibilityRecoveryWindow(Clock {SystemClock.elapsedRealtime()})
+    @Volatile var recoveryListener:((JSONObject)->Unit)?=null
+    private val recoveryJournal=android.util.AtomicFile(java.io.File(context.filesDir,"accessibility-recovery.json"))
+    private val recoveryEvents=java.util.ArrayDeque<JSONObject>().apply {
+        runCatching {
+            if(recoveryJournal.baseFile.length() in 1..65536) {
+                val saved=org.json.JSONArray(recoveryJournal.readFully().toString(Charsets.UTF_8))
+                for(i in (saved.length()-64).coerceAtLeast(0) until saved.length())addLast(saved.getJSONObject(i))
+            }
+        }
+    }
+    private var recoveryEventId=recoveryEvents.peekLast()?.optLong("id") ?: 0L
+    @Synchronized fun accessibilityRecoveryEvents():List<JSONObject> = recoveryEvents.map {JSONObject(it.toString())}
+    private var lastRecoverySignature:String?=null
+    @Synchronized private fun recoveryEvent(phase:String) {
+        val error=if(phase=="failed")recoveryError else "NONE"
+        val signature="$phase:$error"
+        if(lastRecoverySignature==signature)return
+        lastRecoverySignature=signature
+        val event=JSONObject().put("id",++recoveryEventId).put("wallTime",System.currentTimeMillis())
+            .put("phase",phase).put("errorCode",error).put("frameworkPhase",frameworkPhase)
+        recoveryEvents.addLast(event)
+        while(recoveryEvents.size>64)recoveryEvents.removeFirst()
+        runCatching {
+            val output=recoveryJournal.startWrite()
+            try {
+                output.write(org.json.JSONArray(recoveryEvents.toList()).toString().toByteArray(Charsets.UTF_8))
+                recoveryJournal.finishWrite(output)
+            }catch(error:Exception){recoveryJournal.failWrite(output);throw error}
+        }
+        android.util.Log.i("ThorAccessibilityRecovery","$phase:$frameworkPhase:$error")
+        recoveryListener?.invoke(JSONObject(event.toString()))
+    }
+    val accessibilityRestartMessage:String get()="系统保留异常绑定，请在应用设置中强行停止后重新打开 Thor Agent；会话已保存"
     private val recoveryCounts=java.util.concurrent.ConcurrentHashMap<String,java.util.concurrent.atomic.AtomicInteger>()
     private fun trace(phase:RecoveryPhase) {recoveryPhase=phase;recoveryCounts.getOrPut(phase.name){java.util.concurrent.atomic.AtomicInteger()}.incrementAndGet()}
     private fun recordRecoveryError(error:Throwable) {recoveryError=when(error) {
@@ -48,7 +82,8 @@ class DebugConnection(private val context: Context, private val invalidated: () 
             .put("workerQueuedAgeMs",if(recoveryQueuedAt>recoveryWorkerAt)(now-recoveryQueuedAt).coerceAtLeast(0) else 0)
             .put("workerRunningAgeMs",if(recoveryWorkerAt>0)(now-recoveryWorkerAt).coerceAtLeast(0) else 0)
             .put("frameworkPhase",frameworkPhase).put("framework",frameworkState)
-            .put("restartRequired",accessibilityRestartRequired)
+            .put("restartRequired",accessibilityRestartRequired).put("recoveryTimedOut",accessibilityRecoveryTimedOut)
+            .put("events",org.json.JSONArray(accessibilityRecoveryEvents()))
             .put("frameworkBindingAgeMs",if(frameworkBindingSince>0)(now-frameworkBindingSince).coerceAtLeast(0) else 0)
             .put("counters",JSONObject(recoveryCounts.mapValues {it.value.get()}))
     }
@@ -58,12 +93,17 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         ThorAccessibilityService.instance!=null && availability().status==Status.READY -> "已通过 Shizuku 授权校验，本应用无障碍已连接"
         ThorAccessibilityService.instance!=null -> "本应用无障碍已连接"
         accessibilityRestartRequired -> accessibilityRestartMessage
-        accessibilityPrepared -> "Shizuku 已启用本应用无障碍，等待系统连接"
-        else -> setupMessage
+        accessibilityRecoveryTimedOut -> "无障碍自动恢复超时，请在系统设置中关闭后重新开启 Thor Agent 无障碍服务"
+        accessibilityRecoveryPending -> "正在通过已授权的 Shizuku 自动恢复本应用无障碍"
+        ThorAccessibilityService.settingEnabled(context) -> "无障碍连接已失效，请在系统设置中关闭后重新开启 Thor Agent 无障碍服务"
+        else -> "无障碍服务未连接，请在系统设置中开启 Thor Agent 无障碍服务"
     }
-    val accessibilityRecoveryPending:Boolean get() = !closed && ThorAccessibilityService.instance==null && runCatching {
+    private fun recoveryAuthorized():Boolean = runCatching {
         Shizuku.pingBinder() && Shizuku.getUid()==2000 && Shizuku.checkSelfPermission()==PackageManager.PERMISSION_GRANTED
     }.getOrDefault(false)
+    val accessibilityRecoveryNeedsManualAction:Boolean get()=accessibilityRestartRequired || accessibilityRecoveryTimedOut
+    val accessibilityRecoveryPending:Boolean get() = !closed && !accessibilityRestartRequired && !accessibilityRecoveryTimedOut &&
+        ThorAccessibilityService.instance==null && recoveryAuthorized()
     private val hostBinder = Binder()
     private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     private val accessibilityRecovery=AccessibilityRecovery(Clock {SystemClock.elapsedRealtime()})
@@ -72,7 +112,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     // lease: the shell UserService owns only one mutation lease at a time.
     private val mutation=java.util.concurrent.locks.ReentrantLock()
     private val args = Shizuku.UserServiceArgs(ComponentName(context, DebugUserService::class.java))
-        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(22)
+        .daemon(false).processNameSuffix("toolpack_debug").tag("thor-toolpack-debug").version(23)
     private val presentationReader:(Int,IntArray)->List<PresentationWindowProof> = {display,ids->
         val remote=service ?: fail(Code.BACKEND_UNAVAILABLE,"Presentation metadata service is not bound")
         requireTool(!closed && availability().status==Status.READY,Code.PERMISSION_MISSING,"Presentation metadata backend is not authorized")
@@ -108,13 +148,25 @@ class DebugConnection(private val context: Context, private val invalidated: () 
     }
     private fun recoverAccessibility() {
         if(closed)return
+        ThorAccessibilityService.checkConnection()
         bindGranted()
         val actual=service
-        if(ThorAccessibilityService.instance!=null) {
+        val connected=ThorAccessibilityService.instance!=null
+        val authorized=recoveryAuthorized()
+        val repairAllowed=recoveryWindow.allow(authorized,connected)
+        accessibilityRecoveryTimedOut=authorized && !connected && !repairAllowed
+        if(connected) {
             frameworkBindingSince=0L;accessibilityRestartRequired=false
             if(recoveryPhase!=RecoveryPhase.ACCESSIBILITY_CONNECTED)trace(RecoveryPhase.ACCESSIBILITY_CONNECTED)
         }
-        val attempt=accessibilityRecovery.next(actual!=null && availability().status==Status.READY,ThorAccessibilityService.instance!=null) ?: return
+        recoveryEvent(when {
+            connected->"connected"
+            accessibilityRestartRequired->"restart_required"
+            accessibilityRecoveryTimedOut->"timed_out"
+            !authorized->"manual_required"
+            else->"recovering"
+        })
+        val attempt=accessibilityRecovery.next(repairAllowed && !accessibilityRestartRequired && actual!=null && availability().status==Status.READY,connected) ?: return
         recoveryQueuedAt=SystemClock.elapsedRealtime();trace(RecoveryPhase.RECOVERY_QUEUED)
         runCatching {worker.execute {
             recoveryWorkerAt=SystemClock.elapsedRealtime()
@@ -153,12 +205,18 @@ class DebugConnection(private val context: Context, private val invalidated: () 
                 }
                 requireTool(data.getBoolean("enabled"),Code.BACKEND_UNAVAILABLE,"Accessibility framework has not acknowledged disconnect")
                 recoveryError="NONE";trace(RecoveryPhase.SETTINGS_ENABLED)
+                recoveryEvent(if(ThorAccessibilityService.instance!=null)"connected" else "waiting_connection")
                 accessibilityPrepared=true
                 setupMessage="已启用本应用无障碍，等待系统连接；未连接时自动重试"
                 ThorAccessibilityService.invalidatePresentationEvidence()
             }catch(error:Exception) {
-                recordRecoveryError(error);trace(RecoveryPhase.RECOVERY_FAILED)
-                accessibilityPrepared=false;setupMessage="正在通过已授权的 Shizuku 恢复本应用无障碍"
+                if(ThorAccessibilityService.instance!=null) {
+                    recoveryError="NONE";trace(RecoveryPhase.ACCESSIBILITY_CONNECTED);recoveryEvent("connected")
+                } else {
+                    recordRecoveryError(error);trace(RecoveryPhase.RECOVERY_FAILED)
+                    recoveryEvent(if(accessibilityRestartRequired)"restart_required" else "failed")
+                    accessibilityPrepared=false;setupMessage="正在通过已授权的 Shizuku 恢复本应用无障碍"
+                }
             }finally {
                 if(locked){runCatching {actual?.cancel(token)};mutation.unlock()}
                 accessibilityRecovery.finished(attempt);recoveryWorkerAt=0L;recoveryQueuedAt=0L
@@ -424,7 +482,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         } finally {runCatching {remote.cancel(token)}}
     }
     fun shell(run: String, command: String, timeout: Int, max: Int, cp: Checkpoint, approvalHash: String? = null) = call(run, mapOf("operation" to "shell", "command" to command, "timeoutMs" to timeout, "maxBytes" to max,"approvalHash" to approvalHash), cp)
-    fun close() { closed=true;trace(RecoveryPhase.CLOSED);accessibilityRecovery.close();recoveryMonitor.shutdownNow();ThorAccessibilityService.removePresentationReader(this);invalidated();
+    fun close() { recoveryListener=null;closed=true;trace(RecoveryPhase.CLOSED);accessibilityRecovery.close();recoveryMonitor.shutdownNow();ThorAccessibilityService.removePresentationReader(this);invalidated();
         // remove=true does not clear SDK-local callbacks in Shizuku 13.1.5.
         // Detach first so a late old Binder death cannot clear a new Host bind.
         runCatching {Shizuku.unbindUserService(args,this,false)}

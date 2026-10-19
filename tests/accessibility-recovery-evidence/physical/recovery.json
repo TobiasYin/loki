@@ -1,0 +1,48 @@
+{
+  "device": "AYN Thor",
+  "at": "2026-10-19T17:33:21.412392+08:00",
+  "initial": {
+    "enabled": true,
+    "binding": false,
+    "crashed": false,
+    "bound": true
+  },
+  "afterUnexpectedProcessDeath": {
+    "enabled": true,
+    "binding": false,
+    "crashed": false,
+    "bound": true
+  },
+  "passed": true,
+  "samples": [
+    {
+      "elapsedMs": 82,
+      "state": {
+        "enabled": true,
+        "binding": false,
+        "crashed": true,
+        "bound": false
+      },
+      "events": []
+    },
+    {
+      "elapsedMs": 1249,
+      "state": {
+        "enabled": true,
+        "binding": false,
+        "crashed": false,
+        "bound": true
+      },
+      "events": [
+        {
+          "id": 20,
+          "wallTime": 1792402403208,
+          "phase": "connected",
+          "errorCode": "NONE",
+          "frameworkPhase": "NOT_CHECKED"
+        }
+      ]
+    }
+  ],
+  "note": "Unexpected process death can also be recovered by Android itself; monitor-driven repair is independently verified in monitor-recovery.json."
+}

@@ -1,6 +1,21 @@
 # 联网搜索工具与后端
 
 > 2026-10-13 状态更新：五模块已开发并进入正式软件整合。本文早期“仅规划/未授权/无 APK”等叙述保留其历史背景；当前实现、实际测试与尚未完成的 Thor 验收，以 [中文集成报告](integration-report.md) 为准。来源模块旧测试不等于本次集成结果。
+## 当前服务配置（2026-10-19）
+
+APK 支持 DeepSeek、Tavily 和 Brave。设置 → 联网搜索中可选择自动选择、指定服务或关闭。自动选择优先使用已配置的 DeepSeek，其次 Tavily、Brave；仅配置一个时自动使用该服务。指定服务缺少 Key 时显示未配置，不静默切换到其他服务。会话搜索能力开关仍控制工具授权。
+
+- DeepSeek：启用的官方模型配置（`https://api.deepseek.com` 或兼容的 `/v1` 基础地址）自动提供同一个 Key，无需重复输入。第三方代理上的 DeepSeek 模型不复用凭据。多个官方配置时优先使用默认模型服务。新手引导推荐官方 API，一次配置模型和搜索。
+- Tavily：独立加密保存 API Key，POST `https://api.tavily.com/search`，Bearer 认证；请求最多 5 个结果，不请求额外生成答案。
+- Brave：保留原有 Key、可配置地址与 GET 协议。
+- DeepSeek 搜索使用 POST `/v1/tools/search`，搜索词最多 128 个 Unicode 字符；超长查询明确失败，提示缩短。选用 DeepSeek 时，网页读取使用 POST `/v1/tools/fetch` 并返回标题和正文。其他服务继续使用直接网页读取。
+
+凭据由 Native 安装到请求 Header，不传入 WebView。连接测试使用当前草稿，不自动保存；切换服务后需保存才影响运行时。保存搜索配置与模型配置后会重建运行时配置。
+
+验证记录：2026-10-19 已在 AYN Thor 的真实 Agent 会话中通过 Wi-Fi 直连跑通 Tavily 搜索、DeepSeek 搜索和 DeepSeek 网页抓取；Tavily 使用用户提供的测试 Key，DeepSeek 使用已有官方模型 Key。协议测试覆盖 POST/Bearer、结果字段映射、单服务自动启用、显式选择/关闭与官方域名凭据边界。运行 `node scripts/web-services-test.mjs`、`:app:testDebugUnitTest`，实机测试类为 `LiveSearchServicesTest`（必须显式 `liveSearch=true`，Key 通过应用私有 cache 导入并立即删除）。
+
+官方接口依据：[DeepSeek search](https://api-docs.deepseek.com/zh-cn/api/search/)、[DeepSeek fetch](https://api-docs.deepseek.com/zh-cn/api/fetch/)、[Tavily search](https://docs.tavily.com/documentation/api-reference/endpoint/search)。以下早期候选与验收规划保留作历史记录，服务支持范围以本节为准。
+
 ## 产品语义
 
 搜索默认 ON 是 Session 的能力意愿，不提供免费搜索额度，也不等于模型自身具备联网能力。首版必须有一个经过验证的后端；无密钥、无配置或网络不可达时显示具体原因，不注入假可用的 search 工具。

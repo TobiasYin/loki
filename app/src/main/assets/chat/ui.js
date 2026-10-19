@@ -99,7 +99,7 @@
     const mutations=Object.keys(labels).map(cap=>{const key=capabilityKey(s.id,cap);return [cap,capabilityPending.get(key),capabilityErrors.get(key)];});
     if(!changedSection('capabilities',[values,s.pendingAttachments,state.availability,mutations]))return;
     $('attach').textContent=s.pendingAttachments?.length ? `附图 · ${s.pendingAttachments.length}` : '附图';
-    $('capabilities').textContent=`◇ 能力 ${Object.values(values).filter(Boolean).length} ⌄`;
+    $('capability-label').textContent=`能力 ${Object.values(values).filter(Boolean).length}`;
     const panel=$('cap-panel');const focus=panel.contains(document.activeElement)?document.activeElement?.getAttribute('aria-label'):null;panel.replaceChildren();
     for(const [cap,label] of Object.entries(labels)) {
       const key=capabilityKey(s.id,cap),pending=capabilityPending.get(key),error=capabilityErrors.get(key);
@@ -243,6 +243,14 @@
     const container=element('div');
     const toolLabels={'web.request':'网络请求 · curl','files.list':'查看设备目录','files.stat':'查看文件信息','files.find':'查找设备文件','files.read':'读取文件','debug.app_logs':'读取应用日志','files.download':'下载文件','files.download_info':'查看下载','apps.install':'安装应用','apps.launch':'打开应用','agent.background':'聊天转入后台','agent.sleep':'等待','apps.package_info':'核验应用安装','skills.list':'查看 Skill 列表','skills.read':'读取 Skill','skills.save':'保存 Skill','skills.enable':'调整 Skill 启用状态','skills.delete':'删除 Skill','web.search':'搜索网页','web.fetch':'读取网页','perception.capture_screen':'查看当前屏幕','perception.select_screen':'选择操作屏幕','perception.capture_companion':'查看同应用下屏','perception.find_apps':'查找应用','perception.read_ui':'读取界面','perception.ui_tree':'读取组件树','input.scroll':'滚动页面','input.drag':'拖动控件','input.tap':'点击当前屏幕','input.long_press':'长按当前屏幕','input.swipe':'滑动当前屏幕','input.activate':'激活界面控件','input.navigate':'当前屏幕返回','input.type_text':'输入文字','input.key_press':'按键盘键','input.press_button':'按手柄键','input.set_axes':'移动摇杆与扳机','input.release_inputs':'释放输入','device.info':'读取设备信息','perception.device_info':'读取设备信息','debug.shell':'运行设备指令','debug.command_policy':'检查命令安全等级','debug.thor_brightness':'调整 Thor 独立屏幕亮度'};
     const outcomeLabels={observed:'已完成',submitted:'已提交',unknown:'结果未知'};
+    const serviceEvents=run.serviceRecoveryEvents??[];
+    if(serviceEvents.length) {
+      const labels={recovering:'检测到无障碍连接中断，正在通过 Shizuku 自动恢复',waiting_connection:'已重新开启无障碍服务，等待系统连接',connected:'无障碍服务已连接，可继续使用屏幕工具',failed:'本次无障碍恢复未完成，将继续重试',manual_required:'无可用的 Shizuku，请在系统设置中关闭后重新开启无障碍服务',restart_required:'系统保留异常绑定，请重启应用；会话已保存',timed_out:'无障碍自动恢复超时，请在系统设置中关闭后重新开启服务'};
+      const history=element('details',undefined,'service-recovery timeline-note');
+      history.append(element('summary','无障碍服务恢复记录'));
+      for(const event of serviceEvents)if(labels[event.phase])history.append(element('div',labels[event.phase]+'。','service-recovery-event'));
+      container.append(history);
+    }
     const isToolDiagnostic=event=>event.type==='diagnostic' && event.data?.code!=='TARGET_CHANGED' && (event.toolCallId || event.toolId || event.data?.toolId || event.data?.toolName || event.data?.code==='TOOL_FAILED');
     const callId=event=>event.toolCallId??`event:${event.sequence}`;
     const calls=new Map();
@@ -267,36 +275,18 @@
     else if(run.status==='cancelled' && run.stopReason)container.append(element('div',({'用户停止':'已停止本次任务。','用户通过运行通知停止':'已停止本次任务。','能力已变更；旧 lease 不会复活':'能力设置已变更，本次任务已停止。','系统授权或后端失效':'系统授权或设备连接已失效，本次任务已停止。','宿主关闭':'应用已关闭，本次任务已停止。'})[run.stopReason]??'本次任务已停止，可在当前会话继续。','timeline-note run-notice'));
     else if(run.status==='interrupted')container.append(element('div','任务中断，已保留上下文，可在当前会话继续。','timeline-note run-notice'));
     const recoveryFact=call=>call.outcome==='unknown' && call.result?.recovery?.sideEffectPossible!==false && call.result?.recovery?.submission!=='not_dispatched'?'先前操作的提交状态尚未确认，请勿重复旧动作':call.result?.recovery?.submission==='submitted' || call.outcome==='submitted'?'先前操作已提交，需观察结果':'';
-    // Recovery is one current Run state, not one perpetual status per old error.
-    // A result event exists only after Runtime's post-authority checks. Companion
-    // reads/selection/discarded or failed reads cannot qualify a fresh target.
+    // Page changes belong to the rejected operation. Only a validated read
+    // of the selected screen resolves its historical observation status.
     const currentScreenReads=new Set(['perception.app_info','perception.window_info','perception.ui_tree','perception.capture_screen']);
-    const targetResultCalls=new Set(events.filter(event=>event.type==='tool_result' && (event.data?.error??event.error)==='TARGET_CHANGED' && event.toolCallId).map(event=>event.toolCallId));
     const pendingRecoveryCalls=new Set(),reobservedCalls=new Set();
-    let recoverySeen=false,needsObservation=false;
     for(const event of events) {
       const data=event.data??{},error=data.error??event.error,toolId=data.toolId??event.toolId??calls.get(event.toolCallId)?.toolId;
-      // Pi emits a diagnostic for the same rejected call as well. It is a
-      // historical receipt, not another page change (even if delivered late).
-      if(event.type==='diagnostic' && data.code==='TARGET_CHANGED') {
-        if(!event.toolCallId || !targetResultCalls.has(event.toolCallId)){recoverySeen=true;needsObservation=true;}
-      }else if(event.type==='tool_result' && error==='TARGET_CHANGED') {
-        recoverySeen=true;needsObservation=true;
-        if(event.toolCallId)pendingRecoveryCalls.add(event.toolCallId);
-      }else if(event.type==='tool_result' && recoverySeen && !error && !data.contentDiscarded && (data.outcome??event.outcome)==='observed') {
-        if(currentScreenReads.has(toolId)) {
-          needsObservation=false;
-          for(const id of pendingRecoveryCalls)reobservedCalls.add(id);
-          pendingRecoveryCalls.clear();
-        }
-        else if(toolId==='perception.select_screen')needsObservation=true;
+      if(event.type==='tool_result' && error==='TARGET_CHANGED' && event.toolCallId) {
+        pendingRecoveryCalls.add(event.toolCallId);
+      }else if(event.type==='tool_result' && !error && !data.contentDiscarded && (data.outcome??event.outcome)==='observed' && currentScreenReads.has(toolId)) {
+        for(const id of pendingRecoveryCalls)reobservedCalls.add(id);
+        pendingRecoveryCalls.clear();
       }
-    }
-    const recoveryCalls=[...calls.values()].filter(call=>call.error==='TARGET_CHANGED');
-    const recoveryStatus=needsObservation && !terminal.has(run.status)?(run.status==='awaiting_user'?'页面已变化，需重新观察':'页面已变化，正在重新观察'):'';
-    const fact=recoveryStatus?recoveryFact(recoveryCalls.at(-1)??{}):'';
-    if(recoveryStatus || fact) {
-      const note=element('div',[recoveryStatus,fact].filter(Boolean).join('；')+'。','timeline-note recovery-status');note.setAttribute('role','status');container.append(note);
     }
     if(run.status==='awaiting_user') {
       const waiting=events.findLast(e=>e.type==='awaiting_user');
@@ -456,7 +446,8 @@
     // task. A later explicit expansion remains local to this completed run.
     rememberDisclosure(history,`${run.id}:history:${activeRun?'running':'finished'}`,false,open=>{
       const expanded=history.dataset.expanded==='true';
-      historySummary.textContent=activeRun?(expanded?'收起执行过程':`正在运行 · 已完成 ${completedOperations} 项操作`):`用时 ${executionDuration(run,events)}`;
+      history.hidden=activeRun && completedOperations===0 && !expanded;
+      historySummary.textContent=activeRun?(expanded?'收起执行过程':completedOperations>0?`正在运行 · 已完成 ${completedOperations} 项操作`:''):`用时 ${executionDuration(run,events)}`;
       historySummary.setAttribute('aria-label',`${historySummary.textContent}，${expanded?'收起':'展开'}完整过程`);
       for(const node of operations) {
         node.hidden=!open && !recent.has(node);
@@ -684,7 +675,7 @@
   function refreshVoice() {
     if(hold && (hold.sessionId!==state?.selected || active()))cancelVoice();
     $('input').hidden=voiceMode;$('voice-panel').hidden=!voiceMode;
-    $('voice-toggle').innerHTML=voiceMode?'⌨':'<svg width=20 height=24 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=1.8 aria-hidden=true><rect x=8 y=2 width=8 height=13 rx=4></rect><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"></path></svg>';
+    $('voice-toggle').innerHTML=voiceMode?'<svg class=control-icon viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=1.8 stroke-linecap=round stroke-linejoin=round aria-hidden=true><rect x=2 y=5 width=20 height=14 rx=3></rect><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path></svg>':'<svg width=20 height=24 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=1.8 aria-hidden=true><rect x=8 y=2 width=8 height=13 rx=4></rect><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"></path></svg>';
     $('voice-toggle').setAttribute('aria-pressed',String(voiceMode));$('voice-toggle').setAttribute('aria-label',voiceMode?'切换到文字输入':'切换到语音输入');
     const holding=!!hold&&!hold.released;
     $('voice-hold').disabled=!!active() || preparing.has(state?.selected) || voicePhase==='finalizing';
@@ -761,7 +752,7 @@
   });
   $('menu').addEventListener('click',()=>{cancelVoice();refreshVoice();drawer(true);});$('close-drawer').addEventListener('click',()=>drawer(false));$('shade').addEventListener('click',()=>drawer(false));
   for(const id of ['new','drawer-new'])$(id).addEventListener('click',()=>{command({op:'new'});drawer(false);});
-  for(const id of ['settings','drawer-settings'])$(id).addEventListener('click',()=>{cancelVoice();refreshVoice();command({op:'settings'});});
+  $('drawer-settings').addEventListener('click',()=>{cancelVoice();refreshVoice();drawer(false);command({op:'settings'});});
   $('archives').addEventListener('click',()=>{showArchives=!showArchives;renderSessions();});
   $('seed').addEventListener('click',()=>modal('加载长历史示例','向当前会话添加 200 条模拟消息，并新建 49 个会话。此操作会保存到本地，可逐个删除。',null,()=>command({op:'seed'})));
   $('capabilities').addEventListener('click',()=>{popover('cap-panel');$('capabilities').setAttribute('aria-expanded',String(!$('cap-panel').hidden));});

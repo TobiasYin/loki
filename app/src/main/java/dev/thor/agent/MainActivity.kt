@@ -24,6 +24,7 @@ class MainActivity : Activity() {
     private var attachedEngine:AgentRuntimeEngine?=null
     private lateinit var container:FrameLayout
     private var serviceBound=false
+    private var runtimeRecreationHold: RuntimeRecreationHold? = null
     private var chatStarted=false
     private val runtimeUi=object:AgentRuntimeEngine.Ui {
         override fun runtimeUiCommand(op:String,data:JSONObject)=handleRuntimeUi(op,data)
@@ -36,6 +37,7 @@ class MainActivity : Activity() {
             if(isDestroyed || isFinishing)return
             val service=(binder as AgentRuntimeService.LocalBinder).service
             runtimeService=service
+            runtimeRecreationHold?.close(); runtimeRecreationHold = null
             val screen=java.lang.ref.WeakReference(this@MainActivity)
             service.whenEngineReady {screen.get()?.let {if(it.runtimeService===service && !it.isDestroyed && !it.isFinishing)it.attachEngine()}}
         }
@@ -44,22 +46,70 @@ class MainActivity : Activity() {
             if(!isDestroyed && !isFinishing)showRuntimeError("执行服务已退出；历史保留，运行不会自动重放。")
         }
     }
+    private val backgroundStore by lazy { ChatBackgroundStore(this) }
+    private lateinit var backgrounds: ChatBackgroundController
+    private var backgroundPickerKey: String? = null
+    private var backgroundPageKey: String? = null
+    private var appearancePageVisible = false
+    private var backgroundAppsPage: BackgroundAppsPage? = null
+    private var backgroundPreview: ChatBackgroundPreview? = null
+    private var backgroundAppsVisible = false
+    private var backgroundAppsQuery = ""
+    private var backgroundAppsFilter = BackgroundAppFilter.ALL
     private var pickerSession: String? = null
     private var pickerKind="image"
     private var pendingPickerResult:PendingPickerResult?=null
     private var settingsView:View?=null
+    private var settingsScroll: ScrollView? = null
+    private var settingsScrollKey: String? = null
+    private val settingsScrollPositions = mutableMapOf<String, Int>()
+    private val settingsBackCallback = if (android.os.Build.VERSION.SDK_INT >= 33)
+        android.window.OnBackInvokedCallback { settingsBack() } else null
+    private var onboardingStep:Int?=null
+    private var refreshPermissionPage:(()->Unit)?=null
     private var settingsBack:()->Unit={closeSettings()}
     private var microphonePermissionPending=false
     private var voice:VoiceInput?=null
     private var voiceId:String?=null
+    override fun attachBaseContext(newBase: android.content.Context) {
+        val mode = Appearance.mode(newBase)
+        val base = if (mode == ColorMode.SYSTEM) newBase else {
+            val configuration = android.content.res.Configuration(newBase.resources.configuration)
+            configuration.uiMode = (configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                if (mode == ColorMode.DARK) android.content.res.Configuration.UI_MODE_NIGHT_YES else android.content.res.Configuration.UI_MODE_NIGHT_NO
+            newBase.createConfigurationContext(configuration)
+        }
+        super.attachBaseContext(base)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
+        val dark = Appearance.palette(this).dark
+        setTheme(if (dark) R.style.AppThemeDark else R.style.AppThemeLight)
         super.onCreate(savedInstanceState)
+        runtimeRecreationHold = lastNonConfigurationInstance as? RuntimeRecreationHold
+        savedInstanceState?.getBundle("settingsScrollPositions")?.let { positions ->
+            positions.keySet().forEach { key -> settingsScrollPositions[key] = positions.getInt(key) }
+        }
+        appearancePageVisible = savedInstanceState?.getBoolean("appearancePageVisible", false) ?: false
+        val bars = android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+        @Suppress("DEPRECATION")
+        window.statusBarColor = Appearance.palette(this).background
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = Appearance.palette(this).background
+        onboardingStep=savedInstanceState?.takeIf {it.containsKey("onboardingStep")}?.getInt("onboardingStep")
         pickerSession=savedInstanceState?.getString("pickerSession")
         pickerKind=savedInstanceState?.getString("pickerKind") ?: "image"
         pendingPickerResult=PendingPickerResult.restore(savedInstanceState)
-        container=FrameLayout(this)
+        backgroundPickerKey = savedInstanceState?.getString("backgroundPickerKey")
+        backgroundPageKey = savedInstanceState?.getString("backgroundPageKey")
+        backgroundAppsVisible = savedInstanceState?.getBoolean("backgroundAppsVisible", false) ?: false
+        backgroundAppsQuery = savedInstanceState?.getString("backgroundAppsQuery").orEmpty()
+        backgroundAppsFilter = runCatching { BackgroundAppFilter.valueOf(savedInstanceState?.getString("backgroundAppsFilter").orEmpty()) }.getOrDefault(BackgroundAppFilter.ALL)
+        backgrounds = ChatBackgroundController(this, backgroundStore, { if (::web.isInitialized) web else null }, { attachedEngine?.host?.backgroundUpperPackage() })
+        container=ChatSurfaceLayout(this)
         container.addView(TextView(this).apply {text="正在打开聊天…";gravity=android.view.Gravity.CENTER},FrameLayout.LayoutParams(-1,-1))
         setContentView(container)
+        // PhoneWindow needs its decor view installed before accessing the insets controller.
+        window.insetsController?.setSystemBarsAppearance(if (dark) 0 else bars, bars)
         container.setOnApplyWindowInsetsListener {view,insets->
             val bars=insets.getInsets(android.view.WindowInsets.Type.systemBars() or android.view.WindowInsets.Type.ime())
             view.setPadding(bars.left,bars.top,bars.right,bars.bottom);insets
@@ -72,9 +122,15 @@ class MainActivity : Activity() {
         val engine=service.engine ?: run {showRuntimeError(service.initializationError ?: "执行环境暂不可用。");return}
         attachedEngine?.detach(runtimeUi);attachedEngine=engine
         host=engine.host;bridge=engine.bridge
-        settingsView=null;container.removeAllViews();engine.attach(this,container,runtimeUi)
+        rememberSettingsScroll(); unregisterSettingsBack(); settingsScroll=null; settingsScrollKey=null
+        refreshPermissionPage=null;settingsView=null;container.removeAllViews();engine.attach(this,container,runtimeUi)
         web=engine.web // Display-only WebView; execution document stays in Service.
+        backgrounds.attach(container)
         consumePendingPickerResult()
+        if(onboardingStep!=null || !getSharedPreferences("onboarding",MODE_PRIVATE).getBoolean("completed",false))showOnboarding(onboardingStep ?: 0)
+        else if (backgroundAppsVisible) chooseBackgroundApp()
+        else if (appearancePageVisible) showAppearanceSettings()
+        else backgroundPageKey?.let { showBackgroundSettings(it) }
     }
     private fun reloadRuntime() {
         val service=runtimeService ?: return
@@ -82,6 +138,7 @@ class MainActivity : Activity() {
         if(!service.reloadConfiguration {screen.get()?.let {if(it.runtimeService===service && !it.isDestroyed && !it.isFinishing)it.attachEngine()}}) {
             Toast.makeText(this,"请等待活动任务结束后再重新加载设置",Toast.LENGTH_LONG).show();return
         }
+        rememberSettingsScroll(); unregisterSettingsBack(); settingsScroll=null; settingsScrollKey=null
         attachedEngine=null;settingsView=null;container.removeAllViews()
         container.addView(TextView(this).apply {text="正在加载已保存的设置…";gravity=android.view.Gravity.CENTER},FrameLayout.LayoutParams(-1,-1))
     }
@@ -117,24 +174,94 @@ class MainActivity : Activity() {
         if(android.os.Build.VERSION.SDK_INT<33 || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)==android.content.pm.PackageManager.PERMISSION_GRANTED)return
         requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),74)
     }
-    override fun onStart() {super.onStart();chatStarted=true;attachedEngine?.uiVisibilityChanged(runtimeUi)}
-    override fun onStop() {chatStarted=false;super.onStop()}
+    private val accessibilityMonitor=android.os.Handler(android.os.Looper.getMainLooper())
+    private var lastAccessibilityState:String?=null
+    private val accessibilityNotice=dev.thor.tools.AccessibilityRecoveryNotice(dev.thor.tools.Clock {android.os.SystemClock.elapsedRealtime()})
+    private var accessibilityReminder:AlertDialog?=null
+    private val accessibilityCheck=object:Runnable {
+        override fun run() {
+            if(::host.isInitialized && !isDestroyed && !isFinishing) {
+                val status=host.accessibilityStatus()
+                val ready=status.status==dev.thor.tools.Status.READY
+                val recovering=host.accessibilityRecoveryPending()
+                val state="${status.status}:${status.reason}"
+                if(lastAccessibilityState!=state) {
+                    lastAccessibilityState=state
+                    refreshPermissionPage?.invoke()
+                }
+                val showReminder=accessibilityNotice.update(ready,recovering,
+                    dev.thor.tools.diagnostic.ThorAccessibilityService.settingEnabled(this@MainActivity))
+                if(ready || recovering) {
+                    accessibilityReminder?.dismiss();accessibilityReminder=null
+                } else if(showReminder) {
+                    accessibilityReminder=AlertDialog.Builder(this@MainActivity)
+                        .setTitle("无障碍服务连接已失效")
+                        .setMessage(if(host.accessibilityRestartRequired())host.accessibilitySetupStatus() else "${host.accessibilitySetupStatus()}。当前无法读取屏幕或执行操作，请在系统无障碍设置中关闭后重新开启 Thor Agent 服务。")
+                        .setPositiveButton(if(host.accessibilityRestartRequired())"打开应用设置" else "去重新开启") {_,_->
+                            openSystemSettings(if(host.accessibilityRestartRequired())android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:$packageName"))
+                                else android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                        }
+                        .setNegativeButton("稍后处理",null).show()
+                }
+            }
+            accessibilityMonitor.postDelayed(this,1000)
+        }
+    }
+    override fun onResume() {super.onResume();refreshPermissionPage?.invoke();accessibilityMonitor.post(accessibilityCheck)}
+    override fun onStart() {super.onStart();backgrounds.start();chatStarted=true;attachedEngine?.uiVisibilityChanged(runtimeUi)}
+    override fun onStop() {backgrounds.stop();chatStarted=false;super.onStop()}
     override fun onWindowFocusChanged(hasFocus:Boolean) {super.onWindowFocusChanged(hasFocus);attachedEngine?.uiVisibilityChanged(runtimeUi)}
-    override fun onPause() {super.onPause();voice?.close();voice=null;voiceId=null}
+    override fun onPause() {
+        accessibilityMonitor.removeCallbacks(accessibilityCheck)
+        accessibilityReminder?.dismiss();accessibilityReminder=null
+        super.onPause();voice?.close();voice=null;voiceId=null
+    }
     override fun onDestroy() {
+        unregisterSettingsBack()
+        backgroundPreview?.close(); backgroundPreview = null
+        backgrounds.close(); backgroundAppsPage?.close()
         voice?.close();voice=null;voiceId=null
         attachedEngine?.detach(runtimeUi);attachedEngine=null
         if(serviceBound){unbindService(serviceConnection);serviceBound=false}
         runtimeService=null
+        runtimeRecreationHold?.close(); runtimeRecreationHold = null
         super.onDestroy()
+    }
+    @Deprecated("Activity configuration handoff")
+    override fun onRetainNonConfigurationInstance(): Any? {
+        if (!serviceBound) return null
+        // Keep one application-owned binding across the old/new Activity gap.
+        // Idle services otherwise die on the final unbind and lose the live documents.
+        return runtimeRecreationHold?.also { runtimeRecreationHold = null }
+            ?: RuntimeRecreationHold(applicationContext)
     }
     override fun onSaveInstanceState(out: Bundle) {
         super.onSaveInstanceState(out);out.putString("pickerSession",pickerSession);out.putString("pickerKind",pickerKind)
+        rememberSettingsScroll()
+        out.putBundle("settingsScrollPositions", Bundle().apply {
+            settingsScrollPositions.forEach { (key, position) -> putInt(key, position) }
+        })
+        out.putBoolean("backgroundAppsVisible", backgroundAppsVisible)
+        out.putString("backgroundAppsQuery", backgroundAppsPage?.query ?: backgroundAppsQuery)
+        out.putString("backgroundAppsFilter", (backgroundAppsPage?.filter ?: backgroundAppsFilter).name)
+        out.putBoolean("appearancePageVisible", appearancePageVisible)
+        out.putString("backgroundPickerKey", backgroundPickerKey);out.putString("backgroundPageKey", backgroundPageKey)
         pendingPickerResult?.save(out)
+        onboardingStep?.let {out.putInt("onboardingStep",it)}
     }
     @Deprecated("System document picker result")
     override fun onActivityResult(requestCode: Int,resultCode: Int,data: android.content.Intent?) {
         super.onActivityResult(requestCode,resultCode,data)
+        if (requestCode == 75) {
+            val key = backgroundPickerKey; backgroundPickerKey = null
+            if (resultCode == RESULT_OK && data?.data != null && key != null) {
+                backgrounds.import(data.data!!, key) { error ->
+                    if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+                    if (backgroundPageKey == key && ::web.isInitialized && attachedEngine != null) showBackgroundSettings(key)
+                }
+            }
+            return
+        }
         if(requestCode !in setOf(71,72))return
         val uri=data?.data
         if(resultCode!=RESULT_OK || uri==null || requestCode==71 && pickerSession==null) {
@@ -202,31 +329,246 @@ class MainActivity : Activity() {
     @Deprecated("Android permission callback")
     override fun onRequestPermissionsResult(requestCode:Int,permissions:Array<out String>,grantResults:IntArray) {
         super.onRequestPermissionsResult(requestCode,permissions,grantResults)
+        if(requestCode in setOf(73,74,75))refreshPermissionPage?.invoke()
         if(requestCode==73) {microphonePermissionPending=false;Toast.makeText(this,if(grantResults.firstOrNull()==android.content.pm.PackageManager.PERMISSION_GRANTED)"麦克风已允许，请长按开始说话" else "麦克风未允许，可继续文字输入或在系统设置开启",Toast.LENGTH_LONG).show()}
     }
     @Deprecated("Android back callback")
     override fun onBackPressed() {if(settingsView!=null)settingsBack() else super.onBackPressed()}
-    private fun closeSettings() {settingsView?.let {(it.parent as? android.view.ViewGroup)?.removeView(it)};settingsView=null}
-    private fun settingsPage(title:String,content:View,save:(()->Unit)?=null,back:()->Unit={closeSettings()}):LinearLayout {
-        closeSettings()
-        val page=LinearLayout(this).apply {tag="thor-settings-page";orientation=LinearLayout.VERTICAL;setBackgroundColor(if(resources.configuration.uiMode and 0x30==0x20)0xff202020.toInt() else 0xfffafafa.toInt())}
-        val toolbar=LinearLayout(this).apply {gravity=android.view.Gravity.CENTER_VERTICAL;setPadding(12,8,12,8)}
-        toolbar.addView(Button(this).apply {text="‹ 返回";backgroundTintList=android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT);setOnClickListener {back()}})
-        toolbar.addView(TextView(this).apply {text=title;textSize=20f;setTextColor(if(resources.configuration.uiMode and 0x30==0x20)0xffeeeeee.toInt() else 0xff222222.toInt())},LinearLayout.LayoutParams(0,-2,1f))
-        if(save!=null)toolbar.addView(Button(this).apply {text="保存";setTextColor(android.graphics.Color.WHITE);backgroundTintList=android.content.res.ColorStateList.valueOf(0xff2f6edb.toInt());setOnClickListener {save()}})
-        page.addView(toolbar);page.addView(ScrollView(this).apply {isFillViewport=true;addView(content)},LinearLayout.LayoutParams(-1,0,1f))
-        (web.parent as FrameLayout).addView(page,FrameLayout.LayoutParams(-1,-1));settingsView=page;settingsBack=back
+    private fun showAgentActionSettings() {
+        val ui = SettingsUi(this)
+        val content = ui.column()
+        content.addView(ui.text("在 Agent 操作的屏幕上显示半透明圆形光标，点击时缩放，滑动时平滑移动并轻弹回位。", 14f, true))
+        content.addView(Switch(this).apply {
+            text = "显示 Agent 操作光标"
+            isChecked = dev.thor.tools.diagnostic.AgentActionFeedback.enabled(this@MainActivity)
+            setTextColor(ui.ink)
+            setOnCheckedChangeListener { _, enabled ->
+                dev.thor.tools.diagnostic.AgentActionFeedback.setEnabled(this@MainActivity, enabled)
+            }
+        })
+        content.addView(ui.text("默认开启，即时保存。开启会为动作展示增加少量操作延迟；关闭后不再展示或等待光标动画。操作后的页面截图仍会自动返回给 Agent。", 13f, true))
+        settingsPage("Agent 操作展示", content, back = { showSettings() })
+    }
+
+    private fun showAppearanceSettings() {
+        val ui = SettingsUi(this)
+        val content = ui.column()
+        content.addView(ui.text("页面配色", 28f))
+        content.addView(ui.text("聊天、设置、菜单和系统栏使用统一配色。图片与壁纸的颜色叠加层会一起变化。", 14f, true))
+        ui.heading(content, "选择配色")
+        val group = RadioGroup(this)
+        ColorMode.entries.forEach { mode ->
+            group.addView(RadioButton(this).apply {
+                id = View.generateViewId(); text = mode.label; minHeight = ui.dp(56)
+                setTextColor(ui.ink); buttonTintList = android.content.res.ColorStateList.valueOf(ui.accent)
+                isChecked = Appearance.mode(this@MainActivity) == mode
+                setOnClickListener {
+                    if (Appearance.mode(this@MainActivity) != mode) {
+                        Appearance.save(this@MainActivity, mode)
+                        appearancePageVisible = true
+                        recreate()
+                    }
+                }
+            })
+        }
+        ui.card(content).addView(group)
+        ui.heading(content, "背景显示")
+        content.addView(ui.text("亮色使用轻薄的浅色叠加，暗色使用柔和的深色叠加，保留背景细节。消息和输入框另有衬底，保证文字清晰。", 14f, true))
+        content.addView(ui.text("跟随系统会随系统深浅模式自动切换；手动选择亮色或暗色后，系统变化不会覆盖你的选择。", 13f, true))
+        content.addView(ui.button("调整聊天背景") { showBackgroundSettings() })
+        val previewSpec = backgrounds.effectiveSpec()
+        showPreviewSettings("页面配色", content, previewSpec, "页面配色") { showSettings() }
+        appearancePageVisible = true
+    }
+    /** Fixed preview, independently scrolling controls: both remain usable on Thor's lower display. */
+    private fun showPreviewSettings(title: String, controls: LinearLayout, spec: BackgroundSpec, key: String, back: () -> Unit) {
+        val ui = SettingsUi(this)
+        val preview = ChatBackgroundPreview(this, backgroundStore)
+        val pane = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(ui.dp(12), ui.dp(8), ui.dp(12), ui.dp(10))
+            addView(ui.text("虚拟聊天 · 实时预览", 13f, true).apply { setPadding(0, 0, 0, ui.dp(6)) })
+            addView(preview, LinearLayout.LayoutParams(-1, 0, 1f))
+        }
+        controls.setPadding(ui.dp(12), ui.dp(4), ui.dp(12), ui.dp(20))
+        val scroller = ScrollView(this).apply { isFillViewport = true; addView(controls) }
+        val wide = resources.configuration.screenWidthDp >= 520
+        val body = LinearLayout(this).apply {
+            tag = "settings-designed"
+            orientation = if (wide) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+            if (wide) {
+                addView(pane, LinearLayout.LayoutParams(0, -1, .48f))
+                addView(scroller, LinearLayout.LayoutParams(0, -1, .52f))
+            } else {
+                addView(pane, LinearLayout.LayoutParams(-1, ui.dp(220)))
+                addView(scroller, LinearLayout.LayoutParams(-1, 0, 1f))
+            }
+        }
+        settingsPage(title, body, scrollKey = key, back = back, scroll = false)
+        backgroundPreview = preview
+        backgrounds.preview(spec); preview.update(spec)
+        settingsScroll = scroller; settingsScrollKey = key
+        val position = settingsScrollPositions[key] ?: 0
+        scroller.post { scroller.scrollTo(0, position) }
+    }
+    private fun showBackgroundSettings(key: String = ChatBackgroundStore.GLOBAL) {
+        backgroundPageKey = key
+        val ui = SettingsUi(this)
+        val content = ui.column()
+        val global = key == ChatBackgroundStore.GLOBAL
+        fun title(pkg: String) = runCatching { packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrDefault("已移除的应用")
+        content.addView(ui.text(if (global) "聊天背景" else title(key), 28f))
+        content.addView(ui.text(if (global) "全局背景；有专属设置的上屏应用会优先使用自己的背景。" else "切换到此上屏应用时自动生效，设置即时保存。", 13f, true))
+        val spec = backgroundStore.get(key)
+        fun save(next: BackgroundSpec) {
+            backgroundStore.save(key, next)
+            backgrounds.preview(next); backgroundPreview?.update(next)
+        }
+        ui.heading(content, "背景来源")
+        val modes = listOf("default" to "纯色背景", "image" to "手动设置背景图片", "wallpaper" to "透传系统当前壁纸")
+        val group = RadioGroup(this)
+        modes.forEach { (mode, label) ->
+            group.addView(RadioButton(this).apply {
+                id = View.generateViewId(); text = label; isChecked = spec.mode == mode; minHeight = ui.dp(48)
+                setOnClickListener {
+                    if (mode == "image" && backgroundStore.file(backgroundStore.get(key)) == null) {
+                        pickBackgroundImage(key); showBackgroundSettings(key)
+                    } else { save(backgroundStore.get(key).copy(mode = mode)); showBackgroundSettings(key) }
+                }
+            })
+        }
+        ui.card(content).addView(group)
+        content.addView(ui.button(if (spec.image.isEmpty()) "选择背景图片" else "更换背景图片") { pickBackgroundImage(key) })
+        if (spec.mode == "image") {
+            content.addView(ui.text("图片已保存在应用内；透明度越低，底色越明显。", 13f, true))
+        }
+        ui.heading(content, "显示效果")
+        content.addView(ui.text("颜色叠加层随页面配色自动变化，毛玻璃与不透明度保留当前设置。", 13f, true))
+        if (spec.mode == "default") content.addView(ui.text("选择图片或系统壁纸后可调整显示效果。", 13f, true))
+        fun slider(label: String, max: Int, value: Int, enabled: Boolean = spec.mode != "default", changed: (Int) -> Unit) {
+            val card = ui.card(content)
+            val text = ui.text("$label：$value${if (max == 100) "%" else ""}").apply { setPadding(ui.dp(16), ui.dp(10), ui.dp(16), 0) }
+            card.addView(text)
+            card.addView(SeekBar(this).apply {
+                this.max = max; progress = value; contentDescription = label; minimumHeight = ui.dp(48)
+                isEnabled = enabled
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(bar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        text.text = "$label：$progress${if (max == 100) "%" else ""}"
+                        if (fromUser) changed(progress)
+                    }
+                    override fun onStartTrackingTouch(bar: SeekBar?) {}
+                    override fun onStopTrackingTouch(bar: SeekBar?) {}
+                })
+            })
+        }
+        slider("毛玻璃程度", 30, spec.blur) { save(backgroundStore.get(key).copy(blur = it)) }
+        slider("背景不透明度", 100, spec.opacity) { save(backgroundStore.get(key).copy(opacity = it)) }
+        slider("卡片透明度", 100, 100 - spec.cardOpacity, enabled = true) { save(backgroundStore.get(key).copy(cardOpacity = 100 - it)) }
+        content.addView(ui.text("0% 为实心卡片，100% 隐藏卡片底色；文字和按钮保持清晰。", 12f, true))
+        if (spec.mode == "wallpaper") {
+            val blurSupported = android.os.Build.VERSION.SDK_INT >= 31 && getSystemService(android.view.WindowManager::class.java).isCrossWindowBlurEnabled
+            content.addView(ui.text(if (blurSupported) "透传会跟随系统壁纸，包括动态壁纸；效果取决于系统壁纸在此屏幕的支持。" else "透传会跟随系统壁纸；当前系统不支持窗口毛玻璃，壁纸将以原始清晰度显示。图片背景仍支持毛玻璃。", 13f, true))
+        }
+        content.addView(ui.button("查看聊天效果") { closeSettings() })
+        if (global) {
+            ui.heading(content, "上屏应用专属背景")
+            content.addView(ui.text("按已校准的上屏和无障碍窗口识别应用。无法识别或无专属设置时使用全局背景。", 13f, true))
+            val count = backgroundStore.all().keys.count { it != ChatBackgroundStore.GLOBAL }
+            ui.row(ui.card(content), "上屏应用背景", "已配置 $count 个应用 · 搜索并管理", "▧") { chooseBackgroundApp() }
+        } else {
+            content.addView(ui.button("移除此应用设置，跟随全局") {
+                backgroundStore.remove(key); backgrounds.refresh(); chooseBackgroundApp()
+            })
+        }
+        showPreviewSettings(if (global) "聊天背景" else "应用背景", content, spec, "background:$key", back = {
+            if (global) { backgroundPageKey = null; showSettings() } else chooseBackgroundApp()
+        })
+        // settingsPage closes the preceding page before attaching the new one.
+        backgroundPageKey = key
+    }
+    private fun pickBackgroundImage(key: String) {
+        backgroundPickerKey = key
+        runCatching {
+            startActivityForResult(android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT)
+                .addCategory(android.content.Intent.CATEGORY_OPENABLE).setType("image/*"), 75)
+        }.onFailure { backgroundPickerKey = null; Toast.makeText(this, "无法打开图片选择器", Toast.LENGTH_LONG).show() }
+    }
+    private fun chooseBackgroundApp() {
+        // Capture before replacing the preceding page, including search and filter state.
+        backgroundAppsPage?.let { backgroundAppsQuery = it.query; backgroundAppsFilter = it.filter }
+        val page = BackgroundAppsPage(this, backgroundStore,
+            { attachedEngine?.host?.backgroundUpperPackage() ?: java.util.concurrent.CompletableFuture.completedFuture(null) },
+            { showBackgroundSettings(it) }, backgroundAppsQuery, backgroundAppsFilter)
+        settingsPage("上屏应用背景", page.view, back = { showBackgroundSettings() }, scroll = false)
+        backgroundAppsPage = page; backgroundAppsVisible = true
+    }
+    private fun rememberSettingsScroll() {
+        val key = settingsScrollKey ?: return
+        settingsScroll?.let { settingsScrollPositions[key] = it.scrollY }
+    }
+    private fun unregisterSettingsBack() {
+        if (android.os.Build.VERSION.SDK_INT >= 33) settingsBackCallback?.let { onBackInvokedDispatcher.unregisterOnBackInvokedCallback(it) }
+    }
+    private fun closeSettings() = removeSettings(preserveScroll = false)
+    private fun removeSettings(preserveScroll: Boolean) {
+        backgroundPreview?.close(); backgroundPreview = null
+        if (::backgrounds.isInitialized) backgrounds.preview(null)
+        backgroundAppsPage?.let { backgroundAppsQuery = it.query; backgroundAppsFilter = it.filter; it.close() }
+        backgroundAppsPage=null; backgroundAppsVisible=false
+        rememberSettingsScroll()
+        unregisterSettingsBack()
+        appearancePageVisible=false; backgroundPageKey=null; refreshPermissionPage=null
+        if(::web.isInitialized)web.importantForAccessibility=View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+        settingsView?.let {(it.parent as? android.view.ViewGroup)?.removeView(it)}
+        settingsView=null; settingsScroll=null; settingsScrollKey=null
+        if (!preserveScroll) settingsScrollPositions.clear()
+    }
+    private fun settingsPage(title:String,content:View,save:(()->Unit)?=null,scrollKey:String=title,back:()->Unit={closeSettings()},scroll:Boolean=true):LinearLayout {
+        removeSettings(preserveScroll = true)
+        val ui=SettingsUi(this)
+        val page=LinearLayout(this).apply {tag="thor-settings-page";orientation=LinearLayout.VERTICAL;setBackgroundColor(ui.background)}
+        val toolbar=LinearLayout(this).apply {gravity=android.view.Gravity.CENTER_VERTICAL;setPadding(ui.dp(12),ui.dp(8),ui.dp(12),ui.dp(8))}
+        toolbar.addView(ui.button("‹ 返回",back).apply {contentDescription="返回上一页"})
+        toolbar.addView(ui.text(title,20f).apply {setPadding(ui.dp(12),0,0,0)},LinearLayout.LayoutParams(0,-2,1f))
+        if(save!=null)toolbar.addView(ui.button("保存",save))
+        ui.styleForm(content)
+        val scrollView = if (scroll) ScrollView(this).apply { isFillViewport=true; addView(content) } else null
+        page.addView(toolbar);page.addView(scrollView ?: content,LinearLayout.LayoutParams(-1,0,1f))
+        settingsScroll = scrollView; settingsScrollKey = if (scroll) scrollKey else null
+        val position = settingsScrollPositions[scrollKey] ?: 0
+        scrollView?.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(view:View,left:Int,top:Int,right:Int,bottom:Int,oldLeft:Int,oldTop:Int,oldRight:Int,oldBottom:Int) {
+                scrollView.removeOnLayoutChangeListener(this)
+                scrollView.scrollTo(0, position)
+            }
+        })
+        web.importantForAccessibility=View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+        container.addView(page,FrameLayout.LayoutParams(-1,-1));settingsView=page;settingsBack=back
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, settingsBackCallback!!)
+        }
         return page
     }
     private fun showModelProviders() {
         val store=ProviderStore(this)
-        val content=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(24,16,24,24)}
-        content.addView(TextView(this).apply {text="保存多套服务配置，一次使用一个 Provider。在这里切换后直接使用已保存的 API Key；发送框可选择当前服务的模型。";setPadding(0,0,0,16)})
-        for(config in store.list()) {
+        val ui=SettingsUi(this)
+        val content=ui.column()
+        content.addView(ui.text("选择你的 AI 服务",24f).apply {setPadding(ui.dp(6),ui.dp(12),0,ui.dp(6))})
+        content.addView(ui.text("保存多套账号配置，选择一个作为新会话的默认服务。",14f,true).apply {setPadding(ui.dp(6),0,0,ui.dp(12))})
+        if(store.list().isEmpty()) {
+            val empty=SettingsForm(this)
+            val body=empty.section(content,"连接第一个模型服务")
+            body.addView(ui.text("推荐 DeepSeek 官方 API",18f))
+            empty.note(body,"一个 Key 同时用于模型和联网搜索。也支持 OpenCode Go 与自定义接口。")
+        }
+        for(config in store.list().sortedBy {if(it.getString("id")==store.defaultId())0 else 1}) {
             val id=config.getString("id")
-            val row=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(0,12,0,16)}
-            row.addView(TextView(this).apply {text=config.getString("name")+if(store.defaultId()==id)" · 当前使用" else "";textSize=18f;setTypeface(null,android.graphics.Typeface.BOLD)})
-            row.addView(TextView(this).apply {text="${providerKindLabel(config.getString("kind"))} · ${config.getString("model")}\nAPI Key：${store.credentialStatus(id)}";setPadding(0,6,0,8)})
+            val row=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(ui.dp(18),ui.dp(16),ui.dp(18),ui.dp(14))}
+            ui.card(content).addView(row)
+            row.addView(ui.text(if(store.defaultId()==id)"当前默认" else if(config.getBoolean("enabled"))"可切换" else "已停用",12f,true).apply {setTextColor(ui.accent)})
+            row.addView(ui.text(config.getString("name"),18f).apply {setPadding(0,ui.dp(5),0,ui.dp(4))})
+            row.addView(ui.text("${config.getString("model")} · ${store.credentialStatus(id)}",13f,true))
             val buttons=LinearLayout(this).apply {orientation=LinearLayout.HORIZONTAL}
             buttons.addView(Button(this).apply {text="编辑";tag="provider-edit-$id";setOnClickListener {showProviderEditor(config,config.getString("kind"))}})
             if(config.getBoolean("enabled") && store.defaultId()!=id)buttons.addView(Button(this).apply {text="使用此服务";tag="provider-activate-$id";setOnClickListener {
@@ -239,16 +581,21 @@ class MainActivity : Activity() {
                 AlertDialog.Builder(this@MainActivity).setTitle("删除 ${config.getString("name")}？").setMessage("只会删除此服务配置和它的 API Key；其他服务与聊天记录会保留。")
                     .setNegativeButton("取消",null).setPositiveButton("删除") {_,_->if(changeProviderSettings {store.delete(id)})showModelProviders()}.show()
             }})
-            row.addView(buttons);content.addView(row)
-            content.addView(View(this).apply {setBackgroundColor(0x22888888)},LinearLayout.LayoutParams(-1,1))
+            for(index in 0 until buttons.childCount) {
+                val button=buttons.getChildAt(index) as Button
+                button.isAllCaps=false;button.setTextColor(ui.accent);button.backgroundTintList=null;button.background=ui.button("",{}).background;button.textSize=14f
+                button.layoutParams=LinearLayout.LayoutParams(0,ui.dp(48),1f)
+            }
+            row.addView(buttons,LinearLayout.LayoutParams(-1,-2).apply {topMargin=ui.dp(10)})
         }
-        content.addView(Button(this).apply {text="添加模型服务";tag="provider-add";isEnabled=store.list().size<ProviderStore.MAX_PROVIDERS;setOnClickListener {
+        val addProvider=ui.button("添加模型服务",{}).apply {tag="provider-add";isEnabled=store.list().size<ProviderStore.MAX_PROVIDERS;setOnClickListener {
             val kinds=listOf("opencode-go","deepseek","custom")
             AlertDialog.Builder(this@MainActivity).setTitle("添加模型服务").setItems(kinds.map(::providerKindLabel).toTypedArray()) {_,index->showProviderEditor(null,kinds[index])}.show()
-        }})
+        }}
+        content.addView(addProvider,2,LinearLayout.LayoutParams(-1,ui.dp(48)).apply {bottomMargin=ui.dp(12)})
         settingsPage("模型服务",content,back={showSettings()})
     }
-    private fun providerKindLabel(kind:String)=when(kind){"opencode-go"->"OpenCode Go";"deepseek"->"DeepSeek 官方";else->"自定义 API Key"}
+    private fun providerKindLabel(kind:String)=when(kind){"opencode-go"->"OpenCode Go";"deepseek"->"DeepSeek 官方（推荐 · 模型 + 搜索）";else->"自定义 API Key"}
     private fun changeProviderSettings(action:()->Unit):Boolean = try {
         require(!host.hasActiveRuns()) {"请等待活动任务完成后再修改服务配置"}
         action()
@@ -258,7 +605,7 @@ class MainActivity : Activity() {
     }catch(_:Exception){Toast.makeText(this,"修改未完成：请等待活动任务结束，并检查服务配置",Toast.LENGTH_LONG).show();false}
     private fun showProviderEditor(saved:JSONObject?,kind:String) {
         val store=ProviderStore(this);val custom=kind=="custom"
-        val config=saved ?: JSONObject().put("kind",kind).put("enabled",true).put("name",providerKindLabel(kind)).put("protocol",0)
+        val config=saved ?: JSONObject().put("kind",kind).put("enabled",true).put("name",when(kind){"deepseek"->"DeepSeek 官方";"opencode-go"->"OpenCode Go";else->"自定义服务"}).put("protocol",0)
             .put("url",when(kind){"opencode-go"->"https://opencode.ai/zen/go/v1";"deepseek"->DeepSeekCatalog.BASE_URL;else->""})
             .put("model","").put("contextBudget",32768).put("maxOutput",2048).put("supportsImages",true)
         val id=saved?.getString("id")
@@ -271,7 +618,7 @@ class MainActivity : Activity() {
         }
         text("服务类型：${providerKindLabel(kind)}")
         val name=field("服务名称（便于区分账号）","name")
-        val enabled=CheckBox(this).apply {text="允许使用此配置";isChecked=config.optBoolean("enabled",true);content.addView(this)}
+        val enabled=CheckBox(this).apply {text="启用此服务";isChecked=config.optBoolean("enabled",true);content.addView(this)}
         val protocol=Spinner(this).apply {adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,arrayOf("OpenAI Responses","Anthropic Messages","OpenAI Chat Completions"));setSelection(config.optInt("protocol",0));content.addView(this);visibility=if(custom)View.VISIBLE else View.GONE}
         val url=field("模型基础 URL（HTTP / HTTPS）","url").apply {visibility=if(custom)View.VISIBLE else View.GONE}
         val model=field("模型 ID","model").apply {visibility=if(custom)View.VISIBLE else View.GONE}
@@ -286,7 +633,7 @@ class MainActivity : Activity() {
         val headerName=field("自定义凭据头（可选）","headerName")
         val headerTemplate=field("凭据格式，例如 Bearer {{credential}}（可选）","headerTemplate")
         text("API Key：${id?.let {store.credentialStatus(it)} ?: "未保存"}；留空保留此服务已保存的 Key")
-        val key=field("此服务的 API Key（留空保留）","",true).apply {tag="provider-api-key"}
+        val key=field(if(id==null)"输入 API Key" else "输入新的 Key 以替换","",true).apply {tag="provider-api-key"}
         val removeKey=CheckBox(this).apply {text="删除此服务已保存的 API Key";content.addView(this)}
         fun draftKey():String {
             if(removeKey.isChecked)return ""
@@ -301,7 +648,8 @@ class MainActivity : Activity() {
             contextBudget.isEnabled=custom;imageSupport.isEnabled=custom
         }
         renderAdvanced()
-        content.addView(Button(this).apply {text="高级选项 ›";setOnClickListener {advancedExpanded=!advancedExpanded;renderAdvanced();text=if(advancedExpanded)"收起高级选项 ‹" else "高级选项 ›"}})
+        val advancedToggle=Button(this).apply {text="高级选项 ›";setOnClickListener {advancedExpanded=!advancedExpanded;renderAdvanced();text=if(advancedExpanded)"收起高级选项 ‹" else "高级选项 ›"}}
+        content.addView(advancedToggle)
         fun metadata():JSONObject?=(when(kind){"deepseek"->deepseek.models();"opencode-go"->catalog.models();else->null})?.objects()?.firstOrNull {it.getString("id")==model.text.toString() && it.getString("protocol")==ModelCatalog.protocols[protocol.selectedItemPosition]}
         fun updateModels() {
             if(custom)return
@@ -338,7 +686,37 @@ class MainActivity : Activity() {
             test.isEnabled=false;testStatus.text="正在测试当前填写的连接…"
             Thread {val result=ModelConnectionTest.run(testDraft);runOnUiThread {if(test.isAttachedToWindow){test.isEnabled=true;testStatus.text="${result.message} · ${result.elapsedMs} ms\n草稿未保存，点击保存后生效。"}}}.start()
         }
-        settingsPage(if(saved==null)"添加模型服务" else "编辑模型服务",content,save={
+        val form=SettingsForm(this)
+        val identity=form.section(form.rail,"服务配置")
+        identity.addView(form.ui.text(when(kind){"deepseek"->"DeepSeek 官方";"opencode-go"->"OpenCode Go";else->"自定义接口"},18f))
+        if(kind=="deepseek")form.note(identity,"与联网搜索共享 Key。")
+        form.field(identity,"服务名称",name);form.move(identity,enabled)
+        val connection=form.section(form.main,if(custom)"接口与模型" else "选择模型")
+        if(custom) {
+            form.field(connection,"接口协议",protocol);form.field(connection,"API 基础地址",url);form.field(connection,"模型 ID",model)
+        } else {
+            form.move(connection,modelPicker)
+        }
+        val credentials=form.section(form.main,"连接凭据")
+        form.note(credentials,if(id==null)"填写此服务的 API Key，保存后即可使用。" else "${store.credentialStatus(id)} · 留空继续使用")
+        form.move(credentials,key)
+        val validation=form.section(form.main,"连接测试")
+        form.move(validation,test);form.move(validation,testStatus)
+        val options=form.section(form.rail,"更多设置")
+        form.move(options,advancedToggle)
+        val advancedBody=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;visibility=View.GONE}
+        options.addView(advancedBody)
+        form.field(advancedBody,"上下文上限",contextBudget)
+        form.field(advancedBody,"输出上限",maxOutput);form.move(advancedBody,outputHelp);form.move(advancedBody,imageSupport)
+        if(custom){form.field(advancedBody,"凭据请求头",headerName);form.field(advancedBody,"凭据格式",headerTemplate)}
+        else {form.move(advancedBody,refreshModels);form.move(advancedBody,catalogStatus)}
+        if(id!=null)form.move(advancedBody,removeKey)
+        advancedToggle.setOnClickListener {
+            advancedExpanded=!advancedExpanded;renderAdvanced();advancedBody.visibility=if(advancedExpanded)View.VISIBLE else View.GONE
+            advancedToggle.text=if(advancedExpanded)"收起高级选项 ‹" else "高级选项 ›"
+        }
+        form.note(form.rail,"右上角保存后生效。")
+        settingsPage(if(saved==null)"添加模型服务" else "编辑模型服务",form.root,save={
             try {
                 val value=JSONObject(config.toString()).put("kind",kind).put("name",name.text.toString().trim()).put("enabled",enabled.isChecked)
                     .put("url",url.text.toString().trim()).put("protocol",protocol.selectedItemPosition).put("model",model.text.toString().trim())
@@ -349,29 +727,34 @@ class MainActivity : Activity() {
                 if(id!=null && saved.getString("url").trimEnd('/')!=value.getString("url").trimEnd('/') && key.text.isBlank() && !removeKey.isChecked) {
                     testStatus.text="修改服务地址后，请重新填写此服务的 API Key；不会将已保存 Key 自动发送到新地址。";return@settingsPage
                 }
-                if(changeProviderSettings {store.save(value,key.text.toString(),removeKey.isChecked)}){key.text.clear();showModelProviders()}
+                if(changeProviderSettings {store.save(value,key.text.toString(),removeKey.isChecked)}){key.text.clear();if(onboardingStep==null)showModelProviders()}
             }catch(_:Exception){testStatus.text="保存失败：请检查服务名称、地址、模型、预算和 Key；其他服务配置保持不变"}
         },back={key.text.clear();showModelProviders()})
     }
     private fun showSettings(section:String?=null) {
+        if(section==null && onboardingStep!=null) {showOnboarding(onboardingStep!!);return}
         if(section==null) {
-            val content=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(24,16,24,24)}
-            val modelLabel=host.modelLabel()
-            fun row(title:String,subtitle:String,action:()->Unit) {
-                content.addView(Button(this).apply {text=title;isAllCaps=false;textSize=16f;gravity=android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL;minimumHeight=64;setPadding(12,8,12,0);backgroundTintList=android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT);setOnClickListener {action()}},LinearLayout.LayoutParams(-1,-2))
-                content.addView(TextView(this).apply {text=subtitle;textSize=13f;setPadding(12,0,12,18)})
-                content.addView(View(this).apply {setBackgroundColor(0x22888888)},LinearLayout.LayoutParams(-1,1))
-            }
-            row("模型服务 ›",modelLabel+" · "+host.modelStatus()){showSettings("model")}
-            row("联网搜索 ›","Brave 搜索与 API Key"){showSettings("search")}
-            row("火山流式语音识别 ›","语音输入、识别资源与 API Key"){showVoiceSettingsPage()}
-            row("设备与权限 ›","显示映射、无障碍与 Shizuku"){showSettings("device")}
-            val notificationsAllowed=android.os.Build.VERSION.SDK_INT<33 || checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)==android.content.pm.PackageManager.PERMISSION_GRANTED
-            row("后台任务通知 ›",if(notificationsAllowed)"通知中可查看运行并停止任务" else "未允许通知；后台任务仍可运行，点此开启通知") {
-                if(!notificationsAllowed)offerNotificationPermission()
-                else startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,packageName))
-            }
-            settingsPage("设置",content);return
+            val ui=SettingsUi(this)
+            val content=ui.column()
+            content.addView(ui.text("设置",34f).apply {setPadding(ui.dp(8),ui.dp(20),0,ui.dp(4))})
+            content.addView(ui.text("让 Thor 按你的方式工作",14f,true).apply {setPadding(ui.dp(8),0,0,ui.dp(8))})
+            ui.heading(content,"AI 与输入")
+            val ai=ui.card(content)
+            ui.row(ai,"模型服务",host.modelLabel()+" · "+host.modelStatus(),"✦"){showSettings("model")}
+            ui.row(ai,"联网搜索","选择搜索服务、管理 Key 与测试连接","⌕"){showSettings("search")}
+            ui.row(ai,"语音输入","火山流式识别与语音凭据","≋"){showVoiceSettingsPage()}
+            ui.heading(content,"应用与设备")
+            val device=ui.card(content)
+            ui.row(device,"页面配色",Appearance.mode(this).label,"◐"){showAppearanceSettings()}
+            ui.row(device,"聊天背景","图片、按上屏应用设置与系统壁纸","▧"){showBackgroundSettings()}
+            ui.row(device,"Agent 操作展示","半透明光标、点击与滑动动效，可关闭","◎"){showAgentActionSettings()}
+            ui.row(device,"应用权限",permissionSummary(),"✓"){showPermissions()}
+            ui.row(device,"设备与调试","上下屏映射、无障碍与 Shizuku","▣"){showSettings("device")}
+            ui.heading(content,"帮助")
+            ui.row(ui.card(content),"使用引导","重新查看介绍与权限说明","☀"){showOnboarding(0)}
+            settingsPage("设置",content)
+            refreshPermissionPage={rememberSettingsScroll();showSettings()}
+            return
         }
         val prefs = getSharedPreferences("profiles", MODE_PRIVATE); val vault = CredentialVault(this)
         val content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(32, 20, 32, 20) }
@@ -385,28 +768,10 @@ class MainActivity : Activity() {
         }
         if(section=="model") { showModelProviders(); return }
         if(section=="search") {
-        label("联网搜索 · Brave")
-        val searchUrl = field("搜索 API 地址", "searchUrl").apply {if(text.isBlank())setText("https://api.search.brave.com/res/v1/web/search")}
-        label("搜索 Key：${vault.status("search")}")
-        val searchKey = field("API Key（留空保留）", "", true)
-        val removeSearch = CheckBox(this).apply { text = "删除已保存搜索 Key"; content.addView(this) }
-        val searchTestStatus=TextView(this).apply {text="测试当前填写的地址与 Key；留空使用已保存 Key，不自动保存。";content.addView(this)}
-        val searchTest=Button(this).apply {text="测试当前搜索连接";content.addView(this)}
-        searchTest.setOnClickListener {
-            val testUrl=searchUrl.text.toString().trim();val testKey=if(removeSearch.isChecked)"" else searchKey.text.toString().ifBlank {vault.readNative("search").orEmpty()}
-            searchTest.isEnabled=false;searchTestStatus.text="正在测试当前搜索配置…"
-            Thread {val result=SearchConnectionTest.run(testUrl,testKey);runOnUiThread {if(searchTestStatus.isAttachedToWindow){searchTest.isEnabled=true;searchTestStatus.text="${result.message} · ${result.elapsedMs} ms"}}}.start()
-        }
-        settingsPage("联网搜索",content,save={
-            try {
-                require(!host.hasActiveRuns())
-                val value=searchUrl.text.toString().trim();val uri=URI(value)
-                require(uri.scheme in setOf("http","https") && !uri.host.isNullOrBlank() && uri.userInfo==null && uri.rawQuery==null && uri.fragment==null && searchKey.length()<=8192)
-                if(removeSearch.isChecked)vault.remove("search") else if(searchKey.length()>0)vault.put("search",searchKey.text.toString())
-                check(prefs.edit().putString("searchBackend","Brave").putString("searchUrl",value).commit())
-                searchKey.text.clear();closeSettings();reloadRuntime()
-            }catch(_:Exception){Toast.makeText(this,"保存失败：请停止活动任务，并检查搜索地址和 Key",Toast.LENGTH_LONG).show()}
-        },back={showSettings()})
+        showSearchSettings(this,
+            canSave={if(host.hasActiveRuns()){Toast.makeText(this,"请等待活动任务完成后再保存",Toast.LENGTH_LONG).show();false}else true},
+            onModels={showModelProviders()},onSaved={closeSettings();reloadRuntime()},
+            showPage={page,save->settingsPage("联网搜索",page,save=save,back={showSettings()})})
         return
         }
         label("设备与权限")
@@ -415,15 +780,135 @@ class MainActivity : Activity() {
         val lower = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, facts.map { "聊天下屏 ${it.id}: ${it.width}×${it.height}" }); content.addView(this); if(facts.size > 1) setSelection(1) }
         content.addView(Button(this).apply { text = "把聊天移动到所选下屏"; setOnClickListener { val target = facts[lower.selectedItemPosition].id; startActivity(android.content.Intent(this@MainActivity,MainActivity::class.java).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP),android.app.ActivityOptions.makeBasic().setLaunchDisplayId(target).toBundle()) } })
         content.addView(Button(this).apply { text = "确认本次上下屏映射"; setOnClickListener { runCatching { host.calibrate(facts[upper.selectedItemPosition].id, facts[lower.selectedItemPosition].id) }.onSuccess { Toast.makeText(this@MainActivity, "映射已校准；只授权新运行", Toast.LENGTH_LONG).show() }.onFailure { Toast.makeText(this@MainActivity, "必须选择两个不同且存在的显示", Toast.LENGTH_LONG).show() } } })
-        label("${host.accessibilitySetupStatus()}。已有 Shizuku shell 授权时自动开启本应用无障碍；会话能力开关仍由你选择。")
+        val accessibilityStatusView=TextView(this).apply {text=host.accessibilitySetupStatus();content.addView(this)}
         content.addView(Button(this).apply { text = "打开系统无障碍设置（无 Shizuku 时手动开启）"; setOnClickListener { startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) } })
         content.addView(Button(this).apply { text = "请求/绑定 Shizuku（shell UID）"; setOnClickListener { runCatching { host.bindDebug() }.onFailure { Toast.makeText(this@MainActivity, "Shizuku 尚未就绪或没有 shell 授权", Toast.LENGTH_LONG).show() } } })
         label("设备状态：确认上下屏映射后使用屏幕工具；手柄控制暂不可用。\nADB 调试采用命令分级：白名单命令及亮度、风扇、刷新率等常用调整直接执行；涉及隐私或按键分配的灰名单需逐条确认；抹除、格式化、刷机和未审查命令禁止执行。内置操作手册可在 Skill 管理中查看。")
         settingsPage("设备与权限",content,back={showSettings()})
+        refreshPermissionPage={accessibilityStatusView.text=host.accessibilitySetupStatus()}
+    }
+    private fun granted(permission:String)=checkSelfPermission(permission)==android.content.pm.PackageManager.PERMISSION_GRANTED
+    private fun notificationsGranted()=android.os.Build.VERSION.SDK_INT<33 || granted(android.Manifest.permission.POST_NOTIFICATIONS)
+    private fun accessibilityGranted()=host.accessibilityStatus().status==dev.thor.tools.Status.READY
+    private fun accessibilityLabel()=when {
+        accessibilityGranted()->"已连接"
+        host.accessibilityRestartRequired()->"需重启应用"
+        host.accessibilityRecoveryPending()->"正在自动恢复"
+        dev.thor.tools.diagnostic.ThorAccessibilityService.settingEnabled(this)->"连接失效，需重新开启"
+        else->"未开启"
+    }
+    private fun permissionSummary()="通知${if(notificationsGranted())"已开启" else "未开启"} · 麦克风${if(granted(android.Manifest.permission.RECORD_AUDIO))"已允许" else "未允许"} · 无障碍${accessibilityLabel()}"
+    private fun openSystemSettings(intent:android.content.Intent) {
+        runCatching {startActivity(intent)}.onFailure {Toast.makeText(this,"无法打开系统设置，请在系统设置中找到 Thor Agent",Toast.LENGTH_LONG).show()}
+    }
+    private fun requestOptionalPermission(permission:String,code:Int) {
+        val prefs=getSharedPreferences("onboarding",MODE_PRIVATE)
+        if(prefs.getBoolean("asked.$permission",false) && !shouldShowRequestPermissionRationale(permission)) {
+            openSystemSettings(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:$packageName")))
+        } else {
+            prefs.edit().putBoolean("asked.$permission",true).apply()
+            requestPermissions(arrayOf(permission),code)
+        }
+    }
+    private fun permissionCards(ui:SettingsUi,content:LinearLayout) {
+        ui.heading(content,"按需开启，随时可改")
+        val card=ui.card(content)
+        ui.row(card,"后台任务通知 · "+if(notificationsGranted())"已开启" else "未开启","在通知栏查看任务进度并停止任务。","◉") {
+            if(notificationsGranted())openSystemSettings(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,packageName))
+            else requestOptionalPermission(android.Manifest.permission.POST_NOTIFICATIONS,74)
+        }
+        ui.row(card,"麦克风 · "+if(granted(android.Manifest.permission.RECORD_AUDIO))"已允许" else "未允许","用于按住说话；录音发送给配置的语音识别服务，需另行配置语音凭据。","≋") {
+            if(granted(android.Manifest.permission.RECORD_AUDIO))openSystemSettings(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:$packageName")))
+            else requestOptionalPermission(android.Manifest.permission.RECORD_AUDIO,75)
+        }
+        ui.row(card,"无障碍服务 · ${accessibilityLabel()}","${host.accessibilitySetupStatus()}。连接后可读取屏幕与执行操作；使用时还需开启会话中的相应能力。","▣") {
+            openSystemSettings(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+        content.addView(ui.text("文字聊天无需以上权限。Shizuku 与上下屏映射可在「设备与调试」中按需设置。",13f,true).apply {setPadding(ui.dp(8),ui.dp(12),ui.dp(8),ui.dp(20))})
+    }
+    private fun showPermissions() {
+        val ui=SettingsUi(this);val content=ui.column()
+        permissionCards(ui,content)
+        settingsPage("应用权限",content,back={showSettings()})
+        refreshPermissionPage={showPermissions()}
+    }
+    private fun finishOnboarding() {
+        if(!host.onboardingModelReady()) {
+            Toast.makeText(this,"请先连接 LLM 模型服务",Toast.LENGTH_LONG).show();showOnboarding(0);return
+        }
+        if(!getSharedPreferences("onboarding",MODE_PRIVATE).edit().putBoolean("completed",true).commit()) {
+            Toast.makeText(this,"无法保存引导状态，请重试",Toast.LENGTH_LONG).show();return
+        }
+        onboardingStep=null;closeSettings()
+    }
+    private fun leaveOnboarding() {
+        if(getSharedPreferences("onboarding",MODE_PRIVATE).getBoolean("completed",false)) {
+            onboardingStep=null;showSettings()
+        } else moveTaskToBack(true)
+    }
+    private fun voiceConfigured():Boolean {
+        val prefs=getSharedPreferences("voice",MODE_PRIVATE);val vault=CredentialVault(this)
+        return if(prefs.getInt("auth",0)==0)!vault.readNative("voice.api").isNullOrBlank()
+        else !prefs.getString("appId",null).isNullOrBlank() && !vault.readNative("voice.access").isNullOrBlank()
+    }
+    private fun showOnboarding(step:Int) {
+        onboardingStep=step
+        val ui=SettingsUi(this);val content=ui.column()
+        content.addView(ui.text(if(step==0)"连接 AI 服务" else "配置操作权限",34f).apply {setPadding(ui.dp(8),ui.dp(28),0,ui.dp(12))})
+        content.addView(ui.text(if(step==0)"第 1 步，共 2 步 · 推荐连接 DeepSeek 官方 API，一次配置即可使用模型和联网搜索。" else "第 2 步，共 2 步 · 基础开启无障碍，进阶授权 Shizuku。",15f,true).apply {setPadding(ui.dp(8),0,ui.dp(8),ui.dp(20))})
+        if(step==0) {
+            val ready=host.onboardingModelReady()
+            val store=ProviderStore(this);val config=store.defaultId()?.let {store.get(it)}
+            ui.heading(content,"必选 · LLM 模型")
+            ui.row(ui.card(content),"连接 LLM 模型 · ${if(ready)"已配置" else "待配置"}",
+                if(ready)"${config?.optString("name")} · ${config?.optString("model")}\n点击管理或测试连接" else "推荐 DeepSeek 官方 API：填写一个 Key，模型与搜索自动可用。","✦"){showModelProviders()}
+            ui.heading(content,"可选 · 扩展能力")
+            val optional=ui.card(content)
+            ui.row(optional,"语音输入 · ${if(voiceConfigured())"已配置" else "未配置"}","连接火山语音识别服务，用语音输入消息。","≋"){showVoiceSettingsPage()}
+            ui.row(optional,"联网搜索 · ${if(host.onboardingSearchReady())"已配置" else "未配置"}","DeepSeek 官方模型自动共享 Key；也可选择 Tavily 或 Brave。","⌕"){showSettings("search")}
+            content.addView(ui.button("下一步 · 配置操作权限") {
+                if(host.onboardingModelReady())showOnboarding(1)
+                else Toast.makeText(this,"请先连接 LLM 模型服务",Toast.LENGTH_LONG).show()
+            }.apply {isEnabled=ready})
+            if(!ready)content.addView(ui.text("请先完成必选的 LLM 配置；语音与搜索不影响继续。",13f,true).apply {setPadding(ui.dp(8),ui.dp(12),ui.dp(8),0)})
+        } else {
+            ui.heading(content,"基础 · 无障碍服务")
+            ui.row(ui.card(content),"开启无障碍 · ${accessibilityLabel()}",
+                "${host.accessibilitySetupStatus()}。点击打开系统设置，选择 Thor Agent；连接失效时先关闭再重新开启服务。","▣") {
+                openSystemSettings(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            }
+            ui.heading(content,"进阶 · Shizuku 授权")
+            ui.row(ui.card(content),"授权并绑定 Shizuku","用于进阶设备调试与 Shell 操作。请先安装并启动 Shizuku，然后点击授权。","⌘") {
+                runCatching {host.bindDebug()}.onFailure {Toast.makeText(this,"请先安装并以无线调试 / ADB 方式启动 Shizuku，再返回授权（仅支持 shell 身份）",Toast.LENGTH_LONG).show()}
+            }
+            val status=ui.text(host.shizukuSetupStatus(),13f,true).apply {setPadding(ui.dp(8),ui.dp(8),ui.dp(8),ui.dp(16))}
+            content.addView(status)
+            status.addOnAttachStateChangeListener(object:View.OnAttachStateChangeListener {
+                val update=object:Runnable {
+                    override fun run() {if(status.isAttachedToWindow){status.text=host.shizukuSetupStatus();status.postDelayed(this,1000)}}
+                }
+                override fun onViewAttachedToWindow(view:View) {status.post(update)}
+                override fun onViewDetachedFromWindow(view:View) {status.removeCallbacks(update)}
+            })
+            content.addView(ui.text("操作权限可稍后开启。文字聊天只需 LLM 模型；会话中的屏幕感知、操作和调试能力仍由你单独控制。",13f,true).apply {setPadding(ui.dp(8),ui.dp(8),ui.dp(8),ui.dp(20))})
+            content.addView(ui.button("完成，开始使用"){finishOnboarding()})
+        }
+        settingsPage("使用引导 · ${step+1}/2",content,back={if(step==1)showOnboarding(0) else leaveOnboarding()})
+        refreshPermissionPage={showOnboarding(step)}
     }
     private fun showVoiceSettingsPage() {
-        showVoiceSettings(this) {content,save->settingsPage("语音输入",content,save,back={showSettings()})}
+        showVoiceSettings(this,onSaved={if(onboardingStep!=null)showOnboarding(0)}) {content,save->
+            val wrapper=LinearLayout(this).apply {tag="settings-designed";orientation=LinearLayout.VERTICAL;addView(content)}
+            val microphone=SettingsUi(this).button("麦克风权限 · ${if(granted(android.Manifest.permission.RECORD_AUDIO))"已允许" else "点击授予"}") {
+                if(granted(android.Manifest.permission.RECORD_AUDIO))openSystemSettings(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:$packageName")))
+                else requestOptionalPermission(android.Manifest.permission.RECORD_AUDIO,75)
+            }
+            (content.findViewWithTag<LinearLayout>("voice-permission-slot") ?: wrapper).addView(microphone)
+            settingsPage("语音输入",wrapper,save,back={showSettings()})
+            refreshPermissionPage={microphone.text="麦克风权限 · ${if(granted(android.Manifest.permission.RECORD_AUDIO))"已允许" else "点击授予"}"}
+        }
     }
+
 }
 
 /** A document result waiting for the existing Service connection. No Runtime,
@@ -443,4 +928,14 @@ internal data class PendingPickerResult(val requestCode:Int,val uri:String,val s
             return PendingPickerResult(code,uri,sid)
         }
     }
+}
+
+/** Holds no Activity. Released as soon as its replacement has a service binding. */
+private class RuntimeRecreationHold(private val context: android.content.Context) : AutoCloseable {
+    private val connection = object : android.content.ServiceConnection {
+        override fun onServiceConnected(name: android.content.ComponentName, binder: android.os.IBinder) {}
+        override fun onServiceDisconnected(name: android.content.ComponentName) {}
+    }
+    private var bound = context.bindService(android.content.Intent(context, AgentRuntimeService::class.java), connection, android.content.Context.BIND_AUTO_CREATE)
+    override fun close() { if (bound) { context.unbindService(connection); bound = false } }
 }

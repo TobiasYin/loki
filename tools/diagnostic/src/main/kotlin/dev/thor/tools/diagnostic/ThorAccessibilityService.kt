@@ -20,6 +20,14 @@ import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 class ThorAccessibilityService : AccessibilityService() {
+    val actionOverlay by lazy { AgentActionOverlay(this) }
+    val observableWindows: android.util.SparseArray<List<AccessibilityWindowInfo>>
+        get() {
+            val all = windowsOnAllDisplays
+            return android.util.SparseArray<List<AccessibilityWindowInfo>>().also { result ->
+                for (i in 0 until all.size()) result.put(all.keyAt(i), all.valueAt(i).filterNot { actionOverlay.ownsWindow(it.id) })
+            }
+        }
     private val revisions=TargetWindowRevisions()
     private val proofClock=Clock {SystemClock.elapsedRealtime()}
     private val proofs=PresentationProofCache(proofClock)
@@ -38,13 +46,13 @@ class ThorAccessibilityService : AccessibilityService() {
     }
     private fun cached(window:AccessibilityWindowInfo):PresentationWindowProof? {
         if(window.type != -1)return null
-        val windows=windowsOnAllDisplays[window.displayId].orEmpty()
+        val windows=observableWindows[window.displayId].orEmpty()
         return proofs.get(window.displayId,windowKey(window.displayId,windows))?.singleOrNull {it.windowId==window.id}
     }
     private fun scheduleProof(display:Int):Future<*>? {
         proofs.note(display,PresentationCacheReason.PREFLIGHT_BEGIN)
         if(closed || presentationReader==null) {proofs.note(display,PresentationCacheReason.SCHEDULE_NO_READER);return null}
-        val windows=windowsOnAllDisplays[display].orEmpty()
+        val windows=observableWindows[display].orEmpty()
         val ids=windows.filter {it.type == -1}.map {it.id}.toSet()
         if(ids.isEmpty() || ids.size>8) {
             proofs.note(display,if(ids.isEmpty())PresentationCacheReason.SCHEDULE_NO_CANDIDATE else PresentationCacheReason.SCHEDULE_TOO_MANY_CANDIDATES,candidateCount=ids.size)
@@ -77,7 +85,7 @@ class ThorAccessibilityService : AccessibilityService() {
                         proofs.note(display,PresentationCacheReason.READER_COMPLETE,key,durationMs=proofClock.now()-started,candidateCount=found.size,expectedGeneration=generation)
                         when {
                             closed || presentationReader!==reader->proofs.note(display,PresentationCacheReason.RESULT_READER_REJECTED,key,expectedGeneration=generation)
-                            key!=windowKey(display,windowsOnAllDisplays[display].orEmpty())->proofs.note(display,PresentationCacheReason.RESULT_KEY_REJECTED,key,expectedGeneration=generation)
+                            key!=windowKey(display,observableWindows[display].orEmpty())->proofs.note(display,PresentationCacheReason.RESULT_KEY_REJECTED,key,expectedGeneration=generation)
                             found.map {it.windowId}.toSet()!=ids->proofs.note(display,PresentationCacheReason.RESULT_IDS_REJECTED,key,candidateCount=found.size,expectedGeneration=generation)
                             else->proofs.put(display,key,found,started,generation)
                         }
@@ -139,8 +147,9 @@ class ThorAccessibilityService : AccessibilityService() {
     }
     override fun onAccessibilityEvent(event:AccessibilityEvent?) {
         if(event==null)return
+        if(actionOverlay.ownsWindow(event.windowId))return
         val kind=TargetEventKind.fromAndroidType(event.eventType,event.windowChanges,event.contentChangeTypes)
-        val all=windowsOnAllDisplays
+        val all=observableWindows
         if(kind==TargetEventKind.STRUCTURE) {
             val windows=linkedMapOf<Int,Set<Int>>()
             for(index in 0 until all.size())windows[all.keyAt(index)]=all.valueAt(index).map {it.id}.toSet()
@@ -163,14 +172,14 @@ class ThorAccessibilityService : AccessibilityService() {
     fun target(display:Int):Target {
         val fact=displayFacts(this).singleOrNull {it.id==display} ?: return Target(null,"unknown","display-missing")
         // Cache-only: explicit read-only preflight is the sole metadata I/O entry.
-        return UpperTargetResolver.resolve(fact,windowsOnAllDisplays[display].orEmpty().map {windowEvidence(it)},revisions)
+        return UpperTargetResolver.resolve(fact,observableWindows[display].orEmpty().map {windowEvidence(it)},revisions)
     }
     /** Optional ASR scene hint, never input authority. Only the unique verified
      * application window is eligible; no tree traversal, screenshot or shell I/O. */
     fun foregroundWindowTitle(display:Int,packageName:String):String? {
         val before=target(display)
         if(before.validity!="valid" || before.packageName!=packageName)return null
-        val window=windowsOnAllDisplays[display].orEmpty().filter {window->
+        val window=observableWindows[display].orEmpty().filter {window->
             val evidence=windowEvidence(window)
             evidence.isApplicationOn(display) && evidence.packageName==packageName
         }.singleOrNull() ?: return null
@@ -186,9 +195,9 @@ class ThorAccessibilityService : AccessibilityService() {
         "remainingMs" to item.remainingMs,"durationMs" to item.durationMs,"candidateCount" to item.candidateCount,
         "expectedGeneration" to item.expectedGeneration,"errorCode" to item.errorCode?.name)}
     fun targetEventDiagnostics():List<Map<String,Any>> = revisions.diagnostics()
-    override fun onInterrupt() { proofs.invalidate(reason=PresentationCacheReason.SERVICE_INTERRUPT);invalidated?.invoke() }
-    override fun onUnbind(intent:android.content.Intent?):Boolean { proofs.invalidate(reason=PresentationCacheReason.SERVICE_UNBOUND);if(instance===this){instance=null;invalidated?.invoke()};return super.onUnbind(intent) }
-    override fun onDestroy() { closed=true;proofs.invalidate(reason=PresentationCacheReason.SERVICE_DESTROYED);proofWorker.shutdownNow();if(instance===this){instance=null;invalidated?.invoke()};super.onDestroy() }
+    override fun onInterrupt() { actionOverlay.clear(); proofs.invalidate(reason=PresentationCacheReason.SERVICE_INTERRUPT);invalidated?.invoke() }
+    override fun onUnbind(intent:android.content.Intent?):Boolean { actionOverlay.clear(); proofs.invalidate(reason=PresentationCacheReason.SERVICE_UNBOUND);if(instance===this){instance=null;invalidated?.invoke()};return super.onUnbind(intent) }
+    override fun onDestroy() { actionOverlay.clear(); closed=true;proofs.invalidate(reason=PresentationCacheReason.SERVICE_DESTROYED);proofWorker.shutdownNow();if(instance===this){instance=null;invalidated?.invoke()};super.onDestroy() }
     companion object {
         private data class PresentationReader(val owner:Any,val read:(Int,IntArray)->List<PresentationWindowProof>)
         @Volatile private var presentationReader:PresentationReader?=null
@@ -203,6 +212,26 @@ class ThorAccessibilityService : AccessibilityService() {
             instance?.proofs?.note(display,PresentationCacheReason.READER_REMOTE_FAILED,errorCode=code)
         }
         fun invalidatePresentationEvidence(){instance?.proofs?.invalidate(reason=PresentationCacheReason.READER_CHANGED)}
+
+        /** Run on the recovery monitor, never the UI thread. getServiceInfo queries
+         * Android's live IAccessibilityServiceConnection; a retained Java instance
+         * or enabled setting cannot prove that this connection still exists. */
+        fun checkConnection():Boolean {
+            val current=instance ?: return false
+            val connected=!current.closed && runCatching {current.serviceInfo!=null}.getOrDefault(false)
+            if(!connected && instance===current) {
+                instance=null
+                current.proofs.invalidate(reason=PresentationCacheReason.SERVICE_UNBOUND)
+                invalidated?.invoke()
+            }
+            return connected && instance===current
+        }
+        fun settingEnabled(context:android.content.Context):Boolean = runCatching {
+            val own=android.content.ComponentName(context,ThorAccessibilityService::class.java)
+            android.provider.Settings.Secure.getInt(context.contentResolver,android.provider.Settings.Secure.ACCESSIBILITY_ENABLED,0)==1 &&
+                android.provider.Settings.Secure.getString(context.contentResolver,android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+                    .orEmpty().split(':').any {android.content.ComponentName.unflattenFromString(it)==own}
+        }.getOrDefault(false)
 
         @Volatile var instance:ThorAccessibilityService?=null
         @Volatile var invalidated:(()->Unit)?=null
