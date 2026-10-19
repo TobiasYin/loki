@@ -66,7 +66,7 @@ class DiagnosticsActivity : Activity() {
         val scroll = ScrollView(this).apply { addView(body) }; setContentView(scroll)
         fun text(value: String) { body.addView(TextView(this).apply { this.text = value; setPadding(0, 6, 0, 6) }) }
         fun button(label: String, action: () -> Unit): Button = Button(this).apply { this.text = label; setOnClickListener { action() }; body.addView(this) }
-        text("Thor ToolPack 0.1 · local TEST authority · no Pi\nAndroid API backend; Thor delivery UNVERIFIED. Confirm displays after every restart/geometry change.")
+        text("Loki ToolPack 0.1 · local TEST authority · no Pi\nAndroid API backend; Thor delivery UNVERIFIED. Confirm displays after every restart/geometry change.")
         text("ADB DEBUG RISK: arbitrary Shell can capture screens, inject input, access files and networks. Other switches cannot sandbox it. Shell is not Root; effects cannot be rolled back by stopping. Descendants may survive cancellation.")
         Capability.entries.forEach { cap -> body.addView(Switch(this).apply {
             this.text = cap.name.lowercase() + if (cap == Capability.WEB_SEARCH) " (unavailable; outside this module)" else ""

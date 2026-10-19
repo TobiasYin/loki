@@ -1,6 +1,6 @@
 ---
 name: skill-manager
-description: 在用户要求查看、读取、启用、停用或删除 Thor 已安装 Skill 时使用。
+description: 在用户要求查看、读取、启用、停用或删除 Loki 已安装 Skill 时使用。
 ---
 # 管理 Skill
 

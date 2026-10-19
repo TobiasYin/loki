@@ -513,7 +513,7 @@
     let previous=historyMore.parentElement===chat?historyMore:null;
     for(const message of messages) {
       let entry=messageNodes.get(message.id);
-      if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments'),usage=element('div',undefined,'run-usage-footer');usage.hidden=true;usage.setAttribute('aria-label','本轮 Token 与估算费用');card.append(element('div',message.role==='user'?'你':'Thor · Pi Agent','role'),runSlot,textSlot,attachments,usage);entry={card,runSlot,textSlot,attachments,usage,activityNodes:new Map()};messageNodes.set(message.id,entry);}
+      if(!entry){const card=element('article',undefined,`message ${message.role}`),runSlot=element('div'),textSlot=element('div'),attachments=element('div',undefined,'message-attachments'),usage=element('div',undefined,'run-usage-footer');usage.hidden=true;usage.setAttribute('aria-label','本轮 Token 与估算费用');card.append(element('div',message.role==='user'?'你':'Loki','role'),runSlot,textSlot,attachments,usage);entry={card,runSlot,textSlot,attachments,usage,activityNodes:new Map()};messageNodes.set(message.id,entry);}
       const run=runs.get(message.runId),runEvents=events.get(run?.id)??[],projectedEvents=timelineEvents(run,runEvents);
       const hasTextProjection=Array.isArray(run?.textSegments);
       const streamedText=hasTextProjection?'':runEvents.slice().sort((a,b)=>a.sequence-b.sequence).filter(event=>event.type==='text_delta').map(event=>event.data?.text??'').join('');

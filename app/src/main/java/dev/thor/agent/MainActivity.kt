@@ -747,7 +747,7 @@ class MainActivity : Activity() {
             val ui=SettingsUi(this)
             val content=ui.column()
             content.addView(ui.text("设置",34f).apply {setPadding(ui.dp(8),ui.dp(20),0,ui.dp(4))})
-            content.addView(ui.text("让 Thor 按你的方式工作",14f,true).apply {setPadding(ui.dp(8),0,0,ui.dp(8))})
+            content.addView(ui.text("让 Loki 按你的方式协助使用 Thor 掌机",14f,true).apply {setPadding(ui.dp(8),0,0,ui.dp(8))})
             ui.heading(content,"AI 与输入")
             val ai=ui.card(content)
             ui.row(ai,"模型服务",host.modelLabel()+" · "+host.modelStatus(),"✦"){showSettings("model")}
