@@ -22,7 +22,7 @@ assert adb('shell','getprop','ro.product.model').strip()==b'AYN Thor'
 assert adb('shell','getprop','ro.kernel.qemu').strip()!=b'1'
 keys=['enabled_accessibility_services','accessibility_enabled']
 original={k:adb('shell','settings','get','secure',k).decode().strip() for k in keys}
-component='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+component='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
 classes={'context':'PhysicalResumeTest','ime':'PhysicalImeTest','readback':'PhysicalDeviceStateTest','receiver':'PhysicalDeviceFlowTest','install':'EmulatorLiveInstallTest','voice-hold':'PhysicalVoiceHoldTest'}
 outputs={'context':['physical-resume'],'ime':['physical-ime.json','physical-ime-settled.png'],'readback':['physical-device-final-state.json'],'receiver':['physical-cloud-input.json','physical-cloud-logical-report.json','physical-cloud-frame-report.json'],'install':['physical-live-install.json','physical-live-install.png'],'voice-hold':['physical-voice-hold.json']}
 if a.expanded:outputs['receiver']+=['physical-cloud-button-report.json','physical-cloud-axes-report.json']
@@ -35,20 +35,20 @@ for apk in ['app/build/outputs/apk/debug/app-debug.apk','app/build/outputs/apk/a
 try:
  services=':'.join(s for s in original[keys[0]].split(':') if s not in [component,'null',''])
  adb('shell','settings put secure '+keys[0]+' '+shlex.quote(services) if services else 'settings delete secure '+keys[0]);time.sleep(.6)
- adb('shell','am','force-stop','dev.thor.agent')
+ adb('shell','am','force-stop','com.tobias.loki')
  for apk in (a.output/'apks').glob('*.apk'):assert b'Success' in adb('install','-r',str(apk))
  if a.suite=='context':
   guide=(root/'tests/skill-live-evidence/stardew-valley-guide.zip').read_bytes()
-  adb('shell','run-as','dev.thor.agent','sh','-c',"'umask 077; cat > cache/physical-guide.zip'",body=guide)
+  adb('shell','run-as','com.tobias.loki','sh','-c',"'umask 077; cat > cache/physical-guide.zip'",body=guide)
   # Archive prior additive acceptance reports without removing product data.
-  exists=subprocess.run(prefix+['shell','run-as','dev.thor.agent','test','-d','files/physical-resume'],stdout=subprocess.DEVNULL).returncode==0
-  if exists:adb('shell','run-as','dev.thor.agent','mv','files/physical-resume',f'files/physical-resume-{time.time_ns()}')
+  exists=subprocess.run(prefix+['shell','run-as','com.tobias.loki','test','-d','files/physical-resume'],stdout=subprocess.DEVNULL).returncode==0
+  if exists:adb('shell','run-as','com.tobias.loki','mv','files/physical-resume',f'files/physical-resume-{time.time_ns()}')
  else:
   for name in outputs[a.suite]:
-   exists=subprocess.run(prefix+['shell','run-as','dev.thor.agent','test','-f','files/'+name],stdout=subprocess.DEVNULL).returncode==0
-   if exists:adb('shell','run-as','dev.thor.agent','mv','files/'+name,f'files/{name}.previous-{time.time_ns()}')
+   exists=subprocess.run(prefix+['shell','run-as','com.tobias.loki','test','-f','files/'+name],stdout=subprocess.DEVNULL).returncode==0
+   if exists:adb('shell','run-as','com.tobias.loki','mv','files/'+name,f'files/{name}.previous-{time.time_ns()}')
  adb('shell','input','keyevent','224')
- result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','physicalLiveInstall',str(a.suite=='install').lower(),'-e','reuseProfile','true','-e','chatDisplay','4','-e','labDisplay','0',*(['-e','expanded','true'] if a.expanded else []),*(['-e','cleanupSession',a.cleanup_session] if a.cleanup_session else []),*(['-e','dropPointerCapture','true'] if a.drop_pointer_capture else []),'-e','class','dev.thor.agent.'+classes[a.suite],'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+ result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','physicalLiveInstall',str(a.suite=='install').lower(),'-e','reuseProfile','true','-e','chatDisplay','4','-e','labDisplay','0',*(['-e','expanded','true'] if a.expanded else []),*(['-e','cleanupSession',a.cleanup_session] if a.cleanup_session else []),*(['-e','dropPointerCapture','true'] if a.drop_pointer_capture else []),'-e','class','dev.thor.agent.'+classes[a.suite],'com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
  (a.output/'suite.log').write_bytes(result);print(result.decode(),flush=True)
  metadata['passed']=bool(re.search(rb'OK \(\d+ tests?\)',result)) and b'FAILURES' not in result
  assert metadata['passed'],'Physical acceptance failed; original evidence retained'
@@ -56,10 +56,10 @@ finally:
  try:
   for name in outputs[a.suite]:
    with (a.output/(name.replace('/','-')+'.tar')).open('wb') as f:
-    subprocess.run(prefix+['exec-out','run-as','dev.thor.agent','tar','-cf','-','-C','files',name],stdout=f,stderr=subprocess.DEVNULL)
+    subprocess.run(prefix+['exec-out','run-as','com.tobias.loki','tar','-cf','-','-C','files',name],stdout=f,stderr=subprocess.DEVNULL)
   if a.suite=='receiver':
    for kind in (['logical','frame','button','axes'] if a.expanded else ['logical','frame']):
-    raw=subprocess.run(prefix+['exec-out','run-as','dev.thor.agent','cat',f'files/physical-cloud-{kind}-report.json'],capture_output=True)
+    raw=subprocess.run(prefix+['exec-out','run-as','com.tobias.loki','cat',f'files/physical-cloud-{kind}-report.json'],capture_output=True)
     if raw.returncode or not raw.stdout.lstrip().startswith(b'{'):
      (a.output/f'{kind}-collection-error.txt').write_bytes(raw.stdout+raw.stderr);continue
     report=json.loads(raw.stdout);(a.output/f'{kind}-report.json').write_bytes(raw.stdout)
@@ -68,6 +68,6 @@ finally:
     assert hashlib.sha256(events[:report['eventPrefixBytes']]).hexdigest()==report['eventPrefixSha256']
     assert not report['integrity']['incomplete'] and report['integrity']['droppedSamples']==0
  finally:
-  adb('shell','run-as','dev.thor.agent','rm','-f','cache/physical-guide.zip')
+  adb('shell','run-as','com.tobias.loki','rm','-f','cache/physical-guide.zip')
   for key,value in original.items():adb('shell',f'settings delete secure {key}' if value=='null' else f'settings put secure {key} {shlex.quote(value)}')
   (a.output/'metadata.json').write_text(json.dumps(metadata,indent=2)+'\n')

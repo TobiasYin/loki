@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-19",
+  "device": "AYN Thor",
+  "serial": "THOR_DEVICE",
+  "applicationId": "com.tobias.loki",
+  "apk": {
+    "applicationId": "com.tobias.loki",
+    "sha256": "7a4c907346c3d592dd59167b32ee142f0c7a90de2f6ba50a7274df4f1fadd003",
+    "matchesBuiltDebugApk": true
+  },
+  "credentials": {
+    "credentialCount": 6,
+    "allCredentialsDecryptable": true,
+    "preferences": "[profiles, provider-configs, voice]",
+    "passed": true
+  },
+  "permissions": {
+    "notifications": true,
+    "microphone": true,
+    "shizuku": true,
+    "accessibilityConnected": true,
+    "accessibilityStatus": "已通过 Shizuku 授权校验，本应用无障碍已连接",
+    "shizukuStatus": "Shizuku 已授权并绑定（shell）",
+    "passed": true
+  },
+  "model": "OpenCode Go / deepseek-v4.1-flash",
+  "searchBackend": "Brave",
+  "liveNetworkPassed": true,
+  "localWeb": {
+    "scope": "Real model web.fetch to harmless local HTTP target; no model fixture",
+    "requests": [
+      {
+        "path": "/reachability",
+        "authorizationReceived": false,
+        "searchTokenReceived": false
+      }
+    ]
+  },
+  "voice": {
+    "transportPassed": true,
+    "microphonePassed": true,
+    "agentStatus": "completed",
+    "cancelDidNotSend": true,
+    "audioSource": "device-speaker-to-physical-microphone"
+  },
+  "screenInput": {
+    "passed": true,
+    "cases": [
+      {
+        "kind": "logical",
+        "receiverStatus": "pass",
+        "runStatus": "completed",
+        "toolResults": [
+          {
+            "toolId": "input.tap",
+            "error": null
+          }
+        ]
+      },
+      {
+        "kind": "frame",
+        "receiverStatus": "pass",
+        "runStatus": "completed",
+        "toolResults": [
+          {
+            "toolId": "perception.capture_screen",
+            "error": null
+          },
+          {
+            "toolId": "input.tap",
+            "error": null
+          }
+        ]
+      }
+    ]
+  },
+  "adb": {
+    "passed": true,
+    "scenarios": [
+      "white-read-and-lazy-manual",
+      "white-shell-brightness",
+      "upper-independent",
+      "lower-independent",
+      "upper-restore",
+      "lower-restore",
+      "gray-diagnostic-approved",
+      "gray-diagnostic-rejected"
+    ],
+    "originalBrightness": 125,
+    "finalBrightness": "125",
+    "originalPanels": {
+      "upper": 49,
+      "lower": 49
+    },
+    "finalPanels": {
+      "upper": 49,
+      "lower": 49
+    },
+    "originalMode": "0",
+    "finalMode": "0"
+  },
+  "finalState": {
+    "databaseQuickCheck": "ok",
+    "runCount": 20,
+    "allRunsTerminal": true,
+    "allSessionsScreenControlAndDebugOff": true
+  },
+  "runtimeUnitTests": {
+    "tests": 397,
+    "passed": 397,
+    "failed": 0
+  },
+  "retainedFailures": [
+    "Automatic DeepSeek web.fetch returned HTTP_404; configured Brave and direct fetch passed.",
+    "Old physical screen test omitted capability mutation identity; updated it to use UI toggles and confirmation.",
+    "First actual tap reached independent receiver, but post-action screenshot source validation returned PROTOCOL_ERROR; fixed and both physical input cases passed."
+  ]
+}

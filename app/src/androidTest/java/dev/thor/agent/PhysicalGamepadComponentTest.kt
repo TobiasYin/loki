@@ -78,13 +78,13 @@ class PhysicalGamepadComponentTest {
             displayId=0, name='ActivityRecord dev.thor.inputlab/.LabActivity'
           FocusedWindows:
             displayId=0, name='window dev.thor.inputlab/dev.thor.inputlab.LabActivity'
-            displayId=4, name='window dev.thor.agent/dev.thor.agent.MainActivity'
+            displayId=4, name='window com.tobias.loki/dev.thor.agent.MainActivity'
           TouchStatesByDisplay:
           FocusedDisplayId: 4
         """.trimIndent()
         assertTrue(parseFocusDump(sample,0).getBoolean("matchesUpperLab"))
         assertFalse(parseFocusDump(sample.replaceFirst("FocusedDisplayId: 0","FocusedDisplayId: 4"),0).getBoolean("matchesUpperLab"))
-        assertFalse(parseFocusDump(sample.replace("name='window dev.thor.inputlab/dev.thor.inputlab.LabActivity'","name='window dev.thor.agent/dev.thor.agent.MainActivity'"),0).getBoolean("matchesUpperLab"))
+        assertFalse(parseFocusDump(sample.replace("name='window dev.thor.inputlab/dev.thor.inputlab.LabActivity'","name='window com.tobias.loki/dev.thor.agent.MainActivity'"),0).getBoolean("matchesUpperLab"))
         assertFalse(parseFocusDump(sample.substringBefore("  FocusedWindows:"),0).getBoolean("matchesUpperLab"))
     }
     private fun sha(bytes: ByteArray)=MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") {"%02x".format(it)}

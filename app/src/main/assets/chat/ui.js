@@ -547,7 +547,7 @@
   window.receiveNative = next => {
     if(next.fatal) { $('notice').hidden=false; $('notice').textContent=next.fatal; $('send').disabled=true; return; }
     reconcileCapabilities(next);const switched=state?.selected!==next.selected;if(switched && state)drafts.set(state.selected,$('input').value);state=next;if(switched)$('input').value=drafts.get(next.selected)??'';
-    $('title').textContent=selected()?.title??'Thor Agent';
+    $('title').textContent=selected()?.title??'Loki';
     $('notice').hidden=!next.error; $('notice').textContent=next.error??'';
     $('active').hidden=true;$('active').replaceChildren();refreshComposerState();
     renderSessions();renderCapabilities();renderChat();renderSkills();renderModelPicker();renderSkillSelection();refreshVoice();if(switched)$('chat').scrollTop=$('chat').scrollHeight;

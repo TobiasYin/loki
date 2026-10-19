@@ -6,7 +6,7 @@ android {
     namespace = "dev.thor.agent"
     compileSdk = 35
     defaultConfig {
-        applicationId = "dev.thor.agent"
+        applicationId = "com.tobias.loki"
         minSdk = 30
         targetSdk = 35
         versionCode = 9

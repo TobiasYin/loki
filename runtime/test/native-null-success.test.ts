@@ -35,6 +35,29 @@ for(const protocol of ['openai-responses','openai-completions','anthropic-messag
   assert.ok(history.filter(m=>m.kind==='tool_result'&&!m.toolCallId.startsWith('blocked_before_observation')).every(m=>m.kind==='tool_result'&&!m.isError));
   assert.ok(agents.every(a=>a===session.agent));assert.ok(f.turns.at(-1)!.complete);
  });
+ test(`${protocol}: submitted screen action admits its perception-sourced post-action screenshot`,async()=>{
+  const f=fixture(protocol,[{call:{name:'tap',id:'tap_with_capture'}},{text:'The action completed; use its fresh screenshot.'}]);
+  f.snapshot.session.enabled.screen_control=true;
+  f.setTool(async()=>({...success('POST_ACTION_CAPTURE'),outcome:'submitted',submission:'submitted',content:[{type:'text',text:'POST_ACTION_CAPTURE'},{type:'attachment',attachmentId:'tool-image'}]}));
+  await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'Act once and inspect the resulting screen.'}]);
+  const result=f.events.find(e=>e.type==='tool_result')!;
+  assert.equal(f.executions.length,1);assert.equal(result.data.error,undefined);assert.equal(result.data.outcome,'submitted');
+  assert.notEqual(result.data.contentDiscarded,true);assert.ok(JSON.stringify(f.requests[1]!.body).includes(PNG));
+ });
+ for(const invalid of ['unrelated-source','perception-revoked'] as const)test(`${protocol}: submitted screenshot still rejects ${invalid} and preserves its action receipt`,async()=>{
+  const f=fixture(protocol,[{call:{name:'tap',id:'tap_capture_guard'}},{text:'Do not replay the submitted action.'}]);
+  f.snapshot.session.enabled.screen_control=true;
+  if(invalid==='unrelated-source')f.attachments.get('tool-image')!.source=['web_search'];
+  f.setTool(async()=>{
+   if(invalid==='perception-revoked')f.snapshot.session.enabled.screen_perception=false;
+   return {...success('PRIVATE_POST_ACTION_PIXELS'),outcome:'submitted',submission:'submitted',content:[{type:'text',text:'PRIVATE_POST_ACTION_PIXELS'},{type:'attachment',attachmentId:'tool-image'}]};
+  });
+  await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'Act once; respect image provenance and revocation.'}]);
+  const result=f.events.find(e=>e.type==='tool_result')!;
+  assert.equal(f.executions.length,1);assert.ok(result.data.error);assert.equal(result.data.outcome,'submitted');assert.equal(result.data.submission,'submitted');
+  assert.equal(result.data.contentDiscarded,true);assert.ok(!JSON.stringify(f.requests).includes(PNG));
+  assert.ok(!JSON.stringify([f.requests,f.events,f.turns]).includes('PRIVATE_POST_ACTION_PIXELS'));
+ });
  test(`${protocol}: Native error:null success still rejects replaced-source text and pixels`,async()=>{
   const f=fixture(protocol,[{call:{name:'capture',id:'changed_capture'}},{text:'Observe the changed source again.'}]);
   let attachmentReads=0;const get=f.ports.attachments.get;f.ports.attachments.get=async id=>{attachmentReads++;return get(id);};

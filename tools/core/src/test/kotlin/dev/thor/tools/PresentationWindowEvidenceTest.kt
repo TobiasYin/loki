@@ -34,7 +34,7 @@ WindowInfo[WindowInfo[title=null, displayId=4, taskId=-1, type=2037, layer=0, to
         val p=proof();assertEquals(10123,p.ownerUid);assertEquals(2037,p.rawWindowType);assertEquals("48a7ae6",p.token)
         val window=candidate(p);assertEquals(-1,window.type);assertTrue(window.isApplicationOn(4));assertFalse(window.isApplicationOn(0))
         assertEquals("valid",UpperTargetResolver.resolve(display,listOf(window),TargetWindowRevisions()).validity)
-        assertEquals(5034,CompanionWindows.verify(display,"receiver.app",listOf(window),setOf("dev.thor.agent")).windowId)
+        assertEquals(5034,CompanionWindows.verify(display,"receiver.app",listOf(window),setOf("com.tobias.loki")).windowId)
         val target=UpperTargetResolver.resolve(display,listOf(window),TargetWindowRevisions())
         assertEquals(5034,UiActionWindow.select(display,target,5034,"receiver.app",listOf(window)))
     }
@@ -72,7 +72,7 @@ WindowInfo[WindowInfo[title=null, displayId=4, taskId=-1, type=2037, layer=0, to
     @Test fun namesTitlesAndOtherAppsDoNotAuthorizeAnUnknownWindow() {
         denied {proof(windows=wm.replace("package=receiver.app","package=com.android.systemui"))}
         denied {proof(windows=wm.replace("mOwnerUid=10123","mOwnerUid=1000"))}
-        denied {proof(windows=wm.replace("package=receiver.app","package=dev.thor.agent"))}
+        denied {proof(windows=wm.replace("package=receiver.app","package=com.tobias.loki"))}
         assertFalse(candidate().copy(packageName="spoof.app").isApplicationOn(4))
         // App-controlled titles have no place in the joined proof/stable identity.
         assertEquals(proof(),proof(a11y.replace("title=null","title=Any app-controlled title")))

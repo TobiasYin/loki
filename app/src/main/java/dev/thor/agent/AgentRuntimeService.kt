@@ -9,8 +9,8 @@ import android.os.*
  * recovers durable interrupted history when opened, never replays a task. */
 class AgentRuntimeService:Service() {
     companion object {
-        const val ACTION_RUN="dev.thor.agent.runtime.RUN"
-        const val ACTION_STOP="dev.thor.agent.runtime.STOP"
+        const val ACTION_RUN="com.tobias.loki.runtime.RUN"
+        const val ACTION_STOP="com.tobias.loki.runtime.STOP"
         const val CHANNEL="agent-running"
         const val NOTIFICATION_ID=401
     }
@@ -89,7 +89,7 @@ class AgentRuntimeService:Service() {
     private fun notification():Notification {
         val open=PendingIntent.getActivity(this,401,Intent(this,LauncherActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val stop=PendingIntent.getService(this,402,Intent(this,AgentRuntimeService::class.java).setAction(ACTION_STOP),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val builder=Notification.Builder(this,CHANNEL).setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle("Thor Agent 正在运行")
+        val builder=Notification.Builder(this,CHANNEL).setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle("Loki 正在运行")
             .setContentText(if(activeRuns>0)"正在执行 $activeRuns 个任务，可返回聊天查看或停止" else "正在准备你发起的任务")
             .setContentIntent(open).setOngoing(true).setOnlyAlertOnce(true).setCategory(Notification.CATEGORY_SERVICE)
             .addAction(Notification.Action.Builder(null,"停止所有任务",stop).build())

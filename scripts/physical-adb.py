@@ -19,7 +19,7 @@ def adb(*args):return subprocess.check_output(prefix+list(args),stdin=subprocess
 assert adb('shell','getprop','ro.product.model').strip()==b'AYN Thor'
 original={k:adb('shell','settings','get','secure',k).decode().strip() for k in ['enabled_accessibility_services','accessibility_enabled']}
 try:
-    own='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+    own='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
     services=':'.join(s for s in original['enabled_accessibility_services'].split(':') if s not in [own,'null',''])
     adb('shell','settings put secure enabled_accessibility_services '+shlex.quote(services) if services else 'settings delete secure enabled_accessibility_services')
     time.sleep(.6)
@@ -28,11 +28,11 @@ try:
     adb('shell','input','keyevent','224')
     report='physical-fan-policy.json' if a.fan else 'physical-refresh-policy.json' if a.refresh else 'physical-storage-regression.json' if a.storage else 'physical-adb-policy.json'
     test='PhysicalFanPolicyTest' if a.fan else 'PhysicalRefreshPolicyTest' if a.refresh else 'PhysicalStorageRegressionTest' if a.storage else 'PhysicalAdbPolicyTest'
-    adb('shell','run-as','dev.thor.agent','rm','-f','files/'+report)
-    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.'+test,'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+    adb('shell','run-as','com.tobias.loki','rm','-f','files/'+report)
+    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.'+test,'com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'suite.log').write_bytes(result);print(result.decode(),flush=True)
     for name in [report]+(['physical-storage-streaming-regression.json'] if a.storage else []):
-        try:(out/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name))
+        try:(out/name).write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/'+name))
         except subprocess.CalledProcessError:pass
     assert re.search(rb'OK \(\d+ tests?\)',result) and b'FAILURES' not in result,'Physical ADB acceptance failed; inspect redacted evidence'
 finally:

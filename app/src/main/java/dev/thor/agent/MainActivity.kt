@@ -196,7 +196,7 @@ class MainActivity : Activity() {
                 } else if(showReminder) {
                     accessibilityReminder=AlertDialog.Builder(this@MainActivity)
                         .setTitle("无障碍服务连接已失效")
-                        .setMessage(if(host.accessibilityRestartRequired())host.accessibilitySetupStatus() else "${host.accessibilitySetupStatus()}。当前无法读取屏幕或执行操作，请在系统无障碍设置中关闭后重新开启 Thor Agent 服务。")
+                        .setMessage(if(host.accessibilityRestartRequired())host.accessibilitySetupStatus() else "${host.accessibilitySetupStatus()}。当前无法读取屏幕或执行操作，请在系统无障碍设置中关闭后重新开启 Loki 服务。")
                         .setPositiveButton(if(host.accessibilityRestartRequired())"打开应用设置" else "去重新开启") {_,_->
                             openSystemSettings(if(host.accessibilityRestartRequired())android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:$packageName"))
                                 else android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -809,7 +809,7 @@ class MainActivity : Activity() {
     }
     private fun permissionSummary()="通知${if(notificationsGranted())"已开启" else "未开启"} · 麦克风${if(granted(android.Manifest.permission.RECORD_AUDIO))"已允许" else "未允许"} · 无障碍${accessibilityLabel()}"
     private fun openSystemSettings(intent:android.content.Intent) {
-        runCatching {startActivity(intent)}.onFailure {Toast.makeText(this,"无法打开系统设置，请在系统设置中找到 Thor Agent",Toast.LENGTH_LONG).show()}
+        runCatching {startActivity(intent)}.onFailure {Toast.makeText(this,"无法打开系统设置，请在系统设置中找到 Loki",Toast.LENGTH_LONG).show()}
     }
     private fun requestOptionalPermission(permission:String,code:Int) {
         val prefs=getSharedPreferences("onboarding",MODE_PRIVATE)
@@ -885,7 +885,7 @@ class MainActivity : Activity() {
         } else {
             ui.heading(content,"基础 · 无障碍服务")
             ui.row(ui.card(content),"开启无障碍 · ${accessibilityLabel()}",
-                "${host.accessibilitySetupStatus()}。点击打开系统设置，选择 Thor Agent；连接失效时先关闭再重新开启服务。","▣") {
+                "${host.accessibilitySetupStatus()}。点击打开系统设置，选择 Loki；连接失效时先关闭再重新开启服务。","▣") {
                 openSystemSettings(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
             }
             ui.heading(content,"进阶 · Shizuku 授权")

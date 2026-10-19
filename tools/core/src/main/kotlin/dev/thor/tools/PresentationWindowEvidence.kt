@@ -6,7 +6,7 @@ data class PresentationWindowProof(val displayId:Int,val windowId:Int,val token:
     val packageName:String,val flags:String,val frame:TouchableBounds,val rawWindowType:Int=2037) {
     fun matches(window:TargetWindowEvidence,display:Int):Boolean = displayId==display && windowId==window.id &&
         rawWindowType==2037 && frame.left<frame.right && frame.top<frame.bottom && token.matches(Regex("[0-9a-fA-F]{1,16}")) && ownerUid%100000>=10000 &&
-        packageName==window.packageName && packageName !in setOf("android","com.android.systemui","dev.thor.agent","dev.thor.tools.diagnostic") &&
+        packageName==window.packageName && packageName !in setOf("android","com.android.systemui","com.tobias.loki","dev.thor.tools.diagnostic") &&
         window.type == -1 && window.bounds.let {it.left>=frame.left && it.top>=frame.top && it.right<=frame.right && it.bottom<=frame.bottom} &&
         flags.isNotBlank() && flags.split(' ').none {it in setOf("SECURE","NOT_TOUCHABLE") || it.startsWith("0x",true)}
     /** Time/generation/expiry deliberately excluded: identical refreshes must not invalidate node/frame identity. */
@@ -61,7 +61,7 @@ object PresentationWindowEvidence {
             requireTool(one(block,"(?m)^    mDisplayId=(\\d+) ").groupValues[1].toInt()==display,Code.TARGET_CHANGED,"Presentation WM display differs")
             val owner=one(block,"(?m)^    mOwnerUid=(\\d+) showForAllUsers=(?:true|false) package=([A-Za-z][A-Za-z0-9_.]+) appop=[^\\r\\n]*$")
             val uid=owner.groupValues[1].toInt();val pkg=owner.groupValues[2]
-            requireTool(uid%100000>=10000 && pkg !in setOf("android","com.android.systemui","dev.thor.agent","dev.thor.tools.diagnostic"),Code.PERMISSION_MISSING,"System/assistant Presentation is not eligible")
+            requireTool(uid%100000>=10000 && pkg !in setOf("android","com.android.systemui","com.tobias.loki","dev.thor.tools.diagnostic"),Code.PERMISSION_MISSING,"System/assistant Presentation is not eligible")
             val attrs=block.substringAfter("    mAttrs=","").substringBefore("    Requested ","")
             requireTool(attrs.isNotEmpty() && one(attrs,"\\bty=([A-Z_]+)\\b").groupValues[1]=="PRESENTATION",Code.UNSUPPORTED,"Only public Presentation layout type qualifies")
             requireTool(one(block,"mToken=WindowToken\\{[^\\r\\n]* type=(\\d+) ").groupValues[1].toInt()==2037,Code.UNSUPPORTED,"Presentation WindowToken type differs")
@@ -190,7 +190,7 @@ class PresentationProofCache(private val clock:Clock,private val ttlMs:Long=5000
 object PresentationOwnerPolicy {
     fun verify(proof:PresentationWindowProof,callerUid:Int,hostPackage:String,actualPackageUid:Int,systemApp:Boolean) {
         requireTool(proof.ownerUid/100000==callerUid/100000 && proof.ownerUid%100000>=10000 && proof.ownerUid!=callerUid &&
-            proof.packageName !in setOf(hostPackage,"dev.thor.agent","dev.thor.tools.diagnostic","android","com.android.systemui") && !systemApp,
+            proof.packageName !in setOf(hostPackage,"com.tobias.loki","dev.thor.tools.diagnostic","android","com.android.systemui") && !systemApp,
             Code.PERMISSION_MISSING,"Presentation user/system/assistant identity is not eligible")
         requireTool(actualPackageUid==proof.ownerUid,Code.PERMISSION_MISSING,"Presentation package owner UID differs")
     }

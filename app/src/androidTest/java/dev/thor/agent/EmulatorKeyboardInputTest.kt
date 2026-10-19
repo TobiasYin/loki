@@ -261,7 +261,7 @@ class EmulatorKeyboardInputTest {
                 catch(t:Throwable){diagnoseView(host!!);throw t}
             }}
             cleanup("activity"){activity?.let {a->ins.runOnMainSync {a.finish()}}}
-            cleanup("idle"){until("Runtime did not idle before restore"){!shell(automation,"dumpsys activity services dev.thor.agent/.AgentRuntimeService").contains("ServiceRecord{")}}
+            cleanup("idle"){until("Runtime did not idle before restore"){!shell(automation,"dumpsys activity services com.tobias.loki/dev.thor.agent.AgentRuntimeService").contains("ServiceRecord{")}}
             cleanup("preferences"){if(setup){restore(profiles,profileBefore);restore(vault,vaultBefore);restore(roles,rolesBefore)}}
             cleanup("display"){virtual?.release();images?.setOnImageAvailableListener(null,null);drain?.quitSafely();drain?.join(2000);images?.close()}
             cleanup("accessibility"){if(setup){automation.adoptShellPermissionIdentity(android.Manifest.permission.WRITE_SECURE_SETTINGS);try {Settings.Secure.putString(context.contentResolver,Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,a11yBefore);Settings.Secure.putString(context.contentResolver,Settings.Secure.ACCESSIBILITY_ENABLED,enabledBefore);Settings.Secure.putString(context.contentResolver,"immersive_mode_confirmations",immersiveBefore)}finally {automation.dropShellPermissionIdentity()}}}

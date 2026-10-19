@@ -9,7 +9,7 @@ prefix=[str(adb_bin),'-P',str(a.adb_port),'-s',a.serial]
 def adb(*args):return subprocess.check_output(prefix+list(args),stdin=subprocess.DEVNULL)
 assert adb('shell','getprop','ro.product.model').strip()==b'AYN Thor'
 original={k:adb('shell','settings','get','secure',k).decode().strip() for k in ['enabled_accessibility_services','accessibility_enabled']}
-component='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+component='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
 manager='moe.shizuku.privileged.api/moe.shizuku.manager.MainActivity'
 ui_path='/data/local/tmp/thor-shizuku-permission.xml'
 original_grant=None
@@ -22,7 +22,7 @@ def tap(node):
     adb('shell','input','-d','0','tap',str((x1+x2)//2),str((y1+y2)//2));time.sleep(.5)
 def own_switch(tree):
     parents={child:parent for parent in tree.iter() for child in parent}
-    summary=next((n for n in tree.iter('node') if n.get('text')=='dev.thor.agent'),None)
+    summary=next((n for n in tree.iter('node') if n.get('text')=='com.tobias.loki'),None)
     if summary is None:return None
     row=summary
     while row in parents:
@@ -41,7 +41,7 @@ def manager_switch():
         entry=next((n for n in tree.iter('node') if '点按以管理授权的应用' in n.get('text','')),None)
         if entry is not None:tap(entry)
         else:adb('shell','input','-d','0','swipe','1000','900','1000','450','400')
-    raise AssertionError('Thor Agent grant row not visible; no toggle performed')
+    raise AssertionError('loki grant row not visible; no toggle performed')
 def set_grant(enabled):
     switch=manager_switch()
     if (switch.get('checked')=='true')!=enabled:tap(switch)
@@ -52,12 +52,12 @@ try:
     services=[s for s in original['enabled_accessibility_services'].split(':') if s not in [component,'null','']]
     value=':'.join(services)
     adb('shell','settings put secure enabled_accessibility_services '+shlex.quote(value) if value else 'settings delete secure enabled_accessibility_services')
-    time.sleep(.6);adb('shell','am','force-stop','dev.thor.agent')
+    time.sleep(.6);adb('shell','am','force-stop','com.tobias.loki')
     for apk in ['app/build/outputs/apk/debug/app-debug.apk','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk']:
         assert b'Success' in adb('install','-r',apk)
-    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','permissionMissingAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalAccessibilityDeniedTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','permissionMissingAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalAccessibilityDeniedTest','com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'suite.log').write_bytes(result);print(result.decode(),flush=True)
-    (out/'result.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/physical-accessibility-denied.json'))
+    (out/'result.json').write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/physical-accessibility-denied.json'))
     assert re.search(rb'OK \(1 test\)',result) and b'FAILURES' not in result
 finally:
     if original_grant is not None:

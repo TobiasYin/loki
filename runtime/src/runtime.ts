@@ -304,7 +304,14 @@ export class ThorRuntime {
       } else {
         const attachment = await this.ports.attachments.get(c.attachmentId);
         if (attachment) {
-          if (t.requiredCapabilities.some(cap => !attachment.source.includes(cap))) fail('PROTOCOL_ERROR');
+          // A screen action may attach a post-action screenshot. Its pixels
+          // originate from perception; screen_control authorizes the action,
+          // and is already rechecked before and after admitting the result.
+          if (dependsOnScreen(t) && !s.session.enabled.screen_perception) fail('CAPABILITY_DISABLED');
+          const requiredSources = dependsOnScreen(t)
+            ? [...t.requiredCapabilities.filter(cap => cap !== 'screen_control'), 'screen_perception'] as const
+            : t.requiredCapabilities;
+          if (requiredSources.some(cap => !attachment.source.includes(cap))) fail('PROTOCOL_ERROR');
           images++; imageBytes += Math.ceil(attachment.data.length * 3 / 4);
           if (images > t.outputPolicy.maxImages || imageBytes > t.outputPolicy.maxImageBytes) fail('LIMIT_EXCEEDED');
         }

@@ -25,8 +25,8 @@ class LauncherAppsTest {
         for(args in invalid)try {FindAppsQuery.parse(args);fail("Invalid app query accepted: $args")}catch(e:ToolFailure){assertEquals(Code.INVALID_ARGUMENT,e.code)}
     }
     @Test fun launchOnlyAcceptsOneCanonicalPackageAndRejectsOwnAssistant() {
-        assertEquals(lime.packageName,LaunchAppCommand.parse(mapOf("packageName" to lime.packageName),setOf("dev.thor.agent")).packageName)
-        for(name in listOf("dev.thor.agent","dev.thor.agent.test"))try {LaunchAppCommand.parse(mapOf("packageName" to name),setOf("dev.thor.agent","dev.thor.agent.test"));fail("Own assistant launch")}
+        assertEquals(lime.packageName,LaunchAppCommand.parse(mapOf("packageName" to lime.packageName),setOf("com.tobias.loki")).packageName)
+        for(name in listOf("com.tobias.loki","com.tobias.loki.test"))try {LaunchAppCommand.parse(mapOf("packageName" to name),setOf("com.tobias.loki","com.tobias.loki.test"));fail("Own assistant launch")}
             catch(e:ToolFailure){assertEquals(Code.COMMAND_BLOCKED,e.code)}
         for(args in listOf(mapOf("packageName" to "com.example;reboot"),mapOf("packageName" to "https://example.org"),mapOf("packageName" to "com.example/.Hidden"),
             mapOf("packageName" to "com.example","component" to ".Hidden"),mapOf("packageName" to "com.example","displayId" to 4),mapOf("packageName" to "com.example","extras" to emptyMap<String,Any>()),

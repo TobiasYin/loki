@@ -14,7 +14,7 @@ class CompanionObservationTest {
             lower.id to Target("game.app","valid","lower-content",TouchableBounds(0,0,lower.width,lower.height),"lower-layout"))
         val snapshots=Snapshots(Clock {now}) {targets.getValue(it)}.apply {update(listOf(upper,lower));calibrate(upper.id,lower.id)}
         val source=snapshots.capture()
-        fun companion()=snapshots.captureCompanion(source.id,setOf("dev.thor.agent"))
+        fun companion()=snapshots.captureCompanion(source.id,setOf("com.tobias.loki"))
     }
     @Test fun sameAppCompanionHasSeparateNonInputIdentityAndReturnsUpperSnapshot() {
         val f=Fixture(upper,lower);val observation=f.companion()
@@ -29,7 +29,7 @@ class CompanionObservationTest {
         for(target in listOf(Target("other.app","valid","x",lowerRect,"x"),Target("game.app","ambiguous","x",lowerRect,"x"),Target(null,"unknown","x"))) {
             val f=Fixture(upper,lower);f.targets[4]=target;rejects(Code.PERMISSION_MISSING) {f.companion()}
         }
-        val f=Fixture(upper,lower);f.targets[0]=f.targets.getValue(0).copy(packageName="dev.thor.agent");f.targets[4]=f.targets.getValue(4).copy(packageName="dev.thor.agent")
+        val f=Fixture(upper,lower);f.targets[0]=f.targets.getValue(0).copy(packageName="com.tobias.loki");f.targets[4]=f.targets.getValue(4).copy(packageName="com.tobias.loki")
         rejects(Code.PERMISSION_MISSING) {f.companion()}
         val covered=Fixture(upper,lower);covered.targets[0]=covered.targets.getValue(0).copy(touchableBounds=TouchableBounds(0,0,0,0))
         rejects(Code.SECURE_CONTENT) {covered.companion()}
@@ -52,10 +52,10 @@ class CompanionObservationTest {
         TargetWindowEvidence(id,TargetWindowEvidence.APPLICATION,3,true,true,lowerRect,region,true,pkg,lowerRect)
     @Test fun onlyUniqueSameAppVisiblePixelsWithNoOverlayCanBeCaptured() {
         val bars=TargetWindowEvidence(2,TargetWindowEvidence.SYSTEM,4,false,false,TouchableBounds(0,0,1240,40),listOf(TouchableBounds(0,0,1240,40)),true,null,null)
-        val state=CompanionWindows.verify(lower,"game.app",listOf(app(region=listOf(TouchableBounds(0,40,1240,1080))),bars),setOf("dev.thor.agent"))
+        val state=CompanionWindows.verify(lower,"game.app",listOf(app(region=listOf(TouchableBounds(0,40,1240,1080))),bars),setOf("com.tobias.loki"))
         assertEquals(TouchableBounds(0,40,1240,1080),state.clip)
         rejects(Code.TARGET_CHANGED) {CompanionWindows.verify(lower,"game.app",listOf(app(),app(id=3)),emptySet())}
-        rejects(Code.PERMISSION_MISSING) {CompanionWindows.verify(lower,"game.app",listOf(app(pkg="dev.thor.agent")),setOf("dev.thor.agent"))}
+        rejects(Code.PERMISSION_MISSING) {CompanionWindows.verify(lower,"game.app",listOf(app(pkg="com.tobias.loki")),setOf("com.tobias.loki"))}
         rejects(Code.PERMISSION_MISSING) {CompanionWindows.verify(lower,"game.app",listOf(app(pkg="other.app")),emptySet())}
         for(type in listOf(TargetWindowEvidence.SYSTEM,2,4)) {
             val overlay=bars.copy(type=type,bounds=TouchableBounds(100,100,800,800),region=listOf(TouchableBounds(100,100,800,800)))

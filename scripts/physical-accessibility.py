@@ -12,22 +12,22 @@ def adb(*args):return subprocess.check_output(prefix+list(args),stdin=subprocess
 assert adb('shell','getprop','ro.product.model').strip()==b'AYN Thor'
 keys=['enabled_accessibility_services','accessibility_enabled']
 original={k:adb('shell','settings','get','secure',k).decode().strip() for k in keys}
-component='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+component='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
 try:
     for attempt in range(1,3):
         services=[s for s in original[keys[0]].split(':') if s not in [component,'null','']]
         value=':'.join(services)
         adb('shell','settings put secure '+keys[0]+' '+shlex.quote(value) if value else 'settings delete secure '+keys[0])
         time.sleep(.6) # Allow the system to consume the explicit initial setting.
-        adb('shell','am','force-stop','dev.thor.agent')
+        adb('shell','am','force-stop','com.tobias.loki')
         # Package replacement clears Android's stale binding left by the prior
         # instrumentation process. Install only after our setting is disabled,
         # avoiding an automatic bind immediately before instrumentation kills it.
         for apk in ['app/build/outputs/apk/debug/app-debug.apk','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk']:
             assert b'Success' in adb('install','-r',apk)
-        result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalAccessibilityTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+        result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalAccessibilityTest','com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
         (out/f'suite-{attempt}.log').write_bytes(result);print(result.decode(),flush=True)
-        raw=adb('exec-out','run-as','dev.thor.agent','cat','files/physical-accessibility.json')
+        raw=adb('exec-out','run-as','com.tobias.loki','cat','files/physical-accessibility.json')
         (out/f'result-{attempt}.json').write_bytes(raw)
         assert re.search(rb'OK \(1 test\)',result) and b'FAILURES' not in result
         assert json.loads(raw)['passed']

@@ -25,7 +25,7 @@ class PhysicalAccessibilityDeniedTest {
         assertEquals("AYN Thor",android.os.Build.MODEL)
         val context=instrumentation.targetContext
         instrumentation.getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
-        val component="dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService"
+        val component="com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService"
         val before=Settings.Secure.getString(context.contentResolver,"enabled_accessibility_services")
         assertFalse(before.orEmpty().split(':').contains(component))
         val activity=instrumentation.startActivitySync(Intent(context,MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),ActivityOptions.makeBasic().setLaunchDisplayId(args.getString("chatDisplay")!!.toInt()).toBundle()) as MainActivity

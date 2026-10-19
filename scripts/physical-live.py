@@ -31,7 +31,7 @@ if not a.reuse_profile: assert set(config)=={'modelKey','searchKey'} and all(isi
 # This marker prevents any subsequent fixture runner from resetting the live profile.
 (out/'real-profile-imported').touch()
 if not a.reuse_profile:
-    subprocess.run(prefix+['shell','run-as','dev.thor.agent','sh','-c',"'umask 077; mkdir -p cache; cat > cache/physical-credentials.json'"],input=json.dumps(config).encode(),check=True,stdout=subprocess.DEVNULL)
+    subprocess.run(prefix+['shell','run-as','com.tobias.loki','sh','-c',"'umask 077; mkdir -p cache; cat > cache/physical-credentials.json'"],input=json.dumps(config).encode(),check=True,stdout=subprocess.DEVNULL)
 config.clear()
 original_secure={}
 local_server=None;local_port=None;local_url=None;local_requests=[]
@@ -54,26 +54,26 @@ try:
     if a.configure_budget_128k or a.install_app:
         assert a.reuse_profile,'APK upgrade/budget adjustment requires the existing real profile'
         original_secure={k:adb('shell','settings','get','secure',k).decode().strip() for k in ['enabled_accessibility_services','accessibility_enabled']}
-        own='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+        own='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
         services=':'.join(s for s in original_secure['enabled_accessibility_services'].split(':') if s not in [own,'null',''])
         adb('shell','settings put secure enabled_accessibility_services '+shlex.quote(services) if services else 'settings delete secure enabled_accessibility_services')
         time.sleep(.6)
         assert b'Success' in adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
     assert b'Success' in adb('install','-r','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
     if a.configure_budget_128k:
-        budget=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalProfileBudgetTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+        budget=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','class','dev.thor.agent.PhysicalProfileBudgetTest','com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
         (out/'profile-budget-suite.log').write_bytes(budget);print(budget.decode(),flush=True)
         assert re.search(rb'OK \(\d+ tests?\)',budget) and b'FAILURES' not in budget,'Native budget UI update failed'
-        (out/'physical-profile-budget.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/physical-profile-budget.json'))
+        (out/'physical-profile-budget.json').write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/physical-profile-budget.json'))
     adb('shell','input','keyevent','224')
-    adb('shell','run-as','dev.thor.agent','rm','-f','files/physical-live-services.json','files/physical-live-chat.png')
-    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','reuseProfile',str(a.reuse_profile).lower(),'-e','chatDisplay',str(a.chat_display),*(['-e','localWebUrl',local_url] if local_url else []),'-e','class','dev.thor.agent.PhysicalRealServiceTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+    adb('shell','run-as','com.tobias.loki','rm','-f','files/physical-live-services.json','files/physical-live-chat.png')
+    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','reuseProfile',str(a.reuse_profile).lower(),'-e','chatDisplay',str(a.chat_display),*(['-e','localWebUrl',local_url] if local_url else []),'-e','class','dev.thor.agent.PhysicalRealServiceTest','com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'live-suite.log').write_bytes(result)
     print(result.decode(),flush=True)
     for name in ['physical-live-services.json','physical-live-chat.png']:
         try:
-            adb('shell','run-as','dev.thor.agent','test','-f','files/'+name)
-            (out/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name))
+            adb('shell','run-as','com.tobias.loki','test','-f','files/'+name)
+            (out/name).write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/'+name))
         except subprocess.CalledProcessError: pass
     if local_url:
         (out/'physical-local-web-server.json').write_text(json.dumps({'scope':'Real model web.fetch to harmless local HTTP target; no model fixture','requests':local_requests},indent=2)+'\n')
@@ -82,5 +82,5 @@ try:
 finally:
     if local_port is not None:adb('reverse','--remove',f'tcp:{local_port}')
     if local_server is not None:local_server.shutdown();local_server.server_close()
-    adb('shell','run-as','dev.thor.agent','rm','-f','cache/physical-credentials.json')
+    adb('shell','run-as','com.tobias.loki','rm','-f','cache/physical-credentials.json')
     for key,value in original_secure.items():adb('shell',f'settings delete secure {key}' if value=='null' else f'settings put secure {key} {shlex.quote(value)}')

@@ -359,7 +359,7 @@ class EmulatorPresentationControlTest {
                 if(restoreSession!=null){val c=ProductHost::class.java.getDeclaredField("connection").apply {isAccessible=true}.get(ready.host) as String;ok(rpc(ready.host,c,"ui",obj("op" to "select","sessionId" to restoreSession)))}
             }finally {ins.runOnMainSync {restored.finish()};until("Restored idle Activity did not finish"){restored.isDestroyed}}}}
             cleanup("drain-idle-engine-and-accessibility-setup") {
-                until("Idle Service/host must close before restoring accessibility",20){!shell(automation,"dumpsys activity services dev.thor.agent/.AgentRuntimeService").contains("ServiceRecord{")}
+                until("Idle Service/host must close before restoring accessibility",20){!shell(automation,"dumpsys activity services com.tobias.loki/dev.thor.agent.AgentRuntimeService").contains("ServiceRecord{")}
                 until("Shizuku accessibility setup workers must terminate before restoration",20){debugWorkers.all {it.isTerminated}}
                 evidence.put("idleHostsClosedBeforeAccessibilityRestore",true)
             }

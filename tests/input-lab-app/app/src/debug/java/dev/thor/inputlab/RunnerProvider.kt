@@ -19,7 +19,7 @@ class RunnerProvider : ContentProvider() {
     @Synchronized override fun call(method: String, arg: String?, extras: Bundle?): Bundle {
         val caller = Binder.getCallingUid()
         val names = context!!.packageManager.getPackagesForUid(caller).orEmpty()
-        require(names.any { it == "dev.thor.agent" || it == "dev.thor.agent.test" })
+        require(names.any { it == "com.tobias.loki" || it == "com.tobias.loki.test" })
         require(context!!.checkCallingPermission("dev.thor.inputlab.permission.CONTROL") == android.content.pm.PackageManager.PERMISSION_GRANTED)
         val e = extras ?: error("Missing request"); require(e.getInt("version") == 1)
         require(method in setOf("prepare", "report", "describe", "release"))

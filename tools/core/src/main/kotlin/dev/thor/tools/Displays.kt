@@ -48,7 +48,7 @@ class Snapshots(private val clock: Clock, private val currentTarget: (Int) -> Ta
     @Synchronized fun installLowerGuard(guard:(DisplayFact,Target)->Unit) {lowerGuard=guard}
     private fun checkRoleTarget(display:DisplayFact,role:String,target:Target) {
         if(role=="lower") {
-            requireTool(target.validity=="valid" && !target.packageName.isNullOrBlank() && target.packageName!="dev.thor.agent",
+            requireTool(target.validity=="valid" && !target.packageName.isNullOrBlank() && target.packageName!="com.tobias.loki",
                 Code.PERMISSION_MISSING,"Lower target must be a unique non-assistant application")
             requireTool(target.touchableBounds?.let {it.left<it.right && it.top<it.bottom}==true,Code.SECURE_CONTENT,"Lower target has no safe visible region")
             lowerGuard?.invoke(display,target)

@@ -167,7 +167,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         lowerSafetyCache=null // A new tool never inherits a prior password scan.
         schemas.validate(envelope.toolId, args)
         if(ToolPack.descriptors[envelope.toolId]?.let {it.effect==Effect.INPUT && it.targetRequired}==true)
-            InputTargetPolicy.check(envelope.toolId,snapshots.validateReadSource(envelope.snapshotId).target,setOf(context.packageName,"dev.thor.agent"))
+            InputTargetPolicy.check(envelope.toolId,snapshots.validateReadSource(envelope.snapshotId).target,setOf(context.packageName,"com.tobias.loki"))
         if(envelope.toolId in ToolPack.freshReads)invalidateNodeRefs()
         // Read the current app/window/tree even after the model has spent more
         // than an observation lifetime reasoning. The original source still fixes the
@@ -626,7 +626,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
     private fun lowerSafety(display:DisplayFact,target:Target):CompanionWindowState {
         val key=lowerKey(display,target)
         lowerSafetyCache?.takeIf {it.key==key && clock.now()-it.at<100}?.let {return it.state}
-        val state=CompanionWindows.verify(display,target.packageName,companionWindows(display.id),setOf(context.packageName,"dev.thor.agent"))
+        val state=CompanionWindows.verify(display,target.packageName,companionWindows(display.id),setOf(context.packageName,"com.tobias.loki"))
         val window=service().observableWindows[display.id].orEmpty().singleOrNull {it.id==state.windowId}
             ?: fail(Code.TARGET_CHANGED,"Lower application window disappeared")
         val root=window.root ?: fail(Code.SECURE_CONTENT,"Lower application exposes no safe window identity")
@@ -687,7 +687,7 @@ class AndroidBackend(val context: Context, val clock: Clock, val snapshots: Snap
         // Its own identity/freshness lifetime begin now; every image callback checks
         // this fresh window/geometry and discards output if structure changes.
         // Content counters may update; old pixels keep their capture identity.
-        val forbidden=setOf(context.packageName,"dev.thor.agent")
+        val forbidden=setOf(context.packageName,"com.tobias.loki")
         val companionObservation=if(companion)snapshots.captureCompanion(e.snapshotId,forbidden) else null
         val snap = companionObservation?.upper ?: snapshots.captureForRead(e.snapshotId)
         val captureDisplay=companionObservation?.lowerDisplay ?: snap.display
