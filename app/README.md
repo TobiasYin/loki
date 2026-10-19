@@ -1,6 +1,6 @@
 # Loki 正式 Android 宿主
 
-产品入口为 `MainActivity` → `ProductHost` → trusted WebView + 真实 Pi Runtime/Native Fetch/设备 Gateway。构建必须从根目录执行 `./gradlew :app:assembleDebug`。原模拟 Coordinator/RuntimePort 仅为旧单元测试保留，不是正常产品路径。
+Loki 是面向 AYN Thor 掌机的 AI Agent。产品入口为 `MainActivity` → `ProductHost` → trusted WebView + 真实 Pi Runtime/Native Fetch/设备 Gateway。构建必须从根目录执行 `./gradlew :app:assembleDebug`。原模拟 Coordinator/RuntimePort 仅为旧单元测试保留，不是正常产品路径。
 
 Native 保存会话、Run、事件、领域回合、ContextSnapshot manifest 和附件，Keystore 加密凭据及配置备份。恢复只显示 interrupted，不执行旧 intent。四项能力共用 Native Authority；危险操作等待具体审批，未批准不能执行。
 

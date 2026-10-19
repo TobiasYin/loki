@@ -140,7 +140,7 @@
       ],
       "modelVisibility": true,
       "provenance": "builtin",
-      "description": "Move only the Thor Agent chat task into the background so the authorized Run can continue controlling calibrated screens. Takes no package, task, display, command or navigation arguments. Does not start a target app, change screen roles, or alter focus settings. Already hidden chat returns alreadyBackground=true without submitting input. After actual movement, re-observe and explicitly select the desired screen role before further input."
+      "description": "Move only the Loki chat task into the background so the authorized Run can continue controlling calibrated screens. Takes no package, task, display, command or navigation arguments. Does not start a target app, change screen roles, or alter focus settings. Already hidden chat returns alreadyBackground=true without submitting input. After actual movement, re-observe and explicitly select the desired screen role before further input."
     },
     {
       "toolId": "perception.window_info",

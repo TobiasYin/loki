@@ -1,4 +1,7 @@
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:inset="10dp">
+    android:insetLeft="9.26%"
+    android:insetTop="11.83%"
+    android:insetRight="9.26%"
+    android:insetBottom="6.69%">
     <bitmap android:src="@drawable/loki_icon_artwork" android:gravity="fill" />
 </inset>

@@ -93,7 +93,7 @@ class NativeDownloads(private val context: Context) {
         requireTool(max in 1..if(download)256*1024*1024 else 65536,Code.LIMIT_EXCEEDED,"Invalid byte budget")
         val body=(args["body"] as? String)?.toByteArray()
         requireTool(body==null || body.size<=65536 && method !in setOf("GET","HEAD"),message="Body requires a write method and at most 64 KiB")
-        val headers=linkedMapOf("User-Agent" to "ThorAgent/0.6", "Accept" to "*/*")
+        val headers=linkedMapOf("User-Agent" to "Loki/0.6", "Accept" to "*/*")
         @Suppress("UNCHECKED_CAST") val supplied=args["headers"] as? List<Map<String,Any?>> ?: emptyList()
         requireTool(supplied.sumOf {it.string("name").length+it.string("value").length}<=16384,Code.LIMIT_EXCEEDED,"HTTP headers exceed 16 KiB")
         for(h in supplied) {

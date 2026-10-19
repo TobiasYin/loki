@@ -91,10 +91,10 @@ object ModelConnectionTest {
     /** Mirrors Pi Responses request fields and Native Go session affinity, without product state. */
     internal fun request(draft:Draft):Request {
         draft.validate()
-        val messages=JSONArray().put(JSONObject().put("role","user").put("content","Reply only THOR_CONNECTION_OK."))
+        val messages=JSONArray().put(JSONObject().put("role","user").put("content","Reply only LOKI_CONNECTION_OK."))
         val body=JSONObject().put("model",draft.model).put("stream",true)
         when(draft.protocol) {
-            "openai-responses"->body.put("store",false).put("input",JSONArray().put(JSONObject().put("role","user").put("content",JSONArray().put(JSONObject().put("type","input_text").put("text","Reply only THOR_CONNECTION_OK."))))).put("max_output_tokens",draft.maxOutput)
+            "openai-responses"->body.put("store",false).put("input",JSONArray().put(JSONObject().put("role","user").put("content",JSONArray().put(JSONObject().put("type","input_text").put("text","Reply only LOKI_CONNECTION_OK."))))).put("max_output_tokens",draft.maxOutput)
             "anthropic-messages"->body.put("messages",messages).put("max_tokens",draft.maxOutput)
             else->body.put("messages",messages).put("max_tokens",draft.maxOutput)
         }

@@ -4,9 +4,9 @@
 
 `loki-icon.png` 是通过内置 image_gen 工具生成的原始图标。深绿与金色的 Loki 双角面具呼应名字，双眼呼应 AI 助手的屏幕感知功能。图标没有文字，便于小尺寸显示。
 
-Android 资源包含 mdpi 至 xxxhdpi 的传统图标，以及标准和圆形入口共用的 adaptive icon。自适应前景内缩 10dp，给系统裁切和动画留出余量。
+Android 资源包含 mdpi 至 xxxhdpi 的传统图标，以及标准和圆形入口共用的 adaptive icon。自适应前景按比例留白（左右 9.26%、上 11.83%、下 6.69%），给系统裁切和动画留出余量。原图图案的边界中心略偏上，因此增加顶部留白，将图案本身对齐到图标中心；比例定位避免图标尺寸或屏幕密度变化时偏移。
 
-更改 applicationId 后，Android 会将 loki 视为新应用；旧 `dev.thor.agent` 的数据和授权不会自动迁移。安装后需重新配置并授予所需权限。
+更改 applicationId 后，Android 会将 Loki 视为新应用；旧 `dev.thor.agent` 的数据和授权不会自动迁移。安装后需重新配置并授予所需权限。
 
 生成提示词：
 
