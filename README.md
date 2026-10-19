@@ -1,4 +1,6 @@
-# Thor Agent
+# Loki
+
+应用名：`Loki`；Android 包名：`com.tobias.loki`。图标与生成说明见 [应用品牌资源](app/branding/README.md)。更改包名后会作为新应用安装，旧版数据与授权不会自动迁移。
 
 面向 AYN Thor 的 Android Agent：本地 WebView 聊天与锁定版本 Pi，模型协议由 JS 处理，网络与设备授权由 Native 执行。五个独立任务的精确提交已保留历史整合，正式入口已连接真实 Runtime、通用 Native Fetch、持久化与设备 ToolPack；不返回模拟成功。
 
@@ -36,7 +38,7 @@ npm run verify
 
 APK：
 
-- Agent debug：`app/build/outputs/apk/debug/app-debug.apk`，包名 `dev.thor.agent`。
+- Agent debug：`app/build/outputs/apk/debug/app-debug.apk`，包名 `com.tobias.loki`。
 - Agent unsigned release：`app/build/outputs/apk/release/app-release-unsigned.apk`；尚无发布签名。
 - Input Lab debug：`tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk`，包名 `dev.thor.inputlab`，独立 UID/进程。
 - Input Lab unsigned release：同目录 `release/input-lab-release-unsigned.apk`。

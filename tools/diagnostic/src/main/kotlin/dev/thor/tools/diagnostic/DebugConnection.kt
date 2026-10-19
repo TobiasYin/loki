@@ -57,7 +57,7 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         android.util.Log.i("ThorAccessibilityRecovery","$phase:$frameworkPhase:$error")
         recoveryListener?.invoke(JSONObject(event.toString()))
     }
-    val accessibilityRestartMessage:String get()="系统保留异常绑定，请在应用设置中强行停止后重新打开 Thor Agent；会话已保存"
+    val accessibilityRestartMessage:String get()="系统保留异常绑定，请在应用设置中强行停止后重新打开 Loki；会话已保存"
     private val recoveryCounts=java.util.concurrent.ConcurrentHashMap<String,java.util.concurrent.atomic.AtomicInteger>()
     private fun trace(phase:RecoveryPhase) {recoveryPhase=phase;recoveryCounts.getOrPut(phase.name){java.util.concurrent.atomic.AtomicInteger()}.incrementAndGet()}
     private fun recordRecoveryError(error:Throwable) {recoveryError=when(error) {
@@ -93,10 +93,10 @@ class DebugConnection(private val context: Context, private val invalidated: () 
         ThorAccessibilityService.instance!=null && availability().status==Status.READY -> "已通过 Shizuku 授权校验，本应用无障碍已连接"
         ThorAccessibilityService.instance!=null -> "本应用无障碍已连接"
         accessibilityRestartRequired -> accessibilityRestartMessage
-        accessibilityRecoveryTimedOut -> "无障碍自动恢复超时，请在系统设置中关闭后重新开启 Thor Agent 无障碍服务"
+        accessibilityRecoveryTimedOut -> "无障碍自动恢复超时，请在系统设置中关闭后重新开启 Loki 无障碍服务"
         accessibilityRecoveryPending -> "正在通过已授权的 Shizuku 自动恢复本应用无障碍"
-        ThorAccessibilityService.settingEnabled(context) -> "无障碍连接已失效，请在系统设置中关闭后重新开启 Thor Agent 无障碍服务"
-        else -> "无障碍服务未连接，请在系统设置中开启 Thor Agent 无障碍服务"
+        ThorAccessibilityService.settingEnabled(context) -> "无障碍连接已失效，请在系统设置中关闭后重新开启 Loki 无障碍服务"
+        else -> "无障碍服务未连接，请在系统设置中开启 Loki 无障碍服务"
     }
     private fun recoveryAuthorized():Boolean = runCatching {
         Shizuku.pingBinder() && Shizuku.getUid()==2000 && Shizuku.checkSelfPermission()==PackageManager.PERMISSION_GRANTED

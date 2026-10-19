@@ -27,7 +27,7 @@ class PhysicalAccessibilityTest {
         val context=instrumentation.targetContext
         assertEquals("AYN Thor",android.os.Build.MODEL)
         instrumentation.getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
-        val component="dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService"
+        val component="com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService"
         fun services()=Settings.Secure.getString(context.contentResolver,"enabled_accessibility_services").orEmpty().split(':').filter {it.isNotBlank() && it!="null"}.toSet()
         val before=services();assertEquals("Host must match requested initial service setting",args.getString("alreadyEnabled")=="true",component in before)
         val savedProfile=context.getSharedPreferences("profiles",0).getString("url",null)

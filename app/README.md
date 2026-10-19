@@ -1,4 +1,4 @@
-# Thor Agent 正式 Android 宿主
+# Loki 正式 Android 宿主
 
 产品入口为 `MainActivity` → `ProductHost` → trusted WebView + 真实 Pi Runtime/Native Fetch/设备 Gateway。构建必须从根目录执行 `./gradlew :app:assembleDebug`。原模拟 Coordinator/RuntimePort 仅为旧单元测试保留，不是正常产品路径。
 

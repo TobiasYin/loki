@@ -19,7 +19,11 @@ for name,path in artifacts.items():
  with zipfile.ZipFile(path) as z:
   files=z.namelist()
   if name.startswith('agent'):
-   assert "name='dev.thor.agent'" in badging
+   assert "name='com.tobias.loki'" in badging
+   assert "application-label:'Loki'" in badging
+   assert 'android:icon' in manifest and 'android:roundIcon' in manifest
+   icon = re.search(r"application: label='Loki' icon='([^']+)'", badging)
+   assert icon and icon.group(1) in files, 'Launcher icon must resolve to a packaged resource'
    assert 'android.permission.INTERNET' in permissions
    assert re.search(r'android:usesCleartextTraffic.*0xffffffff', manifest), 'HTTP must work in both debug and release'
    assert 'assets/chat/runtime-host.js' in files

@@ -9,7 +9,7 @@ class NavigationFocusTest {
 Input Dispatcher State:
   FocusedDisplayId: 4
   FocusedApplications:
-    displayId=4, name='ActivityRecord{aaa u0 dev.thor.agent/.MainActivity} t574}', dispatchingTimeout=60000ms
+    displayId=4, name='ActivityRecord{aaa u0 com.tobias.loki/dev.thor.agent.MainActivity} t574}', dispatchingTimeout=60000ms
     displayId=0, name='ActivityRecord{bbb u0 $app/org.citra.emu.ui.EmulationActivity} t575}', dispatchingTimeout=5000ms
   FocusedWindows:
     displayId=4, name='ffff com.antutu.ABenchMark'

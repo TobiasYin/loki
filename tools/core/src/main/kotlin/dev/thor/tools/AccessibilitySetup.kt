@@ -6,7 +6,7 @@ object AccessibilitySetup {
     fun availability(enabled:Boolean,connected:Boolean,recoveryPending:Boolean,backend:String):Availability = when {
         connected -> Availability(Status.READY,"本应用无障碍已连接",backend)
         recoveryPending -> Availability(Status.TEMPORARILY_UNAVAILABLE,"本应用无障碍正在通过已授权的 Shizuku 自动恢复，等待系统连接；无需重复授权",backend)
-        enabled -> Availability(Status.TEMPORARILY_UNAVAILABLE,"本应用无障碍已开启但连接不可用，请在系统无障碍设置中关闭后重新开启 Thor Agent 服务",backend)
+        enabled -> Availability(Status.TEMPORARILY_UNAVAILABLE,"本应用无障碍已开启但连接不可用，请在系统无障碍设置中关闭后重新开启 Loki 服务",backend)
         else -> Availability(Status.PERMISSION_MISSING,"本应用无障碍尚未开启，请在设置中授权",backend)
     }
     fun mergedServices(current: String?, applicationPackage: String): String {

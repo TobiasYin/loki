@@ -17,7 +17,7 @@ class ScenarioRunnerProvider:ContentProvider() {
     override fun onCreate()=true
     @Synchronized override fun call(method:String,arg:String?,extras:Bundle?):Bundle {
         val caller=Binder.getCallingUid();val ctx=context!!
-        require(ctx.packageManager.getPackagesForUid(caller).orEmpty().any {it=="dev.thor.agent" || it=="dev.thor.agent.test"})
+        require(ctx.packageManager.getPackagesForUid(caller).orEmpty().any {it=="com.tobias.loki" || it=="com.tobias.loki.test"})
         require(ctx.checkCallingPermission("dev.thor.inputlab.permission.CONTROL")==android.content.pm.PackageManager.PERMISSION_GRANTED)
         val e=extras ?: error("Missing request");require(e.getInt("version")==1);require(method in setOf("describe","prepare","report","release","finish"))
         @Suppress("DEPRECATION") val model=if(method in setOf("describe","prepare")) {

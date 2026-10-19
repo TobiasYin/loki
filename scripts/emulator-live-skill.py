@@ -13,7 +13,7 @@ def call(*args):return subprocess.check_output(prefix+list(args),stdin=subproces
 assert call('shell','getprop','ro.kernel.qemu').strip()==b'1','Physical devices refused'
 out=root/a.output;out.mkdir(parents=True,exist_ok=True)
 assert not (out/'metadata.json').exists(),'Use a fresh output directory'
-own='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+own='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
 original={k:call('shell','settings','get','secure',k).decode().strip() for k in ['enabled_accessibility_services','accessibility_enabled']}
 pinned=out/'apks';pinned.mkdir()
 for path in ['app/build/outputs/apk/debug/app-debug.apk','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk']:shutil.copy2(path,pinned/pathlib.Path(path).name)
@@ -30,11 +30,11 @@ try:
   assert b'Success' in call('install','-r',str(path))
  for phase in (['create','verify'] if a.phase=='all' else [a.phase]):
   stage=out/phase;stage.mkdir()
-  result=call('shell','am','instrument','-w','-r','-e','emulatorLiveSkill','true','-e','skillPhase',phase,*(['-e','skillResumeSession',a.resume_session] if a.resume_session else []),*(['-e','skillCases',a.cases] if a.cases and phase=='verify' else []),'-e','class','dev.thor.agent.EmulatorLiveSkillTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+  result=call('shell','am','instrument','-w','-r','-e','emulatorLiveSkill','true','-e','skillPhase',phase,*(['-e','skillResumeSession',a.resume_session] if a.resume_session else []),*(['-e','skillCases',a.cases] if a.cases and phase=='verify' else []),'-e','class','dev.thor.agent.EmulatorLiveSkillTest','com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
   (stage/'suite.log').write_bytes(result);print(result.decode(),flush=True)
-  report=call('exec-out','run-as','dev.thor.agent','cat','files/skill-live/report.json');(stage/'report.json').write_bytes(report);j=json.loads(report);reports[phase]=j.get('passed')
+  report=call('exec-out','run-as','com.tobias.loki','cat','files/skill-live/report.json');(stage/'report.json').write_bytes(report);j=json.loads(report);reports[phase]=j.get('passed')
   current_requests={request['requestId'] for request in j.get('requests',[])}
-  names=call('shell','run-as','dev.thor.agent','find','files/skill-live','-type','f').decode().splitlines()
+  names=call('shell','run-as','com.tobias.loki','find','files/skill-live','-type','f').decode().splitlines()
   for name in names:
    relative=pathlib.PurePosixPath(name).relative_to('files/skill-live');assert '..' not in relative.parts
    if str(relative)=='report.json':continue
@@ -42,7 +42,7 @@ try:
    if relative.parts[0]=='export' and phase not in ['create','refine','tighten']:continue
    if relative.suffix=='.png' and relative.name not in ({'created.png'} if phase=='create' else {'refined.png'} if phase=='refine' else {'tightened.png'} if phase=='tighten' else {'fish.png','crops.png','equipment.png'}|({'followup.png'} if a.resume_session else set())):continue
    target=stage/pathlib.Path(str(relative));target.parent.mkdir(parents=True,exist_ok=True)
-   target.write_bytes(call('exec-out','run-as','dev.thor.agent','cat',name))
+   target.write_bytes(call('exec-out','run-as','com.tobias.loki','cat',name))
   assert b'OK (1 test)' in result and j.get('passed') is True,f'{phase} failed; raw evidence retained in {stage}'
  export=next((out/phase/'export' for phase in ['tighten','refine','create'] if (out/phase/'export/SKILL.md').exists()),None)
  if export is not None:
@@ -55,4 +55,4 @@ finally:
  (out/'metadata.json').write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+'\n')
  for k,v in original.items():
   call('shell','settings','delete','secure',k) if v=='null' else call('shell','settings','put','secure',k,v)
- call('shell','run-as','dev.thor.agent','rm','-f','cache/skill-live-credentials.json')
+ call('shell','run-as','com.tobias.loki','rm','-f','cache/skill-live-credentials.json')

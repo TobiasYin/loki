@@ -34,7 +34,7 @@ class AgentActionFeedbackDeviceTest {
             image.surface, DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC or DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION or DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY)
         fun feedbackWindows(): String = android.os.ParcelFileDescriptor.AutoCloseInputStream(
             automation.executeShellCommand("dumpsys window windows")).use { it.readBytes().toString(Charsets.UTF_8) }
-            .split(Regex("(?m)^  Window #")).drop(1).filter { it.substringBefore('\n').contains("Thor Agent action feedback") }.joinToString("\n")
+            .split(Regex("(?m)^  Window #")).drop(1).filter { it.substringBefore('\n').contains("Loki action feedback") }.joinToString("\n")
         val temporary = File(context.cacheDir, "feedback-test-${java.util.UUID.randomUUID()}").apply { mkdirs() }
         val debug = DebugConnection(context) {}
         try {

@@ -62,7 +62,7 @@ abstract class EmulatorBackgroundTestState {
             }
             val automation=ins.getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             until("Idle runtime must close before restoring accessibility") {
-                val text=ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("dumpsys activity services dev.thor.agent/.AgentRuntimeService")).use {it.readBytes().toString(Charsets.UTF_8)}
+                val text=ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("dumpsys activity services com.tobias.loki/dev.thor.agent.AgentRuntimeService")).use {it.readBytes().toString(Charsets.UTF_8)}
                 !text.contains("ServiceRecord{") && setupWorkers.all {it.isTerminated}
             }
             automation.adoptShellPermissionIdentity(android.Manifest.permission.WRITE_SECURE_SETTINGS)

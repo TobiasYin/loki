@@ -70,8 +70,8 @@ class PhysicalDeviceFlowTest {
                 until {js(web,"document.querySelectorAll('.session-row').length === ${count+1}")=="true"}
                 // Respect the provider's advertised effort levels on the new composer.
                 js(web,"document.getElementById('effort-select').value='low';document.getElementById('effort-select').dispatchEvent(new Event('change'))")
-                js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'perception',enabled:true}))")
-                js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'screen_control',enabled:true}))")
+                js(web,"{const p=document.querySelector('input[aria-label=屏幕感知]');if(!p.checked)p.click();true}")
+                js(web,"{const c=document.querySelector('input[aria-label=屏幕操作]');if(!c.checked){c.click();document.getElementById('modal-ok').click();}true}")
                 until {js(web,"document.querySelector('input[aria-label=屏幕操作]').checked")=="true"}
                 val description=receiver("describe",Bundle().apply {putInt("version",1)}).getJSONObject("snapshot")
                 assertEquals(upper,description.getJSONObject("geometry").getInt("actualWindowDisplayId"))
@@ -142,7 +142,7 @@ class PhysicalDeviceFlowTest {
                 } finally {
                     runCatching {receiver("release",receiverArgs)}
                     // Each test created its own session; leave it with control off.
-                    runCatching {js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'screen_control',enabled:false}))")}
+                    runCatching {js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'screen_control',enabled:false,clientMutationId:'physical-screen-cleanup-'+Date.now()}))")}
                 }
             }
             assertTrue("Both independent physical receiver cases must pass",evidence.getJSONArray("attempts").objects().all {it.getString("receiverStatus")=="pass"})

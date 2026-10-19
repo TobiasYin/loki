@@ -260,7 +260,7 @@ class PhysicalKeyboardInputTest {
             }}
             cleanup("selection"){if(host!=null && connection!=null && selected!=null)try {ok(rpc(host!!,connection!!,"ui",obj("op" to "select","sessionId" to selected)))}catch(t:Throwable){diagnoseView(host!!);throw t}}
             cleanup("activity"){activity?.let {a->ins.runOnMainSync {a.finish()}}}
-            cleanup("idle"){until("Runtime did not idle before final checks"){!shell(automation,"dumpsys activity services dev.thor.agent/.AgentRuntimeService").contains("ServiceRecord{")}}
+            cleanup("idle"){until("Runtime did not idle before final checks"){!shell(automation,"dumpsys activity services com.tobias.loki/dev.thor.agent.AgentRuntimeService").contains("ServiceRecord{")}}
             cleanup("history"){val after=historyIds();beforeHistory.forEach {(table,ids)->assertTrue("Original $table IDs must remain",after.getValue(table).containsAll(ids))}}
             cleanup("preferences"){assertEquals("Original configuration must remain unchanged",beforePrefs,prefDigests())}
             cleanup("save-report"){evidence.put("configurationPreserved",beforePrefs==prefDigests());save()}

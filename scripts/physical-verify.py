@@ -2,7 +2,7 @@
 """Thor fixture gate, restricted to an app installation this runner created fresh.
 
 Never use this runner after importing real credentials/history. It resets only its
-disposable Thor Agent fixture data and restores existing Accessibility settings.
+disposable loki fixture data and restores existing Accessibility settings.
 Physical input baseline and live cloud services are separate acceptance steps.
 """
 import argparse, hashlib, json, os, pathlib, re, shlex, socket, subprocess, time
@@ -48,13 +48,13 @@ try:
             with socket.create_connection(('127.0.0.1',8877),timeout=.2): break
         except OSError: time.sleep(.1)
     adb('reverse','tcp:8877','tcp:8877')
-    result = adb('shell','am','instrument','-w','-r','-e','labDisplay',str(a.upper_display),'-e','chatDisplay',str(a.chat_display),'-e','disposableInstallation','true','-e','requireShizuku',str(a.require_shizuku).lower(),'-e','class',a.class_name,'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+    result = adb('shell','am','instrument','-w','-r','-e','labDisplay',str(a.upper_display),'-e','chatDisplay',str(a.chat_display),'-e','disposableInstallation','true','-e','requireShizuku',str(a.require_shizuku).lower(),'-e','class',a.class_name,'com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'product-suite.log').write_text(result)
     print(result, flush=True)
     for name in ['integrated-lab-report.json','integrated-lab-native.json','integrated-capture-result.json','integrated-frame-report.json','integrated-frame-native.json','integrated-shell-result.json','integrated-chat.png']:
         try:
-            adb('shell','run-as','dev.thor.agent','test','-f','files/'+name)
-            (out/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name,binary=True))
+            adb('shell','run-as','com.tobias.loki','test','-f','files/'+name)
+            (out/name).write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/'+name,binary=True))
         except subprocess.CalledProcessError:
             (out/name).unlink(missing_ok=True)
     for kind in ['lab','frame']:

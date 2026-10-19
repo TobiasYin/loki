@@ -10,7 +10,7 @@ import dev.thor.tools.*
 /** PackageManager and a fixed launcher Intent only. No shell, arbitrary component,
  * data URI, extras, grants, task clearing, or package enumeration output. */
 class AppLauncher(private val context:Context) {
-    private val ownPackages get()=setOf(context.packageName,"dev.thor.agent")
+    private val ownPackages get()=setOf(context.packageName,"com.tobias.loki")
     private fun intent(packageName:String?=null)=Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).apply {if(packageName!=null)setPackage(packageName)}
     @Suppress("DEPRECATION") private fun candidates(packageName:String?,cp:Checkpoint):List<ResolveInfo> {
         cp.check()

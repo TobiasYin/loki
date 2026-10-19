@@ -307,7 +307,7 @@ class WebViewFlowTest {
         fun shell(command: String) { android.os.ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command)).use {it.readBytes()} }
         // Keep the user's existing services. The outer physical runner restores these settings.
         val existing=android.provider.Settings.Secure.getString(context.contentResolver,"enabled_accessibility_services").orEmpty()
-        val services=(existing.split(':').filter {it.isNotBlank()} + "dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService").distinct().joinToString(":")
+        val services=(existing.split(':').filter {it.isNotBlank()} + "com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService").distinct().joinToString(":")
         shell("settings put secure enabled_accessibility_services $services")
         shell("settings put secure accessibility_enabled 1")
         context.startActivity(Intent().setComponent(android.content.ComponentName("dev.thor.inputlab","dev.thor.inputlab.LabActivity")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),android.app.ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle())

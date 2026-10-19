@@ -10,12 +10,12 @@ def adb(*args):return subprocess.check_output(prefix+list(args),stdin=subprocess
 assert adb('shell','getprop','ro.product.model').strip()==b'AYN Thor'
 assert b'Success' in adb('install','-r','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
 names=['physical-receiver-negatives.json']+[f'physical-negative-{k}-report.json' for k in ['no-input','wrong-target','target-switch']]
-adb('shell','run-as','dev.thor.agent','rm','-f',*['files/'+n for n in names])
-result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','labDisplay',str(a.upper_display),'-e','class','dev.thor.agent.PhysicalReceiverNegativeTest','dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+adb('shell','run-as','com.tobias.loki','rm','-f',*['files/'+n for n in names])
+result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','labDisplay',str(a.upper_display),'-e','class','dev.thor.agent.PhysicalReceiverNegativeTest','com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
 (out/'suite.log').write_bytes(result);print(result.decode(),flush=True)
 for name in names:
     try:
-        data=adb('exec-out','run-as','dev.thor.agent','cat','files/'+name);(out/name).write_bytes(data)
+        data=adb('exec-out','run-as','com.tobias.loki','cat','files/'+name);(out/name).write_bytes(data)
         report=json.loads(data)
         if 'eventPrefixSha256' in report:
             raw=adb('exec-out','run-as','dev.thor.inputlab','cat',f"files/reports/{report['metadata']['attemptId']}/events.jsonl")

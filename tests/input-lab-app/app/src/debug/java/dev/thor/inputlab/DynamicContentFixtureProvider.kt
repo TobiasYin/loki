@@ -15,7 +15,7 @@ class DynamicContentFixtureProvider:ContentProvider() {
     @Synchronized override fun call(method:String,arg:String?,extras:Bundle?):Bundle {
         val ctx=context!!;val caller=Binder.getCallingUid();val e=extras ?: error("Request required")
         require(ctx.checkCallingPermission("dev.thor.inputlab.permission.CONTROL")==android.content.pm.PackageManager.PERMISSION_GRANTED)
-        require(ctx.packageManager.getPackagesForUid(caller).orEmpty().any {it in setOf("dev.thor.agent","dev.thor.agent.test")})
+        require(ctx.packageManager.getPackagesForUid(caller).orEmpty().any {it in setOf("com.tobias.loki","com.tobias.loki.test")})
         require(e.getInt("version")==1 && method in setOf("prepare","report","configure","release"))
         if(method=="prepare"){require(lease==null);require(e.getString("testRunId").orEmpty().length in 1..128)}
         else require(owner==caller && lease!=null && lease==e.getString("lease") && run==e.getString("testRunId"))

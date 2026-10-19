@@ -19,7 +19,7 @@ assert adb('shell','getprop','ro.product.model').strip()==b'AYN Thor'
 assert a.upper_display!=a.chat_display
 original={k:adb('shell','settings','get','secure',k).decode().strip() for k in ['enabled_accessibility_services','accessibility_enabled']}
 try:
-    component='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+    component='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
     services=[s for s in original['enabled_accessibility_services'].split(':') if s not in [component,'null','']]
     value=':'.join(services)
     adb('shell','settings put secure enabled_accessibility_services '+shlex.quote(value) if value else 'settings delete secure enabled_accessibility_services')
@@ -27,14 +27,14 @@ try:
     assert b'Success' in adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
     assert b'Success' in adb('install','-r','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk')
     names=['physical-target-guards.json','physical-guard-clipping-report.json','physical-guard-switch-report.json'] if a.guard_controls else ['physical-cloud-input.json','physical-cloud-logical-report.json','physical-cloud-frame-report.json']
-    adb('shell','run-as','dev.thor.agent','rm','-f',*['files/'+n for n in names])
+    adb('shell','run-as','com.tobias.loki','rm','-f',*['files/'+n for n in names])
     test_class='dev.thor.agent.PhysicalTargetGuardTest' if a.guard_controls else 'dev.thor.agent.PhysicalDeviceFlowTest'
-    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','labDisplay',str(a.upper_display),'-e','class',test_class,'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+    result=adb('shell','am','instrument','-w','-r','-e','physicalAcceptance','true','-e','chatDisplay',str(a.chat_display),'-e','labDisplay',str(a.upper_display),'-e','class',test_class,'com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
     (out/'suite.log').write_bytes(result);print(result.decode(),flush=True)
     for name in names:
         try:
-            adb('shell','run-as','dev.thor.agent','test','-f','files/'+name)
-            (out/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name))
+            adb('shell','run-as','com.tobias.loki','test','-f','files/'+name)
+            (out/name).write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/'+name))
         except subprocess.CalledProcessError:pass
     for kind in (['clipping','switch'] if a.guard_controls else ['logical','frame']):
         report_path=out/f'physical-guard-{kind}-report.json' if a.guard_controls else out/f'physical-cloud-{kind}-report.json'

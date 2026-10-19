@@ -35,7 +35,7 @@ class ScreenSelectionTest {
             rejects(Code.INVALID_ARGUMENT) {ScreenSelection.parse(args)}
     }
     @Test fun lowerOwnUnknownAmbiguousOrNativeUnsafeTargetsAreRejected() {
-        for(target in listOf(Target("dev.thor.agent","valid","x",TouchableBounds(0,0,1240,1080)),Target(null,"unknown","x"),Target("other.app","ambiguous","x"))) {
+        for(target in listOf(Target("com.tobias.loki","valid","x",TouchableBounds(0,0,1240,1080)),Target(null,"unknown","x"),Target("other.app","ambiguous","x"))) {
             val s=Snapshots(Clock {0}) {id->if(id==4)target else Target("first.app","valid","x")}.apply {update(listOf(upper,lower));calibrate(0,4)}
             rejects(Code.PERMISSION_MISSING) {s.selectScreen(s.capture().id,"lower")}
         }

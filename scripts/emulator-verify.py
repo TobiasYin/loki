@@ -8,7 +8,7 @@ def adb(*args,binary=False):return subprocess.check_output([a.adb,'-s',a.serial,
 assert adb('shell','getprop','ro.kernel.qemu').strip()=='1','Selected target is not an emulator'
 assert a.lab_display != 0,'Separate lab display is required for this software dispatch test'
 server=None
-own_service='dev.thor.agent/dev.thor.tools.diagnostic.ThorAccessibilityService'
+own_service='com.tobias.loki/dev.thor.tools.diagnostic.ThorAccessibilityService'
 original_services=adb('shell','settings','get','secure','enabled_accessibility_services').strip()
 original_enabled=adb('shell','settings','get','secure','accessibility_enabled').strip()
 # Instrumentation kills the target process on launch. Do not leave its old bound
@@ -29,16 +29,16 @@ try:
  for port in (8877,8878):adb('reverse',f'tcp:{port}',f'tcp:{port}')
  for apk in ['tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk','app/build/outputs/apk/debug/app-debug.apk','app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk','tests/input-lab-app/app/build/outputs/apk/androidTest/debug/input-lab-debug-androidTest.apk']:
   print(adb('install','-r',apk).strip(),flush=True)
- adb('shell','pm','grant','dev.thor.agent','android.permission.RECORD_AUDIO')
- result=adb('shell','am','instrument','-w','-r','-e','chatDisplay','0','-e','softwareAcceptance','true','-e','class','dev.thor.agent.NativeStorageTest,dev.thor.agent.NativeDownloadsTest,dev.thor.agent.PhysicalFeaturesTest,dev.thor.agent.PhysicalStorageRegressionTest,dev.thor.agent.WebViewFlowTest','-e','labDisplay',str(a.lab_display),'-e','disposableInstallation','true','-e','requireShizuku',str(a.require_shizuku).lower(),'dev.thor.agent.test/androidx.test.runner.AndroidJUnitRunner')
+ adb('shell','pm','grant','com.tobias.loki','android.permission.RECORD_AUDIO')
+ result=adb('shell','am','instrument','-w','-r','-e','chatDisplay','0','-e','softwareAcceptance','true','-e','class','dev.thor.agent.NativeStorageTest,dev.thor.agent.NativeDownloadsTest,dev.thor.agent.PhysicalFeaturesTest,dev.thor.agent.PhysicalStorageRegressionTest,dev.thor.agent.WebViewFlowTest','-e','labDisplay',str(a.lab_display),'-e','disposableInstallation','true','-e','requireShizuku',str(a.require_shizuku).lower(),'com.tobias.loki.test/androidx.test.runner.AndroidJUnitRunner')
  (output/'product-suite-final.log').write_text(result);print(result,flush=True)
  assert re.search(r'OK \(\d+ tests\)',result) and 'FAILURES' not in result,'Product instrumentation failed'
  result=adb('shell','am','instrument','-w','dev.thor.inputlab.test/dev.thor.inputlab.SnapshotInstrumentation')
  (output/'lab-parser-final.log').write_text(result);print(result,flush=True)
  assert '4 Android parser fixture checks passed.' in result,'Lab parser instrumentation failed'
- if a.require_shizuku:(output/'integrated-shell-result.json').write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/integrated-shell-result.json',binary=True))
+ if a.require_shizuku:(output/'integrated-shell-result.json').write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/integrated-shell-result.json',binary=True))
  for name in ['integrated-session-continuation.json','integrated-tool-timeout-recovery.json','integrated-probe-0.json','integrated-probe-1.json','integrated-probe-2.json','integrated-text-only-profile.json','integrated-parallel-approval.json','integrated-concurrent-sessions.json','integrated-settings-page.json','integrated-composer-native.png','integrated-settings-native.png','integrated-voice-settings-native.png','physical-features.json','physical-storage-streaming-regression.json','physical-storage-regression.json','integrated-lab-report.json','integrated-lab-native.json','integrated-capture-result.json','integrated-frame-report.json','integrated-frame-native.json','integrated-chat.png']:
-  (output/name).write_bytes(adb('exec-out','run-as','dev.thor.agent','cat','files/'+name,binary=True))
+  (output/name).write_bytes(adb('exec-out','run-as','com.tobias.loki','cat','files/'+name,binary=True))
  report=json.loads((output/'integrated-lab-report.json').read_text());attempt=report['metadata']['attemptId']
  raw=adb('exec-out','run-as','dev.thor.inputlab','cat',f'files/reports/{attempt}/events.jsonl',binary=True)
  assert not report['integrity']['incomplete'] and report['integrity']['droppedSamples']==0

@@ -63,7 +63,7 @@ class PhysicalAdbPolicyTest {
             js(web,"document.getElementById('new').click()")
             until {js(web,"document.querySelectorAll('.session-row').length === ${count+1}")=="true"}
             createdSessions.add(host.selectedSession())
-            js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:true}))")
+            js(web,"{const c=document.querySelector('input[aria-label=\"ADB 调试\"]');if(!c.checked){c.click();document.getElementById('modal-ok').click();}true}")
             until {js(web,"document.querySelector('input[aria-label=\"ADB 调试\"]').checked")=="true"}
         }
         fun finished(label: String): List<JSONObject> {
@@ -142,7 +142,7 @@ class PhysicalAdbPolicyTest {
                     assertFalse(shellResults.any {it.optString("outcome")=="submitted"})
                 }
                 evidence.put(label,obj("before" to before,"after" to after,"approved" to approve,"approvalRequired" to false));save()
-                js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false}))")
+                js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false,clientMutationId:'physical-debug-cleanup-'+Date.now()}))")
             }
             for((label,screen,value,approve) in listOf(
                 listOf("upper-independent","upper",42,true),listOf("lower-independent","lower",37,true),
@@ -157,7 +157,7 @@ class PhysicalAdbPolicyTest {
                 val results=events.filter {it.getString("type")=="tool_result" && it.getJSONObject("data").optString("toolId")=="debug.thor_brightness"}.map {it.getJSONObject("data")}
                 assertTrue(results.any {if(accepted)it.isNull("error") && it.optString("outcome")=="submitted" else it.optString("error")=="PERMISSION_MISSING"})
                 evidence.put(label,obj("screen" to screen,"requested" to level,"approved" to accepted,"before" to JSONArray(before),"after" to JSONArray(after),"approvalRequired" to false,"otherScreenUnchanged" to true));save()
-                js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false}))")
+                js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false,clientMutationId:'physical-debug-cleanup-'+Date.now()}))")
             }
             for(approve in listOf(true,false)) {
                 newSession()
@@ -192,8 +192,8 @@ class PhysicalAdbPolicyTest {
                 evidence.put("finalPanels",finalPanels)
             }
             evidence.put("finalBrightness",shell("settings get system screen_brightness")).put("finalMode",shell("settings get system screen_brightness_mode"));save()
-            runCatching {js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false}))")}
-            for(sid in createdSessions)runCatching {js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(sid)},capability:'debug',enabled:false}))")}
+            runCatching {js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(host.selectedSession())},capability:'debug',enabled:false,clientMutationId:'physical-debug-cleanup-'+Date.now()}))")}
+            for(sid in createdSessions)runCatching {js(web,"ThorUI.postMessage(JSON.stringify({op:'capability',sessionId:${JSONObject.quote(sid)},capability:'debug',enabled:false,clientMutationId:'physical-debug-cleanup-'+Date.now()}))")}
             ins.runOnMainSync {activity.finish()};ins.waitForIdleSync()
         }
     }
