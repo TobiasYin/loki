@@ -5,8 +5,9 @@ import java.net.URI
 
 /** Credentials are resolved only in Native. Official DeepSeek records share their model credential. */
 object SearchServices {
-    val names=listOf("自动选择","DeepSeek","Tavily","Brave","关闭")
+    val names=listOf("自动选择","DeepSeek",VolcAgentPlan.SEARCH_NAME,"Tavily","Brave","关闭")
     fun endpoint(backend:String)=when(backend) {
+        VolcAgentPlan.SEARCH_NAME->VolcAgentPlan.SEARCH_ENDPOINT
         "DeepSeek"->"https://api.deepseek.com/v1/tools/search"
         "Tavily"->"https://api.tavily.com/search"
         else->"https://api.search.brave.com/res/v1/web/search"
@@ -14,7 +15,7 @@ object SearchServices {
     data class Service(val backend:String,val url:String,val key:String) { override fun toString()="Service($backend, credential=[REDACTED])" }
     fun choose(selected:String,available:List<Service>):Service? = when(selected) {
         "关闭"->null
-        "自动选择",""->available.firstOrNull {it.backend=="DeepSeek"} ?: available.firstOrNull()
+        "自动选择",""->available.firstOrNull {it.backend==VolcAgentPlan.SEARCH_NAME} ?: available.firstOrNull {it.backend=="DeepSeek"} ?: available.firstOrNull()
         else->available.firstOrNull {it.backend.equals(selected,true)}
     }
     fun available(context:Context):List<Service> {
@@ -23,6 +24,7 @@ object SearchServices {
             if(row.optBoolean("enabled") && isOfficialDeepSeek(row.optString("url")))runCatching {store.credential(row.getString("id"))}.getOrNull()?.takeIf {it.isNotBlank()} else null
         }
         return listOfNotNull(
+            VolcAgentPlan.credential(context)?.let {Service(VolcAgentPlan.SEARCH_NAME,VolcAgentPlan.SEARCH_ENDPOINT,it)},
             deepseek?.let {Service("DeepSeek",endpoint("DeepSeek"),it)},
             runCatching {vault.readNative("search.tavily")}.getOrNull()?.takeIf {it.isNotBlank()}?.let {Service("Tavily",endpoint("Tavily"),it)},
             runCatching {vault.readNative("search")}.getOrNull()?.takeIf {it.isNotBlank()}?.let {Service("Brave",prefs.getString("searchUrl",endpoint("Brave"))!!.ifBlank {endpoint("Brave")},it)}

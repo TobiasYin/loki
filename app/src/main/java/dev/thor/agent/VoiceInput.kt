@@ -30,8 +30,9 @@ class MicrophoneInput(context:Context):PcmInput {
     override fun close() {stop();recorder.release()}
 }
 
-data class VoiceConfig(val apiKey:String?,val appId:String?,val accessKey:String?,val resource:String) {
-    fun request(endpoint:String=VolcAsrProtocol.ENDPOINT):Request {
+data class VoiceConfig(val apiKey:String?,val appId:String?,val accessKey:String?,val resource:String,val endpoint:String=VolcAsrProtocol.ENDPOINT) {
+    override fun toString()="VoiceConfig(resource=$resource, credential=[REDACTED])"
+    fun request(endpoint:String=this.endpoint):Request {
         require(resource in setOf("volc.bigasr.sauc.duration","volc.bigasr.sauc.concurrent","volc.seedasr.sauc.duration","volc.seedasr.sauc.concurrent"))
         val requestId=UUID.randomUUID().toString()
         val request=Request.Builder().url(endpoint).header("X-Api-Resource-Id",resource).header("X-Api-Request-Id",requestId).header("X-Api-Connect-Id",requestId)
@@ -44,7 +45,7 @@ data class VoiceConfig(val apiKey:String?,val appId:String?,val accessKey:String
 /** Owns a single foreground hold. No audio files, JS audio buffers, credentials, or retries. */
 class VoiceInput(private val config:VoiceConfig,private val inputFactory:()->PcmInput,private val emit:(JSONObject)->Unit,
     private val client:OkHttpClient=OkHttpClient.Builder().connectTimeout(10,TimeUnit.SECONDS).readTimeout(0,TimeUnit.MILLISECONDS).followRedirects(false).followSslRedirects(false).build(),
-    private val endpoint:String=VolcAsrProtocol.ENDPOINT,
+    private val endpoint:String=config.endpoint,
     private val recognitionContext:VoiceRecognitionContext?=null,
     private val recognitionContextProvider:(()->VoiceRecognitionContext?)?=null):AutoCloseable {
     private val worker=Executors.newSingleThreadExecutor()

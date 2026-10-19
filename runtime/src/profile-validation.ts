@@ -12,6 +12,7 @@ export function hasOfficialMetadata(p: ModelProfile): boolean {
       ? path==='/zen/go' || path==='/inference/go/anthropic'
       : path==='/zen/go/v1' || path==='/inference/go/openai/v1';
     return p.provider === 'opencode-go' && u.hostname === 'opencode.ai' && goPath
+      || p.provider === 'volcengine-agent-plan' && p.protocol === 'openai-responses' && u.hostname === 'ark.cn-beijing.volces.com' && path === '/api/plan/v3'
       || p.provider === 'deepseek' && u.hostname === 'api.deepseek.com' && (path === '' || path === '/v1');
   } catch { return false; }
 }

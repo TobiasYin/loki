@@ -49,3 +49,16 @@ test('Go Anthropic preset switches protocol and sends exactly one v1/messages su
   const wrong={...f.snapshot.session.model,baseUrl:'https://opencode.ai/zen/go/v1'};
   assert.equal(hasOfficialMetadata(wrong),false);
 });
+test('AgentPlan official metadata is scoped to its exact Responses endpoint',()=>{
+  const p={...official('deepseek'),provider:'volcengine-agent-plan',baseUrl:'https://ark.cn-beijing.volces.com/api/plan/v3'};
+  checkProfile(p);assert.equal(p.lastProbe.textStream,false);
+  for(const baseUrl of ['https://ark.cn-beijing.volces.com/api/v3','https://ark.cn-beijing.volces.com.evil.invalid/api/plan/v3','http://ark.cn-beijing.volces.com/api/plan/v3'])assert.throws(()=>checkProfile({...p,baseUrl}),{code:'UNSUPPORTED'});
+  assert.equal(hasOfficialMetadata({...p,protocol:'anthropic-messages'}),false);
+});
+test('AgentPlan selection uses its own Responses route and existing tool loop',async()=>{
+  const f=fixture('openai-responses',[{call:{name:'echo',args:'{"text":"Plan"}'}},{text:'Plan complete'}]);
+  Object.assign(f.snapshot.session.model,official('deepseek'),{provider:'volcengine-agent-plan',baseUrl:'https://ark.cn-beijing.volces.com/api/plan/v3',modelId:'fixture-model',reasoning:false});
+  const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'Check plan tool'}]);
+  assert.equal(result.state,'completed');
+  assert.ok(f.requests.every(r=>new URL(r.url).pathname==='/api/plan/v3/responses'));
+});

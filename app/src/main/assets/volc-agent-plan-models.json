@@ -1,0 +1,128 @@
+[
+  {
+    "id": "ark-code-latest",
+    "name": "ark-code-latest",
+    "contextWindow": 256000,
+    "maxTokens": 32000,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "doubao-seed-2.1-pro",
+    "name": "doubao-seed-2.1-pro",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "doubao-seed-2.1-lite",
+    "name": "doubao-seed-2.1-lite",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "doubao-seed-evolving",
+    "name": "doubao-seed-evolving",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "glm-5.3",
+    "name": "glm-5.3",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text"
+    ]
+  },
+  {
+    "id": "glm-5.3-flash",
+    "name": "glm-5.3-flash",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "glm-latest",
+    "name": "glm-latest",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text"
+    ]
+  },
+  {
+    "id": "deepseek-v4.1-flash",
+    "name": "deepseek-v4.1-flash",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "deepseek-v4-flash",
+    "name": "deepseek-v4-flash",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text"
+    ]
+  },
+  {
+    "id": "deepseek-v4-pro",
+    "name": "deepseek-v4-pro",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text"
+    ]
+  },
+  {
+    "id": "doubao-seed-2.0-mini",
+    "name": "doubao-seed-2.0-mini",
+    "contextWindow": 256000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "kimi-k3",
+    "name": "kimi-k3",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "kimi-k2.8-preview",
+    "name": "kimi-k2.8-preview",
+    "contextWindow": 1024000,
+    "maxTokens": 65536,
+    "input": [
+      "text",
+      "image"
+    ]
+  }
+]

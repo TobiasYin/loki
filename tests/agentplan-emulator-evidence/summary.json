@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-19",
+  "avd": "thor_agent_dual_api36",
+  "serial": "emulator-5560",
+  "androidApi": 36,
+  "screenIds": [
+    0,
+    4
+  ],
+  "physicalDeviceTests": false,
+  "liveServices": [
+    "Responses streaming",
+    "Agent web.search tool round trip",
+    "ASR 2.0 known synthetic PCM",
+    "TTS 2.0 emulator AudioTrack"
+  ],
+  "appUnitTests": 259,
+  "runtimeTests": 390,
+  "lint": "passed",
+  "integrationTypecheck": "passed",
+  "searchWireTests": "passed",
+  "coldBootPassed": true,
+  "credentialsPersisted": true,
+  "liveInstrumentedTests": 1,
+  "coldBootInstrumentedTests": 1,
+  "liveDurationSeconds": 22.991,
+  "coldBootDurationSeconds": 4.097,
+  "apks": {
+    "app/build/outputs/apk/debug/app-debug.apk": "a82c51be38eddd25594b36ba07261fee1ff617f07d11e81b8380368340b3e4be",
+    "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "e7aa8b0c3067fc0f0a768acc987f739688445f6e8a8d3b522b58c0b3c37a7201"
+  },
+  "sources": {
+    "scripts/thor-emulator.py": "7dccec82a2096f98706d6c937b4b48ba4b7295f4065cddc0bcc8c54d4e1d445c",
+    "integration/web-services.ts": "c60bb90ea7b2e1a6a4d90ff2891a6449d6982e7fa6993acc7d427e3e6c0b8ab9",
+    "runtime/src/profile-validation.ts": "c6f94667b7ee7e75f11dab9e611e0a7a8fb997a278164180045d16642eeed6f7",
+    "app/src/androidTest/java/dev/thor/agent/EmulatorAgentPlanTest.kt": "16d677896bea192c3f8040653552e95cae2648d8f122dc6a3892d8133d881e50",
+    "app/src/main/java/dev/thor/agent/VolcAsrProtocol.kt": "a7a74de3f5c8537b3367cce3f26111481031da9c3a7643df3952e3dc3a6ccb3b",
+    "app/src/main/java/dev/thor/agent/VolcAgentPlan.kt": "437a9c0ae77d71411bff72d4bd4902be567138be8da0978a2f188d8597d22bd7",
+    "app/src/main/java/dev/thor/agent/VolcPlanSpeech.kt": "3334a5f9bed6d4b4954e0889430cb8847cf3a2aff1ba8d18f5bb617fad3369ef",
+    "app/src/main/java/dev/thor/agent/VoiceSettings.kt": "e159edb13365bb5ccc51d112e24a4c1cd65564a1f9fdfb580e7904ccd8a1e26c",
+    "app/src/main/java/dev/thor/agent/VoiceServices.kt": "4d59165205e4699e83645239b45cfb407fe5a8a1bdb5cd36f1c34315b6f630f4"
+  },
+  "evidence": {
+    "cold-boot.json": "42bf5af3dda3a011c7e8a1d35f205b24b8e9ee3ae95c50821bf796d391e6941b",
+    "services.json": "18247d6a9a36c52e38f796ac5aa9b6a3460884d4afa7c39ad2fa0de293732410",
+    "cold-start.log": "8d6aee33c7d066c5537ea2a5e5e13fb03ca778219240ae495b77a713bd202927",
+    "voice-settings.png": "3f7be55f6b94aca5aa677015e6d2ce1d8b73a87510f48226b1cec90d71236c53",
+    "cold-boot-instrumentation.log": "4b7f17656952f1b336eae395e501a64a7c9248e72da2f387bfdf308a909da745",
+    "instrumentation.log": "b631eefa115e82feef1f472a28a9e2deb6f63c42b244106bf08552e85323d478",
+    "displays.json": "7ce7bc65702edbb8373c449e9d6e8cb944b3c59e3676182c484072562102df61"
+  }
+}

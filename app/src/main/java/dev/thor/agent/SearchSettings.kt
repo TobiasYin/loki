@@ -32,7 +32,7 @@ internal fun showSearchSettings(
     val content=ui.column()
     fun ref(name:String)=if(name=="Tavily")"search.tavily" else "search"
     fun key(name:String)=if(name in removed)"" else drafts[name].orEmpty().ifBlank {runCatching {vault.readNative(ref(name))}.getOrNull().orEmpty()}
-    fun services()=available.filter {it.backend=="DeepSeek"}+listOf("Tavily","Brave").mapNotNull {name->key(name).takeIf {it.isNotBlank()}?.let {SearchServices.Service(name,if(name=="Brave")braveUrl else SearchServices.endpoint(name),it)}}
+    fun services()=available.filter {it.backend in setOf("DeepSeek",VolcAgentPlan.SEARCH_NAME)}+listOf("Tavily","Brave").mapNotNull {name->key(name).takeIf {it.isNotBlank()}?.let {SearchServices.Service(name,if(name=="Brave")braveUrl else SearchServices.endpoint(name),it)}}
     fun inset(parent:LinearLayout)=LinearLayout(activity).apply {orientation=LinearLayout.VERTICAL;setPadding(ui.dp(18),ui.dp(if(compact)12 else 16),ui.dp(18),ui.dp(if(compact)12 else 18));parent.addView(this)}
     fun note(parent:LinearLayout,value:String)=parent.addView(ui.text(value,13f,true).apply {setPadding(0,ui.dp(8),0,0)})
     fun heading(parent:LinearLayout,value:String) {
@@ -61,7 +61,7 @@ internal fun showSearchSettings(
         }
         val selection=ui.card(chooser)
         val pickService:()->Unit={
-            val labels=arrayOf("自动选择 · 推荐","DeepSeek · 共享模型 Key","Tavily","Brave","关闭联网搜索")
+            val labels=arrayOf("自动选择 · 推荐","DeepSeek · 共享模型 Key","豆包搜索 · 共享当前 AgentPlan Key","Tavily","Brave","关闭联网搜索")
             AlertDialog.Builder(activity).setTitle("选择搜索服务").setSingleChoiceItems(labels,SearchServices.names.indexOf(selected)) {dialog,index->
                 selected=SearchServices.names[index];advanced=false;dialog.dismiss();render()
             }.setNegativeButton("取消",null).show()
@@ -72,7 +72,7 @@ internal fun showSearchSettings(
             note(body,when(selected){"自动选择"->"自动使用已配置服务";"DeepSeek"->"共享官方模型 Key";"关闭"->"不提供网页搜索工具";else->"独立搜索 Key"})
         } else {
             ui.row(selection,when(selected){"自动选择"->"自动选择 · 推荐";"关闭"->"关闭联网搜索";else->selected},
-                when(selected){"自动选择"->"优先使用已配置的 DeepSeek，其次 Tavily、Brave。";"关闭"->"不向模型提供网页搜索工具。";"DeepSeek"->"与 DeepSeek 官方模型共享 API Key。";else->"使用 $selected 提供网页搜索。"},"⌕",pickService)
+                when(selected){"自动选择"->"当前 AgentPlan 优先，其次 DeepSeek、Tavily、Brave。";"关闭"->"不向模型提供网页搜索工具。";"DeepSeek"->"与 DeepSeek 官方模型共享 API Key。";else->"使用 $selected 提供网页搜索。"},"⌕",pickService)
             selection.getChildAt(0).tag="search-service-picker"
         }
         when(selected) {
@@ -85,11 +85,18 @@ internal fun showSearchSettings(
                 if(manage) {
                     heading(details,"管理服务")
                     val card=ui.card(details)
-                    for(name in listOf("DeepSeek","Tavily","Brave")) {
+                    for(name in listOf(VolcAgentPlan.SEARCH_NAME,"DeepSeek","Tavily","Brave")) {
                         val configured=services().any {it.backend==name}
-                        ui.row(card,"$name · ${if(configured)"已配置" else "未配置"}",if(name=="DeepSeek")"共享官方模型 Key" else "填写或更新 API Key",if(configured)"✓" else "+") {selected=name;render()}
+                        ui.row(card,"$name · ${if(configured)"已配置" else "未配置"}",if(name in setOf("DeepSeek",VolcAgentPlan.SEARCH_NAME))"共享官方模型 Key" else "填写或更新 API Key",if(configured)"✓" else "+") {selected=name;render()}
                     }
                 }
+            }
+            VolcAgentPlan.SEARCH_NAME->{
+                heading(details,"共享当前火山 AgentPlan Key")
+                val body=inset(ui.card(details));val configured=services().any {it.backend==VolcAgentPlan.SEARCH_NAME}
+                body.addView(ui.text(if(configured)"✓ 已共享当前 AgentPlan Key" else "请配置并使用火山 AgentPlan",18f))
+                note(body,"在模型服务中保存 AgentPlan Key 并使用此服务；无需额外搜索 Key。请先在火山控制台开启豆包搜索抵扣。切换到其他模型服务后，不再自动使用此套餐 Key。")
+                body.addView(ui.button("管理模型服务",onModels))
             }
             "DeepSeek"->{
                 heading(details,"模型与搜索共用一个 Key")

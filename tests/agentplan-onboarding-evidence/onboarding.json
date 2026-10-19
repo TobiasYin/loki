@@ -1,0 +1,10 @@
+{
+  "emulator": true,
+  "credential": "synthetic, no network request",
+  "passed": true,
+  "modelSelected": true,
+  "emptyKeyBlocked": true,
+  "sameKeyForVoiceAndSearch": true,
+  "guideCompleted": true,
+  "originalConfigurationRestored": true
+}

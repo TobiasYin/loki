@@ -20,6 +20,7 @@ object SearchConnectionTest {
             val client=OkHttpClient.Builder().followRedirects(false).followSslRedirects(false).callTimeout(30,TimeUnit.SECONDS).build()
             val builder=Request.Builder().header("Accept","application/json")
             val request=if(backend=="Brave")builder.url("$url?q=Android&count=1").header("X-Subscription-Token",key).build()
+                else if(backend==VolcAgentPlan.SEARCH_NAME)builder.url(url).header("Authorization","Bearer $key").post(JSONObject().put("Query","Android").put("SearchType","web").put("Count",1).toString().toRequestBody("application/json".toMediaType())).build()
                 else builder.url(url).header("Authorization","Bearer $key").post(JSONObject().put("query","Android").put(if(backend=="Tavily")"max_results" else "count",1).toString().toRequestBody("application/json".toMediaType())).build()
             client.newCall(request).execute().use {response->
                 if(!response.isSuccessful)return result(false,when(response.code){401,403->"搜索认证失败（HTTP ${response.code}），请检查 Key 权限";429->"搜索限流或额度不足（HTTP 429）";in 300..399->"搜索返回重定向；未向其他地址转发 Key";else->"搜索服务请求失败（HTTP ${response.code}）"})
@@ -27,7 +28,7 @@ object SearchConnectionTest {
                 val bounded=dev.thor.tools.Budgets.read(body.byteStream(),256*1024)
                 if(bounded.truncated)return result(false,"搜索响应超出测试大小上限")
                 val data=JSONObject(bounded.bytes.toString(Charsets.UTF_8))
-                if((if(backend=="Brave")data.optJSONObject("web")?.optJSONArray("results") else data.optJSONArray("results"))!=null)result(true,"$backend 搜索连接可用，当前草稿未保存")
+                if((if(backend=="Brave")data.optJSONObject("web")?.optJSONArray("results") else if(backend==VolcAgentPlan.SEARCH_NAME && data.optJSONObject("ResponseMetadata")?.optJSONObject("Error")==null)data.optJSONObject("Result")?.optJSONArray("WebResults") else data.optJSONArray("results"))!=null)result(true,"$backend 搜索连接可用，当前草稿未保存")
                 else result(false,"连接成功但返回格式不是 $backend 搜索结果，请检查地址")
             }
         }catch(error:Exception){

@@ -123,6 +123,7 @@ class ProductHost private constructor(private val context: Context, private val 
     private val providerModels=linkedMapOf<String,JSONObject>()
     private val catalog=ModelCatalog(context)
     private val deepseekCatalog=DeepSeekCatalog(context)
+    private val volcCatalog=VolcAgentPlanCatalog(context)
     private val revision = prefs.getInt("revision", 0)
     private var searchUrl: String? = null
     private var searchConfigured = false
@@ -291,6 +292,7 @@ class ProductHost private constructor(private val context: Context, private val 
     private fun configModels(config:JSONObject):List<JSONObject> = when(config.getString("kind")) {
         "opencode-go"->catalog.models().objects()
         "deepseek"->deepseekCatalog.models().objects()
+        VolcAgentPlan.KIND->volcCatalog.models().objects()
         else->listOf(obj("id" to config.getString("model"),"name" to config.getString("name"),
             "protocol" to ModelCatalog.protocols[config.getInt("protocol")],"contextWindow" to config.getInt("contextBudget"),
             "maxOutput" to config.getInt("maxOutput"),"supportsTools" to true,"input" to JSONArray(if(config.getBoolean("supportsImages"))listOf("text","image") else listOf("text")),
@@ -546,7 +548,7 @@ class ProductHost private constructor(private val context: Context, private val 
             available.put(t.toolId,state)
             if (a.status == Status.READY && capability in granted) allowed.add(t.toolId)
         }
-        available.put("web.search", obj("status" to if(searchConfigured && b.runId != probeRun) "ready" else "backend_missing", "reason" to "请配置 DeepSeek 官方模型 Key 或 Tavily / Brave 搜索 Key"))
+        available.put("web.search", obj("status" to if(searchConfigured && b.runId != probeRun) "ready" else "backend_missing", "reason" to "请配置火山 AgentPlan、DeepSeek 官方或 Tavily / Brave 搜索服务"))
         available.put("web.fetch", obj("status" to if(b.runId != probeRun) "ready" else "backend_missing", "reason" to "通过系统网络读取 HTTP/HTTPS，支持内网与代理 DNS"))
         val enabled = JSONObject(); for(cap in dev.thor.bridge.Capability.entries) enabled.put(cap.name, cap in authority.enabled(b))
         val profile=JSONObject(scope.profile.toString())

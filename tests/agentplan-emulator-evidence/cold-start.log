@@ -1,0 +1,25 @@
+Starting thor_agent_dual_api36 on emulator-5560; log: ./build/emulator/thor-project/emulator.log
+{
+  "avd": "thor_agent_dual_api36",
+  "serial": "emulator-5560",
+  "emulator": true,
+  "android": "16",
+  "screens": [
+    {
+      "role": "upper",
+      "displayId": 0,
+      "width": 1920,
+      "height": 1080,
+      "densityDpi": 369
+    },
+    {
+      "role": "lower",
+      "displayId": 4,
+      "width": 1240,
+      "height": 1080,
+      "densityDpi": 369
+    }
+  ],
+  "idStrategy": "Boot without secondary displays; hotplug/remove temporary displays with IDs below 4, then retain logical display 4."
+}
+Install: path/to/android-sdk/platform-tools/adb -s emulator-5560 install -r app/build/outputs/apk/debug/app-debug.apk

@@ -18,6 +18,7 @@ internal object OfficialProfilePolicy {
             if(u.scheme!="https" || u.userInfo!=null || u.query!=null || u.fragment!=null || u.port !in setOf(-1,443))false
             else when(provider) {
                 "opencode-go"->u.host=="opencode.ai" && (path=="/zen/go/v1" || path.matches(Regex("/inference/go/(openai|anthropic)/v1")))
+                VolcAgentPlan.KIND->u.host=="ark.cn-beijing.volces.com" && path=="/api/plan/v3"
                 "deepseek"->u.host=="api.deepseek.com" && path in setOf("","/v1")
                 else->false
             }

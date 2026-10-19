@@ -57,19 +57,24 @@ APK：
 
 0.8 的官方模型预设、现代输入区、消息展开动画、速度优化、后台运行、双屏工具和真实游戏长流程进度见 [0.8 变更与验证边界](docs/release-0.8-progress.md)。
 
-## 仅软件模拟器验证
+## 默认开发与模拟器验收
 
-真机与模拟器证据分开记录，历次暂停时的已完成项、实际状态和缺口见 [续测清单](docs/physical-test-resume.md)。[暂停期间软件验收](docs/software-pause-validation.md) 保留当时仅使用独立 AVD 的结果，不把它当作真机结论；本轮连接设备后的结果见上述 0.7 记录。不复制真机凭据到 AVD，也不重置真机资料。
+后续开发任务默认使用项目专用 AVD **`thor_agent_dual_api36`**（默认序列号 **`emulator-5560`**）：上屏 **display 0 / 1920×1080**，下屏 **display 4 / 1240×1080**，均为 **369 dpi**。聊天主界面运行在下屏 display 4。开发代理和人工开发均按根目录 [AGENTS.md](AGENTS.md) 执行，配置及恢复方式见 [专用双屏模拟器说明](docs/project-thor-emulator.md)。
 
 ```sh
-# 先启动明确选定的 AVD。脚本拒绝实体设备和未指定 serial。
-# API36 可创建受控 overlay 显示；记录 dumpsys display 中真实生成的 ID，不猜 ID。
-adb -s emulator-XXXX shell settings put global overlay_display_devices 720x1280/240
-adb -s emulator-XXXX shell dumpsys display
-python3 scripts/emulator-verify.py --serial emulator-XXXX --lab-display ACTUAL_OVERLAY_ID
+# 创建或复用项目专用 AVD，并核对屏幕 ID、尺寸与密度
+python3 scripts/thor-emulator.py
+
+# 安装与运行；每条 ADB 命令明确指定目标设备
+adb -s emulator-5560 install -r app/build/outputs/apk/debug/app-debug.apk
+adb -s emulator-5560 shell am start --display 4 -n dev.thor.agent/.MainActivity
 ```
 
-脚本只运行明确选定的软件测试类，覆盖模型协议与网页桥接、Skill 页面、语音模式、SQLite 和生命周期，不自动发现真机风扇/亮度等硬件测试。模型和搜索使用本机受控服务；匿名 HTTP 跨端口跳转用于检查 Android 原生桥接与无凭据请求。结束时移除测试端口转发并恢复无障碍设置。
+涉及 Android 界面或设备行为的变更，默认在这套双屏环境完成验收，并保留原有数据和凭据。历史测试脚本若固定为其他屏幕角色，应先适配参数或实现，再用于当前默认环境。真机专项测试按用户要求单独执行和记录，模拟器结果不能替代硬件验收。
+
+历史受控服务 runner [emulator-verify.py](scripts/emulator-verify.py) 及历次 [软件集成报告](docs/integration-report.md)、[实机报告](docs/physical-test-report.md) 保留各自测试条件，不改变本节默认开发环境。
+
+该 runner 只运行明确选定的软件测试类，覆盖模型协议与网页桥接、Skill 页面、语音模式、SQLite 和生命周期，不自动发现真机风扇/亮度等硬件测试。模型和搜索使用本机受控服务；匿名 HTTP 跨端口跳转用于检查 Android 原生桥接与无凭据请求。结束时移除测试端口转发并恢复无障碍设置。
 
 runner 只通过 signature 保护的 debug provider 准备/读报告，经真实 Pi → Native → Accessibility → Android dispatch 施加输入；没有 setPassed/事件回放入口。准备和报告通道不注册为模型工具。receiver 的 `unqualified-physical-baseline-pending` 保持不变，不把 AVD 结果冒充 Thor POC-11。
 

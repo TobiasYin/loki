@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "credentialsPersisted": true,
+  "sameKeyForVoiceAndSearch": true,
+  "screens": [
+    {
+      "id": 0,
+      "width": 1920,
+      "height": 1080,
+      "densityDpi": 369
+    },
+    {
+      "id": 4,
+      "width": 1240,
+      "height": 1080,
+      "densityDpi": 369
+    }
+  ],
+  "uiDisplay": 4
+}

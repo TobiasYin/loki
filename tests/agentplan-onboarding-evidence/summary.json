@@ -1,0 +1,25 @@
+{
+  "emulator": "emulator-5560",
+  "chatDisplay": 4,
+  "initializationTestsPassed": 1,
+  "navigationTestsPassed": 1,
+  "cloudRequests": false,
+  "originalConfigurationRestored": true,
+  "debugBuild": "passed",
+  "lintDebug": "passed",
+  "sources": {
+    "app/src/main/java/dev/thor/agent/MainActivity.kt": "0156de0e2c8665367ad9403c5b59aa03a5f75a9de2a52ad46e72725993c77b16",
+    "app/src/androidTest/java/dev/thor/agent/AgentPlanOnboardingTest.kt": "d56f79aeaead51a187c6017419b36be90e64a69e5fba7c14308a03a0395bff5f",
+    "app/src/androidTest/java/dev/thor/agent/OnboardingNavigationTest.kt": "2ae5609f715f5d14b94c9f6e0284d7fb949cbd05c6fefdf9c0cf96c24011f7dc"
+  },
+  "apks": {
+    "app/build/outputs/apk/debug/app-debug.apk": "4627b64383a15e347b73ae4888a27f1222c97328f2a8b75cca5b073745f3c596",
+    "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "abd12c0cc6c434175eaf57e1299e37f0dfc4b6fd1035e9dbb3b3a511d33db9cd"
+  },
+  "evidence": {
+    "onboarding.json": "4d04d89bf66a08a6fa08e3620f63451b684a13165e6397f2407ccb953b13b0a4",
+    "navigation.log": "e38dbe36b27b4c9b1bca31b9251e32a8741649aa1e786b0e39eab91b461e4953",
+    "instrumentation.log": "94a787afc39d1076e49314bb24490914a467e3a5b4b604e5b920c059486cc9fd",
+    "onboarding.png": "38c613e21c4c7b9e28666bece60af1a9f01ee61772b69e90fef4e3032718dcd0"
+  }
+}

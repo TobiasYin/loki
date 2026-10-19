@@ -15,3 +15,13 @@ assert.throws(()=>webRequest('DeepSeek',true,'https://service.test',{query:'中'
 assert.doesNotThrow(()=>webRequest('DeepSeek',true,'https://service.test',{query:'😀'.repeat(128)}));
 assert.throws(()=>searchResults('Tavily','{"error":"denied"}'));
 console.log('Search wire formats, result normalization, fetch and Unicode limits passed');
+const doubao=webRequest('豆包搜索',true,'https://open.feedcoopapi.com/search_api/web_search',{query:'火山 AgentPlan'});
+assert.equal(doubao.init.method,'POST');
+assert.deepEqual(JSON.parse(doubao.init.body),{Query:'火山 AgentPlan',Count:5,SearchType:'web'});
+assert.deepEqual(searchResults('豆包搜索',JSON.stringify({Result:{WebResults:[{Title:'火山',Url:'https://example.com',Snippet:'摘要',PublishTime:'2026-10-19'}]}})),[{title:'火山',url:'https://example.com',summary:'摘要',sourceTime:'2026-10-19'}]);
+assert.throws(()=>searchResults('豆包搜索',JSON.stringify({ResponseMetadata:{Error:{Code:'Denied'}},Result:{WebResults:[]}})));
+assert.throws(()=>webRequest('豆包搜索',true,'https://example.com',{query:'字'.repeat(101)}));
+assert.throws(()=>webRequest('豆包搜索',true,'https://example.com',{query:' '}));
+assert.doesNotThrow(()=>webRequest('豆包搜索',true,'https://example.com',{query:'😀'.repeat(100)}));
+assert.equal(webRequest('豆包搜索',false,'https://example.com',{url:'https://example.com'}).init.method,'GET');
+console.log('Doubao search normalization, service errors and Unicode limits passed');

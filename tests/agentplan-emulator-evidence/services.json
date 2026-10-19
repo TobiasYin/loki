@@ -1,0 +1,48 @@
+{
+  "emulator": true,
+  "chatDisplay": 4,
+  "credentials": "one Native Keystore reference",
+  "source": "https:\/\/ark.volcengine.com\/region:cn-beijing\/docs\/agent-plan-personal-openclaw.md",
+  "discoveredModels": [
+    "ark-code-latest",
+    "doubao-seed-2.1-pro",
+    "doubao-seed-2.1-lite",
+    "doubao-seed-evolving",
+    "glm-5.3",
+    "glm-5.3-flash",
+    "glm-latest",
+    "deepseek-v4.1-flash",
+    "deepseek-v4-flash",
+    "deepseek-v4-pro",
+    "doubao-seed-2.0-mini",
+    "kimi-k3",
+    "kimi-k2.8-preview"
+  ],
+  "modelPicker": true,
+  "secretNotRefilled": true,
+  "textStreaming": {
+    "passed": true,
+    "elapsedMs": 985
+  },
+  "search": {
+    "passed": true,
+    "elapsedMs": 297
+  },
+  "sendNotice": "\"\"",
+  "agentSearch": {
+    "status": "completed",
+    "toolSucceeded": true
+  },
+  "asr": {
+    "source": "known synthetic PCM, emulator network; no microphone",
+    "phase": "complete",
+    "phraseMatched": true
+  },
+  "tts": {
+    "passed": true,
+    "model": "doubao-seed-tts-2.0",
+    "playback": "emulator AudioTrack"
+  },
+  "voiceSettings": true,
+  "passed": true
+}
