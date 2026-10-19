@@ -39,7 +39,7 @@ python3 scripts/thor-emulator.py
 ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest
 adb -s emulator-5560 install -r app/build/outputs/apk/debug/app-debug.apk
 adb -s emulator-5560 install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-adb -s emulator-5560 shell am start --display 4 -n dev.thor.agent/.MainActivity
+adb -s emulator-5560 shell am start --display 4 -n com.tobias.loki/dev.thor.agent.MainActivity
 ```
 
 完整环境说明见 [项目专用 Thor 双屏模拟器](docs/project-thor-emulator.md)。

@@ -30,7 +30,7 @@ adb -s emulator-5560 install -r app/build/outputs/apk/debug/app-debug.apk
 adb -s emulator-5560 install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
 # 主界面放到 Thor 对应的下屏
-adb -s emulator-5560 shell am start --display 4 -n dev.thor.agent/.MainActivity
+adb -s emulator-5560 shell am start --display 4 -n com.tobias.loki/dev.thor.agent.MainActivity
 ```
 
 多显示器尺寸与密度配置参考 [Android 模拟器多显示器说明](https://developer.android.com/studio/run/emulator-extended-controls)。屏幕路由测试应分别以 0 为上屏、4 为下屏，不把单屏 UI 测试视为双屏触控、手柄或真机麦克风验收。

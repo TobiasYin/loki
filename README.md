@@ -69,7 +69,7 @@ python3 scripts/thor-emulator.py
 
 # 安装与运行；每条 ADB 命令明确指定目标设备
 adb -s emulator-5560 install -r app/build/outputs/apk/debug/app-debug.apk
-adb -s emulator-5560 shell am start --display 4 -n dev.thor.agent/.MainActivity
+adb -s emulator-5560 shell am start --display 4 -n com.tobias.loki/dev.thor.agent.MainActivity
 ```
 
 涉及 Android 界面或设备行为的变更，默认在这套双屏环境完成验收，并保留原有数据和凭据。历史测试脚本若固定为其他屏幕角色，应先适配参数或实现，再用于当前默认环境。真机专项测试按用户要求单独执行和记录，模拟器结果不能替代硬件验收。

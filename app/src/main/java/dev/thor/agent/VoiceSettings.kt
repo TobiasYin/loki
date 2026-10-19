@@ -100,7 +100,7 @@ fun showVoiceSettings(activity:Activity,onSaved:()->Unit={},present:(View,()->Un
     if(plan!=null) {
         val speech=form.section(form.main,"AgentPlan 语音合成 · TTS 2.0")
         form.note(speech,"共享当前套餐 Key。输入要朗读的文字，合成后在本机播放；每次调用消耗套餐额度。")
-        val words=EditText(activity).apply {hint="输入朗读文字（最多 1000 字）";setText("你好，我是 Thor，火山 AgentPlan 语音已接入。")}
+        val words=EditText(activity).apply {hint="输入朗读文字（最多 1000 字）";setText("你好，我是 Loki，火山 AgentPlan 语音已接入。")}
         form.move(speech,words)
         val state=ui.text("豆包语音合成 2.0 · VV 音色",13f,true)
         var player:VolcPlanSpeech?=null
