@@ -1,1 +1,1 @@
-{"name":"thor-native-fetch","version":"0.1.0","private":true,"type":"module","scripts":{"test":"node --test *.test.mjs"},"engines":{"node":">=22"}}
+{"name":"thor-native-fetch","version":"0.1.0","private":true,"type":"module","scripts":{"test":"node --test *.test.mjs"},"engines":{"node":">=22"},"license":"MIT"}

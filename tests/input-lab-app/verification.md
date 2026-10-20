@@ -32,7 +32,7 @@ prepare 新增可选整数 `observationSeconds`，默认 5、仅允许 5..30；l
 
 ## 重配置修复首次构建
 
-从根工程运行 `JAVA_HOME=path/to/jdk-17 ANDROID_HOME=path/to/android-sdk ./gradlew :input-lab:testDebugUnitTest :input-lab:lintDebug :input-lab:assembleDebug --console=plain` 成功。仅构建 Input Lab；未运行会重置 Native 配置的 fixture runner，未安装/启动 APK、注入输入或修改设备设置。
+从根工程运行 `./gradlew :input-lab:testDebugUnitTest :input-lab:lintDebug :input-lab:assembleDebug --console=plain` 成功。仅构建 Input Lab；未运行会重置 Native 配置的 fixture runner，未安装/启动 APK、注入输入或修改设备设置。
 
 当前 56 个 JVM 测试全部通过：AttemptTest 37、JournalTest 7、DeviceContinuityTest 7、AxisProfileTest 5；0 failures/errors/skipped。新增测试覆盖相同空闲回调、真实 tap/A 键完成后的回调、增删/未知/缺失设备、身份/来源/range/fuzz/能力变化、焦点/生命周期/布局/显示变化、既有不确定性、被变更设备的持有状态、其他设备持有不污染、Thor BRAKE/GAS profile 冻结、键盘/虚拟/不明确设备拒绝、跨设备借用与缺轴/未归零拒绝。结果位于 `app/build/test-results/testDebugUnitTest/`。Lint 0 errors / 38 warnings（英文 UI 本地化、固定 target35、较新版 Gradle 提示），位于 `app/build/reports/lint-results-debug.html`。
 

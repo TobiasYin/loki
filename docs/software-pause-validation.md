@@ -24,7 +24,7 @@
 使用专用可丢弃 AVD；本脚本 fixture 会替换该 AVD 中的测试 App 连接资料，拒绝覆盖真实服务地址。先创建或选择 overlay，读取实际显示编号后执行：
 
 ```sh
-ANDROID_HOME=path/to/android-sdk python3 scripts/emulator-verify.py --serial emulator-5554 --lab-display 2
+python3 scripts/emulator-verify.py --serial emulator-5554 --lab-display 2
 ```
 
 不要直接复制编号到其他 AVD；文档中的 2 是本轮观测值。可提交摘要在 `tests/software-pause-evidence/summary.json`，包含 APK 指纹、源码核对、原始文件哈希、已通过与跳过范围、失败历史和清理状态；完整原始报告/日志在 `build/integration/`。真机剩余任务见 [暂停与续测清单](physical-test-resume.md)。

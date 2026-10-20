@@ -10,3 +10,19 @@
 **/node_modules/
 
 **/__pycache__/
+
+# Local credentials and Android signing material.
+.env
+.env.*
+!.env.example
+!.env.template
+**/local.properties
+key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+.DS_Store
+
+# Original game captures are retained only in the private pre-rewrite backup.
+/tests/release-0.8-evidence/game/*.png

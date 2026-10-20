@@ -21,8 +21,8 @@
 ```sh
 cd path/to/thor-agent
 # 设置到自己的 JDK/SDK；本项目不修改全局设置。
-export JAVA_HOME=path/to/jdk-17
-export ANDROID_HOME=path/to/android-sdk
+export JAVA_HOME="$(cd path/to/jdk-17 && pwd)"
+export ANDROID_HOME="$(cd path/to/android-sdk && pwd)"
 ./gradlew :input-lab:assembleDebug :input-lab:testDebugUnitTest :input-lab:lintDebug
 # Android 平台解析器测试 APK（不注入任何输入、不创建接收证据）
 ./gradlew :input-lab:assembleDebugAndroidTest

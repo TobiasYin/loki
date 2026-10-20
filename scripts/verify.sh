@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
+python3 scripts/check-public-source.py
 mkdir -p build/integration
-for directory in runtime native-bridge/js app; do npm ci --ignore-scripts --prefix "$directory"; done
+for directory in runtime native-bridge/js app; do npm ci --ignore-scripts --registry=https://registry.npmjs.org/ --prefix "$directory"; done
 npm test --prefix runtime
 npm test --prefix native-bridge/js
 npm test --prefix app

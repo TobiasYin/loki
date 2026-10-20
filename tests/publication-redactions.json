@@ -1,0 +1,573 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "baseCommit": "6b5888fb3cff4c6ad208dbcbcbe1fe00e53962ab",
+  "scope": "Publication cleanup: relative host paths, fixed physical-device alias, and withheld game screenshots. Export digests and byte counts match the published files; original digests and original source pins identify private pre-rewrite evidence. Git commit IDs will be mapped separately after main history rewrite. This is not a test rerun.",
+  "files": [
+    {
+      "path": "docs/loki-physical-validation.md",
+      "originalBytes": 3805,
+      "originalSha256": "7ed6710d647055ed31f453db63a722bc1a0e4573da90d6f4e161a8d290c7b1cf",
+      "change": "publication-redaction",
+      "publishedBytes": 3808,
+      "publishedSha256": "c0f4de444bf5ff1c59e6c5d903fe140fad020987b3cc14c92a7b69199ad6abcb"
+    },
+    {
+      "path": "docs/opencode-zen.md",
+      "originalBytes": 18181,
+      "originalSha256": "5b4ef57f647e23324d399d84dfc1556aa31256d94731d9e18dd5b90d1e7cfb19",
+      "change": "publication-redaction",
+      "publishedBytes": 18184,
+      "publishedSha256": "f6320a50fd7651ba1593cb81da7c9724ec34acc363dbafd732c744ef1e9815b5"
+    },
+    {
+      "path": "docs/physical-resume-2026-10-16.md",
+      "originalBytes": 7275,
+      "originalSha256": "6317e8f7628433fb049bafd120fe02194e00ef3e9cc11a2fa8d4ebc014715c4a",
+      "change": "publication-redaction",
+      "publishedBytes": 7281,
+      "publishedSha256": "c5c7c79479d4f4e1769f8ce451a644fa79e64e1fce11c797af7ba408d9091201"
+    },
+    {
+      "path": "docs/physical-test-resume.md",
+      "originalBytes": 14010,
+      "originalSha256": "ab1d74981834760d19fa56ae45898a13eefa8c053ecf6258bd2d455f5a7e9713",
+      "change": "publication-redaction",
+      "publishedBytes": 14013,
+      "publishedSha256": "7e97ca67ecf416353802e74ce46a1d005deda662c89ea4777271cce22df8c3ed"
+    },
+    {
+      "path": "docs/voice-hold-fix.md",
+      "originalBytes": 3803,
+      "originalSha256": "333a9f6b279d419b31f6223a46a05b03e1babe878dc5d1afd8c692fca33a73f3",
+      "change": "publication-redaction",
+      "publishedBytes": 3809,
+      "publishedSha256": "28ff63b0db69c6620f26ea1849a4f3a46355e2fe2c204ede58d1d702e79d9518"
+    },
+    {
+      "path": "tests/agentplan-emulator-evidence/cold-start.log",
+      "change": "relative-paths",
+      "originalBytes": 789,
+      "originalSha256": "3345323aa104842e750f13c25d84e0c22a0c51f046a288d1b14ea5aebfe06b5b",
+      "publishedBytes": 724,
+      "publishedSha256": "8d6aee33c7d066c5537ea2a5e5e13fb03ca778219240ae495b77a713bd202927"
+    },
+    {
+      "path": "tests/agentplan-emulator-evidence/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 2707,
+      "originalSha256": "ea102709325e2bca7b2389c21a0a52f8d942685862b12b43b660db2d66b4243c",
+      "publishedBytes": 2707,
+      "publishedSha256": "317e96a78bf3e7851ccce4dc22ae9ec813c4d5b50ceb066cc1f91e88e65991c5"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 11687,
+      "originalSha256": "c5e1ea77de6b0c4030a3fc3d02e1367756b596543423145a394b54269f4c963b",
+      "publishedBytes": 11687,
+      "publishedSha256": "c9e1b16481938f4bfa470b36a51a4b4e3dd1f24a4a78eaaa0ae71f973036d7d9"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software-fixture-fix/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 11306,
+      "originalSha256": "44da9d3a9f49534d474d7d45abd74039bafb4fcdf3006f4ff9b2724dee7196f6",
+      "publishedBytes": 11180,
+      "publishedSha256": "2d93301d499b8109443bdc8f8c3d5043ab20dd548707b88d894794172fcfb3c9"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software-fixture-fix/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1328,
+      "originalSha256": "dfad10c53acc8f0d998ecefac73bbc11c220436c78f89f78515df97a98aee9db",
+      "publishedBytes": 1328,
+      "publishedSha256": "de666a5635e7169fa59ce5f4cf18702461ef166b69575a39d0364a2660a6394e"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software-publication/diagnostics-gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 10175,
+      "originalSha256": "c7915714c0e50445da826830bb5c876049627fd7ebdfd45a8de2fba1c71f648b",
+      "publishedBytes": 10133,
+      "publishedSha256": "3b638029f3a24314ed5ac8d977fbef51a906e181f9bdda79ec258d3939e94df4"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software-publication/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 26153,
+      "originalSha256": "4516fa0165d956279921a5b5bcc74b0c88abad6b349c61405410451c4bae5136",
+      "publishedBytes": 25859,
+      "publishedSha256": "d94de92b4c3fa745739d5f38c88499a9871c19d1dfc366bced513ba2f59e7650"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software-publication/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1984,
+      "originalSha256": "7396d7e5bf5561718d8c333ee038f206e092eab76a7ed92b8b93bb10cca6ed1a",
+      "publishedBytes": 1984,
+      "publishedSha256": "68d7b69f2525b6d79abdaa88fa7b5201a57ccea05b45622316080bce716b3562"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software-publication/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 6678,
+      "originalSha256": "fafa6aea6bf452aad6c61e8ddeb970367d776b84a25e9562bd59112d55210781",
+      "publishedBytes": 6678,
+      "publishedSha256": "4c98a5c63e0a8819445799557501b26b52a70d3ed8d1685fdef4097db9fb34c0"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 46256,
+      "originalSha256": "62cbaf276e4bb5543f8b4d43076d8e826345f1245a3b3cbcfc4c5af382b64f1e",
+      "publishedBytes": 45710,
+      "publishedSha256": "55e3eb1f32f996ac4ea971baba22495862229c29d363b514f5532952d80af1d3"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1660,
+      "originalSha256": "db4adb4b6738a0776be26c7149a21f2a66629d7aa9e593571e33139d65460ae1",
+      "publishedBytes": 1660,
+      "publishedSha256": "c045ed7fbbb7db7f4aad85dad4606eb31ca440d993c7f444ac53ca7755918c5d"
+    },
+    {
+      "path": "tests/dynamic-input-evidence/software/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 6475,
+      "originalSha256": "baee6495f4def2d6cfb7a40d2a7a144eaad272fe329bfea999b16f36d385a04b",
+      "publishedBytes": 6475,
+      "publishedSha256": "0e3d45ccf83821bd546f97943aa91b5a0575a40206ace4280fc4683098159a74"
+    },
+    {
+      "path": "tests/input-lab-app/evidence/build-and-test.txt",
+      "change": "relative-paths",
+      "originalBytes": 5291,
+      "originalSha256": "002bb79dd60ef846306e1f3c43d55701def2be5538b9d3bab3d537b81374951d",
+      "publishedBytes": 5181,
+      "publishedSha256": "e9527263675807b92970bf50530a0eac6138c9d655a05d3ae1b5f9c39bd9228d"
+    },
+    {
+      "path": "tests/integration-evidence/commit-verify.log",
+      "change": "relative-paths",
+      "originalBytes": 40425,
+      "originalSha256": "f3392fdf4d72f46797bd658191dd4164e4cd6eb34521349ec70ef8654319ee90",
+      "publishedBytes": 40341,
+      "publishedSha256": "aa0fd71cf85a95934258bd306456d9847e1efb66f3cff17361b21fba985a3959"
+    },
+    {
+      "path": "tests/integration-evidence/verification.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 3677,
+      "originalSha256": "a6d8e6c25a34a19d477092b4e77253197586938692e6050f82fa7eed3ea42ac1",
+      "publishedBytes": 3677,
+      "publishedSha256": "bf994415f34dd7b4943b1dbf62016c36ba67a3e85b49ca8fd2e27af3debc6adc"
+    },
+    {
+      "path": "tests/loki-physical-evidence/summary.json",
+      "originalBytes": 3122,
+      "originalSha256": "c8db2c8e97d4cb0e9697435780a4d2f5312d1155a232af4acaf49bdfb409435b",
+      "change": "publication-redaction",
+      "publishedBytes": 3125,
+      "publishedSha256": "cd782eb7d6bb4d6cd2454b25384f44b5493dd88b1e1ce67cf71589f5fc11b033"
+    },
+    {
+      "path": "tests/physical-evidence/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 18733,
+      "originalSha256": "37e9fe196abadf1dbf524bf9dbe9a2a4edfd347b7e626a2056a3150abeddd0ef",
+      "publishedBytes": 18733,
+      "publishedSha256": "698a181b7b9070c3787f6e59cb20c477a6558c1fbec2fe3e706a4e27907e3eac"
+    },
+    {
+      "path": "tests/physical-evidence/runner-shell.log",
+      "change": "relative-paths",
+      "originalBytes": 1105,
+      "originalSha256": "306e719b7ce381a516ab755a5742b6c5dcf35e2f1a496675604034ea0ccd43d0",
+      "publishedBytes": 1070,
+      "publishedSha256": "a224fe17bb391fa39ac7a816c1932030d0e1b62f4a7e09989738537c490e24f3"
+    },
+    {
+      "path": "tests/physical-evidence/software-verify.log",
+      "change": "relative-paths",
+      "originalBytes": 43371,
+      "originalSha256": "3272f803080310de0b93e4006a4f4d856f4a79af5402d5220b1d7d1d07e552ee",
+      "publishedBytes": 43245,
+      "publishedSha256": "d0b31d5cc1ad0e291fbe0d760a6db41187e0c586917f30404c333bcdf9425f90"
+    },
+    {
+      "path": "tests/provider-multi-config-evidence/software-build.txt",
+      "change": "relative-paths",
+      "originalBytes": 11599,
+      "originalSha256": "99bded083c70b161cb5394f9cf36c11d3d71c65a0c671ceaaeb0aca5b5c09ee7",
+      "publishedBytes": 11557,
+      "publishedSha256": "ab837754ec683e0be898e4091047bd638c18a21dd3f79f5e21e6228c4d8d5d08"
+    },
+    {
+      "path": "tests/release-0.6-evidence/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 7383,
+      "originalSha256": "124728f5d650f0bbd0189d983ae8b176995036ba5f0806dec0ed02ae33b72b1b",
+      "publishedBytes": 7383,
+      "publishedSha256": "571239bba3222c629fe7ed1b733f47f54659cc47689125e7853e0b07ddc529d4"
+    },
+    {
+      "path": "tests/release-0.6-evidence/receiver/metadata.json",
+      "originalBytes": 1463,
+      "originalSha256": "8fdf8a72cf180b8591a9c4e82bf29121a7edc3c0102e1c2c8073e9157f67f706",
+      "change": "publication-redaction",
+      "publishedBytes": 1466,
+      "publishedSha256": "a51cf21a4cfd33a35144516e1cf8fa0b2c376b965133ab02ed282b0559eaff2f"
+    },
+    {
+      "path": "tests/release-0.6-evidence/software/build-and-lint.log",
+      "change": "relative-paths",
+      "originalBytes": 29078,
+      "originalSha256": "241e7cf22ad6ed3e40b5cecc3536c1cc3701a545c7d2f554b477e25b44b4f986",
+      "publishedBytes": 28826,
+      "publishedSha256": "688d4c50dc6734588ccf9d616e580fa6ef4b2b9de6ec2bb40253fb6f2f74a2c5"
+    },
+    {
+      "path": "tests/release-0.7-evidence/software/final-build-08.log",
+      "change": "relative-paths",
+      "originalBytes": 31419,
+      "originalSha256": "675224e4f48fbd3b30ba4f6735510828cb012898bd1e2d33e9f5655944051e2b",
+      "publishedBytes": 31377,
+      "publishedSha256": "e2b1bc003b681ad2ec0686944e1a6326461002255be2a63f97c0de2613aee755"
+    },
+    {
+      "path": "tests/release-0.8-evidence/game/host-diagnosed-lower-save-menu.png",
+      "change": "withheld-media",
+      "originalBytes": 859729,
+      "originalSha256": "82e794b6855f301c6ce3e2cd2dbf1cb127ab3a3af6c71a9c961b43fbe10d33c5",
+      "published": false
+    },
+    {
+      "path": "tests/release-0.8-evidence/game/model-launched-game-upper.png",
+      "change": "withheld-media",
+      "originalBytes": 3363059,
+      "originalSha256": "f7576289e6f4d3a32b7d84f2a02f8ac22be2679dc93ee3ba3e012c9ccdd51f23",
+      "published": false
+    },
+    {
+      "path": "tests/release-0.8-evidence/game/model-opened-menu-upper.png",
+      "change": "withheld-media",
+      "originalBytes": 1379054,
+      "originalSha256": "c7c72a0a33c990be883edbe991de98f27a799181d2c26f7af7eab3ba8214e5b6",
+      "published": false
+    },
+    {
+      "path": "tests/release-0.8-evidence/game/progress.json",
+      "originalBytes": 59721,
+      "originalSha256": "02bc7042a50c5b0b92e6df7443fdb98744f656604896be2c63d23b0843ce964c",
+      "change": "publication-redaction",
+      "publishedBytes": 59972,
+      "publishedSha256": "bc9971ba6c619959b709d59e9c2207aa62dc50b772ba85e542f32e285e902503"
+    },
+    {
+      "path": "tests/release-0.8-evidence/legacy-null-history/before-fix.log",
+      "change": "relative-paths",
+      "originalBytes": 6939,
+      "originalSha256": "95f391f41da8b86f6aae0679c0093a1028e8416b509b5244f61081eeaa41f0a8",
+      "publishedBytes": 6687,
+      "publishedSha256": "8ee08e5ad0face9339c642aefd2a1de84192bbc72fda10e54d7f2eea55b080a6"
+    },
+    {
+      "path": "tests/release-0.8-evidence/legacy-null-history/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 6876,
+      "originalSha256": "8bbab949f59228e1f46dde0057cbcd3c6eb0cfe1caea22811e252b3268a29868",
+      "publishedBytes": 6877,
+      "publishedSha256": "737651f4f9318e5bb422ec72dd2c44c9411d402ec9ae7202df926590747107be"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-dual-document/final-gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 33347,
+      "originalSha256": "6968956a051d67996766d8a2ccfb5b9526860320fe1d02602186fca0216f24a9",
+      "publishedBytes": 33305,
+      "publishedSha256": "5003171e4f53fc237c8e208a9a949453a03a4338b78804a0f37261a36c468df0"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-dual-document/initial-gradle-before-stop-hardening.log",
+      "change": "relative-paths",
+      "originalBytes": 36259,
+      "originalSha256": "fef7eac67e327fdbd6e5cf59d44f24ed8933deee085bab6d85fa9e85ea79580e",
+      "publishedBytes": 35503,
+      "publishedSha256": "35b454ff4b5a610a88d19a28a17a150dacc4c543d53c1a8ad08313a636e6e31c"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-dual-document/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 2362,
+      "originalSha256": "dceea0c6eb3ea8c31a57746494ba9f866b67225b7afa22196fcbda5ccc486f45",
+      "publishedBytes": 2362,
+      "publishedSha256": "aa41a2c03190060602d0ea0b8f2f03027c1985c637ff6229c05d611f7e5d6793"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-dual-document/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 16195,
+      "originalSha256": "7b93b59f932e42ce67d734ad30194852a79ca29782fdd538050cb699ab67acfa",
+      "publishedBytes": 16195,
+      "publishedSha256": "96015064aa870ce8652d7a2e7269cdf14cd048004adc7233d7b56d41b824558e"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-execution-projection/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 33281,
+      "originalSha256": "6f7d4f7c4b9ab970dea27ed8a5dcf4128a5c35c701595daf19441657d8be2027",
+      "publishedBytes": 33239,
+      "publishedSha256": "383211edf20c98e09d56567460f441a588d6bbc573ae39f6c38f956da2515b39"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-execution-projection/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1064,
+      "originalSha256": "d5cdfaceeb8fbe76a1e6a6f052a3ffc733c820024de186ecd50cf7892bcb0810",
+      "publishedBytes": 1065,
+      "publishedSha256": "da1164ee8ec3ef0b0f673782d656642e034947c9fee92665b898c5b8fc7f15ee"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-expiry-startup-final/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 53644,
+      "originalSha256": "fd48cae65de9db6f6ede0f33e1194ac0f10f42b1f6e8fc21bcfaac84bef1b45d",
+      "publishedBytes": 52930,
+      "publishedSha256": "542b9bdae768b5076444c6f1568033b4138747357b877b4dd00cdbd77cbbbaa6"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-expiry-startup-final/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 2349,
+      "originalSha256": "6b384fc3e00b92f033e69be674ddf9bb4008258238470dbba99ff5b842aa868d",
+      "publishedBytes": 2350,
+      "publishedSha256": "c6463d11b3a5aea21fc5f08d59201ce7bfec6ba2bb26b4788c704228e4d7da45"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-expiry-startup-final/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 18090,
+      "originalSha256": "7fb539466f4829ebb0d3707aebaea41709f46643c01813d7e81f0eb6f0f4d2ff",
+      "publishedBytes": 18091,
+      "publishedSha256": "e4ae38178d142f2ac2126ca547d7f8ca2b7c9027ca678d94a2678faa6300299d"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-full-snapshot/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 33292,
+      "originalSha256": "8725a61bd3c8072a889d74054d01eb7953e7f22fce83f4503d9adfebca2c997b",
+      "publishedBytes": 33250,
+      "publishedSha256": "79cc149994423d5d0a1e0ae006780a6488c9b3266dcd8678c0ac75f972440fb7"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-full-snapshot/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1050,
+      "originalSha256": "4d22e19e009a313f89ee19a33b2c5c5e1ec60266ba75ecb8153860e3075dd7bb",
+      "publishedBytes": 1051,
+      "publishedSha256": "ffb298c3c5d83fd1f9eadfdd3ed49bf63109afba5e4510ce4f93dd2e5ee78882"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-legacy-null-final/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 33456,
+      "originalSha256": "2412e2844217c994270b8120ba39ac1a21a8f2e634d5d28a11bb8764da15009f",
+      "publishedBytes": 33414,
+      "publishedSha256": "b41b27f6dccff4951d945e545d9927fd82f64fc11301871c25d5a87b59a30e78"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-legacy-null-final/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1996,
+      "originalSha256": "8ec579d52f26270e226a69d6b889e056748227d2d50b8618d0c113811a4da1bd",
+      "publishedBytes": 1997,
+      "publishedSha256": "ac98011f03940c83b2b2988c43a83e4bda97bfe20c2b3658d186559512957a9e"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-legacy-null-final/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 16488,
+      "originalSha256": "97d2892b445c2e49f3b2689318fab42a06338755d16ae0c62e2af039eccf90c9",
+      "publishedBytes": 16489,
+      "publishedSha256": "3cc8569c55c6caa982cf410a8e2db755a904554eac7724760cb2301e08456e36"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-long-task-recovery/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 49929,
+      "originalSha256": "79dd0bd04595cf4ad91f085b6850a97bbe5a96611b10cad6fc605117842e2fcd",
+      "publishedBytes": 49551,
+      "publishedSha256": "d69e0a02633166699c4036d6849744ac51cd441f9e9e80744cc665a1c37f5c4a"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-long-task-recovery/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 2376,
+      "originalSha256": "407b7aea37b195b62060202813b8bfb81360aa4aee6f4cc506b6fc692e3734f2",
+      "publishedBytes": 2376,
+      "publishedSha256": "f6214f98e17863dc65c6686e570a25475fc6d15ee0ecdad14ff52339f23c72f8"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-long-task-recovery/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 16588,
+      "originalSha256": "62428aa6a73a07046d54eb0158e0141c39b3115573b1d203d65692c4a25b6913",
+      "publishedBytes": 16588,
+      "publishedSha256": "2692359a4141c8de45feefff5e30ef3e7b59faffe5dd6d495fe1080ad2c45d2b"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-native-null-final/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 33456,
+      "originalSha256": "2a42792db8f855ca1a1ec961d216d5d5481b195a66ab5c0a4e1f1c8ecdeda18f",
+      "publishedBytes": 33414,
+      "publishedSha256": "062b3817a256a1b4b5f4be80faa885ceaf24b75f23ff968d1719c67ffa48de38"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-native-null-final/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 2054,
+      "originalSha256": "ab3563d7355a857ba183f68f0195af3f5fcb87df89ede1c33f019a16ca0a9f75",
+      "publishedBytes": 2054,
+      "publishedSha256": "ecc3a1b66e1d582fe9e9a3b848f555030edf44d0190614dc89d0ca6e5781051e"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-native-null-final/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 15860,
+      "originalSha256": "571f759e28a81bea7cf6e011655132e4304883f4d0dac0a9c3d97ea7e7b33421",
+      "publishedBytes": 15860,
+      "publishedSha256": "afec1bd77502ce15496257a2bb092e1838199419255ec2c8cc9554b9f6cdf0f1"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-presentation-trace/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 50897,
+      "originalSha256": "aa9a9c77be513a4a456f6dc92a1e88d08c2171fd5a78308b918ab65a702b94ed",
+      "publishedBytes": 50771,
+      "publishedSha256": "6bb423b871ee927068bf4eae079afa8747dbb87768092f1aa35915cb4f2f03ad"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-presentation-trace/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1019,
+      "originalSha256": "de431a5cf3cff82c26837c87b15898e12fdc446a9521f7e59f750d4877353d5e",
+      "publishedBytes": 1020,
+      "publishedSha256": "08c82e499b86f87db26697d185f7b89ff938ada50854cfa11fc1469a3c40f1aa"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-recovery-ui/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 34259,
+      "originalSha256": "2603f4dac6c62a2deaa52aaed5cfb0dd76b9a31465c31850aad8a3388e460f90",
+      "publishedBytes": 33965,
+      "publishedSha256": "0354b5064debb3b8c64bacebfeb6edfd205e4116cabc06aae44e65ee3a3c7178"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-recovery-ui/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1014,
+      "originalSha256": "d099c8311ba662e4aaf8f4126d3e2942c5687bf739de46558bd14c126f10dc88",
+      "publishedBytes": 1015,
+      "publishedSha256": "cd0aba3e4a634a44f1f777ba3add48f725b3d5847b32356776548a14f893f14f"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-scoped-focus-final/gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 50738,
+      "originalSha256": "dbd92f5543667f5ddc0d531581cfd8824704134e36f56a649d8234d3cc708b0c",
+      "publishedBytes": 50360,
+      "publishedSha256": "dbb763dcb143b5dcb50a80ecbb28378ecd76e8a7793e73f1256d9fc06d4661ec"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-scoped-focus-final/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 2157,
+      "originalSha256": "0cf538b7f50ba7149f56154fa09a8dfa04397601d51ef1757e0996d6c769e82c",
+      "publishedBytes": 2158,
+      "publishedSha256": "a9785a9d7509d7ffdeb72e30212352917887f6f8f267f246ac6f7981a2629f22"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-scoped-focus-final/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 17715,
+      "originalSha256": "48582b7d14cc9c5638c70597655767280b2554d4f045717c3e3ff3e1004925eb",
+      "publishedBytes": 17716,
+      "publishedSha256": "c34d7dd9fd4e2f149a9c71c6019d0de9522687723aa65994d01b5fd218603f94"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-target-recovery/gradle-02.log",
+      "change": "relative-paths",
+      "originalBytes": 34704,
+      "originalSha256": "03f32e41a52ed7ef2a9245c37615a534a2c9d6d8faa1ecb524e1e1727f2c17b8",
+      "publishedBytes": 34116,
+      "publishedSha256": "821f25b9d2618071efb0381fc866e3b414d4f02b776ad4f83c31c0069d5fdaaf"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-target-recovery/initial-gradle-failed.log",
+      "change": "relative-paths",
+      "originalBytes": 11063,
+      "originalSha256": "c3c0321672420c685f5ad4264eb77630ea642b2ddb9652fb4bbf4541cef05271",
+      "publishedBytes": 10937,
+      "publishedSha256": "782cf7005431952dba9d08ad45d9f0bc74c1bd60ec80ef9804f55f71333edf62"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-target-recovery/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 1851,
+      "originalSha256": "b58ebad9d29ceec324029c8a3bd8c4106d570477e33ae7f92d64735646117fbd",
+      "publishedBytes": 1851,
+      "publishedSha256": "c849958e631d2b45fbea50ddf5feeb744cbc3ee96dd78e52f5c99db8e2b2d7c3"
+    },
+    {
+      "path": "tests/release-0.8-evidence/software-target-recovery/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 12709,
+      "originalSha256": "72356cc421fcd5ddec9a712677745dbdc8338d63ecdb1415c44e721e7640c0aa",
+      "publishedBytes": 12709,
+      "publishedSha256": "1694492daaf55cc42684daf5fd44b31b5659429434f0b55dd601bfbc9c23bed6"
+    },
+    {
+      "path": "tests/voice-empty-evidence/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 4243,
+      "originalSha256": "56a7ff5ab836b1822b4b53d3cbae509ea02fe8938163ec15fa7a720757e4f442",
+      "publishedBytes": 4243,
+      "publishedSha256": "46c140e12742d30a26557435c55a03079b0fe5fdc4203e9e440e18aa795c2e2b"
+    },
+    {
+      "path": "tests/voice-empty-evidence/software/final-gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 18264,
+      "originalSha256": "a36eac60ed948b3477a1d738f1b3eeb9dc06d375a3cff82077ad5eded1eb5679",
+      "publishedBytes": 18222,
+      "publishedSha256": "37b8fb7ea1f3e3211a2502ef49fe233f17abb8bb24700533939d7ddd50a9212c"
+    },
+    {
+      "path": "tests/voice-empty-evidence/software/initial-fixture-failure-gradle.log",
+      "change": "relative-paths",
+      "originalBytes": 17298,
+      "originalSha256": "ed3c32616f271425ceedcba343c847cfc9cc98fc90bc280e6defccf6fdeb0f4d",
+      "publishedBytes": 17214,
+      "publishedSha256": "567666ae7ee908186c300af7b62231e0a6bf6f379d91fbb9cbe683ac5fb4d6ad"
+    },
+    {
+      "path": "tests/voice-empty-evidence/software/manifest.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 2172,
+      "originalSha256": "98a3a9c428b7e5d1afbc323ad4a8fa0fb3443f72f415ef28aaba1390bcbdabcf",
+      "publishedBytes": 2173,
+      "publishedSha256": "39a5edbd07b1071e6cd2f38a70a1a537239997f63a000ad4fbea12fbace2160c"
+    },
+    {
+      "path": "tests/voice-empty-evidence/software/summary.json",
+      "change": "export-integrity-metadata",
+      "originalBytes": 8323,
+      "originalSha256": "c2ed8d32d2118288f86ed43871acf373d6c05b09303b645d6abefd1545fef41c",
+      "publishedBytes": 8324,
+      "publishedSha256": "8b2806573aad746eae9198b3d76b41ce92d77750f3bf8200b14d85efd1e2ca6d"
+    }
+  ]
+}

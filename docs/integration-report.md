@@ -83,8 +83,8 @@
 官方 Shizuku `13.6.0.r1086.2650830c` 只安装在该 AVD；下载 APK SHA-256 `6e273ab0e991c4e79bc8b1bbb9b9dd739ccac1a8712a541a214078886b7b790f`，签名校验结果保存。Native 权限实际由 Shizuku 授权对话框批准，Android pm grant 不被当作 Shizuku 服务授权成功。服务实际 UID 2000，UserService执行和取消实际跑过。
 
 ```sh
-export JAVA_HOME=path/to/jdk-17
-export ANDROID_HOME=path/to/android-sdk
+export JAVA_HOME="$(cd path/to/jdk-17 && pwd)"
+export ANDROID_HOME="$(cd path/to/android-sdk && pwd)"
 npm run install:deps
 npm run verify
 # 显式 AVD 已启动；使用 dumpsys display 返回的真实 overlay ID。

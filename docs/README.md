@@ -44,3 +44,5 @@
 - [火山 AgentPlan 单 Key 接入](volc-agent-plan.md)：文本模型发现与选择、豆包搜索、ASR、TTS。
 - [项目专用 Thor 双屏模拟器](project-thor-emulator.md)：display 0 / 4、Thor 对应分辨率与密度、可重复启动脚本。
 - [AgentPlan 模拟器验收](agentplan-emulator-acceptance.md)：真实套餐服务闭环、冷启动与单 Key 持久化、验收边界。
+- [GitHub 公开检查记录](public-release-review.md)：公共 npm 源、开发机路径清理、凭据扫描、证据哈希与待确认内容。
+- [main 历史清理记录](history-rewrite.md)：提交身份、历史脱敏、截图移除、提交映射及远端覆盖结果。
