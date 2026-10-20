@@ -10,6 +10,8 @@ export interface ModelProfile {
   profileId: string; revision: number; label: string;
   protocol: 'openai-responses' | 'anthropic-messages' | 'openai-completions'; baseUrl: string; modelId: string;
   credentialRef: string; contextWindow: number; maxOutput: number;
+  /** Independent provider input cap, including system, tools, history and images. */
+  maxInput?: number;
   /** Native marks only an implicit official-profile output ceiling as automatic. */
   outputBudgetAutomatic?: boolean;
   input?: ('text'|'image')[];

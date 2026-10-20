@@ -9,7 +9,7 @@ internal object OfficialProfilePolicy {
         val base=configured.trimEnd('/')
         // Anthropic SDK itself appends /v1/messages. Go's shared configured
         // endpoint includes /v1 for the OpenAI transports, so remove it only here.
-        return if(provider=="opencode-go" && protocol=="anthropic-messages")base.removeSuffix("/v1") else base
+        return if(provider in setOf("opencode-go",OpenCodeZenCatalog.KIND) && protocol=="anthropic-messages")base.removeSuffix("/v1") else base
     }
     fun metadataKnown(provider:String,baseUrl:String,declared:Boolean):Boolean {
         if(!declared)return false
@@ -17,6 +17,7 @@ internal object OfficialProfilePolicy {
             val u=URI(baseUrl);val path=u.path.orEmpty().trimEnd('/')
             if(u.scheme!="https" || u.userInfo!=null || u.query!=null || u.fragment!=null || u.port !in setOf(-1,443))false
             else when(provider) {
+                OpenCodeZenCatalog.KIND->u.host=="opencode.ai" && path=="/zen/v1"
                 "opencode-go"->u.host=="opencode.ai" && (path=="/zen/go/v1" || path.matches(Regex("/inference/go/(openai|anthropic)/v1")))
                 VolcAgentPlan.KIND->u.host=="ark.cn-beijing.volces.com" && path=="/api/plan/v3"
                 "deepseek"->u.host=="api.deepseek.com" && path in setOf("","/v1")

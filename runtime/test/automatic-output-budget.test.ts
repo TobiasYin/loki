@@ -132,3 +132,26 @@ test('product continuation after official Pi compaction discards pre-compaction 
   assert.ok(!continuation.includes('older context older context'));
   assert.ok(f.events.some(event=>event.type==='diagnostic' && event.data.code==='CONTEXT_COMPACTION_FINISHED' && event.data.compacted===true));
 });
+
+test('independent Zen input limit prevents oversized prompts even when total context has room',async()=>{
+  const f=fixture();Object.assign(f.snapshot.session.model,{contextWindow:200000,maxInput:16000,maxOutput:32000,outputBudgetAutomatic:true,piSettings:{compaction:{enabled:false}}});
+  const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'Long input '.repeat(12000)}]);
+  assert.equal(result.state,'failed');assert.equal(result.error,'LIMIT_EXCEEDED');assert.equal(f.requests.length,0);
+});
+
+test('Zen compacts at the independent input cap while total context still has room',async()=>{
+  const f=fixture('openai-responses',[{text:'SUMMARY: keep the current goal.'},{text:'Continued under the input cap.'}]);
+  Object.assign(f.snapshot.session.model,{contextWindow:200000,maxInput:16000,maxOutput:1024,
+    piSettings:{compaction:{enabled:true,reserveTokens:5000,keepRecentTokens:800},retry:{enabled:false}}});
+  const recent=piAssistant(f,'Recent checkpoint.');recent.usage={...recent.usage,input:12500,output:10,totalTokens:12510};
+  const state=nativePiState(f,[
+    {role:'user',content:'Old goal '+ 'older context '.repeat(1200),timestamp:1},piAssistant(f,'Earlier stage complete.'),
+    {role:'user',content:'Recent task '+ 'recent context '.repeat(300),timestamp:1},recent,
+  ]);
+  const logical=new RuntimeSession(f.lease.sessionId);
+  const result=await new ThorRuntime(f.ports,registry(),{},logical).run(f.lease,[{type:'text',text:'Current goal'}],state);
+  assert.equal(result.state,'completed');assert.equal(f.requests.length,2);
+  assert.equal(logical.piSnapshot!.entries.filter(entry=>entry.type==='compaction').length,1);
+  assert.ok(f.events.some(event=>event.type==='diagnostic' && event.data.code==='CONTEXT_COMPACTION_FINISHED' && event.data.compacted===true));
+  assert.ok(JSON.stringify(f.requests[1]!.body).includes('SUMMARY: keep the current goal.'));
+});

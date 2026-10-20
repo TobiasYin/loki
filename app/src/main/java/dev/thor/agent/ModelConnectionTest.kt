@@ -21,7 +21,7 @@ object ModelConnectionTest {
             require(maxOutput in 16..3999999) {"连接测试的输出上限无效"}
             require(protocol in ModelCatalog.protocols && model.isNotBlank() && model.length<=200) {"请选择模型和接口类型"}
             require(credential.isNotBlank() && credential.length<=8192 && '\n' !in credential && '\r' !in credential) {"请填写 API Key，或保留已保存的 Key"}
-            require(!isGoEndpoint(baseUrl) || !headerName.equals("x-opencode-session",true)) {"OpenCode 会话头由应用生成，不能作为凭据头"}
+            require(!isOpenCodeEndpoint(baseUrl) || !headerName.equals("x-opencode-session",true)) {"OpenCode 会话头由应用生成，不能作为凭据头"}
             require(headerName.isBlank() || headerName.matches(Regex("[A-Za-z0-9-]+")) && headerName.lowercase() !in setOf("host","content-length","transfer-encoding","connection","content-type")) {"凭据头名称无效"}
             require(headerTemplate.isBlank() || headerTemplate.split("{{credential}}").size==2 && '\r' !in headerTemplate && '\n' !in headerTemplate) {"凭据格式必须包含一次 {{credential}}"}
         }
@@ -60,7 +60,8 @@ object ModelConnectionTest {
                         if(bounded.truncated)"" else safeError(draft,JSONObject(bounded.bytes.toString(Charsets.UTF_8)))
                     }.getOrDefault("")
                     val summary=when(response.code) {
-                    401,403->"认证失败（HTTP ${response.code}），请检查 API Key 和订阅权限"
+                    403->if(isZenEndpoint(draft.baseUrl) && diagnostic.contains("type=FreeTierError"))"OpenCode Zen 免费模型调用被服务端拒绝（HTTP 403 · FreeTierError），请检查该账户与客户端的使用条件" else "认证失败（HTTP 403），请检查 API Key 和订阅权限"
+                    401->"认证失败（HTTP ${response.code}），请检查 API Key 和订阅权限"
                     404->"接口或模型不存在（HTTP 404），请检查地址、接口类型和模型 ID"
                     429->"请求限流或额度不足（HTTP 429），请稍后重试"
                     in 300..399->"服务返回重定向；为保护 Key，未向其他地址转发"
@@ -88,6 +89,8 @@ object ModelConnectionTest {
         }
     }
     internal fun isGoEndpoint(base:String):Boolean=runCatching {val uri=URI(base);uri.scheme=="https" && uri.host=="opencode.ai" && uri.port in setOf(-1,443) && uri.path.trimEnd('/')=="/zen/go/v1" && uri.userInfo==null && uri.query==null && uri.fragment==null}.getOrDefault(false)
+    internal fun isZenEndpoint(base:String):Boolean=runCatching {val uri=URI(base);uri.scheme=="https" && uri.host=="opencode.ai" && uri.port in setOf(-1,443) && uri.path.trimEnd('/')=="/zen/v1" && uri.userInfo==null && uri.query==null && uri.fragment==null}.getOrDefault(false)
+    internal fun isOpenCodeEndpoint(base:String)=isGoEndpoint(base) || isZenEndpoint(base)
     /** Mirrors Pi Responses request fields and Native Go session affinity, without product state. */
     internal fun request(draft:Draft):Request {
         draft.validate()
@@ -98,6 +101,7 @@ object ModelConnectionTest {
             "anthropic-messages"->body.put("messages",messages).put("max_tokens",draft.maxOutput)
             else->body.put("messages",messages).put("max_tokens",draft.maxOutput)
         }
+        if(isZenEndpoint(draft.baseUrl))body.put("tools",OpenCodeZenRequestContract.textProbeTools(draft.protocol))
         if(draft.reasoningEffort!=null)when(draft.protocol) {
             "openai-responses"->{
                 val reasoning=JSONObject().put("effort",draft.reasoningEffort)
@@ -115,7 +119,10 @@ object ModelConnectionTest {
         val request=Request.Builder().url(draft.endpoint()).header(authName,template.replace("{{credential}}",draft.credential))
             .header("Accept","text/event-stream").post(body.toString().toRequestBody("application/json".toMediaType()))
         if(draft.protocol=="anthropic-messages")request.header("anthropic-version","2023-06-01")
-        if(isGoEndpoint(draft.baseUrl))request.header("x-opencode-session",java.util.UUID.randomUUID().toString())
+        if(isOpenCodeEndpoint(draft.baseUrl)) {
+            request.header("User-Agent",if(isZenEndpoint(draft.baseUrl))OpenCodeZenRequestContract.userAgent else "loki/${BuildConfig.VERSION_NAME}")
+            request.header("x-opencode-session",if(isZenEndpoint(draft.baseUrl))OpenCodeSessionIds.create() else java.util.UUID.randomUUID().toString())
+        }
         return request.build()
     }
     internal fun isDeepSeekEndpoint(base:String):Boolean=runCatching {val uri=URI(base);uri.scheme=="https" && uri.host=="api.deepseek.com" && uri.port in setOf(-1,443) && uri.path.trimEnd('/') in setOf("","/v1") && uri.userInfo==null && uri.query==null && uri.fragment==null}.getOrDefault(false)

@@ -8,7 +8,7 @@ object OutputBudgetPolicy {
 
     fun resolve(provider:String,contextWindow:Int,modelLimit:Int?=null,explicitText:String?=null,
                 legacyCustomOutput:Int=CUSTOM_DEFAULT,rejectExcess:Boolean=false):Budget {
-        require(provider in setOf("custom","opencode-go","deepseek",VolcAgentPlan.KIND))
+        require(provider in setOf("custom","opencode-go",OpenCodeZenCatalog.KIND,"deepseek",VolcAgentPlan.KIND))
         require(contextWindow in 4096..4000000)
         val official=provider!="custom"
         if(official)require(modelLimit!=null && modelLimit>=16 && modelLimit<=contextWindow)

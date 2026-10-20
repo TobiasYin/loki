@@ -67,7 +67,9 @@ export function hasPerceptionContext(snapshot: AuthoritySnapshot): boolean {
  * message eviction or compression. Pi owns those responsibilities. */
 export function buildProductPrompt(snapshot: AuthoritySnapshot, tools: ToolDescriptor[]): string {
   const system = productSystem(snapshot, tools, snapshot.session.model.contextWindow);
-  return system.content + Object.entries(system.sections ?? {}).map(([name, content]) => `\n\n${name}\n${content}`).join('');
+  const prompt=system.content + Object.entries(system.sections ?? {}).map(([name, content]) => `\n\n${name}\n${content}`).join('');
+  const skillReader=tools.find(tool=>tool.toolId==='skills.read')?.modelName??'skills_read';
+  return prompt.replace(/\bskills_read\b/g,skillReader);
 }
 
 /** Native-authorized current facts, supplied as chronological session data.

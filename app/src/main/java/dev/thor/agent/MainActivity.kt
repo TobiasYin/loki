@@ -18,6 +18,7 @@ import java.net.URI
 class MainActivity : Activity() {
     private lateinit var web: WebView
     private lateinit var host: ProductHost
+    private val zenCatalog by lazy { OpenCodeZenCatalog(this) }
     // Aliases retained for settings and acceptance tests; Service owns these.
     private var bridge: dev.thor.bridge.android.TrustedWebViewBridge? = null
     private var runtimeService:AgentRuntimeService?=null
@@ -559,7 +560,7 @@ class MainActivity : Activity() {
             val empty=SettingsForm(this)
             val body=empty.section(content,"连接第一个模型服务")
             body.addView(ui.text("推荐 DeepSeek 官方 API",18f))
-            empty.note(body,"也可选择火山 AgentPlan，一个套餐 Key 用于模型、语音与搜索；支持 OpenCode Go 与自定义接口。")
+            empty.note(body,"也可选择火山 AgentPlan，一个套餐 Key 用于模型、语音与搜索；支持 OpenCode Zen 免费模型、OpenCode Go 与自定义接口。")
         }
         for(config in store.list().sortedBy {if(it.getString("id")==store.defaultId())0 else 1}) {
             val id=config.getString("id")
@@ -588,13 +589,13 @@ class MainActivity : Activity() {
             row.addView(buttons,LinearLayout.LayoutParams(-1,-2).apply {topMargin=ui.dp(10)})
         }
         val addProvider=ui.button("添加模型服务",{}).apply {tag="provider-add";isEnabled=store.list().size<ProviderStore.MAX_PROVIDERS;setOnClickListener {
-            val kinds=listOf("opencode-go","deepseek",VolcAgentPlan.KIND,"custom")
+            val kinds=listOf("opencode-go","deepseek",VolcAgentPlan.KIND,"custom",OpenCodeZenCatalog.KIND)
             AlertDialog.Builder(this@MainActivity).setTitle("添加模型服务").setItems(kinds.map(::providerKindLabel).toTypedArray()) {_,index->showProviderEditor(null,kinds[index])}.show()
         }}
         content.addView(addProvider,2,LinearLayout.LayoutParams(-1,ui.dp(48)).apply {bottomMargin=ui.dp(12)})
         settingsPage("模型服务",content,back={showSettings()})
     }
-    private fun providerKindLabel(kind:String)=when(kind){"opencode-go"->"OpenCode Go";"deepseek"->"DeepSeek 官方（推荐 · 模型 + 搜索）";VolcAgentPlan.KIND->"火山 AgentPlan（模型 + 语音 + 搜索）";else->"自定义 API Key"}
+    private fun providerKindLabel(kind:String)=when(kind){OpenCodeZenCatalog.KIND->"OpenCode Zen（免费模型）";"opencode-go"->"OpenCode Go";"deepseek"->"DeepSeek 官方（推荐 · 模型 + 搜索）";VolcAgentPlan.KIND->"火山 AgentPlan（模型 + 语音 + 搜索）";else->"自定义 API Key"}
     private fun changeProviderSettings(action:()->Unit):Boolean = try {
         require(!host.hasActiveRuns()) {"请等待活动任务完成后再修改服务配置"}
         action()
@@ -604,8 +605,8 @@ class MainActivity : Activity() {
     }catch(_:Exception){Toast.makeText(this,"修改未完成：请等待活动任务结束，并检查服务配置",Toast.LENGTH_LONG).show();false}
     private fun showProviderEditor(saved:JSONObject?,kind:String) {
         val store=ProviderStore(this);val custom=kind=="custom"
-        val config=saved ?: JSONObject().put("kind",kind).put("enabled",true).put("name",when(kind){"deepseek"->"DeepSeek 官方";"opencode-go"->"OpenCode Go";VolcAgentPlan.KIND->"火山 AgentPlan";else->"自定义服务"}).put("protocol",0)
-            .put("url",when(kind){"opencode-go"->"https://opencode.ai/zen/go/v1";"deepseek"->DeepSeekCatalog.BASE_URL;VolcAgentPlan.KIND->VolcAgentPlan.BASE_URL;else->""})
+        val config=saved ?: JSONObject().put("kind",kind).put("enabled",true).put("name",when(kind){OpenCodeZenCatalog.KIND->"OpenCode Zen";"deepseek"->"DeepSeek 官方";"opencode-go"->"OpenCode Go";VolcAgentPlan.KIND->"火山 AgentPlan";else->"自定义服务"}).put("protocol",0)
+            .put("url",when(kind){OpenCodeZenCatalog.KIND->OpenCodeZenCatalog.BASE_URL;"opencode-go"->"https://opencode.ai/zen/go/v1";"deepseek"->DeepSeekCatalog.BASE_URL;VolcAgentPlan.KIND->VolcAgentPlan.BASE_URL;else->""})
             .put("model","").put("contextBudget",32768).put("maxOutput",2048).put("supportsImages",true)
         val id=saved?.getString("id")
         val content=LinearLayout(this).apply {orientation=LinearLayout.VERTICAL;setPadding(24,16,24,24)}
@@ -626,11 +627,11 @@ class MainActivity : Activity() {
         val outputHelp=text(if(custom)"输出上限留空使用 2048。" else "输出上限留空自动跟随所选模型，包含思考与正文。")
         val imageSupport=CheckBox(this).apply {text="支持图片输入";isChecked=config.optBoolean("supportsImages",true);content.addView(this)}
         val catalog=ModelCatalog(this);val deepseek=DeepSeekCatalog(this);val volc=VolcAgentPlanCatalog(this)
-        fun officialModels()=when(kind){"deepseek"->deepseek.models();VolcAgentPlan.KIND->volc.models();else->catalog.models()}
-        fun officialSource()=when(kind){"deepseek"->deepseek.source();VolcAgentPlan.KIND->volc.source();else->catalog.source()}
+        fun officialModels()=when(kind){OpenCodeZenCatalog.KIND->zenCatalog.models();"deepseek"->deepseek.models();VolcAgentPlan.KIND->volc.models();else->catalog.models()}
+        fun officialSource()=when(kind){OpenCodeZenCatalog.KIND->zenCatalog.source();"deepseek"->deepseek.source();VolcAgentPlan.KIND->volc.source();else->catalog.source()}
         val modelPicker=Spinner(this).apply {tag="model-picker";contentDescription="选择模型";visibility=if(custom)View.GONE else View.VISIBLE;content.addView(this)}
         val catalogStatus=text("").apply {tag="model-catalog-status";visibility=modelPicker.visibility}
-        val refreshModels=Button(this).apply {text=when(kind){"deepseek"->"刷新 DeepSeek 官方模型列表";VolcAgentPlan.KIND->"发现 / 刷新火山官方模型目录";else->"刷新 OpenCode Go 模型列表"};visibility=modelPicker.visibility;content.addView(this)}
+        val refreshModels=Button(this).apply {text=when(kind){OpenCodeZenCatalog.KIND->"刷新 Zen 免费模型";"deepseek"->"刷新 DeepSeek 官方模型列表";VolcAgentPlan.KIND->"发现 / 刷新火山官方模型目录";else->"刷新 OpenCode Go 模型列表"};visibility=modelPicker.visibility;content.addView(this)}
         val headerName=field("自定义凭据头（可选）","headerName")
         val headerTemplate=field("凭据格式，例如 Bearer {{credential}}（可选）","headerTemplate")
         text("API Key：${id?.let {store.credentialStatus(it)} ?: "未保存"}；留空保留此服务已保存的 Key")
@@ -660,8 +661,13 @@ class MainActivity : Activity() {
             fun applyChoice(index:Int) {
                 val choice=choices[index];model.setText(choice.getString("id"));protocol.setSelection(ModelCatalog.protocols.indexOf(choice.getString("protocol")))
                 contextBudget.setText(choice.getInt("contextWindow").toString());imageSupport.isChecked=choice.optJSONArray("input")?.let {a->(0 until a.length()).any {a.optString(it)=="image"}}==true
-                catalogStatus.text="${officialSource()}\n上下文 ${choice.getInt("contextWindow")} · 输出容量 ${choice.getInt("maxOutput")} tokens\n思考强度 ${choice.getJSONArray("efforts").join(" / ")}"
+                catalogStatus.text="${officialSource()}\n${if(kind==OpenCodeZenCatalog.KIND)"免费 · 输入上限 ${choice.optInt("maxInput",choice.getInt("contextWindow"))} · " else ""}上下文 ${choice.getInt("contextWindow")} · 输出容量 ${choice.getInt("maxOutput")} tokens\n思考强度 ${choice.getJSONArray("efforts").join(" / ")}"
             }
+            if(choices.isEmpty()) {
+                model.setText("");modelPicker.isEnabled=false
+                catalogStatus.text="${officialSource()}\n当前没有可用的免费兼容模型，请稍后刷新。";return
+            }
+            modelPicker.isEnabled=true
             val choice=choices.indexOfFirst {it.getString("id")==model.text.toString()}.coerceAtLeast(0)
             modelPicker.setSelection(choice);applyChoice(choice)
             modelPicker.onItemSelectedListener=object:android.widget.AdapterView.OnItemSelectedListener {
@@ -670,15 +676,47 @@ class MainActivity : Activity() {
             }
         }
         updateModels()
-        refreshModels.setOnClickListener {
-            val credential=draftKey()
-            if(kind=="deepseek" && credential.isBlank()){catalogStatus.text="请填写此服务的 DeepSeek API Key 后刷新";return@setOnClickListener}
+        var refreshGeneration=0
+        var zenLoading=false
+        fun refreshCatalog() {
+            val credential=runCatching {draftKey()}.getOrElse {catalogStatus.text="请检查此服务的 API Key";return}
+            if(kind in setOf("deepseek",OpenCodeZenCatalog.KIND) && (credential.isBlank() || credential.length>8192 || credential.any {it=='\r' || it=='\n'})) {
+                catalogStatus.text="请填写此服务有效的 API Key 后刷新";return
+            }
+            val generation=++refreshGeneration
+            zenLoading=kind==OpenCodeZenCatalog.KIND
             refreshModels.isEnabled=false;catalogStatus.text="正在读取模型资料…"
-            Thread {val success=runCatching {when(kind){"deepseek"->deepseek.refresh(credential);VolcAgentPlan.KIND->volc.refresh();else->catalog.refresh()}}.isSuccess
-                runOnUiThread {if(refreshModels.isAttachedToWindow){refreshModels.isEnabled=true;if(success)updateModels() else catalogStatus.text="暂时无法刷新，请检查此服务的 Key、网络或额度；保留缓存模型资料"}}
+            Thread {val result=runCatching {when(kind){OpenCodeZenCatalog.KIND->zenCatalog.refresh(credential);"deepseek"->deepseek.refresh(credential);VolcAgentPlan.KIND->volc.refresh();else->catalog.refresh()}}
+                runOnUiThread {if(refreshModels.isAttachedToWindow && generation==refreshGeneration){
+                    zenLoading=false;refreshModels.isEnabled=true
+                    if(result.isSuccess)updateModels() else catalogStatus.text="暂时无法刷新，请检查此服务的 Key、网络或额度；保留缓存模型资料"
+                }}
             }.start()
         }
-        fun outputBudget()=OutputBudgetPolicy.resolve(kind,contextBudget.text.toString().toInt(),metadata()?.getInt("maxOutput"),maxOutput.text.toString(),rejectExcess=true)
+        refreshModels.setOnClickListener {refreshCatalog()}
+        // Debounce pastes/typing; stale results cannot replace the current draft's status.
+        val autoRefresh=Runnable {if(key.isAttachedToWindow)refreshCatalog()}
+        fun scheduleZenRefresh() {
+            if(kind!=OpenCodeZenCatalog.KIND)return
+            key.removeCallbacks(autoRefresh);refreshGeneration++;zenLoading=false;refreshModels.isEnabled=true
+            if(runCatching {draftKey().isNotBlank()}.getOrDefault(false))key.postDelayed(autoRefresh,800)
+        }
+        if(kind==OpenCodeZenCatalog.KIND) {
+            key.addTextChangedListener(object:android.text.TextWatcher {
+                override fun beforeTextChanged(s:CharSequence?,start:Int,count:Int,after:Int)=Unit
+                override fun onTextChanged(s:CharSequence?,start:Int,before:Int,count:Int)=scheduleZenRefresh()
+                override fun afterTextChanged(s:android.text.Editable?)=Unit
+            })
+            removeKey.setOnCheckedChangeListener {_,_->scheduleZenRefresh()}
+            key.addOnAttachStateChangeListener(object:View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v:View)=scheduleZenRefresh()
+                override fun onViewDetachedFromWindow(v:View) {key.removeCallbacks(autoRefresh);refreshGeneration++}
+            })
+        }
+        fun outputBudget():OutputBudgetPolicy.Budget {
+            if(kind==OpenCodeZenCatalog.KIND)require(metadata()!=null && !zenLoading) {"请等待免费模型加载完成并选择模型"}
+            return OutputBudgetPolicy.resolve(kind,contextBudget.text.toString().toInt(),metadata()?.getInt("maxOutput"),maxOutput.text.toString(),rejectExcess=true)
+        }
         fun draft()=ModelConnectionTest.Draft(url.text.toString().trim(),ModelCatalog.protocols[protocol.selectedItemPosition],model.text.toString().trim(),draftKey(),if(custom)headerName.text.toString() else "",if(custom)headerTemplate.text.toString() else "",maxOutput=outputBudget().tokens).withProfile(metadata(),maxOutput.text.toString())
         val testStatus=text("测试只使用此服务当前填写的配置与 Key；草稿不会自动保存。").apply {tag="model-test-status"}
         val test=Button(this).apply {text="测试当前填写的连接";tag="model-test";content.addView(this)}
@@ -689,7 +727,8 @@ class MainActivity : Activity() {
         }
         val form=SettingsForm(this)
         val identity=form.section(form.rail,"服务配置")
-        identity.addView(form.ui.text(when(kind){"deepseek"->"DeepSeek 官方";"opencode-go"->"OpenCode Go";VolcAgentPlan.KIND->"火山 AgentPlan";else->"自定义接口"},18f))
+        identity.addView(form.ui.text(when(kind){OpenCodeZenCatalog.KIND->"OpenCode Zen";"deepseek"->"DeepSeek 官方";"opencode-go"->"OpenCode Go";VolcAgentPlan.KIND->"火山 AgentPlan";else->"自定义接口"},18f))
+        if(kind==OpenCodeZenCatalog.KIND)form.note(identity,"填写 API Key 后自动获取免费模型；只显示价格为零且支持聊天和工具的模型。免费额度与可用模型以 Zen 服务为准。")
         if(kind=="deepseek")form.note(identity,"与联网搜索共享 Key。")
         if(kind==VolcAgentPlan.KIND)form.note(identity,"一个套餐 Key 用于文本、语音识别、语音合成与豆包搜索。使用此服务后语音自动接入；搜索请选择自动选择或豆包搜索。请在火山控制台开启豆包搜索抵扣。模型目录不代表当前档位已获权限。")
         form.field(identity,"服务名称",name);form.move(identity,enabled)
@@ -698,7 +737,7 @@ class MainActivity : Activity() {
             form.field(connection,"接口协议",protocol);form.field(connection,"API 基础地址",url);form.field(connection,"模型 ID",model)
         } else {
             form.move(connection,modelPicker)
-            if(kind==VolcAgentPlan.KIND){form.move(connection,refreshModels);form.move(connection,catalogStatus)}
+            if(kind in setOf(VolcAgentPlan.KIND,OpenCodeZenCatalog.KIND)){form.move(connection,refreshModels);form.move(connection,catalogStatus)}
         }
         val credentials=form.section(form.main,"连接凭据")
         form.note(credentials,if(id==null)"填写此服务的 API Key，保存后即可使用。" else "${store.credentialStatus(id)} · 留空继续使用")
@@ -712,7 +751,7 @@ class MainActivity : Activity() {
         form.field(advancedBody,"上下文上限",contextBudget)
         form.field(advancedBody,"输出上限",maxOutput);form.move(advancedBody,outputHelp);form.move(advancedBody,imageSupport)
         if(custom){form.field(advancedBody,"凭据请求头",headerName);form.field(advancedBody,"凭据格式",headerTemplate)}
-        else if(kind!=VolcAgentPlan.KIND){form.move(advancedBody,refreshModels);form.move(advancedBody,catalogStatus)}
+        else if(kind !in setOf(VolcAgentPlan.KIND,OpenCodeZenCatalog.KIND)){form.move(advancedBody,refreshModels);form.move(advancedBody,catalogStatus)}
         if(id!=null)form.move(advancedBody,removeKey)
         advancedToggle.setOnClickListener {
             advancedExpanded=!advancedExpanded;renderAdvanced();advancedBody.visibility=if(advancedExpanded)View.VISIBLE else View.GONE
@@ -867,7 +906,7 @@ class MainActivity : Activity() {
             val store=ProviderStore(this);val config=store.defaultId()?.let {store.get(it)}
             ui.heading(content,"必选 · LLM 模型")
             ui.row(ui.card(content),"连接 LLM 模型 · ${if(ready)"已配置" else "待配置"}",
-                if(ready)"${config?.optString("name")} · ${config?.optString("model")}\n点击管理或测试连接" else "可选择火山 AgentPlan、DeepSeek 官方、OpenCode Go 或自定义接口。","✦"){showModelProviders()}
+                if(ready)"${config?.optString("name")} · ${config?.optString("model")}\n点击管理或测试连接" else "可选择火山 AgentPlan、DeepSeek 官方、OpenCode Zen、OpenCode Go 或自定义接口。","✦"){showModelProviders()}
             ui.row(ui.card(content),"配置火山 AgentPlan","填写一个套餐 Key，选择模型；语音和豆包搜索共享此 Key。","✦") {
                 val plans=store.list().filter {it.getString("kind")==VolcAgentPlan.KIND && it.getBoolean("enabled")}
                 val saved=plans.firstOrNull {it.getString("id")==store.defaultId()} ?: plans.firstOrNull()

@@ -1,0 +1,497 @@
+{
+  "verifiedAt": "2026-10-20",
+  "metadataSource": "https://models.dev/api.json",
+  "availabilitySource": "https://opencode.ai/zen/v1/models",
+  "metadata": {
+    "opencode": {
+      "id": "opencode",
+      "env": [
+        "OPENCODE_API_KEY"
+      ],
+      "npm": "@ai-sdk/openai-compatible",
+      "api": "https://opencode.ai/inference/openai/v1",
+      "name": "OpenCode",
+      "doc": "https://opencode.ai/v2/docs/console/models/",
+      "models": {
+        "nemotron-3.5-super-vl-free": {
+          "id": "nemotron-3.5-super-vl-free",
+          "name": "Nemotron 3.5 Super VL Free",
+          "description": "NVIDIA vision-language reasoning model for text, image, and video understanding and agentic tool use",
+          "family": "nemotron-free",
+          "attachment": true,
+          "reasoning": true,
+          "reasoning_options": [
+            {
+              "type": "effort",
+              "values": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh"
+              ]
+            }
+          ],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "temperature": true,
+          "release_date": "2026-10-15",
+          "last_updated": "2026-10-15",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": true,
+          "limit": {
+            "context": 1048576,
+            "input": 1048576,
+            "output": 131072
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "nvidia/nemotron-3.5-super-vl-120b-a12b"
+        },
+        "big-pickle": {
+          "id": "big-pickle",
+          "name": "Big Pickle",
+          "description": "Reasoning model for deliberate analysis, multi-step problem solving, and tool use",
+          "family": "big-pickle",
+          "attachment": false,
+          "reasoning": true,
+          "reasoning_options": [],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "structured_output": true,
+          "temperature": true,
+          "knowledge": "2025-01",
+          "release_date": "2025-10-17",
+          "last_updated": "2025-10-17",
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": false,
+          "limit": {
+            "context": 200000,
+            "input": 160000,
+            "output": 32000
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0,
+            "cache_write": 0
+          }
+        },
+        "glm-5.3-flash-free": {
+          "id": "glm-5.3-flash-free",
+          "name": "GLM-5.3-Flash Free",
+          "description": "Native multimodal GLM model for efficient coding and long-horizon agent tasks",
+          "family": "glm-flash",
+          "attachment": true,
+          "reasoning": true,
+          "reasoning_options": [
+            {
+              "type": "effort",
+              "values": [
+                "low",
+                "high",
+                "max"
+              ]
+            }
+          ],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "structured_output": true,
+          "temperature": true,
+          "release_date": "2026-08-26",
+          "last_updated": "2026-08-26",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "video",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": true,
+          "limit": {
+            "context": 200000,
+            "output": 32000
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "zhipuai/glm-5.3-flash"
+        },
+        "mimo-v2.6-flash-free": {
+          "id": "mimo-v2.6-flash-free",
+          "name": "MiMo-V2.6-Flash Free",
+          "description": "MiMo Flash model for multimodal coding agents and long-context automation",
+          "family": "mimo",
+          "attachment": true,
+          "reasoning": true,
+          "reasoning_options": [],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "temperature": true,
+          "release_date": "2026-09-22",
+          "last_updated": "2026-09-22",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "audio",
+              "video"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": true,
+          "limit": {
+            "context": 200000,
+            "output": 32000
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "xiaomi/mimo-v2.6-flash"
+        },
+        "deepseek-v4.1-flash-free": {
+          "id": "deepseek-v4.1-flash-free",
+          "name": "DeepSeek V4.1 Flash Free",
+          "description": "DeepSeek V4.1 Flash model for reasoning and agentic coding",
+          "family": "deepseek-flash",
+          "attachment": true,
+          "reasoning": true,
+          "reasoning_options": [
+            {
+              "type": "effort",
+              "values": [
+                "low",
+                "high",
+                "max"
+              ]
+            }
+          ],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "structured_output": true,
+          "temperature": true,
+          "knowledge": "2025-05",
+          "release_date": "2026-09-10",
+          "last_updated": "2026-09-10",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": true,
+          "limit": {
+            "context": 200000,
+            "output": 32000
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "deepseek/deepseek-v4.1-flash"
+        },
+        "minimax-m3.1-flash-free": {
+          "id": "minimax-m3.1-flash-free",
+          "name": "MiniMax M3.1 Flash Free",
+          "description": "Frontier multimodal coding model with 1M context window and tunable thinking depth",
+          "family": "minimax",
+          "attachment": true,
+          "reasoning": true,
+          "reasoning_options": [
+            {
+              "type": "effort",
+              "values": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ]
+            }
+          ],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "temperature": true,
+          "release_date": "2026-10-19",
+          "last_updated": "2026-10-19",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "video"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": false,
+          "limit": {
+            "context": 1000000,
+            "output": 512000
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "minimax/MiniMax-M3.1-Flash"
+        },
+        "beam-free": {
+          "id": "beam-free",
+          "name": "Beam Free",
+          "description": "Sparse mixture-of-experts reasoning model with 23B active parameters for coding and agentic workflows",
+          "family": "beam",
+          "attachment": false,
+          "reasoning": true,
+          "reasoning_options": [
+            {
+              "type": "effort",
+              "values": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ]
+            }
+          ],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "structured_output": true,
+          "temperature": true,
+          "knowledge": "2026-06-30",
+          "release_date": "2026-10-05",
+          "last_updated": "2026-10-16",
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": true,
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "reflection/beam-1.0-501b-a23b"
+        },
+        "longcat-2.5-preview-free": {
+          "id": "longcat-2.5-preview-free",
+          "name": "LongCat 2.5 Preview Free",
+          "description": "Meituan's multimodal reasoning model for coding and agent tasks, with image understanding and a 1M-token context window",
+          "family": "longcat",
+          "attachment": true,
+          "reasoning": true,
+          "reasoning_options": [
+            {
+              "type": "toggle"
+            }
+          ],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "temperature": true,
+          "release_date": "2026-09-25",
+          "last_updated": "2026-09-25",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": false,
+          "limit": {
+            "context": 1000000,
+            "output": 131072
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "meituan/longcat-2.5-preview"
+        },
+        "nemotron-3.5-lightning-free": {
+          "id": "nemotron-3.5-lightning-free",
+          "name": "Nemotron 3.5 Lightning Free",
+          "description": "Fast NVIDIA Nemotron MoE for reliable agentic tasks across enterprise workloads",
+          "family": "nemotron-free",
+          "attachment": false,
+          "reasoning": true,
+          "reasoning_options": [],
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "structured_output": true,
+          "temperature": true,
+          "release_date": "2026-08-11",
+          "last_updated": "2026-08-11",
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "open_weights": true,
+          "limit": {
+            "context": 262144,
+            "output": 262144
+          },
+          "provider": {
+            "api": "https://opencode.ai/inference/openai/v1"
+          },
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache_read": 0
+          },
+          "canonical_model_id": "nvidia/nemotron-3.5-lightning"
+        }
+      }
+    }
+  },
+  "available": {
+    "object": "list",
+    "data": [
+      {
+        "id": "big-pickle",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "beam-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "mimo-v2.6-flash-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "nemotron-3.5-super-vl-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "nemotron-3.5-lightning-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "longcat-2.5-preview-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "deepseek-v4.1-flash-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "glm-5.3-flash-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      },
+      {
+        "id": "minimax-m3.1-flash-free",
+        "object": "model",
+        "created": 1792465868,
+        "owned_by": "opencode"
+      }
+    ]
+  }
+}

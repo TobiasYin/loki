@@ -11,7 +11,8 @@ export function hasOfficialMetadata(p: ModelProfile): boolean {
     const goPath=p.protocol==='anthropic-messages'
       ? path==='/zen/go' || path==='/inference/go/anthropic'
       : path==='/zen/go/v1' || path==='/inference/go/openai/v1';
-    return p.provider === 'opencode-go' && u.hostname === 'opencode.ai' && goPath
+    return p.provider === 'opencode-zen' && u.hostname === 'opencode.ai' && (p.protocol==='anthropic-messages' ? path==='/zen' : path==='/zen/v1')
+      || p.provider === 'opencode-go' && u.hostname === 'opencode.ai' && goPath
       || p.provider === 'volcengine-agent-plan' && p.protocol === 'openai-responses' && u.hostname === 'ark.cn-beijing.volces.com' && path === '/api/plan/v3'
       || p.provider === 'deepseek' && u.hostname === 'api.deepseek.com' && (path === '' || path === '/v1');
   } catch { return false; }
@@ -22,6 +23,7 @@ export function checkProfile(p: ModelProfile): void {
   const u = (() => { try { return new URL(p.baseUrl); } catch { return reject(); } })();
   if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || u.search || u.hash) reject();
   if (!['openai-responses', 'anthropic-messages', 'openai-completions'].includes(p.protocol) || !p.modelId || !p.credentialRef || p.contextWindow < p.maxOutput || p.contextWindow === p.maxOutput && p.outputBudgetAutomatic !== true || p.maxOutput < 16 || !Number.isSafeInteger(p.contextWindow) || !Number.isSafeInteger(p.maxOutput) || p.outputBudgetAutomatic !== undefined && typeof p.outputBudgetAutomatic !== 'boolean') reject();
+  if (p.maxInput !== undefined && (!Number.isSafeInteger(p.maxInput) || p.maxInput < 4096 || p.maxInput > p.contextWindow)) reject();
   if (p.configurationProbe === true) {
     // Native only sets this on its dedicated explicit configuration-test lease.
     // The probe must run before it has a successful lastProbe observation.

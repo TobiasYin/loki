@@ -72,7 +72,7 @@ export function assertRuntimeFeatures(): void {
 }
 function toModel(p: ModelProfile): Model<any> {
   return { id: p.modelId, name: p.label, api: p.protocol, provider:p.provider==='opencode-go'?'opencode-go':p.provider==='deepseek'?'deepseek':p.protocol==='anthropic-messages'?'anthropic':'openai', baseUrl: p.baseUrl.replace(/\/+$/, ''),
-    reasoning: p.reasoning??(p.thinkingEffort!==undefined && p.thinkingEffort!=='off'), thinkingLevelMap:p.thinkingLevelMap as Model<any>['thinkingLevelMap'], input:p.input??['text','image'], contextWindow: p.contextWindow, maxTokens: p.maxOutput,
+    reasoning: p.reasoning??(p.thinkingEffort!==undefined && p.thinkingEffort!=='off'), thinkingLevelMap:p.thinkingLevelMap as Model<any>['thinkingLevelMap'], input:p.input??['text','image'], contextWindow: Math.min(p.contextWindow,p.maxInput??p.contextWindow), maxTokens: p.maxOutput,
     // Pi requires a price object. Zero is an internal sentinel, never a displayed price claim.
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, compat: { ...p.compat, supportsMidConvoSystemMessages: false } };
 }
@@ -192,8 +192,12 @@ export class ThorRuntime {
     if (checkReadSource && t.effectClass === 'read' && t.requiredCapabilities.includes('screen_perception') && s.l0.snapshotId !== a.requestSnapshot?.l0.snapshotId) fail('TARGET_CHANGED');
     return s;
   }
+  /** Zen's wire name maps to the real, scoped Skill reader; Native identity is unchanged. */
+  private modelToolName(t: ToolDescriptor, profile: ModelProfile): string {
+    return profile.provider==='opencode-zen' && t.toolId==='skills.read' && !this.registry.get('read') ? 'read' : t.modelName;
+  }
   private tools(a: Active, descriptors: ToolDescriptor[]): AgentTool[] {
-    return descriptors.map(t => ({ name: t.modelName, label: t.toolId, description: t.description, parameters: t.inputSchema, replay: 'never', executionMode: 'sequential',
+    return descriptors.map(t => ({ name: this.modelToolName(t,a.profile), label: t.toolId, description: t.description, parameters: t.inputSchema, replay: 'never', executionMode: 'sequential',
       prepareArguments: args => { this.registry.validate(t.modelName, args); return args as any; },
       execute: async (callId, args, signal) => {
         const deadline = Math.min(Date.now() + t.timeoutMs, a.lease.expiresAt, this.limits.runTimeoutMs ? a.run.startedAt + this.limits.runTimeoutMs : Number.MAX_SAFE_INTEGER);
@@ -480,7 +484,7 @@ export class ThorRuntime {
           const snapshot=await this.authority(active,true);
           active.effective=this.publishedTools(snapshot,profile);
           active.toolSchemaId=snapshot.toolSchemaId;
-          active.pi.session.setActiveToolsByName(active.effective.map(tool=>tool.modelName));
+          active.pi.session.setActiveToolsByName(active.effective.map(tool=>this.modelToolName(tool,profile)));
           const observation=buildRuntimeObservation(snapshot);
           if(observation!==active.lastObservation) {
             active.lastObservation=observation;
@@ -498,7 +502,7 @@ export class ThorRuntime {
             const manifest={snapshotId:crypto.randomUUID(),modelProfileRevision:profile.revision,capabilityEpoch:lease.capabilityEpoch,
               registryVersion:this.registry.version,l0SnapshotId:snapshot.l0.snapshotId,
               includedMessageIds:active.pi!.manager.getBranch().map(e=>e.id),attachmentRefs:[],
-              effectiveTools:active.agent!.state.tools.flatMap(tool=>this.registry.get(tool.name)?.toolId??[]),
+              effectiveTools:active.agent!.state.tools.flatMap(tool=>active.effective.find(t=>this.modelToolName(t,profile)===tool.name)?.toolId??[]),
               ...(active.toolSchemaId ? {toolSchemaId:active.toolSchemaId} : {}),
               estimatedTokens:usage.tokens,estimated:true as const,compressionVersion:'pi-session-v1' as const,droppedTurnIds:[],contentHash:await hash(request.context.messages)};
             await this.persist(active,()=>this.ports.persistence.saveContext(manifest));
@@ -527,6 +531,7 @@ export class ThorRuntime {
               // Pi's projection-aware estimate rather than stale raw usage.
               const estimated=active.compacting?estimateContextTokens(context.messages).tokens:
                 estimateProjectedContextTokens(active.pi!.manager.buildSessionProjection(),active.pi!.manager.getBranch()).tokens;
+              if(profile.maxInput!==undefined && estimated+4096>profile.maxInput)fail('LIMIT_EXCEEDED');
               const available=profile.contextWindow-estimated-(profile.outputBudgetAutomatic?4096:profile.maxOutput);
               if(available<(profile.outputBudgetAutomatic?16:0))fail('LIMIT_EXCEEDED');
               const maxTokens=profile.outputBudgetAutomatic?Math.min(options?.maxTokens??profile.maxOutput,available):(options?.maxTokens??profile.maxOutput);
@@ -557,9 +562,9 @@ export class ThorRuntime {
       active.effective=this.publishedTools(initial,profile);
       active.toolSchemaId=initial.toolSchemaId;
       active.pi=createPiSession({agent,sessionId:lease.sessionId,header:prepared.header,entries:prepared.entries,leafId:prepared.leafId,model,
-        systemPrompt:buildProductPrompt(initial,active.effective),tools:allTools,
+        systemPrompt:buildProductPrompt(initial,active.effective.map(t=>({...t,modelName:this.modelToolName(t,profile)}))),tools:allTools,
         settings:{...profile.piSettings}});
-      active.pi.session.setActiveToolsByName(active.effective.map(t=>t.modelName));
+      active.pi.session.setActiveToolsByName(active.effective.map(t=>this.modelToolName(t,profile)));
       if(this.session)this.session.agent=agent;
       const officialBefore=agent.beforeToolCall;
       agent.beforeToolCall=async(call,signal)=>audit.permits(call.toolCall.id,call.toolCall.arguments)?officialBefore?.(call,signal):{block:true,reason:'PROTOCOL_ERROR: incomplete or conflicting JSON',terminate:true};

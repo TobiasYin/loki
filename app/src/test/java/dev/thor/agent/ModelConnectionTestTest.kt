@@ -117,6 +117,40 @@ class ModelConnectionTestTest {
         for(url in listOf("http://opencode.ai/zen/go/v1","https://opencode.ai.evil.test/zen/go/v1","https://opencode.ai/other/v1","https://opencode.ai:8443/zen/go/v1"))
             assertNull(ModelConnectionTest.request(draft.copy(baseUrl=url)).header("x-opencode-session"))
     }
+    @Test fun zenDraftAddsItsOwnClientIdentityAndCompatibleSessionIdOnlyAtTheOfficialEndpoint() {
+        val draft=ModelConnectionTest.Draft(OpenCodeZenCatalog.BASE_URL,"openai-completions","glm-5.3-flash-free","fixture-key")
+        val first=ModelConnectionTest.request(draft);val second=ModelConnectionTest.request(draft)
+        assertTrue(OpenCodeSessionIds.valid(first.header("x-opencode-session")!!))
+        assertNotEquals(first.header("x-opencode-session"),second.header("x-opencode-session"))
+        assertEquals(OpenCodeZenRequestContract.userAgent,first.header("User-Agent"))
+        assertTrue(first.header("User-Agent")!!.contains("loki/"))
+        assertNull(ModelConnectionTest.request(draft.copy(baseUrl="https://opencode.ai.evil.test/zen/v1")).header("x-opencode-session"))
+        val timestamp=1792465868000L
+        val generated=OpenCodeSessionIds.create(timestamp)
+        assertEquals(((timestamp*0x1000+1).inv() and 0xffffffffffffL).toString(16).padStart(12,'0'),generated.substring(4,16))
+    }
+    @Test fun zenFreeTierRejectionKeepsTheServiceReasonWithoutMislabelingItAsABadKey() {
+        MockWebServer().use {server->
+            server.enqueue(MockResponse().setResponseCode(403).setBody("""{"error":{"type":"FreeTierError","message":"Free tier admission rejected"}}"""))
+            val client=okhttp3.OkHttpClient.Builder().addInterceptor {chain->chain.proceed(chain.request().newBuilder().url(server.url("/chat/completions")).build())}.build()
+            val result=ModelConnectionTest.run(ModelConnectionTest.Draft(OpenCodeZenCatalog.BASE_URL,"openai-completions","fixture-free","fixture-secret"),client)
+            assertFalse(result.success);assertTrue(result.message.contains("FreeTierError"));assertFalse(result.message.contains("认证失败"));assertFalse(result.message.contains("fixture-secret"))
+            val request=server.takeRequest();assertTrue(OpenCodeSessionIds.valid(request.getHeader("x-opencode-session")!!));assertEquals(OpenCodeZenRequestContract.userAgent,request.getHeader("User-Agent"))
+        }
+    }
+    @Test fun zenTextProbeDeclaresTheScopedReaderForEachProtocolWithoutChangingOtherProviders() {
+        for(protocol in ModelCatalog.protocols) {
+            val draft=ModelConnectionTest.Draft(OpenCodeZenCatalog.BASE_URL,protocol,"fixture-free","fixture-key")
+            fun body(value:ModelConnectionTest.Draft):JSONObject {val buffer=okio.Buffer();ModelConnectionTest.request(value).body!!.writeTo(buffer);return JSONObject(buffer.readUtf8())}
+            val tool=body(draft).getJSONArray("tools").getJSONObject(0)
+            val function=if(protocol=="openai-completions")tool.getJSONObject("function") else tool
+            assertEquals("read",function.getString("name"))
+            val schema=function.getJSONObject(if(protocol=="anthropic-messages")"input_schema" else "parameters")
+            assertEquals(setOf("name","path"),schema.getJSONObject("properties").keys().asSequence().toSet())
+            assertEquals("name",schema.getJSONArray("required").getString(0));assertFalse(schema.getBoolean("additionalProperties"))
+            assertFalse(body(draft.copy(baseUrl="https://opencode.ai/zen/go/v1")).has("tools"))
+        }
+    }
     @Test fun badRequestDiagnosticOnlyReturnsRedactedWhitelistedFields() {
         MockWebServer().use {server->
             server.start();val secret="private_fake+test_key_1234567890"

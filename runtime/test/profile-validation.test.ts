@@ -62,3 +62,13 @@ test('AgentPlan selection uses its own Responses route and existing tool loop',a
   assert.equal(result.state,'completed');
   assert.ok(f.requests.every(r=>new URL(r.url).pathname==='/api/plan/v3/responses'));
 });
+test('Zen free profile sends chat and tools through the Zen endpoint without a fabricated probe',async()=>{
+  const f=fixture('openai-completions',[{call:{name:'echo',args:'{"text":"Zen"}'}},{text:'Zen complete'}]);
+  Object.assign(f.snapshot.session.model,official('deepseek'),{provider:'opencode-zen',protocol:'openai-completions',baseUrl:'https://opencode.ai/zen/v1',maxInput:160000,contextWindow:200000,maxOutput:32000,modelId:'big-pickle',reasoning:false,compat:{maxTokensField:'max_tokens'}});
+  const result=await new ThorRuntime(f.ports,registry()).run(f.lease,[{type:'text',text:'Check Zen tool'}]);
+  assert.equal(result.state,'completed');assert.equal(f.executions.length,1);
+  assert.ok(f.requests.every(r=>new URL(r.url).pathname==='/zen/v1/chat/completions'));
+  assert.ok(f.requests.every(r=>r.body.max_tokens===32000 && r.body.max_completion_tokens===undefined));
+  for(const maxInput of [0,200001,160000.5,NaN])assert.throws(()=>checkProfile({...f.snapshot.session.model,maxInput}),{code:'UNSUPPORTED'});
+  assert.equal(hasOfficialMetadata({...f.snapshot.session.model,baseUrl:'https://opencode.ai/zen/go/v1'}),false);
+});

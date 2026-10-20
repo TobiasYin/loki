@@ -122,6 +122,8 @@ class ProductHost private constructor(private val context: Context, private val 
     private val providerSecrets=providerConfigs.keys.mapNotNull {key->runCatching {providerStore.credential(key)}.getOrNull()?.let {key to it}}.toMap()
     private val providerModels=linkedMapOf<String,JSONObject>()
     private val catalog=ModelCatalog(context)
+    private val zenCatalog=OpenCodeZenCatalog(context)
+    private val opencodeSessionIds=OpenCodeSessionIds(context)
     private val deepseekCatalog=DeepSeekCatalog(context)
     private val volcCatalog=VolcAgentPlanCatalog(context)
     private val revision = prefs.getInt("revision", 0)
@@ -233,8 +235,9 @@ class ProductHost private constructor(private val context: Context, private val 
                 val path=when(api) {"openai-responses"->"${u.path.trimEnd('/')}/responses";"openai-completions"->"${u.path.trimEnd('/')}/chat/completions";else->"${u.path.trimEnd('/').removeSuffix("/v1")}/v1/messages"}
                 val headerName=config.optString("headerName").ifBlank {if(api=="anthropic-messages")"x-api-key" else "Authorization"}
                 val headerTemplate=config.optString("headerTemplate").ifBlank {if(api=="anthropic-messages")"{{credential}}" else "Bearer {{credential}}"}
-                val goSessionHeader=if(ModelConnectionTest.isGoEndpoint(base))"x-opencode-session" else null
-                profiles.add(NetworkProfile("$ref:$api","${u.scheme}://${u.rawAuthority}",setOf(path),setOf("POST"),setOf(Purpose.model,Purpose.configuration_test),credentialRef,mapOf(headerName to headerTemplate),nativeSessionHeader=goSessionHeader))
+                val goSessionHeader=if(ModelConnectionTest.isOpenCodeEndpoint(base))"x-opencode-session" else null
+                val zen=config.getString("kind")==OpenCodeZenCatalog.KIND
+                profiles.add(NetworkProfile("$ref:$api","${u.scheme}://${u.rawAuthority}",setOf(path),setOf("POST"),setOf(Purpose.model,Purpose.configuration_test),credentialRef,mapOf(headerName to headerTemplate),nativeSessionHeader=goSessionHeader,nativeSessionValue=if(zen)opencodeSessionIds::forSession else null,nativeUserAgent=if(zen)OpenCodeZenRequestContract.userAgent else null))
             }
             providerModels[configId]=obj("profileId" to "$ref:$protocol","revision" to config.getInt("revision"),"label" to config.getString("name"),"protocol" to protocol,
                 "baseUrl" to base,"modelId" to config.getString("model"),"credentialRef" to credentialRef,
@@ -290,6 +293,7 @@ class ProductHost private constructor(private val context: Context, private val 
         if(s.optString("providerConfigId").let {it.isBlank() || it==config.getString("id")})s
         else s.optJSONObject("modelSelections")?.optJSONObject(config.getString("id")) ?: JSONObject()
     private fun configModels(config:JSONObject):List<JSONObject> = when(config.getString("kind")) {
+        OpenCodeZenCatalog.KIND->zenCatalog.models().objects()
         "opencode-go"->catalog.models().objects()
         "deepseek"->deepseekCatalog.models().objects()
         VolcAgentPlan.KIND->volcCatalog.models().objects()
@@ -302,12 +306,12 @@ class ProductHost private constructor(private val context: Context, private val 
         configModels(config).map {source->JSONObject(source.toString()).put("providerConfigId",config.getString("id")).put("providerName",config.getString("name"))
             .put("provider",config.getString("kind")).put("choiceId","${config.getString("id")}::${source.getString("id")}")}
     })
-    private fun profileConfigured(p:JSONObject)=p.optString("providerConfigId") in providerModels
+    private fun profileConfigured(p:JSONObject)=p.optBoolean("configured") && p.optString("providerConfigId") in providerModels
     private fun selectedProfile(s:JSONObject,required:Boolean=true):JSONObject {
         val config=providerConfig(s)
-        val configured=config!=null && config.getBoolean("enabled") && config.getString("id") in providerModels
+        val configured=config!=null && config.getBoolean("enabled") && config.getString("id") in providerModels && configModels(config).isNotEmpty()
         if(required)requireTool(configured,Code.INVALID_ARGUMENT,"所选模型服务不可用，请在设置保存该服务的 API Key，或选择已配置的服务")
-        if(config==null)return obj("providerConfigId" to s.optString("providerConfigId"),"providerName" to "未配置","provider" to "custom","configured" to false,
+        if(config==null || configModels(config).isEmpty())return obj("providerConfigId" to s.optString("providerConfigId"),"providerName" to "未配置","provider" to "custom","configured" to false,
             "modelId" to "","label" to "添加模型","protocol" to "openai-responses","contextWindow" to 32768,"maxOutput" to 2048,"efforts" to JSONArray(listOf("off")),"thinkingEffort" to "off")
         val provider=config.getString("kind")
         val optionsForProvider=providerOptions(s,config)
@@ -325,8 +329,10 @@ class ProductHost private constructor(private val context: Context, private val 
             .put("supportsTools",chosen.optBoolean("supportsTools",false)).put("metadataSource",chosen.optString("metadataSource"))
             .put("profileId","${providerProfileRef(config)}:$protocol").put("revision",config.getInt("revision")).put("modelId",chosen.getString("id")).put("label",chosen.getString("name"))
             .put("protocol",protocol).put("contextWindow",chosen.getInt("contextWindow")).put("maxOutput",outputBudget.tokens).put("outputBudgetAutomatic",outputBudget.automatic)
-            .put("maxOutputLimit",chosen.getInt("maxOutput")).put("input",chosen.optJSONArray("input") ?: JSONArray(listOf("text"))).put("thinkingEffort",effort).put("efforts",efforts).put("reasoning",chosen.optBoolean("reasoning",effort!="off"))
+            .put("maxInput",chosen.optInt("maxInput",chosen.getInt("contextWindow"))).put("maxOutputLimit",chosen.getInt("maxOutput")).put("input",chosen.optJSONArray("input") ?: JSONArray(listOf("text"))).put("thinkingEffort",effort).put("efforts",efforts).put("reasoning",chosen.optBoolean("reasoning",effort!="off"))
             .put("thinkingLevelMap",chosen.optJSONObject("thinkingLevelMap")).put("compat",chosen.optJSONObject("compat"))
+        if(ModelConnectionTest.isOpenCodeEndpoint(config.getString("url")))profile.put("customHeaders",obj("User-Agent" to
+            if(provider==OpenCodeZenCatalog.KIND)OpenCodeZenRequestContract.userAgent else "loki/${BuildConfig.VERSION_NAME}"))
         if(profile.has("baseUrl"))profile.put("baseUrl",OfficialProfilePolicy.protocolBase(provider,protocol,profile.getString("baseUrl")))
         return profile
     }

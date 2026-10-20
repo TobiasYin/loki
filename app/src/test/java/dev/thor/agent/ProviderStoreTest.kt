@@ -27,7 +27,7 @@ class ProviderStoreTest {
         override fun credentialStatus(ref:String)=if(keys.containsKey(ref))"已加密保存" else "未保存"
     }
     private fun draft(id:String="account-a",kind:String="custom",url:String="https://example.test/v1")=JSONObject().put("id",id).put("kind",kind)
-        .put("url",if(kind=="deepseek")DeepSeekCatalog.BASE_URL else if(kind=="opencode-go")"https://opencode.ai/zen/go/v1" else url)
+        .put("url",if(kind==OpenCodeZenCatalog.KIND)OpenCodeZenCatalog.BASE_URL else if(kind=="deepseek")DeepSeekCatalog.BASE_URL else if(kind=="opencode-go")"https://opencode.ai/zen/go/v1" else url)
         .put("name","账户 $id").put("model","fixture-model").put("protocol",0).put("contextBudget",32768).put("maxOutput",2048)
     private fun rejected(block:()->Unit){assertThrows(IllegalArgumentException::class.java){block()}}
     @Test fun initialEmptyStoreHasNoInventedProfile(){val memory=Memory();val store=ProviderStore(memory);assertTrue(store.list().isEmpty());assertNull(store.defaultId());assertEquals(1,memory.writes)}
@@ -39,6 +39,14 @@ class ProviderStoreTest {
         ProviderStore(memory);assertEquals(1,memory.writes)
     }
     @Test fun multipleAccountsOfSameKindKeepIndependentKeys(){val memory=Memory();val store=ProviderStore(memory);store.save(draft("a","deepseek"),"key-a");store.save(draft("b","deepseek"),"key-b");assertEquals("key-a",store.credential("a"));assertEquals("key-b",store.credential("b"));assertEquals(2,store.list().size)}
+    @Test fun zenAccountsPersistIndependentEncryptedKeysAndPinnedEndpoint() {
+        val memory=Memory();val store=ProviderStore(memory)
+        store.save(draft("zen",OpenCodeZenCatalog.KIND).put("model","big-pickle").put("protocol",2),"zen-fixture")
+        store.save(draft("go","opencode-go"),"go-fixture")
+        val restored=ProviderStore(memory);assertEquals(OpenCodeZenCatalog.KIND,restored.get("zen")!!.getString("kind"))
+        assertEquals("zen-fixture",restored.credential("zen"));assertEquals("go-fixture",restored.credential("go"))
+        assertFalse(memory.value!!.contains("zen-fixture"))
+    }
     @Test fun blankSaveKeepsOnlyCurrentCredential(){val memory=Memory();val store=ProviderStore(memory);store.save(draft("a"),"key-a");store.save(draft("b"),"key-b");store.save(draft("a").put("name","new"),"");assertEquals("key-a",store.credential("a"));assertEquals("key-b",store.credential("b"));assertEquals(2,store.get("a")!!.getInt("revision"))}
     @Test fun explicitRemovalAndDeleteOnlyAffectTheirRecord(){val memory=Memory();val store=ProviderStore(memory);store.save(draft("a"),"key-a");store.save(draft("b"),"key-b");store.save(draft("a"),removeKey=true);assertNull(store.credential("a"));assertEquals("key-b",store.credential("b"));store.delete("a");assertEquals("b",store.defaultId());assertEquals("key-b",store.credential("b"))}
     @Test fun providerKindCannotSilentlyReuseAnExistingCredential(){val memory=Memory();val store=ProviderStore(memory);store.save(draft("a"),"key-a");rejected {store.save(draft("a","deepseek"))};assertEquals("custom",store.get("a")!!.getString("kind"));assertEquals("key-a",store.credential("a"))}
@@ -53,7 +61,7 @@ class ProviderStoreTest {
     @Test fun generatedIdsAreStableAndSafe(){val store=ProviderStore(Memory());val d=draft().apply {remove("id")};val result=store.save(d);val id=result.getString("id");assertTrue(id.matches(Regex("[a-zA-Z0-9-]+")));assertEquals(id,store.list()[0].getString("id"));assertEquals("provider.$id.model",ProviderStore.credentialRef(id))}
     @Test fun invalidIdsCannotAliasOldVaultReferences(){for(id in listOf("../model","x.model","x/y","","-bad","x".repeat(65))){if(id.isEmpty())continue;rejected {ProviderStore.credentialRef(id)}}}
     @Test fun malformedOrSecretBearingUrlsDoNotSaveOrChangeCredentials(){for(url in listOf("file:///test","https://user:pass@example.test","https://example.test?key=1","https://example.test/#frag")){val m=Memory();val s=ProviderStore(m);rejected{s.save(draft(url=url),"fixture-key")};assertTrue(s.list().isEmpty());assertTrue(m.keys.isEmpty())}}
-    @Test fun officialDestinationsArePinned(){for(kind in listOf("opencode-go","deepseek")){rejected {ProviderStore(Memory()).save(draft(kind=kind).put("url","https://other.test"),"fixture-key")}}}
+    @Test fun officialDestinationsArePinned(){for(kind in listOf("opencode-go","deepseek",OpenCodeZenCatalog.KIND)){rejected {ProviderStore(Memory()).save(draft(kind=kind).put("url","https://other.test"),"fixture-key")}}}
     @Test fun invalidKeysAndBudgetsAreRejectedBeforeCredentialMutation(){val m=Memory();val s=ProviderStore(m);for(d in listOf(draft().put("maxOutput",32768),draft().put("contextBudget",100),draft().put("maxOutputText","-1"))){rejected{s.save(d,"fixture-key")}};rejected{s.save(draft(),"a\nb")};assertTrue(m.keys.isEmpty());assertTrue(s.list().isEmpty())}
     @Test fun corruptStoredDocumentDoesNotOverwriteExistingStore(){val m=Memory().apply {value="{}"};assertThrows(Exception::class.java){ProviderStore(m)};assertEquals("{}",m.value);assertEquals(0,m.writes)}
     @Test fun failedMetadataWriteRestoresOldEndpointAndKey() {

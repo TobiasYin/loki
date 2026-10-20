@@ -609,7 +609,8 @@
     const picker=$('model-picker');
     picker.replaceChildren(element('span',name,'model-name'),element('span',detail,'model-detail'),element('span',' ⌄','model-chevron'));
     picker.title=name+detail;picker.setAttribute('aria-label',`选择模型和思考强度：${name}${detail}`);
-    $('model-context').textContent=profile.contextWindow?`上下文 ${Intl.NumberFormat('en',{notation:'compact'}).format(profile.contextWindow)} tokens`:'';
+    const formatTokens=value=>Intl.NumberFormat('en',{notation:'compact'}).format(value);
+    $('model-context').textContent=profile.contextWindow?`上下文 ${formatTokens(profile.contextWindow)}${profile.maxInput && profile.maxInput<profile.contextWindow?' · 输入 '+formatTokens(profile.maxInput):''} tokens`:'';
   }
   function renderModelEfforts(profile) {
     fillPicker('effort-select',(profile.efforts??['off']).map(value=>({value,label:effortNames[value]??value})),profile.thinkingEffort??'off',thinkingEffort=>{

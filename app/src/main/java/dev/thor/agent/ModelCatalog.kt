@@ -13,6 +13,18 @@ class ModelCatalog(private val context:Context) {
         const val SOURCE="https://models.dev/api.json"
         const val AVAILABILITY_SOURCE="https://opencode.ai/zen/go/v1/models"
         private const val CACHE_VERSION=2
+        /** Provider metadata is larger than the tool-result CONFIG budget (1 MiB).
+         * Keep its independent, bounded read local to public catalog requests. */
+        internal fun readCatalog(input:java.io.InputStream,limit:Int):JSONObject {
+            require(limit in 1..16*1024*1024)
+            val out=java.io.ByteArrayOutputStream();val buffer=ByteArray(8192)
+            while(true) {
+                val count=input.read(buffer);if(count<0)break
+                require(out.size()+count<=limit) {"模型目录超出读取预算"}
+                out.write(buffer,0,count)
+            }
+            return JSONObject(out.toString(Charsets.UTF_8.name()))
+        }
         val protocols=listOf("openai-responses","anthropic-messages","openai-completions")
         fun normalize(raw:JSONObject):JSONArray {
             val result=JSONArray()
@@ -39,10 +51,10 @@ class ModelCatalog(private val context:Context) {
         }
         /** OpenCode's documented catalog source + its public service model list.
          * Unknown models/protocols without usable metadata are omitted, never guessed. */
-        fun normalizeOfficial(raw:JSONObject,available:JSONObject,transportProfiles:JSONArray):JSONArray {
-            val provider=raw.getJSONObject("opencode-go");val models=provider.getJSONObject("models")
+        fun normalizeOfficial(raw:JSONObject,available:JSONObject,transportProfiles:JSONArray,providerId:String="opencode-go",availabilitySource:String=AVAILABILITY_SOURCE,allowEmpty:Boolean=false):JSONArray {
+            val provider=raw.getJSONObject(providerId);val models=provider.getJSONObject("models")
             val ids=available.getJSONArray("data").objects().map {it.getString("id")}.toSet()
-            require(ids.isNotEmpty() && ids.size<=256)
+            require((allowEmpty || ids.isNotEmpty()) && ids.size<=256)
             val transports=transportProfiles.objects().associateBy {it.getString("id")}
             val result=JSONArray()
             for(id in ids.sorted()) {
@@ -65,6 +77,8 @@ class ModelCatalog(private val context:Context) {
                     return if(value.isFinite() && value==kotlin.math.floor(value) && value in 0.0..4000000.0)value.toInt() else 0
                 }
                 val context=integer("context");val output=integer("output")
+                val inputLimit=if(limit.has("input"))integer("input") else context
+                if(inputLimit !in 4096..context)continue
                 if(context !in 4096..4000000 || output !in 16..context)continue
                 val providerInput=source.optJSONObject("modalities")?.optJSONArray("input") ?: continue
                 val inputs=(0 until providerInput.length()).map {providerInput.getString(it)}
@@ -89,13 +103,13 @@ class ModelCatalog(private val context:Context) {
                 }}
                 val name=source.optString("name",id)
                 if(!id.matches(Regex("[A-Za-z0-9_.:-]{1,200}")) || name.length !in 1..160 || name.any(Char::isISOControl))continue
-                result.put(obj("id" to id,"name" to name,"protocol" to protocol,"contextWindow" to context,"maxOutput" to output,
+                result.put(obj("id" to id,"name" to name,"protocol" to protocol,"contextWindow" to context,"maxInput" to inputLimit,"maxOutput" to output,
                     "reasoning" to reasoning,"supportsTools" to (source.opt("tool_call")==true),"input" to JSONArray(input),"providerInput" to providerInput,
                     "efforts" to JSONArray(efforts),"defaultEffort" to if("high" in efforts)"high" else efforts.first(),"thinkingLevelMap" to levelMap,
                     "compat" to (fallback?.optJSONObject("compat") ?: JSONObject()),"providerMetadataKnown" to true,
-                    "metadataSource" to SOURCE,"availabilitySource" to AVAILABILITY_SOURCE,"effortSource" to if(mapped.isEmpty() && reasoning)"Pi transport compatibility" else SOURCE))
+                    "metadataSource" to SOURCE,"availabilitySource" to availabilitySource,"effortSource" to if(mapped.isEmpty() && reasoning)"Pi transport compatibility" else SOURCE))
             }
-            require(result.length() in 1..256) {"No supported OpenCode Go models with complete metadata"}
+            require(result.length() in (if(allowEmpty)0 else 1)..256) {"No supported models with complete metadata"}
             return result
         }
         fun validateCached(models:JSONArray):JSONArray {
@@ -104,6 +118,7 @@ class ModelCatalog(private val context:Context) {
             for(m in models.objects()) {
                 require(ids.add(m.getString("id")) && m.getString("id").matches(Regex("[A-Za-z0-9_.:-]{1,200}")) && m.getString("protocol") in protocols)
                 require(m.getInt("contextWindow") in 4096..4000000 && m.getInt("maxOutput") in 16..m.getInt("contextWindow"))
+                require(!m.has("maxInput") || m.getInt("maxInput") in 4096..m.getInt("contextWindow"))
                 require(m.optBoolean("providerMetadataKnown") && m.opt("supportsTools") is Boolean && m.opt("reasoning") is Boolean)
                 require(m.getJSONArray("input").objectsOrStrings().let {"text" in it && it.all {v->v in setOf("text","image")}})
                 require(m.getJSONArray("efforts").objectsOrStrings().let {it.isNotEmpty() && it.all {v->v in setOf("off","minimal","low","medium","high","xhigh","max")}})
@@ -134,9 +149,7 @@ class ModelCatalog(private val context:Context) {
         val client=OkHttpClient.Builder().callTimeout(25,TimeUnit.SECONDS).build()
         fun fetch(url:String,limit:Int):JSONObject=client.newCall(Request.Builder().url(url).header("Accept","application/json").build()).execute().use {response->
             require(response.isSuccessful) {"模型目录请求失败（HTTP ${response.code}）"}
-            val bounded=response.body?.byteStream()?.use {dev.thor.tools.Budgets.read(it,limit)} ?: error("Empty catalog")
-            require(!bounded.truncated) {"模型目录超出读取预算"}
-            JSONObject(bounded.bytes.toString(Charsets.UTF_8))
+            response.body?.byteStream()?.use {readCatalog(it,limit)} ?: error("Empty catalog")
         }
         val models=normalizeOfficial(fetch(SOURCE,16*1024*1024),fetch(AVAILABILITY_SOURCE,2*1024*1024),models())
         check(prefs.edit().putInt("version",CACHE_VERSION).putString("models",models.toString()).putString("source","OpenCode 官方服务列表 + Models.dev · ${java.time.LocalDate.now()}").commit())

@@ -29,9 +29,27 @@ class TransportTest {
         assertEquals("native-session",policy.prepare(start).headers["x-opencode-session"])
         assertEquals("another-native-session",policy.prepare(start.copy(envelope=start.envelope.copy(binding=binding.copy(sessionId="another-native-session")))).headers["x-opencode-session"])
         assertThrows(BridgeFailure::class.java) {policy.prepare(start.copy(envelope=start.envelope.copy(binding=binding.copy(sessionId="bad\r\nheader"))))}
+        val zen=profile.copy(nativeSessionValue={native->"ses_"+native.replace('-','_')})
+        val mapped=NetworkPolicy(listOf(zen),CredentialVault(emptyMap()))
+        assertEquals("ses_native_session",mapped.prepare(start).headers["x-opencode-session"])
+        assertEquals("ses_another_native_session",mapped.prepare(start.copy(envelope=start.envelope.copy(binding=binding.copy(sessionId="another-native-session")))).headers["x-opencode-session"])
+        assertThrows(BridgeFailure::class.java) {NetworkPolicy(listOf(profile.copy(nativeSessionValue={"bad\r\nheader"})),CredentialVault(emptyMap())).prepare(start)}
+        assertThrows(IllegalArgumentException::class.java) {zen.copy(nativeSessionHeader=null)}
         val ordinary=NetworkPolicy(listOf(profile.copy(nativeSessionHeader=null)),CredentialVault(emptyMap()))
         assertFalse(ordinary.prepare(start.copy(headers=emptyMap())).headers.containsKey("x-opencode-session"))
         assertThrows(IllegalArgumentException::class.java) {profile.copy(nativeSessionHeader="authorization")}
+    }
+    @Test fun nativeUserAgentSurvivesBrowserOmissionAndOverridesCallerOnlyForItsProfile() {
+        val binding=Binding("session","run","lease","connection",1)
+        val profile=NetworkProfile("zen","https://opencode.ai",setOf("/zen/v1/chat/completions"),setOf("POST"),setOf(Purpose.model),nativeUserAgent="opencode/1.18.31 loki/test")
+        val request=HttpStart(NetworkEnvelope(1,"request",binding,Purpose.model,"zen",1),"https://opencode.ai/zen/v1/chat/completions")
+        val policy=NetworkPolicy(listOf(profile),CredentialVault(emptyMap()))
+        for(headers in listOf(emptyMap(),mapOf("User-Agent" to "browser-default")))assertEquals(profile.nativeUserAgent,policy.prepare(request.copy(headers=headers)).headers["user-agent"])
+        val ordinary=NetworkPolicy(listOf(profile.copy(nativeUserAgent=null)),CredentialVault(emptyMap()))
+        assertFalse(ordinary.prepare(request).headers.containsKey("user-agent"))
+        assertEquals("caller",ordinary.prepare(request.copy(headers=mapOf("user-agent" to "caller"))).headers["user-agent"])
+        for(value in listOf("", "bad\r\nheader", "a".repeat(513)))assertThrows(IllegalArgumentException::class.java){profile.copy(nativeUserAgent=value)}
+        assertThrows(IllegalArgumentException::class.java){profile.copy(headerTemplates=mapOf("User-Agent" to "{{credential}}"))}
     }
     private class Lab(val limits: Limits = Limits(chunkBytes = 3), val credential: Boolean = false, tls: Boolean = false): AutoCloseable {
         val server = MockWebServer().apply {

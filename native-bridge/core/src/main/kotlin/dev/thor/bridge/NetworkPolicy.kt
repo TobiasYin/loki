@@ -6,14 +6,16 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.net.URLDecoder
 
 /** Installed by Native settings, never from bridge payloads. Paths are exact, canonical encoded paths. */
-data class NetworkProfile(val ref: String, val origin: String?, val paths: Set<String>, val methods: Set<String>, val purposes: Set<Purpose>, val credentialRef: String? = null, val headerTemplates: Map<String, String> = emptyMap(), val nativeSessionHeader: String? = null) {
+data class NetworkProfile(val ref: String, val origin: String?, val paths: Set<String>, val methods: Set<String>, val purposes: Set<Purpose>, val credentialRef: String? = null, val headerTemplates: Map<String, String> = emptyMap(), val nativeSessionHeader: String? = null, val nativeSessionValue: ((String)->String)? = null, val nativeUserAgent:String? = null) {
     init {
         require(ref.isNotBlank() && methods.isNotEmpty() && purposes.isNotEmpty())
         require(origin != null || purposes.all { it == Purpose.web_fetch })
         require(origin != null || credentialRef == null)
         require(paths.isNotEmpty() || origin == null)
         require(headerTemplates.values.all { "{{credential}}" in it })
+        require(nativeSessionValue == null || nativeSessionHeader != null)
         require(nativeSessionHeader == null || nativeSessionHeader == "x-opencode-session" && origin != null && purposes.all { it == Purpose.model || it == Purpose.configuration_test } && headerTemplates.keys.none { it.equals(nativeSessionHeader, true) })
+        require(nativeUserAgent == null || origin != null && nativeUserAgent.isNotBlank() && nativeUserAgent.length<=512 && nativeUserAgent.all {it.code in 32..126} && headerTemplates.keys.none {it.equals("User-Agent",true)})
     }
 }
 class CredentialVault(values: Map<String, String>) {
@@ -53,12 +55,17 @@ class NetworkPolicy(profiles: List<NetworkProfile>, val vault: CredentialVault, 
             headers[name.lowercase()] = template.replace("{{credential}}", secret)
         }
         p.nativeSessionHeader?.let { name ->
-            val session = start.envelope.binding.sessionId
+            val nativeSession = start.envelope.binding.sessionId
+            requireBridge(nativeSession.matches(Regex("[A-Za-z0-9_-]{1,100}")), Code.INVALID_REQUEST)
+            val session = p.nativeSessionValue?.invoke(nativeSession) ?: nativeSession
             requireBridge(session.matches(Regex("[A-Za-z0-9_-]{1,100}")), Code.INVALID_REQUEST)
             // Routing identity is always derived from the Native-authorized binding.
             // A caller-supplied header cannot route a turn into another conversation.
             headers[name] = session
         }
+        // WebView Request can remove User-Agent. Install the Native-selected
+        // value after caller headers, so browser behavior cannot break routing.
+        p.nativeUserAgent?.let {headers["user-agent"]=it}
         // Reachability and proxy DNS are owned by the system network. Do not
         // reject LAN, loopback, reserved/fake-IP or mixed-family DNS results.
         return Prepared(p, url, headers, resolver)
