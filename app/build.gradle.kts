@@ -9,8 +9,8 @@ android {
         applicationId = "com.tobias.loki"
         minSdk = 30
         targetSdk = 35
-        versionCode = 9
-        versionName = "0.8.0-integration"
+        versionCode = 10
+        versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { buildConfig = true }

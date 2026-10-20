@@ -1,5 +1,7 @@
 # Loki
 
+当前公开发布版本：**v0.1.0**（Android `versionName=0.1.0`、`versionCode=10`）。项目从此版本重新开始公开版本编号；下文 0.3–0.8 等记录属于此前内部开发阶段，保留原始验证范围。发布说明见 [v0.1.0](docs/releases/v0.1.0.md)。
+
 应用名：`Loki`；Android 包名：`com.tobias.loki`。图标与生成说明见 [应用品牌资源](app/branding/README.md)。更改包名后会作为新应用安装，旧版数据与授权不会自动迁移。
 
 Loki 是面向 AYN Thor 掌机的 Android AI Agent：本地 WebView 聊天与锁定版本 Pi，模型协议由 JS 处理，网络与设备授权由 Native 执行。五个独立任务的精确提交已保留历史整合，正式入口已连接真实 Runtime、通用 Native Fetch、持久化与设备 ToolPack；不返回模拟成功。
@@ -41,7 +43,7 @@ npm 依赖统一使用公共源 `https://registry.npmjs.org/`，模块内单独�
 APK：
 
 - Agent debug：`app/build/outputs/apk/debug/app-debug.apk`，包名 `com.tobias.loki`。
-- Agent unsigned release：`app/build/outputs/apk/release/app-release-unsigned.apk`；尚无发布签名。
+- Agent unsigned release：`app/build/outputs/apk/release/app-release-unsigned.apk`。Gradle 默认输出未签名包；[GitHub Release](https://github.com/TobiasYin/loki/releases/tag/v0.1.0) 提供使用独立长期发布密钥签名的可安装 APK，签名私钥与密码不进入仓库。
 - Input Lab debug：`tests/input-lab-app/app/build/outputs/apk/debug/input-lab-debug.apk`，包名 `dev.thor.inputlab`，独立 UID/进程。
 - Input Lab unsigned release：同目录 `release/input-lab-release-unsigned.apk`。
 - 诊断宿主：`tools/diagnostic/build/outputs/apk/debug/diagnostic-debug.apk` 与 `native-bridge/host/build/outputs/apk/debug/bridge-host-debug.apk`。
